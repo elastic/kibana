@@ -83,7 +83,7 @@ export const isolationRequestHandler = function (
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
-    const endpointData = await getMetadataForEndpoints(endpointIDs, context, endpointContext);
+    const endpointData = await getMetadataForEndpoints(endpointIDs, context);
 
     const casesClient = await endpointContext.service.getCasesClient(req);
 

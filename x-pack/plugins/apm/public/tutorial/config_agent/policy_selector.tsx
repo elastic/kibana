@@ -21,7 +21,7 @@ interface Props {
   options: PolicyOption[];
   selectedOption?: PolicyOption;
   onChange: (selectedOption?: PolicyOption) => void;
-  fleetLink: {
+  fleetLink?: {
     label: string;
     href: string;
   };
@@ -58,9 +58,11 @@ export function PolicySelector({
         { defaultMessage: 'Choose policy' }
       )}
       labelAppend={
-        <EuiText size="xs">
-          <EuiLink href={fleetLink.href}>{fleetLink.label}</EuiLink>
-        </EuiText>
+        fleetLink && (
+          <EuiText size="xs">
+            <EuiLink href={fleetLink.href}>{fleetLink.label}</EuiLink>
+          </EuiText>
+        )
       }
       helpText={i18n.translate(
         'xpack.apm.tutorial.agent_config.choosePolicy.helper',

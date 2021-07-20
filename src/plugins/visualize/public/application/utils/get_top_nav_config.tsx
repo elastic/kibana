@@ -81,6 +81,7 @@ export const getTopNavConfig = (
     embeddableId,
   }: TopNavConfigParams,
   {
+    data,
     application,
     chrome,
     history,
@@ -154,17 +155,17 @@ export const getTopNavConfig = (
               saveOptions.dashboardId === 'new' ? '#/create' : `#/view/${saveOptions.dashboardId}`;
           }
 
-          if (newlyCreated && stateTransfer) {
+          if (stateTransfer) {
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 input: { savedObjectId: id },
-                embeddableId,
+                embeddableId: savedVis.copyOnSave ? undefined : embeddableId,
+                searchSessionId: data.search.session.getSessionId(),
               },
               path,
             });
           } else {
-            // TODO: need the same thing here?
             application.navigateToApp(app, { path });
           }
         } else {
@@ -214,6 +215,7 @@ export const getTopNavConfig = (
       } as VisualizeInput,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
+      searchSessionId: data.search.session.getSessionId(),
     };
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
@@ -394,6 +396,7 @@ export const getTopNavConfig = (
                     } as VisualizeInput,
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
+                    searchSessionId: data.search.session.getSessionId(),
                   };
 
                   const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
@@ -449,7 +452,9 @@ export const getTopNavConfig = (
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
@@ -475,7 +480,9 @@ export const getTopNavConfig = (
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
                     onSave={onSave}
                     tagOptions={tagOptions}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                   />
                 );

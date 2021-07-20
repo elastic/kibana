@@ -21,6 +21,6 @@ export const addDecorators = () => {
 
   addDecorator(kibanaContextDecorator);
   addDecorator(routerContextDecorator);
-  addDecorator(servicesContextDecorator);
   addDecorator(legacyContextDecorator());
+  addDecorator(servicesContextDecorator());
 };

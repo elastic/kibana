@@ -7,7 +7,6 @@
     "data",
     "embeddable",
     "features",
-    "fleet",
     "infra",
     "licensing",
     "observability",
@@ -24,11 +23,15 @@
     "security",
     "spaces",
     "taskManager",
-    "usageCollection"
+    "usageCollection",
+    "fleet"
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "requiredBundles": [
     "fleet",
     "home",

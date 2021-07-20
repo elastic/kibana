@@ -52,6 +52,106 @@ export const comment: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
+export const isolateCommentActions: CommentResponse = {
+  associationType: AssociationType.case,
+  id: 'mock-action-comment-1',
+  comment: 'Isolating this for investigation',
+  type: CommentType.actions as const,
+  created_at: '2019-11-25T21:55:00.177Z',
+  actions: {
+    targets: [
+      {
+        endpointId: '123',
+        hostname: 'windows-host-1',
+      },
+    ],
+    type: 'isolate',
+  },
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  owner: SECURITY_SOLUTION_OWNER,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: '2019-11-25T21:55:00.177Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  version: 'WzEsMV0=',
+};
+
+export const releaseCommentActions: CommentResponse = {
+  associationType: AssociationType.case,
+  id: 'mock-action-comment-1',
+  comment: 'Releasing this for investigation',
+  type: CommentType.actions as const,
+  created_at: '2019-11-25T21:55:00.177Z',
+  actions: {
+    targets: [
+      {
+        endpointId: '123',
+        hostname: 'windows-host-1',
+      },
+    ],
+    type: 'unisolate',
+  },
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  owner: SECURITY_SOLUTION_OWNER,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: '2019-11-25T21:55:00.177Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  version: 'WzEsMV0=',
+};
+
+export const isolateCommentActionsMultipleTargets: CommentResponse = {
+  associationType: AssociationType.case,
+  id: 'mock-action-comment-1',
+  comment: 'Isolating this for investigation',
+  type: CommentType.actions as const,
+  created_at: '2019-11-25T21:55:00.177Z',
+  actions: {
+    targets: [
+      {
+        endpointId: '123',
+        hostname: 'windows-host-1',
+      },
+      {
+        endpointId: '456',
+        hostname: 'windows-host-2',
+      },
+    ],
+    type: 'isolate',
+  },
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  owner: SECURITY_SOLUTION_OWNER,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: '2019-11-25T21:55:00.177Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  version: 'WzEsMV0=',
+};
+
 export const commentAlert: CommentResponse = {
   associationType: AssociationType.case,
   id: 'mock-comment-1',

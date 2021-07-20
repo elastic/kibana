@@ -32,7 +32,7 @@ import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../commo
 
 import type { FleetConfigType } from '../common/types';
 
-import { CUSTOM_LOGS_INTEGRATION_NAME, FLEET_BASE_PATH } from './constants';
+import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
 import { createPackageSearchProvider } from './search_provider';
@@ -183,14 +183,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       deps.home.featureCatalogue.register({
         id: 'fleet',
         title: i18n.translate('xpack.fleet.featureCatalogueTitle', {
-          defaultMessage: 'Add Elastic Agent',
+          defaultMessage: 'Add Elastic Agent integrations',
         }),
         description: i18n.translate('xpack.fleet.featureCatalogueDescription', {
-          defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
+          defaultMessage: 'Add and manage integrations with Elastic Agent',
         }),
         icon: 'indexManagementApp',
         showOnHomePage: true,
-        path: FLEET_BASE_PATH,
+        path: INTEGRATIONS_BASE_PATH,
         category: FeatureCatalogueCategory.DATA,
         order: 510,
       });

@@ -7,3 +7,4 @@
 
 export { toSentenceSerial } from './to_sentence_serial';
 export { getAsLocalDateTimeString } from './get_as_local_datetime_string';
+export { mimeType } from './mime_types';

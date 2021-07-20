@@ -20,26 +20,6 @@ import { populateTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
-const RowRenderersId = [
-  'alerts',
-  'auditd',
-  'auditd_file',
-  'library',
-  'netflow',
-  'plain',
-  'registry',
-  'suricata',
-  'system',
-  'system_dns',
-  'system_endgame_process',
-  'system_file',
-  'system_fim',
-  'system_security_event',
-  'system_socket',
-  'threat_match',
-  'zeek',
-];
-
 describe('Row renderers', () => {
   beforeEach(() => {
     cleanKibana();
@@ -63,8 +43,9 @@ describe('Row renderers', () => {
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).should('exist');
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
 
-    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().uncheck();
+    // Intercepts should be before click handlers that activate them rather than afterwards or you have race conditions
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().uncheck();
 
     cy.wait('@updateTimeline').then((interception) => {
       expect(interception.request.body.timeline.excludedRowRendererIds).to.contain('netflow');
@@ -84,6 +65,9 @@ describe('Row renderers', () => {
     cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).should('exist');
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('be.checked');
 
+    // Intercepts should be before click handlers that activate them rather than afterwards or you have race conditions
+    cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+
     // Keep clicking on the disable all button until the first element of all the elements are no longer checked.
     // In cases where the click handler is not present on the page just yet, this will cause the button to be clicked
     // multiple times until it sees that the click took effect. You could go through the whole list but I just check
@@ -95,11 +79,6 @@ describe('Row renderers', () => {
       })
       .should('not.be.checked');
 
-    cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
-
-    cy.wait('@updateTimeline').then((interception) => {
-      expect(interception.request.body.timeline.excludedRowRendererIds).to.eql(RowRenderersId);
-    });
   });
 });

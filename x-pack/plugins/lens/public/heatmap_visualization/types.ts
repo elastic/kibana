@@ -14,7 +14,8 @@ import {
   LEGEND_FUNCTION,
   LENS_HEATMAP_RENDERER,
 } from './constants';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import { CustomPaletteParams } from '../shared_components';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
 
@@ -32,7 +33,8 @@ export type HeatmapLayerState = SharedHeatmapLayerState & {
 };
 
 export type HeatmapVisualizationState = HeatmapLayerState & {
-  palette?: PaletteOutput;
+  // need to store the current accessor to reset the color stops at accessor change
+  palette?: PaletteOutput<CustomPaletteParams> & { accessor: string };
 };
 
 export type HeatmapExpressionArgs = SharedHeatmapLayerState & {
@@ -58,6 +60,7 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
+  paletteService: PaletteRegistry;
 };
 
 export interface HeatmapLegendConfig {

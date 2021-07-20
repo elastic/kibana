@@ -14,7 +14,10 @@ import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
-import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+import {
+  ensurePreconfiguredPackagesAndPolicies,
+  comparePreconfiguredPolicyToCurrent,
+} from './preconfiguration';
 
 jest.mock('./agent_policy_update');
 
@@ -277,5 +280,77 @@ describe('policy preconfiguration', () => {
     expect(policiesB.length).toEqual(1);
     expect(policiesB[0].id).toBe('mocked-test-id');
     expect(policiesB[0].updated_at).toEqual(policiesA[0].updated_at);
+  });
+});
+
+describe('comparePreconfiguredPolicyToCurrent', () => {
+  const baseConfig = {
+    name: 'Test policy',
+    namespace: 'default',
+    description: 'This is a test policy',
+    id: 'test-id',
+    unenroll_timeout: 60,
+    package_policies: [
+      {
+        package: { name: 'test_package' },
+        name: 'Test package',
+      },
+    ],
+  };
+
+  const basePackagePolicy: AgentPolicy = {
+    id: 'test-id',
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+    name: 'Test policy',
+    description: 'This is a test policy',
+    unenroll_timeout: 60,
+    is_preconfigured: true,
+    status: 'active',
+    is_managed: true,
+    revision: 1,
+    updated_at: '2021-07-07T16:29:55.144Z',
+    updated_by: 'system',
+    package_policies: [
+      {
+        package: { name: 'test_package', title: 'Test package', version: '1.0.0' },
+        name: 'Test package',
+        namespace: 'default',
+        enabled: true,
+        id: 'test-package-id',
+        revision: 1,
+        updated_at: '2021-07-07T16:29:55.144Z',
+        updated_by: 'system',
+        created_at: '2021-07-07T16:29:55.144Z',
+        created_by: 'system',
+        inputs: [],
+        policy_id: 'abc123',
+        output_id: 'default',
+      },
+    ],
+  };
+
+  it('should return hasChanged when a top-level policy field changes', () => {
+    const { hasChanged } = comparePreconfiguredPolicyToCurrent(
+      { ...baseConfig, unenroll_timeout: 120 },
+      basePackagePolicy
+    );
+    expect(hasChanged).toBe(true);
+  });
+
+  it('should not return hasChanged when no top-level fields change', () => {
+    const { hasChanged } = comparePreconfiguredPolicyToCurrent(
+      {
+        ...baseConfig,
+        package_policies: [
+          {
+            package: { name: 'different_package' },
+            name: 'Different package',
+          },
+        ],
+      },
+      basePackagePolicy
+    );
+    expect(hasChanged).toBe(false);
   });
 });

@@ -83,7 +83,7 @@ export const useActionResults = ({
 
       const totalResponded =
         // @ts-expect-error update types
-        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count;
+        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
       const aggsBuckets =
         // @ts-expect-error update types
         responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
@@ -120,7 +120,7 @@ export const useActionResults = ({
           failed: 0,
         },
       },
-      refetchInterval: isLive ? 1000 : false,
+      refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
       enabled: !skip && !!agentIds?.length,
       onSuccess: () => setErrorToast(),

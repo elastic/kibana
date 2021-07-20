@@ -8,7 +8,7 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MBMap } from './mb_map';
+import { MbMap } from './mb_map';
 import {
   clearGoto,
   clearMouseCoordinates,
@@ -19,6 +19,7 @@ import {
   setAreTilesLoaded,
   setMapInitError,
   setMouseCoordinates,
+  updateMetaFromTiles,
 } from '../../actions';
 import {
   getGoto,
@@ -33,6 +34,7 @@ import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
 import { DRAW_MODE } from '../../../common';
+import { TileMetaFeature } from '../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -79,8 +81,11 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
       dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
     },
+    updateMetaFromTiles(layerId: string, features: TileMetaFeature[]) {
+      dispatch(updateMetaFromTiles(layerId, features));
+    },
   };
 }
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(MBMap);
+const connected = connect(mapStateToProps, mapDispatchToProps)(MbMap);
 export { connected as MBMap };

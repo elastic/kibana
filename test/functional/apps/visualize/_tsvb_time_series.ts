@@ -155,7 +155,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('Clicking on the chart', () => {
         it(`should create a filter`, async () => {
-          await visualBuilder.setMetricsGroupByTerms('machine.os.raw');
+          await visualBuilder.setMetricsGroupByTerms('machine.os.raw', {
+            include: 'win 7',
+            exclude: 'ios',
+          });
           await visualBuilder.clickSeriesOption();
           await testSubjects.click('visualizeSaveButton');
 

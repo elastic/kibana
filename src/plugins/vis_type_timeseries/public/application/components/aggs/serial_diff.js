@@ -24,6 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 export const SerialDiffAgg = (props) => {
   const { siblings, fields, indexPattern, model } = props;
@@ -74,7 +75,7 @@ export const SerialDiffAgg = (props) => {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
-              fields={fields[indexPattern]}
+              fields={fields[getIndexPatternKey(indexPattern)]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
             />

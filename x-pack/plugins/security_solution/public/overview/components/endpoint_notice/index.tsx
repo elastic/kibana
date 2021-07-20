@@ -35,7 +35,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
           </b>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.title"
-            defaultMessage="Endpoint Security (beta)"
+            defaultMessage="Endpoint Security"
           />
         </>
       }
@@ -51,7 +51,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
         <EuiButton onClick={handleGetStartedClick} href={endpointsLink}>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.tryButton"
-            defaultMessage="Try Endpoint Security (beta)"
+            defaultMessage="Try Endpoint Security"
           />
         </EuiButton>
         <EuiButtonEmpty onClick={onDismiss}>
