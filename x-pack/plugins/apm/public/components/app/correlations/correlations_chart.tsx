@@ -70,6 +70,11 @@ const chartTheme: PartialTheme = {
   },
 };
 
+// Log based axis cannot start a 0. Use a small positive number instead.
+const yAxisDomain = {
+  min: 0.00001,
+};
+
 interface CorrelationsChartProps {
   field?: string;
   value?: string;
@@ -140,7 +145,10 @@ export function CorrelationsChart({
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
   return (
-    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+    <div
+      data-test-subj="apmCorrelationsChart"
+      style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+    >
       <Chart
         size={{
           height: '250px',
@@ -168,6 +176,7 @@ export function CorrelationsChart({
         />
         <Axis
           id="y-axis"
+          domain={yAxisDomain}
           title={i18n.translate(
             'xpack.apm.correlations.latency.chart.numberOfTransactionsLabel',
             { defaultMessage: '# transactions' }
@@ -190,6 +199,7 @@ export function CorrelationsChart({
           yAccessors={['doc_count']}
           color={euiTheme.eui.euiColorVis1}
           fit="lookahead"
+          tickFormat={(d) => d}
         />
         {Array.isArray(histogram) &&
           field !== undefined &&
@@ -212,6 +222,7 @@ export function CorrelationsChart({
               xAccessor="key"
               yAccessors={['doc_count']}
               color={euiTheme.eui.euiColorVis2}
+              tickFormat={(d) => d}
             />
           )}
       </Chart>
