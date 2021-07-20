@@ -7,6 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
+import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
 import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
@@ -139,22 +140,30 @@ export class TelemetryEventsSender {
     return callCluster('search', query);
   }
 
-  public async fetchEndpointMetrics() {
+  public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    const query = {
+    const query: SearchRequest = {
       expand_wildcards: 'open,hidden',
-      index: `.ds-metrics-endpoint.metrics*`,
+      index: `.ds-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
+          },
+        },
         aggs: {
           endpoint_agents: {
             terms: {
+              field: 'agent.id',
               size: this.max_records,
-              field: 'agent.id.keyword',
             },
             aggs: {
               latest_metrics: {
@@ -175,7 +184,6 @@ export class TelemetryEventsSender {
       },
     };
 
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
     return this.esClient.search(query);
   }
 
@@ -192,35 +200,38 @@ export class TelemetryEventsSender {
     });
   }
 
-  public async fetchEndpointPolicyConfigs(id: string) {
+  public async fetchPolicyConfigs(id: string) {
     if (this.savedObjectClient === undefined) {
       throw Error('could not fetch endpoint policy configs. saved object client is not available');
     }
 
-    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
+    return this.agentPolicyService?.get(this.savedObjectClient, id);
   }
 
-  public async fetchFailedEndpointPolicyResponses() {
+  public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    const query = {
+    const query: SearchRequest = {
       expand_wildcards: 'open,hidden',
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
         query: {
-          match: {
-            'Endpoint.policy.applied.status': 'failure',
+          range: {
+            '@timestamp': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
           },
         },
         aggs: {
           policy_responses: {
             terms: {
               size: this.max_records,
-              field: 'Endpoint.policy.applied.id.keyword',
+              field: 'Endpoint.policy.applied.id',
             },
             aggs: {
               latest_response: {
@@ -241,7 +252,6 @@ export class TelemetryEventsSender {
       },
     };
 
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
     return this.esClient.search(query);
   }
 
