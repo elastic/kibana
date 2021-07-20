@@ -190,6 +190,7 @@ export function CorrelationsChart({
           yAccessors={['doc_count']}
           color={euiTheme.eui.euiColorVis1}
           fit="lookahead"
+          tickFormat={(d) => d}
         />
         {Array.isArray(histogram) &&
           field !== undefined &&
@@ -212,6 +213,7 @@ export function CorrelationsChart({
               xAccessor="key"
               yAccessors={['doc_count']}
               color={euiTheme.eui.euiColorVis2}
+              tickFormat={(d) => d}
             />
           )}
       </Chart>
