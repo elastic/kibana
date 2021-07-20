@@ -60,8 +60,6 @@ Review important information about the {kib} 7.13.x releases.
 [[release-notes-7.13.4]]
 == {kib} 7.13.4
 
-coming::[7.13.4]
-
 For information about the {kib} 7.13.4 release, review the following information.
 
 [float]
