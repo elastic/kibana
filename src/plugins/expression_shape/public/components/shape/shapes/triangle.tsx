@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../../../presentation_util/public';
+import { createShape } from '../../reusable';
 
-export const Hexagon = createShape({
+export const Triangle = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -16,7 +16,6 @@ export const Hexagon = createShape({
     height: 100,
   },
   shapeProps: {
-    points:
-      '70.000, 15.359 30.000, 15.359 10.000, 50.000 30.000, 84.641 70.000, 84.641 90.000, 50.000',
+    points: '50.000, 20.000 15.359, 80.000 84.641, 80.000',
   },
 });

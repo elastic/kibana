@@ -12,7 +12,7 @@ import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plug
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '../../../presentation_util/public';
 import { ShapeRendererConfig } from '../../common/types';
-import { LazyShapeComponent } from '../components';
+import { LazyShapeComponent } from '../components/shape';
 
 const strings = {
   getDisplayName: () =>

@@ -26,3 +26,10 @@ export interface ParentNodeParams {
   width: number;
   height: number;
 }
+
+export interface ViewBoxParams {
+  minX: number;
+  minY: number;
+  width: number;
+  height: number;
+}

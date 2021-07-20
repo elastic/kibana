@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../../../presentation_util/public';
+import { createShape, SvgElementTypes } from '../../reusable';
 
-export const SpeechBubble = createShape({
+export const Semicircle = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -16,7 +16,7 @@ export const SpeechBubble = createShape({
     height: 100,
   },
   shapeProps: {
-    points: '0,0 100,0 100,70 40,70 20,85 25,70 0,70',
-    strokeLinejoin: 'round',
+    d: 'M 5,50 h 90 A 45 45 180 1 0 5,50 Z',
   },
+  shapeType: SvgElementTypes.path,
 });

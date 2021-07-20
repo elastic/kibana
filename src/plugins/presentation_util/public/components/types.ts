@@ -22,5 +22,3 @@ export interface SaveModalDashboardProps {
   onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
-
-export * from './shape/types';

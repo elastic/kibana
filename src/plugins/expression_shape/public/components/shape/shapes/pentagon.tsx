@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../../../presentation_util/public';
+import { createShape } from '../../reusable';
 
 export const Pentagon = createShape({
   viewBox: {

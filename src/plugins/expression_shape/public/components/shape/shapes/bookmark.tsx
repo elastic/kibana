@@ -6,19 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
+import { createShape } from '../../reusable';
 
-export const Circle = createShape({
+export const Bookmark = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
-    width: 100,
+    width: 60,
     height: 100,
   },
   shapeProps: {
-    r: '45',
-    cx: '50',
-    cy: '50',
+    points: '0,0 60,0 60,95 30,75 0,95 0,0',
   },
-  shapeType: SvgElementTypes.circle,
 });

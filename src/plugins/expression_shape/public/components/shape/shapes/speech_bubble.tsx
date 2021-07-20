@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ViewBoxParams } from '../../types';
+import { createShape } from '../../reusable';
 
-export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
-  if (!viewBox) return;
-  return `${viewBox?.minX} ${viewBox?.minY} ${viewBox?.width} ${viewBox?.height}`;
-}
+export const SpeechBubble = createShape({
+  viewBox: {
+    minX: 0,
+    minY: 0,
+    width: 100,
+    height: 100,
+  },
+  shapeProps: {
+    points: '0,0 100,0 100,70 40,70 20,85 25,70 0,70',
+    strokeLinejoin: 'round',
+  },
+});

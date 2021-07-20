@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { Ref } from 'react';
-import { ShapeDrawer, ShapeRef } from '../../../presentation_util/public';
+import { ShapeDrawer, ShapeRef } from '../reusable';
 import { getShape } from './shapes';
 import { ShapeDrawerComponentProps } from './types';
 

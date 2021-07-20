@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../../../presentation_util/public';
+import { createShape, SvgElementTypes } from '../../reusable';
 
-export const TriangleRight = createShape({
+export const Circle = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -16,6 +16,9 @@ export const TriangleRight = createShape({
     height: 100,
   },
   shapeProps: {
-    points: '0, 10 0, 100 90, 100',
+    r: '45',
+    cx: '50',
+    cy: '50',
   },
+  shapeType: SvgElementTypes.circle,
 });

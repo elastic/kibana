@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createShape } from '../../../../presentation_util/public';
 
-export const ArrowMulti = createShape({
+import { createShape } from '../../reusable';
+
+export const Tag = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -15,6 +16,6 @@ export const ArrowMulti = createShape({
     height: 60,
   },
   shapeProps: {
-    points: '5,30 25,10 25,20 75,20 75,10 95,30 75,50 75,40 25,40 25,50',
+    points: '0,0 75,0 90,30 75,60 0,60',
   },
 });

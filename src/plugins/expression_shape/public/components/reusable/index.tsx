@@ -6,17 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
-
-export const Semicircle = createShape({
-  viewBox: {
-    minX: 0,
-    minY: 0,
-    width: 100,
-    height: 100,
-  },
-  shapeProps: {
-    d: 'M 5,50 h 90 A 45 45 180 1 0 5,50 Z',
-  },
-  shapeType: SvgElementTypes.path,
-});
+export * from './shape_drawer';
+export * from './shape_factory';
+export * from './types';

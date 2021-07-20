@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, lazy, useCallback, RefCallback } from 'react';
+import React, { useState, useEffect, useCallback, RefCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
+import { withSuspense } from '../../../../presentation_util/public';
 import {
+  ShapeRef,
   ShapeAttributes,
   ShapeContentAttributes,
   SvgConfig,
   getDefaultShapeData,
-  withSuspense,
-  ShapeRef,
-} from '../../../presentation_util/public';
+} from '../reusable';
 import { Dimensions, ShapeComponentProps } from './types';
-import { getViewBox } from '../../common/lib';
-import { LazyShapeDrawer } from '..';
+import { getViewBox } from '../../../common/lib';
+import { LazyShapeDrawer } from '../../index';
 
 const ShapeDrawer = withSuspense(LazyShapeDrawer);
 

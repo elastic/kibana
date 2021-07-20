@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IInterpreterRenderHandlers } from '../../../../../src/plugins/expressions';
-import { ShapeRendererConfig } from '../../common/types';
-import { ShapeDrawerProps } from '../../../presentation_util/public';
+import { IInterpreterRenderHandlers } from '../../../../../../src/plugins/expressions';
+import { ShapeRendererConfig } from '../../../common/types';
+import { ShapeDrawerProps } from '../reusable';
 
 export interface ShapeComponentProps extends ShapeRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

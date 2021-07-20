@@ -6,5 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './shape_drawer';
-export * from './shape_factory';
+import { createShape } from '../../reusable';
+
+export const Rhombus = createShape({
+  viewBox: {
+    minX: 0,
+    minY: 0,
+    width: 100,
+    height: 100,
+  },
+  shapeProps: {
+    points: '50,10 10,50 50,90 90,50',
+  },
+});

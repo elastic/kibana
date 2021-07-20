@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ViewBoxParams } from '../../../presentation_util/common';
-import { ParentNodeParams } from '../types';
+import { ParentNodeParams, ViewBoxParams } from '../types';
+
+export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
+  if (!viewBox) return;
+  return `${viewBox?.minX} ${viewBox?.minY} ${viewBox?.width} ${viewBox?.height}`;
+}
 
 function getMinxAndWidth(viewBoxParams: ViewBoxParams, { borderOffset, width }: ParentNodeParams) {
   let { minX, width: shapeWidth } = viewBoxParams;

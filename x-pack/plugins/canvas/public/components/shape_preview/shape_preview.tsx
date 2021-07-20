@@ -11,14 +11,12 @@ import {
   LazyShapeDrawer,
   Shape,
   ShapeDrawerComponentProps,
-} from '../../../../../../src/plugins/expression_shape/public';
-import {
-  withSuspense,
-  ViewBoxParams,
   getDefaultShapeData,
   SvgConfig,
   ShapeRef,
-} from '../../../../../../src/plugins/presentation_util/public';
+  ViewBoxParams,
+} from '../../../../../../src/plugins/expression_shape/public';
+import { withSuspense } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
   shape?: Shape;

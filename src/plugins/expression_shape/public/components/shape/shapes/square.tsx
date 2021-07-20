@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
+import { createShape, SvgElementTypes } from '../../reusable';
 
 export const Square = createShape({
   viewBox: {

@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createShape } from '../../../../presentation_util/public';
 
-export const Arrow = createShape({
+import { createShape } from '../../reusable';
+
+export const Star = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -15,6 +16,7 @@ export const Arrow = createShape({
     height: 100,
   },
   shapeProps: {
-    points: '0,40 60,40 60,20 95,50 60,80 60,60 0,60',
+    points:
+      '41.183, 37.865 12.652, 37.865 35.734, 54.635 26.917, 81.771 50.000, 65.000 73.265, 81.904 64.266, 54.635 87.348, 37.865 58.817, 37.865 50.07, 10.515',
   },
 });

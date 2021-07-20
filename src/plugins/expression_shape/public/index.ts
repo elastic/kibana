@@ -15,6 +15,8 @@ export function plugin() {
 }
 
 export * from './expression_renderers';
-export type { ShapeDrawerComponentProps } from './components/types';
-export { LazyShapeDrawer } from './components';
+export { LazyShapeDrawer } from './components/shape';
+export { getDefaultShapeData } from './components/reusable';
+export * from './components/shape/types';
+export * from './components/reusable/types';
 export * from '../common/types';

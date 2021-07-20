@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../../../presentation_util/public';
+import { createShape } from '../../reusable';
 
-export const Kite = createShape({
+export const TriangleRight = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
     width: 100,
-    height: 150,
+    height: 100,
   },
   shapeProps: {
-    points: '50,10 10,50 50,140 90,50',
+    points: '0, 10 0, 100 90, 100',
   },
 });

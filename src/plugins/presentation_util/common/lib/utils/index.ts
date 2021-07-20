@@ -10,7 +10,6 @@ export * from './dataurl';
 export * from './httpurl';
 export * from './resolve_dataurl';
 export * from './url';
-export * from './view_box';
 
 export async function getElasticLogo() {
   return await import('./elastic_logo');

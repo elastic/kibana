@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../../../presentation_util/public';
+import { createShape } from '../../reusable';
 
-export const Bookmark = createShape({
+export const Kite = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
-    width: 60,
-    height: 100,
+    width: 100,
+    height: 150,
   },
   shapeProps: {
-    points: '0,0 60,0 60,95 30,75 0,95 0,0',
+    points: '50,10 10,50 50,140 90,50',
   },
 });
