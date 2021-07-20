@@ -80,7 +80,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
           creationErrors.message
         : undefined;
 
-      if (errorMessage && errorMessage.match('has one or more removed policies')) {
+      if (errorMessage && errorMessage.match('is assigned with a policy that no longer exists')) {
         policies.options.forEach((policy) => {
           errorMessage = errorMessage?.replace(policy.id, policy.name);
         });

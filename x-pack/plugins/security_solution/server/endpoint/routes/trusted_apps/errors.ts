@@ -15,7 +15,9 @@ export class TrustedAppNotFoundError extends Error {
 export class TrustedAppPolicyNotExistsError extends Error {
   constructor(name: string, policyIds: string[]) {
     super(
-      `Trusted Application (${name}) has one or more removed policies: ${policyIds.join(', ')}`
+      `Trusted Application (${name}) is assigned with a policy that no longer exists: ${policyIds.join(
+        ', '
+      )}`
     );
   }
 }
