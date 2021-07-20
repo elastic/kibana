@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import Boom from '@hapi/boom';
 import { INDEX_PATTERN } from '../../../common/constants';
+import { LegacyRequest } from '../../types';
 
 /*
  * Check the currently logged-in user's privileges for "read" privileges on the
@@ -16,7 +17,7 @@ import { INDEX_PATTERN } from '../../../common/constants';
  *
  * @param req {Object} the server route handler request object
  */
-export async function verifyMonitoringAuth(req) {
+export async function verifyMonitoringAuth(req: LegacyRequest) {
   const xpackInfo = get(req.server.plugins.monitoring, 'info');
 
   if (xpackInfo) {
@@ -37,7 +38,7 @@ export async function verifyMonitoringAuth(req) {
  * @param req {Object} the server route handler request object
  * @return {Promise} That either resolves with no response (void) or an exception.
  */
-async function verifyHasPrivileges(req) {
+async function verifyHasPrivileges(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   let response;

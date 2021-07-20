@@ -19,10 +19,10 @@ export async function getMetrics(
   req: LegacyRequest,
   indexPattern: string,
   metricSet: Metric[] = [],
-  filters = [],
+  filters: Array<Record<string, any>> = [],
   metricOptions = {},
   numOfBuckets: number = 0,
-  groupBy: string | string[] | null = null
+  groupBy: string | Record<string, any> | null = null
 ) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');

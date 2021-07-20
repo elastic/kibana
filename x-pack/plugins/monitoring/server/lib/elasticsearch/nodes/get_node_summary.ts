@@ -53,8 +53,6 @@ export function handleResponse(
 
     if (clusterNode) {
       const _shardStats = shardStats.nodes[nodeUuid] ?? {};
-      // FIX: clusterState.master_node is a boolean but being passed as a string?
-      // @ts-ignore
       const calculatedNodeType = calculateNodeType(stats, clusterState?.master_node); // set type for labeling / iconography
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(
         node,

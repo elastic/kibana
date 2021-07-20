@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { get, isUndefined } from 'lodash';
+import { isUndefined } from 'lodash';
 import { getNodeIds } from './get_node_ids';
+// @ts-ignore
 import { filter } from '../../../pagination/filter';
 import { sortNodes } from './sort_nodes';
+// @ts-ignore
 import { paginate } from '../../../pagination/paginate';
 import { getMetrics } from '../../../details/get_metrics';
+import { LegacyRequest } from '../../../../types';
 
 /**
  * This function performs an optimization around the node listing tables in the UI. To avoid
@@ -28,25 +31,41 @@ import { getMetrics } from '../../../details/get_metrics';
  * @param {*} sort - ({ field, direction })
  * @param {*} queryText - Text that will be used to filter out pipelines
  */
+
+interface Node {
+  name: string;
+  uuid: string;
+  isOnline: boolean;
+  shardCount: number;
+}
+
 export async function getPaginatedNodes(
-  req,
-  esIndexPattern,
-  { clusterUuid },
-  metricSet,
-  pagination,
-  sort,
-  queryText,
-  { clusterStats, nodesShardCount }
+  req: LegacyRequest,
+  esIndexPattern: string,
+  { clusterUuid }: { clusterUuid: string },
+  metricSet: string[],
+  pagination: { index: number; size: number },
+  sort: { field: string; direction: string },
+  queryText: string,
+  {
+    clusterStats,
+    nodesShardCount,
+  }: {
+    clusterStats: {
+      cluster_state: { nodes: Record<string, Node> };
+    };
+    nodesShardCount: { nodes: Record<string, { shardCount: number }> };
+  }
 ) {
   const config = req.server.config();
-  const size = config.get('monitoring.ui.max_bucket_size');
-  const nodes = await getNodeIds(req, esIndexPattern, { clusterUuid }, size);
+  const size = Number(config.get('monitoring.ui.max_bucket_size'));
+  const nodes: Node[] = await getNodeIds(req, esIndexPattern, { clusterUuid }, size);
 
   // Add `isOnline` and shards from the cluster state and shard stats
-  const clusterState = get(clusterStats, 'cluster_state', { nodes: {} });
+  const clusterState = clusterStats?.cluster_state ?? { nodes: {} };
   for (const node of nodes) {
-    node.isOnline = !isUndefined(get(clusterState, ['nodes', node.uuid]));
-    node.shardCount = get(nodesShardCount, `nodes[${node.uuid}].shardCount`, 0);
+    node.isOnline = !isUndefined(clusterState?.nodes[node.uuid]);
+    node.shardCount = nodesShardCount?.nodes[node.uuid]?.shardCount ?? 0;
   }
 
   // `metricSet` defines a list of metrics that are sortable in the UI
@@ -82,7 +101,7 @@ export async function getPaginatedNodes(
 
     const metricList = metricSeriesData[metricName];
     for (const metricItem of metricList[0]) {
-      const node = nodes.find((node) => node.uuid === metricItem.groupedBy);
+      const node = nodes.find((n) => n.uuid === metricItem.groupedBy);
       if (!node) {
         continue;
       }
@@ -91,7 +110,7 @@ export async function getPaginatedNodes(
       if (dataSeries && dataSeries.length) {
         const lastItem = dataSeries[dataSeries.length - 1];
         if (lastItem.length && lastItem.length === 2) {
-          node[metricName] = lastItem[1];
+          Reflect.set(node, metricName, lastItem[1]);
         }
       }
     }

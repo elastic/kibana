@@ -17,10 +17,10 @@ import { ElasticsearchLegacySource } from '../../../../common/types/es';
 
 type Node = ElasticsearchLegacySource['source_node'] & {
   attributes?: Record<string, any>;
-  node_ids: Array<string | undefined>;
+  node_ids?: Array<string | boolean | undefined>;
 };
 
-export function calculateNodeType(node: Node, masterNodeId?: string) {
+export function calculateNodeType(node: Node, masterNodeId?: string | boolean) {
   const attrs = node.attributes || {};
 
   function mightBe(attr?: string) {
@@ -36,7 +36,7 @@ export function calculateNodeType(node: Node, masterNodeId?: string) {
   if (uuid !== undefined && uuid === masterNodeId) {
     return 'master';
   }
-  if (node.node_ids.includes(masterNodeId)) {
+  if (node.node_ids?.includes(masterNodeId)) {
     return 'master';
   }
   if (isNot(attrs.data) && isNot(attrs.master)) {

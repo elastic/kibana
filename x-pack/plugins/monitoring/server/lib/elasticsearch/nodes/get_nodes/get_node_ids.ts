@@ -9,8 +9,14 @@ import moment from 'moment';
 import { get } from 'lodash';
 import { ElasticsearchMetric } from '../../../metrics';
 import { createQuery } from '../../../create_query';
+import { LegacyRequest, Bucket } from '../../../../types';
 
-export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
+export async function getNodeIds(
+  req: LegacyRequest,
+  indexPattern: string,
+  { clusterUuid }: { clusterUuid: string },
+  size: number
+) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
@@ -55,5 +61,7 @@ export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return get(response, 'aggregations.composite_data.buckets', []).map((bucket) => bucket.key);
+  return get(response, 'aggregations.composite_data.buckets', []).map(
+    (bucket: Bucket) => bucket.key
+  );
 }

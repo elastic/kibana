@@ -30,13 +30,13 @@ const CONVERTED_TOKEN = `odh_`;
  * @param string prefix - This is the aggregation name prefix where the rest of the name will be the type of aggregation
  * @param object metricObj The metric aggregation itself
  */
-export function convertMetricNames(prefix, metricObj) {
+export function convertMetricNames(prefix: string, metricObj: Record<string, any>) {
   return Object.entries(metricObj).reduce((newObj, [key, value]) => {
     const newValue = cloneDeep(value);
     if (key.includes('_deriv') && newValue.derivative) {
       newValue.derivative.buckets_path = `${CONVERTED_TOKEN}${prefix}__${newValue.derivative.buckets_path}`;
     }
-    newObj[`${CONVERTED_TOKEN}${prefix}__${key}`] = newValue;
+    Reflect.set(newObj, `${CONVERTED_TOKEN}${prefix}__${key}`, newValue);
     return newObj;
   }, {});
 }
@@ -50,32 +50,36 @@ export function convertMetricNames(prefix, metricObj) {
  *
  * @param object byDateBucketResponse - The response object from the single `date_histogram` bucket
  */
-export function uncovertMetricNames(byDateBucketResponse) {
-  const unconverted = {};
+
+type MetricNameBucket = { key: string; key_as_string: string; doc_count: number } & Record<
+  string,
+  any
+>;
+export function uncovertMetricNames(byDateBucketResponse: { buckets: MetricNameBucket[] }) {
+  const unconverted: Record<string, { buckets: MetricNameBucket[] }> = {};
   for (const metricName of LISTING_METRICS_NAMES) {
     unconverted[metricName] = {
       buckets: byDateBucketResponse.buckets.map((bucket) => {
         const {
-          // eslint-disable-next-line camelcase
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           key_as_string,
-          // eslint-disable-next-line camelcase
           key,
-          // eslint-disable-next-line camelcase
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           doc_count,
           ...rest
         } = bucket;
-        const metrics = Object.entries(rest).reduce((accum, [key, value]) => {
-          if (key.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
-            const name = key.split('__')[1];
+        const metrics = Object.entries(rest).reduce((accum, [k, value]) => {
+          if (k.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
+            const name = k.split('__')[1];
             accum[name] = value;
           }
           return accum;
-        }, {});
+        }, {} as Record<string, any>);
 
         return {
-          key_as_string /* eslint-disable-line camelcase */,
+          key_as_string,
           key,
-          doc_count /* eslint-disable-line camelcase */,
+          doc_count,
           ...metrics,
         };
       }),

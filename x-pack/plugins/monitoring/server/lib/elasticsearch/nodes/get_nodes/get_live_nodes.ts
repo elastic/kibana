@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export async function getLivesNodes(req) {
+import { LegacyRequest } from '../../../../types';
+
+export async function getLivesNodes(req: LegacyRequest) {
   const params = {
     path: '/_nodes',
     method: 'GET',

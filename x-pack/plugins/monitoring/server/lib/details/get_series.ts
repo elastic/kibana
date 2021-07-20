@@ -115,11 +115,11 @@ async function fetchSeries(
   indexPattern: string,
   metric: Metric,
   metricOptions: any,
-  groupBy: string | string[] | null,
+  groupBy: string | Record<string, any> | null,
   min: string,
   max: string,
   bucketSize: number,
-  filters: string[]
+  filters: Array<Record<string, any>>
 ) {
   // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
   const adjustedMin = metric.derivative
@@ -257,7 +257,7 @@ const formatBucketSize = (bucketSizeInSeconds: number) => {
 
 function handleSeries(
   metric: Metric,
-  groupBy: string | string[] | null,
+  groupBy: string | Record<string, any> | null,
   min: string,
   max: string,
   bucketSizeInSeconds: number,
@@ -330,8 +330,8 @@ export async function getSeries(
   indexPattern: string,
   metricName: string,
   metricOptions: Record<string, any>,
-  filters: string[],
-  groupBy: string | string[] | null,
+  filters: Array<Record<string, any>>,
+  groupBy: string | Record<string, any> | null,
   {
     min,
     max,

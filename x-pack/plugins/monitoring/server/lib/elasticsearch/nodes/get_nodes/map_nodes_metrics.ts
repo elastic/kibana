@@ -8,8 +8,16 @@
 import { get, map, min, max, last } from 'lodash';
 import { filterPartialBuckets } from '../../../filter_partial_buckets';
 import { metrics } from '../../../metrics';
+import { Bucket } from '../../../../types';
 
-function calcSlope(data) {
+type MetricBucket = Bucket & { metric_deriv?: { value: number; normalized_value: number } };
+interface TimeOptions {
+  min?: number;
+  max?: number;
+  bucketSize?: number;
+}
+
+function calcSlope(data: Array<{ x: number; y: number }>) {
   const length = data.length;
   const xSum = data.reduce((prev, curr) => prev + curr.x, 0);
   const ySum = data.reduce((prev, curr) => prev + curr.y, 0);
@@ -27,12 +35,15 @@ function calcSlope(data) {
   return null; // convert possible NaN to `null` for JSON-friendliness
 }
 
-const mapBuckets = (bucket, metric) => {
+const mapBuckets = (
+  bucket: MetricBucket,
+  metric: { derivative: boolean; calculation: (b: Bucket) => number | null }
+) => {
   const x = bucket.key;
 
   if (metric.calculation) {
     return {
-      x: bucket.key,
+      x: Number(bucket.key),
       y: metric.calculation(bucket),
     };
   }
@@ -60,12 +71,16 @@ const mapBuckets = (bucket, metric) => {
   return { x, y: null };
 };
 
-function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime, bucketSize }) {
+function reduceMetric(
+  metricName: string,
+  metricBuckets: MetricBucket[],
+  { min: startTime, max: endTime, bucketSize }: TimeOptions
+) {
   if (startTime === undefined || endTime === undefined || startTime >= endTime) {
     return null;
   }
 
-  const partialBucketFilter = filterPartialBuckets(startTime, endTime, bucketSize, {
+  const partialBucketFilter = filterPartialBuckets(startTime, endTime, bucketSize!, {
     ignoreEarly: true,
   });
   const metric = metrics[metricName];
@@ -85,7 +100,7 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
   const minVal = min(map(mappedData, 'y'));
   const maxVal = max(map(mappedData, 'y'));
   const lastVal = last(map(mappedData, 'y'));
-  const slope = calcSlope(mappedData) > 0 ? 1 : -1; // no need for the entire precision, it's just an up/down arrow
+  const slope = Number(calcSlope(mappedData as Array<{ x: number; y: number }>)) > 0 ? 1 : -1; // no need for the entire precision, it's just an up/down arrow
 
   return {
     metric: metric.serialize(),
@@ -93,14 +108,14 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
   };
 }
 
-function reduceAllMetrics(metricSet, timeOptions) {
-  const metrics = {};
+function reduceAllMetrics(metricSet: string[], timeOptions: TimeOptions) {
+  const reducedMetrics: Record<string, any> = {};
   Object.keys(metricSet).forEach((metricName) => {
     const metricBuckets = get(metricSet, [metricName, 'buckets']);
     metrics[metricName] = reduceMetric(metricName, metricBuckets, timeOptions); // append summarized metric data
   });
 
-  return metrics;
+  return reducedMetrics;
 }
 
 /*
@@ -112,8 +127,12 @@ function reduceAllMetrics(metricSet, timeOptions) {
  * @param {Object} timeOptions: min, max, and bucketSize needed for date histogram creation
  * @return {Object} summarized metric data about each node keyed by nodeId
  */
-export function mapNodesMetrics(metricsForNodes, nodesInfo, timeOptions) {
-  const metricRows = {};
+export function mapNodesMetrics(
+  metricsForNodes: Record<string, string[]>,
+  nodesInfo: Record<string, { isOnline: boolean }>,
+  timeOptions: TimeOptions
+) {
+  const metricRows: Record<string, any> = {};
   Object.keys(metricsForNodes).forEach((nodeId) => {
     if (nodesInfo[nodeId].isOnline) {
       // only do the work of mapping metrics if the node is online

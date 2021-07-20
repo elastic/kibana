@@ -18,7 +18,7 @@ import { convertMetricNames } from '../../convert_metric_names';
  * @param {Number} bucketSize: Bucket size in seconds for date histogram interval
  * @return {Object} Aggregation DSL
  */
-export function getMetricAggs(listingMetrics) {
+export function getMetricAggs(listingMetrics: string[]) {
   let aggItems = {};
 
   listingMetrics.forEach((metricName) => {
