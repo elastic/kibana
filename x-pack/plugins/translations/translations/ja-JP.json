@@ -4427,7 +4427,6 @@
     "visTypeTimeseries.iconSelect.tagLabel": "タグ",
     "visTypeTimeseries.indexPattern.detailLevel": "詳細レベル",
     "visTypeTimeseries.indexPattern.detailLevelAriaLabel": "詳細レベル",
-    "visTypeTimeseries.indexPattern.detailLevelHelpText": "時間範囲に基づき自動間隔を制御します。デフォルトの間隔は詳細設定の{histogramTargetBars}と{histogramMaxBars}の影響を受けます。",
     "visTypeTimeseries.indexPattern.dropLastBucketLabel": "最後のバケットをドロップしますか？",
     "visTypeTimeseries.indexPattern.finest": "最も細かい",
     "visTypeTimeseries.indexPattern.intervalHelpText": "例：auto、1m、1d、7d、1y、>=1m",
