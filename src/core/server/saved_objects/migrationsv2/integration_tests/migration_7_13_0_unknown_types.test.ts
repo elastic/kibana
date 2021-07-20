@@ -64,6 +64,7 @@ describe('migration v2', () => {
   it('logs a warning and completes the migration with unknown docs retained', async () => {
     root = createRoot();
     esServer = await startES();
+    await root.preboot();
     await root.setup();
     await root.start();
 
@@ -147,12 +148,14 @@ describe('migration v2', () => {
     // Start kibana with foo and space types disabled
     root = createRoot();
     esServer = await startES();
+    await root.preboot();
     await root.setup();
     await root.start();
 
     // Shutdown and start Kibana again with space type registered to ensure space docs get migrated
     await root.shutdown();
     root = createRoot();
+    await root.preboot();
     const coreSetup = await root.setup();
     coreSetup.savedObjects.registerType({
       name: 'space',
