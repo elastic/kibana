@@ -23,9 +23,28 @@ const createMockClients = () => ({
   appClient: siemMock.createClient(),
 });
 
+/**
+ * Adds mocking to the interface so we don't have to cast everywhere
+ */
+type SecuritySolutionRequestHandlerContextMock = SecuritySolutionRequestHandlerContext & {
+  core: {
+    elasticsearch: {
+      client: {
+        asCurrentUser: {
+          updateByQuery: jest.Mock;
+          search: jest.Mock;
+          transport: {
+            request: jest.Mock;
+          };
+        };
+      };
+    };
+  };
+};
+
 const createRequestContextMock = (
   clients: ReturnType<typeof createMockClients> = createMockClients()
-) => {
+): SecuritySolutionRequestHandlerContextMock => {
   const coreContext = coreMock.createRequestHandlerContext();
   return ({
     alerting: { getAlertsClient: jest.fn(() => clients.alertsClient) },
@@ -39,7 +58,7 @@ const createRequestContextMock = (
     },
     licensing: clients.licensing,
     securitySolution: { getAppClient: jest.fn(() => clients.appClient) },
-  } as unknown) as SecuritySolutionRequestHandlerContext;
+  } as unknown) as SecuritySolutionRequestHandlerContextMock;
 };
 
 const createTools = () => {

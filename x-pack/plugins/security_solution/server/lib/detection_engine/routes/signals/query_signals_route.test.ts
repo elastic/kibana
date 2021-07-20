@@ -27,8 +27,7 @@ describe('query for signal', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
     );
 
@@ -71,8 +70,7 @@ describe('query for signal', () => {
     });
 
     test('catches error if query throws error', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
       );
       const response = await server.inject(getSignalsAggsQueryRequest(), context);

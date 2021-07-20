@@ -100,8 +100,7 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
     addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
@@ -129,8 +128,7 @@ describe('add_prepackaged_rules_route', () => {
 
     test('it returns a 400 if the index does not exist', async () => {
       const request = addPrepackagedRulesRequest();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(request, context);
@@ -185,8 +183,7 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('catches errors if payloads cause errors to be thrown', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
       );
       const request = addPrepackagedRulesRequest();

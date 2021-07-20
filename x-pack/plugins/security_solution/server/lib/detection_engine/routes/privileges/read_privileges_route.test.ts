@@ -19,8 +19,7 @@ describe('read_privileges route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.transport.request as any).mockResolvedValue({
+    context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue({
       body: getMockPrivilegesResult(),
     });
 
@@ -66,8 +65,7 @@ describe('read_privileges route', () => {
     });
 
     test('returns 500 when bad response from cluster', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.transport.request as any).mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
       );
       const response = await server.inject(

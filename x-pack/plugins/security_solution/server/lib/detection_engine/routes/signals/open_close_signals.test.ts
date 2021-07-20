@@ -26,8 +26,7 @@ describe('set signal status', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         getSuccessfulSignalUpdateResponse()
       )
@@ -58,8 +57,7 @@ describe('set signal status', () => {
     });
 
     test('catches error if asCurrentUser throws error', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.updateByQuery as any).mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
       );
       const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
