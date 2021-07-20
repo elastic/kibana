@@ -7,15 +7,11 @@
 
 import React from 'react';
 
-import '../../../common/mock/match_media';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { TestProviders } from '../../../common/mock';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
+import { useMountAppended } from '../../../utils/use_mount_appended';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
 
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { FieldsPane } from './fields_pane';
-
-jest.mock('../../../common/lib/kibana');
 
 const timelineId = 'test';
 

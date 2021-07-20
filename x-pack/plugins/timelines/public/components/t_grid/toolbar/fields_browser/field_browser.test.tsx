@@ -8,9 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import '../../../common/mock/match_media';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders, mockBrowserFields } from '../../../../mock';
 
 import { FieldsBrowser } from './field_browser';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
