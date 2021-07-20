@@ -14,32 +14,23 @@ import {
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
 
-/**
- * Given an endpoint package policy, verifies that all enabled features that
- * require a certain license level have a valid license for them.
- */
-export const isEndpointPolicyValidForLicense = (
-  policy: PolicyConfig,
-  license: ILicense | null
-): boolean => {
-  if (isAtLeast(license, 'platinum')) {
-    const defaults = policyFactoryWithSupportedFeatures();
+function isEndpointPolicyValidForPlatinumLicense(policy: PolicyConfig): boolean {
+  const defaults = policyFactoryWithSupportedFeatures();
 
-    // only platinum or higher may enable ransomware
-    if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
-      return false;
-    }
-
-    // only platinum or higher may enable ransomware
-    if (
-      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported
-    ) {
-      return false;
-    }
-
-    return true; // currently, platinum allows all features
+  // only platinum or higher may enable ransomware
+  if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
+    return false;
   }
 
+  // only platinum or higher may enable ransomware
+  if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
+    return false;
+  }
+
+  return true; // currently, platinum allows all features
+}
+
+function isEndpointPolicyValidForMalware(policy: PolicyConfig): boolean {
   const defaults = policyFactoryWithoutPaidFeatures();
 
   // only platinum or higher may disable malware notification
@@ -60,7 +51,11 @@ export const isEndpointPolicyValidForLicense = (
   ) {
     return false;
   }
+  return true;
+}
 
+function isEndpointPolicyValidForRansomware(policy: PolicyConfig): boolean {
+  const defaults = policyFactoryWithoutPaidFeatures();
   // only platinum or higher may enable ransomware
   if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
     return false;
@@ -87,6 +82,12 @@ export const isEndpointPolicyValidForLicense = (
   if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
     return false;
   }
+  return true;
+}
+
+function isEndpointPolicyValidForMemoryProtection(policy: PolicyConfig): boolean {
+  const defaults = policyFactoryWithoutPaidFeatures();
+
   // only platinum or higher may enable memory_protection
   if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
     return false;
@@ -112,8 +113,37 @@ export const isEndpointPolicyValidForLicense = (
   if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
     return false;
   }
+  return true;
+}
+
+function isEndpointPolicyValidForNonPlatinumLicense(policy: PolicyConfig): boolean {
+  if (!isEndpointPolicyValidForMalware(policy)) {
+    return false;
+  }
+
+  if (!isEndpointPolicyValidForRansomware(policy)) {
+    return false;
+  }
+
+  if (!isEndpointPolicyValidForMemoryProtection(policy)) {
+    return false;
+  }
 
   return true;
+}
+
+/**
+ * Given an endpoint package policy, verifies that all enabled features that
+ * require a certain license level have a valid license for them.
+ */
+export const isEndpointPolicyValidForLicense = (
+  policy: PolicyConfig,
+  license: ILicense | null
+): boolean => {
+  if (isAtLeast(license, 'platinum')) {
+    return isEndpointPolicyValidForPlatinumLicense(policy);
+  }
+  return isEndpointPolicyValidForNonPlatinumLicense(policy);
 };
 
 /**
