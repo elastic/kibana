@@ -37,7 +37,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   const [showFlyout, setShowFlyout] = useState(false);
 
-  async function changeSpacesHandler(spacesToAdd: string[], spacesToMaybeRemove: string[]) {
+  async function changeSpacesHandler(
+    _objects: Array<{ type: string; id: string }>, // this is ignored because ML jobs do not have references
+    spacesToAdd: string[],
+    spacesToMaybeRemove: string[]
+  ) {
     // If the user is adding the job to all current and future spaces, don't remove it from any specified spaces
     const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
 

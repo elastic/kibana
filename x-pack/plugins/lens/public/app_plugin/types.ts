@@ -20,7 +20,7 @@ import {
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
+import { LensEmbeddableInput } from '../embeddable/embeddable';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
@@ -34,7 +34,7 @@ import {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
-import { EditorFrameInstance } from '../types';
+import { Datasource, EditorFrameInstance, Visualization } from '../types';
 import { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
@@ -54,7 +54,8 @@ export interface LensAppProps {
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
-  initialContext?: VisualizeFieldContext;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
 }
 
 export type RunSave = (
@@ -81,6 +82,8 @@ export interface LensTopNavMenuProps {
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
+  datasourceMap: Record<string, Datasource>;
+  title?: string;
 }
 
 export interface HistoryLocationState {
@@ -109,6 +112,10 @@ export interface LensAppServices {
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
+}
+
+export interface LensTopNavTooltips {
+  showExportWarning: () => string | undefined;
 }
 
 export interface LensTopNavActions {

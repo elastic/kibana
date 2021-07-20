@@ -79,6 +79,15 @@ export const buildEqlSearchRequest = (
   eventCategoryOverride: string | undefined
 ): EqlSearchRequest => {
   const timestamp = timestampOverride ?? '@timestamp';
+
+  const defaultTimeFields = ['@timestamp'];
+  const timestamps =
+    timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
+  const docFields = timestamps.map((tstamp) => ({
+    field: tstamp,
+    format: 'strict_date_optional_time',
+  }));
+
   // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
   // allowing us to make 1024-item chunks of exception list items.
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
@@ -121,6 +130,13 @@ export const buildEqlSearchRequest = (
         },
       },
       event_category_field: eventCategoryOverride,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        ...docFields,
+      ],
     },
   };
 };

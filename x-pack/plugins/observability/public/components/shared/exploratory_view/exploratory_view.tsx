@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
@@ -14,11 +14,12 @@ import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
-import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesBuilder } from './series_builder/series_builder';
 import { SeriesUrl } from './types';
+import { LensEmbeddable } from './lens_embeddable';
+import { EmptyView } from './components/empty_view';
 
 export const combineTimeRanges = (
   allSeries: Record<string, SeriesUrl>,
@@ -52,14 +53,13 @@ export function ExploratoryView({
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   const {
-    services: { lens, notifications },
+    services: { lens },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const seriesBuilderRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [height, setHeight] = useState<string>('100vh');
-  const [seriesId, setSeriesId] = useState<string>('');
 
   const [lastUpdated, setLastUpdated] = useState<number | undefined>();
 
@@ -69,13 +69,7 @@ export function ExploratoryView({
 
   const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
-  const LensComponent = lens?.EmbeddableComponent;
-
-  const { firstSeriesId, firstSeries: series, setSeries, allSeries } = useSeriesStorage();
-
-  useEffect(() => {
-    setSeriesId(firstSeriesId);
-  }, [allSeries, firstSeriesId]);
+  const { firstSeries, firstSeriesId, allSeries } = useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
 
@@ -108,49 +102,16 @@ export function ExploratoryView({
     setHeightOffset();
   });
 
-  const timeRange = combineTimeRanges(allSeries, series);
-
-  const onLensLoad = useCallback(() => {
-    setLastUpdated(Date.now());
-  }, []);
-
-  const onBrushEnd = useCallback(
-    ({ range }: { range: number[] }) => {
-      if (series?.reportType !== 'data-distribution') {
-        setSeries(seriesId, {
-          ...series,
-          time: {
-            from: new Date(range[0]).toISOString(),
-            to: new Date(range[1]).toISOString(),
-          },
-        });
-      } else {
-        notifications?.toasts.add(
-          i18n.translate('xpack.observability.exploratoryView.noBrusing', {
-            defaultMessage: 'Zoom by brush selection is only available on time series charts.',
-          })
-        );
-      }
-    },
-    [notifications?.toasts, series, seriesId, setSeries]
-  );
-
   return (
     <Wrapper>
       {lens ? (
         <>
-          <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
+          <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={firstSeriesId} />
           <LensWrapper ref={wrapperRef} height={height}>
-            {lensAttributes && timeRange.to && timeRange.from ? (
-              <LensComponent
-                id="exploratoryView"
-                timeRange={timeRange}
-                attributes={lensAttributes}
-                onLoad={onLensLoad}
-                onBrushEnd={onBrushEnd}
-              />
+            {lensAttributes ? (
+              <LensEmbeddable setLastUpdated={setLastUpdated} lensAttributes={lensAttributes} />
             ) : (
-              <EmptyView series={series} loading={loading} height={height} />
+              <EmptyView series={firstSeries} loading={loading} height={height} />
             )}
           </LensWrapper>
           <SeriesBuilder

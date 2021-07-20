@@ -30,7 +30,7 @@ export async function fetchNodesFromClusterStats(
 ): Promise<AlertClusterStatsNodes[]> {
   const params = {
     index,
-    filterPath: ['aggregations.clusters.buckets'],
+    filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       sort: [

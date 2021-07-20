@@ -16,7 +16,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { CASES_APP_ID } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
@@ -31,9 +31,12 @@ export const CaseDetailsPage = React.memo(() => {
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {
-      navigateToApp(CASES_APP_ID, { path: getCaseUrl(search) });
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
+        path: getCaseUrl(search),
+      });
     }
-  }, [navigateToApp, userPermissions, search]);
+  }, [userPermissions, navigateToApp, search]);
 
   return caseId != null ? (
     <>

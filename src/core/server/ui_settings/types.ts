@@ -68,6 +68,14 @@ export interface IUiSettingsClient {
 }
 
 /** @internal */
+export interface InternalUiSettingsServicePreboot {
+  /**
+   * Creates a {@link IUiSettingsClient} that returns default values for the Core uiSettings.
+   */
+  createDefaultsClient(): IUiSettingsClient;
+}
+
+/** @internal */
 export interface InternalUiSettingsServiceSetup {
   /**
    * Sets settings with default values for the uiSettings.

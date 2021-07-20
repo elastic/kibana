@@ -49,8 +49,9 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { useHostDetails } from '../../containers/hosts/details';
+import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -96,19 +97,21 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const [loading, { hostDetails: hostOverview, id, refetch }] = useHostDetails({
+  const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
     hostName: detailName,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
-  const filterQuery = convertToBuildEsQuery({
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],
     filters: getFilters(),
   });
+
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());
@@ -166,6 +169,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     }}
                     setQuery={setQuery}
                     refetch={refetch}
+                    inspect={inspect}
                   />
                 )}
               </AnomalyTableProvider>

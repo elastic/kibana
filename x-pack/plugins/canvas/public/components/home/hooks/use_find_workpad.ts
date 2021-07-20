@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
-import useMount from 'react-use/lib/useMount';
+import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { WorkpadFindResponse } from '../../../services/workpad';
-
 import { useNotifyService, useWorkpadService } from '../../../services';
-const emptyResponse = { total: 0, workpads: [] };
 
 export const useFindWorkpads = () => {
   const workpadService = useWorkpadService();
@@ -28,25 +24,6 @@ export const useFindWorkpads = () => {
     },
     [notifyService, workpadService]
   );
-};
-
-export const useFindWorkpadsOnMount = (): [boolean, WorkpadFindResponse] => {
-  const [isMounted, setIsMounted] = useState(false);
-  const findWorkpads = useFindWorkpads();
-  const [workpadResponse, setWorkpadResponse] = useState<WorkpadFindResponse>(emptyResponse);
-
-  const fetchWorkpads = useCallback(async () => {
-    const foundWorkpads = await findWorkpads();
-    setWorkpadResponse(foundWorkpads || emptyResponse);
-    setIsMounted(true);
-  }, [findWorkpads]);
-
-  useMount(() => {
-    fetchWorkpads();
-    return () => setIsMounted(false);
-  });
-
-  return [isMounted, workpadResponse];
 };
 
 const errors = {

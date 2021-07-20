@@ -102,7 +102,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomVersion(): string {
-    return [6, ...this.randomNGenerator(10, 2)].map((x) => x.toString()).join('.');
+    return [7, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
   protected randomChoice<T>(choices: T[]): T {

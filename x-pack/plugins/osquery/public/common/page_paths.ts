@@ -11,12 +11,15 @@ export type StaticPage =
   | 'live_queries'
   | 'live_query_new'
   | 'scheduled_query_groups'
-  | 'scheduled_query_group_add';
+  | 'scheduled_query_group_add'
+  | 'saved_queries'
+  | 'saved_query_new';
 
 export type DynamicPage =
   | 'live_query_details'
   | 'scheduled_query_group_details'
-  | 'scheduled_query_group_edit';
+  | 'scheduled_query_group_edit'
+  | 'saved_query_edit';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -50,6 +53,9 @@ export const pagePathGetters: {
   live_queries: () => '/live_queries',
   live_query_new: () => '/live_queries/new',
   live_query_details: ({ liveQueryId }) => `/live_queries/${liveQueryId}`,
+  saved_queries: () => '/saved_queries',
+  saved_query_new: () => '/saved_queries/new',
+  saved_query_edit: ({ savedQueryId }) => `/saved_queries/${savedQueryId}`,
   scheduled_query_groups: () => '/scheduled_query_groups',
   scheduled_query_group_add: () => '/scheduled_query_groups/add',
   scheduled_query_group_details: ({ scheduledQueryGroupId }) =>

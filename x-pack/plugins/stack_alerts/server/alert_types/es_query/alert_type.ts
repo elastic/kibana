@@ -140,6 +140,7 @@ export function getAlertType(
       ],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
   };
@@ -186,7 +187,10 @@ export function getAlertType(
                         filter: [
                           {
                             range: {
-                              [params.timeField]: { lte: timestamp },
+                              [params.timeField]: {
+                                lte: timestamp,
+                                format: 'strict_date_optional_time',
+                              },
                             },
                           },
                         ],

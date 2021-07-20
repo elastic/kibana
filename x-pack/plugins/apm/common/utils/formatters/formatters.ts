@@ -18,6 +18,14 @@ export function asDecimal(value?: number | null) {
   return numeral(value).format('0,0.0');
 }
 
+export function asPreciseDecimal(value?: number | null, dp: number = 3) {
+  if (!isFiniteNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
+  return numeral(value).format(`0,0.${'0'.repeat(dp)}`);
+}
+
 export function asInteger(value?: number | null) {
   if (!isFiniteNumber(value)) {
     return NOT_AVAILABLE_LABEL;

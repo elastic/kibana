@@ -21,6 +21,7 @@ describe('AppLogic', () => {
     account: {},
     hasInitialized: false,
     isOrganization: false,
+    searchOAuth: {},
     organization: {},
   };
 
@@ -36,6 +37,10 @@ describe('AppLogic', () => {
     },
     hasInitialized: true,
     isOrganization: false,
+    searchOAuth: {
+      clientId: 'someUID',
+      redirectUrl: 'http://localhost:3002/ws/search_callback',
+    },
     organization: {
       defaultOrgName: 'My Organization',
       name: 'ACME Donuts',

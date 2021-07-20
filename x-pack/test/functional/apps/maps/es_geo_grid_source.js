@@ -59,9 +59,9 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should not rerequest when zoom changes do not cause geotile_grid precision to change', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.2);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.4);
           const beforeSameZoom = await getRequestTimestamp();
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.8);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.6);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeSameZoom);
         });

@@ -15,7 +15,6 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
-  MetadataQueryStrategyVersions,
   HostStatus,
   ActivityLog,
   HostMetadata,
@@ -33,11 +32,13 @@ import {
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
+  isUninitialisedResourceState,
 } from '../../../state';
 
 import { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -69,6 +70,11 @@ export const policyItemsLoading = (state: Immutable<EndpointState>) => state.pol
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
+export const getIsEndpointPackageInfoUninitialized: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
+  isUninitialisedResourceState(packageInfo)
+);
 
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
@@ -84,16 +90,9 @@ export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =
   state.agentsWithEndpointsTotalError;
 
 export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
-const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
 
-export const endpointPackageVersion = createSelector(
-  endpointPackageInfo,
-  (info) => info?.version ?? undefined
-);
-
-export const isTransformEnabled = createSelector(
-  queryStrategyVersion,
-  (version) => version !== MetadataQueryStrategyVersions.VERSION_1
+export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
+  isLoadedResourceState(info) ? info.data.version : undefined
 );
 
 /**
@@ -364,9 +363,11 @@ export const getIsolationRequestError: (
   }
 });
 
-export const getEndpointDetailsFlyoutView = (
+export const getIsOnEndpointDetailsActivityLog: (
   state: Immutable<EndpointState>
-): EndpointIndexUIQueryParams['show'] => state.endpointDetails.flyoutView;
+) => boolean = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show === EndpointDetailsTabsTypes.activityLog;
+});
 
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>

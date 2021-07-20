@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
+import { ReindexAction, ReindexStatus } from '../../../../../../../common/types';
 
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -37,7 +37,7 @@ interface ReindexFlyoutProps {
   startReindex: () => void;
   cancelReindex: () => void;
   docLinks: DocLinksStart;
-  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
+  reindexBlocker?: ReindexAction['blockerForReindexing'];
 }
 
 interface ReindexFlyoutState {

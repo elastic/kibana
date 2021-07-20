@@ -70,6 +70,7 @@ storiesOf('components/datasource/DatasourceComponent', module)
       setPreviewing={action('setPreviewing')}
       isInvalid={false}
       setInvalid={action('setInvalid')}
+      renderError={action('renderError')}
     />
   ))
   .add('datasource with expression arguments', () => (
@@ -90,5 +91,6 @@ storiesOf('components/datasource/DatasourceComponent', module)
       setPreviewing={action('setPreviewing')}
       isInvalid={false}
       setInvalid={action('setInvalid')}
+      renderError={action('renderError')}
     />
   ));

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { startTrackingEventLoopDelaysUsage } from './event_loop_delays';
 export { registerEventLoopDelaysCollector } from './event_loop_delays_usage_collector';
+export { startTrackingEventLoopDelaysThreshold } from './track_threshold';
+export { startTrackingEventLoopDelaysUsage } from './track_delays';
 export { SAVED_OBJECTS_DAILY_TYPE } from './saved_objects';

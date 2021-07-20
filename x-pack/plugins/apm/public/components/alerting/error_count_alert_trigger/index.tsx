@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { defaults } from 'lodash';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
@@ -18,6 +18,7 @@ import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 export interface AlertParams {
   windowSize: number;
@@ -35,49 +36,55 @@ interface Props {
 
 export function ErrorCountAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
-  const { serviceName } = useParams<{ serviceName?: string }>();
+
+  const serviceNameFromUrl = useServiceName();
+
   const { urlParams } = useUrlParams();
-  const { start, end } = urlParams;
+  const { start, end, environment: environmentFromUrl } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
+    serviceName: serviceNameFromUrl,
     start,
     end,
   });
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
+  const params = defaults(
+    {
+      ...alertParams,
+    },
+    {
+      threshold: 25,
+      windowSize: 1,
+      windowUnit: 'm',
+      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
+      serviceName: serviceNameFromUrl,
+    }
+  );
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (windowSize && windowUnit) {
+      if (params.windowSize && params.windowUnit) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
           params: {
             query: {
-              ...getAbsoluteTimeRange(windowSize, windowUnit),
-              environment,
-              serviceName,
+              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
+              environment: params.environment,
+              serviceName: params.serviceName,
             },
           },
         });
       }
     },
-    [windowSize, windowUnit, environment, serviceName]
+    [
+      params.windowSize,
+      params.windowUnit,
+      params.environment,
+      params.serviceName,
+    ]
   );
 
-  const defaults = {
-    threshold: 25,
-    windowSize: 1,
-    windowUnit: 'm',
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaults,
-    ...alertParams,
-  };
-
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField value={params.serviceName} />,
     <EnvironmentField
       currentValue={params.environment}
       options={environmentOptions}
@@ -109,14 +116,14 @@ export function ErrorCountAlertTrigger(props: Props) {
   const chartPreview = (
     <ChartPreview
       data={data?.errorCountChartPreview}
-      threshold={threshold}
+      threshold={params.threshold}
       yTickFormat={asInteger}
     />
   );
 
   return (
     <ServiceAlertTrigger
-      defaults={defaults}
+      defaults={params}
       fields={fields}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}

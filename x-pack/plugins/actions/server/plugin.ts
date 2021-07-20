@@ -152,7 +152,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly kibanaIndexConfig: { kibana: { index: string } };
 
   constructor(initContext: PluginInitializerContext) {
-    this.logger = initContext.logger.get('actions');
+    this.logger = initContext.logger.get();
     this.actionsConfig = getValidatedConfig(
       this.logger,
       resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())

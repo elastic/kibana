@@ -21,7 +21,6 @@ import { deserializeTime, serializeTime } from './time_serialization';
 import { csvToArray } from './utils';
 
 export function deserializeSnapshotDetails(
-  repository: string,
   snapshotDetailsEs: SnapshotDetailsEs,
   managedRepository?: string,
   successfulSnapshots?: SnapshotDetailsEs[]
@@ -33,6 +32,7 @@ export function deserializeSnapshotDetails(
   const {
     snapshot,
     uuid,
+    repository,
     version_id: versionId,
     version,
     indices = [],

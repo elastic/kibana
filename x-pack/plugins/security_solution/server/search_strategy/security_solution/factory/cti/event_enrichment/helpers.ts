@@ -8,14 +8,16 @@
 import { get, isEmpty } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 
-import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../../../../common/cti/constants';
-import { CtiEnrichment } from '../../../../../../common/search_strategy/security_solution/cti';
-
-type EventField = keyof typeof EVENT_ENRICHMENT_INDICATOR_FIELD_MAP;
-const validEventFields = Object.keys(EVENT_ENRICHMENT_INDICATOR_FIELD_MAP) as EventField[];
-
-const isValidEventField = (field: string): field is EventField =>
-  validEventFields.includes(field as EventField);
+import {
+  ENRICHMENT_TYPES,
+  EVENT_ENRICHMENT_INDICATOR_FIELD_MAP,
+} from '../../../../../../common/cti/constants';
+import {
+  CtiEnrichment,
+  EventField,
+  isValidEventField,
+  validEventFields,
+} from '../../../../../../common/search_strategy/security_solution/cti';
 
 export const buildIndicatorShouldClauses = (
   eventFields: Record<string, unknown>
@@ -67,6 +69,7 @@ const buildIndicatorMatchedFields = (
     'matched.field': [eventField],
     'matched.id': [hit._id],
     'matched.index': [hit._index],
+    'matched.type': [ENRICHMENT_TYPES.InvestigationTime],
   };
 };
 

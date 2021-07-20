@@ -17,7 +17,21 @@ import { endpointPageHttpMock } from '../../../mocks';
 import { fireEvent } from '@testing-library/dom';
 import { licenseService } from '../../../../../../common/hooks/use_license';
 
-jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/lib/kibana/kibana_react', () => {
+  const originalModule = jest.requireActual('../../../../../../common/lib/kibana/kibana_react');
+  return {
+    ...originalModule,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path}`,
+          navigateToApp: jest.fn(),
+        },
+      },
+    }),
+  };
+});
 jest.mock('../../../../../../common/hooks/use_license');
 
 describe('When using the Endpoint Details Actions Menu', () => {
@@ -32,6 +46,10 @@ describe('When using the Endpoint Details Actions Menu', () => {
     // Safe to mutate this mocked data
     // @ts-ignore
     endpointHost.metadata.Endpoint.state.isolation = isolation;
+    // @ts-ignore
+    endpointHost.metadata.host.os.name = 'Windows';
+    // @ts-ignore
+    endpointHost.metadata.agent.version = '7.14.0';
     httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
   };
 
@@ -45,7 +63,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
 
     act(() => {
       mockedContext.history.push(
-        '/endpoints?selected_endpoint=5fe11314-678c-413e-87a2-b4a3461878ee'
+        '/administration/endpoints?selected_endpoint=5fe11314-678c-413e-87a2-b4a3461878ee'
       );
     });
 

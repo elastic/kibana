@@ -46,7 +46,8 @@ export function createElasticCloudInstructions(
 function getApmServerInstructionSet(
   cloudSetup?: CloudSetup
 ): InstructionSetSchema {
-  const cloudId = cloudSetup?.cloudId;
+  const deploymentId = cloudSetup?.deploymentId;
+
   return {
     title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
       defaultMessage: 'APM Server',
@@ -59,8 +60,8 @@ function getApmServerInstructionSet(
             title: 'Enable the APM Server in the ESS console',
             textPre: i18n.translate('xpack.apm.tutorial.elasticCloud.textPre', {
               defaultMessage:
-                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments?q={cloudId}) and enable APM in the deployment settings. Once enabled, refresh this page.',
-              values: { cloudId },
+                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments/{deploymentId}/edit) and enable APM in the deployment settings. Once enabled, refresh this page.',
+              values: { deploymentId },
             }),
           },
         ],

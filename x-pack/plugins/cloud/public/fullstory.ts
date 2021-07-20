@@ -12,7 +12,7 @@ export interface FullStoryDeps {
   basePath: IBasePath;
   orgId: string;
   packageInfo: PackageInfo;
-  userIdPromise: Promise<string | undefined>;
+  userId?: string;
 }
 
 interface FullStoryApi {
@@ -24,7 +24,7 @@ export const initializeFullStory = async ({
   basePath,
   orgId,
   packageInfo,
-  userIdPromise,
+  userId,
 }: FullStoryDeps) => {
   // @ts-expect-error
   window._fs_debug = false;
@@ -73,28 +73,24 @@ export const initializeFullStory = async ({
   /* eslint-enable */
 
   // @ts-expect-error
-  const fullstory: FullStoryApi = window.FSKibana;
+  const fullStory: FullStoryApi = window.FSKibana;
 
-  // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
-  // @ts-expect-error
-  window.FSKibana.event('Loaded Kibana', {
-    kibana_version_str: packageInfo.version,
-  });
-
-  // Use a promise here so we don't have to wait to retrieve the user to start recording the session
-  userIdPromise
-    .then((userId) => {
-      if (!userId) return;
+  try {
+    // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
+    // across domains work
+    if (userId) {
       // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
       const hashedId = sha256(userId.toString());
-      // @ts-expect-error
-      window.FSKibana.identify(hashedId);
-    })
-    .catch((e) => {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`,
-        e
-      );
-    });
+      fullStory.identify(hashedId);
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`, e);
+  }
+
+  // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
+  fullStory.event('Loaded Kibana', {
+    // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
+    kibana_version_str: packageInfo.version,
+  });
 };

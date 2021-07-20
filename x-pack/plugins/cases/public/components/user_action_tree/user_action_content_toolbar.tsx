@@ -32,12 +32,12 @@ const UserActionContentToolbarComponent = ({
   onQuote,
   userCanCrud,
 }: UserActionContentToolbarProps) => (
-  <EuiFlexGroup>
-    <EuiFlexItem>
+  <EuiFlexGroup responsive={false} alignItems="center">
+    <EuiFlexItem grow={false}>
       <UserActionCopyLink id={id} getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId} />
     </EuiFlexItem>
     {userCanCrud && (
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <UserActionPropertyActions
           id={id}
           editLabel={editLabel}

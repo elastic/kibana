@@ -539,7 +539,12 @@ export const AlertsList: React.FunctionComponent = () => {
             fullWidth
             isClearable
             data-test-subj="alertSearchField"
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              if (e.target.value === '') {
+                setSearchText(e.target.value);
+              }
+            }}
             onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
                 setSearchText(inputText);

@@ -6,17 +6,22 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { SearchHit } from 'src/core/types/elasticsearch/search';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../common/runtime_types';
+import { JourneyStep } from '../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
   syntheticEventTypes?: string | string[];
 }
 
-const defaultEventTypes = ['step/end', 'cmd/status', 'step/screenshot', 'journey/browserconsole'];
+const defaultEventTypes = [
+  'cmd/status',
+  'journey/browserconsole',
+  'step/end',
+  'step/screenshot',
+  'step/screenshot_ref',
+];
 
 export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   if (!eventTypes) {
@@ -26,11 +31,12 @@ export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   }
 };
 
-export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
-  uptimeEsClient,
-  checkGroup,
-  syntheticEventTypes,
-}) => {
+type ResultType = JourneyStep & { '@timestamp': string };
+
+export const getJourneySteps: UMElasticsearchQueryFn<
+  GetJourneyStepsParams,
+  JourneyStep[]
+> = async ({ uptimeEsClient, checkGroup, syntheticEventTypes }) => {
   const params = {
     query: {
       bool: {
@@ -53,28 +59,43 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
       { '@timestamp': { order: 'asc' } },
     ] as const),
     _source: {
-      excludes: ['synthetics.blob'],
+      excludes: ['synthetics.blob', 'screenshot_ref'],
     },
     size: 500,
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const screenshotIndexes: number[] = (result.hits.hits as Array<SearchHit<Ping>>)
-    .filter((h) => h._source?.synthetics?.type === 'step/screenshot')
-    .map((h) => h._source?.synthetics?.step?.index as number);
+  const steps = result.hits.hits.map(
+    ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType
+  );
 
-  return ((result.hits.hits as Array<SearchHit<Ping>>)
-    .filter((h) => h._source?.synthetics?.type !== 'step/screenshot')
-    .map((h) => {
-      const source = h._source as Ping & { '@timestamp': string };
-      return {
-        ...source,
-        timestamp: source['@timestamp'],
-        docId: h._id,
-        synthetics: {
-          ...source.synthetics,
-          screenshotExists: screenshotIndexes.some((i) => i === source.synthetics?.step?.index),
-        },
-      };
-    }) as unknown) as Ping;
+  const screenshotIndexList: number[] = [];
+  const refIndexList: number[] = [];
+  const stepsWithoutImages: ResultType[] = [];
+
+  /**
+   * Store screenshot indexes, we use these to determine if a step has a screenshot below.
+   * Store steps that are not screenshots, we return these to the client.
+   */
+  for (const step of steps) {
+    const { synthetics } = step;
+    if (synthetics.type === 'step/screenshot' && synthetics?.step?.index) {
+      screenshotIndexList.push(synthetics.step.index);
+    } else if (synthetics.type === 'step/screenshot_ref' && synthetics?.step?.index) {
+      refIndexList.push(synthetics.step.index);
+    } else {
+      stepsWithoutImages.push(step);
+    }
+  }
+
+  return stepsWithoutImages.map(({ _id, ...rest }) => ({
+    _id,
+    ...rest,
+    timestamp: rest['@timestamp'],
+    synthetics: {
+      ...rest.synthetics,
+      isFullScreenshot: screenshotIndexList.some((i) => i === rest?.synthetics?.step?.index),
+      isScreenshotRef: refIndexList.some((i) => i === rest?.synthetics?.step?.index),
+    },
+  }));
 };

@@ -43,6 +43,7 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
       context: [{ name: 'server', description: 'the server' }],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: false,
     producer: 'security-solution',
     async executor({
       services: { alertWithPersistence, findAlerts },

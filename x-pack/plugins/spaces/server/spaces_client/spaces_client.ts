@@ -11,7 +11,12 @@ import { omit } from 'lodash';
 import type { ISavedObjectsRepository, SavedObject } from 'src/core/server';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../../common';
+import type {
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+} from '../../common';
 import { isReservedSpace } from '../../common';
 import type { ConfigType } from '../config';
 
@@ -22,6 +27,7 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
   'shareSavedObjectsIntoSpace',
 ];
 const DEFAULT_PURPOSE = 'any';
+const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 /**
  * Client interface for interacting with spaces.
@@ -57,6 +63,12 @@ export interface ISpacesClient {
    * @param id the id of the space to delete.
    */
   delete(id: string): Promise<void>;
+
+  /**
+   * Disables the specified legacy URL aliases.
+   * @param aliases the aliases to disable.
+   */
+  disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]): Promise<void>;
 }
 
 /**
@@ -133,6 +145,15 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.deleteByNamespace(id);
 
     await this.repository.delete('space', id);
+  }
+
+  public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    const attributes = { disabled: true };
+    const objectsToUpdate = aliases.map(({ targetSpace, targetType, sourceId }) => {
+      const id = `${targetSpace}:${targetType}:${sourceId}`;
+      return { type: LEGACY_URL_ALIAS_TYPE, id, attributes };
+    });
+    await this.repository.bulkUpdate(objectsToUpdate);
   }
 
   private transformSavedObjectToSpace(savedObject: SavedObject<any>) {

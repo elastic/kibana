@@ -12,4 +12,12 @@ export const jobAuditMessagesJobIdSchema = schema.object({
   jobId: schema.maybe(schema.string()),
 });
 
-export const jobAuditMessagesQuerySchema = schema.object({ from: schema.maybe(schema.string()) });
+export const jobAuditMessagesQuerySchema = schema.object({
+  from: schema.maybe(schema.string()),
+  start: schema.maybe(schema.string()),
+  end: schema.maybe(schema.string()),
+});
+
+export const clearJobAuditMessagesBodySchema = schema.object({
+  jobId: schema.string(),
+});

@@ -88,6 +88,7 @@ interface RelevanceTuningActions {
     optionType: keyof Pick<Boost, 'operation' | 'function'>;
     value: string;
   };
+  updatePrecision(precision: number): { precision: number };
   updateSearchValue(query: string): string;
 }
 
@@ -143,6 +144,7 @@ export const RelevanceTuningLogic = kea<
       optionType,
       value,
     }),
+    updatePrecision: (precision) => ({ precision }),
     updateSearchValue: (query) => query,
   }),
   reducers: () => ({
@@ -150,11 +152,16 @@ export const RelevanceTuningLogic = kea<
       {
         search_fields: {},
         boosts: {},
+        precision: 2,
       },
       {
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
         setSearchSettings: (_, { searchSettings }) => searchSettings,
         setSearchSettingsResponse: (_, { searchSettings }) => searchSettings,
+        updatePrecision: (currentSearchSettings, { precision }) => ({
+          ...currentSearchSettings,
+          precision,
+        }),
       },
     ],
     schema: [
@@ -184,6 +191,7 @@ export const RelevanceTuningLogic = kea<
     unsavedChanges: [
       false,
       {
+        updatePrecision: () => true,
         setSearchSettings: () => true,
         setSearchSettingsResponse: () => false,
       },
@@ -261,7 +269,7 @@ export const RelevanceTuningLogic = kea<
       const { engineName } = EngineLogic.values;
       const { http } = HttpLogic.values;
       const { search_fields: searchFields, boosts } = removeBoostStateProps(values.searchSettings);
-      const url = `/api/app_search/engines/${engineName}/search_settings_search`;
+      const url = `/api/app_search/engines/${engineName}/search`;
 
       actions.setResultsLoading(true);
 

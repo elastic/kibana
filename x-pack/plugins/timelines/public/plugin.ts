@@ -21,7 +21,7 @@ import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
-
+import * as hoverActions from './components/hover_actions';
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
   private _store: Store | undefined;
@@ -35,10 +35,14 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       return {} as TimelinesUIStart;
     }
     return {
+      getHoverActions: () => {
+        return hoverActions;
+      },
       getTGrid: (props: TGridProps) => {
         return getTGridLazy(props, {
           store: this._store,
           storage: this._storage,
+          setStore: this.setStore.bind(this),
           data,
         });
       },
@@ -60,11 +64,14 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getUseDraggableKeyboardWrapper: () => {
         return useDraggableKeyboardWrapper;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setTGridEmbeddedStore: (store: any) => {
-        this._store = store;
+      setTGridEmbeddedStore: (store: Store) => {
+        this.setStore(store);
       },
     };
+  }
+
+  private setStore(store: Store) {
+    this._store = store;
   }
 
   public stop() {}

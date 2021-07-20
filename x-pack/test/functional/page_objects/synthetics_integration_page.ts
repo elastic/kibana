@@ -86,7 +86,7 @@ export function SyntheticsIntegrationPageProvider({
      * @params {value} the value of the input
      */
     async fillTextInputByTestSubj(testSubj: string, value: string) {
-      const field = await testSubjects.find(testSubj, 5000);
+      const field = await testSubjects.find(testSubj);
       await field.scrollIntoViewIfNecessary({ bottomOffset: fixedFooterHeight });
       await field.click();
       await field.clearValue();
@@ -118,7 +118,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async findHTTPAdvancedOptionsAccordion() {
       await this.ensureIsOnPackagePage();
-      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion', 5000);
+      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion');
       return accordion;
     },
 

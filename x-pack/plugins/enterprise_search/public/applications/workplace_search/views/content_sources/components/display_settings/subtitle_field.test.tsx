@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -12,7 +14,11 @@ import { shallow } from 'enzyme';
 import { SubtitleField } from './subtitle_field';
 
 describe('SubtitleField', () => {
-  const result = { foo: 'bar' };
+  const result = {
+    ...exampleResult.exampleDocuments[0],
+    foo: 'bar',
+  };
+
   it('renders', () => {
     const props = {
       result,

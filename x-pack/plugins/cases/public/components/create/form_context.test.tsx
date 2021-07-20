@@ -183,6 +183,36 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
     });
 
+    it('it does not submits the title when the length is longer than 64 characters', async () => {
+      const longTitle =
+        'This is a title that should not be saved as it is longer than 64 characters.';
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseForm {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      act(() => {
+        wrapper
+          .find(`[data-test-subj="caseTitle"] input`)
+          .first()
+          .simulate('change', { target: { value: longTitle } });
+        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      });
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('[data-test-subj="caseTitle"] .euiFormErrorText').text()).toBe(
+          'The length of the title is too long. The maximum length is 64.'
+        );
+      });
+      expect(postCase).not.toHaveBeenCalled();
+    });
+
     it('should toggle sync settings', async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,

@@ -64,16 +64,6 @@ export interface AlertSummaryRow {
   };
 }
 
-export interface ThreatSummaryRow {
-  title: string;
-  description: {
-    contextId: string;
-    eventId: string;
-    fieldName: string;
-    values: string[];
-  };
-}
-
 export interface ThreatDetailsRow {
   title: string;
   description: {
@@ -82,7 +72,7 @@ export interface ThreatDetailsRow {
   };
 }
 
-export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
+export type SummaryRow = AlertSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -207,7 +197,7 @@ export const onEventDetailsTabKeyPressed = ({
 };
 
 const getTitle = (title: string) => (
-  <EuiTitle size="xxs">
+  <EuiTitle size="xxxs">
     <h5>{title}</h5>
   </EuiTitle>
 );
@@ -215,7 +205,6 @@ getTitle.displayName = 'getTitle';
 
 export const getSummaryColumns = (
   DescriptionComponent:
-    | React.FC<ThreatSummaryRow['description']>
     | React.FC<AlertSummaryRow['description']>
     | React.FC<ThreatDetailsRow['description']>
 ): Array<EuiBasicTableColumn<SummaryRow>> => {

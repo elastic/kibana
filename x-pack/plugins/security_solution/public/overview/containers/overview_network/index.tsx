@@ -74,7 +74,7 @@ export const useNetworkOverview = ({
 
   const overviewNetworkSearch = useCallback(
     (request: NetworkOverviewRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -118,7 +118,7 @@ export const useNetworkOverview = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

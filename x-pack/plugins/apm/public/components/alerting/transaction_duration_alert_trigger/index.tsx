@@ -7,16 +7,18 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { map } from 'lodash';
+import { map, defaults } from 'lodash';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { getTransactionType } from '../../../context/apm_service/apm_service_context';
+import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useServiceName } from '../../../hooks/use_service_name';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -72,46 +74,67 @@ interface Props {
 export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const { transactionTypes, transactionType } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end } = urlParams;
+
+  const { start, end, environment: environmentFromUrl } = urlParams;
+
+  const serviceNameFromUrl = useServiceName();
+
+  const transactionTypes = useServiceTransactionTypesFetcher(
+    serviceNameFromUrl
+  );
+  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
+
+  const transactionTypeFromUrl = getTransactionType({
+    transactionType: urlParams.transactionType,
+    transactionTypes,
+    agentName,
+  });
+
+  const params = defaults(
+    {
+      ...alertParams,
+    },
+    {
+      aggregationType: 'avg',
+      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
+      threshold: 1500,
+      windowSize: 5,
+      windowUnit: 'm',
+      transactionType: transactionTypeFromUrl,
+      serviceName: serviceNameFromUrl,
+    }
+  );
+
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
+    serviceName: params.serviceName,
     start,
     end,
   });
-  const {
-    aggregationType,
-    environment,
-    threshold,
-    windowSize,
-    windowUnit,
-  } = alertParams;
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (windowSize && windowUnit) {
+      if (params.windowSize && params.windowUnit) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
           params: {
             query: {
-              ...getAbsoluteTimeRange(windowSize, windowUnit),
-              aggregationType,
-              environment,
-              serviceName,
-              transactionType: alertParams.transactionType,
+              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
+              aggregationType: params.aggregationType,
+              environment: params.environment,
+              serviceName: params.serviceName,
+              transactionType: params.transactionType,
             },
           },
         });
       }
     },
     [
-      aggregationType,
-      environment,
-      serviceName,
-      alertParams.transactionType,
-      windowSize,
-      windowUnit,
+      params.aggregationType,
+      params.environment,
+      params.serviceName,
+      params.transactionType,
+      params.windowSize,
+      params.windowUnit,
     ]
   );
 
@@ -122,7 +145,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
   // The threshold from the form is in ms. Convert to µs.
-  const thresholdMs = threshold * 1000;
+  const thresholdMs = params.threshold * 1000;
 
   const chartPreview = (
     <ChartPreview
@@ -132,26 +155,12 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />
   );
 
-  if (!transactionTypes.length || !serviceName) {
+  if (!transactionTypes.length || !params.serviceName) {
     return null;
   }
 
-  const defaults = {
-    threshold: 1500,
-    aggregationType: 'avg',
-    windowSize: 5,
-    windowUnit: 'm',
-    transactionType,
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaults,
-    ...alertParams,
-  };
-
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField value={params.serviceName} />,
     <TransactionTypeField
       currentValue={params.transactionType}
       options={transactionTypes.map((key) => ({ text: key, value: key }))}
@@ -206,7 +215,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
   return (
     <ServiceAlertTrigger
       chartPreview={chartPreview}
-      defaults={defaults}
+      defaults={params}
       fields={fields}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}

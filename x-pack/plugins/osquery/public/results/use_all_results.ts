@@ -78,7 +78,7 @@ export const useAllResults = ({
       };
     },
     {
-      refetchInterval: isLive ? 1000 : false,
+      refetchInterval: isLive ? 5000 : false,
       enabled: !skip,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>

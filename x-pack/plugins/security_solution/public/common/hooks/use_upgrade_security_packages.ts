@@ -8,14 +8,9 @@
 import { useEffect } from 'react';
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import {
-  epmRouteService,
-  appRoutesService,
-  CheckPermissionsResponse,
-  BulkInstallPackagesResponse,
-} from '../../../../fleet/common';
+import { epmRouteService, BulkInstallPackagesResponse } from '../../../../fleet/common';
 import { StartServices } from '../../types';
-import { useIngestEnabledCheck } from './endpoint/ingest_enabled';
+import { useUserPrivileges } from '../components/user_privileges';
 
 /**
  * Requests that the endpoint and security_detection_engine package be upgraded to the latest version
@@ -35,25 +30,9 @@ const sendUpgradeSecurityPackages = async (
   });
 };
 
-/**
- * Checks with the ingest manager if the current user making these requests has the right permissions
- * to install the endpoint package.
- *
- * @param http an http client for sending the request
- * @param options an object containing options for the request
- */
-const sendCheckPermissions = async (
-  http: HttpStart,
-  options: HttpFetchOptions = {}
-): Promise<CheckPermissionsResponse> => {
-  return http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
-    ...options,
-  });
-};
-
 export const useUpgradeSecurityPackages = () => {
   const context = useKibana<StartServices>();
-  const { allEnabled: ingestEnabled } = useIngestEnabledCheck();
+  const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -63,21 +42,11 @@ export const useUpgradeSecurityPackages = () => {
       abortController.abort();
     };
 
-    if (ingestEnabled) {
+    if (canAccessFleet) {
       const signal = abortController.signal;
 
       (async () => {
         try {
-          // make sure we're a privileged user before trying to install the package
-          const { success: hasPermissions } = await sendCheckPermissions(context.services.http, {
-            signal,
-          });
-
-          // if we're not a privileged user then return and don't try to check the status of the endpoint package
-          if (!hasPermissions) {
-            return abortRequests;
-          }
-
           // ignore the response for now since we aren't notifying the user
           await sendUpgradeSecurityPackages(context.services.http, { signal });
         } catch (error) {
@@ -93,5 +62,5 @@ export const useUpgradeSecurityPackages = () => {
         return abortRequests;
       })();
     }
-  }, [ingestEnabled, context.services.http]);
+  }, [canAccessFleet, context.services.http]);
 };
