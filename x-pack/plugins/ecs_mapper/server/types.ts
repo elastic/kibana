@@ -7,7 +7,7 @@
 
 import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { License, Mapper } from './services';
+import { License } from './services';
 
 export interface EcsMapperPluginDependencies {
   licensing: LicensingPluginSetup;
@@ -16,5 +16,4 @@ export interface EcsMapperPluginDependencies {
 export interface RouteDependencies {
   router: IRouter;
   license: License;
-  mapper: Mapper;
 }

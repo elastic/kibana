@@ -6,4 +6,3 @@
  */
 
 export { License } from './license';
-export { Mapper } from './mapper';
