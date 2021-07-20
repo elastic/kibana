@@ -4475,7 +4475,6 @@
     "visTypeTimeseries.iconSelect.tagLabel": "标签",
     "visTypeTimeseries.indexPattern.detailLevel": "详细程度",
     "visTypeTimeseries.indexPattern.detailLevelAriaLabel": "详细程度",
-    "visTypeTimeseries.indexPattern.detailLevelHelpText": "根据时间范围控制自动时间间隔。默认时间间隔受高级设置 {histogramTargetBars} 和 {histogramMaxBars} 影响。",
     "visTypeTimeseries.indexPattern.dropLastBucketLabel": "丢弃上一存储桶？",
     "visTypeTimeseries.indexPattern.finest": "最精细",
     "visTypeTimeseries.indexPattern.intervalHelpText": "示例：auto、1m、1d、7d、1y、>=1m",
