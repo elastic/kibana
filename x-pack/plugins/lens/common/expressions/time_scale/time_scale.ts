@@ -25,7 +25,6 @@ export interface TimeScaleArgs {
   outputColumnId: string;
   targetUnit: TimeScaleUnit;
   outputColumnName?: string;
-  timeZone?: string;
 }
 
 const unitInMs: Record<TimeScaleUnit, number> = {
@@ -70,22 +69,11 @@ export const timeScale: ExpressionFunctionDefinition<
       help: '',
       required: true,
     },
-    timeZone: {
-      types: ['string'],
-      help: '',
-    },
   },
   inputTypes: ['datatable'],
   async fn(
     input,
-    {
-      dateColumnId,
-      inputColumnId,
-      outputColumnId,
-      outputColumnName,
-      targetUnit,
-      timeZone,
-    }: TimeScaleArgs
+    { dateColumnId, inputColumnId, outputColumnId, outputColumnName, targetUnit }: TimeScaleArgs
   ) {
     const dateColumnDefinition = input.columns.find((column) => column.id === dateColumnId);
 
@@ -126,7 +114,7 @@ export const timeScale: ExpressionFunctionDefinition<
     // the datemath plugin always parses dates by using the current default moment time zone.
     // to use the configured time zone, we are switching just for the bounds calculation.
     const defaultTimezone = moment().zoneName();
-    moment.tz.setDefault(timeZone ?? timeInfo.timeZone);
+    moment.tz.setDefault(timeInfo.timeZone);
 
     const timeBounds = timeInfo.timeRange && calculateBounds(timeInfo.timeRange);
 
