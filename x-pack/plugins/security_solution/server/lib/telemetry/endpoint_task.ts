@@ -166,6 +166,11 @@ export class TelemetryEndpointTask {
       body: EndpointMetricsAggregation;
     };
 
+    if (endpointMetricsResponse.aggregations === undefined) {
+      this.logger.debug(`no endpoint metrics to report`);
+      return 0;
+    }
+
     const endpointMetrics = endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
       (epMetrics) => {
         return {
@@ -188,8 +193,10 @@ export class TelemetryEndpointTask {
      */
     const agentsResponse = endpointData.fleetAgentsResponse;
     if (agentsResponse === undefined) {
+      this.logger.debug('no fleet agent information available');
       return 0;
     }
+
     const fleetAgents = agentsResponse.agents.reduce((cache, agent) => {
       if (agent.id === DefaultEndpointPolicyIdToIgnore) {
         return cache;
@@ -241,14 +248,19 @@ export class TelemetryEndpointTask {
     const { body: failedPolicyResponses } = (endpointData.epPolicyResponse as unknown) as {
       body: EndpointPolicyResponseAggregation;
     };
-    const policyResponses = failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
-      (cache, endpointAgentId) => {
-        const doc = endpointAgentId.latest_response.hits.hits[0];
-        cache.set(endpointAgentId.key, doc);
-        return cache;
-      },
-      new Map<string, EndpointPolicyResponseDocument>()
-    );
+
+    // If there is no policy responses in the 24h > now then we will continue
+    const policyResponses =
+      failedPolicyResponses.aggregations === undefined
+        ? new Map<string, EndpointPolicyResponseDocument>()
+        : failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
+            (cache, endpointAgentId) => {
+              const doc = endpointAgentId.latest_response.hits.hits[0];
+              cache.set(endpointAgentId.key, doc);
+              return cache;
+            },
+            new Map<string, EndpointPolicyResponseDocument>()
+          );
 
     /** STAGE 4 - Create the telemetry log records
      *
@@ -267,7 +279,7 @@ export class TelemetryEndpointTask {
 
         const policyInformation = fleetAgents.get(fleetAgentId);
         if (policyInformation) {
-          policyConfig = endpointPolicyCache.get(policyInformation);
+          policyConfig = endpointPolicyCache.get(policyInformation) || null;
 
           if (policyConfig) {
             failedPolicy = policyResponses.get(policyConfig?.id);
@@ -319,7 +331,7 @@ export class TelemetryEndpointTask {
       );
       return telemetryPayloads.length;
     } catch (err) {
-      this.logger.error('Could not send endpoint alert telemetry');
+      this.logger.warn('could not complete endpoint alert telemetry task');
       return 0;
     }
   };
