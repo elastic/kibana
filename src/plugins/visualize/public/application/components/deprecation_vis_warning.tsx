@@ -40,7 +40,7 @@ export const DeprecationWarning = () => {
                         <EuiLink href={advancedSettingsLink}>
                           <FormattedMessage
                             id="visualize.legacyCharts.conditionalMessage.advanced settings link"
-                            defaultMessage="Advanced settings."
+                            defaultMessage="Advanced Settings."
                           />
                         </EuiLink>
                       ),
