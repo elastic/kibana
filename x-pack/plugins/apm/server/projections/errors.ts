@@ -10,11 +10,8 @@ import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
 } from '../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
+import { environmentQuery } from '../../common/utils/environment_query';
 import { ProcessorEvent } from '../../common/processor_event';
 
 export function getErrorGroupsProjection({

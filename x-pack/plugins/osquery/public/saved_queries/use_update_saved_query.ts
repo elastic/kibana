@@ -37,6 +37,17 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
         throw new Error('CurrentUser is missing');
       }
 
+      const conflictingEntries = await savedObjects.client.find({
+        type: savedQuerySavedObjectType,
+        // @ts-expect-error update types
+        search: payload.id,
+        searchFields: ['id'],
+      });
+      if (conflictingEntries.savedObjects.length) {
+        // @ts-expect-error update types
+        throw new Error(`Saved query with id ${payload.id} already exists.`);
+      }
+
       return savedObjects.client.update(savedQuerySavedObjectType, savedQueryId, {
         // @ts-expect-error update types
         ...payload,
@@ -56,7 +67,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
           i18n.translate('xpack.osquery.editSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully updated "{savedQueryName}" query',
             values: {
-              savedQueryName: payload.attributes?.name ?? '',
+              savedQueryName: payload.attributes?.id ?? '',
             },
           })
         );

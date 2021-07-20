@@ -245,9 +245,23 @@ export const STATUS = i18n.translate(
   }
 );
 
+export const SIGNAL_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const TRIGGERED = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
   {
     defaultMessage: 'Triggered',
+  }
+);
+
+export const TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
+  {
+    defaultMessage: 'Timestamp',
   }
 );

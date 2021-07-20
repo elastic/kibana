@@ -68,6 +68,7 @@ import { TimeBuckets } from '../../services/time_buckets';
 import { extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
+import { extractErrorProperties } from '../../utils/error_utils';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -371,9 +372,16 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         earliest,
         latest
       );
+      // Because load overall stats perform queries in batches
+      // there could be multiple errors
+      if (Array.isArray(allStats.errors) && allStats.errors.length > 0) {
+        allStats.errors.forEach((err: any) => {
+          dataLoader.displayError(extractErrorProperties(err));
+        });
+      }
       setOverallStats(allStats);
     } catch (err) {
-      dataLoader.displayError(err);
+      dataLoader.displayError(err.body ?? err);
     }
   }
 
