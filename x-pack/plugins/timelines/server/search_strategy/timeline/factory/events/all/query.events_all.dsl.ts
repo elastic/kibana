@@ -23,6 +23,7 @@ export const buildTimelineEventsAllQuery = ({
   pagination: { activePage, querySize },
   sort,
   timerange,
+  authFilter,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
 
@@ -46,7 +47,8 @@ export const buildTimelineEventsAllQuery = ({
     return [];
   };
 
-  const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
+  const filters = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
+  const filter = authFilter != null ? [...filters, { ...authFilter }] : filters;
 
   const getSortField = (sortFields: TimelineRequestSortField[]) =>
     sortFields.map((item) => {

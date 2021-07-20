@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { remove } from 'lodash';
 import { JsonObject } from '@kbn/common-utils';
-import { nodeBuilder, EsQueryConfig } from '../../../../../src/plugins/data/common';
-import { toElasticsearchQuery } from '../../../../../src/plugins/data/common/es_query';
+import { remove } from 'lodash';
+
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 
@@ -25,14 +25,8 @@ export interface AlertingAuthorizationFilterOpts {
 interface AlertingAuthorizationFilterFieldNames {
   ruleTypeId: string;
   consumer: string;
+  spaceIds?: string;
 }
-
-const esQueryConfig: EsQueryConfig = {
-  allowLeadingWildcards: true,
-  dateFormatTZ: 'Zulu',
-  ignoreFilterIfFieldNotInIndex: false,
-  queryStringOptions: { analyze_wildcard: true },
-};
 
 export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
@@ -82,8 +76,8 @@ export const buildRuleTypeFilter = (
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
   opts: AlertingAuthorizationFilterOpts,
   alertSpaceId?: string
-) => {
-  const allFilters = Array.from(ruleTypes).map<JSON.Object[]>(({ id, authorizedConsumers }) => {
+): JsonObject => {
+  const allFilters = Array.from(ruleTypes).map(({ id, authorizedConsumers }) => {
     const ruleIdFilter = {
       bool: {
         should: [
@@ -97,7 +91,7 @@ export const buildRuleTypeFilter = (
       },
     };
     const spaceIdFilter =
-      alertSpaceId != null
+      alertSpaceId != null && opts.fieldNames.spaceIds != null
         ? {
             bool: {
               filter: [{ term: { [opts.fieldNames.spaceIds]: alertSpaceId } }],

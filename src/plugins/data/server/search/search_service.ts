@@ -109,6 +109,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: StrategyMap = {};
   private sessionService: ISearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
+  private searchAsInternalUser!: ISearchStrategy;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,

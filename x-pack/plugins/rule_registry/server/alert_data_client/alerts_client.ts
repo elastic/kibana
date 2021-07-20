@@ -6,6 +6,11 @@
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import {
+  mapConsumerToIndexName,
+  validFeatureIds,
+  isValidFeatureId,
+} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 
 import { AlertTypeParams } from '../../../alerting/server';
 import {
@@ -24,7 +29,6 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '../utils/rbac';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &

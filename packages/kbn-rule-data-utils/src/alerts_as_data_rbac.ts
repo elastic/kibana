@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -13,7 +14,18 @@
  * This doesn't work in combination with the `xpack.ruleRegistry.index`
  * setting, with which the user can change the index prefix.
  */
-export const mapConsumerToIndexName = {
+
+export const ALERTS_CONSUMERS = {
+  APM: 'apm',
+  LOGS: 'logs',
+  INFRASTRUCTURE: 'infrastructure',
+  OBSERVABILITY: 'observability',
+  SIEM: 'siem',
+  SYNTHETICS: 'synthetics',
+} as const;
+export type ALERTS_CONSUMERS = typeof ALERTS_CONSUMERS[keyof typeof ALERTS_CONSUMERS];
+
+export const mapConsumerToIndexName: Record<ALERTS_CONSUMERS, string | string[]> = {
   apm: '.alerts-observability-apm',
   logs: '.alerts-observability.logs',
   infrastructure: '.alerts-observability.metrics',

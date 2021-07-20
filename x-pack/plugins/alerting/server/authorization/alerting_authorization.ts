@@ -102,8 +102,6 @@ export class AlertingAuthorization {
     // manually authorize each rule type in the management UI.
     this.exemptConsumerIds = exemptConsumerIds;
 
-    this.spaceId = getSpace(request).then((maybeSpace) => maybeSpace?.id);
-
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
       .then(
@@ -125,6 +123,12 @@ export class AlertingAuthorization {
         // failing to fetch the space means the user is likely not privileged in the
         // active space at all, which means that their list of features should be empty
         return new Set();
+      });
+
+    this.spaceId = getSpace(request)
+      .then((maybeSpace) => maybeSpace?.id)
+      .catch((e) => {
+        return undefined;
       });
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
@@ -302,8 +306,11 @@ export class AlertingAuthorization {
       );
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
+      const alertsSpaceId =
+        authorizationEntity === AlertingAuthorizationEntity.Alert ? await this.spaceId : undefined;
+
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts),
+        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, alertsSpaceId),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
