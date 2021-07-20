@@ -8,7 +8,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
-import { UpgradePackagePolicyDryRunResponse } from '../../../../plugins/fleet/common';
+import {
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
+} from '../../../../plugins/fleet/common';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -81,13 +84,19 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('upgrade package policy when package is installed', async function () {
-      beforeEach(async function () {
+    describe('when package is installed', async function () {
+      before(async function () {
         await supertest
           .post(`/api/fleet/epm/packages/multiple_versions-0.3.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
+      });
+
+      after(async function () {
+        await supertest
+          .delete(`/api/fleet/epm/packages/multiple_version-0.3.0`)
+          .set('kbn-xsrf', 'xxxx');
       });
 
       it('should return valid diff when "dryRun: true" is provided', async function () {
@@ -110,7 +119,45 @@ export default function (providerContext: FtrProviderContext) {
         expect(proposedPackagePolicy.package?.version).to.be('0.3.0');
       });
 
-      it.skip('should upgrade package policy when "dryRun: false" is provided', async function () {});
+      it('should upgrade package policy when "dryRun: false" is provided', async function () {
+        const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packagePolicyIds: [packagePolicyId],
+            dryRun: false,
+          })
+          .expect(200);
+
+        expect(body.length).to.be(1);
+        expect(body[0].success).to.be(true);
+      });
+    });
+
+    describe('when package is not installed', function () {
+      it('should return an 404 when "dryRun:true" is provided', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packagePolicyIds: ['xxxx'],
+            dryRun: true,
+          })
+          .expect(404);
+      });
+
+      it('should return a 200 and "success:false" when "dryRun:false" is provided', async function () {
+        const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packagePolicyIds: ['xxxx'],
+            dryRun: false,
+          })
+          .expect(200);
+
+        expect(body[0].success).to.be(false);
+      });
     });
   });
 }
