@@ -8,6 +8,7 @@
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import type { ExecutionContextServiceStart } from 'src/core/public';
 import {
   ExecutionContextSearch,
   Filter,
@@ -98,6 +99,7 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
+  executionContext: ExecutionContextServiceStart;
 }
 
 export class Embeddable
@@ -323,7 +325,15 @@ export class Embeddable
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
+    const executionContext = this.deps.executionContext.create({
+      type: 'lens',
+      name: this.savedVis.visualizationType ?? '',
+      description: this.savedVis.title ?? this.savedVis.description ?? '',
+      id: this.id,
+      url: this.output.editUrl,
+    });
     const input = this.getInput();
+
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
@@ -339,6 +349,7 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
+        executionContext={executionContext}
         canEdit={this.getIsEditable() && input.viewMode === 'edit'}
         onRuntimeError={() => {
           this.logError('runtime');
