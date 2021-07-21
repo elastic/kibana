@@ -7,7 +7,6 @@
 
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
@@ -57,14 +56,9 @@ type InventoryMetricThresholdAlertInstance = AlertInstance<
 >;
 type InventoryMetricThresholdAlertInstanceFactory = (
   id: string,
-  threshold: number | undefined,
-  value: number | undefined
+  threshold?: number | undefined,
+  value?: number | undefined
 ) => InventoryMetricThresholdAlertInstance;
-
-interface AlertData {
-  threshold: number | undefined;
-  value: number | undefined;
-}
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
@@ -83,17 +77,10 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     } = params as InventoryMetricThresholdParams;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (
-      id,
-      threshold,
-      value
-    ) =>
+    const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (id) =>
       alertWithLifecycle({
         id,
-        fields: {
-          [ALERT_EVALUATION_THRESHOLD]: threshold,
-          [ALERT_EVALUATION_VALUE]: value,
-        },
+        fields: {},
       });
 
     const source = await libs.sources.getSourceConfiguration(
@@ -124,7 +111,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       )
     );
     const inventoryItems = Object.keys(first(results)!);
-
     for (const item of inventoryItems) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = results.every((result) => {
@@ -188,8 +174,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alertData = buildAlertData(first(results)![item], nextState);
-        const alertInstance = alertInstanceFactory(`${item}`, alertData.threshold, alertData.value);
+
+        const alertInstance = alertInstanceFactory(`${item}`);
         alertInstance.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
@@ -230,15 +216,6 @@ const buildReasonWithVerboseMetricName = (
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);
-};
-
-const buildAlertData = (inventoryItem: any, nextState: any): AlertData => {
-  const threshold =
-    nextState === AlertStates.WARNING ? inventoryItem.warningThreshold! : inventoryItem.threshold;
-  return {
-    value: inventoryItem.currentValue,
-    threshold,
-  };
 };
 
 const mapToConditionsLookup = (
