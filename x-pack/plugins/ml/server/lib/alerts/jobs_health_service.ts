@@ -117,7 +117,7 @@ export function jobsHealthServiceProvider(
         return results;
       }
 
-      logger.debug(`Performing health checks for job ids: ${jobIds.join(', ')}`);
+      logger.debug(`Performing health checks for job IDs: ${jobIds.join(', ')}`);
 
       if (config.datafeed.enabled) {
         const response = await this.getNotStartedDatafeeds(jobIds);

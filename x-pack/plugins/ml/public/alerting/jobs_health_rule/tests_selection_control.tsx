@@ -100,7 +100,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, 
             label={
               <FormattedMessage
                 id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.errorMessagesCheck.label"
-                defaultMessage="There are errors in job messages"
+                defaultMessage="There are errors in the job messages."
               />
             }
             onChange={updateCallback.bind(null, {

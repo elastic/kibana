@@ -19,7 +19,7 @@ export function registerJobsHealthAlertingRule(
   triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     description: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.description', {
-      defaultMessage: 'Alert when anomaly detection jobs experiencing realtime issues.',
+      defaultMessage: 'Alert when anomaly detection jobs experience operational issues.',
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
@@ -48,7 +48,7 @@ export function registerJobsHealthAlertingRule(
       ) {
         validationResult.errors.testsConfig.push(
           i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.errorMessage', {
-            defaultMessage: 'At least one health check has to be enabled',
+            defaultMessage: 'At least one health check must be enabled.',
           })
         );
       }
