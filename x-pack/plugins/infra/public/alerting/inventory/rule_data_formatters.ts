@@ -29,18 +29,10 @@ export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
     },
   });
 
-  const alertStartDate = fields[ALERT_START];
-  const timestamp = alertStartDate != null ? new Date(alertStartDate).valueOf() : null;
-  const link = modifyUrl('/app/metrics/link-to/default/metrics', ({ query, ...otherUrlParts }) => ({
-    ...otherUrlParts,
-    query: {
-      ...query,
-      ...(timestamp != null ? { time: `${timestamp}` } : {}),
-    },
-  }));
+  const link = '/app/metrics/inventory';
 
   return {
     reason,
-    link, // TODO: refactor to URL generators
+    link,
   };
 };
