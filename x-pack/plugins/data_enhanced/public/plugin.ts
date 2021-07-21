@@ -46,7 +46,7 @@ export class DataEnhancedPlugin
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
-    { bfetch, data, management }: DataEnhancedSetupDependencies
+    { data, management }: DataEnhancedSetupDependencies
   ) {
     this.config = this.initializerContext.config.get<ConfigSchema>();
     if (this.config.search.sessions.enabled) {

@@ -48,7 +48,7 @@ describe('Background Search Session Management Table', () => {
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-      urls: mockUrls,
+      url: mockUrls,
       notifications: mockCoreStart.notifications,
       application: mockCoreStart.application,
     });

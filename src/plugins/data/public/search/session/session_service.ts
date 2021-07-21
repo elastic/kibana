@@ -15,7 +15,7 @@ import {
   ToastsStart as ToastService,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,
@@ -44,7 +44,7 @@ export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
 /**
  * Provide info about current search session to be stored in the Search Session saved object
  */
-export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
+export interface SearchSessionInfoProvider {
   /**
    * User-facing name of the session.
    * e.g. will be displayed in saved Search Sessions management list
@@ -58,9 +58,9 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
   appendSessionStartTimeToName?: boolean;
 
   getUrlGeneratorData: () => Promise<{
-    urlGeneratorId: ID;
-    initialState: UrlGeneratorStateMapping[ID]['State'];
-    restoreState: UrlGeneratorStateMapping[ID]['State'];
+    urlGeneratorId: string;
+    initialState: SerializableState;
+    restoreState: SerializableState;
   }>;
 }
 
@@ -414,8 +414,8 @@ export class SessionService {
    * @param searchSessionInfoProvider - info provider for saving a search session
    * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
    */
-  public enableStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
-    searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
+  public enableStorage(
+    searchSessionInfoProvider: SearchSessionInfoProvider,
     searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
   ) {
     this.searchSessionInfoProvider = {

@@ -7,13 +7,15 @@
  */
 
 import { History } from 'history';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
+import { SavedDashboardPanel } from 'src/plugins/dashboard/common/types';
 import { DashboardConstants } from '../..';
 import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getQueryParams } from '../../services/kibana_utils';
 import { createQueryParamObservable } from '../../../../kibana_utils/public';
-import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../../url_generator';
+import { DASHBOARD_APP_LOCATOR, DashboardAppLocatorParams } from '../../locator';
 import {
   DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
@@ -37,7 +39,7 @@ export function createSessionRestorationDataProvider(deps: {
     getName: async () => deps.getDashboardTitle(),
     getUrlGeneratorData: async () => {
       return {
-        urlGeneratorId: DASHBOARD_APP_URL_GENERATOR,
+        urlGeneratorId: DASHBOARD_APP_LOCATOR,
         initialState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: false }),
         restoreState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: true }),
       };
@@ -105,7 +107,7 @@ function getUrlGeneratorState({
   getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;
-}): DashboardUrlGeneratorState {
+}): DashboardAppLocatorParams {
   const appState = stateToRawDashboardState({ state: getAppState(), version: kibanaVersion });
   const { filterManager, queryString } = data.query;
   const { timefilter } = data.query.timefilter;
@@ -113,7 +115,8 @@ function getUrlGeneratorState({
   return {
     timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
-    panels: getDashboardId() ? undefined : appState.panels,
+    panels: (getDashboardId() ? undefined : appState.panels) as SavedDashboardPanel[] &
+      SerializableState,
     query: queryString.formatQuery(appState.query),
     filters: filterManager.getFilters(),
     savedQuery: appState.savedQuery,

@@ -92,6 +92,7 @@ import { SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { SerializableState as SerializableState_3 } from 'src/plugins/kibana_utils/common';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { StartServicesAccessor } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
@@ -2479,18 +2480,17 @@ export interface SearchInterceptorDeps {
 // @internal
 export type SearchRequest = Record<string, any>;
 
-// Warning: (ae-forgotten-export) The symbol "UrlGeneratorId" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "SearchSessionInfoProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
+export interface SearchSessionInfoProvider {
     appendSessionStartTimeToName?: boolean;
     getName: () => Promise<string>;
     // (undocumented)
     getUrlGeneratorData: () => Promise<{
-        urlGeneratorId: ID;
-        initialState: UrlGeneratorStateMapping[ID]['State'];
-        restoreState: UrlGeneratorStateMapping[ID]['State'];
+        urlGeneratorId: string;
+        initialState: SerializableState_3;
+        restoreState: SerializableState_3;
     }>;
 }
 
@@ -2813,7 +2813,6 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/public/index.ts:436:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:439:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:34:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/search/session/session_service.ts:62:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

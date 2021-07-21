@@ -8,8 +8,8 @@
 
 ```typescript
 getUrlGeneratorData: () => Promise<{
-        urlGeneratorId: ID;
-        initialState: UrlGeneratorStateMapping[ID]['State'];
-        restoreState: UrlGeneratorStateMapping[ID]['State'];
+        urlGeneratorId: string;
+        initialState: SerializableState;
+        restoreState: SerializableState;
     }>;
 ```
