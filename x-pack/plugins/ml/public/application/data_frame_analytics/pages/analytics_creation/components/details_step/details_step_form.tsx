@@ -83,8 +83,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedIndexCheck = debounce(async () => {
     try {
-      const { exists } = await ml.checkIndexExists({ index: destinationIndex });
-      setFormState({ destinationIndexNameExists: exists });
+      const resp = await ml.checkIndicesExists({ indices: [destinationIndex] });
+      setFormState({ destinationIndexNameExists: resp[destinationIndex].exists });
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingIndexExists', {

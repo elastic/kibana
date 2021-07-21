@@ -34,10 +34,9 @@ import type { JobType } from '../../../../../common/types/saved_objects';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { CannotImportJobsCallout } from './cannot_import_jobs_callout';
 import { CannotReadFileCallout } from './cannot_read_file_callout';
-import { isJobIdValid } from '../../../../../common/util/job_utils';
-import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { JobImportService } from './jobs_import_service';
+import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 
 interface Props {
@@ -45,8 +44,8 @@ interface Props {
 }
 export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
-    jobs: { bulkCreateJobs, jobsExist: adJobsExist },
-    dataFrameAnalytics: { createDataFrameAnalytics, jobsExist: dfaJobsExist },
+    jobs: { bulkCreateJobs },
+    dataFrameAnalytics: { createDataFrameAnalytics },
   } = useMlApiContext();
   const {
     services: {
@@ -76,6 +75,15 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     () => toastNotificationServiceProvider(toasts),
     [toasts]
   );
+
+  const [validateIds] = useValidateIds(
+    jobType,
+    jobIdObjects,
+    idsMash,
+    setJobIdObjects,
+    setValidatingJobs
+  );
+  useDebounce(validateIds, 400, [idsMash]);
 
   const reset = useCallback((showFileError = false) => {
     setAdJobs([]);
@@ -115,33 +123,41 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       setTotalJobsRead(loadedFile.jobs.length);
 
       const validatedJobs = await jobImportService.validateJobs(
-        loadedFile.jobs as ImportedAdJob[],
+        loadedFile.jobs,
         loadedFile.jobType,
         getIndexPatternTitles
       );
 
       if (loadedFile.jobType === 'anomaly-detector') {
         const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
-          validatedJobs.jobIds.includes(j.job.job_id)
+          validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.job.job_id)
         );
         setAdJobs(tempJobs);
       } else if (loadedFile.jobType === 'data-frame-analytics') {
         const tempJobs = (loadedFile.jobs as DataFrameAnalyticsConfig[]).filter((j) =>
-          validatedJobs.jobIds.includes(j.id)
+          validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.id)
         );
         setDfaJobs(tempJobs);
       }
 
       setJobType(loadedFile.jobType);
       setJobIdObjects(
-        validatedJobs.jobIds.map((id) => ({
-          id,
-          originalId: id,
-          valid: true,
-          invalidMessage: '',
+        validatedJobs.jobs.map(({ jobId, destIndex }) => ({
+          jobId,
+          originalId: jobId,
+          jobIdValid: true,
+          jobIdInvalidMessage: '',
+          jobIdValidated: false,
+          destIndex,
+          originalDestIndex: destIndex,
+          destIndexValid: true,
+          destIndexInvalidMessage: '',
+          destIndexValidated: false,
         }))
       );
-      setIdsMash(validatedJobs.jobIds.map((id) => id).join(''));
+
+      const ids = createIdsMash(validatedJobs.jobs as JobIdObject[], loadedFile.jobType);
+      setIdsMash(ids);
       setValidatingJobs(true);
       setSkippedJobs(validatedJobs.skippedJobs);
     } catch (error) {
@@ -239,7 +255,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const js = [...jobIdObjects];
       js.splice(index, 1);
       setJobIdObjects(js);
-      setIdsMash(js.map(({ id }) => id).join(''));
+
+      const ids = createIdsMash(js, jobType);
+      setIdsMash(ids);
       setValidatingJobs(true);
     },
     [jobIdObjects, adJobs, dfaJobs]
@@ -250,61 +268,35 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       jobIdObjects.length === 0 ||
       importing === true ||
       validatingJobs === true ||
-      jobIdObjects.some(({ valid }) => valid === false);
+      jobIdObjects.some(({ jobIdValid }) => jobIdValid === false);
     setImportDisabled(disabled);
 
     setDeleteDisabled(importing === true || validatingJobs === true);
   }, [jobIdObjects, idsMash, validatingJobs, importing]);
 
-  const validateIds = useCallback(async () => {
-    const existsChecks: string[] = [];
-    jobIdObjects.forEach((j) => {
-      existsChecks.push(j.id);
-      j.valid = true;
-      j.invalidMessage = '';
-
-      if (j.id === '') {
-        j.valid = false;
-        j.invalidMessage = jobEmpty;
-        return;
-      }
-      if (j.id.length > JOB_ID_MAX_LENGTH) {
-        j.valid = false;
-        j.invalidMessage = jobInvalidLength;
-        return;
-      }
-      if (isJobIdValid(j.id) === false) {
-        j.valid = false;
-        j.invalidMessage = jobInvalid;
-        return;
-      }
-    });
-
-    if (jobType !== null) {
-      const jobsExist = jobType === 'anomaly-detector' ? adJobsExist : dfaJobsExist;
-      jobsExist(existsChecks, true).then((resp) => {
-        jobIdObjects.forEach((j) => {
-          if (j.valid === true) {
-            // only apply the exists result if the previous checks are ok
-            const hh = resp[j.id];
-            j.valid = !hh.exists;
-            j.invalidMessage = hh.exists ? jobExists : '';
-          }
-        });
-        setJobIdObjects([...jobIdObjects]);
-        setValidatingJobs(false);
-      });
-    }
-  }, [idsMash, jobIdObjects]);
-
-  useDebounce(validateIds, 400, [idsMash]);
-
   const renameJob = useCallback(
     (id: string, i: number) => {
-      jobIdObjects[i].id = id;
-      jobIdObjects[i].valid = false;
+      jobIdObjects[i].jobId = id;
+      jobIdObjects[i].jobIdValid = false;
+      jobIdObjects[i].jobIdValidated = false;
       setJobIdObjects([...jobIdObjects]);
-      setIdsMash(jobIdObjects.map(({ id: jId }) => jId).join(''));
+
+      const ids = createIdsMash(jobIdObjects, jobType);
+      setIdsMash(ids);
+      setValidatingJobs(true);
+    },
+    [jobIdObjects]
+  );
+
+  const renameDestIndex = useCallback(
+    (id: string, i: number) => {
+      jobIdObjects[i].destIndex = id;
+      jobIdObjects[i].destIndexValid = false;
+      jobIdObjects[i].destIndexValidated = false;
+      setJobIdObjects([...jobIdObjects]);
+
+      const ids = createIdsMash(jobIdObjects, jobType);
+      setIdsMash(ids);
       setValidatingJobs(true);
     },
     [jobIdObjects]
@@ -397,8 +389,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                         <EuiFlexGroup>
                           <EuiFlexItem>
                             <EuiFormRow
-                              error={jobId.invalidMessage}
-                              isInvalid={jobId.invalidMessage.length > 0}
+                              error={jobId.jobIdInvalidMessage}
+                              isInvalid={jobId.jobIdValid === false}
                             >
                               <EuiFieldText
                                 prepend={i18n.translate(
@@ -409,11 +401,29 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                                 )}
                                 disabled={importing}
                                 compressed={true}
-                                value={jobId.id}
+                                value={jobId.jobId}
                                 onChange={(e) => renameJob(e.target.value, i)}
-                                isInvalid={jobId.valid === false}
+                                isInvalid={jobId.jobIdValid === false}
                               />
                             </EuiFormRow>
+
+                            {jobType === 'data-frame-analytics' && (
+                              <EuiFormRow helpText={jobId.destIndexInvalidMessage}>
+                                <EuiFieldText
+                                  prepend={i18n.translate(
+                                    'xpack.ml.importExport.importFlyout.destIndex',
+                                    {
+                                      defaultMessage: 'Destination index',
+                                    }
+                                  )}
+                                  disabled={importing}
+                                  compressed={true}
+                                  value={jobId.destIndex}
+                                  onChange={(e) => renameDestIndex(e.target.value, i)}
+                                  isInvalid={jobId.destIndexValid === false}
+                                />
+                              </EuiFormRow>
+                            )}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <DeleteJobButton index={i} />
@@ -470,31 +480,11 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
   );
 };
 
-const jobEmpty = i18n.translate('xpack.ml.importExport.importFlyout.validateJobId.jobNameEmpty', {
-  defaultMessage: 'Enter a valid job ID',
-});
-const jobInvalid = i18n.translate(
-  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAllowedCharacters',
-  {
-    defaultMessage:
-      'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
-      'must start and end with an alphanumeric character',
-  }
-);
-const jobInvalidLength = i18n.translate(
-  'xpack.ml.importExport.importFlyout.validateJobId.jobIdInvalidMaxLengthErrorMessage',
-  {
-    defaultMessage:
-      'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
-    values: {
-      maxLength: JOB_ID_MAX_LENGTH,
-    },
-  }
-);
-const jobExists = i18n.translate(
-  'xpack.ml.importExport.importFlyout.validateJobId.jobNameAlreadyExists',
-  {
-    defaultMessage:
-      'Job ID already exists. A job ID cannot be the same as an existing job or group.',
-  }
-);
+function createIdsMash(jobIdObjects: JobIdObject[], jobType: JobType | null) {
+  return (
+    jobIdObjects.map(({ jobId }) => jobId).join('') +
+    (jobType === 'data-frame-analytics'
+      ? jobIdObjects.map(({ destIndex }) => destIndex).join('')
+      : '')
+  );
+}
