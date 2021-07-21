@@ -97,7 +97,11 @@ export const DraggableSignatureId = React.memo<{ id: string; signatureId: number
 
     return (
       <SignatureFlexItem grow={false}>
-        <DraggableWrapper dataProvider={dataProviderProp} render={render} />
+        <DraggableWrapper
+          dataProvider={dataProviderProp}
+          isDraggableDisabled={false}
+          render={render}
+        />
       </SignatureFlexItem>
     );
   }
@@ -124,6 +128,7 @@ export const SuricataSignature = React.memo<{
           data-test-subj="draggable-signature-link"
           field={SURICATA_SIGNATURE_FIELD_NAME}
           id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
+          isDraggableDisabled={false}
           value={signature}
         >
           <div>

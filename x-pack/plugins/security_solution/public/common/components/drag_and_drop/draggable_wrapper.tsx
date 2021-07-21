@@ -95,6 +95,7 @@ type RenderFunctionProp = (
 interface Props {
   dataProvider: DataProvider;
   disabled?: boolean;
+  isDraggableDisabled?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
   timelineId?: string;
@@ -126,24 +127,14 @@ const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   return links.length > 0;
 };
 
-const DraggableWrapperComponent: React.FC<Props> = ({
-  dataProvider,
-  onFilterAdded,
-  render,
-  timelineId,
-  truncate,
-}) => {
+const useHoverActions = ({ dataProvider, onFilterAdded, render, timelineId }: Props) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
-  const draggableRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
-  const [goGetTimelineId, setGoGetTimelineId] = useState(false);
-  const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
-  const [providerRegistered, setProviderRegistered] = useState(false);
-  const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
-  const dispatch = useDispatch();
-  const { timelines } = useKibana().services;
+  const [goGetTimelineId, setGoGetTimelineId] = useState(false);
+  const timelineIdFind = useGetTimelineId(containerRef, goGetTimelineId);
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -171,32 +162,11 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     });
   }, [handleClosePopOverTrigger]);
 
-  const registerProvider = useCallback(() => {
-    if (!isDisabled) {
-      dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
-      setProviderRegistered(true);
-    }
-  }, [isDisabled, dispatch, dataProvider]);
-
-  const unRegisterProvider = useCallback(
-    () =>
-      providerRegistered &&
-      dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
-    [providerRegistered, dispatch, dataProvider.id]
-  );
-
-  useEffect(
-    () => () => {
-      unRegisterProvider();
-    },
-    [unRegisterProvider]
-  );
-
   const hoverContent = useMemo(() => {
     // display links as additional content in the hover menu to enable keyboard
     // navigation of links (when the draggable contains them):
     const additionalContent =
-      hoverActionsOwnFocus && !showTopN && draggableContainsLinks(draggableRef.current) ? (
+      hoverActionsOwnFocus && !showTopN && draggableContainsLinks(containerRef.current) ? (
         <ProviderContentWrapper
           data-test-subj={`draggable-link-content-${dataProvider.queryMatch.field}`}
         >
@@ -235,6 +205,110 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     toggleTopN,
   ]);
 
+  const setContainerRef = useCallback((e: HTMLDivElement) => {
+    containerRef.current = e;
+  }, []);
+
+  const onFocus = useCallback(() => {
+    if (!hoverActionsOwnFocus) {
+      keyboardHandlerRef.current?.focus();
+    }
+  }, [hoverActionsOwnFocus, keyboardHandlerRef]);
+
+  const onCloseRequested = useCallback(() => {
+    setShowTopN(false);
+
+    if (hoverActionsOwnFocus) {
+      setHoverActionsOwnFocus(false);
+
+      setTimeout(() => {
+        onFocus(); // return focus to this draggable on the next tick, because we owned focus
+      }, 0);
+    }
+  }, [onFocus, hoverActionsOwnFocus]);
+
+  const openPopover = useCallback(() => {
+    setHoverActionsOwnFocus(true);
+  }, []);
+
+  return useMemo(
+    () => ({
+      closePopOverTrigger,
+      handleClosePopOverTrigger,
+      hoverActionsOwnFocus,
+      hoverContent,
+      keyboardHandlerRef,
+      onCloseRequested,
+      onFocus,
+      openPopover,
+      setContainerRef,
+      showTopN,
+    }),
+    [
+      closePopOverTrigger,
+      handleClosePopOverTrigger,
+      hoverActionsOwnFocus,
+      hoverContent,
+      onCloseRequested,
+      onFocus,
+      openPopover,
+      setContainerRef,
+      showTopN,
+    ]
+  );
+};
+
+const DraggableOnWrapperComponent: React.FC<Props> = ({
+  dataProvider,
+  onFilterAdded,
+  render,
+  timelineId,
+  truncate,
+}) => {
+  const [providerRegistered, setProviderRegistered] = useState(false);
+  const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
+  const dispatch = useDispatch();
+  const { timelines } = useKibana().services;
+  const {
+    closePopOverTrigger,
+    handleClosePopOverTrigger,
+    hoverActionsOwnFocus,
+    hoverContent,
+    keyboardHandlerRef,
+    onCloseRequested,
+    openPopover,
+    onFocus,
+    setContainerRef,
+    showTopN,
+  } = useHoverActions({
+    dataProvider,
+    onFilterAdded,
+    render,
+    timelineId,
+    truncate,
+  });
+
+  const registerProvider = useCallback(() => {
+    if (!isDisabled) {
+      dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
+      setProviderRegistered(true);
+    }
+  }, [isDisabled, dispatch, dataProvider]);
+
+  const unRegisterProvider = useCallback(
+    () =>
+      providerRegistered &&
+      dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
+    [providerRegistered, dispatch, dataProvider.id]
+  );
+
+  useEffect(
+    () => () => {
+      unRegisterProvider();
+    },
+    [unRegisterProvider]
+  );
+
   const RenderClone = useCallback(
     (provided, snapshot) => (
       <ConditionalPortal registerProvider={registerProvider}>
@@ -264,7 +338,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         {...provided.dragHandleProps}
         ref={(e: HTMLDivElement) => {
           provided.innerRef(e);
-          draggableRef.current = e;
+          setContainerRef(e);
         }}
         data-test-subj="providerContainer"
         isDragging={snapshot.isDragging}
@@ -292,12 +366,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         )}
       </ProviderContainer>
     ),
-    [dataProvider, registerProvider, render, truncate]
+    [dataProvider, registerProvider, render, setContainerRef, truncate]
   );
-
-  const openPopover = useCallback(() => {
-    setHoverActionsOwnFocus(true);
-  }, []);
 
   const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
     closePopover: handleClosePopOverTrigger,
@@ -306,24 +376,6 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     keyboardHandlerRef,
     openPopover,
   });
-
-  const onFocus = useCallback(() => {
-    if (!hoverActionsOwnFocus) {
-      keyboardHandlerRef.current?.focus();
-    }
-  }, [hoverActionsOwnFocus, keyboardHandlerRef]);
-
-  const onCloseRequested = useCallback(() => {
-    setShowTopN(false);
-
-    if (hoverActionsOwnFocus) {
-      setHoverActionsOwnFocus(false);
-
-      setTimeout(() => {
-        onFocus(); // return focus to this draggable on the next tick, because we owned focus
-      }, 0);
-    }
-  }, [onFocus, hoverActionsOwnFocus]);
 
   const DroppableContent = useCallback(
     (droppableProvided) => (
@@ -350,7 +402,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         {droppableProvided.placeholder}
       </div>
     ),
-    [DraggableContent, dataProvider.id, isDisabled, onBlur, onFocus, onKeyDown]
+    [DraggableContent, dataProvider.id, isDisabled, keyboardHandlerRef, onBlur, onFocus, onKeyDown]
   );
 
   const content = useMemo(
@@ -381,6 +433,74 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       hoverContent={hoverContent}
       onCloseRequested={onCloseRequested}
       render={renderContent}
+    />
+  );
+};
+
+const DraggableWrapperComponent: React.FC<Props> = ({
+  dataProvider,
+  isDraggableDisabled = true,
+  onFilterAdded,
+  render,
+  timelineId,
+  truncate,
+}) => {
+  const {
+    closePopOverTrigger,
+    hoverActionsOwnFocus,
+    hoverContent,
+    onCloseRequested,
+    setContainerRef,
+    showTopN,
+  } = useHoverActions({
+    dataProvider,
+    onFilterAdded,
+    render,
+    timelineId,
+    truncate,
+  });
+  const renderContent = useCallback(
+    () => (
+      <div
+        ref={(e: HTMLDivElement) => {
+          setContainerRef(e);
+        }}
+        tabIndex={-1}
+        data-rbd-draggable-id={getDraggableId(dataProvider.id)}
+      >
+        {truncate ? (
+          <TruncatableText data-test-subj="render-truncatable-content">
+            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+          </TruncatableText>
+        ) : (
+          <ProviderContentWrapper
+            data-test-subj={`render-content-${dataProvider.queryMatch.field}`}
+          >
+            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+          </ProviderContentWrapper>
+        )}
+      </div>
+    ),
+    [dataProvider, render, setContainerRef, truncate]
+  );
+  if (isDraggableDisabled) {
+    return (
+      <WithHoverActions
+        alwaysShow={showTopN || hoverActionsOwnFocus}
+        closePopOverTrigger={closePopOverTrigger}
+        hoverContent={hoverContent}
+        onCloseRequested={onCloseRequested}
+        render={renderContent}
+      />
+    );
+  }
+  return (
+    <DraggableOnWrapperComponent
+      dataProvider={dataProvider}
+      onFilterAdded={onFilterAdded}
+      render={render}
+      timelineId={timelineId}
+      truncate={truncate}
     />
   );
 };

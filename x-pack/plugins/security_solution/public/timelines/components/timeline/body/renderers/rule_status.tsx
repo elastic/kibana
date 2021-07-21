@@ -35,6 +35,7 @@ const RuleStatusComponent: React.FC<Props> = ({ contextId, eventId, fieldName, v
     <DefaultDraggable
       field={fieldName}
       id={`alert-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      isDraggableDisabled={false}
       value={`${value}`}
       tooltipContent={fieldName}
     >

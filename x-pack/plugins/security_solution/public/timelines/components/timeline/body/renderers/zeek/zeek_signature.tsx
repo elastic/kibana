@@ -105,7 +105,11 @@ export const DraggableZeekElement = React.memo<{
 
   return value != null ? (
     <TokensFlexItem grow={false}>
-      <DraggableWrapper dataProvider={dataProviderProp} render={render} />
+      <DraggableWrapper
+        dataProvider={dataProviderProp}
+        isDraggableDisabled={false}
+        render={render}
+      />
     </TokensFlexItem>
   ) : null;
 });
