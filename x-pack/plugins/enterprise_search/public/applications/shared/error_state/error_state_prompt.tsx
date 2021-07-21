@@ -100,7 +100,7 @@ export const ErrorStatePrompt: React.FC = () => {
             defaultMessage="Review setup guide"
           />
         </EuiButtonTo>,
-        <BetaNotification buttonProps={{ flush: undefined }} />,
+        <BetaNotification buttonProps={{ size: 'm', flush: undefined }} />,
       ]}
     />
   );
