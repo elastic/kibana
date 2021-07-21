@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const ResolverCyclesCallOut = React.memo(({ cyclicalIds }: { cyclicalIds: string[] }) => (
   <EuiCallOut
@@ -16,9 +17,10 @@ export const ResolverCyclesCallOut = React.memo(({ cyclicalIds }: { cyclicalIds:
     data-test-subj="resolver:cycles-callout"
   >
     <p>
-      {`The Analyzer has detected cycles in the tree associated with this event or alert. This means that a process node
-      either references itself as it's parent or rreferences one of it's descendants as it's parent, creating an unexpected loop. The
-      following ID's have been found to be the cause and are not displayed: [${cyclicalIds}]`}
+      {i18n.translate('xpack.securitySolution.resolver.cyclesDetected.message', {
+        defaultMessage: `The Analyzer has detected cycles in the tree associated with this event or alert. This means that a process node
+      is referencing itself as it's parent, creating a cycle. The following process.entity_id values have been found to be the cause and are not displayed: [${cyclicalIds}]`,
+      })}
     </p>
   </EuiCallOut>
 ));
