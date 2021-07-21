@@ -26,6 +26,7 @@ import {
   RULE_UUID,
   TAGS,
   TIMESTAMP,
+  SPACE_IDS,
 } from '../../../common/technical_rule_data_field_names';
 import { ecsFieldMap } from './ecs_field_map';
 
@@ -43,6 +44,7 @@ export const technicalRuleFieldMap = {
   ),
   [OWNER]: { type: 'keyword' },
   [PRODUCER]: { type: 'keyword' },
+  [SPACE_IDS]: { type: 'keyword', array: true },
   [ALERT_UUID]: { type: 'keyword' },
   [ALERT_ID]: { type: 'keyword' },
   [ALERT_START]: { type: 'date' },
