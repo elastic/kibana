@@ -235,7 +235,7 @@ describe('FieldSuggestions', () => {
     it('should use terms_enum', async () => {
       uiConfig = {
         [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: true,
-        [UI_SETTINGS.AUTOCOMPLETE_USE_TERMS_ENUM]: true,
+        [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: 'terms_enum',
       };
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
@@ -255,7 +255,7 @@ describe('FieldSuggestions', () => {
     it('should use terms_agg', async () => {
       uiConfig = {
         [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: true,
-        [UI_SETTINGS.AUTOCOMPLETE_USE_TERMS_ENUM]: false,
+        [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: 'terms_agg',
       };
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
@@ -275,7 +275,7 @@ describe('FieldSuggestions', () => {
     it('should use method passed in', async () => {
       uiConfig = {
         [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: true,
-        [UI_SETTINGS.AUTOCOMPLETE_USE_TERMS_ENUM]: true,
+        [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: 'terms_agg',
       };
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable

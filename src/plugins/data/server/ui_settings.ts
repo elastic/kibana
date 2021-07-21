@@ -711,20 +711,21 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: true,
       description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
         defaultMessage:
-          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. Only applies when `autocomplete:useTermsEnum` is `false`.',
+          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. Only applies when `autocomplete:autocompleteValueSuggestionMethod` is `terms_agg`.',
       }),
       schema: schema.boolean(),
     },
-    [UI_SETTINGS.AUTOCOMPLETE_USE_TERMS_ENUM]: {
-      name: i18n.translate('data.advancedSettings.autocompleteUseTermsEnum', {
-        defaultMessage: 'Use terms enum API',
+    [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
+      name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
+        defaultMessage: 'Autocomplete value suggestion method',
       }),
-      value: true,
-      description: i18n.translate('data.advancedSettings.autocompleteUseTermsEnumText', {
+      value: 'terms_enum',
+      description: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodText', {
         defaultMessage:
-          'Use the Elasticsearch terms enum API for improved autocomplete suggestion performance. Results will not completely reflect the selected time range, and will not be sorted by popularity.',
+          'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the Elasticsearch terms enum API for improved autocomplete suggestion performance (results will not completely reflect the selected time range, and will not be sorted by popularity). Select terms_agg to use an Elasticsearch terms aggregation.',
       }),
-      schema: schema.boolean(),
+      options: ['terms_enum', 'terms_agg'],
+      schema: schema.string(),
     },
     [UI_SETTINGS.SEARCH_TIMEOUT]: {
       name: i18n.translate('data.advancedSettings.searchTimeout', {
