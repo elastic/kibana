@@ -4,11 +4,13 @@
 
 ## MatchAllFilter type
 
+> Warning: This API is now obsolete.
+> 
+> Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+> 
+
 <b>Signature:</b>
 
 ```typescript
-export declare type MatchAllFilter = Filter & {
-    meta: MatchAllFilterMeta;
-    match_all: any;
-};
+declare type MatchAllFilter = oldMatchAllFilter;
 ```
