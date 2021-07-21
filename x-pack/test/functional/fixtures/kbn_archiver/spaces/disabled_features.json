@@ -4,7 +4,7 @@
     "timeFieldName": "@timestamp",
     "title": "logstash-*"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.15.0",
   "id": "logstash-*",
   "migrationVersion": {
     "index-pattern": "7.11.0"

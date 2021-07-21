@@ -96,7 +96,7 @@
     ],
     "width": 840
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.15.0",
   "id": "workpad-1705f884-6224-47de-ba49-ca224fe6ec31",
   "migrationVersion": {
     "canvas-workpad": "7.0.0"
@@ -104,5 +104,5 @@
   "references": [],
   "type": "canvas-workpad",
   "updated_at": "2018-11-19T19:36:28.511Z",
-  "version": "WzUsMV0="
+  "version": "WzUsMl0="
 }

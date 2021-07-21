@@ -4,7 +4,7 @@
     "timeFieldName": "@timestamp",
     "title": "logstash-lens"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.15.0",
   "id": "logstash-lens",
   "migrationVersion": {
     "index-pattern": "7.11.0"
@@ -52,7 +52,7 @@
     "title": "Artistpreviouslyknownaslens",
     "visualizationType": "lnsMetric"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.15.0",
   "id": "my-lens-vis",
   "migrationVersion": {
     "lens": "7.14.0"
@@ -139,7 +139,7 @@
     ],
     "width": 840
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.15.0",
   "id": "workpad-1705f884-6224-47de-ba49-ca224fe6ec31",
   "migrationVersion": {
     "canvas-workpad": "7.0.0"
