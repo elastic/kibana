@@ -29,8 +29,7 @@ import {
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
-  KBN_IS_TILE_COMPLETE,
-  IS_DRAW_LAYER_REQUEST_ID,
+  KBN_IS_TILE_COMPLETE
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
