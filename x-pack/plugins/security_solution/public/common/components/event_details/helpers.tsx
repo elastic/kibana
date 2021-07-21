@@ -197,7 +197,7 @@ export const onEventDetailsTabKeyPressed = ({
 };
 
 const getTitle = (title: string) => (
-  <EuiTitle size="xxs">
+  <EuiTitle size="xxxs">
     <h5>{title}</h5>
   </EuiTitle>
 );
