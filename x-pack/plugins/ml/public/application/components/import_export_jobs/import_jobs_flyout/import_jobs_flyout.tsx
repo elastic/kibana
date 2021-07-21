@@ -275,7 +275,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       jobIdObjects.length === 0 ||
       importing === true ||
       validatingJobs === true ||
-      jobIdObjects.some(({ jobIdValid }) => jobIdValid === false);
+      jobIdObjects.some(
+        ({ jobIdValid, destIndexValid }) => jobIdValid === false || destIndexValid === false
+      );
     setImportDisabled(disabled);
 
     setDeleteDisabled(importing === true || validatingJobs === true);
@@ -300,6 +302,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       jobIdObjects[i].destIndex = id;
       jobIdObjects[i].destIndexValid = false;
       jobIdObjects[i].destIndexValidated = false;
+      jobIdObjects[i].destIndexInvalidMessage = '';
       setJobIdObjects([...jobIdObjects]);
 
       const ids = createIdsMash(jobIdObjects, jobType);
@@ -415,7 +418,17 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                             </EuiFormRow>
 
                             {jobType === 'data-frame-analytics' && (
-                              <EuiFormRow helpText={jobId.destIndexInvalidMessage}>
+                              <EuiFormRow
+                                helpText={
+                                  jobId.destIndexValid === true ? jobId.destIndexInvalidMessage : ''
+                                }
+                                error={
+                                  jobId.destIndexValid === false
+                                    ? jobId.destIndexInvalidMessage
+                                    : ''
+                                }
+                                isInvalid={jobId.destIndexValid === false}
+                              >
                                 <EuiFieldText
                                   prepend={i18n.translate(
                                     'xpack.ml.importExport.importFlyout.destIndex',

@@ -78,7 +78,7 @@ export const useValidateIds = (
             j.destIndexValidated = true;
           }
 
-          if (j.destIndexValidated === false) {
+          if (j.destIndexValid === true) {
             destIndexExistsChecks.push(j.destIndex);
           }
         });

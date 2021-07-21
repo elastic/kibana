@@ -115,8 +115,11 @@ export class JobImportService {
     }
 
     return jobs.map((j, i) => {
-      const { jobId } = jobIds[i];
+      const { jobId, destIndex } = jobIds[i];
       j.id = jobId;
+      if (destIndex !== undefined) {
+        j.dest.index = destIndex;
+      }
       return j;
     });
   }
