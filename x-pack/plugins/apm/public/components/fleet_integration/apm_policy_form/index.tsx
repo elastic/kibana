@@ -24,8 +24,7 @@ interface Props {
 
 export function APMPolicyForm({ values = {}, onChange }: Props) {
   function handleChange(key: string, value: any) {
-    values[key] = { ...values[key], value };
-    onChange(values);
+    onChange({ ...values, [key]: { ...values[key], value } });
   }
   return (
     <>
