@@ -65,7 +65,7 @@ export const FIELD = i18n.translate('xpack.timelines.fieldBrowser.fieldLabel', {
 });
 
 export const FIELDS = i18n.translate('xpack.timelines.fieldBrowser.fieldsTitle', {
-  defaultMessage: 'Columns',
+  defaultMessage: 'Fields',
 });
 
 export const FIELDS_COUNT = (totalCount: number) =>

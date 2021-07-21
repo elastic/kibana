@@ -23,6 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import {
+  Filter,
+  FieldFilter,
+  buildFilter,
+  buildCustomFilter,
+  cleanFilter,
+  getFilterParams,
+} from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -39,14 +47,6 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { getIndexPatternFromFilter } from '../../../query';
 import { IIndexPattern, IFieldType } from '../../..';
-import {
-  Filter,
-  FieldFilter,
-  buildFilter,
-  buildCustomFilter,
-  cleanFilter,
-  getFilterParams,
-} from '../../../../common';
 
 export interface Props {
   filter: Filter;

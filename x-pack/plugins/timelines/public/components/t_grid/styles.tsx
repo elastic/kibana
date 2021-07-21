@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -458,3 +458,16 @@ export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
     },
   })
 )<{ $isVisible: boolean }>``;
+
+export const UpdatedFlexItem = styled(EuiFlexItem)<{ show: boolean }>`
+  height: 0px;
+  position: relative;
+  top: ${({ theme }) => theme.eui.paddingSizes.s};
+  ${({ show }) => (show ? '' : 'visibility: hidden;')}
+  z-index: ${({ theme }) => theme.eui.euiZLevel1};
+`;
+
+export const AlertCount = styled.span`
+  color: ${({ theme }) => theme.eui.euiTextColors.subdued};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+`;
