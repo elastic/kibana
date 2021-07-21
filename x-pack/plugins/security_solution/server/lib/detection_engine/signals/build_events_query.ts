@@ -99,7 +99,7 @@ export const buildEventsSearchQuery = ({
     { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
   ];
 
-  const sort = [];
+  const sort: estypes.SearchSort = [];
   if (timestampOverride) {
     sort.push({
       [timestampOverride]: {

@@ -302,7 +302,7 @@ export interface SearchAfterAndBulkCreateParams {
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
-  sortOrder?: SortOrderOrUndefined;
+  sortOrder?: estypes.SearchSortOrder;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
