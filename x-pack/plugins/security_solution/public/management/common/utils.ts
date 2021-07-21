@@ -39,7 +39,7 @@ export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: s
     : '';
 
   const excludedPoliciesKuery = parsedExcludedPolicies
-    ? parsedExcludedPolicies.map((policy) => `not ${getPolicyQuery(policy)}`).join(' OR ')
+    ? parsedExcludedPolicies.map((policy) => `not ${getPolicyQuery(policy)}`).join(' AND ')
     : '';
 
   const kuery = [];

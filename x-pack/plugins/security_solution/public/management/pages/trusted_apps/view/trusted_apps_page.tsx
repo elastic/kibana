@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useEffect } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
@@ -42,7 +42,6 @@ import { EmptyState } from './components/empty_state';
 import { SearchBar } from '../../../components/search_bar';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
-import { PoliciesSelector } from '../../../components/policies_selector';
 
 export const TrustedAppsPage = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -52,12 +51,14 @@ export const TrustedAppsPage = memo(() => {
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const policyList = useTrustedAppsSelector(listOfPolicies);
   const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
-  const navigationCallbackQuery = useTrustedAppsNavigateCallback((query: string) => ({
-    filter: query,
-  }));
-  const navigationCallbackPolicies = useTrustedAppsNavigateCallback(
-    (includedPolicies: string, excludedPolicies: string) => ({ includedPolicies, excludedPolicies })
+  const navigationCallbackQuery = useTrustedAppsNavigateCallback(
+    (query: string, includedPolicies?: string, excludedPolicies?: string) => ({
+      filter: query,
+      includedPolicies,
+      excludedPolicies,
+    })
   );
+
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
     show: 'create',
     id: undefined,
@@ -70,9 +71,9 @@ export const TrustedAppsPage = memo(() => {
     view_type: viewType,
   }));
   const handleOnSearch = useCallback(
-    (query: string) => {
+    (query: string, includedPolicies?: string, excludedPolicies?: string) => {
       dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
-      navigationCallbackQuery(query);
+      navigationCallbackQuery(query, includedPolicies, excludedPolicies);
     },
     [dispatch, navigationCallbackQuery]
   );
@@ -115,39 +116,15 @@ export const TrustedAppsPage = memo(() => {
 
       {doEntriesExist ? (
         <>
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="m"
-            data-test-subj="trustedAppsListFilterSection"
-          >
-            <EuiFlexItem>
-              <SearchBar
-                defaultValue={location.filter}
-                onSearch={handleOnSearch}
-                placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <PoliciesSelector
-                policies={policyList}
-                defaultExcludedPolicies={location.excludedPolicies}
-                defaultIncludedPolicies={location.includedPolicies}
-                onChangeSelection={(items) => {
-                  navigationCallbackPolicies(
-                    items
-                      .filter((item) => item.checked === 'on')
-                      .map((item) => item.id)
-                      .join(','),
-                    items
-                      .filter((item) => item.checked === 'off')
-                      .map((item) => item.id)
-                      .join(',')
-                  );
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <SearchBar
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
+            hasPolicyFilter
+            policyList={policyList}
+            defaultExcludedPolicies={location.excludedPolicies}
+            defaultIncludedPolicies={location.includedPolicies}
+          />
           <EuiFlexGroup
             direction="column"
             gutterSize="none"

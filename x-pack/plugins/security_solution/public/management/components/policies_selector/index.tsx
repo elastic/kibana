@@ -159,7 +159,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
               panelPaddingSize="none"
             >
               <EuiPopoverTitle paddingSize="s">
-                <EuiFieldSearch compressed onChange={onChange} />
+                <EuiFieldSearch compressed onChange={onChange} value={query} />
               </EuiPopoverTitle>
               <div className="euiFilterSelect__items">{dropdownItems}</div>
             </EuiPopover>
