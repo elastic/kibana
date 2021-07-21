@@ -727,4 +727,9 @@ export class VisualBuilderPageObject extends FtrService {
       await this.comboBox.set('topHitOrderByFieldSelect', timeField);
     });
   }
+
+  public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
+    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
+    await optionInput.type(query);
+  }
 }
