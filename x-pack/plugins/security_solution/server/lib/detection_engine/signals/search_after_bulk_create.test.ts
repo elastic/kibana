@@ -21,7 +21,7 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mo
 import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
+import { BulkCreate, BulkResponse, RuleRangeTuple, SignalSource, WrapHits } from './types';
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
@@ -38,7 +38,7 @@ const buildRuleMessage = mockBuildRuleMessage;
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
   let bulkCreate: BulkCreate;
-  let wrapHits: WrapHits;
+  let wrapHits: WrapHits<SignalSource>;
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());

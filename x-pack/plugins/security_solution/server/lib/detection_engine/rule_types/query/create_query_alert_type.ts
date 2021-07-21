@@ -14,12 +14,9 @@ import { SetupPlugins } from '../../../../../target/types/server/plugin';
 import { ConfigType } from '../../../../config';
 
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
-import { getFilter } from '../../signals/get_filter';
-import { searchAfterAndBulkCreate } from '../../signals/search_after_bulk_create';
+import { queryExecutor } from '../../signals/executors/query';
 
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { createResultObject } from '../utils';
-import { QueryAlertState } from './types';
 
 export const createQueryAlertType = (createOptions: {
   lists: SetupPlugins['lists'];
@@ -65,9 +62,8 @@ export const createQueryAlertType = (createOptions: {
     isExportable: false,
     producer: 'security-solution',
     async executor(execOptions) {
-      let result = createResultObject<QueryAlertState>({});
+      // let result = createResultObject<QueryAlertState>({});
       const {
-        params: { filters, index, language, outputIndex, query },
         runOpts: {
           buildRuleMessage,
           bulkCreate,
@@ -79,47 +75,24 @@ export const createQueryAlertType = (createOptions: {
           wrapHits,
         },
         services,
+        state,
       } = execOptions;
 
-      try {
-        const esFilter = await getFilter({
-          type: 'query',
-          filters,
-          language,
-          query,
-          savedId: undefined,
-          services,
-          index,
-          lists: exceptionItems,
-        });
-
-        const runResult = await searchAfterAndBulkCreate({
-          tuple,
-          listClient,
-          exceptionsList: exceptionItems,
-          ruleSO: rule,
-          services,
-          logger,
-          eventsTelemetry: undefined, // TODO
-          id: rule.id,
-          inputIndexPattern: index ?? [],
-          signalsIndex: outputIndex, // FIXME
-          filter: esFilter,
-          pageSize: searchAfterSize,
-          buildRuleMessage,
-          bulkCreate,
-          wrapHits,
-        });
-
-        result = {
-          ...result,
-          ...runResult,
-        };
-      } catch (error) {
-        logger.error(error);
-      }
-
-      return result;
+      const result = await queryExecutor({
+        buildRuleMessage,
+        bulkCreate,
+        exceptionItems,
+        eventsTelemetry: undefined,
+        listClient,
+        logger,
+        rule,
+        searchAfterSize,
+        services,
+        tuple,
+        version: '1.0.0', // TODO: deprecated?
+        wrapHits,
+      });
+      return { ...result, state };
     },
   });
 };

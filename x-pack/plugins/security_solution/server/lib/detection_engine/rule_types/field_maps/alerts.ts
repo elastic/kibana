@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const alertsFieldMap = {
+import { FieldMap } from '../../../../../../rule_registry/common/field_map';
+
+export const alertsFieldMap: FieldMap = {
   'kibana.alert.ancestors': {
     type: 'object',
     array: true,
@@ -32,7 +34,7 @@ export const alertsFieldMap = {
     required: true,
   },
   'kibana.alert.depth': {
-    type: 'long',
+    type: 'integer', // TODO: should be 'long'?
     array: false,
     required: true,
   },
@@ -187,7 +189,7 @@ export const alertsFieldMap = {
     required: true,
   },
   'kibana.alert.threshold_result.terms.value': {
-    type: 'long',
+    type: 'keyword',
     array: false,
     required: true,
   },

@@ -8,11 +8,12 @@
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty, get } from 'lodash';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import { BuildRuleMessage } from './rule_messages';
-import { RefreshTypes } from '../types';
-import { BaseHit } from '../../../../common/detection_engine/types';
-import { errorAggregator, makeFloatString } from './utils';
+import { Logger } from 'kibana/server';
+import { BaseHit } from '../../../../../common/detection_engine/types';
+import { BuildRuleMessage } from '../../signals/rule_messages';
+import { errorAggregator, makeFloatString } from '../../signals/utils';
+import { RefreshTypes } from '../../types';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 
 export interface GenericBulkCreateResponse<T> {
   success: boolean;
@@ -23,7 +24,7 @@ export interface GenericBulkCreateResponse<T> {
 
 export const bulkCreateFactory = (
   logger: Logger,
-  esClient: ElasticsearchClient,
+  ruleDataClient: RuleDataClient,
   buildRuleMessage: BuildRuleMessage,
   refreshForBulkCreate: RefreshTypes
 ) => async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
@@ -39,7 +40,7 @@ export const bulkCreateFactory = (
   const bulkBody = wrappedDocs.flatMap((wrappedDoc) => [
     {
       create: {
-        _index: wrappedDoc._index,
+        // _index: wrappedDoc._index,
         _id: wrappedDoc._id,
       },
     },
@@ -47,7 +48,7 @@ export const bulkCreateFactory = (
   ]);
   const start = performance.now();
 
-  const { body: response } = await esClient.bulk({
+  const { body: response } = await ruleDataClient.getWriter().bulk({
     refresh: refreshForBulkCreate,
     body: bulkBody,
   });

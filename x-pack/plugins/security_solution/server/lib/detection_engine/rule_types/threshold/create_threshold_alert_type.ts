@@ -71,22 +71,13 @@ export const createThresholdAlertType = (createOptions: {
       const {
         alertId,
         params,
-        runOpts: {
-          buildRuleMessage,
-          bulkCreate,
-          exceptionItems,
-          listClient,
-          rule,
-          searchAfterSize,
-          tuple,
-          wrapHits,
-        },
+        runOpts: { buildRuleMessage, bulkCreate },
         services,
         startedAt,
         state,
       } = execOptions;
       const result = createResultObject<ThresholdAlertState>(state);
-      const { index, outputIndex, query, threshold, timestampOverride } = params;
+      const { index, query, threshold, timestampOverride } = params;
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
       const from = fromDate.toISOString();
       const to = startedAt.toISOString();

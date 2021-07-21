@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import {
-  SearchAfterAndBulkCreateParams,
-  SignalSourceHit,
-  WrapHits,
-  WrappedSignalHit,
-} from './types';
-import { generateId } from './utils';
-import { buildBulkBody } from './build_bulk_body';
-import { filterDuplicateSignals } from './filter_duplicate_signals';
-import type { ConfigType } from '../../../config';
+import { SearchAfterAndBulkCreateParams, SignalSourceHit, WrapHits } from '../../signals/types';
+import { buildBulkBody } from './utils/build_bulk_body';
+import { generateId } from '../../signals/utils';
+import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
+import type { ConfigType } from '../../../../config';
+import { WrappedRACAlert } from '../types';
 
 export const wrapHitsFactory = ({
   ruleSO,
@@ -25,7 +21,7 @@ export const wrapHitsFactory = ({
   signalsIndex: string;
   mergeStrategy: ConfigType['alertMergeStrategy'];
 }): WrapHits => (events) => {
-  const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
+  const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
     {
       _index: signalsIndex,
       _id: generateId(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import { SearchHit } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Moment } from 'moment';
@@ -18,12 +18,12 @@ import {
 } from '../../../../../alerting/common';
 import { AlertType } from '../../../../../alerting/server';
 import { ListClient } from '../../../../../lists/server';
-import { TechnicalRuleFieldMaps } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import {
   AlertTypeWithExecutor,
   PersistenceServices,
   RuleDataClient,
 } from '../../../../../rule_registry/server';
+import { BaseHit, SearchTypes } from '../../../../../timelines/common';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -59,8 +59,7 @@ export interface RunOpts<TParams extends RuleParams> {
     from: Moment;
     maxSignals: number;
   };
-  // wrapHits: WrapHits;
-  wrapHits: (hits: Array<estypes.SearchHit<RACAlert>>) => WrappedRACAlert[];
+  wrapHits: WrapHits;
 }
 
 export type SecurityAlertTypeExecutor<
@@ -101,8 +100,28 @@ export type CreateSecurityRuleTypeFactory = (options: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any>;
 
-export interface RACAlert extends TechnicalRuleFieldMaps {
-  todo?: undefined;
+export type RACBaseHit<T> = BaseHit<T>;
+
+export interface RACAlertSignal {
+  [key: string]: SearchTypes;
 }
 
-export type WrappedRACAlert = RACAlert;
+export interface RACAlertSignalRule {
+  [key: string]: SearchTypes;
+}
+
+export type RACAlertSignalWithRule = RACAlertSignal &
+  RACAlertSignalRule & {
+    [key: string]: SearchTypes;
+  };
+
+export interface RACAlert {
+  '@timestamp': string;
+  event: object;
+  signal: RACAlertSignalWithRule;
+  [key: string]: SearchTypes;
+}
+
+export type RACSourceHit = SearchHit<RACAlert>;
+
+export type WrappedRACAlert = RACBaseHit<RACAlert>;

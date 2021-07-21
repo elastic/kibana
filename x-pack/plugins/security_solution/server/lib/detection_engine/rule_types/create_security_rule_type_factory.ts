@@ -32,8 +32,7 @@ import {
 } from '../notifications/schedule_notification_actions';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
-import { bulkCreateFactory } from '../signals/bulk_create_factory';
-import { wrapHitsFactory } from '../signals/wrap_hits_factory';
+import { bulkCreateFactory, wrapHitsFactory } from './factories';
 
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
@@ -180,12 +179,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           lists: (params.exceptionsList as ListArray) ?? [],
         });
 
-        const bulkCreate = bulkCreateFactory(
-          logger,
-          ruleDataClient.getWriter().bulk,
-          buildRuleMessage,
-          refresh
-        );
+        const bulkCreate = bulkCreateFactory(logger, ruleDataClient, buildRuleMessage, refresh);
 
         const wrapHits = wrapHitsFactory({
           ruleSO,
