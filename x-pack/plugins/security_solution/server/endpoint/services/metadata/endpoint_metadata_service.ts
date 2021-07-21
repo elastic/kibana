@@ -26,12 +26,27 @@ import {
 import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders';
 import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import { EndpointError } from '../../errors';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
 };
 
+// Will wrap the given Error with `EndpointError`, which will
+// help getting a good picture of where in our code the error originated from.
+const wrapErrorIfNeeded = (error: Error): EndpointError =>
+  error instanceof EndpointError ? error : new EndpointError(error.message, error);
+
+// used as the callback to `Promise#catch()` to ensure errors (especially those from kibana/elasticsearch clients) are wrapped
+const catchAndWrapError = <E extends Error>(error: E) => Promise.reject(wrapErrorIfNeeded(error));
+
 export class EndpointMetadataService {
+  /**
+   * For internal use only by the `this.DANGEROUS_INTERNAL_SO_CLIENT`
+   * @deprecated
+   */
+  private __DANGEROUS_INTERNAL_SO_CLIENT: SavedObjectsClientContract | undefined;
+
   /**
    * A Saved Object client that can access any saved object. Used primarly to retrieve fleet data
    * for endpoint enrichment (so that users are not required to have superuser role)
@@ -40,26 +55,33 @@ export class EndpointMetadataService {
    *
    * @private
    */
-  private readonly DANGEROUS_INTERNAL_SO_CLIENT: SavedObjectsClientContract;
+  public get DANGEROUS_INTERNAL_SO_CLIENT() {
+    // The INTERNAL SO client must be created during the first time its used. This is because creating it during
+    // instance initialization (in `constructor(){}`) causes the SO Client to be invalid (perhaps because this
+    // instantiation is happening during the plugin's the start phase)
+    if (!this.__DANGEROUS_INTERNAL_SO_CLIENT) {
+      const fakeRequest = ({
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: { href: {} },
+        raw: { req: { url: '/' } },
+      } as unknown) as KibanaRequest;
 
+      this.__DANGEROUS_INTERNAL_SO_CLIENT = this.savedObjectsStart.getScopedClient(fakeRequest, {
+        excludedWrappers: ['security'],
+        includedHiddenTypes: ['ingest-agent-policies'],
+      });
+    }
+
+    return this.__DANGEROUS_INTERNAL_SO_CLIENT;
+  }
   constructor(
     private savedObjectsStart: SavedObjectsServiceStart,
     private readonly agentService: AgentService,
     private readonly agentPolicyService: AgentPolicyServiceInterface
-  ) {
-    const fakeRequest = ({
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown) as KibanaRequest;
-
-    this.DANGEROUS_INTERNAL_SO_CLIENT = this.savedObjectsStart.getScopedClient(fakeRequest, {
-      excludedWrappers: ['security'],
-    });
-  }
+  ) {}
 
   /**
    * Retrieve a single endpoint host metadata
@@ -72,7 +94,7 @@ export class EndpointMetadataService {
    */
   async getHostMetadata(esClient: ElasticsearchClient, endpointId: string): Promise<HostMetadata> {
     const query = getESQueryHostMetadataByID(endpointId);
-    const queryResult = await esClient.search<HostMetadata>(query);
+    const queryResult = await esClient.search<HostMetadata>(query).catch(catchAndWrapError);
     const endpointMetadata = queryResponseToHostResult(queryResult.body).result;
 
     if (endpointMetadata) {
@@ -94,35 +116,39 @@ export class EndpointMetadataService {
     esClient: ElasticsearchClient,
     endpointId: string
   ): Promise<HostInfo> {
-    const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
-    const fleetAgent = await this.getFleetAgent(esClient, endpointMetadata.elastic.agent.id);
-    const fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id!);
-    const endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
-      (policy: PackagePolicy) => policy.package?.name === 'endpoint'
-    );
+    try {
+      const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
+      const fleetAgent = await this.getFleetAgent(esClient, endpointMetadata.elastic.agent.id);
+      const fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id!);
+      const endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
+        (policy: PackagePolicy) => policy.package?.name === 'endpoint'
+      );
 
-    return {
-      metadata: endpointMetadata,
-      host_status: fleetAgentStatusToEndpointHostStatus(
-        this.agentService.getStatusForAgent(fleetAgent)
-      ),
-      policy_info: {
-        agent: {
-          applied: {
-            revision: fleetAgent.policy_revision ?? 0,
-            id: fleetAgent.policy_id ?? '',
+      return {
+        metadata: endpointMetadata,
+        host_status: fleetAgentStatusToEndpointHostStatus(
+          this.agentService.getStatusForAgent(fleetAgent)
+        ),
+        policy_info: {
+          agent: {
+            applied: {
+              revision: fleetAgent.policy_revision ?? 0,
+              id: fleetAgent.policy_id ?? '',
+            },
+            configured: {
+              revision: fleetAgentPolicy.revision,
+              id: fleetAgentPolicy.id,
+            },
           },
-          configured: {
-            revision: fleetAgentPolicy.revision,
-            id: fleetAgentPolicy.id,
+          endpoint: {
+            revision: endpointPackagePolicy?.revision ?? 0,
+            id: endpointPackagePolicy?.id ?? '',
           },
         },
-        endpoint: {
-          revision: endpointPackagePolicy?.revision ?? 0,
-          id: endpointPackagePolicy?.id ?? '',
-        },
-      },
-    };
+      };
+    } catch (error) {
+      throw wrapErrorIfNeeded(error);
+    }
   }
 
   /**
@@ -141,7 +167,7 @@ export class EndpointMetadataService {
         throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
       }
 
-      throw error;
+      throw new EndpointError(error.message, error);
     }
   }
 
@@ -153,11 +179,9 @@ export class EndpointMetadataService {
    * @throws
    */
   async getFleetAgentPolicy(agentPolicyId: string): Promise<AgentPolicyWithPackagePolicies> {
-    const agentPolicy = await this.agentPolicyService.get(
-      this.DANGEROUS_INTERNAL_SO_CLIENT,
-      agentPolicyId,
-      true
-    );
+    const agentPolicy = await this.agentPolicyService
+      .get(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyId, true)
+      .catch(catchAndWrapError);
 
     if (agentPolicy) {
       return agentPolicy as AgentPolicyWithPackagePolicies;

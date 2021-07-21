@@ -32,6 +32,7 @@ import {
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
 import { EndpointMetadataService } from './services/metadata';
+import { EndpointAppContentServicesNotStartedError } from './errors';
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<
@@ -65,7 +66,7 @@ export class EndpointAppContextService {
   private license: LicenseService | undefined;
   public security: SecurityPluginStart | undefined;
   private cases: CasesPluginStartContract | undefined;
-
+  private endpointMetadataService: EndpointMetadataService | undefined;
   private experimentalFeatures: ExperimentalFeatures | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
@@ -77,7 +78,7 @@ export class EndpointAppContextService {
     this.license = dependencies.licenseService;
     this.security = dependencies.security;
     this.cases = dependencies.cases;
-
+    this.endpointMetadataService = dependencies.endpointMetadataService;
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
@@ -108,6 +109,13 @@ export class EndpointAppContextService {
     return this.experimentalFeatures;
   }
 
+  public getEndpointMetadataService(): EndpointMetadataService {
+    if (!this.endpointMetadataService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.endpointMetadataService;
+  }
+
   public getAgentService(): AgentService | undefined {
     return this.agentService;
   }
@@ -126,14 +134,14 @@ export class EndpointAppContextService {
 
   public getLicenseService(): LicenseService {
     if (!this.license) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+      throw new EndpointAppContentServicesNotStartedError();
     }
     return this.license;
   }
 
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
     if (!this.cases) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+      throw new EndpointAppContentServicesNotStartedError();
     }
     return this.cases.getCasesClientWithRequest(req);
   }
