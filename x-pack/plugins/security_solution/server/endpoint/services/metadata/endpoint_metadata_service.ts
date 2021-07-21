@@ -71,7 +71,6 @@ export class EndpointMetadataService {
 
       this.__DANGEROUS_INTERNAL_SO_CLIENT = this.savedObjectsStart.getScopedClient(fakeRequest, {
         excludedWrappers: ['security'],
-        includedHiddenTypes: ['ingest-agent-policies'],
       });
     }
 
