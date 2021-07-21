@@ -7,7 +7,16 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/bulk_upgrade_agents.yaml
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+                required:
+                  - success
     '400':
       description: BAD REQUEST
       content:
