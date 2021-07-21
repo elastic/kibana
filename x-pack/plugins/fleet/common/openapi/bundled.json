@@ -1026,13 +1026,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "agentPolicyIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
+                  "agentPolicyId": {
+                    "type": "string"
                   }
-                }
+                },
+                "required": [
+                  "agentPolicyId"
+                ]
               }
             }
           }

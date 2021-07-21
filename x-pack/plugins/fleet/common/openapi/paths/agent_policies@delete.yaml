@@ -24,10 +24,10 @@ post:
         schema:
           type: object
           properties:
-            agentPolicyIds:
-              type: array
-              items:
-                type: string
+            agentPolicyId:
+              type: string
+          required:
+            - agentPolicyId
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 parameters: []

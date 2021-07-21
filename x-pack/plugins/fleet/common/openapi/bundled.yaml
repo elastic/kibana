@@ -633,10 +633,10 @@ paths:
             schema:
               type: object
               properties:
-                agentPolicyIds:
-                  type: array
-                  items:
-                    type: string
+                agentPolicyId:
+                  type: string
+              required:
+                - agentPolicyId
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     parameters: []
