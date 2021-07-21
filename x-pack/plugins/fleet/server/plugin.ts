@@ -33,6 +33,8 @@ import type { FleetConfigType, NewPackagePolicy, UpdatePackagePolicy } from '../
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 
+import { getAgentStatus } from '../common/services/agent_status';
+
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -308,6 +310,7 @@ export class FleetPlugin
       agentService: {
         getAgent: getAgentById,
         listAgents: getAgentsByKuery,
+        getStatusForAgent: getAgentStatus,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },

@@ -10,6 +10,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/ser
 
 import type { AgentStatus, Agent } from '../types';
 
+import type { getAgentStatus } from '../../common/services/agent_status';
+
 import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
@@ -56,6 +58,11 @@ export interface AgentService {
    * Return the status by the Agent's id
    */
   getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
+  /**
+   * Return the current status for a given Agent
+   * @param agent
+   */
+  getStatusForAgent: typeof getAgentStatus;
   /**
    * List agents
    */
