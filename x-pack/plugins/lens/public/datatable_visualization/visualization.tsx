@@ -21,12 +21,8 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
-import { getDefaultSummaryLabel, ColumnState } from '../../common/expressions';
-
-export interface SortingState {
-  columnId: string | undefined;
-  direction: 'asc' | 'desc' | 'none';
-}
+import { getDefaultSummaryLabel } from '../../common/expressions';
+import type { ColumnState, SortingState } from '../../common/expressions';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];

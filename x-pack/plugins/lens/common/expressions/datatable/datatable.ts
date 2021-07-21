@@ -17,6 +17,11 @@ import { getSortingCriteria } from './sorting';
 import { computeSummaryRowForColumn } from './summary';
 import { transposeTable } from './transpose_helpers';
 
+export interface SortingState {
+  columnId: string | undefined;
+  direction: 'asc' | 'desc' | 'none';
+}
+
 export interface DatatableProps {
   data: LensMultiTable;
   untransposedData?: LensMultiTable;
@@ -33,8 +38,8 @@ export interface DatatableArgs {
   title: string;
   description?: string;
   columns: ColumnConfigArg[];
-  sortingColumnId: string | undefined;
-  sortingDirection: 'asc' | 'desc' | 'none';
+  sortingColumnId: SortingState['columnId'];
+  sortingDirection: SortingState['direction'];
 }
 
 function isRange(meta: { params?: { id?: string } } | undefined) {

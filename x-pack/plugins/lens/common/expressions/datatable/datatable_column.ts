@@ -19,12 +19,7 @@ import type { CustomPaletteParams } from '../../types';
 export type LensGridDirection = 'none' | Direction;
 
 export interface ColumnConfig {
-  columns: Array<
-    Omit<ColumnState, 'palette'> & {
-      type: 'lens_datatable_column';
-      palette?: PaletteOutput<CustomPaletteState>;
-    }
-  >;
+  columns: ColumnConfigArg[];
   sortingColumnId: string | undefined;
   sortingDirection: LensGridDirection;
 }
