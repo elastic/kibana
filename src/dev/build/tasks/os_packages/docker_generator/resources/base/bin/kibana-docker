@@ -395,6 +395,8 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.validateArtifactDownloads
+    xpack.securitySolution.prebuiltRulesFromFileSystem
+    xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
     xpack.task_manager.enabled
