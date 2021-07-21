@@ -24,6 +24,7 @@ import {
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema, SchemaType } from '../../../shared/schema/types';
+import { InlineEditableTable } from '../../../shared/tables/inline_editable_table';
 import { ReorderableTable } from '../../../shared/tables/reorderable_table';
 import { Result } from '../result';
 
@@ -353,8 +354,16 @@ export const Library: React.FC = () => {
               { name: 'Whatever', render: (item) => <div>Whatever</div> },
             ]}
           />
-
           <EuiSpacer />
+
+          <EuiTitle size="m">
+            <h2>InlineEditableTable</h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          <InlineEditableTable />
+          <EuiSpacer />
+
           <EuiSpacer />
           <EuiSpacer />
         </EuiPageContentBody>
