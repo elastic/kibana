@@ -64,7 +64,6 @@ import { help as savedMap } from './dict/saved_map';
 import { help as savedSearch } from './dict/saved_search';
 import { help as savedVisualization } from './dict/saved_visualization';
 import { help as seriesStyle } from './dict/series_style';
-import { help as shape } from './dict/shape';
 import { help as sort } from './dict/sort';
 import { help as staticColumn } from './dict/static_column';
 import { help as string } from './dict/string';
@@ -226,7 +225,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   savedSearch,
   savedVisualization,
   seriesStyle,
-  shape,
   sort,
   staticColumn,
   string,
