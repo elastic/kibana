@@ -26,6 +26,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     columnName,
     eventId,
     field,
+    isDraggable = true,
     timelineId,
     truncate,
     values,
@@ -34,6 +35,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
@@ -48,6 +50,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             fieldFormat={field.format || ''}
             fieldName={columnName}
             fieldType={field.type || ''}
+            isDraggable={isDraggable}
             value={parseValue(value)}
             truncate={truncate}
             linkValue={head(linkValues)}

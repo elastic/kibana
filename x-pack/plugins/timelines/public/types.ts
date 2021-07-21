@@ -11,6 +11,7 @@ import { Store } from 'redux';
 import type {
   LastUpdatedAtProps,
   LoadingPanelProps,
+  FieldBrowserWrappedProps,
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
 } from './components';
@@ -28,6 +29,7 @@ export interface TimelinesUIStart {
   getTGridReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
+  getFieldBrowser: (props: FieldBrowserWrappedProps) => ReactElement<FieldBrowserWrappedProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
   getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
   getUseDraggableKeyboardWrapper: () => (

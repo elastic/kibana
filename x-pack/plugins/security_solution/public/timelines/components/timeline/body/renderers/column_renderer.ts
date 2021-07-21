@@ -15,6 +15,7 @@ export interface ColumnRenderer {
     columnName,
     eventId,
     field,
+    isDraggable,
     timelineId,
     truncate,
     values,
@@ -23,6 +24,7 @@ export interface ColumnRenderer {
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
     values: string[] | null | undefined;

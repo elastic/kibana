@@ -6,8 +6,16 @@
  */
 
 import moment from 'moment';
+import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
-export const getLastTaskExecutionTimestamp = (
+/**
+ * Determines the when the last run was in order to execute to.
+ *
+ * @param executeTo
+ * @param lastExecutionTimestamp
+ * @returns the timestamp to search from
+ */
+export const getPreviousDiagTaskTimestamp = (
   executeTo: string,
   lastExecutionTimestamp?: string
 ) => {
@@ -21,3 +29,57 @@ export const getLastTaskExecutionTimestamp = (
 
   return lastExecutionTimestamp;
 };
+
+/**
+ * Determines the when the last run was in order to execute to.
+ *
+ * @param executeTo
+ * @param lastExecutionTimestamp
+ * @returns the timestamp to search from
+ */
+export const getPreviousEpMetaTaskTimestamp = (
+  executeTo: string,
+  lastExecutionTimestamp?: string
+) => {
+  if (lastExecutionTimestamp === undefined) {
+    return moment(executeTo).subtract(24, 'hours').toISOString();
+  }
+
+  if (moment(executeTo).diff(lastExecutionTimestamp, 'hours') >= 24) {
+    return moment(executeTo).subtract(24, 'hours').toISOString();
+  }
+
+  return lastExecutionTimestamp;
+};
+
+/**
+ * Chunks an Array<T> into an Array<Array<T>>
+ * This is to prevent overloading the telemetry channel + user resources
+ *
+ * @param telemetryRecords
+ * @param batchSize
+ * @returns the batch of records
+ */
+export const batchTelemetryRecords = (
+  telemetryRecords: unknown[],
+  batchSize: number
+): unknown[][] =>
+  [...Array(Math.ceil(telemetryRecords.length / batchSize))].map((_) =>
+    telemetryRecords.splice(0, batchSize)
+  );
+
+/**
+ * User defined type guard for PackagePolicy
+ *
+ * @param data the union type of package policies
+ * @returns type confirmation
+ */
+export function isPackagePolicyList(
+  data: string[] | PackagePolicy[] | undefined
+): data is PackagePolicy[] {
+  if (data === undefined || data.length < 1) {
+    return false;
+  }
+
+  return (data as PackagePolicy[])[0].inputs !== undefined;
+}

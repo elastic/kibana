@@ -53,7 +53,10 @@ export function healthRoute(
   logger: Logger,
   taskManagerId: string,
   config: TaskManagerConfig
-): Observable<TaskManagerServiceStatus> {
+): {
+  serviceStatus$: Observable<TaskManagerServiceStatus>;
+  monitoredHealth$: Observable<MonitoredHealth>;
+} {
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
@@ -67,6 +70,7 @@ export function healthRoute(
   }
 
   const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
+  const monitoredHealth$: Subject<MonitoredHealth> = new Subject<MonitoredHealth>();
 
   /* keep track of last health summary, as we'll return that to the next call to _health */
   let lastMonitoredStats: MonitoringStats | null = null;
@@ -84,6 +88,7 @@ export function healthRoute(
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
+      monitoredHealth$.next(monitoredHealth);
       logHealthMetrics(monitoredHealth, logger, config);
     });
 
@@ -104,7 +109,7 @@ export function healthRoute(
       });
     }
   );
-  return serviceStatus$;
+  return { serviceStatus$, monitoredHealth$ };
 }
 
 export function withServiceStatus(

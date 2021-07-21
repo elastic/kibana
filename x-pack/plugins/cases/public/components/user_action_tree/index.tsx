@@ -107,12 +107,20 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: 10px;
+      padding: ${theme.eui.paddingSizes.s};
       border-radius: ${theme.eui.paddingSizes.xs};
     }
 
     & .comment-alert .euiCommentEvent__headerData {
       flex-grow: 1;
+    }
+
+    & .comment-action.empty-comment .euiCommentEvent--regular {
+      box-shadow: none;
+      .euiCommentEvent__header {
+        padding: ${theme.eui.euiSizeM} ${theme.eui.paddingSizes.s};
+        border-bottom: 0;
+      }
     }
   `}
 `;
@@ -467,10 +475,6 @@ export const UserActionTree = React.memo(
                           isLoadingIds,
                           getCaseDetailHrefWithCommentId,
                           actionsNavigation,
-                          manageMarkdownEditIds,
-                          handleManageMarkdownEditId,
-                          handleManageQuote,
-                          handleSaveComment,
                           action,
                         }),
                       ]
