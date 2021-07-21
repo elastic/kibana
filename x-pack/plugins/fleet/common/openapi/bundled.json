@@ -200,7 +200,14 @@
                             "type": "string"
                           },
                           "type": {
-                            "type": "string"
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -224,7 +231,21 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "Packages - Delete",
