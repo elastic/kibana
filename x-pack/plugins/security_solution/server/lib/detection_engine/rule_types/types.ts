@@ -47,7 +47,7 @@ type SimpleAlertType<
   TState extends AlertTypeState,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
+> = AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
 export interface RunOpts<TParams extends RuleParams> {
   buildRuleMessage: BuildRuleMessage;
@@ -81,7 +81,7 @@ type SecurityAlertTypeWithExecutor<
   TParams extends RuleParams,
   TAlertInstanceContext extends AlertInstanceContext = {}
 > = Omit<
-  AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
   executor: SecurityAlertTypeExecutor<TState, TServices, TParams, TAlertInstanceContext>;

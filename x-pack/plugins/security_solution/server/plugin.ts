@@ -46,7 +46,6 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { compose } from './lib/compose/kibana';
 import { createQueryAlertType } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
@@ -320,8 +319,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         taskManager: plugins.taskManager!,
       });
     }
-
-    compose(core, plugins, endpointContext);
 
     core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(

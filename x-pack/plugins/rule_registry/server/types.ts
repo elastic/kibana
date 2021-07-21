@@ -19,7 +19,7 @@ type SimpleAlertType<
   TState extends AlertTypeState,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
+> = AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
 export type AlertTypeExecutor<
   TState extends AlertTypeState,
@@ -38,7 +38,7 @@ export type AlertTypeWithExecutor<
   TAlertInstanceContext extends AlertInstanceContext = {},
   TServices extends Record<string, any> = {}
 > = Omit<
-  AlertType<TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
   executor: AlertTypeExecutor<TState, TParams, TAlertInstanceContext, TServices>;
