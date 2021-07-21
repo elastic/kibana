@@ -461,7 +461,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    * field along with other document fields
    */
   useEffect(() => {
-    if (isPanelVisible && fieldTypeToProcess === 'runtime') {
+    if (isPanelVisible) {
       fetchSampleDocuments();
     }
   }, [isPanelVisible, fetchSampleDocuments, fieldTypeToProcess]);
