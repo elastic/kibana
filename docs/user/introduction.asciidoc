@@ -425,7 +425,7 @@ the <<get-started,{kib} Quick start>>.
 |<<xpack-graph, Graph>>
 
 |Share your data
-|<<dashboard, Dashboard>>, <<canvas, Canvas>>
+|<<dashboard, Dashboard>>, <<canvas, Canvas>>, <<discover,Discover>>
 
 2+|*Administer your Kibana instance*
 
