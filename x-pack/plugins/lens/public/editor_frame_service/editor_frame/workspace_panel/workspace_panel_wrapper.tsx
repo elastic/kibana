@@ -62,16 +62,16 @@ export function WorkspacePanelWrapper({
     },
     [dispatchLens, activeVisualization]
   );
-  const warnings: React.ReactNode[] = [];
+  const warningMessages: React.ReactNode[] = [];
   if (activeVisualization?.getWarningMessages) {
-    warnings.push(
+    warningMessages.push(
       ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
     );
   }
   Object.entries(datasourceStates).forEach(([datasourceId, datasourceState]) => {
     const datasource = datasourceMap[datasourceId];
     if (!datasourceState.isLoading && datasource.getWarningMessages) {
-      warnings.push(
+      warningMessages.push(
         ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI) || [])
       );
     }
@@ -120,7 +120,9 @@ export function WorkspacePanelWrapper({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            {warnings && warnings.length ? <WarningsPopover>{warnings}</WarningsPopover> : null}
+            {warningMessages && warningMessages.length ? (
+              <WarningsPopover>{warningMessages}</WarningsPopover>
+            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

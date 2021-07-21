@@ -66,14 +66,16 @@ export const combineResults = (
   newResult: SearchAfterAndBulkCreateReturnType
 ): SearchAfterAndBulkCreateReturnType => ({
   success: currentResult.success === false ? false : newResult.success,
+  warning: currentResult.warning || newResult.warning,
   bulkCreateTimes: calculateAdditiveMax(currentResult.bulkCreateTimes, newResult.bulkCreateTimes),
   searchAfterTimes: calculateAdditiveMax(
     currentResult.searchAfterTimes,
     newResult.searchAfterTimes
   ),
   lastLookBackDate: newResult.lastLookBackDate,
+  createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
-  warnings: [...currentResult.warnings, ...newResult.warnings],
+  warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
   errors: [...new Set([...currentResult.errors, ...newResult.errors])],
 });
 
@@ -93,22 +95,26 @@ export const combineConcurrentResults = (
       const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
       return {
         success: accum.success && item.success,
+        warning: accum.warning || item.warning,
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
         lastLookBackDate,
+        createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
-        warnings: [...accum.warnings, ...item.warnings],
+        warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
       };
     },
     {
       success: true,
+      warning: false,
       searchAfterTimes: [],
       bulkCreateTimes: [],
       lastLookBackDate: undefined,
+      createdSignalsCount: 0,
       createdSignals: [],
       errors: [],
-      warnings: [],
+      warningMessages: [],
     }
   );
 

@@ -1076,12 +1076,14 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
-        warnings: [],
+        warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1094,12 +1096,14 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
-        warnings: [],
+        warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1410,12 +1414,14 @@ describe('utils', () => {
       const searchAfterReturnType = createSearchAfterReturnType();
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
-        warnings: [],
+        warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1423,38 +1429,45 @@ describe('utils', () => {
     test('createSearchAfterReturnType can override all values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
-        warnings: ['test warning'],
+        warning: true,
+        warningMessages: ['test warning'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
-        warnings: ['test warning'],
+        warning: true,
+        warningMessages: ['test warning'],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
 
     test('createSearchAfterReturnType can override select values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
+        createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
-        warnings: [],
+        warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1465,12 +1478,14 @@ describe('utils', () => {
       const merged = mergeReturns([createSearchAfterReturnType(), createSearchAfterReturnType()]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
-        warnings: [],
+        warning: false,
+        warningMessages: [],
       };
       expect(merged).toEqual(expected);
     });
@@ -1519,31 +1534,36 @@ describe('utils', () => {
       const merged = mergeReturns([
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
+          createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
           success: true,
-          warnings: ['warning1'],
+          warningMessages: ['warning1'],
         }),
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
+          createdSignalsCount: 2,
           createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
           success: true,
-          warnings: ['warning2'],
+          warningMessages: ['warning2'],
+          warning: true,
         }),
       ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
+        createdSignalsCount: 5, // Adds the 3 and 2 together
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
-        warnings: ['warning1', 'warning2'],
+        warning: true,
+        warningMessages: ['warning1', 'warning2'],
       };
       expect(merged).toEqual(expected);
     });
