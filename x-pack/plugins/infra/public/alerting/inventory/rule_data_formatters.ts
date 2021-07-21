@@ -6,19 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE, ALERT_ID } from '@kbn/rule-data-utils';
+import { ALERT_ID } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
-  const actualCount = fields[ALERT_EVALUATION_VALUE];
-  const thresholdCount = fields[ALERT_EVALUATION_THRESHOLD];
   const groupName = fields[ALERT_ID];
   const reason = i18n.translate('xpack.infra.metrics.alerting.inventory.alertReasonDescription', {
-    defaultMessage:
-      'Current value is {actualCount} (threshold of {thresholdCount}) for {groupName}.',
+    defaultMessage: 'Inventory alert for {groupName}.', // TEMP reason message, will be deleted once we index the reason field
     values: {
-      actualCount,
-      thresholdCount,
       groupName,
     },
   });
