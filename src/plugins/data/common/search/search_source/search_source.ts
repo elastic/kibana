@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
+import { uniqueId, keyBy, pick, difference, isEqual, uniqWith, isObject } from 'lodash';
 import {
   catchError,
   finalize,
@@ -94,7 +94,6 @@ import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 import {
   getEsQueryConfig,
   buildEsQuery,
-  Filter,
   UI_SETTINGS,
   isErrorResponse,
   isPartialResponse,
@@ -102,6 +101,7 @@ import {
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { extractReferences } from './extract_references';
+import { getFilterAsArray } from './get_filter_as_array';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -854,7 +854,7 @@ export class SearchSource {
       index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
     if (originalFilters) {
-      const filters = this.getFilters(originalFilters);
+      const filters = getFilterAsArray(originalFilters);
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
@@ -879,21 +879,5 @@ export class SearchSource {
   public serialize() {
     const [searchSourceFields, references] = extractReferences(this.getSerializedFields());
     return { searchSourceJSON: JSON.stringify(searchSourceFields), references };
-  }
-
-  private getFilters(filterField: SearchSourceFields['filter']): Filter[] {
-    if (!filterField) {
-      return [];
-    }
-
-    if (Array.isArray(filterField)) {
-      return filterField;
-    }
-
-    if (isFunction(filterField)) {
-      return this.getFilters(filterField());
-    }
-
-    return [filterField];
   }
 }
