@@ -18,7 +18,9 @@ import { deepExactRt } from '@kbn/io-ts-utils/target/deep_exact_rt';
 import { mergeRt } from '@kbn/io-ts-utils/target/merge_rt';
 import { Route, Router } from './types';
 
-export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
+export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes>;
+
+export function createRouter(routes: Route[]) {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
 
@@ -157,10 +159,8 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     });
   };
 
-  return {
-    link: (path, ...args) => {
-      return link(path, ...args);
-    },
+  const router = {
+    link,
     getParams: (...args: any[]) => {
       const matches = matchRoutes(...args);
       return matches.length
@@ -173,8 +173,11 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     matchRoutes: (...args: any[]) => {
       return matchRoutes(...args) as any;
     },
-    getRoutePath: (route) => {
+    getRoutePath: (route: Route) => {
       return reactRouterConfigsByRoute.get(route)!.path as string;
     },
   };
+
+  // prevent "Type instantation is excessively deep"
+  return router as any;
 }

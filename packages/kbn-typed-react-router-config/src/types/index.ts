@@ -13,7 +13,9 @@ import { RequiredKeys, ValuesType } from 'utility-types';
 // import { unconst } from '../unconst';
 import { NormalizePath } from './utils';
 
-export type PathsOf<TRoutes extends Route[]> = keyof MapRoutes<TRoutes> & string;
+export type PathsOf<TRoutes extends Route[]> = [keyof MapRoutes<TRoutes>] extends [never]
+  ? string
+  : keyof MapRoutes<TRoutes> & string;
 
 export interface RouteMatch<TRoute extends Route = Route> {
   route: TRoute;

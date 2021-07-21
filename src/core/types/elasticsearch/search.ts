@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ValuesType } from 'utility-types';
+import { ValuesType, UnionToIntersection } from 'utility-types';
 import { estypes } from '@elastic/elasticsearch';
 
 type InvalidAggregationRequest = unknown;
@@ -549,8 +549,8 @@ export type AggregateOf<
   // t_test: {} not defined
 })[ValidAggregationKeysOf<TAggregationContainer> & AggregationTypeName];
 
-type AggregateOfMap<TAggregationMap extends AggregationMap, TDocument> = {
-  [TAggregationName in keyof TAggregationMap]: TAggregationMap[TAggregationName] extends estypes.AggregationsAggregationContainer
+type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
+  [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends estypes.AggregationsAggregationContainer
     ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
@@ -569,7 +569,7 @@ type SearchResponseOf<
 > = SubAggregateOf<TAggregationRequest, TDocument>;
 
 // if aggregation response cannot be inferred, fall back to unknown
-type WrapAggregationResponse<T> = keyof T extends never
+type WrapAggregationResponse<T> = keyof UnionToIntersection<T> extends never
   ? { aggregations?: unknown }
   : { aggregations?: T };
 

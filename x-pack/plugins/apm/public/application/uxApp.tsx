@@ -110,6 +110,7 @@ export function UXAppRoot({
           services={{ ...core, ...plugins, embeddable, data }}
         >
           <i18nCore.Context>
+            {/* @ts-expect-error Type instantiation is excessively deep */}
             <RouterProvider history={history} router={uxRouter}>
               <UrlParamsProvider>
                 <UxApp />
