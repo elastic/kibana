@@ -11,13 +11,8 @@ import { EuiDraggable, EuiIcon } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
 import { Cell } from './cell';
+import { DRAGGABLE_UX_STYLE } from './constants';
 import { Column } from './types';
-
-const draggableUXStyle = {
-  flexBasis: '16px',
-  flexGrow: 0,
-  alignItems: 'center',
-};
 
 export interface DraggableBodyRowProps<Item> {
   columns: Array<Column<Item>>;
@@ -48,7 +43,7 @@ export const DraggableBodyRow = <Item extends object>({
         columns={columns}
         item={item}
         additionalProps={additionalProps}
-        firstCell={<Cell {...draggableUXStyle}>{<EuiIcon type="grab" />}</Cell>}
+        firstCell={<Cell {...DRAGGABLE_UX_STYLE}>{<EuiIcon type="grab" />}</Cell>}
       />
     </EuiDraggable>
   );

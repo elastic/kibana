@@ -27,7 +27,7 @@ export const BodyRow = <Item extends object>({
   firstCell,
 }: BodyRowProps<Item>) => {
   return (
-    <div className="reorderable-table-row">
+    <div className="reorderableTableRow">
       <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart">

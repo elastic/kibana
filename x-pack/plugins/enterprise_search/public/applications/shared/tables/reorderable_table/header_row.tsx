@@ -20,7 +20,7 @@ interface HeaderRowProps<Item> {
 
 export const HeaderRow = <Item extends object>({ columns, firstCell }: HeaderRowProps<Item>) => {
   return (
-    <div className="reorderable-table-header">
+    <div className="reorderableTableHeader">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFlexGroup>

@@ -10,19 +10,15 @@ import React from 'react';
 import classNames from 'classnames';
 
 import './reorderable_table.scss';
+
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
 import { Cell } from './cell';
+import { DRAGGABLE_UX_STYLE } from './constants';
 import { DraggableBodyRow } from './draggable_body_row';
 import { DraggableBodyRows } from './draggable_body_rows';
 import { HeaderRow } from './header_row';
 import { Column } from './types';
-
-const draggableUXStyle = {
-  flexBasis: '16px',
-  flexGrow: 0,
-  alignItems: 'center',
-};
 
 interface ReorderableTableProps<Item> {
   columns: Array<Column<Item>>;
@@ -40,14 +36,15 @@ export const ReorderableTable = <Item extends object>({
   className = '',
   disableDragging = false,
   disableReordering = false,
+
   onReorder = () => undefined,
   rowProps = () => ({}),
 }: ReorderableTableProps<Item>) => {
   return (
-    <div className={classNames(className, 'reorderable-table')}>
+    <div className={classNames(className, 'reorderableTable')}>
       <HeaderRow
         columns={columns}
-        firstCell={!disableReordering ? <Cell {...draggableUXStyle} /> : undefined}
+        firstCell={!disableReordering ? <Cell {...DRAGGABLE_UX_STYLE} /> : undefined}
       />
 
       {!disableReordering ? (

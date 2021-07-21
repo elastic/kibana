@@ -1,11 +1,11 @@
-.reorderable-table {
+.reorderableTable {
 
-  &-no-items {
+  &NoItems {
     border-top: $euiBorderThin;
     background-color: $euiColorEmptyShade;
   }
 
-  &-row {
+  &Row {
     border-top: $euiBorderThin;
     background-color: $euiColorEmptyShade;
 
@@ -14,7 +14,7 @@
     }
   }
 
-  &-header {
+  &Header {
     > .euiFlexGroup--directionRow.euiFlexGroup--gutterLarge {
       margin: -12px 0;
     }
