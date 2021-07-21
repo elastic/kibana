@@ -71,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'dashboard',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(403);
@@ -86,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'dashboard',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(200);
@@ -103,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'visualization',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(403);
@@ -118,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'visualization',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(200);
@@ -135,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'canvas',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(403);
@@ -150,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'canvas',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(200);
@@ -166,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
             searchSource: {},
             objectType: 'search',
             title: 'test disallowed',
-            version: '7.13.0',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(403);

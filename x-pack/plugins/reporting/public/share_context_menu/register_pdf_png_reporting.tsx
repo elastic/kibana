@@ -38,6 +38,7 @@ const jobParamsProvider = ({
     browserTimezone,
     layout: sharingData.layout as LayoutParams,
     title: sharingData.title as string,
+    version: '7.14.0',
   };
 };
 

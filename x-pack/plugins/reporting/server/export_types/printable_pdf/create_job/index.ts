@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cryptoFactory } from '../../../lib';
+import { checkParamsVersion, cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF, TaskPayloadPDF } from '../types';
@@ -16,24 +16,17 @@ export const createJobFnFactory: CreateJobFnFactory<
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function createJob(
-    { title, relativeUrls, browserTimezone, layout, objectType },
-    context,
-    req
-  ) {
+  return async function createJob(jobParams, _context, req) {
     const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
-    validateUrls(relativeUrls);
+    validateUrls(jobParams.relativeUrls);
+    jobParams.version = checkParamsVersion(jobParams, logger);
 
     return {
       headers: serializedEncryptedHeaders,
       spaceId: reporting.getSpaceId(req, logger),
-      browserTimezone,
       forceNow: new Date().toISOString(),
-      layout,
-      relativeUrls,
-      title,
-      objectType,
+      ...jobParams,
     };
   };
 };

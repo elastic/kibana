@@ -15,7 +15,12 @@ describe('Class Report', () => {
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
-      payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'cool report' },
+      payload: {
+        headers: 'payload_test_field',
+        objectType: 'testOt',
+        title: 'cool report',
+        version: '7.14.0',
+      },
       meta: { objectType: 'test' },
       timeout: 30000,
     });
@@ -64,7 +69,12 @@ describe('Class Report', () => {
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
-      payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'hot report' },
+      payload: {
+        headers: 'payload_test_field',
+        objectType: 'testOt',
+        title: 'hot report',
+        version: '7.14.0',
+      },
       meta: { objectType: 'stange' },
       timeout: 30000,
     });

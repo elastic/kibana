@@ -69,6 +69,7 @@ describe('Enqueue Job', () => {
       {
         objectType: 'visualization',
         title: 'cool-viz',
+        version: '7.14.0',
       },
       false,
       ({} as unknown) as ReportingRequestHandlerContext,
