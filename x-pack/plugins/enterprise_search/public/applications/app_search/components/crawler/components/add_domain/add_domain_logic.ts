@@ -10,7 +10,10 @@ import { kea, MakeLogicType } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
-import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
+import {
+  flashAPIErrors,
+  getErrorsFromHttpResponse,
+} from '../../../../../shared/flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -21,7 +24,7 @@ import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
 import { CrawlerDataFromServer, CrawlerDomain } from '../../types';
 import { crawlerDataServerToClient } from '../../utils';
 
-import { extractDomainAndEntryPointFromUrl } from './utils';
+import { extractDomainAndEntryPointFromUrl, getDomainWithProtocol } from './utils';
 
 export interface AddDomainLogicValues {
   addDomainFormInputValue: string;
@@ -44,6 +47,11 @@ export interface AddDomainLogicActions {
   validateDomain(): void;
 }
 
+const DEFAULT_SELECTOR_VALUES = {
+  addDomainFormInputValue: 'https://',
+  entryPointValue: '/',
+};
+
 export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainLogicActions>>({
   path: ['enterprise_search', 'app_search', 'crawler', 'add_domain'],
   actions: () => ({
@@ -60,18 +68,18 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
   }),
   reducers: () => ({
     addDomainFormInputValue: [
-      'https://',
+      DEFAULT_SELECTOR_VALUES.addDomainFormInputValue,
       {
-        clearDomainFormInputValue: () => 'https://',
+        clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.addDomainFormInputValue,
         setAddDomainFormInputValue: (_, newValue: string) => newValue,
         onValidateDomain: (_, { newValue }: { newValue: string }) => newValue,
       },
     ],
     entryPointValue: [
-      '/',
+      DEFAULT_SELECTOR_VALUES.entryPointValue,
       {
-        clearDomainFormInputValue: () => '/',
-        setAddDomainFormInputValue: () => '/',
+        clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
+        setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
         onValidateDomain: (_, { newEntryPointValue }) => newEntryPointValue,
       },
     ],
@@ -147,18 +155,15 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         // didn't actually persist the new domain to our BE, and we take no action
       } catch (e) {
         // we surface errors inside the form instead of in flash messages
-        const errorMessages = Array.isArray(e?.body?.attributes?.errors)
-          ? (e.body!.attributes.errors as string[])
-          : [(e?.body?.message as string) || defaultErrorMessage];
+        const errorMessages = getErrorsFromHttpResponse(e);
         actions.onSubmitNewDomainError(errorMessages);
       }
     },
     validateDomain: () => {
-      const {
-        domain: newUrlValue,
-        entryPoint: newEntryPointValue,
-      } = extractDomainAndEntryPointFromUrl(values.addDomainFormInputValue.trim());
-      actions.onValidateDomain(newUrlValue, newEntryPointValue);
+      const { domain, entryPoint } = extractDomainAndEntryPointFromUrl(
+        values.addDomainFormInputValue.trim()
+      );
+      actions.onValidateDomain(domain, entryPoint);
     },
   }),
 });

@@ -269,34 +269,6 @@ describe('AddDomainLogic', () => {
             'second error',
           ]);
         });
-
-        it('passes a single message to the error callback', async () => {
-          http.post.mockReturnValueOnce(
-            Promise.reject({
-              body: {
-                message: 'a single error',
-              },
-            })
-          );
-
-          AddDomainLogic.actions.submitNewDomain();
-          await nextTick();
-
-          expect(AddDomainLogic.actions.onSubmitNewDomainError).toHaveBeenCalledWith([
-            'a single error',
-          ]);
-        });
-
-        it('provides a default error messages to the error callback', async () => {
-          http.post.mockReturnValueOnce(Promise.reject({}));
-
-          AddDomainLogic.actions.submitNewDomain();
-          await nextTick();
-
-          expect(AddDomainLogic.actions.onSubmitNewDomainError).toHaveBeenCalledWith([
-            defaultErrorMessage,
-          ]);
-        });
       });
     });
 
