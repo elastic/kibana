@@ -91,6 +91,7 @@ describe('core lifecycle handlers', () => {
     });
     server = createHttpServer({ configService });
 
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;

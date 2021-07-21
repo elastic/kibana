@@ -32,6 +32,7 @@ describe('Elasticsearch Errors', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
     start = await root.start();
     client = start.elasticsearch.client.asInternalUser;
