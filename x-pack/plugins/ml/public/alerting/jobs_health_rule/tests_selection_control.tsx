@@ -8,7 +8,7 @@
 import React, { FC, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormFieldset, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFormFieldset, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { JobsHealthRuleTestsConfig } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
@@ -19,7 +19,11 @@ interface TestsSelectionControlProps {
   errors?: string[];
 }
 
-export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, onChange }) => {
+export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({
+  config,
+  onChange,
+  errors,
+}) => {
   const uiConfig = getResultJobsHealthRuleConfig(config);
 
   const updateCallback = useCallback(
@@ -43,11 +47,15 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, 
         ),
       }}
     >
-      <EuiSwitch
-        label={HEALTH_CHECK_NAMES.datafeed}
-        onChange={updateCallback.bind(null, { datafeed: { enabled: !uiConfig.datafeed.enabled } })}
-        checked={uiConfig.datafeed.enabled}
-      />
+      <EuiFormRow isInvalid={!!errors?.length} error={errors}>
+        <EuiSwitch
+          label={HEALTH_CHECK_NAMES.datafeed}
+          onChange={updateCallback.bind(null, {
+            datafeed: { enabled: !uiConfig.datafeed.enabled },
+          })}
+          checked={uiConfig.datafeed.enabled}
+        />
+      </EuiFormRow>
 
       <EuiSpacer size="s" />
 

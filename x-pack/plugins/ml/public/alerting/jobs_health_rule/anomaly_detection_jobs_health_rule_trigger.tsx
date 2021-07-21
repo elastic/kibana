@@ -88,6 +88,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   return (
     <EuiForm
       data-test-subj={'mlJobsHealthAlertingRuleForm'}
+      invalidCallout={'none'}
       error={formErrors}
       isInvalid={isFormInvalid}
     >
