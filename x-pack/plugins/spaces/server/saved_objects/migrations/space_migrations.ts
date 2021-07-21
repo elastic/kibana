@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn } from 'src/core/server';
+import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-export const migrateToKibana660: SavedObjectMigrationFn<any, any> = (doc) => {
+export const migrateTo660 = (doc: SavedObjectUnsanitizedDoc<Space>) => {
   if (!doc.attributes.hasOwnProperty('disabledFeatures')) {
     doc.attributes.disabledFeatures = [];
   }
