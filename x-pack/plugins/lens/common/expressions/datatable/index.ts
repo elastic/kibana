@@ -7,7 +7,3 @@
 
 export * from './datatable_column';
 export * from './datatable';
-export * from './sorting';
-export * from './summary';
-export * from './transpose_helpers';
-export * from './utils';

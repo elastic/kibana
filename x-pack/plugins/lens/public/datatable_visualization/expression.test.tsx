@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { getDatatable, DatatableProps } from '../../common/expressions';
+import { DatatableProps } from '../../common/expressions';
 import type { LensMultiTable } from '../../common';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import { getDatatable } from './expression';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
