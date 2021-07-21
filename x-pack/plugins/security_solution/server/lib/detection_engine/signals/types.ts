@@ -187,6 +187,7 @@ export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
   RuleParams,
+  never, // Only use if defining useSavedObjectReferences hook
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -197,6 +198,7 @@ export const isAlertExecutor = (
 
 export type SignalRuleAlertTypeDefinition = AlertType<
   RuleParams,
+  never, // Only use if defining useSavedObjectReferences hook
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
