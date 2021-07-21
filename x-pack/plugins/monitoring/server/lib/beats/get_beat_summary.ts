@@ -81,7 +81,7 @@ export async function getBeatSummary(
     beatUuid,
     start,
     end,
-  }: { clusterUuid: string; beatUuid: string; start: Date; end: Date }
+  }: { clusterUuid: string; beatUuid: string; start: number; end: number }
 ) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatSummary');
 

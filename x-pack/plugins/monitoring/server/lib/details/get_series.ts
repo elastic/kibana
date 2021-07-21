@@ -66,7 +66,7 @@ function getUuid(req: LegacyRequest, metric: Metric) {
 }
 
 function defaultCalculation(bucket: SeriesBucket, key: string) {
-  const legacyValue = get(bucket, key, null);
+  const legacyValue: number = get(bucket, key, null);
   const mbValue = bucket.metric_mb_deriv?.normalized_value ?? null;
   let value;
   if (mbValue !== null && !isNaN(mbValue) && mbValue > 0) {
@@ -275,7 +275,7 @@ function handleSeries(
       firstUsableBucketIndex,
       bucketSizeInSeconds * 1000
     );
-    let data: Array<[string, number]> = [];
+    let data: Array<[string | number, number | null]> = [];
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts

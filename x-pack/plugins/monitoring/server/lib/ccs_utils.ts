@@ -52,7 +52,7 @@ export function appendMetricbeatIndex(
 export function prefixIndexPattern(
   config: Config,
   indexPattern: string,
-  ccs: string,
+  ccs?: string,
   monitoringIndicesOnly: boolean = false
 ) {
   let ccsEnabled = false;
