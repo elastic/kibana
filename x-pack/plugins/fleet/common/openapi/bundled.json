@@ -1947,17 +1947,18 @@
               "packagePolicies": {
                 "oneOf": [
                   {
+                    "type": "array",
                     "items": {
                       "type": "string"
                     }
                   },
                   {
+                    "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/package_policy"
                     }
                   }
-                ],
-                "type": "array"
+                ]
               },
               "updated_on": {
                 "type": "string",
