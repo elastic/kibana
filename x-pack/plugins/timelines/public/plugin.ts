@@ -8,16 +8,21 @@
 import { Store } from 'redux';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type {
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   CoreStart,
 } from '../../../../src/core/public';
 import type { TimelinesUIStart, TGridProps } from './types';
-import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
-import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserWrappedProps } from './components';
+import {
+  getLastUpdatedLazy,
+  getLoadingPanelLazy,
+  getTGridLazy,
+  getFieldsBrowserLazy,
+} from './methods';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
@@ -54,6 +59,11 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getLastUpdated: (props: LastUpdatedAtProps) => {
         return getLastUpdatedLazy(props);
+      },
+      getFieldBrowser: (props: FieldBrowserWrappedProps) => {
+        return getFieldsBrowserLazy(props, {
+          store: this._store!,
+        });
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;

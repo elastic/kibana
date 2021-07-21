@@ -140,6 +140,7 @@ export class LicenseState {
 
   public ensureLicenseForAlertType<
     Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams,
     State extends AlertTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
@@ -148,6 +149,7 @@ export class LicenseState {
   >(
     alertType: AlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
