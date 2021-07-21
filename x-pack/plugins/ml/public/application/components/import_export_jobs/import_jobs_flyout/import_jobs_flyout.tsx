@@ -239,7 +239,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   }, []);
 
   const displayImportErrorToast = useCallback((errors: ErrorType[]) => {
-    const title = i18n.translate('xpack.ml.importExport.importFlyout.importJobSuccessToast', {
+    const title = i18n.translate('xpack.ml.importExport.importFlyout.importJobErrorToast', {
       defaultMessage: '{count, plural, one {# job} other {# jobs}} failed to import correctly',
       values: { count: errors.length },
     });

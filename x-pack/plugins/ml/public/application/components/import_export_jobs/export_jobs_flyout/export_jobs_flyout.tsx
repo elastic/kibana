@@ -108,7 +108,6 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     setExporting(true);
     const title = i18n.translate('xpack.ml.importExport.exportFlyout.exportDownloading', {
       defaultMessage: 'Your file is downloading in the background',
-      values: { count: selectedJobIds.length },
     });
     displaySuccessToast(title);
 
