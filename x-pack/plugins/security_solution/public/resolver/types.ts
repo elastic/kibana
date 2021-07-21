@@ -470,7 +470,7 @@ export interface IndexedProcessTree {
   /**
    * IDs of nodes that reference themselves as parents
    */
-  cyclicalNodeIds?: Set<string>;
+  cyclicalNodeIds: Set<string>;
   /**
    * The id of the origin or root node provided by the backend
    */

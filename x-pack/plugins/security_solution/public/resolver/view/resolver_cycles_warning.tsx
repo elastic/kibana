@@ -19,7 +19,9 @@ export const ResolverCyclesCallOut = React.memo(({ cyclicalIds }: { cyclicalIds:
     <p>
       {i18n.translate('xpack.securitySolution.resolver.cyclesDetected.message', {
         defaultMessage: `The Analyzer has detected cycles in the tree associated with this event or alert. This means that a process node
-      is referencing itself as it's parent, creating a cycle. The following process.entity_id values have been found to be the cause and are not displayed: [${cyclicalIds}]`,
+                         is referencing itself as it's parent, creating a cycle. The following process.entity_id values have been found
+                         to be the cause and are not displayed: [${cyclicalIds.join(',')}]
+                        `,
       })}
     </p>
   </EuiCallOut>
