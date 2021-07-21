@@ -719,6 +719,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
         defaultMessage: 'Autocomplete value suggestion method',
       }),
+      type: 'select',
       value: 'terms_enum',
       description: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodText', {
         defaultMessage:
