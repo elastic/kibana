@@ -202,6 +202,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
                       data-test-subj="port"
                       eventId={eventId}
                       fieldName={`${type}.port`}
+                      isDraggable={true}
                       value={port}
                     />
                   </EuiFlexItem>
