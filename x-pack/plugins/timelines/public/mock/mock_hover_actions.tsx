@@ -11,11 +11,11 @@ export const mockHoverActions = {
   addToTimeline: {
     AddToTimelineButton: () => <>{'Add To Timeline'}</>,
     keyboardShortcut: 'timelineAddShortcut',
-    useGetHandleStartDragToTimeline: () => jest.fn(),
+    useGetHandleStartDragToTimeline: () => jest.fn,
   },
   columnToggle: {
     ColumnToggleButton: () => <>{'Column Toggle'}</>,
-    columnToggleFn: jest.fn(),
+    columnToggleFn: jest.fn,
     keyboardShortcut: 'columnToggleShortcut',
   },
   copy: {
@@ -24,12 +24,12 @@ export const mockHoverActions = {
   },
   filterForValue: {
     FilterForValueButton: () => <>{'Filter button'}</>,
-    filterForValueFn: jest.fn(),
+    filterForValueFn: jest.fn,
     keyboardShortcut: 'filterForShortcut',
   },
   filterOutValue: {
     FilterOutValueButton: () => <>{'Filter out button'}</>,
-    filterOutValueFn: jest.fn(),
+    filterOutValueFn: jest.fn,
     keyboardShortcut: 'filterOutShortcut',
   },
 };

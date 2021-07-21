@@ -39,7 +39,7 @@ export const AdditionalContent = styled.div`
 AdditionalContent.displayName = 'AdditionalContent';
 
 const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
-  padding: ${(props) => (props.$showTopN ? 'none' : props.theme.eui.paddingSizes.s)};
+  padding: ${(props) => (props.$showTopN ? 'none' : `0 ${props.theme.eui.paddingSizes.s}`)};
   display: flex;
 
   &:focus-within {
@@ -58,10 +58,6 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
 
   .timelines__hoverActionButton,
   .securitySolution__hoverActionButton {
-    // TODO: Using this logic from discover
-    /* @include euiBreakpoint('m', 'l', 'xl') {
-      opacity: 0;
-    } */
     opacity: 0;
 
     &:focus {
@@ -182,27 +178,11 @@ export const HoverActions: React.FC<Props> = React.memo(
     })();
 
     const handleFilterForValue = useCallback(() => {
-      if (values) {
-        if (Array.isArray(values)) {
-          values.forEach((val) =>
-            filterForValueFn({ field, value: val, filterManager, onFilterAdded })
-          );
-        } else {
-          filterForValueFn({ field, value: values, filterManager, onFilterAdded });
-        }
-      }
+      filterForValueFn({ field, value: values, filterManager, onFilterAdded });
     }, [filterForValueFn, field, values, filterManager, onFilterAdded]);
 
     const handleFilterOutValue = useCallback(() => {
-      if (values) {
-        if (Array.isArray(values)) {
-          values.forEach((val) =>
-            filterOutValueFn({ field, value: val, filterManager, onFilterAdded })
-          );
-        } else {
-          filterOutValueFn({ field, value: values, filterManager, onFilterAdded });
-        }
-      }
+      filterOutValueFn({ field, value: values, filterManager, onFilterAdded });
     }, [filterOutValueFn, field, values, filterManager, onFilterAdded]);
 
     const handleToggleColumn = useCallback(
@@ -273,7 +253,6 @@ export const HoverActions: React.FC<Props> = React.memo(
             break;
         }
       },
-
       [
         addToTimelineKeyboardShortcut,
         columnToggleKeyboardShortcut,

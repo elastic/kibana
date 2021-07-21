@@ -12,6 +12,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { EventFieldsData } from './types';
 
+jest.mock('../../lib/kibana');
 interface Column {
   field: string;
   name: string | JSX.Element;
@@ -42,12 +43,14 @@ describe('getColumns', () => {
     });
   });
 
-  describe('column hover actions', () => {
+  describe('column actions', () => {
     let actionsColumn: Column;
     const mockDataToUse = mockBrowserFields.agent;
+    const testValue = 'testValue';
     const testData = {
       type: 'someType',
       category: 'agent',
+      field: 'agent.id',
       ...mockDataToUse,
     } as EventFieldsData;
 
@@ -55,26 +58,56 @@ describe('getColumns', () => {
       actionsColumn = getColumns(defaultProps)[0] as Column;
     });
 
-    test('should be enabled when the field does not exist', () => {
-      const testField = 'nonExistingField';
-      const wrapper = mount(
-        <TestProviders>{actionsColumn.render(testField, testData)}</TestProviders>
-      ) as ReactWrapper;
-      expect(
-        wrapper.find(`[data-test-subj="toggle-field-${testField}"]`).first().prop('disabled')
-      ).toBe(false);
+    describe('filter in', () => {
+      test('it renders a filter for (+) button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-for"]').exists()).toBeTruthy();
+      });
     });
 
-    test('should be enabled when the field does exist', () => {
-      const testField = mockDataToUse.fields
-        ? Object.keys(mockDataToUse.fields)[0]
-        : 'agent.hostname';
-      const wrapper = mount(
-        <TestProviders>{actionsColumn.render(testField, testData)}</TestProviders>
-      ) as ReactWrapper;
-      expect(
-        wrapper.find(`[data-test-subj="toggle-field-${testField}"]`).first().prop('disabled')
-      ).toBe(false);
+    describe('filter out', () => {
+      test('it renders a filter out (-) button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeTruthy();
+      });
+    });
+
+    describe('add to timeline', () => {
+      test('it renders an add to timeline button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-add-timeline"]').exists()).toBeTruthy();
+      });
+    });
+
+    describe('column toggle', () => {
+      test('it renders a column toggle button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(
+          wrapper.find('[data-test-subj="hover-actions-toggle-column"]').exists()
+        ).toBeTruthy();
+      });
+    });
+
+    describe('copy', () => {
+      test('it renders a copy button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBeTruthy();
+      });
     });
   });
 });

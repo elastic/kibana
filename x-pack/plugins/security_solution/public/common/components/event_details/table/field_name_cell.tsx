@@ -43,7 +43,13 @@ export const FieldNameCell = React.memo(
             scripted={scripted} // TODO: Will get with kibana indexPatterns;
           />
         </EuiFlexItem>
-        <EuiFlexGroup wrap={true} gutterSize="none" responsive={false} alignItems="flexStart">
+        <EuiFlexGroup
+          wrap={true}
+          gutterSize="none"
+          responsive={false}
+          alignItems="flexStart"
+          data-test-subj="field-name-cell"
+        >
           <EuiFlexItem className="eventFieldsTable__fieldName eui-textBreakAll" grow={false}>
             <EuiToolTip
               position="top"
@@ -55,7 +61,7 @@ export const FieldNameCell = React.memo(
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <span>{field}</span>
+              <span data-test-subj="field-name">{field}</span>
             </EuiToolTip>
           </EuiFlexItem>
           {isMultiField && (
