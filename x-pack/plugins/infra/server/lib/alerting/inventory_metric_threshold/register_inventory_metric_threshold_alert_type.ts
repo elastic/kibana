@@ -62,6 +62,7 @@ export const registerMetricInventoryThresholdAlertType = (
    * TODO: Remove this use of `any` by utilizing a proper type
    */
   Record<string, any>,
+  never, // Only use if defining useSavedObjectReferences hook
   Record<string, any>,
   AlertInstanceState,
   AlertInstanceContext,

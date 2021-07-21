@@ -36,6 +36,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 10,
       });
       plugin = new AlertingPlugin(context);
 
@@ -61,7 +62,7 @@ describe('Alerting Plugin', () => {
 
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, 'default'> = {
+      const sampleAlertType: AlertType<never, never, never, never, never, 'default'> = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
@@ -122,6 +123,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -161,6 +163,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -214,6 +217,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       });
       const plugin = new AlertingPlugin(context);
 
