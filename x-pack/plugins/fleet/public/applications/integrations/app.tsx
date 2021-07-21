@@ -239,7 +239,26 @@ export const AppRoutes = memo(() => {
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />
         </Route>
-        <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />
+        <Route
+          render={({ location }) => {
+            // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+            const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+            if (!shouldRedirectHash) {
+              return <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />;
+            }
+            const pathname = location.hash.replace(/^#/, '');
+
+            return (
+              <Redirect
+                to={{
+                  ...location,
+                  pathname,
+                  hash: undefined,
+                }}
+              />
+            );
+          }}
+        />
       </Switch>
     </>
   );

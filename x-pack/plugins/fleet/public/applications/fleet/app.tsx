@@ -319,7 +319,26 @@ export const AppRoutes = memo(
             <CreatePackagePolicyPage />
           </Route>
 
-          <Redirect to={FLEET_ROUTING_PATHS.agents} />
+          <Route
+            render={({ location }) => {
+              // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+              const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+              if (!shouldRedirectHash) {
+                return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
+              }
+              const pathname = location.hash.replace(/^#\/fleet/, '');
+
+              return (
+                <Redirect
+                  to={{
+                    ...location,
+                    pathname,
+                    hash: undefined,
+                  }}
+                />
+              );
+            }}
+          />
         </Switch>
       </>
     );
