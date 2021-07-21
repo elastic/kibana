@@ -9,6 +9,7 @@ import { Settings } from './settings_form';
 export const tlsSettings: Settings = {
   title: 'TLS Settings',
   subtitle: 'Settings for TLS certification.',
+  requiredErrorMessage: 'Required when TLS is enabled',
   fields: [
     {
       key: 'tls_enabled',

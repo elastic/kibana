@@ -30,6 +30,7 @@ interface AdvancedOptionsField {
 export interface Settings {
   title: string;
   subtitle: string;
+  requiredErrorMessage?: string;
   fields: Field[];
 }
 
@@ -56,22 +57,27 @@ interface Props {
   onChange: FormRowOnChange;
 }
 
-const tlsRequiredMessage = 'Required when TLS is enabled';
-
 function FormRow({
   field,
   values,
   onChange,
+  requiredErrorMessage,
 }: {
   field: Field;
   values?: PackagePolicyValues;
   onChange: FormRowOnChange;
+  requiredErrorMessage?: string;
 }) {
   if (field.type === 'advanced_option') {
     return (
       <AdvancedOptions>
         {field.fields.map((advancedField) =>
-          FormRow({ field: advancedField, values, onChange })
+          FormRow({
+            field: advancedField,
+            values,
+            onChange,
+            requiredErrorMessage,
+          })
         )}
       </AdvancedOptions>
     );
@@ -111,7 +117,7 @@ function FormRow({
               }
               helpText={
                 <EuiText size="xs" color={isInvalid ? 'danger' : 'subdued'}>
-                  {isInvalid ? tlsRequiredMessage : field.helpText}
+                  {isInvalid ? requiredErrorMessage : field.helpText}
                 </EuiText>
               }
             >
@@ -135,7 +141,7 @@ function FormRow({
               }
               helpText={
                 <EuiText size="xs" color={isInvalid ? 'danger' : 'subdued'}>
-                  {isInvalid ? tlsRequiredMessage : field.helpText}
+                  {isInvalid ? requiredErrorMessage : field.helpText}
                 </EuiText>
               }
             >
@@ -156,6 +162,7 @@ function FormRow({
               field: childField,
               values,
               onChange,
+              requiredErrorMessage,
             })
           )}
       </React.Fragment>
@@ -181,7 +188,12 @@ export function SettingsForm({ settings, values, onChange }: Props) {
       <EuiHorizontalRule margin="s" />
 
       {settings.fields.map((field) => {
-        return FormRow({ field, values, onChange });
+        return FormRow({
+          field,
+          values,
+          onChange,
+          requiredErrorMessage: settings.requiredErrorMessage,
+        });
       })}
     </EuiPanel>
   );

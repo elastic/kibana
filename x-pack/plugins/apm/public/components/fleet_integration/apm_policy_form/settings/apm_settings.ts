@@ -10,6 +10,7 @@ import { Settings } from './settings_form';
 export const apmSettings: Settings = {
   title: 'General',
   subtitle: 'Settings for the APM integration.',
+  requiredErrorMessage: 'Required field',
   fields: [
     {
       key: 'host',
