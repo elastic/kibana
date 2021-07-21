@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiNotificationBadge, EuiSelectableOption } from '@elastic/eui';
-import classNames from 'classnames';
+import { EuiSelectableOption } from '@elastic/eui';
+import { deepEqual } from '@hapi/hoek';
+import { isEqual } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { esFilters } from '../../../../../../data/public';
 import { Embeddable } from '../../../../../../embeddable/public';
 import {
   InputControlEmbeddable,
@@ -17,22 +19,30 @@ import {
   InputControlOutput,
 } from '../../embeddable/types';
 import { OptionsListPopover } from './options_list_popover_component';
+import { OptionsListSummary } from './options_list_summary_component';
 
-export type OptionsListDataFetcher = (props: {
+interface OptionsListDataFetchProps {
   field: string;
   indexPattern: string;
-  filters: InputControlInput['filters'];
   query: InputControlInput['query'];
+  filters: InputControlInput['filters'];
   timeRange: InputControlInput['timeRange'];
-}) => Promise<EuiSelectableOption[]>;
+
+  search?: string;
+}
+
+export type OptionsListDataFetcher = (
+  props: OptionsListDataFetchProps
+) => Promise<EuiSelectableOption[]>;
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-
 export interface OptionsListEmbeddableInput extends InputControlInput {
   field: string;
+  search: string;
   indexPattern: string;
   multiSelect: boolean;
   selectedItems?: string[];
+  availableOptions?: EuiSelectableOption[];
 }
 
 export class OptionsListEmbeddable
@@ -41,7 +51,21 @@ export class OptionsListEmbeddable
   public readonly type = OPTIONS_LIST_CONTROL;
 
   private node?: HTMLElement;
-  private availableOptions: EuiSelectableOption[] = [];
+
+  // save a copy of the last dataFetchProps for diffing
+  private lastDataFetchProps?: OptionsListDataFetchProps;
+
+  private diffDataFetchProps = (
+    current?: OptionsListDataFetchProps,
+    last?: OptionsListDataFetchProps
+  ) => {
+    if (!current || !last) return true;
+    const { filters: currentFilters, ...currentWithoutFilters } = current;
+    const { filters: lastFilters, ...lastWithoutFilters } = last;
+    if (!deepEqual(currentWithoutFilters, lastWithoutFilters)) return true;
+    if (!esFilters.compareFilters(lastFilters ?? [], currentFilters ?? [])) return true;
+    return false;
+  };
 
   constructor(
     input: OptionsListEmbeddableInput,
@@ -50,30 +74,34 @@ export class OptionsListEmbeddable
   ) {
     super(input, output);
 
-    const { filters, query, timeRange } = input;
-    fetchData({
-      indexPattern: input.indexPattern,
-      field: input.field,
-      timeRange,
-      filters,
-      query,
-    }).then((newData) => (this.availableOptions = newData));
-    // TODO: Refetch whenever filters, query, or timeRange changes.
+    const refreshData = () => {
+      const { filters, query, timeRange, indexPattern, field, search } = this.input;
+      const currentDataFetchProps = { filters, query, timeRange, indexPattern, field, search };
+      if (this.diffDataFetchProps(currentDataFetchProps, this.lastDataFetchProps)) {
+        this.lastDataFetchProps = currentDataFetchProps;
+        this.updateOutput({ loading: true });
+        fetchData({
+          indexPattern,
+          timeRange,
+          filters,
+          field,
+          query,
+          search,
+        }).then((newOptions) => {
+          this.updateInput({ availableOptions: newOptions });
+          this.updateOutput({ loading: false });
+        });
+      }
+    };
+
+    this.getInput$().subscribe(() => refreshData());
+    refreshData();
   }
 
   reload = () => {};
 
-  public updateItem(index: number) {
-    if (!this.availableOptions[index]) {
-      return;
-    }
-    const newItems = [...this.availableOptions];
-    newItems[index].checked = newItems[index].checked === 'on' ? undefined : 'on';
-    this.availableOptions = newItems;
-  }
-
   public getPopover = () => {
-    return <OptionsListPopover availableOptions={this.availableOptions} />;
+    return <OptionsListPopover embeddable={this} />;
   };
 
   public render = (node: HTMLElement) => {
@@ -81,34 +109,6 @@ export class OptionsListEmbeddable
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-    const { selectedItems } = this.getInput();
-
-    ReactDOM.render(
-      <>
-        <span
-          className={classNames('optionsList--selections', {
-            'optionsList--selectionsEmpty': !selectedItems?.length,
-          })}
-        >
-          {!selectedItems?.length ? 'Select...' : selectedItems.join(', ')}
-        </span>
-
-        <span
-          className="optionsList--notification"
-          style={{
-            visibility: selectedItems?.length && selectedItems.length > 1 ? 'visible' : 'hidden',
-          }}
-        >
-          <EuiNotificationBadge size={'m'} color="subdued">
-            {selectedItems?.length}
-          </EuiNotificationBadge>
-        </span>
-
-        <span className="optionsList--notification">
-          <EuiIcon type={'arrowDown'} />
-        </span>
-      </>,
-      node
-    );
+    ReactDOM.render(<OptionsListSummary embeddable={this} />, node);
   };
 }

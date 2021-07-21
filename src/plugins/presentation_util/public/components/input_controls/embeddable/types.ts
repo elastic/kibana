@@ -7,7 +7,7 @@
  */
 
 import { Filter, Query, TimeRange } from '../../../../../data/public';
-import { EmbeddableInput, EmbeddableOutput } from '../../../../../embeddable/public';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../../../../../embeddable/public';
 
 export type InputControlInput = EmbeddableInput & {
   filters?: Filter[];
@@ -19,6 +19,6 @@ export type InputControlOutput = EmbeddableOutput & {
   filters?: Filter[];
 };
 
-export interface InputControlEmbeddable {
+export interface InputControlEmbeddable extends IEmbeddable {
   getPopover: () => JSX.Element;
 }
