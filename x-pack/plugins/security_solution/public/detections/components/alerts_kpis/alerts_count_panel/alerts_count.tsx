@@ -22,13 +22,11 @@ interface AlertsCountProps {
   loading: boolean;
   data: AlertSearchResponse<unknown, AlertsCountAggregation> | null;
   selectedStackByOption: string;
-  height?: number;
 }
 
-const Wrapper = styled.div<{ height?: number }>`
+const Wrapper = styled.div`
   overflow: scroll;
   margin-top: -8px;
-  ${({ height }) => (height != null ? `height: ${height}px;` : '')};
 `;
 
 const StyledSpan = styled.span`
@@ -67,31 +65,29 @@ const getAlertsCountTableColumns = (
   ];
 };
 
-export const AlertsCount = memo<AlertsCountProps>(
-  ({ loading, selectedStackByOption, data, height }) => {
-    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-    const listItems: GenericBuckets[] = data?.aggregations?.alertsByGroupingCount?.buckets ?? [];
-    const tableColumns = useMemo(
-      () => getAlertsCountTableColumns(selectedStackByOption, defaultNumberFormat),
-      [selectedStackByOption, defaultNumberFormat]
-    );
+export const AlertsCount = memo<AlertsCountProps>(({ loading, selectedStackByOption, data }) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const listItems: GenericBuckets[] = data?.aggregations?.alertsByGroupingCount?.buckets ?? [];
+  const tableColumns = useMemo(
+    () => getAlertsCountTableColumns(selectedStackByOption, defaultNumberFormat),
+    [selectedStackByOption, defaultNumberFormat]
+  );
 
-    return (
-      <>
-        {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
+  return (
+    <>
+      {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
 
-        <Wrapper data-test-subj="alertsCountTable" height={height}>
-          <EuiInMemoryTable
-            isSelectable={false}
-            columns={tableColumns}
-            items={listItems}
-            loading={loading}
-            sorting={true}
-          />
-        </Wrapper>
-      </>
-    );
-  }
-);
+      <Wrapper data-test-subj="alertsCountTable">
+        <EuiInMemoryTable
+          isSelectable={false}
+          columns={tableColumns}
+          items={listItems}
+          loading={loading}
+          sorting={true}
+        />
+      </Wrapper>
+    </>
+  );
+});
 
 AlertsCount.displayName = 'AlertsCount';

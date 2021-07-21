@@ -25,4 +25,4 @@ export const DEFAULT_STACK_BY_FIELD = 'signal.rule.name';
 
 export const PANEL_HEIGHT = 300;
 export const MOBILE_PANEL_HEIGHT = 500;
-export const DATA_HEIGHT = 200;
+export const CHART_HEIGHT = 200;

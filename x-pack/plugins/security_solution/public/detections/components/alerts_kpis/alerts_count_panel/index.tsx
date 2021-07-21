@@ -18,7 +18,7 @@ import { getAlertsCountQuery } from './helpers';
 import * as i18n from './translations';
 import { AlertsCount } from './alerts_count';
 import type { AlertsCountAggregation } from './types';
-import { DATA_HEIGHT, DEFAULT_STACK_BY_FIELD } from '../common/config';
+import { DEFAULT_STACK_BY_FIELD } from '../common/config';
 import type { AlertsStackByField } from '../common/types';
 import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
 import { KpiPanel, StackBySelect } from '../common/components';
@@ -97,7 +97,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             data={alertsData}
             loading={isLoadingAlerts}
             selectedStackByOption={selectedStackByOption}
-            height={DATA_HEIGHT}
           />
         </KpiPanel>
       </InspectButtonContainer>

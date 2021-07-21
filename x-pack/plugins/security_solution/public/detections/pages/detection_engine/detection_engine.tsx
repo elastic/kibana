@@ -57,7 +57,7 @@ import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_a
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
 import { AlertsCountPanel } from '../../components/alerts_kpis/alerts_count_panel';
-import { DATA_HEIGHT } from '../../components/alerts_kpis/common/config';
+import { CHART_HEIGHT } from '../../components/alerts_kpis/common/config';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -254,7 +254,7 @@ const DetectionEnginePageComponent = () => {
               <EuiFlexGroup wrap>
                 <EuiFlexItem grow={2}>
                   <AlertsHistogramPanel
-                    chartHeight={DATA_HEIGHT}
+                    chartHeight={CHART_HEIGHT}
                     filters={alertsHistogramDefaultFilters}
                     query={query}
                     showTotalAlertsCount={false}
