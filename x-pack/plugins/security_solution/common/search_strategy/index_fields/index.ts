@@ -13,8 +13,6 @@ import {
 } from '../../../../../../src/plugins/data/common';
 import { DocValueFields, Maybe } from '../common';
 
-export type BeatFieldsFactoryQueryType = 'beatFields';
-
 interface FieldInfo {
   category: string;
   description?: string;
