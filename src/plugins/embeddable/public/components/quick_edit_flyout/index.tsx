@@ -34,7 +34,7 @@ import {
 
 interface Props {
   onClose: () => void;
-  onCancel: () => void;
+  initialInput: EmbeddableInput;
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   application: ApplicationStart;
   stateTransferService?: EmbeddableStateTransfer;
@@ -75,10 +75,13 @@ export class QuickEditFlyout extends React.Component<Props> {
   }
 
   private async goToApp(context: IEmbeddable) {
-    const { stateTransferService, application } = this.props;
+    const { stateTransferService, application, embeddable, initialInput } = this.props;
 
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
+      // Restore embeddable to original state before navigating away
+      embeddable.updateInput(initialInput);
+
       if (stateTransferService && appTarget.state) {
         await stateTransferService.navigateToEditor(appTarget.app, {
           path: appTarget.path,
@@ -127,7 +130,7 @@ export class QuickEditFlyout extends React.Component<Props> {
   }
 
   public render() {
-    const { embeddable, onClose, onCancel } = this.props;
+    const { embeddable, initialInput, onClose } = this.props;
 
     const title = !embeddable.getTitle() ? 'Edit panel' : `Edit ${embeddable.getTitle()}`;
 
@@ -168,7 +171,10 @@ export class QuickEditFlyout extends React.Component<Props> {
               <EuiButtonEmpty
                 iconType="cross"
                 onClick={() => {
-                  onCancel();
+                  // Restore embeddable state if we cancel
+                  embeddable.updateInput(initialInput);
+                  embeddable.reload();
+
                   onClose();
                 }}
                 flush="left"

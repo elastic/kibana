@@ -26,17 +26,13 @@ export async function openQuickEditFlyout(options: {
     toMountPoint(
       <QuickEditFlyout
         embeddable={embeddable}
+        initialInput={initialInput}
         application={application}
         stateTransferService={stateTransferService}
         onClose={() => {
           if (flyoutSession) {
             flyoutSession.close();
           }
-        }}
-        onCancel={() => {
-          // Restore embeddable state if we cancel
-          embeddable.updateInput(initialInput);
-          embeddable.reload();
         }}
       />
     ),
