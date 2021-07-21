@@ -20,6 +20,8 @@ export const createTGridMocks = () => ({
   // eslint-disable-next-line react/display-name
   getTGrid: () => <>{'hello grid'}</>,
   // eslint-disable-next-line react/display-name
+  getFieldBrowser: () => <div data-test-subj="field-browser" />,
+  // eslint-disable-next-line react/display-name
   getLastUpdated: (props: LastUpdatedAtProps) => <LastUpdatedAt {...props} />,
   // eslint-disable-next-line react/display-name
   getLoadingPanel: (props: LoadingPanelProps) => <LoadingPanel {...props} />,
