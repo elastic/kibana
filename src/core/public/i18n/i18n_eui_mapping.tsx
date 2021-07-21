@@ -15,7 +15,7 @@ interface EuiValues {
 }
 
 export const getEuiContextMapping = () => {
-  const euiContextMapping = {
+  return {
     'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
       defaultMessage: 'Loading',
     }),
@@ -141,12 +141,6 @@ export const getEuiContextMapping = () => {
         defaultMessage: 'All actions',
         description:
           'ARIA label and tooltip content describing a button that expands an actions menu',
-      }
-    ),
-    'euiCollapsibleNav.closeButtonLabel': i18n.translate(
-      'core.euiCollapsibleNav.closeButtonLabel',
-      {
-        defaultMessage: 'close',
       }
     ),
     'euiColorPicker.screenReaderAnnouncement': i18n.translate(
@@ -1134,7 +1128,24 @@ export const getEuiContextMapping = () => {
         defaultMessage: 'You can quickly navigate this list using arrow keys.',
       }
     ),
+    'euiNotificationEventReadIcon.read': i18n.translate('core.euiNotificationEventReadIcon.read', {
+      defaultMessage: 'Read',
+    }),
+    'euiNotificationEventReadIcon.readAria': ({ eventName }: EuiValues) =>
+      i18n.translate('core.euiNotificationEventReadIcon.readAria', {
+        defaultMessage: '{eventName} is read',
+        values: { eventName },
+      }),
+    'euiNotificationEventReadIcon.unread': i18n.translate(
+      'core.euiNotificationEventReadIcon.unread',
+      {
+        defaultMessage: 'Unread',
+      }
+    ),
+    'euiNotificationEventReadIcon.unreadAria': ({ eventName }: EuiValues) =>
+      i18n.translate('core.euiNotificationEventReadIcon.unreadAria', {
+        defaultMessage: '{eventName} is unread',
+        values: { eventName },
+      }),
   };
-
-  return euiContextMapping;
 };
