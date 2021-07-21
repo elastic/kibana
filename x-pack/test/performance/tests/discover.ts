@@ -22,6 +22,10 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await kibanaServer.importExport.load('x-pack/test/performance/kbn_archives/discover');
     });
 
+    after(async () => {
+      await kibanaServer.importExport.unload('x-pack/test/performance/kbn_archives/discover');
+    });
+
     it('opens home page', async () => {
       await common.navigateToApp('home');
       await retry.waitFor('solutions rendered', async () => {
