@@ -421,7 +421,7 @@ paths:
                     type: number
                     enum:
                       - 400
-      operationId: unenroll-agents
+      operationId: unenroll-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -457,7 +457,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/upgrade_agent'
-      operationId: upgrade-agents
+      operationId: upgrade-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:

@@ -679,7 +679,7 @@
             }
           }
         },
-        "operationId": "unenroll-agents",
+        "operationId": "unenroll-agent",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -740,7 +740,7 @@
             }
           }
         },
-        "operationId": "upgrade-agents",
+        "operationId": "upgrade-agent",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
