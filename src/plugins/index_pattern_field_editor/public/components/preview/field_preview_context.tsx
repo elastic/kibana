@@ -160,28 +160,18 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     setParams((prev) => ({ ...prev, ...updated }));
   }, []);
 
-  const allParamsDefined = useCallback(
-    () =>
-      Object.entries(params)
-        // We don't need the "name" or "format" information for the _execute API
-        .filter(([key]) => key !== 'name' && key !== 'format')
-        .every(([_, value]) => Boolean(value)),
-    [params]
-  );
+  const needToUpdatePreview = useMemo(() => {
+    const allParamsDefined = (['type', 'script', 'index', 'document'] as Array<
+      keyof Params
+    >).every((key) => Boolean(params[key]));
 
-  const hasSomePreviewRequestParamChanged = useCallback(() => {
-    return (
+    const hasSomeParamsChanged =
       lastExecutePainlessRequestParams.current.type !== type ||
       lastExecutePainlessRequestParams.current.script !== script?.source ||
-      lastExecutePainlessRequestParams.current.documentId !== currentDocId
-    );
-  }, [type, script, currentDocId]);
+      lastExecutePainlessRequestParams.current.documentId !== currentDocId;
 
-  const doExecuteScript = useCallback(() => {
-    return (
-      fieldTypeToProcess === 'runtime' && allParamsDefined() && hasSomePreviewRequestParamChanged()
-    );
-  }, [fieldTypeToProcess, allParamsDefined, hasSomePreviewRequestParamChanged]);
+    return allParamsDefined && hasSomeParamsChanged;
+  }, [type, script?.source, currentDocId, params]);
 
   const valueFormatter = useCallback(
     (value: unknown) => {
@@ -293,7 +283,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const updatePreview = useCallback(async () => {
-    if (!doExecuteScript()) {
+    if (!needToUpdatePreview) {
       return;
     }
 
@@ -356,7 +346,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       });
     }
   }, [
-    doExecuteScript,
+    needToUpdatePreview,
     params,
     currentDocIndex,
     currentDocId,
@@ -460,10 +450,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    * the 500ms of the debounce, we set the loading state in this effect
    */
   useEffect(() => {
-    if (doExecuteScript()) {
+    if (needToUpdatePreview) {
       setIsLoadingPreview(true);
     }
-  }, [doExecuteScript]);
+  }, [needToUpdatePreview]);
 
   /**
    * When the component mounts, if we are creating/editing a runtime field
@@ -489,9 +479,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   useEffect(() => {
     if (document) {
-      const willExecuteScript = doExecuteScript();
-
-      if (willExecuteScript) {
+      if (needToUpdatePreview) {
         // We'll update the field "value" after executing the Painless script
         // Here we want to immediately update the field "key" whenever the name changes
         setPreviewResponse(({ fields: { 0: field } }) => ({
@@ -523,7 +511,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         };
       });
     }
-  }, [name, document, script, valueFormatter, doExecuteScript]);
+  }, [name, document, script, valueFormatter, needToUpdatePreview]);
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };
