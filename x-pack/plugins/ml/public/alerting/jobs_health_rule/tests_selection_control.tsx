@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormFieldset, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { JobsHealthRuleTestsConfig } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
+import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 
 interface TestsSelectionControlProps {
   config: JobsHealthRuleTestsConfig;
@@ -43,12 +44,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({ config, 
       }}
     >
       <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.datafeedCheck.label"
-            defaultMessage="Datafeed is not started"
-          />
-        }
+        label={HEALTH_CHECK_NAMES.datafeed}
         onChange={updateCallback.bind(null, { datafeed: { enabled: !uiConfig.datafeed.enabled } })}
         checked={uiConfig.datafeed.enabled}
       />

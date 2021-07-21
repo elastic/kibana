@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const ML_ALERT_TYPES = {
   ANOMALY_DETECTION: 'xpack.ml.anomaly_detection_alert',
   AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
@@ -17,3 +19,9 @@ export const ALERT_PREVIEW_SAMPLE_SIZE = 5;
 export const TOP_N_BUCKETS_COUNT = 1;
 
 export const ALL_JOBS_SELECTION = '*';
+
+export const HEALTH_CHECK_NAMES = {
+  datafeed: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckName', {
+    defaultMessage: 'Datafeed is not started',
+  }),
+};

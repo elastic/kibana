@@ -14,16 +14,15 @@ import {
   JobSelection,
 } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
-import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
+import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../../shared_services/shared_services';
 import { AnomalyDetectionJobsHealthAlertContext } from './register_jobs_monitoring_rule_type';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
-import { JobsHealthTests } from '../../../common/types/alerts';
 
 interface TestResult {
-  name: JobsHealthTests;
+  name: string;
   context: AnomalyDetectionJobsHealthAlertContext;
 }
 
@@ -124,7 +123,7 @@ export function jobsHealthServiceProvider(
         const response = await this.getNotStartedDatafeeds(jobIds);
         if (response && response.length > 0) {
           results.push({
-            name: 'datafeed',
+            name: HEALTH_CHECK_NAMES.datafeed,
             context: {
               jobIds: [...new Set(response.map((v) => v.job_id))],
               message: i18n.translate(
