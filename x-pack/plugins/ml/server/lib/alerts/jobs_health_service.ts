@@ -8,6 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
+import { MlJobState } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
 import {
   AnomalyDetectionJobsHealthRuleParams,
@@ -28,7 +29,7 @@ interface TestResult {
 
 type TestsResults = TestResult[];
 
-type NotStartedDatafeedResponse = Array<DatafeedStats & { job_id: string }>;
+type NotStartedDatafeedResponse = Array<DatafeedStats & { job_id: string; job_state: MlJobState }>;
 
 export function jobsHealthServiceProvider(
   mlClient: MlClient,
@@ -75,13 +76,17 @@ export function jobsHealthServiceProvider(
 
   return {
     /**
-     * Gets not started datafeeds for provided jobs selection.
+     * Gets not started datafeeds and not opened jobs for provided jobs selection.
      * @param jobIds
      */
     async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse | void> {
       const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
       if (datafeeds) {
+        const {
+          body: { jobs: jobsStats },
+        } = await mlClient.getJobStats({ job_id: jobIds.join(',') });
+
         const {
           body: { datafeeds: datafeedsStats },
         } = await mlClient.getDatafeedStats({
@@ -90,13 +95,20 @@ export function jobsHealthServiceProvider(
 
         // match datafeed stats with the job ids
         return (datafeedsStats as DatafeedStats[])
-          .filter((datafeedStat) => datafeedStat.state !== 'started')
           .map((datafeedStats) => {
+            const jobId = datafeedStats.timing_stats.job_id;
+            const jobState =
+              jobsStats.find((jobStats) => jobStats.job_id === jobId)?.state ?? 'failed';
             return {
               ...datafeedStats,
-              job_id: datafeeds.find((d) => d.datafeed_id === datafeedStats.datafeed_id)!.job_id,
+              job_id: jobId,
+              job_state: jobState,
             };
-          });
+          })
+          .filter(
+            (datafeedStat) =>
+              datafeedStat.state !== 'started' && datafeedStat.job_state !== 'opened'
+          );
       }
     },
     /**
