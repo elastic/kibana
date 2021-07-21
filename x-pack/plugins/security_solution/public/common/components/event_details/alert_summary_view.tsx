@@ -170,7 +170,7 @@ const getSummaryRows = ({
         const description = {
           ...initialDescription,
           data: field,
-          values: field.originalValue,
+          values: field.values,
           linkValue: linkValue ?? undefined,
           fieldFromBrowserField: get(`${category}.fields.${field.field}`, browserFields),
         };
