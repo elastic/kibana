@@ -152,9 +152,9 @@ export interface IEmbeddable<
    */
   getInspectorAdapters(): Adapters | undefined;
 
-  getQuickEditControl?():
+  getQuickEditor?():
     | Promise<{
-        control: JSX.Element;
+        component: JSX.Element;
         onSave(): void;
       }>
     | undefined;

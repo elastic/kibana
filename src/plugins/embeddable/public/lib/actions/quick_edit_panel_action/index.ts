@@ -49,7 +49,7 @@ export class QuickEditPanelAction implements Action<QuickEditActionContext> {
       }
     }
 
-    return Boolean(embeddable.parent && embeddable.getQuickEditControl);
+    return Boolean(embeddable.parent && embeddable.getQuickEditor);
   }
 
   public async execute({ embeddable }: QuickEditActionContext) {

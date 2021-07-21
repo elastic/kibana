@@ -7,6 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import React from 'react';
 import { render } from 'react-dom';
 import { take } from 'rxjs/operators';
@@ -31,6 +33,8 @@ import {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '../..';
+
+const EDITOR_CONTAINER_ID = 'kbnQuickEditEditorContainer';
 
 interface Props {
   onClose: () => void;
@@ -57,10 +61,10 @@ export class QuickEditFlyout extends React.Component<Props> {
     this.onSave = () => {};
 
     const { embeddable, application } = this.props;
-    if (embeddable.getQuickEditControl) {
-      embeddable.getQuickEditControl()?.then(({ control, onSave }) => {
-        if (control) {
-          render(control, document.getElementById('hello-put-it-here'));
+    if (embeddable.getQuickEditor) {
+      embeddable.getQuickEditor()?.then(({ component, onSave }) => {
+        if (component) {
+          render(component, document.getElementById(EDITOR_CONTAINER_ID));
         }
 
         this.onSave = onSave;
@@ -132,7 +136,15 @@ export class QuickEditFlyout extends React.Component<Props> {
   public render() {
     const { embeddable, initialInput, onClose } = this.props;
 
-    const title = !embeddable.getTitle() ? 'Edit panel' : `Edit ${embeddable.getTitle()}`;
+    const enhancedAriaLabel = i18n.translate('embeddableApi.quickEdit.flyout.titleLabel', {
+      defaultMessage: 'Edit {title}',
+      values: { title: embeddable.getTitle() },
+    });
+
+    const enhancedAriaNoTitleLabel = i18n.translate('embeddableApi.quickEdit.flyout.noTitleLabel', {
+      defaultMessage: 'Edit panel',
+    });
+    const label = !embeddable.getTitle() ? enhancedAriaNoTitleLabel : enhancedAriaLabel;
 
     const editApp = embeddable.getOutput().editApp;
     return (
@@ -142,7 +154,7 @@ export class QuickEditFlyout extends React.Component<Props> {
             <EuiFlexItem>
               <EuiTitle size="m">
                 <h2>
-                  <span>{title}</span>
+                  <span>{label}</span>
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -153,7 +165,11 @@ export class QuickEditFlyout extends React.Component<Props> {
               }}
               external={true}
             >
-              Open in {editApp}
+              <FormattedMessage
+                id="embeddableApi.quickEdit.flyout.openAppLabel"
+                defaultMessage="Open in {editApp}"
+                values={{ editApp }}
+              />
               <EuiIcon size="s" className="euiLink__externalIcon" type="popout" />
             </EuiLink>
           </EuiFlexGroup>
@@ -161,7 +177,7 @@ export class QuickEditFlyout extends React.Component<Props> {
         <div style={{ width: '100%', height: '100%' }}>
           <EuiFlexGroup direction="column" style={{ height: '100%' }}>
             <EuiFlexItem grow={true}>
-              <div id="hello-put-it-here" style={{ height: '100%' }} />
+              <div id={EDITOR_CONTAINER_ID} style={{ height: '100%' }} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
@@ -179,7 +195,10 @@ export class QuickEditFlyout extends React.Component<Props> {
                 }}
                 flush="left"
               >
-                Cancel
+                <FormattedMessage
+                  id="embeddableApi.quickEdit.flyout.cancelLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -190,7 +209,10 @@ export class QuickEditFlyout extends React.Component<Props> {
                 }}
                 fill
               >
-                Save
+                <FormattedMessage
+                  id="embeddableApi.quickEdit.flyout.saveLabel"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
