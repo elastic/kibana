@@ -17,7 +17,7 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization.
 
-* *CSV Reports* &mdash; Generate and download a CSV file of a saved search.
+* *CSV Reports* &mdash; Generate and download a CSV file of a *Discover* saved search.
 
 * *Permalinks* &mdash; Share a direct link to a *Discover* saved search, dashboard, or visualization.
 
