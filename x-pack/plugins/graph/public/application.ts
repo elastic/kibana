@@ -13,7 +13,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import 'brace';
 import 'brace/mode/json';
-import '@elastic/ui-ace/ui-ace';
 
 // required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
