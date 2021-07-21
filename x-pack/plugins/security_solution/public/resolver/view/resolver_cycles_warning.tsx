@@ -24,7 +24,7 @@ export const ResolverCyclesCallOut = React.memo(({ cyclicalIds }: { cyclicalIds:
                         `,
       })}
     </p>
-    <p> {cyclicalIds.join(',')} </p>
+    <p> {cyclicalIds.join(', ')} </p>
   </EuiCallOut>
 ));
 
