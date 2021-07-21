@@ -113,15 +113,11 @@ export class APMPlugin
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
-    const alertsIndexPattern = ruleDataService.getFullAssetName(
-      'observability-apm*'
+    const assetName = 'observability-apm';
+    const componentTemplateName = ruleDataService.getFullAssetName(
+      'apm-mappings'
     );
-
     const initializeRuleDataTemplates = once(async () => {
-      const componentTemplateName = ruleDataService.getFullAssetName(
-        'apm-mappings'
-      );
-
       if (!ruleDataService.isWriteEnabled()) {
         return;
       }
@@ -151,7 +147,7 @@ export class APMPlugin
         },
       });
 
-      await ruleDataService.createOrUpdateIndexTemplate({
+      /*await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('apm-index-template'),
         body: {
           index_patterns: [alertsIndexPattern],
@@ -160,9 +156,9 @@ export class APMPlugin
             componentTemplateName,
           ],
         },
-      });
-      await ruleDataService.updateIndexMappingsMatchingPattern(
-        alertsIndexPattern
+      });*/
+      await ruleDataService.updateIndexMappingsForAsset(
+        assetName
       );
     });
 
@@ -175,8 +171,12 @@ export class APMPlugin
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
       APM_SERVER_FEATURE_ID,
-      ruleDataService.getFullAssetName('observability-apm'),
-      () => initializeRuleDataTemplatesPromise
+      assetName,
+      () => initializeRuleDataTemplatesPromise,
+      [
+        ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+        componentTemplateName,
+      ]
     );
 
     const resourcePlugins = mapValues(plugins, (value, key) => {

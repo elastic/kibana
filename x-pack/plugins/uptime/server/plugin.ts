@@ -34,11 +34,9 @@ export class Plugin implements PluginType {
   public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
     this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
-
+    const assetName = 'observability.synthetics';
+    const componentTemplateName = ruleDataService.getFullAssetName('synthetics-mappings');
     const ready = once(async () => {
-      const componentTemplateName = ruleDataService.getFullAssetName('synthetics-mappings');
-      const alertsIndexPattern = ruleDataService.getFullAssetName('observability.synthetics*');
-
       if (!ruleDataService.isWriteEnabled()) {
         return;
       }
@@ -55,7 +53,7 @@ export class Plugin implements PluginType {
         },
       });
 
-      await ruleDataService.createOrUpdateIndexTemplate({
+      /*await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('synthetics-index-template'),
         body: {
           index_patterns: [alertsIndexPattern],
@@ -64,9 +62,9 @@ export class Plugin implements PluginType {
             componentTemplateName,
           ],
         },
-      });
+      });*/
 
-      await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
+      await ruleDataService.updateIndexMappingsForAsset(assetName);
     });
 
     // initialize eagerly
@@ -76,8 +74,12 @@ export class Plugin implements PluginType {
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
       'synthetics',
-      ruleDataService.getFullAssetName('observability.synthetics'),
-      () => initializeRuleDataTemplatesPromise
+      assetName,
+      () => initializeRuleDataTemplatesPromise,
+      [
+        ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+        componentTemplateName,
+      ]
     );
 
     initServerWithKibana(

@@ -50,6 +50,8 @@ export interface RuleDataClientConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   isWriteEnabled: boolean;
   ready: () => Promise<void>;
+  componentTemplateNames: string[];
   alias: string;
   feature: ValidFeatureId;
+  secondaryAlias?: string;
 }

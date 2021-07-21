@@ -21,7 +21,7 @@ const createRuleDataPluginServiceMock = (_: RuleDataPluginServiceConstructorOpti
     createOrUpdateIndexTemplate: jest.fn(),
     createOrUpdateLifecyclePolicy: jest.fn(),
     getRuleDataClient: jest.fn(),
-    updateIndexMappingsMatchingPattern: jest.fn(),
+    updateIndexMappingsForAsset: jest.fn(),
   };
   return mocked;
 };

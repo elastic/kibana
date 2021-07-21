@@ -195,12 +195,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let ruleDataClient: RuleDataClient | null = null;
     if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
-
-      const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
-
+      const assetName = 'security.alerts';
+      const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
       const initializeRuleDataTemplates = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
-
         if (!ruleDataService.isWriteEnabled()) {
           return;
         }
@@ -217,7 +214,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
         });
 
-        await ruleDataService.createOrUpdateIndexTemplate({
+        /*await ruleDataService.createOrUpdateIndexTemplate({
           name: ruleDataService.getFullAssetName('security.alerts-index-template'),
           body: {
             index_patterns: [alertsIndexPattern],
@@ -227,8 +224,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               componentTemplateName,
             ],
           },
-        });
-        await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
+        });*/
+        await ruleDataService.updateIndexMappingsForAsset(assetName);
       });
 
       // initialize eagerly
@@ -238,8 +235,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       ruleDataClient = ruleDataService.getRuleDataClient(
         SERVER_APP_ID,
-        ruleDataService.getFullAssetName('security.alerts'),
-        () => initializeRuleDataTemplatesPromise
+        assetName,
+        () => initializeRuleDataTemplatesPromise,
+        [
+          ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+          ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+          componentTemplateName,
+        ],
+        config.signalsIndex,
       );
 
       // sec

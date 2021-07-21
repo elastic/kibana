@@ -184,9 +184,10 @@ export class RuleDataPluginService {
     return this._createOrUpdateLifecyclePolicy(policy);
   }
 
-  async updateIndexMappingsMatchingPattern(pattern: string) {
+  async updateIndexMappingsForAsset(assetName: string) {
     await this.wait();
     const clusterClient = await this.getClusterClient();
+    const pattern = this.getFullAssetName(assetName);
     const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
     const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
     Object.entries(aliasesResponse).forEach(([index, aliases]) => {
@@ -224,13 +225,21 @@ export class RuleDataPluginService {
     return [this.options.index, assetName].filter(Boolean).join('-');
   }
 
-  getRuleDataClient(feature: ValidFeatureId, alias: string, initialize: () => Promise<void>) {
+  getRuleDataClient(
+    feature: ValidFeatureId,
+    assetName: string,
+    initialize: () => Promise<void>,
+    componentTemplateNames:  string[],
+    secondaryAlias?: string,
+  ) {
     return new RuleDataClient({
-      alias,
+      alias: this.getFullAssetName(assetName),
       feature,
       getClusterClient: () => this.getClusterClient(),
       isWriteEnabled: this.isWriteEnabled(),
       ready: initialize,
+      componentTemplateNames,
+      secondaryAlias,
     });
   }
 }

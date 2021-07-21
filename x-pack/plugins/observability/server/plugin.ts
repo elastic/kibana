@@ -100,10 +100,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
+    // ???? This appears to be a stub
     const ruleDataClient = plugins.ruleRegistry.ruleDataService.getRuleDataClient(
       'observability',
-      plugins.ruleRegistry.ruleDataService.getFullAssetName(),
-      () => Promise.resolve()
+      '',
+      () => Promise.resolve(),
+      [],
     );
 
     registerRoutes({

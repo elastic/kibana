@@ -26,13 +26,10 @@ export const createRuleDataClient = ({
   logger: Logger;
   ruleDataService: RuleRegistryPluginSetupContract['ruleDataService'];
 }) => {
+  const componentTemplateName = ruleDataService.getFullAssetName(
+    `${registrationContext}-mappings`
+  );
   const initializeRuleDataTemplates = once(async () => {
-    const componentTemplateName = ruleDataService.getFullAssetName(
-      `${registrationContext}-mappings`
-    );
-
-    const indexNamePattern = ruleDataService.getFullAssetName(`${registrationContext}*`);
-
     if (!ruleDataService.isWriteEnabled()) {
       return;
     }
@@ -60,7 +57,7 @@ export const createRuleDataClient = ({
       },
     });
 
-    await ruleDataService.createOrUpdateIndexTemplate({
+    /*await ruleDataService.createOrUpdateIndexTemplate({
       name: ruleDataService.getFullAssetName(registrationContext),
       body: {
         index_patterns: [indexNamePattern],
@@ -69,9 +66,9 @@ export const createRuleDataClient = ({
           componentTemplateName,
         ],
       },
-    });
+    });*/
 
-    await ruleDataService.updateIndexMappingsMatchingPattern(indexNamePattern);
+    await ruleDataService.updateIndexMappingsForAsset(registrationContext);
   });
 
   // initialize eagerly
@@ -81,7 +78,11 @@ export const createRuleDataClient = ({
 
   return ruleDataService.getRuleDataClient(
     ownerFeatureId,
-    ruleDataService.getFullAssetName(registrationContext),
-    () => initializeRuleDataTemplatesPromise
+    registrationContext,
+    () => initializeRuleDataTemplatesPromise,
+    [
+      ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+      componentTemplateName,
+    ]
   );
 };
