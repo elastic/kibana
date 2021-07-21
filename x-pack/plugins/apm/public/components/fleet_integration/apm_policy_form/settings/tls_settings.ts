@@ -16,7 +16,6 @@ export const tlsSettings: Settings = {
       title: 'Enable TLS',
       type: 'bool',
       required: true,
-      defaultValue: false,
       fields: [
         {
           key: 'tls_certificate',

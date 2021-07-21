@@ -43,7 +43,6 @@ type Field =
       helpText?: string;
       type: 'text' | 'bool' | 'select' | 'area';
       required: boolean;
-      defaultValue?: any;
       fields?: Field[];
       prependIcon?: string;
     }
@@ -100,7 +99,7 @@ function FormRow({
             >
               <EuiSwitch
                 label={field.label || (fieldValue ? 'Enabled' : 'Disabled')}
-                checked={fieldValue || field.defaultValue}
+                checked={fieldValue}
                 onChange={(e) => {
                   onChange(field.key, e.target.checked);
                 }}
@@ -123,7 +122,7 @@ function FormRow({
             >
               <EuiFieldText
                 isInvalid={isInvalid}
-                value={fieldValue || field.defaultValue}
+                value={fieldValue}
                 onChange={(e) => {
                   onChange(field.key, e.target.value);
                 }}
@@ -147,7 +146,7 @@ function FormRow({
             >
               <EuiTextArea
                 isInvalid={isInvalid}
-                value={fieldValue || field.defaultValue}
+                value={fieldValue}
                 onChange={(e) => {
                   onChange(field.key, e.target.value);
                 }}

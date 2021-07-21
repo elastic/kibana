@@ -14,7 +14,6 @@ export const rumSettings: Settings = {
       key: 'enable_rum',
       type: 'bool',
       required: true,
-      defaultValue: false,
       title: 'Enable RUM',
       description: 'Enable Real User Monitoring (RUM)',
       fields: [

@@ -18,7 +18,6 @@ export const apmSettings: Settings = {
       required: true,
       label: 'Host',
       title: 'Server configuration',
-      defaultValue: 'localhost:8200',
       description:
         'Choose a name and description to help identify how this integration will be used.',
     },
@@ -27,7 +26,6 @@ export const apmSettings: Settings = {
       type: 'text',
       required: true,
       label: 'URL',
-      defaultValue: 'http://localhost:8200',
     },
     {
       key: 'secret_token',
@@ -35,7 +33,6 @@ export const apmSettings: Settings = {
       required: true,
       label: 'API key for agent authentication',
       helpText: 'Enable API Key auth between APM Server and APM Agents.',
-      defaultValue: false,
     },
     {
       type: 'advanced_option',
@@ -45,7 +42,6 @@ export const apmSettings: Settings = {
           type: 'text',
           required: false,
           label: "Maximum size of a request's header (bytes)",
-          defaultValue: 1048576,
           title: 'Limits',
           description:
             'Set limits on request headers sizes and timing configurations.',
@@ -55,14 +51,12 @@ export const apmSettings: Settings = {
           type: 'text',
           required: false,
           label: 'Idle time before underlying connection is closed',
-          defaultValue: '45s',
         },
         {
           key: 'read_timeout',
           type: 'text',
           required: false,
           label: 'Maximum duration for reading an entire request',
-          defaultValue: '3600s',
         },
         {
           key: 'shutdown_timeout',
@@ -70,28 +64,24 @@ export const apmSettings: Settings = {
           required: false,
           label:
             'Maximum duration before releasing resources when shutting down',
-          defaultValue: '30s',
         },
         {
           key: 'write_timeout',
           type: 'text',
           required: false,
           label: 'Maximum duration for writing a response',
-          defaultValue: '30s',
         },
         {
           key: 'max_event_bytes',
           type: 'text',
           required: false,
           label: 'Maximum size per event (bytes)',
-          defaultValue: 307200,
         },
         {
           key: 'max_connections',
           type: 'text',
           required: false,
           label: 'Simultaneously accepted connections',
-          defaultValue: 0,
         },
         {
           key: 'response_headers',
@@ -135,7 +125,6 @@ export const apmSettings: Settings = {
           required: false,
           title: 'Enable APM Server Golang expvar support',
           description: 'Exposed under /debug/vars',
-          defaultValue: false,
         },
       ],
     },
