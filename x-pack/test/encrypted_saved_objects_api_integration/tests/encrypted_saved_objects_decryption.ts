@@ -13,6 +13,14 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('encrypted saved objects decryption', () => {
+    // This test uses esArchiver to load alert and action saved objects that have been created with a different encryption key
+    // than what is used in the test. The SOs are from an older Kibana version to ensure that some migrations will be applied,
+    // specifically the 7.11 migration on alert SO and the 7.14 migration on action SO.
+
+    // When the test runs, you will see in the console logs both the decryption error and a warning that the migration will run anyway.
+    // The test asserts that the alert and action SOs have the new fields expected post-migration but retrieving them via
+    // getDecryptedAsInternalUser fails (as expected) because the decryption fails.
+
     describe('migrations', () => {
       before(async () => {
         await esArchiver.load(
