@@ -151,7 +151,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             />
           </EuiText>
           <EuiSpacer size="l" />
-          <EuiButton href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}>
+          <EuiButton
+            fill
+            href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}
+          >
             {i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
               defaultMessage: 'View assets',
             })}
@@ -220,6 +223,12 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                     iconType="plusInCircle"
                     onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
                     data-test-subj="addAgentButton"
+                    aria-label={i18n.translate(
+                      'xpack.fleet.epm.packageDetails.integrationList.addAgent',
+                      {
+                        defaultMessage: 'Add Agent',
+                      }
+                    )}
                   />
                 </EuiToolTip>
               )}

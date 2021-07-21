@@ -72,6 +72,7 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -94,8 +95,6 @@ import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
   getEsQueryConfig,
-  buildEsQuery,
-  Filter,
   UI_SETTINGS,
   isErrorResponse,
   isPartialResponse,
@@ -288,6 +287,8 @@ export class SearchSource {
     // This still uses bfetch for batching.
     if (!options?.strategy && syncSearchByDefault) {
       options.strategy = ES_SEARCH_STRATEGY;
+      // `ES_SEARCH_STRATEGY` doesn't support search sessions, hence remove sessionId
+      options.sessionId = undefined;
     }
 
     const s$ = defer(() => this.requestIsStarting(options)).pipe(

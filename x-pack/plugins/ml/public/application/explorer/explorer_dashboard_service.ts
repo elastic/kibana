@@ -22,7 +22,7 @@ import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_
 import { EXPLORER_ACTION } from './explorer_constants';
 import { AppStateSelectedCells } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
-import { ExplorerAppState } from '../../../common/types/ml_url_generator';
+import { ExplorerAppState } from '../../../common/types/locator';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 

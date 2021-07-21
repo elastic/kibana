@@ -51,7 +51,6 @@
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
-|  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Interface for an index pattern saved object |
 |  [IScopedSearchClient](./kibana-plugin-plugins-data-server.iscopedsearchclient.md) |  |
@@ -60,7 +59,6 @@
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
 |  [ISearchStrategy](./kibana-plugin-plugins-data-server.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
-|  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-server.optionedvalueprop.md) |  |
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
@@ -108,11 +106,12 @@
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-server.iessearchresponse.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
+|  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
 |  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
+|  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
-|  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [SearchRequestHandlerContext](./kibana-plugin-plugins-data-server.searchrequesthandlercontext.md) |  |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 

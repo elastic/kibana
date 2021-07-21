@@ -118,7 +118,12 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const uninstallPackage = useCallback(
-    async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
+    async ({
+      name,
+      version,
+      title,
+      redirectToVersion,
+    }: Pick<PackageInfo, 'name' | 'version' | 'title'> & { redirectToVersion: string }) => {
       setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
       const pkgkey = `${name}-${version}`;
 
@@ -160,9 +165,15 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
             />
           ),
         });
+        if (redirectToVersion !== version) {
+          const settingsPath = getPath('integration_details_settings', {
+            pkgkey: `${name}-${redirectToVersion}`,
+          });
+          history.push(settingsPath);
+        }
       }
     },
-    [notifications.toasts, setPackageInstallStatus]
+    [notifications.toasts, setPackageInstallStatus, getPath, history]
   );
 
   return {

@@ -17,11 +17,8 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../../../observability/server';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,

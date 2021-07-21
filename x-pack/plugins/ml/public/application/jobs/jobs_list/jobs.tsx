@@ -10,7 +10,7 @@ import { NavigationMenu } from '../../components/navigation_menu';
 // @ts-ignore
 import { JobsListView } from './components/jobs_list_view/index';
 import { usePageUrlState } from '../../util/url_state';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';

@@ -33,6 +33,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -166,6 +167,7 @@ export const expectedDsl = {
   ignoreUnavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -199,6 +201,7 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -381,6 +384,7 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -947,6 +951,7 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -1925,6 +1930,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',

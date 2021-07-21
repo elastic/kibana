@@ -16,6 +16,7 @@ const errors = getFunctionErrors().progress;
 // TODO: this test was not running and is not up to date
 describe.skip('progress', () => {
   const fn = functionWrapper(progress);
+
   const value = 0.33;
 
   it('returns a render as progress', () => {

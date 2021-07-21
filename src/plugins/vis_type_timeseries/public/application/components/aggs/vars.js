@@ -15,6 +15,7 @@ import { AddDeleteButtons } from '../add_delete_buttons';
 import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 export const newVariable = (opts) => ({ id: uuid.v1(), name: '', field: '', ...opts });
 
@@ -59,7 +60,7 @@ export class CalculationVars extends Component {
               metrics={this.props.metrics}
               metric={this.props.model}
               value={row.field}
-              fields={this.props.fields[this.props.indexPattern]}
+              fields={this.props.fields[getIndexPatternKey(this.props.indexPattern)]}
               includeSiblings={this.props.includeSiblings}
               exclude={this.props.exclude}
             />

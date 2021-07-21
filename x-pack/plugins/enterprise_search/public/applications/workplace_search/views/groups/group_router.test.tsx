@@ -17,7 +17,6 @@ import { shallow } from 'enzyme';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
-import { ManageUsersModal } from './components/manage_users_modal';
 import { SharedSourcesModal } from './components/shared_sources_modal';
 import { GroupRouter } from './group_router';
 
@@ -28,7 +27,6 @@ describe('GroupRouter', () => {
   beforeEach(() => {
     setMockValues({
       sharedSourcesModalVisible: false,
-      manageUsersModalVisible: false,
       group: groups[0],
     });
 
@@ -47,16 +45,14 @@ describe('GroupRouter', () => {
     expect(wrapper.find(GroupSourcePrioritization)).toHaveLength(1);
   });
 
-  it('renders modals', () => {
+  it('renders modal', () => {
     setMockValues({
       sharedSourcesModalVisible: true,
-      manageUsersModalVisible: true,
       group: groups[0],
     });
 
     const wrapper = shallow(<GroupRouter />);
 
-    expect(wrapper.find(ManageUsersModal)).toHaveLength(1);
     expect(wrapper.find(SharedSourcesModal)).toHaveLength(1);
   });
 });

@@ -7,8 +7,9 @@
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
+
 import {
-  elasticLogo,
+  getElasticLogo,
   resolveWithMissingImage,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 
@@ -29,10 +30,9 @@ export interface Return {
   dataurl: string;
 }
 
-export function image(): ExpressionFunctionDefinition<'image', null, Arguments, Return> {
+export function image(): ExpressionFunctionDefinition<'image', null, Arguments, Promise<Return>> {
   const { help, args: argHelp } = getFunctionHelp().image;
   const errors = getFunctionErrors().image;
-
   return {
     name: 'image',
     aliases: [],
@@ -45,7 +45,7 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
         types: ['string', 'null'],
         help: argHelp.dataurl,
         aliases: ['_', 'url'],
-        default: elasticLogo,
+        default: null,
       },
       mode: {
         types: ['string'],
@@ -54,13 +54,17 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
         options: Object.values(ImageMode),
       },
     },
-    fn: (input, { dataurl, mode }) => {
+    fn: async (input, { dataurl, mode }) => {
       if (!mode || !Object.values(ImageMode).includes(mode)) {
         throw errors.invalidImageMode();
       }
+      const { elasticLogo } = await getElasticLogo();
+
+      if (dataurl === null) {
+        dataurl = elasticLogo;
+      }
 
       const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
-
       return {
         type: 'image',
         mode: modeStyle,

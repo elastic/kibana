@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
+import type { IExecutionContextContainer } from 'src/core/public';
 
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
@@ -21,6 +22,7 @@ import { PersistableStateService, SerializableState } from '../../../kibana_util
 import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
+  createTable,
   font,
   variableSet,
   variable,
@@ -77,6 +79,8 @@ export interface ExpressionExecutionParams {
   syncColors?: boolean;
 
   inspectorAdapters?: Adapters;
+
+  executionContext?: IExecutionContextContainer;
 }
 
 /**
@@ -335,6 +339,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public setup(...args: unknown[]): ExpressionsServiceSetup {
     for (const fn of [
       clog,
+      createTable,
       font,
       variableSet,
       variable,

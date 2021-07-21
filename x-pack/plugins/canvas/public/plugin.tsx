@@ -30,8 +30,6 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
-import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
-import { pluginServices } from './services';
 import { pluginServiceRegistry } from './services/kibana';
 
 export { CoreStart, CoreSetup };
@@ -75,13 +73,9 @@ export type CanvasStart = void;
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
-  private srcPlugin = new CanvasSrcPlugin();
 
   public setup(coreSetup: CoreSetup<CanvasStartDeps>, setupPlugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(setupPlugins.expressions);
-
-    this.srcPlugin.setup(coreSetup, { canvas: canvasApi });
 
     // Set the nav link to the last saved url if we have one in storage
     const lastPath = getSessionStorage().get(
@@ -101,11 +95,20 @@ export class CanvasPlugin
       order: 3000,
       updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
-        // Load application bundle
-        const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
+        const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
+        const srcPlugin = new CanvasSrcPlugin();
+        srcPlugin.setup(coreSetup, { canvas: canvasApi });
 
         // Get start services
         const [coreStart, startPlugins] = await coreSetup.getStartServices();
+
+        srcPlugin.start(coreStart, startPlugins);
+
+        const { pluginServices } = await import('./services');
+        pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
+
+        // Load application bundle
+        const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
         const canvasStore = await initializeCanvas(
           coreSetup,
@@ -145,8 +148,6 @@ export class CanvasPlugin
   }
 
   public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
-    this.srcPlugin.start(coreStart, startPlugins);
-    pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
     initLoadingIndicator(coreStart.http.addLoadingCountSource);
   }
 }

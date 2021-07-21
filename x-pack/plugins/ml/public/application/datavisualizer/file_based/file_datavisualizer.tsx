@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana, useMlUrlGenerator } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -34,7 +34,7 @@ export const FileDataVisualizerPage: FC = () => {
       },
     },
   } = useMlKibana();
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator()!;
   getMlNodeCount();
 
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
@@ -50,7 +50,7 @@ export const FileDataVisualizerPage: FC = () => {
         icon: 'machineLearningApp',
         type: 'file',
         getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
-          return await mlUrlGenerator.createUrl({
+          return await mlLocator.getUrl({
             page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
             pageState: {
               index: indexPatternId,
@@ -81,7 +81,7 @@ export const FileDataVisualizerPage: FC = () => {
         icon: 'dataVisualizer',
         type: 'file',
         getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
-          return await mlUrlGenerator.createUrl({
+          return await mlLocator.getUrl({
             page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
             pageState: {
               index: indexPatternId,

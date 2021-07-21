@@ -35,88 +35,76 @@ describe('createInitialState', () => {
         migrationsConfig,
         typeRegistry,
       })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "batchSize": 1000,
-        "controlState": "INIT",
-        "currentAlias": ".kibana_task_manager",
-        "indexPrefix": ".kibana_task_manager",
-        "kibanaVersion": "8.1.0",
-        "knownTypes": Array [],
-        "legacyIndex": ".kibana_task_manager",
-        "logs": Array [],
-        "outdatedDocumentsQuery": Object {
-          "bool": Object {
-            "should": Array [],
-          },
+    ).toEqual({
+      batchSize: 1000,
+      controlState: 'INIT',
+      currentAlias: '.kibana_task_manager',
+      indexPrefix: '.kibana_task_manager',
+      kibanaVersion: '8.1.0',
+      knownTypes: [],
+      legacyIndex: '.kibana_task_manager',
+      logs: [],
+      outdatedDocumentsQuery: {
+        bool: {
+          should: [],
         },
-        "preMigrationScript": Object {
-          "_tag": "None",
-        },
-        "retryAttempts": 15,
-        "retryCount": 0,
-        "retryDelay": 0,
-        "targetIndexMappings": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "my_type": Object {
-              "properties": Object {
-                "title": Object {
-                  "type": "text",
-                },
+      },
+      preMigrationScript: {
+        _tag: 'None',
+      },
+      retryAttempts: 15,
+      retryCount: 0,
+      retryDelay: 0,
+      targetIndexMappings: {
+        dynamic: 'strict',
+        properties: {
+          my_type: {
+            properties: {
+              title: {
+                type: 'text',
               },
             },
           },
         },
-        "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
-        "tempIndexMappings": Object {
-          "dynamic": false,
-          "properties": Object {
-            "migrationVersion": Object {
-              "dynamic": "true",
-              "type": "object",
-            },
-            "type": Object {
-              "type": "keyword",
-            },
+      },
+      tempIndex: '.kibana_task_manager_8.1.0_reindex_temp',
+      tempIndexMappings: {
+        dynamic: false,
+        properties: {
+          migrationVersion: {
+            dynamic: 'true',
+            type: 'object',
+          },
+          type: {
+            type: 'keyword',
           },
         },
-        "unusedTypesQuery": Object {
-          "bool": Object {
-            "must_not": Array [
-              Object {
-                "term": Object {
-                  "type": "fleet-agent-events",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "tsvb-validation-telemetry",
-                },
-              },
-              Object {
-                "bool": Object {
-                  "must": Array [
-                    Object {
-                      "match": Object {
-                        "type": "search-session",
-                      },
+      },
+      unusedTypesQuery: {
+        bool: {
+          must_not: expect.arrayContaining([
+            {
+              bool: {
+                must: [
+                  {
+                    match: {
+                      type: 'search-session',
                     },
-                    Object {
-                      "match": Object {
-                        "search-session.persisted": false,
-                      },
+                  },
+                  {
+                    match: {
+                      'search-session.persisted': false,
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ]),
         },
-        "versionAlias": ".kibana_task_manager_8.1.0",
-        "versionIndex": ".kibana_task_manager_8.1.0_001",
-      }
-    `);
+      },
+      versionAlias: '.kibana_task_manager_8.1.0',
+      versionIndex: '.kibana_task_manager_8.1.0_001',
+    });
   });
 
   it('returns state with the correct `knownTypes`', () => {

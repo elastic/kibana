@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -15,7 +14,6 @@ import {
   EuiIconTip,
   EuiPopover,
   EuiText,
-  EuiToolTip,
   EuiPopoverProps,
   EuiPagination,
 } from '@elastic/eui';
@@ -31,7 +29,6 @@ import { OnChangePage } from '../types';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { LoadingPanel } from '../../loading';
-import { LastUpdatedAt } from '../../last_updated';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -100,6 +97,7 @@ export const EventsCountComponent = ({
   isOpen,
   items,
   itemsCount,
+  itemsPerPage,
   onClick,
   serverSideEventCount,
 }: {
@@ -108,51 +106,40 @@ export const EventsCountComponent = ({
   isOpen: boolean;
   items: React.ReactElement[];
   itemsCount: number;
+  itemsPerPage: number;
   onClick: () => void;
   serverSideEventCount: number;
   footerText: string | React.ReactNode;
 }) => {
-  const totalCount = useMemo(() => (serverSideEventCount > 0 ? serverSideEventCount : 0), [
-    serverSideEventCount,
-  ]);
-  return (
-    <h5>
-      <PopoverRowItems
-        className="footer-popover"
-        id="customizablePagination"
-        data-test-subj="timelineSizeRowPopover"
-        button={
-          <>
-            <EuiBadge data-test-subj="local-events-count" color="hollow">
-              {itemsCount}
-              <EuiButtonEmpty
-                className={EVENTS_COUNT_BUTTON_CLASS_NAME}
-                size="s"
-                color="text"
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={onClick}
-                data-test-subj="local-events-count-button"
-              />
-            </EuiBadge>
-            {` ${i18n.OF} `}
-          </>
-        }
-        isOpen={isOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
+  const button = useMemo(
+    () => (
+      <EuiButtonEmpty
+        className={EVENTS_COUNT_BUTTON_CLASS_NAME}
+        size="s"
+        color="text"
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={onClick}
+        data-test-subj="local-events-count-button"
       >
-        <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
-      </PopoverRowItems>
-      <EuiToolTip content={`${totalCount} ${footerText?.toString()}`}>
-        <ServerSideEventCount>
-          <EuiBadge color="hollow" data-test-subj="server-side-event-count">
-            {totalCount}
-          </EuiBadge>{' '}
-          {documentType}
-        </ServerSideEventCount>
-      </EuiToolTip>
-    </h5>
+        {i18n.ROWS_PER_PAGE(itemsPerPage)}
+      </EuiButtonEmpty>
+    ),
+    [itemsPerPage, onClick]
+  );
+
+  return (
+    <EuiPopover
+      className="footer-popover"
+      id="customizablePagination"
+      data-test-subj="timelineSizeRowPopover"
+      button={button}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
+    </EuiPopover>
   );
 };
 
@@ -211,7 +198,6 @@ export const PagingControl = React.memo(PagingControlComponent);
 
 PagingControl.displayName = 'PagingControl';
 interface FooterProps {
-  updatedAt: number;
   activePage: number;
   height: number;
   id: string;
@@ -227,7 +213,6 @@ interface FooterProps {
 /** Renders a loading indicator and paging controls */
 export const FooterComponent = ({
   activePage,
-  updatedAt,
   height,
   id,
   isLive,
@@ -341,6 +326,7 @@ export const FooterComponent = ({
               isOpen={isPopoverOpen}
               items={rowItems}
               itemsCount={itemsCount}
+              itemsPerPage={itemsPerPage}
               onClick={onButtonClick}
               serverSideEventCount={totalCount}
             />
@@ -377,10 +363,6 @@ export const FooterComponent = ({
               isLoading={isLoading}
             />
           )}
-        </EuiFlexItem>
-
-        <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-          <LastUpdatedAt updatedAt={updatedAt} compact={false} />
         </EuiFlexItem>
       </FooterFlexGroup>
     </FooterContainer>

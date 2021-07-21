@@ -94,19 +94,19 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
         coreStart: CoreStart,
         packagesResponse: GetPackagesResponse['response']
       ): GlobalSearchProviderResult[] => {
-        const packages = packagesResponse.slice(0, maxResults);
+        return packagesResponse
+          .flatMap(
+            includeAllPackages
+              ? (pkg) => toSearchResult(pkg, coreStart.application)
+              : (pkg) => {
+                  if (!term || !pkg.title.toLowerCase().includes(term)) {
+                    return [];
+                  }
 
-        return packages.flatMap(
-          includeAllPackages
-            ? (pkg) => toSearchResult(pkg, coreStart.application)
-            : (pkg) => {
-                if (!term || !pkg.title.toLowerCase().includes(term)) {
-                  return [];
+                  return toSearchResult(pkg, coreStart.application);
                 }
-
-                return toSearchResult(pkg, coreStart.application);
-              }
-        );
+          )
+          .slice(0, maxResults);
       };
 
       return combineLatest([coreStart$, getPackages$()]).pipe(

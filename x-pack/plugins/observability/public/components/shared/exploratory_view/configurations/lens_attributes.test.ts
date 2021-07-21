@@ -411,6 +411,7 @@ describe('Lens Attribute', () => {
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
         indexPattern: mockIndexPattern,
+        labels: layerConfig.seriesConfig.labels,
       });
 
       expect(lnsAttr.visualization.layers).toEqual([

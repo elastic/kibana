@@ -8,6 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { merge } from 'lodash';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
@@ -16,7 +17,10 @@ import {
   UseMessagesStorage,
 } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from './index';
-import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
+import {
+  initialUserPrivilegesState,
+  useUserPrivileges,
+} from '../../common/components/user_privileges';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
@@ -26,6 +30,7 @@ import {
   mockCtiLinksResponse,
 } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
+import { EndpointPrivileges } from '../../common/components/user_privileges/use_endpoint_privileges';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -47,12 +52,28 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../common/hooks/endpoint/ingest_enabled');
+jest.mock('../../common/components/user_privileges', () => {
+  return {
+    ...jest.requireActual('../../common/components/user_privileges'),
+    useUserPrivileges: jest.fn(() => {
+      return {
+        listPrivileges: { loading: false, error: undefined, result: undefined },
+        detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+        endpointPrivileges: {
+          loading: false,
+          canAccessEndpointManagement: true,
+          canAccessFleet: true,
+        },
+      };
+    }),
+  };
+});
 jest.mock('../../common/containers/local_storage/use_messages_storage');
 
 jest.mock('../containers/overview_cti_links');
 jest.mock('../containers/overview_cti_links/use_cti_event_counts');
 jest.mock('../containers/overview_cti_links');
+
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
@@ -74,18 +95,35 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
   };
 };
 const mockUseSourcererScope = useSourcererScope as jest.Mock;
-const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 
 describe('Overview', () => {
+  const loadedUserPrivilegesState = (
+    endpointOverrides: Partial<EndpointPrivileges> = {}
+  ): ReturnType<typeof initialUserPrivilegesState> =>
+    merge(initialUserPrivilegesState(), {
+      endpointPrivileges: {
+        loading: false,
+        canAccessFleet: true,
+        canAccessEndpointManagement: true,
+        ...endpointOverrides,
+      },
+    });
+
   beforeEach(() => {
+    mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState());
     mockUseFetchIndex.mockReturnValue([
       false,
       {
         indexExists: true,
       },
     ]);
+  });
+
+  afterAll(() => {
+    mockUseUserPrivileges.mockReset();
   });
 
   describe('rendering', () => {
@@ -97,7 +135,6 @@ describe('Overview', () => {
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -125,7 +162,6 @@ describe('Overview', () => {
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -153,7 +189,6 @@ describe('Overview', () => {
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -175,7 +210,6 @@ describe('Overview', () => {
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -197,7 +231,6 @@ describe('Overview', () => {
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -219,7 +252,7 @@ describe('Overview', () => {
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: false });
+      mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
 
       const wrapper = mount(
         <TestProviders>
@@ -239,7 +272,7 @@ describe('Overview', () => {
           selectedPatterns: [],
           indicesExist: false,
         });
-        mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: false });
+        mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
         mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
@@ -266,7 +299,7 @@ describe('Overview', () => {
       });
 
       it('shows Endpoint get ready button when ingest is enabled', () => {
-        mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
+        mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: true }));
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>

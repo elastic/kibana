@@ -10,8 +10,10 @@ import { CommonEmbeddableStartContract } from '../types';
 import { baseEmbeddableMigrations } from './migrate_base_input';
 import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 
+export type MigrateFunction = (state: SerializableState, version: string) => SerializableState;
+
 export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) => {
-  return (state: SerializableState, version: string) => {
+  const migrateFn: MigrateFunction = (state: SerializableState, version: string) => {
     const enhancements = (state.enhancements as SerializableState) || {};
     const factory = embeddables.getEmbeddableFactory(state.type as string);
 
@@ -19,8 +21,14 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
       ? baseEmbeddableMigrations[version](state)
       : state;
 
-    if (factory && factory.migrations[version]) {
+    if (factory?.migrations[version]) {
       updatedInput = factory.migrations[version](updatedInput);
+    }
+
+    if (factory?.isContainerType) {
+      updatedInput.panels = ((state.panels as SerializableState[]) || []).map((panel) => {
+        return migrateFn(panel, version);
+      });
     }
 
     updatedInput.enhancements = {};
@@ -35,4 +43,6 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
 
     return updatedInput;
   };
+
+  return migrateFn;
 };

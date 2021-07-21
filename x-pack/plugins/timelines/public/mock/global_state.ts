@@ -24,6 +24,7 @@ export const mockGlobalState: TimelineState = {
       id: 'test',
       indexNames: [
         'apm-*-transaction*',
+        'traces-apm*',
         'auditbeat-*',
         'endgame-*',
         'filebeat-*',
