@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-getSearchSourceTimeFilter(forceNow?: Date): import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter[] | {
+getSearchSourceTimeFilter(forceNow?: Date): import("@kbn/es-query").RangeFilter[] | {
         meta: {
             index: string | undefined;
             params: {};
@@ -43,7 +43,7 @@ getSearchSourceTimeFilter(forceNow?: Date): import("../../../../../../bazel-out/
 
 <b>Returns:</b>
 
-`import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter[] | {
+`import("@kbn/es-query").RangeFilter[] | {
         meta: {
             index: string | undefined;
             params: {};

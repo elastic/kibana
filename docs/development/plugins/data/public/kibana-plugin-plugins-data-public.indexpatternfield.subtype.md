@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-get subType(): import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IFieldSubType | undefined;
+get subType(): import("@kbn/es-query").IFieldSubType | undefined;
 ```

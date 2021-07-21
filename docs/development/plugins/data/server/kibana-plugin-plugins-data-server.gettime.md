@@ -10,7 +10,7 @@
 export declare function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
     forceNow?: Date;
     fieldName?: string;
-}): import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter | undefined;
+}): import("@kbn/es-query").RangeFilter | undefined;
 ```
 
 ## Parameters
@@ -23,5 +23,5 @@ export declare function getTime(indexPattern: IIndexPattern | undefined, timeRan
 
 <b>Returns:</b>
 
-`import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter | undefined`
+`import("@kbn/es-query").RangeFilter | undefined`
 
