@@ -468,6 +468,10 @@ export interface IndexedProcessTree {
    */
   idToNode: Map<string, ResolverNode>;
   /**
+   * IDs of nodes that reference themselves as parents
+   */
+  cyclicalNodeIds?: Set<string>;
+  /**
    * The id of the origin or root node provided by the backend
    */
   originID: string | undefined;

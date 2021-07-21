@@ -215,6 +215,11 @@ export const hasMoreGenerations = composeSelectors(
  */
 export const graphableNodes = composeSelectors(dataStateSelector, dataSelectors.graphableNodes);
 
+/**
+ * A boolean detailing whether or not cycles exist in the given tree
+ */
+export const cyclicalNodes = composeSelectors(dataStateSelector, dataSelectors.cyclicalNodes);
+
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
 const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);

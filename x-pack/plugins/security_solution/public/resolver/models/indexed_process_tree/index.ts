@@ -33,7 +33,10 @@ function calculateGenerationsAndDescendantsFromOrigin(
 
 function parentInternal(node: ResolverNode, idToNode: Map<string, ResolverNode>) {
   const uniqueParentId = nodeModel.parentId(node);
-  if (uniqueParentId === undefined) {
+  const nodeId = nodeModel.nodeID(node);
+  // We check if the node is self-referencing as the parent.
+  // If so we ignore the parent id
+  if (uniqueParentId === undefined || uniqueParentId === nodeId) {
     return undefined;
   } else {
     return idToNode.get(uniqueParentId);
@@ -72,6 +75,7 @@ export function factory(
 ): IndexedProcessTree {
   const idToChildren = new Map<string | undefined, ResolverNode[]>();
   const idToValue = new Map<string, ResolverNode>();
+  const cyclicalNodeIds = new Set<string>();
 
   for (const node of nodes) {
     const nodeID: string | undefined = nodeModel.nodeID(node);
@@ -79,13 +83,17 @@ export function factory(
       idToValue.set(nodeID, node);
 
       const uniqueParentId: string | undefined = nodeModel.parentId(node);
-
-      let childrenWithTheSameParent = idToChildren.get(uniqueParentId);
-      if (!childrenWithTheSameParent) {
-        childrenWithTheSameParent = [];
-        idToChildren.set(uniqueParentId, childrenWithTheSameParent);
+      const isCyclical = uniqueParentId === nodeID;
+      if (isCyclical) {
+        cyclicalNodeIds.add(nodeID); // track to tell the user via a callout
+      } else {
+        let childrenWithTheSameParent = idToChildren.get(uniqueParentId);
+        if (!childrenWithTheSameParent) {
+          childrenWithTheSameParent = [];
+          idToChildren.set(uniqueParentId, childrenWithTheSameParent);
+        }
+        childrenWithTheSameParent.push(node);
       }
-      childrenWithTheSameParent.push(node);
     }
   }
 
@@ -112,6 +120,7 @@ export function factory(
     idToChildren,
     idToNode: idToValue,
     originID,
+    cyclicalNodeIds,
     generations,
     descendants,
     ancestors,

@@ -7,7 +7,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,6 +27,7 @@ import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
+import { ResolverCyclesCallOut } from './resolver_cycles_warning';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -97,70 +98,74 @@ export const ResolverWithoutProviders = React.memo(
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const resolverTreeHasNodes = useSelector(selectors.resolverTreeHasNodes);
     const colorMap = useColors();
-
+    const cyclicalNodes = useSelector(selectors.cyclicalNodes);
+    const cyclicalIds = useMemo(() => [...cyclicalNodes], [cyclicalNodes]);
     return (
-      <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
-        {isLoading ? (
-          <div data-test-subj="resolver:graph:loading" className="loading-container">
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        ) : hasError ? (
-          <div data-test-subj="resolver:graph:error" className="loading-container">
-            <div>
-              {' '}
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.resolver.loadingError"
-                defaultMessage="Error loading data."
-              />
+      <>
+        {cyclicalNodes.size > 0 && <ResolverCyclesCallOut cyclicalIds={cyclicalIds} />}
+        <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
+          {isLoading ? (
+            <div data-test-subj="resolver:graph:loading" className="loading-container">
+              <EuiLoadingSpinner size="xl" />
             </div>
-          </div>
-        ) : resolverTreeHasNodes ? (
-          <>
-            <GraphContainer
-              data-test-subj="resolver:graph"
-              className="resolver-graph kbn-resetFocusState"
-              onMouseDown={onMouseDown}
-              ref={ref}
-              role="tree"
-              tabIndex={0}
-              aria-activedescendant={activeDescendantId || undefined}
-            >
-              {connectingEdgeLineSegments.map(
-                ({ points: [startPosition, endPosition], metadata }) => (
-                  <EdgeLine
-                    edgeLineMetadata={metadata}
-                    key={metadata.reactKey}
-                    startPosition={startPosition}
-                    endPosition={endPosition}
-                    projectionMatrix={projectionMatrix}
-                  />
-                )
-              )}
-              {[...processNodePositions].map(([treeNode, position]) => {
-                const nodeID = nodeModel.nodeID(treeNode);
-                if (nodeID === undefined) {
-                  throw new Error('Tried to render a node without an ID');
-                }
-                return (
-                  <ProcessEventDot
-                    key={nodeID}
-                    nodeID={nodeID}
-                    position={position}
-                    projectionMatrix={projectionMatrix}
-                    node={treeNode}
-                    timeAtRender={timeAtRender}
-                  />
-                );
-              })}
-            </GraphContainer>
-            <PanelRouter />
-          </>
-        ) : (
-          <ResolverNoProcessEvents />
-        )}
-        <GraphControls />
-        <SymbolDefinitions />
-      </StyledMapContainer>
+          ) : hasError ? (
+            <div data-test-subj="resolver:graph:error" className="loading-container">
+              <div>
+                {' '}
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.resolver.loadingError"
+                  defaultMessage="Error loading data."
+                />
+              </div>
+            </div>
+          ) : resolverTreeHasNodes ? (
+            <>
+              <GraphContainer
+                data-test-subj="resolver:graph"
+                className="resolver-graph kbn-resetFocusState"
+                onMouseDown={onMouseDown}
+                ref={ref}
+                role="tree"
+                tabIndex={0}
+                aria-activedescendant={activeDescendantId || undefined}
+              >
+                {connectingEdgeLineSegments.map(
+                  ({ points: [startPosition, endPosition], metadata }) => (
+                    <EdgeLine
+                      edgeLineMetadata={metadata}
+                      key={metadata.reactKey}
+                      startPosition={startPosition}
+                      endPosition={endPosition}
+                      projectionMatrix={projectionMatrix}
+                    />
+                  )
+                )}
+                {[...processNodePositions].map(([treeNode, position]) => {
+                  const nodeID = nodeModel.nodeID(treeNode);
+                  if (nodeID === undefined) {
+                    throw new Error('Tried to render a node without an ID');
+                  }
+                  return (
+                    <ProcessEventDot
+                      key={nodeID}
+                      nodeID={nodeID}
+                      position={position}
+                      projectionMatrix={projectionMatrix}
+                      node={treeNode}
+                      timeAtRender={timeAtRender}
+                    />
+                  );
+                })}
+              </GraphContainer>
+              <PanelRouter />
+            </>
+          ) : (
+            <ResolverNoProcessEvents />
+          )}
+          <GraphControls />
+          <SymbolDefinitions />
+        </StyledMapContainer>
+      </>
     );
   })
 );

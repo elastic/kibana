@@ -365,3 +365,61 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
   }
   return withRelatedEventsOnOrigin(resolverTree, relatedEvents, nodeDataResponse, originID);
 }
+
+export function mockTreeWithOriginAndOneCycle({
+  originID,
+  firstChildID,
+}: {
+  originID: string;
+  firstChildID: string;
+}): {
+  treeResponse: ResolverNode[];
+  resolverTree: NewResolverTree;
+  relatedEvents: ResolverRelatedEvents;
+  nodeDataResponse: SafeResolverEvent[];
+} {
+  const originProcessEvent: SafeResolverEvent = mockEndpointEvent({
+    pid: 0,
+    entityID: originID,
+    processName: 'c.ext',
+    parentEntityID: 'none',
+    timestamp: 1600863932316,
+  });
+  const firstChildProcessEvent: SafeResolverEvent = mockEndpointEvent({
+    pid: 1,
+    entityID: firstChildID,
+    processName: 'd',
+    parentEntityID: firstChildID,
+    timestamp: 1600863932317,
+  });
+
+  const originNode: ResolverNode = mockResolverNode({
+    id: originID,
+    name: 'c.ext',
+    stats: { total: 2, byCategory: {} },
+    timestamp: 1600863932316,
+  });
+
+  const firstChildNode: ResolverNode = mockResolverNode({
+    id: firstChildID,
+    name: 'd',
+    parentID: firstChildID,
+    timestamp: 1600863932317,
+  });
+
+  const treeResponse = [originNode, firstChildNode];
+
+  return {
+    treeResponse,
+    resolverTree: {
+      originID,
+      nodes: treeResponse,
+    },
+    relatedEvents: {
+      entityID: originID,
+      events: [],
+      nextEvent: null,
+    },
+    nodeDataResponse: [originProcessEvent, firstChildProcessEvent],
+  };
+}

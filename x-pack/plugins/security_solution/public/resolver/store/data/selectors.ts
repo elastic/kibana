@@ -179,6 +179,12 @@ const tree = createSelector(graphableNodes, originID, function indexedProcessTre
   return indexedProcessTreeModel.factory(graphableNodes, currentOriginID);
 });
 
+export const cyclicalNodes = createSelector(tree, function getCycles(
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  tree
+) {
+  return tree.cyclicalNodeIds;
+});
 /**
  * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
@@ -467,11 +473,14 @@ export const ariaFlowtoCandidate: (
         throw new Error('could not find child event in process tree.');
       }
 
+      const parentId = nodeModel.parentId(node);
+      const isCyclical = parentId === nodeID;
+
+      // If there are cycles we do not want to show these nodes as it causes an infinite loop
+      if (isCyclical) return null;
+
       // nodes with the same parent ID
-      const children = indexedProcessTreeModel.children(
-        indexedProcessTree,
-        nodeModel.parentId(node)
-      );
+      const children = indexedProcessTreeModel.children(indexedProcessTree, parentId);
 
       let previousChild: ResolverNode | null = null;
       // Loop over all nodes that have the same parent ID (even if the parent ID is undefined or points to a node that isn't in the tree.)

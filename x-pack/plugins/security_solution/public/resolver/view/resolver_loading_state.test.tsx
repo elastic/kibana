@@ -10,6 +10,7 @@ import { pausifyMock } from '../data_access_layer/mocks/pausify_mock';
 import { emptifyMock } from '../data_access_layer/mocks/emptify_mock';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import '../test_utilities/extend_jest';
+import { originNodeWithOneCycle } from '../data_access_layer/mocks/origin_node_with_one_cycle';
 
 describe('Resolver: data loading and resolution states', () => {
   let simulator: Simulator;
@@ -177,6 +178,40 @@ describe('Resolver: data loading and resolution states', () => {
         resolverGraphError: 0,
         resolverTree: 1,
         resolverGraphNodes: 3,
+      });
+    });
+  });
+
+  describe('When all resolver data requests successfully resolve with cycles', () => {
+    beforeEach(() => {
+      const {
+        metadata: { databaseDocumentID },
+        dataAccessLayer,
+      } = originNodeWithOneCycle();
+
+      simulator = new Simulator({
+        dataAccessLayer,
+        databaseDocumentID,
+        resolverComponentInstanceID,
+        indices: [],
+        shouldUpdate: false,
+        filters: {},
+      });
+    });
+
+    it('should display a message informing the user there are cycles in the graph', async () => {
+      await expect(
+        simulator.map(() => ({
+          resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
+          resolverGraphError: simulator.testSubject('resolver:graph:error').length,
+          resolverCyclesCallout: simulator.testSubject('resolver:cycles-callout').length,
+          resolverGraphNodes: simulator.testSubject('resolver:node').length,
+        }))
+      ).toYieldEqualTo({
+        resolverGraphLoading: 0,
+        resolverGraphError: 0,
+        resolverCyclesCallout: 1,
+        resolverGraphNodes: 1, // The self-referenced node is hidden
       });
     });
   });
