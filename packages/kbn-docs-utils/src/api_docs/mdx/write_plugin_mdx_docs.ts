@@ -85,19 +85,21 @@ import ${json} from './${fileName}.json';
 
 ${plugin.manifest.description ?? ''}
 
-${plugin.manifest.owner?.githubTeam && name
-        ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
-        : name
-          ? `Contact ${name} for questions regarding this plugin.`
-          : ''
-      }
+${
+  plugin.manifest.owner?.githubTeam && name
+    ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
+    : name
+    ? `Contact ${name} for questions regarding this plugin.`
+    : ''
+}
 
 **Code health stats**
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| ${pluginStats.apiCount} | ${pluginStats.isAnyType.length} | ${pluginStats.missingComments.length
-      } | ${pluginStats.missingExports} |
+| ${pluginStats.apiCount} | ${pluginStats.isAnyType.length} | ${
+      pluginStats.missingComments.length
+    } | ${pluginStats.missingExports} |
 
 `) + '\n\n';
 

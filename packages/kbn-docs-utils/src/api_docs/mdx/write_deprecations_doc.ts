@@ -27,14 +27,17 @@ export function writeDeprecationDoc(
     | Deprecated API | Reference location | Remove By |
     | ---------------|-----------|-----------|
     ${deprecations[key]
-          .map((dep) => {
-            const path = dep.ref.link.path;
-            return `| <DocLink id="${getPluginApiDocId(dep.deprecatedApi.parentPluginId)}" section="${dep.deprecatedApi.id
-              }" text="${dep.deprecatedApi.label}"/> | [${path.substr(path.lastIndexOf(Path.sep) + 1)}#L${dep.ref.link.lineNumber
-              }](https://github.com/elastic/kibana/tree/master/${path}#L${dep.ref.link.lineNumber}) | ${dep.deprecatedApi.removeBy ? dep.deprecatedApi.removeBy : '-'
-              } |`;
-          })
-          .join('\n')}
+      .map((dep) => {
+        const path = dep.ref.link.path;
+        return `| <DocLink id="${getPluginApiDocId(dep.deprecatedApi.parentPluginId)}" section="${
+          dep.deprecatedApi.id
+        }" text="${dep.deprecatedApi.label}"/> | [${path.substr(path.lastIndexOf(Path.sep) + 1)}#L${
+          dep.ref.link.lineNumber
+        }](https://github.com/elastic/kibana/tree/master/${path}#L${dep.ref.link.lineNumber}) | ${
+          dep.deprecatedApi.removeBy ? dep.deprecatedApi.removeBy : '-'
+        } |`;
+      })
+      .join('\n')}
     `;
     })
     .join('\n\n');
