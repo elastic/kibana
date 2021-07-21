@@ -18,7 +18,6 @@ import {
 } from '../../../../detection_engine/routes/__mocks__';
 import {
   addPrepackagedRulesRequest,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
 } from '../../../../detection_engine/routes/__mocks__/request_responses';
 
@@ -47,7 +46,6 @@ describe('installPrepackagedTimelines', () => {
       authz: {},
     } as unknown) as SecurityPluginSetup;
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     jest.doMock('./helpers', () => {
