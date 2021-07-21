@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   ALERTS_HEADERS_RISK_SCORE,
@@ -37,6 +36,7 @@ import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
+import { EventFieldsData } from './types';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -80,7 +80,7 @@ const networkFields = [
 const getDescription = ({
   data,
   eventId,
-  fieldFromBrowserField,
+  // fieldFromBrowserField,
   linkValue,
   timelineId,
   values,
@@ -94,7 +94,7 @@ const getDescription = ({
         contextId={timelineId}
         data={data}
         eventId={eventId}
-        fieldFromBrowserField={fieldFromBrowserField}
+        // fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
         values={values}
       />
@@ -102,7 +102,7 @@ const getDescription = ({
         contextId={timelineId}
         data={data}
         eventId={eventId}
-        fieldFromBrowserField={fieldFromBrowserField}
+        // fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
         timelineId={timelineId}
         values={values}
@@ -117,13 +117,13 @@ const getSummaryRows = ({
   timelineId,
   eventId,
 }: {
-  data: TimelineEventsDetailsItem[];
+  data: EventFieldsData[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
 }) => {
   const categoryField = find({ category: 'event', field: 'event.category' }, data) as
-    | TimelineEventsDetailsItem
+    | EventFieldsData
     | undefined;
   const eventCategory = Array.isArray(categoryField?.originalValue)
     ? categoryField?.originalValue[0]
@@ -141,7 +141,6 @@ const getSummaryRows = ({
         const initialDescription = {
           contextId: timelineId,
           eventId,
-          fieldName: item.id,
           value: null,
           fieldType: 'string',
           linkValue: undefined,
@@ -162,13 +161,10 @@ const getSummaryRows = ({
         const linkValue = getOr(null, 'originalValue.0', linkValueField);
         const value = getOr(null, 'originalValue.0', field);
         const category = field.category;
-        const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
         const description = {
           ...initialDescription,
           data: field,
-          value,
           values: field.originalValue,
-          fieldType: item.fieldType ?? fieldType,
           linkValue: linkValue ?? undefined,
           fieldFromBrowserField: get(`${category}.fields.${field.field}`, browserFields),
         };
@@ -183,7 +179,7 @@ const getSummaryRows = ({
                   title: `${entry.field} [threshold]`,
                   description: {
                     ...description,
-                    value: entry.value,
+                    values: [entry.value],
                   },
                 };
               }
@@ -203,7 +199,7 @@ const getSummaryRows = ({
                 title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
                 description: {
                   ...description,
-                  value: `count(${parsedValue.field}) == ${parsedValue.value}`,
+                  values: [`count(${parsedValue.field}) == ${parsedValue.value}`],
                 },
               },
             ];
@@ -227,7 +223,7 @@ const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns
 
 const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
+  data: EventFieldsData[];
   eventId: string;
   timelineId: string;
   title?: string;
@@ -243,18 +239,15 @@ const AlertSummaryViewComponent: React.FC<{
     return endpointAlertCheck({ data });
   }, [data]);
 
-  const endpointId = useMemo(() => {
-    const findAgentId = find({ category: 'agent', field: 'agent.id' }, data)?.values;
-    return findAgentId ? findAgentId[0] : '';
-  }, [data]);
+  const endpointId = useMemo(() => find({ category: 'agent', field: 'agent.id' }, data), [data]);
 
   const agentStatusRow = {
     title: i18n.AGENT_STATUS,
     description: {
-      contextId: timelineId,
+      data: endpointId ?? ({} as EventFieldsData),
       eventId,
-      fieldName: 'agent.status',
-      value: endpointId,
+      timelineId,
+      values: endpointId?.values,
       linkValue: undefined,
     },
   };

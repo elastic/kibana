@@ -56,12 +56,9 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    contextId: string;
     data: EventFieldsData;
     eventId: string;
-    fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
-    fieldName: string;
-    fieldType: string;
+    // fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
     linkValue: string | undefined;
     timelineId: string;
     values: string[] | null | undefined;

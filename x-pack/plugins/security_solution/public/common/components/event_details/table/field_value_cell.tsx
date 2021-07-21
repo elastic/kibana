@@ -17,7 +17,7 @@ export interface FieldValueCellProps {
   contextId: string;
   data: EventFieldsData;
   eventId: string;
-  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
   getLinkValue?: (field: string) => string | null;
   linkValue?: string | null | undefined;
   values: string[] | null | undefined;

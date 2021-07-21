@@ -19,7 +19,7 @@ interface Props {
   data: EventFieldsData;
   disabled?: boolean;
   eventId: string;
-  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
   getLinkValue?: (field: string) => string | null;
   linkValue?: string | null | undefined;
   onFilterAdded?: () => void;
