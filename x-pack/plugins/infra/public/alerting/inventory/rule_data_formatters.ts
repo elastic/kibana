@@ -6,13 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_START,
-  ALERT_ID,
-} from '@kbn/rule-data-utils';
-import { modifyUrl } from '@kbn/std';
+import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE, ALERT_ID } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
