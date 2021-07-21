@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { checkParamsVersion, cryptoFactory } from '../../../lib';
+import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF, TaskPayloadPDF } from '../types';
@@ -20,7 +20,6 @@ export const createJobFnFactory: CreateJobFnFactory<
     const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     validateUrls(jobParams.relativeUrls);
-    jobParams.version = checkParamsVersion(jobParams, logger);
 
     return {
       headers: serializedEncryptedHeaders,

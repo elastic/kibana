@@ -6,7 +6,7 @@
  */
 
 import { CSV_JOB_TYPE } from '../../../common/constants';
-import { checkParamsVersion, cryptoFactory } from '../../lib';
+import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 
@@ -20,8 +20,6 @@ export const createJobFnFactory: CreateJobFnFactory<
 
   return async function createJob(jobParams, _context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
-
-    jobParams.version = checkParamsVersion(jobParams, logger);
 
     return {
       headers: serializedEncryptedHeaders,
