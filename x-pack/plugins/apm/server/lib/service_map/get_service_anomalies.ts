@@ -112,12 +112,15 @@ export async function getServiceAnomalies({
       typeof params
     > = anomalyResponse as any;
 
+    const serviceBuckets =
+      typedAnomalyResponse.aggregations?.services.buckets ?? [];
+
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
-        typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
+        serviceBuckets.filter((bucket) =>
           jobIds.includes(bucket.key.jobId as string)
-        ) ?? [],
+        ),
         // sort by job ID in case there are multiple jobs for one service to
         // ensure consistent results
         (bucket) => bucket.key.jobId
