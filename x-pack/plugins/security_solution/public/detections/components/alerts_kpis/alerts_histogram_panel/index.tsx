@@ -37,7 +37,7 @@ import { AlertsHistogram } from './alerts_histogram';
 import * as i18n from './translations';
 import type { AlertsAggregation, AlertsTotal } from './types';
 import { LinkButton } from '../../../../common/components/links';
-import type { SecurityPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
 import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackBySelect } from '../common/components';
@@ -261,6 +261,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             titleSize={titleSize}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
+            hideSubtitle
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>

@@ -85,7 +85,12 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     return (
       <InspectButtonContainer>
         <KpiPanel hasBorder data-test-subj="alertsCountPanel">
-          <HeaderSection id={uniqueQueryId} title={i18n.COUNT_TABLE_TITLE} titleSize="s">
+          <HeaderSection
+            id={uniqueQueryId}
+            title={i18n.COUNT_TABLE_TITLE}
+            titleSize="s"
+            hideSubtitle
+          >
             <StackBySelect selected={selectedStackByOption} onSelect={setSelectedStackByOption} />
           </HeaderSection>
           <AlertsCount
