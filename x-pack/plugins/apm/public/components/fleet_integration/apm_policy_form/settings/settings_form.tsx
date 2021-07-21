@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { PackagePolicyValues } from '.';
+import { PackagePolicyValues } from '../';
 
 interface AdvancedOptionsField {
   type: 'advanced_option';
@@ -44,6 +44,7 @@ type Field =
       required: boolean;
       defaultValue?: any;
       fields?: Field[];
+      prependIcon?: string;
     }
   | AdvancedOptionsField;
 
