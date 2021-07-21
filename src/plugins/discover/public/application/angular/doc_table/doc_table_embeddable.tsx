@@ -10,8 +10,6 @@ import React, { Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPagination } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING } from '../../../../common';
-import { getServices } from '../../../kibana_services';
 import { ToolBarPagerText } from './components/pager/tool_bar_pager_text';
 import { PAGE_SIZE, usePager } from './lib/use_pager';
 import { DocTableRow } from './components/table_row';
@@ -19,6 +17,7 @@ import { DocTableRow } from './components/table_row';
 export interface DocTableEmbeddableProps {
   totalHitCount: number;
   rows: DocTableRow[];
+  sampleSize: number;
   renderRows: (row: DocTableRow[]) => JSX.Element[];
   renderHeader: () => JSX.Element;
 }
@@ -38,7 +37,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     <FormattedMessage
       id="discover.docTable.limitedSearchResultLabel"
       defaultMessage="Limited to {resultCount} results. Refine your search."
-      values={{ resultCount: getServices().uiSettings.get(SAMPLE_SIZE_SETTING, 500) }}
+      values={{ resultCount: props.sampleSize }}
     />
   );
 

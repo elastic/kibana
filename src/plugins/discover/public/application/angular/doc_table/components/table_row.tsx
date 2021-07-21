@@ -10,8 +10,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import { getServices, IndexPattern } from '../../../../kibana_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
+import { IndexPattern } from '../../../../kibana_services';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../../helpers';
 import { getContextUrl } from '../../../helpers/get_context_url';
@@ -19,6 +18,7 @@ import { DocViewer } from '../../../components/doc_viewer/doc_viewer';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { trimAngularSpan } from '../../../components/table/table_helper';
 import { TableRowDetails } from './table_row_details';
+import { FilterManager } from '../../../../../../data/public';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -32,6 +32,9 @@ export interface TableRowProps {
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
   useNewFieldsApi: boolean;
+  hideTimeColumn: boolean;
+  filterManager: FilterManager;
+  addBasePath: (path: string) => string;
 }
 
 export const TableRow = ({
@@ -40,11 +43,12 @@ export const TableRow = ({
   row,
   indexPattern,
   useNewFieldsApi,
+  hideTimeColumn,
   onAddColumn,
   onRemoveColumn,
+  filterManager,
+  addBasePath,
 }: TableRowProps) => {
-  const services = getServices();
-
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -54,10 +58,6 @@ export const TableRow = ({
 
   const flattenedRow = useMemo(() => indexPattern.flattenHit(row), [indexPattern, row]);
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
-  const hideTimeColumn = useMemo(
-    () => services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-    [services]
-  );
 
   // toggle display of the rows details, a full list of the fields from each row
   const toggleRow = () => setOpen((prevOpen) => !prevOpen);
@@ -65,35 +65,28 @@ export const TableRow = ({
   /**
    * Fill an element with the value of a field
    */
-  const _displayField = useCallback(
-    (fieldName: string) => {
-      const text = indexPattern.formatField(row, fieldName);
-      const formattedField = trimAngularSpan(String(text));
-      // eslint-disable-next-line react/no-danger
-      const fieldElement = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
+  const _displayField = (fieldName: string) => {
+    const text = indexPattern.formatField(row, fieldName);
+    const formattedField = trimAngularSpan(String(text));
+    // eslint-disable-next-line react/no-danger
+    const fieldElement = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
 
-      return <div className="truncate-by-height">{fieldElement}</div>;
+    return <div className="truncate-by-height">{fieldElement}</div>;
+  };
+  const inlineFilter = useCallback(
+    (column: string, type: '+' | '-') => {
+      const field = indexPattern.fields.getByName(column);
+      filter(field!, flattenedRow[column], type);
     },
-    [indexPattern, row]
+    [filter, flattenedRow, indexPattern.fields]
   );
 
-  const inlineFilter = (column: string, type: '+' | '-') => {
-    const field = indexPattern.fields.getByName(column);
-    filter(field!, flattenedRow[column], type);
-  };
-
   const getContextAppHref = () => {
-    return getContextUrl(
-      row._id,
-      indexPattern.id!,
-      columns,
-      services.filterManager,
-      services.addBasePath
-    );
+    return getContextUrl(row._id, indexPattern.id!, columns, filterManager, addBasePath);
   };
 
   const getSingleDocHref = () => {
-    return services.addBasePath(
+    return addBasePath(
       `/app/discover#/doc/${indexPattern.id!}/${row._index}?id=${encodeURIComponent(row._id)}`
     );
   };
@@ -103,7 +96,7 @@ export const TableRow = ({
       <EuiButtonEmpty
         onClick={toggleRow}
         size="xs"
-        aria-expanded={!!open}
+        aria-expanded={open}
         aria-label={i18n.translate('discover.docTable.tableRow.toggleRowDetailsButtonAriaLabel', {
           defaultMessage: 'Toggle row details',
         })}

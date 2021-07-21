@@ -53,7 +53,6 @@ describe('Doc table component', () => {
       onMoveColumn: () => {},
       onRemoveColumn: () => {},
       onSort: () => {},
-      sampleSize: 500,
       useNewFieldsApi: true,
       dataTestSubj: 'discoverDocTable',
     };

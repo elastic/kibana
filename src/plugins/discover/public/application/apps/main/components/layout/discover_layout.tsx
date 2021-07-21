@@ -327,7 +327,6 @@ export function DiscoverLayout({
                           onMoveColumn={onMoveColumn}
                           onRemoveColumn={onRemoveColumn}
                           onSort={onSort}
-                          sampleSize={sampleSize}
                           useNewFieldsApi={useNewFieldsApi}
                           dataTestSubj="discoverDocTable"
                         />

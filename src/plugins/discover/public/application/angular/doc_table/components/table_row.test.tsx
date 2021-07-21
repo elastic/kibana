@@ -13,8 +13,8 @@ import { setDocViewsRegistry, setServices } from '../../../../kibana_services';
 import { createFilterManagerMock } from '../../../../../../data/public/query/filter_manager/filter_manager.mock';
 import { DiscoverServices } from 'src/plugins/discover/public/build_services';
 import { DocViewsRegistry } from '../../../doc_views/doc_views_registry';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from 'src/plugins/discover/common';
 import { indexPatternWithTimefieldMock } from 'src/plugins/discover/public/__mocks__/index_pattern_with_timefield';
+import { uiSettingsMock } from 'src/plugins/discover/public/__mocks__/ui_settings';
 
 jest.mock('../../helpers', () => {
   const originalModule = jest.requireActual('../../helpers');
@@ -56,24 +56,19 @@ describe('Doc table row component', () => {
   beforeEach(() => {
     mockInlineFilter = jest.fn();
 
-    defaultProps = {
+    defaultProps = ({
       columns: ['_source'],
       filter: mockInlineFilter,
       indexPattern: indexPatternWithTimefieldMock,
       row: mockHit,
       useNewFieldsApi: true,
-    };
-
-    setServices(({
-      uiSettings: {
-        get: (key: string) => {
-          if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-            return true;
-          }
-        },
-      },
       filterManager: mockFilterManager,
       addBasePath: (path: string) => path,
+      hideTimeColumn: true,
+    } as unknown) as TableRowProps;
+
+    setServices(({
+      uiSettings: uiSettingsMock,
     } as unknown) as DiscoverServices);
 
     setDocViewsRegistry(new DocViewsRegistry());

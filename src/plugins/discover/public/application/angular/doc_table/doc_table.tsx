@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useMemo, useRef, useState } from 'react';
 import './index.scss';
 import { EuiButtonEmpty, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TableHeader } from './components/table_header/table_header';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../../common';
 import { getServices, IndexPattern } from '../../../kibana_services';
 import { UI_SETTINGS } from '../../../../../data/public';
 import { SortOrder } from './components/table_header/helpers';
@@ -39,10 +43,6 @@ export interface DocTableProps {
    */
   indexPattern: IndexPattern;
   /**
-   * Max count of rows to be able to load. Used only for 'infinite' table
-   */
-  sampleSize?: number;
-  /**
    * Current sorting
    */
   sort: string[][];
@@ -50,10 +50,6 @@ export interface DocTableProps {
    * Total rows count. Used only for 'embeddable' table
    */
   totalHitCount?: number;
-  /**
-   * Visible rows on first render. Used only for 'infinite' table
-   */
-  minimumVisibleRows?: number;
   /**
    * New fields api switch
    */
@@ -112,7 +108,6 @@ export const DocTable = ({
   sort,
   onFilter,
   useNewFieldsApi,
-  sampleSize,
   searchDescription,
   sharedItemTitle,
   dataTestSubj,
@@ -120,10 +115,24 @@ export const DocTable = ({
 }: DocTableProps) => {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
-  const { uiSettings } = getServices();
-  const defaultSortOrder = uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
-  const hideTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
-  const isShortDots = uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+  const [
+    defaultSortOrder,
+    hideTimeColumn,
+    isShortDots,
+    sampleSize,
+    filterManager,
+    addBasePath,
+  ] = useMemo(() => {
+    const services = getServices();
+    return [
+      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+      services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
+      services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
+      services.filterManager,
+      services.addBasePath,
+    ];
+  }, []);
 
   const onSkipBottomButtonClick = useCallback(async () => {
     // delay scrolling to after the rows have been rendered
@@ -190,27 +199,26 @@ export const DocTable = ({
           indexPattern={indexPattern}
           row={current}
           useNewFieldsApi={!!useNewFieldsApi}
+          hideTimeColumn={hideTimeColumn}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
+          filterManager={filterManager}
+          addBasePath={addBasePath}
         />
       ));
     },
-    [columns, onFilter, indexPattern, onAddColumn, onRemoveColumn, useNewFieldsApi]
+    [
+      columns,
+      onFilter,
+      indexPattern,
+      useNewFieldsApi,
+      hideTimeColumn,
+      onAddColumn,
+      onRemoveColumn,
+      filterManager,
+      addBasePath,
+    ]
   );
-
-  const commonProps = {
-    columns,
-    rows,
-    indexPattern,
-    onSort,
-    onAddColumn,
-    onMoveColumn,
-    onRemoveColumn,
-    useNewFieldsApi,
-    defaultSortOrder,
-    hideTimeColumn,
-    isShortDots,
-  };
 
   return (
     <div
@@ -222,12 +230,12 @@ export const DocTable = ({
       data-test-subj={dataTestSubj}
       data-render-complete={!isLoading}
     >
-      {!isLoading && rows && rows.length !== 0 && (
+      {rows.length !== 0 ? (
         <Fragment>
           <SkipBottomButton onClick={onSkipBottomButtonClick} />
           {type === 'infinite' && (
             <DocTableInfiniteMemoized
-              {...commonProps}
+              rows={rows}
               renderHeader={renderHeader}
               renderRows={renderRows}
               minimumVisibleRows={minimumVisibleRows || 50}
@@ -235,10 +243,11 @@ export const DocTable = ({
           )}
           {type === 'embeddable' && (
             <DocTableEmbeddableMemoized
-              {...commonProps}
+              rows={rows}
               renderHeader={renderHeader}
               renderRows={renderRows}
               totalHitCount={totalHitCount!}
+              sampleSize={sampleSize}
             />
           )}
           {type === 'context' && (
@@ -257,7 +266,7 @@ export const DocTable = ({
               <FormattedMessage
                 id="discover.howToSeeOtherMatchingDocumentsDescription"
                 defaultMessage="These are the first {sampleSize} documents matching
-                  your search, refine your search to see others."
+            your search, refine your search to see others."
                 values={{ sampleSize }}
               />
               <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
@@ -270,8 +279,7 @@ export const DocTable = ({
             </span>
           )}
         </Fragment>
-      )}
-      {rows && rows.length === 0 && (
+      ) : (
         <div className="kbnDocTable__error">
           <EuiText size="xs" color="subdued">
             <EuiIcon type="visualizeApp" size="m" color="subdued" />

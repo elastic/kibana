@@ -29,19 +29,14 @@ export const TableCell = (props: CellProps) => {
   const handleFilterFor = () => props.inlineFilter(props.column, '+');
   const handleFilterOut = () => props.inlineFilter(props.column, '-');
 
-  if (props.filterable) {
-    return (
-      <td className={classes} data-test-subj="docTableField">
-        {props.formatted}
-        <TableCellActions handleFilterOut={handleFilterOut} handleFilterFor={handleFilterFor} />
-      </td>
-    );
-  }
-
   return (
     <td className={classes} data-test-subj="docTableField">
       {props.formatted}
-      <span className="kbnDocTableCell__filter" />
+      {props.filterable ? (
+        <TableCellActions handleFilterOut={handleFilterOut} handleFilterFor={handleFilterFor} />
+      ) : (
+        <span className="kbnDocTableCell__filter" />
+      )}
     </td>
   );
 };
