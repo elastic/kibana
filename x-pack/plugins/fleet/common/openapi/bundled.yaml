@@ -162,7 +162,9 @@ paths:
                         id:
                           type: string
                         type:
-                          type: string
+                          oneOf:
+                            - $ref: '#/components/schemas/kibana_saved_object_type'
+                            - $ref: '#/components/schemas/elasticsearch_asset_type'
                       required:
                         - id
                         - type
@@ -1059,6 +1061,28 @@ components:
         - format_version
         - download
         - path
+    kibana_saved_object_type:
+      title: Kibana saved object asset type
+      type: string
+      enum:
+        - dashboard
+        - visualization
+        - search
+        - index-pattern
+        - map
+        - lens
+        - ml-module
+        - security-rule
+    elasticsearch_asset_type:
+      title: Elasticsearch asset type
+      type: string
+      enum:
+        - component_template
+        - ingest_pipeline
+        - index_template
+        - ilm_policy
+        - transform
+        - data_stream_ilm_policy
     agent_type:
       type: string
       title: Agent type

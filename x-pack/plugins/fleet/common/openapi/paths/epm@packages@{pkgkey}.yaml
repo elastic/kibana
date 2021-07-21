@@ -80,7 +80,9 @@ delete:
                     id:
                       type: string
                     type:
-                      type: string
+                      oneOf:
+                        - $ref: ../components/schemas/kibana_saved_object_type.yaml
+                        - $ref: ../components/schemas/elasticsearch_asset_type.yaml
                   required:
                     - id
                     - type
