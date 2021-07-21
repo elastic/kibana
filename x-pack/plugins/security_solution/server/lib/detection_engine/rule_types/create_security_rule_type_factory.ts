@@ -204,21 +204,25 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             },
           });
           // TODO: AlertTypeState?
+          const createdSignals = result.createdSignals.concat(runResult.createdSignals);
+          const warningMessages = result.warningMessages.concat(runResult.warningMessages);
           result = {
             bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
-            createdSignals: result.createdSignals.concat(runResult.createdSignals),
+            createdSignals,
+            createdSignalsCount: createdSignals.length,
             errors: result.errors.concat(runResult.errors),
             lastLookbackDate: runResult.lastLookbackDate,
             searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
             state: runState,
             success: result.success && runResult.success,
-            warnings: result.warnings.concat(runResult.warnings),
+            warning: warningMessages.length > 0,
+            warningMessages,
           };
           runState = runResult.state;
         }
 
-        if (result.warnings.length) {
-          const warningMessage = buildRuleMessage(result.warnings.join());
+        if (result.warningMessages.length) {
+          const warningMessage = buildRuleMessage(result.warningMessages.join());
           await ruleStatusService.partialFailure(warningMessage);
         }
 
@@ -264,7 +268,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             )
           );
 
-          if (!hasError && !wroteWarningStatus && !result.warnings.length) {
+          if (!hasError && !wroteWarningStatus && !result.warning) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,

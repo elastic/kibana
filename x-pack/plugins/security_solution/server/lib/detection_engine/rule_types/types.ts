@@ -32,13 +32,15 @@ import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
+  createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
   lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
   success: boolean;
-  warnings: string[];
+  warning: boolean;
+  warningMessages: string[];
 }
 
 type SimpleAlertType<

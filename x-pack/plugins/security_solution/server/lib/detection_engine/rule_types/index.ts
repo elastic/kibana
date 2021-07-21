@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { createEqlAlertType } from './eql/create_eql_alert_type';
 export { createQueryAlertType } from './query/create_query_alert_type';
-export { createThresholdAlertType } from './threshold/create_threshold_alert_type';

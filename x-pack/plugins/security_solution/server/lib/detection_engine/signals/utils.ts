@@ -666,29 +666,35 @@ export const createSearchAfterReturnTypeFromResponse = ({
 
 export const createSearchAfterReturnType = ({
   success,
+  warning,
   searchAfterTimes,
   bulkCreateTimes,
   lastLookBackDate,
+  createdSignalsCount,
   createdSignals,
   errors,
-  warnings,
+  warningMessages,
 }: {
   success?: boolean | undefined;
+  warning?: boolean;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
+  createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
-  warnings?: string[] | undefined;
+  warningMessages?: string[] | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
+    warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
+    createdSignalsCount: createdSignals?.length ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
-    warnings: warnings ?? [],
+    warningMessages: warningMessages ?? [],
   };
 };
 
@@ -718,32 +724,38 @@ export const mergeReturns = (
   return searchAfters.reduce((prev, next) => {
     const {
       success: existingSuccess,
+      warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
-      warnings: existingWarningMessages,
+      warningMessages: existingWarningMessages,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
       success: newSuccess,
+      warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
+      createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
-      warnings: newWarningMessages,
+      warningMessages: newWarningMessages,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
       success: existingSuccess && newSuccess,
+      warning: existingWarning && newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
+      createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
-      warnings: [...existingWarningMessages, ...newWarningMessages],
+      warningMessages: [...existingWarningMessages, ...newWarningMessages],
     };
   });
 };

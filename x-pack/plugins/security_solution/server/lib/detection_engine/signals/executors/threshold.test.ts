@@ -79,6 +79,7 @@ describe('threshold_executor', () => {
           errors: [],
           success: true,
           bulkCreateDuration: '0',
+          createdItemsCount: 0,
           createdItems: [],
         })),
         wrapHits: jest.fn(),

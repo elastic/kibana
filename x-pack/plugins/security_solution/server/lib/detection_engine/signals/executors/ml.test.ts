@@ -58,6 +58,7 @@ describe('ml_executor', () => {
     (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
       success: true,
       bulkCreateDuration: 0,
+      createdItemsCount: 0,
       errors: [],
     });
   });

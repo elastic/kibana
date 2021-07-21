@@ -274,7 +274,6 @@ export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCrea
 export type SimpleHit = BaseHit<{ '@timestamp': string }>;
 
 export type WrapHits = (hits: estypes.SearchHit[]) => SimpleHit[];
-// export type WrapHits = (hits: Array<estypes.SearchHit<SignalSource>>) => SimpleHit[];
 
 export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
 
@@ -303,12 +302,14 @@ export interface SearchAfterAndBulkCreateParams {
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
+  warning: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
+  createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
-  warnings: string[];
+  warningMessages: string[];
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {

@@ -151,7 +151,7 @@ describe('signal_rule_alert_type', () => {
       };
     });
     const executorReturnValue = createSearchAfterReturnType({
-      createdSignals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      createdSignalsCount: 10,
     });
     (queryExecutor as jest.Mock).mockClear();
     (queryExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
@@ -429,11 +429,13 @@ describe('signal_rule_alert_type', () => {
     it('when bulk indexing failed', async () => {
       const result: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: null,
+        createdSignalsCount: 0,
         createdSignals: [],
-        warnings: [],
+        warningMessages: [],
         errors: ['Error that bubbled up.'],
       };
       (queryExecutor as jest.Mock).mockResolvedValue(result);

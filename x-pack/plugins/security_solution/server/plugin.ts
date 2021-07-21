@@ -47,11 +47,7 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
-import {
-  createEqlAlertType,
-  createQueryAlertType,
-  createThresholdAlertType,
-} from './lib/detection_engine/rule_types';
+import { createQueryAlertType } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -252,22 +248,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // Register rule types via rule-registry
       this.setupPlugins.alerting.registerType(
         createQueryAlertType({
-          lists: plugins.lists,
-          logger: this.logger,
-          mergeStrategy: this.config.alertMergeStrategy,
-          ruleDataClient,
-        })
-      );
-      this.setupPlugins.alerting.registerType(
-        createEqlAlertType({
-          lists: plugins.lists,
-          logger: this.logger,
-          mergeStrategy: this.config.alertMergeStrategy,
-          ruleDataClient,
-        })
-      );
-      this.setupPlugins.alerting.registerType(
-        createThresholdAlertType({
           lists: plugins.lists,
           logger: this.logger,
           mergeStrategy: this.config.alertMergeStrategy,

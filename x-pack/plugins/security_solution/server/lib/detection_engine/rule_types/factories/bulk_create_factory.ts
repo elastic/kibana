@@ -18,6 +18,7 @@ import { RuleDataClient } from '../../../../../../rule_registry/server';
 export interface GenericBulkCreateResponse<T> {
   success: boolean;
   bulkCreateDuration: string;
+  createdItemsCount: number;
   createdItems: Array<T & { _id: string; _index: string }>;
   errors: string[];
 }
@@ -33,6 +34,7 @@ export const bulkCreateFactory = (
       errors: [],
       success: true,
       bulkCreateDuration: '0',
+      createdItemsCount: 0,
       createdItems: [],
     };
   }
@@ -85,6 +87,7 @@ export const bulkCreateFactory = (
       errors: Object.keys(errorCountByMessage),
       success: false,
       bulkCreateDuration: makeFloatString(end - start),
+      createdItemsCount: createdItems.length,
       createdItems,
     };
   } else {
@@ -92,6 +95,7 @@ export const bulkCreateFactory = (
       errors: [],
       success: true,
       bulkCreateDuration: makeFloatString(end - start),
+      createdItemsCount: createdItems.length,
       createdItems,
     };
   }

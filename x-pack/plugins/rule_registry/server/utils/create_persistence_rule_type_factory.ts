@@ -38,22 +38,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
               );
               return response;
-              /*
-              return {
-                createdSignals: alerts.map((alert) =>
-                  alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
-                ),
-                errors: [],
-              };
-              */
             }
-
-            /*
-            return {
-              createdSignals: 0,
-              errors: [],
-            };
-            */
           },
         },
       });
