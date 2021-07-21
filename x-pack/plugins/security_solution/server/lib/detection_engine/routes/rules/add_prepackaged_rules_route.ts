@@ -77,7 +77,9 @@ export const addPrepackedRulesRoute = (
           siemClient,
           alertsClient,
           frameworkRequest,
-          config.maxTimelineImportExportSize
+          config.maxTimelineImportExportSize,
+          config.prebuiltRulesFromFileSystem,
+          config.prebuiltRulesFromSavedObjects
         );
         return response.ok({ body: validated ?? {} });
       } catch (err) {
@@ -104,7 +106,9 @@ export const createPrepackagedRules = async (
   siemClient: AppClient,
   alertsClient: AlertsClient,
   frameworkRequest: FrameworkRequest,
-  maxTimelineImportExportSize: number,
+  maxTimelineImportExportSize: ConfigType['maxTimelineImportExportSize'],
+  prebuiltRulesFromFileSystem: ConfigType['prebuiltRulesFromFileSystem'],
+  prebuiltRulesFromSavedObjects: ConfigType['prebuiltRulesFromSavedObjects'],
   exceptionsClient?: ExceptionListClient
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
   const esClient = context.core.elasticsearch.client;
@@ -121,7 +125,11 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
+  const latestPrepackagedRules = await getLatestPrepackagedRules(
+    ruleAssetsClient,
+    prebuiltRulesFromFileSystem,
+    prebuiltRulesFromSavedObjects
+  );
   const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
