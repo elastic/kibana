@@ -38,7 +38,9 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
         return (
           data.pageIndex === location.page_index &&
           data.pageSize === location.page_size &&
-          data.timestamp >= freshDataTimestamp
+          data.timestamp >= freshDataTimestamp &&
+          data.excludedPolicies === location.excludedPolicies &&
+          data.includedPolicies === location.includedPolicies
         );
       }))
   );

@@ -131,6 +131,8 @@ export const TrustedAppsPage = memo(() => {
             <EuiFlexItem grow={false}>
               <PoliciesSelector
                 policies={policyList}
+                defaultExcludedPolicies={location.excludedPolicies}
+                defaultIncludedPolicies={location.includedPolicies}
                 onChangeSelection={(items) => {
                   navigationCallbackPolicies(
                     items

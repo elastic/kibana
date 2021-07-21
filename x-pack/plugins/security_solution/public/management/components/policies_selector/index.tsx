@@ -22,6 +22,8 @@ import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 
 export interface PoliciesSelectorProps {
   policies: ImmutableArray<PolicyData>;
+  defaultIncludedPolicies?: string;
+  defaultExcludedPolicies?: string;
   onChangeSelection: (items: Item[]) => void;
 }
 
@@ -31,111 +33,141 @@ export interface Item {
   checked?: FilterChecked;
 }
 
-export const PoliciesSelector = memo<PoliciesSelectorProps>(({ policies, onChangeSelection }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [query, setQuery] = useState<string>('');
-  const [itemsList, setItemsList] = useState<Item[]>([]);
+interface DefaultPoliciesByKey {
+  [key: string]: boolean;
+}
 
-  useEffect(() => {
-    setItemsList([
-      ...policies.map((policy) => ({ name: policy.name, id: policy.id })),
-      { name: 'Global entries' },
-      { name: 'Unassigned entries' },
-    ]);
-  }, [policies]);
+export const PoliciesSelector = memo<PoliciesSelectorProps>(
+  ({ policies, onChangeSelection, defaultExcludedPolicies, defaultIncludedPolicies }) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [query, setQuery] = useState<string>('');
+    const [itemsList, setItemsList] = useState<Item[]>([]);
 
-  const onButtonClick = () => {
-    setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
-  };
+    useEffect(() => {
+      const defaultIncludedPoliciesByKey: DefaultPoliciesByKey = defaultIncludedPolicies
+        ? defaultIncludedPolicies.split(',').reduce((acc, val) => ({ ...acc, [val]: true }), {})
+        : {};
 
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
+      const defaultExcludedPoliciesByKey: DefaultPoliciesByKey = defaultExcludedPolicies
+        ? defaultExcludedPolicies.split(',').reduce((acc, val) => ({ ...acc, [val]: true }), {})
+        : {};
 
-  const onChange = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
-    const value = ev.target.value || '';
-    setQuery(value);
-  }, []);
+      const getCheckedValue = (id: string): FilterChecked | undefined =>
+        defaultIncludedPoliciesByKey[id]
+          ? 'on'
+          : defaultExcludedPoliciesByKey[id]
+          ? 'off'
+          : undefined;
 
-  const updateItem = useCallback(
-    (index: number) => {
-      if (!itemsList[index]) {
-        return;
-      }
+      setItemsList([
+        ...policies.map((policy) => ({
+          name: policy.name,
+          id: policy.id,
+          checked: getCheckedValue(policy.id),
+        })),
+        { name: 'Global entries', id: 'global', checked: getCheckedValue('global') },
+        { name: 'Unassigned entries', id: 'unassigned', checked: getCheckedValue('unassigned') },
+      ]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [policies]);
 
-      const newItems = [...itemsList];
+    const onButtonClick = () => {
+      setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
+    };
 
-      switch (newItems[index].checked) {
-        case 'on':
-          newItems[index].checked = 'off';
-          break;
+    const closePopover = () => {
+      setIsPopoverOpen(false);
+    };
 
-        case 'off':
-          newItems[index].checked = undefined;
-          break;
+    const onChange = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
+      const value = ev.target.value || '';
+      setQuery(value);
+    }, []);
 
-        default:
-          newItems[index].checked = 'on';
-      }
+    const updateItem = useCallback(
+      (index: number) => {
+        if (!itemsList[index]) {
+          return;
+        }
 
-      setItemsList(newItems);
-      onChangeSelection(newItems);
-    },
-    [itemsList, onChangeSelection]
-  );
+        const newItems = [...itemsList];
 
-  const dropdownItems = useMemo(
-    () =>
-      itemsList.map((item, index) =>
-        item.name.match(new RegExp(query, 'i')) ? (
-          <EuiFilterSelectItem checked={item.checked} key={index} onClick={() => updateItem(index)}>
-            {item.name}
-          </EuiFilterSelectItem>
-        ) : null
+        switch (newItems[index].checked) {
+          case 'on':
+            newItems[index].checked = 'off';
+            break;
+
+          case 'off':
+            newItems[index].checked = undefined;
+            break;
+
+          default:
+            newItems[index].checked = 'on';
+        }
+
+        setItemsList(newItems);
+        onChangeSelection(newItems);
+      },
+      [itemsList, onChangeSelection]
+    );
+
+    const dropdownItems = useMemo(
+      () =>
+        itemsList.map((item, index) =>
+          item.name.match(new RegExp(query, 'i')) ? (
+            <EuiFilterSelectItem
+              checked={item.checked}
+              key={index}
+              onClick={() => updateItem(index)}
+            >
+              {item.name}
+            </EuiFilterSelectItem>
+          ) : null
+        ),
+      [itemsList, query, updateItem]
+    );
+
+    const button = useMemo(
+      () => (
+        <EuiFilterButton
+          iconType="arrowDown"
+          onClick={onButtonClick}
+          isSelected={isPopoverOpen}
+          numFilters={itemsList.length}
+          hasActiveFilters={!!itemsList.find((item) => item.checked === 'on')}
+          numActiveFilters={itemsList.filter((item) => item.checked === 'on').length}
+        >
+          {'Policies'}
+        </EuiFilterButton>
       ),
-    [itemsList, query, updateItem]
-  );
+      [isPopoverOpen, itemsList]
+    );
 
-  const button = useMemo(
-    () => (
-      <EuiFilterButton
-        iconType="arrowDown"
-        onClick={onButtonClick}
-        isSelected={isPopoverOpen}
-        numFilters={itemsList.length}
-        hasActiveFilters={!!itemsList.find((item) => item.checked === 'on')}
-        numActiveFilters={itemsList.filter((item) => item.checked === 'on').length}
+    return (
+      <EuiFlexGroup
+        data-test-subj="policiesSelector"
+        direction="row"
+        alignItems="center"
+        gutterSize="l"
       >
-        {'Policies'}
-      </EuiFilterButton>
-    ),
-    [isPopoverOpen, itemsList]
-  );
-
-  return (
-    <EuiFlexGroup
-      data-test-subj="policiesSelector"
-      direction="row"
-      alignItems="center"
-      gutterSize="l"
-    >
-      <EuiFlexItem>
-        <EuiFilterGroup>
-          <EuiPopover
-            button={button}
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-          >
-            <EuiPopoverTitle paddingSize="s">
-              <EuiFieldSearch compressed onChange={onChange} />
-            </EuiPopoverTitle>
-            <div className="euiFilterSelect__items">{dropdownItems}</div>
-          </EuiPopover>
-        </EuiFilterGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+        <EuiFlexItem>
+          <EuiFilterGroup>
+            <EuiPopover
+              button={button}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+            >
+              <EuiPopoverTitle paddingSize="s">
+                <EuiFieldSearch compressed onChange={onChange} />
+              </EuiPopoverTitle>
+              <div className="euiFilterSelect__items">{dropdownItems}</div>
+            </EuiPopover>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 PoliciesSelector.displayName = 'PoliciesSelector';
