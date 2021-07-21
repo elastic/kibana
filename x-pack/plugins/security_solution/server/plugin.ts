@@ -397,7 +397,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         plugins.fleet?.agentService!,
-        plugins.fleet?.agentPolicyService!
+        plugins.fleet?.agentPolicyService!,
+        logger
       ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,

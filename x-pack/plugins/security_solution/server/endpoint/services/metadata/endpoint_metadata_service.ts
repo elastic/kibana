@@ -8,6 +8,7 @@
 import {
   ElasticsearchClient,
   KibanaRequest,
+  Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from 'kibana/server';
@@ -20,12 +21,13 @@ import {
 } from '../../../../../fleet/server';
 import {
   EndpointHostNotFoundError,
+  EndpointHostUnEnrolledError,
   FleetAgentNotFoundError,
   FleetAgentPolicyNotFoundError,
 } from './errors';
 import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders';
 import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
-import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import { DEFAULT_ENDPOINT_HOST_STATUS, fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import { EndpointError } from '../../errors';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
@@ -37,7 +39,8 @@ type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
 const wrapErrorIfNeeded = (error: Error): EndpointError =>
   error instanceof EndpointError ? error : new EndpointError(error.message, error);
 
-// used as the callback to `Promise#catch()` to ensure errors (especially those from kibana/elasticsearch clients) are wrapped
+// used as the callback to `Promise#catch()` to ensure errors
+// (especially those from kibana/elasticsearch clients) are wrapped
 const catchAndWrapError = <E extends Error>(error: E) => Promise.reject(wrapErrorIfNeeded(error));
 
 export class EndpointMetadataService {
@@ -46,6 +49,13 @@ export class EndpointMetadataService {
    * @deprecated
    */
   private __DANGEROUS_INTERNAL_SO_CLIENT: SavedObjectsClientContract | undefined;
+
+  constructor(
+    private savedObjectsStart: SavedObjectsServiceStart,
+    private readonly agentService: AgentService,
+    private readonly agentPolicyService: AgentPolicyServiceInterface,
+    private readonly logger?: Logger
+  ) {}
 
   /**
    * A Saved Object client that can access any saved object. Used primarly to retrieve fleet data
@@ -76,15 +86,11 @@ export class EndpointMetadataService {
 
     return this.__DANGEROUS_INTERNAL_SO_CLIENT;
   }
-  constructor(
-    private savedObjectsStart: SavedObjectsServiceStart,
-    private readonly agentService: AgentService,
-    private readonly agentPolicyService: AgentPolicyServiceInterface
-  ) {}
 
   /**
-   * Retrieve a single endpoint host metadata
-   * (NOTE: Not enriched with fleet data. See `getEnrichedHostMetadata()` wanting a more complete picture of the Endpoint)
+   * Retrieve a single endpoint host metadata. Note that the return endpoint document, if found,
+   * could be associated with a Fleet Agent that is no longer active. If wanting to ensure the
+   * endpoint is associated with an active Fleet Agent, then use `getEnrichedHostMetadata()` instead
    *
    * @param esClient Elasticsearch Client (usually scoped to the user's context)
    * @param endpointId the endpoint id (from `agent.id`)
@@ -115,28 +121,67 @@ export class EndpointMetadataService {
     esClient: ElasticsearchClient,
     endpointId: string
   ): Promise<HostInfo> {
+    const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
+
+    let fleetAgentId = endpointMetadata.elastic.agent.id;
+    let fleetAgent: Agent | undefined;
+
+    // Get Fleet agent
     try {
-      const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
-      const fleetAgent = await this.getFleetAgent(esClient, endpointMetadata.elastic.agent.id);
-      const fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id!);
-      const endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
-        (policy: PackagePolicy) => policy.package?.name === 'endpoint'
+      if (!fleetAgentId) {
+        fleetAgentId = endpointMetadata.agent.id;
+        this.logger?.warn(`Missing elastic agent id, using host id instead ${fleetAgentId}`);
+      }
+
+      fleetAgent = await this.getFleetAgent(esClient, fleetAgentId);
+    } catch (error) {
+      if (error instanceof FleetAgentNotFoundError) {
+        this.logger?.warn(`agent with id ${fleetAgentId} not found`);
+      } else {
+        throw error;
+      }
+    }
+
+    // If the agent is not longer active, then that means that the Agent/Endpoint have been un-enrolled from the host
+    if (fleetAgent && !fleetAgent.active) {
+      throw new EndpointHostUnEnrolledError(
+        `Endpoint with id ${endpointId} (Fleet agent id ${fleetAgentId}) is unenrolled`
       );
+    }
+
+    // ------------------------------------------------------------------------------
+    // Any failures in enriching the Host form this point should NOT cause an error
+    // ------------------------------------------------------------------------------
+    try {
+      let fleetAgentPolicy: AgentPolicyWithPackagePolicies | undefined;
+      let endpointPackagePolicy: PackagePolicy | undefined;
+
+      // Get Agent Policy and Endpoint Package Policy
+      if (fleetAgent) {
+        try {
+          fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id!);
+          endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
+            (policy) => policy.package?.name === 'endpoint'
+          );
+        } catch (error) {
+          this.logger?.error(error);
+        }
+      }
 
       return {
         metadata: endpointMetadata,
-        host_status: fleetAgentStatusToEndpointHostStatus(
-          this.agentService.getStatusForAgent(fleetAgent)
-        ),
+        host_status: fleetAgent
+          ? fleetAgentStatusToEndpointHostStatus(this.agentService.getStatusForAgent(fleetAgent))
+          : DEFAULT_ENDPOINT_HOST_STATUS,
         policy_info: {
           agent: {
             applied: {
-              revision: fleetAgent.policy_revision ?? 0,
-              id: fleetAgent.policy_id ?? '',
+              revision: fleetAgent?.policy_revision ?? 0,
+              id: fleetAgent?.policy_id ?? '',
             },
             configured: {
-              revision: fleetAgentPolicy.revision,
-              id: fleetAgentPolicy.id,
+              revision: fleetAgentPolicy?.revision ?? 0,
+              id: fleetAgentPolicy?.id ?? '',
             },
           },
           endpoint: {

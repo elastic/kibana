@@ -38,6 +38,7 @@ import {
   queryResponseToHostResult,
 } from './support/query_strategies';
 import { NotFoundError } from '../../errors';
+import { EndpointHostUnEnrolledError } from '../../services/metadata';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -68,6 +69,20 @@ const errorHandler = <E extends Error>(
 ): IKibanaResponse => {
   if (error instanceof NotFoundError) {
     return res.notFound({ body: error });
+  }
+
+  if (error instanceof EndpointHostUnEnrolledError) {
+    return res.badRequest({ body: error });
+  }
+
+  // legacy check for Boom errors. `ts-ignore` is for the errors around non-standard error properties
+  // @ts-ignore
+  const boomStatusCode = error.isBoom && error?.output?.statusCode;
+  if (boomStatusCode) {
+    return res.customError({
+      statusCode: boomStatusCode,
+      body: error,
+    });
   }
 
   // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
