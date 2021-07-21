@@ -41,6 +41,8 @@ export interface TaskRunnerContext {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   alertTypeRegistry: AlertTypeRegistry;
   kibanaBaseUrl: string | undefined;
+  supportsEphemeralTasks: boolean;
+  maxEphemeralActionsPerAlert: Promise<number>;
 }
 
 export class TaskRunnerFactory {
@@ -57,6 +59,7 @@ export class TaskRunnerFactory {
 
   public create<
     Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams,
     State extends AlertTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
@@ -65,6 +68,7 @@ export class TaskRunnerFactory {
   >(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -79,6 +83,7 @@ export class TaskRunnerFactory {
 
     return new TaskRunner<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
