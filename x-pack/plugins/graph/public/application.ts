@@ -120,7 +120,7 @@ const mainTemplate = (basePath: string) => `<div ng-view class="gphAppWrapper">
 
 const moduleName = 'app/graph';
 
-const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap', 'ui.ace'];
+const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap'];
 
 function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
