@@ -43,6 +43,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 SRC_DEPS = [
   "//packages/kbn-expect",
+  "//packages/kbn-std",
   "//packages/kbn-utils",
   "@npm//@babel/core",
   "@npm//axios",
@@ -60,10 +61,12 @@ SRC_DEPS = [
   "@npm//moment",
   "@npm//normalize-path",
   "@npm//rxjs",
+  "@npm//tar",
   "@npm//tree-kill",
   "@npm//tslib",
   "@npm//typescript",
-  "@npm//vinyl"
+  "@npm//vinyl",
+  "@npm//yauzl"
 ]
 
 TYPES_DEPS = [
@@ -76,8 +79,10 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/normalize-path",
   "@npm//@types/react",
+  "@npm//@types/tar",
   "@npm//@types/testing-library__jest-dom",
-  "@npm//@types/vinyl"
+  "@npm//@types/vinyl",
+  "@npm//@types/yauzl"
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS

@@ -101,12 +101,25 @@ export type NotificationExecutorOptions = AlertExecutorOptions<
 // since we are only increasing the strictness of params.
 export const isNotificationAlertExecutor = (
   obj: NotificationAlertTypeDefinition
-): obj is AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
+): obj is AlertType<
+  AlertTypeParams,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+> => {
   return true;
 };
 
 export type NotificationAlertTypeDefinition = Omit<
-  AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext, 'default'>,
+  AlertType<
+    AlertTypeParams,
+    AlertTypeParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    'default'
+  >,
   'executor'
 > & {
   executor: ({
