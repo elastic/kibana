@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AddDomainLogic } from './add_domain_logic';
 
@@ -41,12 +42,19 @@ export const AddDomainForm: React.FC = () => {
       >
         <EuiFormRow
           fullWidth
-          label="Domain URL"
+          label={
+            i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainForm.urlLabel', {
+              defaultMessage: 'Domain URL',
+            }) /* "Domain URL"*/
+          }
           helpText={
             <EuiText size="s">
-              {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainForm.helpText', {
-                defaultMessage: 'Domain URLs require a protocol and cannot contain any paths.',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.urlHelpText',
+                {
+                  defaultMessage: 'Domain URLs require a protocol and cannot contain any paths.',
+                }
+              )}
             </EuiText>
           }
         >
@@ -79,17 +87,14 @@ export const AddDomainForm: React.FC = () => {
             <EuiText size="s">
               <p>
                 <strong>
-                  {
-                    // TODO Is there a better way to include the EuiCode inside i18n.translate?
-                    i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.entryPointLabel',
-                      {
-                        defaultMessage: 'Web Crawler entry point has been set as',
-                      }
-                    )
-                  }
-                </strong>{' '}
-                <EuiCode>{entryPointValue}</EuiCode>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.appSearch.crawler.addDomainForm.entryPointLabel"
+                    defaultMessage="Web Crawler entry point has been set as {entryPointValue}"
+                    values={{
+                      entryPointValue: <EuiCode>{entryPointValue}</EuiCode>,
+                    }}
+                  />
+                </strong>
               </p>
             </EuiText>
           </>

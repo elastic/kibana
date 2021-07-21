@@ -11,7 +11,9 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButton, EuiCode, EuiFieldText, EuiForm } from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiForm } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { rerender } from '../../../../../test_helpers';
 
@@ -103,7 +105,7 @@ describe('AddDomainForm', () => {
 
       rerender(wrapper);
 
-      expect(wrapper.find(EuiCode)).toHaveLength(0);
+      expect(wrapper.find(FormattedMessage)).toHaveLength(0);
     });
 
     it('displays the entry point otherwise', () => {
@@ -114,7 +116,7 @@ describe('AddDomainForm', () => {
 
       rerender(wrapper);
 
-      expect(wrapper.find(EuiCode)).toHaveLength(1);
+      expect(wrapper.find(FormattedMessage)).toHaveLength(1);
     });
   });
 });
