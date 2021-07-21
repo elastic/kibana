@@ -39,6 +39,10 @@ describe('createMonitoringStatsStream', () => {
       },
       custom: {},
     },
+    ephemeral_tasks: {
+      enabled: true,
+      request_capacity: 10,
+    },
   };
 
   it('returns the initial config used to configure Task Manager', async () => {
