@@ -93,7 +93,6 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     endpointMetadataService,
     packageService: createMockPackageService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    savedObjectsStart,
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
     security: securityMock.createStart(),

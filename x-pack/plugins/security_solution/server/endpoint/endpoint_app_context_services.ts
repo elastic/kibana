@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger, SavedObjectsServiceStart } from 'src/core/server';
+import { KibanaRequest, Logger } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
@@ -47,7 +47,6 @@ export type EndpointAppContextServiceStartContract = Partial<
   alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
-  savedObjectsStart: SavedObjectsServiceStart;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
@@ -62,7 +61,6 @@ export class EndpointAppContextService {
   private manifestManager: ManifestManager | undefined;
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
-  private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private config: ConfigType | undefined;
   private license: LicenseService | undefined;
   public security: SecurityPluginStart | undefined;
@@ -75,7 +73,6 @@ export class EndpointAppContextService {
     this.packagePolicyService = dependencies.packagePolicyService;
     this.agentPolicyService = dependencies.agentPolicyService;
     this.manifestManager = dependencies.manifestManager;
-    this.savedObjectsStart = dependencies.savedObjectsStart;
     this.config = dependencies.config;
     this.license = dependencies.licenseService;
     this.security = dependencies.security;
