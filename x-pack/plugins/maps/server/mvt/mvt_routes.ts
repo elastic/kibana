@@ -235,9 +235,9 @@ export function initMVTRoutes({
       });
 
       try {
-        // console.log('sdfsdl', tile.length, typeof tile);
-        // const jsonTile = new VectorTile(new Protobuf(tile));
-        // console.log('jst', jsonTile);
+        console.log('sdfsdl', tile.length, typeof tile);
+        const jsonTile = new VectorTile(new Protobuf(tile));
+        console.log('jst', jsonTile);
       }catch(e) {
         console.error('Cant parse vector tile');
         // console.error(e);

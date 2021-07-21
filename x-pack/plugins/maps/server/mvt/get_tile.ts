@@ -183,6 +183,7 @@ export async function getGridTile({
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = tileBounds;
     requestBody.track_total_hits = false;
 
+
     const response = await context
       .search!.search(
         {
