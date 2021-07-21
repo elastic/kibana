@@ -17,7 +17,6 @@ import {
   EuiComboBoxProps,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
@@ -25,16 +24,7 @@ import { OperationSupportMatrix } from './operation_support';
 import { IndexPattern, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
-
-const truncate = function (label: string, length: number, separator = '...') {
-  if (label.length <= length) return label;
-
-  const charsToShow = length - separator.length;
-  const frontChars = Math.ceil(charsToShow / 2);
-  const backChars = Math.floor(charsToShow / 2);
-
-  return label.substr(0, frontChars) + separator + label.substr(label.length - backChars);
-};
+import { TruncatedLabel } from './truncated_label';
 export interface FieldChoice {
   type: 'field';
   field: string;
@@ -179,7 +169,7 @@ export function FieldSelect({
   ]);
   const comboBoxRef = useRef<HTMLInputElement>(null);
   const labelWidth = (comboBoxRef.current?.clientWidth || 305) - 70; // subtracting paddings
-  const labelLength = Math.round(labelWidth * 7.7); // dividing the width by the approximate space of a single letter, depends on the font size and spacing
+  const labelLength = Math.round(labelWidth / 8.3); // dividing the width by the approximate space of a single letter, depends on the font size and spacing
 
   return (
     <div ref={comboBoxRef}>
@@ -228,9 +218,7 @@ export function FieldSelect({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiHighlight search={searchValue}>
-                {truncate(option.label, labelLength)}
-              </EuiHighlight>
+              <TruncatedLabel label={option.label} length={labelLength} search={searchValue} />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
