@@ -19,17 +19,31 @@ Other versions: {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.
 // tag::notable-highlights[]
 
 [float]
+[[enterprise-search-7-14]]
+=== Enterprise Search now in {kib}
+
+beta[] You can now manage your Enterprise Search deployments without leaving {kib}!
+7.14 introduces *App Search* and *Workplace Search* management dashboards for
+{kib}, so you can experience the full power of Elastic from a single interface.
+Get started by selecting Enterprise Search from the main menu or {kib} Home screen.
+Learn more in
+https://www.elastic.co/guide/en/enterprise-search/7.14/user-interfaces.html#user-interfaces-management-kibana[Setting up Enterprise Search in {kib}].
+
+[role="screenshot"]
+image::user/images/new-enterprise-search.png[Enterprise Search home page, where you can open App Search and Workplace Search]
+
+[float]
 [[alerting-7-14]]
 === Alerting&mdash;import and export rules & connectors
 
 7.14 adds the ability to export and import rules and connectors between {kib} deployments and spaces.
-This increases support for {kib}’s multi-tenancy paradigm as well as reusability.
+This increases support for {kib}’s multi-tenancy paradigm and for reusability.
 Write your rules once and reuse them fast and effortlessly according to your organization’s needs.
 
 [role="screenshot"]
-image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
+image::user/images/new-alerting.png[How to export and import rules and connectors]
 
-We also improved the observability of alerting by enhancing:
+We also improved the observability of alerting by enhancing the following:
 
 * The Task Manager health API with the ability to log stats over time when a
 problem occurs and an (experimental) capacity estimation.
@@ -37,7 +51,8 @@ problem occurs and an (experimental) capacity estimation.
 and a log at the start of a rule or connector execution.
 * The server logs with a log warning when disabling an alert task due to not finding the
 rule saved object.
-* The documentation with example event log queries and an enhanced *Alerting* and *Task Manager* <<alerting-troubleshooting,troubleshooting page>>.
+* The documentation with example event log queries and an
+enhanced *Alerting* and *Task Manager* {kibana-ref}/alerting-troubleshooting.html[troubleshooting doc].
 
 [float]
 [[lens-7-14]]
@@ -50,11 +65,11 @@ With formulas, you can combine math operations and aggregated fields to author
 your own metrics at query time. With the easy-to-use, autocompleting formula editor, you can:
 
 * Mix and match filtered and time shifted {es} aggregations
-* Add report-time calculations on the fly, such as cumulative sum or moving average
+* Add report-time calculations on the fly, such as cumulative sum and moving average
 * Build comparisons to the overall summary data using the new overall functions
 
 [role="screenshot"]
-image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
+image::user/images/new-lens-custom-formulas.png[Custom formulas in Lens]
 
 Want to learn more? Check out the searchable in-product reference documentation,
 which also includes common use cases. When you’re ready, use full screen mode to create your own formulas.
@@ -66,15 +81,191 @@ Make easy and powerful comparisons between two time periods by adding time shift
 metrics to your visualizations. Time shifted metrics help to reduce the distraction
 caused by the seasonal or behavioral changes in your data.
 
-role="screenshot"]
-image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
+[role="screenshot"]
+image::user/images/new-lens-time-shifts.png[Time shift metrics in Lens]
 
 [float]
 ==== Table enhancements
 
-Color by value
-Visually emphasize specific metric values with flexible conditional coloring. Kibana provides you with an out-of-the-box palette, or you can define your own custom color palette. To dynamically apply colors, specify the color stops by percent or number values. For values that are outside the specified range, control how to apply colors with color continuity.
+Notable table enhancements include:
 
+* *Summary rows*. Add a row to your table that summarizes the column values,
+and customize how you want the summary aggregation and label to appear.
 
+* *Color by value*. Visually emphasize specific metric values with flexible
+conditional coloring. {kib} provides you with an out-of-the-box palette,
+or you can define your own custom color palette. To dynamically apply colors,
+specify the color stops by percent or number values. For values that are outside
+the specified range, control how to apply colors with color continuity.
++
+[role="screenshot"]
+image::user/images/new-lens-color-by-value.png[Metrics values in table emphaized with flexible conditional coloring]
+
+[float]
+==== Additional improvements
+
+* experimental[] *Heatmaps*. Create heatmaps, sometimes called swim lanes,
+which are useful for showing a single metric at the intersection of two dimensions.
+
+* *Improved editing performance*. Notice the extremely fast switching between
+visualization authoring & dashboard for an improved authoring workflow.
+
+* *Legend values on hover*. Configure legends to display the values on hover.
+This helps you clearly see the legend values with dense data sets.
+
+* *Custom axis controls*. Create consistent scales across your visualizations
+on a dashboard. Represent the possible range of values--even when those values
+may not be returned in the current data set.
+
+* *Opacity slider in area charts*. To make it easier to analyze the area chart
+data that frequently overlaps, you can now adjust the transparency with the Fill opacity slider.
+
+* *Quickly navigate to Maps*>
+Select a geospatial field in the *Available fields* list to open and visualize it in *Maps*,
+including any filters you’ve applied.
+
+[float]
+[[new-theme-7-14]]
+=== New EUI theme
+
+{kib} now uses the new https://elastic.github.io/eui/#/[EUI] theme by default.
+The updated theme brings a more modern look to the entire interface.
+Due to small changes to padding, margins, and font sizes in the base components,
+you might notice minor changes to dashboard layouts. During the 7.x cycle,
+you can revert to the old theme in {kibana-ref}/advanced-options.html[Advanced Settings].
+
+[float]
+[[saved-objects-migration-7-14]]
+=== Improvements to saved objects migrations
+
+The migration system for saved objects, the data structures that underpin much of {kib},
+has improved. Now upgrading from prior versions is quicker and more seamless,
+even for the largest of deployments. In addition, when problems arise, the error logging
+is now more clear, so administrators can get migration back on track faster.
+Finally, to help a bit more, we’ve clarified our migration documentation.
+
+[float]
+[[maps-7-14]]
+=== Maps&mdash;new time slider and drawing tools
+
+[float]
+==== Time slider
+
+You can now analyze and explore space and time with the time slider.
+This control allows you to look at a subset of time (a time slice), move it forward or backward,
+and play back your data based on the global time extent. The time slider works
+on all layers that are based on a time-field.
+
+[role="screenshot"]
+image::user/images/new-maps-timeslider.png[Map showing time slider that you can use to look at a slice of time]
+
+[float]
+==== Create and edit tools
+
+beta[] You can now create a new index, and with a new set of drawing tools,
+add or delete documents. Use the drawing tools to create new data and add geographic
+context to your map, good for annotation or ad-hoc analysis.
+You can edit both new and existing layers (indices).
+Editing is not supported on layers with clustering, joins, or time filtering.
+
+[role="screenshot"]
+image::user/images/new-maps-edit.png[Map showing set of drawing tools to add or delete new data and add geographic context to your map]
+
+[float]
+==== Enhanced spatial filters
+
+Filtering is now more intuitive.  The spatial filters in *Maps* are enhanced to work
+with all layers on the map, meaning you no longer have to specify a target index pattern
+when configuring the filter. When using the distance filter, you will now see a
+distance value displayed as you draw the shape. This makes it easier to filter all
+documents that are within 10 kilometers of a specific location.
+
+[float]
+[[discover-7-14]]
+=== Discover&mdash;new community-requested features
+
+*Discover* debuts several community-requested features: a multi-fields toggle,
+enhanced *Lens* integration, and source views in the document viewer.
+*Discover* also enhances the user experience with improvements to stability, performance,
+accessibility, and usability.  For more information on the most-used app in {kib}, refer to {kibana-ref}/discover.html[Discover].
+
+[float]
+[[labs-7-14]]
+=== Labs&mdash;preview experimental features
+
+With *Labs*, you can now try out and provide feedback on the
+*Canvas* and *Dashboard* features that are in progress or experimental.
+When enabled, you’ll see *Labs* in the toolbar.
+
+[role="screenshot"]
+image::user/images/new-labs.png[Dashboard app showing how to access Labs from the toolbar]
+
+The first *Labs* project is *Defer loading panels below the fold*. To improve dashboard loading time,
+the dashboard panels that users must scroll to see are loaded when they first
+become visible on the dashboard. The result is a dashboard whose initial load is much faster.
+Go to {kibana-ref}/advanced-options.html[Advanced Settings] to enable *Labs*, give *Defer loading* a try,
+and let us know what you think.
+
+[float]
+[[canvas-7-14]]
+=== Canvas&mdash;improves SQL expression function
+
+The {es} SQL expression function in *Canvas* has changed to gracefully
+handle arrays in retrieved data. If the data for the SQL expression includes an array,
+the first entry of the array is returned in the result set.
+
+Additionally, the SQL expression function now supports passing parameters into the query,
+making it much easier to pass in variable values to your SQL queries on your workpad.
+
+[role="screenshot"]
+image::user/images/new-canvas.png[Canvas Elasticsearch SQL expression function]
+
+[float]
+[[ml-7-14]]
+
+=== Machine learning&mdash;maps,delayed data, & more
+
+[float]
+==== Choropleth maps for anomalies
+
+Choropleth maps are now available in the *Anomaly Explorer* and the *Data Visualizer*
+for fields such as country and region codes, zip codes, or states. The integration
+relies on a new service provided by the *Maps* plugin, which automatically
+identifies fields that store location data based on sample values or
+contextual knowledge about the data.
+For example, for jobs with region ISO code partitioning or influencer fields,
+a map is displayed in the *Anomaly Explorer* showing the count of anomalies by location.
+
+[role="screenshot"]
+image::user/images/new-ml-choropleth-map.png[Canvas Elasticsearch SQL expression function]
+
+[float]
+==== Delayed data visualization for anomaly detection
+
+Delayed data are documents that are indexed after a time that the datafeed
+has already processed the time period for the anomaly detection job.
+For jobs with delayed data, it can be difficult to understand why the current data
+is different from what was processed for the anomaly detection job.
+
+The new visualization&mdash;opened from *Job Management*&mdash;charts the event
+counts of the job and the source data to identify where missing data has occurred
+and understand if it is a persistent problem. It enables you to decide
+whether to take action, such as to increase the query delay of the datafeed
+or to restore a model snapshot.
+
+[role="screenshot"]
+image::user/images/new-ml-delayed-data.png[Delayed data visualization for anomaly detection]
+
+[float]
+==== Rare job wizard for anomaly detection
+From 7.13, you can create rare detector jobs by using the new {anomaly-job} wizard.
+https://www.elastic.co/blog/using-elastic-machine-learning-rare-analysis-to-hunt-for-the-unusual[Three general detector types are available]:
+rare, rare in population, and frequently rare in population. The latter two require
+a population field to select, and it’s also possible to add a split field to any of the choices.
+A detector summary appears when the configuration details are provided, which
+summarizes what the job will do and which fields it will operate on.
+
+[role="screenshot"]
+image::user/images/new-ml-rare-job.jpg[Rare job wizard for anomaly detection]
 
 // end::notable-highlights[]
