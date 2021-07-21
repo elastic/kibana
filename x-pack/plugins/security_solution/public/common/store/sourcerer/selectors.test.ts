@@ -32,9 +32,9 @@ describe('Sourcerer selectors', () => {
     it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', () => {
       const mapStateToProps = getSourcererScopeSelector();
       const myMockGlobalState = cloneDeep(mockGlobalState);
-      myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns.filter(
-        (index) => !index.includes('logs-*')
-      );
+      myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
+        'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,traces-apm*,winlogbeat-*',
+      ];
       expect(
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns
       ).toEqual([
@@ -52,10 +52,7 @@ describe('Sourcerer selectors', () => {
       const mapStateToProps = getSourcererScopeSelector();
       const myMockGlobalState = cloneDeep(mockGlobalState);
       myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
-        ...myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns.filter(
-          (index) => !index.includes('logs-*')
-        ),
-        'logs-endpoint.event-*',
+        'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,traces-apm*,winlogbeat-*,logs-endpoint.event-*',
       ];
       expect(
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns

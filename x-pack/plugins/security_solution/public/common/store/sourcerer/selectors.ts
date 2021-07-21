@@ -85,7 +85,8 @@ const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();
   const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
-    const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',') : [];
+    const selectedPatterns =
+      selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',').sort() : [];
     return selectedPatterns.some((index) => index === 'logs-*')
       ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
       : selectedPatterns;
