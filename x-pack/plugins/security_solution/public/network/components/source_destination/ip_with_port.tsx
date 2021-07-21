@@ -39,6 +39,7 @@ const PortWithSeparator = React.memo<{
           data-test-subj="port"
           eventId={eventId}
           fieldName={portFieldName}
+          isDraggable={true}
           value={port}
         />
       </EuiFlexItem>

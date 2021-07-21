@@ -17,9 +17,15 @@ import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/ind
 
 type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange'> & {
   indexPatterns: IndexPatternValue[];
+  'data-test-subj'?: string;
 };
 
-export function QueryBarWrapper({ query, onChange, indexPatterns }: QueryBarWrapperProps) {
+export function QueryBarWrapper({
+  query,
+  onChange,
+  indexPatterns,
+  'data-test-subj': dataTestSubj,
+}: QueryBarWrapperProps) {
   const { indexPatterns: indexPatternsService } = getDataStart();
   const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
 
@@ -60,6 +66,7 @@ export function QueryBarWrapper({ query, onChange, indexPatterns }: QueryBarWrap
       onChange={onChange}
       indexPatterns={indexes}
       {...coreStartContext}
+      dataTestSubj={dataTestSubj}
     />
   );
 }
