@@ -10,8 +10,9 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
-import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { buildEsQuery } from '@kbn/es-query';
 
+import type { IIndexPattern } from 'src/plugins/data/public';
 import {
   RuleDataClient,
   createPersistenceRuleTypeFactory,
