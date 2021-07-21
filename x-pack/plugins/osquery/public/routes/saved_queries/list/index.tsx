@@ -55,8 +55,8 @@ const SavedQueriesPageComponent = () => {
   const { push } = useHistory();
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('updated_at');
+  const [pageSize, setPageSize] = useState(20);
+  const [sortField, setSortField] = useState('attributes.updated_at');
   const [sortDirection, setSortDirection] = useState('desc');
 
   const { data } = useSavedQueries({ isLive: true });
