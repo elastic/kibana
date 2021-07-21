@@ -18,6 +18,8 @@ URL::       ServiceNow instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
 
+The ServiceNow user requires at minimum read/create/update access to the Incident table and read access to the sys_choice. If access is not provided to sys_choice, then the choices on test will not render.
+
 [float]
 [[servicenow-connector-networking-configuration]]
 ==== Connector networking configuration
