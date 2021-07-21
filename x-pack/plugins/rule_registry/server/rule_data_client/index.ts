@@ -113,18 +113,17 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  createNamespacedIndexTemplate(namespace?: string): IndicesPutIndexTemplateRequest {
-    const namespacedAlias = getNamespacedAlias({ alias: this.options.alias, namespace });
+  createNamespacedIndexTemplate(primaryNamespacedAlias: string, secondaryNamespacedAlias?: string): IndicesPutIndexTemplateRequest {
     return {
-      name: namespacedAlias,
+      name: primaryNamespacedAlias,
       body: {
-        index_patterns: [`${namespacedAlias}*`],
+        index_patterns: [`${primaryNamespacedAlias}*`],
         composed_of: [
           ...this.options.componentTemplateNames,
         ],
         template: {
-          aliases: this.options.secondaryAlias != null ? {
-            [getNamespacedAlias({ alias: this.options.secondaryAlias, namespace})]: {
+          aliases: secondaryNamespacedAlias != null ? {
+            [secondaryNamespacedAlias]: {
               is_write_index: false,
             }
           } : undefined,
@@ -133,7 +132,7 @@ export class RuleDataClient implements IRuleDataClient {
               name: DEFAULT_ILM_POLICY_ID,
               // TODO: fix the types in the ES package, they don't include rollover_alias???
               // @ts-expect-error
-              rollover_alias: namespacedAlias,
+              rollover_alias: primaryNamespacedAlias,
             },
           },
         },
@@ -142,10 +141,13 @@ export class RuleDataClient implements IRuleDataClient {
   }
 
   async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {
-    const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
+    const namespacedAlias = getNamespacedAlias({ alias: this.options.alias, namespace });
 
     const clusterClient = await this.getClusterClient();
-    const template = this.createNamespacedIndexTemplate(namespace);
+    const secondaryNamespacedAlias = this.options.secondaryAlias != null ? 
+      getNamespacedAlias({ alias: this.options.secondaryAlias, namespace })
+      : undefined;
+    const template = this.createNamespacedIndexTemplate(namespacedAlias, secondaryNamespacedAlias);
     // TODO: need a way to update this template if/when we decide to make changes to the 
     // built in index template. Probably do it as part of updateIndexMappingsForAsset?
     // (Before upgrading any indices, find and upgrade all namespaced index templates - component templates
@@ -158,10 +160,10 @@ export class RuleDataClient implements IRuleDataClient {
     // - maybe we want to store the namespace as a _meta field on the index template for easy retrieval
     await clusterClient.indices.putIndexTemplate(template);
     const { body: aliasExists } = await clusterClient.indices.existsAlias({
-      name: alias,
+      name: namespacedAlias,
     });
 
-    const concreteIndexName = `${alias}-000001`;
+    const concreteIndexName = `${namespacedAlias}-000001`;
 
     if (!aliasExists) {
       try {
@@ -169,7 +171,7 @@ export class RuleDataClient implements IRuleDataClient {
           index: concreteIndexName,
           body: {
             aliases: {
-              [alias]: {
+              [namespacedAlias]: {
                 is_write_index: true,
               },
             },
