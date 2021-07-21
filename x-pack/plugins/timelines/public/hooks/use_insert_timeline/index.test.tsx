@@ -20,7 +20,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../common/hooks/use_selector', () => ({
+jest.mock('../use_selector', () => ({
   useShallowEqualSelector: jest.fn().mockReturnValue({
     timelineTitle: mockTgridModel.title,
     timelineSavedObjectId: mockTgridModel.savedObjectId,

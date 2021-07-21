@@ -15,8 +15,9 @@ import { TestProviders } from '../../../../mock';
 import { AddToCaseAction, APP_ID, SecurityPageName } from './add_to_case_action';
 import { basicCase } from '../../../../../../cases/public/containers/mock';
 import { Case, SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
+import { blah } from '../../../../../../../../src'
 
-jest.mock('../../../../../../../../../src/plugins/kibana_react/public');
+jest.mock('../../../../../../../../src/plugins/kibana_react/public');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('AddToCaseAction', () => {

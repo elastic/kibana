@@ -26,6 +26,11 @@ describe('helpers', () => {
     it('creates the correct toast when the sync alerts is on', () => {
       // We remove the id as is randomly generated and the text as it is a React component
       // which is being test on toaster_content.test.tsx
+      const toasts = jest.fn().mockReturnValue({
+        addError: jest.fn(),
+        addSuccess: jest.fn(),
+        addWarning: jest.fn(),
+      });
       const { id, text, title, ...toast } = createUpdateSuccessToaster(
         toasts,
         theCase,
