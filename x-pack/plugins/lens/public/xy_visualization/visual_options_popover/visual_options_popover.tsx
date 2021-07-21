@@ -83,7 +83,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
       <ToolbarPopover
-        title={i18n.translate('xpack.lens.shared.curveLabel', {
+        title={i18n.translate('xpack.lens.shared.visualOptions', {
           defaultMessage: 'Visual options',
         })}
         type="visualOptions"

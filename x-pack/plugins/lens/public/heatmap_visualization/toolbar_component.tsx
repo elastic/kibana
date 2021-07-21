@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { FC, memo } from 'react';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { VisualizationToolbarProps } from '../types';
-import { LegendSettingsPopover } from '../shared_components';
+import { LegendSettingsPopover, ToolbarPopover } from '../shared_components';
 import { HeatmapVisualizationState } from './types';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
@@ -37,11 +37,20 @@ export const HeatmapToolbar = memo(
     const legendMode = state.legend.isVisible ? 'show' : 'hide';
 
     return (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" responsive={false}>
+            <VisualOptionsPopover
+              valueLabels={state.gridConfig.isCellLabelVisible}
+              onValueLabelChange={(value) =>
+                setState({
+                  ...state,
+                  gridConfig: { ...state.gridConfig, isCellLabelVisible: value },
+                })
+              }
+            />
             <LegendSettingsPopover
-              groupPosition={'none'}
+              groupPosition={'right'}
               legendOptions={legendOptions}
               mode={legendMode}
               onDisplayChange={(optionId) => {
@@ -72,3 +81,75 @@ export const HeatmapToolbar = memo(
     );
   }
 );
+
+const valueLabelsOptions: Array<{
+  id: string;
+  value: boolean;
+  label: string;
+  'data-test-subj': string;
+}> = [
+  {
+    id: `value_labels_hide`,
+    value: false,
+    label: i18n.translate('xpack.lens.heatmapChart.valueLabelsVisibility.auto', {
+      defaultMessage: 'Hide',
+    }),
+    'data-test-subj': 'lnsXY_valueLabels_hide',
+  },
+  {
+    id: `value_labels_show`,
+    value: true,
+    label: i18n.translate('xpack.lens.heatmapChart.valueLabelsVisibility.inside', {
+      defaultMessage: 'Show',
+    }),
+    'data-test-subj': 'lnsXY_valueLabels_inside',
+  },
+];
+
+interface VisualOptionsProps {
+  valueLabels?: boolean;
+  onValueLabelChange: (newMode: boolean) => void;
+}
+
+const VisualOptionsPopover: FC<VisualOptionsProps> = ({
+  onValueLabelChange,
+  valueLabels = 'hide',
+}) => {
+  return (
+    <ToolbarPopover
+      title={i18n.translate('xpack.lens.shared.visualOptions', {
+        defaultMessage: 'Visual options',
+      })}
+      type="visualOptions"
+      groupPosition="left"
+      buttonDataTestSubj="lnsVisualOptionsButton"
+    >
+      <EuiFormRow
+        display="columnCompressed"
+        label={
+          <span>
+            {i18n.translate('xpack.lens.heatmapChart.chartValueLabelVisibilityLabel', {
+              defaultMessage: 'Labels',
+            })}
+          </span>
+        }
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.heatmapChart.chartValueLabelVisibilityLabel', {
+            defaultMessage: 'Labels',
+          })}
+          data-test-subj="lnsValueLabelsDisplay"
+          name="valueLabelsDisplay"
+          buttonSize="compressed"
+          options={valueLabelsOptions}
+          idSelected={valueLabelsOptions.find(({ value }) => value === valueLabels)!.id}
+          onChange={(modeId) => {
+            const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
+            onValueLabelChange(newMode);
+          }}
+        />
+      </EuiFormRow>
+    </ToolbarPopover>
+  );
+};
