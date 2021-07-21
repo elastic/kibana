@@ -252,12 +252,9 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Object {
-                  "savedObjects": Object {
-                    "level": degraded,
-                    "summary": "This is degraded!",
-                  },
-                },
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
               },
               "summary": "[savedObjects]: This is degraded!",
             },
@@ -305,12 +302,9 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Object {
-                  "savedObjects": Object {
-                    "level": degraded,
-                    "summary": "This is degraded!",
-                  },
-                },
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
               },
               "summary": "[savedObjects]: This is degraded!",
             },

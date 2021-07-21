@@ -777,13 +777,11 @@ out through *Advanced Settings*. *Default: `true`*
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
-a|
-`xpack.discoverEnhanced.actions.`
+|[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 
-a|
-`xpack.discoverEnhanced.actions.`
+|[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 

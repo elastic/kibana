@@ -144,6 +144,8 @@ export class EndpointAppContextService {
           this.manifestManager,
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
+          dependencies.config.prebuiltRulesFromFileSystem,
+          dependencies.config.prebuiltRulesFromSavedObjects,
           dependencies.security,
           dependencies.alerting,
           dependencies.licenseService,

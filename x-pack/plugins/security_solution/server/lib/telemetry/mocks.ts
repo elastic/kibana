@@ -22,6 +22,8 @@ export const createMockTelemetryEventsSender = (
     start: jest.fn(),
     stop: jest.fn(),
     fetchDiagnosticAlerts: jest.fn(),
+    fetchEndpointMetrics: jest.fn(),
+    fetchEndpointPolicyResponses: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
