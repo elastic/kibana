@@ -205,11 +205,6 @@ export const getBreadcrumbsForRoute = (
   }
 
   if (isAdminRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'administration', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
     return [siemRootBreadcrumb, ...getAdminBreadcrumbs(spyState)];
   }
 

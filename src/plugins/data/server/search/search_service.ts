@@ -158,7 +158,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
 
-    registerBsearchRoute(bfetch, (request: KibanaRequest) => this.asScoped(request));
+    registerBsearchRoute(
+      bfetch,
+      (request: KibanaRequest) => this.asScoped(request),
+      core.executionContext
+    );
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
