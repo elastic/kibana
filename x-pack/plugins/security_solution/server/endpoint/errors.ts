@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 export class EndpointError extends Error {
-  constructor(message: string) {
+  constructor(message: string, public readonly meta?: unknown) {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;

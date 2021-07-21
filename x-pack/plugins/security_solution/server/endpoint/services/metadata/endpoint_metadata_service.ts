@@ -6,16 +6,40 @@
  */
 
 import {
-  IScopedClusterClient,
+  ElasticsearchClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from 'kibana/server';
 import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
 import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
-import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/server';
+import {
+  AgentNotFoundError,
+  AgentPolicyServiceInterface,
+  AgentService,
+} from '../../../../../fleet/server';
+import {
+  EndpointHostNotFoundError,
+  FleetAgentNotFoundError,
+  FleetAgentPolicyNotFoundError,
+} from './errors';
+import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders';
+import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
+import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
+
+type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
+  package_policies: PackagePolicy[];
+};
 
 export class EndpointMetadataService {
+  /**
+   * A Saved Object client that can access any saved object. Used primarly to retrieve fleet data
+   * for endpoint enrichment (so that users are not required to have superuser role)
+   *
+   * **IMPORTANT: SHOULD BE USED ONLY FOR READ-ONLY ACCESS AND WITH DISCRETION**
+   *
+   * @private
+   */
   private readonly DANGEROUS_INTERNAL_SO_CLIENT: SavedObjectsClientContract;
 
   constructor(
@@ -46,8 +70,16 @@ export class EndpointMetadataService {
    *
    * @throws
    */
-  async getHostMetadata(esClient: IScopedClusterClient, endpointId: string): Promise<HostMetadata> {
-    // needs:  esClient (scoped per/request)
+  async getHostMetadata(esClient: ElasticsearchClient, endpointId: string): Promise<HostMetadata> {
+    const query = getESQueryHostMetadataByID(endpointId);
+    const queryResult = await esClient.search<HostMetadata>(query);
+    const endpointMetadata = queryResponseToHostResult(queryResult.body).result;
+
+    if (endpointMetadata) {
+      return endpointMetadata;
+    }
+
+    throw new EndpointHostNotFoundError(`Endpoint with id ${endpointId} not found`);
   }
 
   /**
@@ -59,29 +91,78 @@ export class EndpointMetadataService {
    * @throws
    */
   async getEnrichedHostMetadata(
-    esClient: IScopedClusterClient,
+    esClient: ElasticsearchClient,
     endpointId: string
-  ): Promise<HostInfo> {}
+  ): Promise<HostInfo> {
+    const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
+    const fleetAgent = await this.getFleetAgent(esClient, endpointMetadata.elastic.agent.id);
+    const fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id!);
+    const endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
+      (policy: PackagePolicy) => policy.package?.name === 'endpoint'
+    );
+
+    return {
+      metadata: endpointMetadata,
+      host_status: fleetAgentStatusToEndpointHostStatus(
+        this.agentService.getStatusForAgent(fleetAgent)
+      ),
+      policy_info: {
+        agent: {
+          applied: {
+            revision: fleetAgent.policy_revision ?? 0,
+            id: fleetAgent.policy_id ?? '',
+          },
+          configured: {
+            revision: fleetAgentPolicy.revision,
+            id: fleetAgentPolicy.id,
+          },
+        },
+        endpoint: {
+          revision: endpointPackagePolicy?.revision ?? 0,
+          id: endpointPackagePolicy?.id ?? '',
+        },
+      },
+    };
+  }
 
   /**
    * Retrieve a single Fleet Agent data
    *
+   * @param esClient Elasticsearch Client (usually scoped to the user's context)
    * @param agentId The elastic agent id (`from `elastic.agent.id`)
    */
-  async getFleetAgent(agentId: string): Promise<Agent> {
-    // needs: AgentService
-    // needs: SavedObjects client (normally scoped, but we likely will use an "internal" user here
+  async getFleetAgent(esClient: ElasticsearchClient, agentId: string): Promise<Agent> {
+    try {
+      return this.agentService.getAgent(esClient, agentId);
+    } catch (error) {
+      if (error instanceof AgentNotFoundError) {
+        throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
+      }
+
+      throw error;
+    }
   }
 
   /**
    * Retrieve a specific Fleet Agent Policy
    *
    * @param agentPolicyId
+   *
+   * @throws
    */
-  async getFleetAgentPolicy(
-    agentPolicyId: string
-  ): Promise<Omit<AgentPolicy, 'package_policies'> & { package_policies: PackagePolicy[] }> {
-    // needs: AgentPolicyService
-    // needs: SavedObjects client (normally scoped, but we likely will use an "internal" user here
+  async getFleetAgentPolicy(agentPolicyId: string): Promise<AgentPolicyWithPackagePolicies> {
+    const agentPolicy = await this.agentPolicyService.get(
+      this.DANGEROUS_INTERNAL_SO_CLIENT,
+      agentPolicyId,
+      true
+    );
+
+    if (agentPolicy) {
+      return agentPolicy as AgentPolicyWithPackagePolicies;
+    }
+
+    throw new FleetAgentPolicyNotFoundError(
+      `Fleet agent policy with id ${agentPolicyId} not found`
+    );
   }
 }

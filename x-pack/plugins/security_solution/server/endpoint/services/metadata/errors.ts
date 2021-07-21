@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { NotFoundError } from '../../errors';
 
 export class EndpointHostNotFoundError extends NotFoundError {}
+
+export class FleetAgentNotFoundError extends NotFoundError {}
+
+export class FleetAgentPolicyNotFoundError extends NotFoundError {}
