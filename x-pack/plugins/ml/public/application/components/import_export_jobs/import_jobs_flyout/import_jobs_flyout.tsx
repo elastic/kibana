@@ -38,6 +38,7 @@ import { toastNotificationServiceProvider } from '../../../services/toast_notifi
 import { JobImportService } from './jobs_import_service';
 import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
+import { ErrorType, extractErrorProperties } from '../../../../../common/util/errors';
 
 interface Props {
   isDisabled: boolean;
@@ -187,21 +188,14 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const bulkCreateADJobs = useCallback(async (jobs: ImportedAdJob[]) => {
     const results = await bulkCreateJobs(jobs);
     let successCount = 0;
+    const errors: ErrorType[] = [];
     Object.entries(results).forEach(([jobId, { job, datafeed }]) => {
       if (job.error || datafeed.error) {
         if (job.error) {
-          const title = i18n.translate('xpack.ml.importExport.importFlyout.importADJobError', {
-            defaultMessage: 'Could not create job {jobId}',
-            values: { jobId },
-          });
-          displayErrorToast(job.error, title);
+          errors.push(job.error);
         }
         if (datafeed.error) {
-          const title = i18n.translate('xpack.ml.importExport.importFlyout.importDatafeedError', {
-            defaultMessage: 'Could not create datafeed for job {jobId}',
-            values: { jobId },
-          });
-          displayErrorToast(datafeed.error, title);
+          errors.push(datafeed.error);
         }
       } else {
         successCount++;
@@ -211,25 +205,28 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     if (successCount > 0) {
       displayImportSuccessToast(successCount);
     }
+    if (errors.length > 0) {
+      displayImportErrorToast(errors);
+    }
   }, []);
 
   const bulkCreateDfaJobs = useCallback(async (jobs: DataFrameAnalyticsConfig[]) => {
+    const errors: ErrorType[] = [];
     const results = await Promise.all(
       jobs.map(async ({ id, ...config }) => {
         try {
           return await createDataFrameAnalytics(id, config);
         } catch (error) {
-          const title = i18n.translate('xpack.ml.importExport.importFlyout.importDFAJobError', {
-            defaultMessage: 'Could not create job {id}',
-            values: { id },
-          });
-          displayErrorToast(error, title);
+          errors.push(error);
         }
       })
     );
     const successCount = Object.values(results).filter((job) => job !== undefined).length;
     if (successCount > 0) {
       displayImportSuccessToast(successCount);
+    }
+    if (errors.length > 0) {
+      displayImportErrorToast(errors);
     }
   }, []);
 
@@ -239,6 +236,16 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       values: { count },
     });
     displaySuccessToast(title);
+  }, []);
+
+  const displayImportErrorToast = useCallback((errors: ErrorType[]) => {
+    const title = i18n.translate('xpack.ml.importExport.importFlyout.importJobSuccessToast', {
+      defaultMessage: '{count, plural, one {# job} other {# jobs}} failed to import correctly',
+      values: { count: errors.length },
+    });
+
+    const errorList = errors.map(extractErrorProperties);
+    displayErrorToast((errorList as unknown) as ErrorType, title);
   }, []);
 
   const deleteJob = useCallback(
