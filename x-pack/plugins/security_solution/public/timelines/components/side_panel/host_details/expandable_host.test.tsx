@@ -18,6 +18,7 @@ import {
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { ExpandableHostDetails } from './expandable_host';
+import { getPatternList } from '../../../../common/store/sourcerer/helpers';
 
 describe('Expandable Host Component', () => {
   const state: State = {
@@ -53,7 +54,9 @@ describe('Expandable Host Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(['IShouldBeUsed']);
+      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(
+        getPatternList(mockGlobalState.sourcerer.defaultIndexPattern)
+      );
     });
   });
 });

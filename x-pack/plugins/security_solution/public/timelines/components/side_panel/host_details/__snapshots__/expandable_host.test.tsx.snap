@@ -105,7 +105,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
       id="hostsDetailsQuery"
       indexNames={
         Array [
-          "IShouldBeUsed",
+          "apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*",
         ]
       }
       isInDetailsSidePanel={true}
