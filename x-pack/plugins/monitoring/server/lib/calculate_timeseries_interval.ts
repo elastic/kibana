@@ -15,5 +15,8 @@ export function calculateTimeseriesInterval(
 ) {
   const duration = moment.duration(upperBoundInMsSinceEpoch - lowerBoundInMsSinceEpoch, 'ms');
 
-  return Math.max(minIntervalSeconds, calculateAuto(100, duration).asSeconds());
+  return Math.max(
+    !isNaN(minIntervalSeconds) ? minIntervalSeconds : 0,
+    calculateAuto(100, duration).asSeconds()
+  );
 }

@@ -33,7 +33,8 @@ function find(
   rules: RoundingRule[],
   check: (b: number | Duration, i: Duration, t: number) => Duration | void
 ) {
-  function pick(buckets: number, duration: Duration): Duration {
+  function pick(buckets?: number, duration?: Duration): Duration {
+    if (!buckets || !duration) return moment.duration(0);
     const target = duration.asMilliseconds() / buckets;
     let lastResp;
 

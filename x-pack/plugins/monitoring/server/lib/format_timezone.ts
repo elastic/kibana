@@ -21,6 +21,6 @@ export const formatUTCTimestampForTimezone = (utcTimestamp: string | number, tim
     return utcTimestamp;
   }
   const offsetInMinutes = moment.tz(timezone).utcOffset();
-  const offsetTimestamp = utcTimestamp + offsetInMinutes * 1 * 60 * 1000;
+  const offsetTimestamp = Number(utcTimestamp) + offsetInMinutes * 1 * 60 * 1000;
   return offsetTimestamp;
 };

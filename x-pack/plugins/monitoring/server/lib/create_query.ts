@@ -72,7 +72,7 @@ export function createQuery(options: {
   uuid?: string;
   start?: number;
   end?: number;
-  metric: { uuidField?: string; timestampField: string };
+  metric?: { uuidField?: string; timestampField: string };
 }) {
   const { type, types, clusterUuid, uuid, filters } = defaults(options, { filters: [] });
 
@@ -100,14 +100,14 @@ export function createQuery(options: {
   let uuidFilter;
   // options.uuid can be null, for example getting all the clusters
   if (uuid) {
-    const uuidField = options.metric.uuidField;
+    const uuidField = options.metric?.uuidField;
     if (!uuidField) {
       throw new MissingRequiredError('options.uuid given but options.metric.uuidField is false');
     }
     uuidFilter = { term: { [uuidField]: uuid } };
   }
 
-  const timestampField = options.metric.timestampField;
+  const timestampField = options.metric?.timestampField;
   if (!timestampField) {
     throw new MissingRequiredError('metric.timestampField');
   }

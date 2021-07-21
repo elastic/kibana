@@ -6,10 +6,11 @@
  */
 
 import { isFunction, get } from 'lodash';
+import type { MonitoringConfig } from '../config';
 
-interface Config {
+type Config = Partial<MonitoringConfig> & {
   get?: (key: string) => any;
-}
+};
 
 export function appendMetricbeatIndex(
   config: Config,
@@ -51,7 +52,7 @@ export function appendMetricbeatIndex(
 export function prefixIndexPattern(
   config: Config,
   indexPattern: string,
-  ccs?: string,
+  ccs: string,
   monitoringIndicesOnly: boolean = false
 ) {
   let ccsEnabled = false;

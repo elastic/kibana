@@ -45,7 +45,7 @@ export async function getPaginatedNodes(
   { clusterUuid }: { clusterUuid: string },
   metricSet: string[],
   pagination: { index: number; size: number },
-  sort: { field: string; direction: string },
+  sort: { field: string; direction: 'asc' | 'desc' },
   queryText: string,
   {
     clusterStats,

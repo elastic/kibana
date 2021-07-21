@@ -112,7 +112,7 @@ function reduceAllMetrics(metricSet: string[], timeOptions: TimeOptions) {
   const reducedMetrics: Record<string, any> = {};
   Object.keys(metricSet).forEach((metricName) => {
     const metricBuckets = get(metricSet, [metricName, 'buckets']);
-    metrics[metricName] = reduceMetric(metricName, metricBuckets, timeOptions); // append summarized metric data
+    reducedMetrics[metricName] = reduceMetric(metricName, metricBuckets, timeOptions); // append summarized metric data
   });
 
   return reducedMetrics;

@@ -22,8 +22,8 @@ export function createBeatsQuery(options: {
   metric?: BeatsMetricFields;
   uuid?: string;
   clusterUuid: string;
-  start?: Date | number;
-  end?: Date | number;
+  start?: number;
+  end?: number;
 }) {
   const opts = {
     filters: [] as any[],

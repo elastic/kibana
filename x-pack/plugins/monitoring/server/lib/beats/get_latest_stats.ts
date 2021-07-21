@@ -11,8 +11,8 @@ import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import type { BeatsElasticsearchResponse, BucketCount } from './types';
 
-export function handleResponse(response: BeatsElasticsearchResponse) {
-  const aggs = response.aggregations;
+export function handleResponse(response?: BeatsElasticsearchResponse) {
+  const aggs = response?.aggregations;
 
   const getTimeRangeCount = (name: string) => {
     const lastActiveBuckets = aggs?.active_counts?.buckets ?? [];

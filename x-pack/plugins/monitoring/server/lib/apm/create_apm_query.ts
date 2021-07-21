@@ -19,8 +19,8 @@ export function createApmQuery(options: {
   metric?: ApmMetricFields;
   uuid?: string;
   clusterUuid: string;
-  start?: Date | number;
-  end?: Date | number;
+  start?: number;
+  end?: number;
 }) {
   const opts = {
     filters: [] as any[],
