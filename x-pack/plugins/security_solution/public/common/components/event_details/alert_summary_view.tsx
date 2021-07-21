@@ -80,7 +80,7 @@ const networkFields = [
 const getDescription = ({
   data,
   eventId,
-  // fieldFromBrowserField,
+  fieldFromBrowserField,
   linkValue,
   timelineId,
   values,
@@ -94,7 +94,7 @@ const getDescription = ({
         contextId={timelineId}
         data={data}
         eventId={eventId}
-        // fieldFromBrowserField={fieldFromBrowserField}
+        fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
         values={values}
       />
@@ -102,7 +102,7 @@ const getDescription = ({
         contextId={timelineId}
         data={data}
         eventId={eventId}
-        // fieldFromBrowserField={fieldFromBrowserField}
+        fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
         timelineId={timelineId}
         values={values}

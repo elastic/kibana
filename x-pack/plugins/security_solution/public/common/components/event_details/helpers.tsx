@@ -58,7 +58,7 @@ export interface AlertSummaryRow {
   description: {
     data: EventFieldsData;
     eventId: string;
-    // fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
+    fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
     linkValue: string | undefined;
     timelineId: string;
     values: string[] | null | undefined;
