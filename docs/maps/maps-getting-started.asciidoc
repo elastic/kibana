@@ -34,7 +34,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 . Open the main menu, and then click *Dashboard*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
-. Click the **Create new Maps** icon image:maps/images/app_gis_icon.jpg[].
+. Click the **Create new Maps** icon image:maps/images/app_gis_icon.png[]
 
 [float]
 [[maps-add-choropleth-layer]]
