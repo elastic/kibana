@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           jenkinsJobName: process.env.JOB_NAME,
           jenkinsBuildNumber: process.env.BUILD_NUMBER,
         })
-          .filter(([k, v]) => !!v)
+          .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
       },
     },

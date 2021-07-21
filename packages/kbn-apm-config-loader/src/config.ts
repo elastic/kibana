@@ -127,7 +127,12 @@ export class ApmConfiguration {
     }
 
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
-      config.globalLabels = process.env.ELASTIC_APM_GLOBAL_LABELS;
+      config.globalLabels = Object.fromEntries(
+        process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
+          const [key, ...val] = p.split('=');
+          return [key, val.join('=')];
+        })
+      );
     }
 
     return config;
