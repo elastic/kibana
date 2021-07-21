@@ -48,6 +48,7 @@ const StatefulCellComponent = ({
         eventId,
         data,
         header,
+        isDraggable: true,
         isExpandable: true,
         isExpanded: false,
         isDetails: false,

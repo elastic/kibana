@@ -817,6 +817,11 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
+  public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
+    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
+    await optionInput.type(query);
+  }
+
   public async toggleNewChartsLibraryWithDebug(enabled: boolean) {
     await this.kibanaServer.uiSettings.update({
       'visualization:visualize:legacyChartsLibrary': !enabled,
