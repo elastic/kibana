@@ -434,6 +434,47 @@ paths:
                   type: boolean
                 force:
                   type: boolean
+  /agents/bulk_unenroll:
+    post:
+      summary: Agents - Bulk unenroll
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    error:
+                      type: string
+                  required:
+                    - success
+      operationId: bulk-unenroll-agents
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revoke:
+                  type: boolean
+                force:
+                  type: boolean
+                agents:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+              required:
+                - agents
   '/agents/{agentId}/upgrade':
     parameters:
       - schema:
