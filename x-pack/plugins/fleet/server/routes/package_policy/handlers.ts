@@ -189,12 +189,10 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     if (request.body.dryRun) {
-      const body = [];
+      const body: UpgradePackagePolicyDryRunResponse = [];
+
       for (const id of request.body.packagePolicyIds) {
-        const result: UpgradePackagePolicyDryRunResponse = await packagePolicyService.getUpgradeDryRunDiff(
-          soClient,
-          id
-        );
+        const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
         body.push(result);
       }
       return response.ok({

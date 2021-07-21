@@ -67,10 +67,12 @@ export interface UpgradePackagePolicyBaseResponse {
   name?: string;
 }
 
-export interface UpgradePackagePolicyDryRunResponse extends UpgradePackagePolicyBaseResponse {
+export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
   hasErrors: boolean;
   diff?: [PackagePolicy, DryRunPackagePolicy];
 }
+
+export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];
 
 export interface UpgradePackagePolicyResponseItem extends UpgradePackagePolicyBaseResponse {
   id: string;

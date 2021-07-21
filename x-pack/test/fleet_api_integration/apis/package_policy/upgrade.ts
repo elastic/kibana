@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return valid diff when "dryRun: true" is provided', async function () {
-        const { body }: { body: UpgradePackagePolicyDryRunResponse[] } = await supertest
+        const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
           .post(`/api/fleet/package_policies/upgrade`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -145,7 +145,8 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(body.hasErrors).to.be(true);
+        expect(body[0].hasErrors).to.be(true);
+        expect(body[1].hasErrors).to.be(true);
       });
 
       it('should return a 200 with errors and "success:false" when "dryRun:false" is provided', async function () {

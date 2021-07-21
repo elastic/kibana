@@ -24,7 +24,6 @@ import {
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
-  UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
@@ -34,6 +33,7 @@ import type {
   PackageInfo,
   ListWithKuery,
   ListResult,
+  UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -531,7 +531,7 @@ class PackagePolicyService {
   public async getUpgradeDryRunDiff(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<UpgradePackagePolicyDryRunResponse> {
+  ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
       const { packagePolicy, installedPkgInfo } = await this.getUpgradePackagePolicyInfo(
         soClient,
