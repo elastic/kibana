@@ -25,12 +25,6 @@ import {
 export type SourcererState = SourcererModel;
 
 export const sourcererReducer = reducerWithInitialState(initialSourcererState)
-  // TODO: Steph/sourcerer this is unused?
-  // .case(setIndexPatternsList, (state, { defaultIndexPattern, kibanaIndexPatterns }) => ({
-  //   ...state,
-  //   defaultIndexPattern,
-  //   kibanaIndexPatterns,
-  // }))
   .case(setSignalIndexName, (state, { signalIndexName }) => ({
     ...state,
     signalIndexName,

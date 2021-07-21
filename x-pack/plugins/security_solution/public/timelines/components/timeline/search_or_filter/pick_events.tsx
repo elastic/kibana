@@ -199,7 +199,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           }))
         );
       } else if (filter === 'raw') {
-        // TODO: Steph/sourcerer double check this
         setSelectedOptions(
           defaultPatterns.map((indexSelected) => ({
             label: indexSelected,

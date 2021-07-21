@@ -17,11 +17,6 @@ export const setSource = actionCreator<{
   payload: ManageScopeInit;
 }>('SET_SOURCE');
 
-// TODO: Steph/sourcerer this is unused?
-// export const setIndexPatternsList = actionCreator<{
-//   kibanaIndexPatterns: KibanaIndexPatterns;
-// }>('SET_INDEX_PATTERNS_LIST');
-
 export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
   'SET_SIGNAL_INDEX_NAME'
 );
