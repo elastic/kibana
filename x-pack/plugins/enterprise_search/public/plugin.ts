@@ -15,6 +15,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -43,13 +44,14 @@ export interface ClientData extends InitialAppData {
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
 }
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
-  security?: SecurityPluginStart;
+  data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {

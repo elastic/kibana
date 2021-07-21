@@ -74,6 +74,33 @@ describe('test', () => {
         .createTaskRunner;
     const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
     await taskRunner.run();
-    expect(mockSender.fetchDiagnosticAlerts).not.toHaveBeenCalled();
+    expect(mockSender.fetchEndpointMetrics).not.toHaveBeenCalled();
+    expect(mockSender.fetchEndpointPolicyResponses).not.toHaveBeenCalled();
+  });
+
+  test('endpoint task should run when opted in', async () => {
+    const mockSender = createMockTelemetryEventsSender(true);
+    const mockTaskManager = taskManagerMock.createSetup();
+    const telemetryEpMetaTask = new MockTelemetryEndpointTask(logger, mockTaskManager, mockSender);
+
+    const mockTaskInstance = {
+      id: TelemetryEndpointTaskConstants.TYPE,
+      runAt: new Date(),
+      attempts: 0,
+      ownerId: '',
+      status: TaskStatus.Running,
+      startedAt: new Date(),
+      scheduledAt: new Date(),
+      retryAt: new Date(),
+      params: {},
+      state: {},
+      taskType: TelemetryEndpointTaskConstants.TYPE,
+    };
+    const createTaskRunner =
+      mockTaskManager.registerTaskDefinitions.mock.calls[0][0][TelemetryEndpointTaskConstants.TYPE]
+        .createTaskRunner;
+    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
+    await taskRunner.run();
+    expect(telemetryEpMetaTask.runTask).toHaveBeenCalled();
   });
 });
