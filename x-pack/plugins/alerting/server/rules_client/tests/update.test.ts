@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -33,7 +33,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -52,14 +52,14 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('update()', () => {
-  let alertsClient: AlertsClient;
+  let rulesClient: RulesClient;
   let actionsClient: jest.Mocked<ActionsClient>;
   const existingAlert = {
     id: '1',
@@ -98,8 +98,8 @@ describe('update()', () => {
   };
 
   beforeEach(async () => {
-    alertsClient = new AlertsClient(alertsClientParams);
-    actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    rulesClient = new RulesClient(rulesClientParams);
+    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       {
@@ -118,7 +118,7 @@ describe('update()', () => {
         isPreconfigured: false,
       },
     ]);
-    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
+    rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
     alertTypeRegistry.get.mockReturnValue({
@@ -235,7 +235,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    const result = await alertsClient.update({
+    const result = await rulesClient.update({
       id: '1',
       data: {
         schedule: { interval: '10s' },
@@ -402,7 +402,7 @@ describe('update()', () => {
   });
 
   it('calls the createApiKey function', async () => {
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
@@ -458,7 +458,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    const result = await alertsClient.update({
+    const result = await rulesClient.update({
       id: '1',
       data: {
         schedule: { interval: '10s' },
@@ -614,7 +614,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    const result = await alertsClient.update({
+    const result = await rulesClient.update({
       id: '1',
       data: {
         schedule: { interval: '10s' },
@@ -636,7 +636,7 @@ describe('update()', () => {
         ],
       },
     });
-    expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -721,12 +721,12 @@ describe('update()', () => {
   });
 
   it('throws an error if API key creation throws', async () => {
-    alertsClientParams.createAPIKey.mockImplementation(() => {
+    rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
     expect(
       async () =>
-        await alertsClient.update({
+        await rulesClient.update({
           id: '1',
           data: {
             schedule: { interval: '10s' },
@@ -785,7 +785,7 @@ describe('update()', () => {
       producer: 'alerts',
     });
     await expect(
-      alertsClient.update({
+      rulesClient.update({
         id: '1',
         data: {
           schedule: { interval: '10s' },
@@ -846,7 +846,7 @@ describe('update()', () => {
         },
       ],
     });
-    await alertsClient.update({
+    await rulesClient.update({
       id: '1',
       data: {
         ...existingAlert.attributes,
@@ -854,7 +854,7 @@ describe('update()', () => {
       },
     });
 
-    expect(alertsClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
   });
 
   it('swallows error when invalidate API key throws', async () => {
@@ -888,7 +888,7 @@ describe('update()', () => {
       ],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail')); // add ApiKey to invalidate
-    await alertsClient.update({
+    await rulesClient.update({
       id: '1',
       data: {
         schedule: { interval: '10s' },
@@ -910,7 +910,7 @@ describe('update()', () => {
         ],
       },
     });
-    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
     );
   });
@@ -1007,7 +1007,7 @@ describe('update()', () => {
         },
       ],
     });
-    await alertsClient.update({
+    await rulesClient.update({
       id: '1',
       data: {
         schedule: { interval: '10s' },
@@ -1044,19 +1044,19 @@ describe('update()', () => {
       },
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
-    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'update(): Failed to load API key to invalidate on alert 1: Fail'
     );
   });
 
   test('throws when unsecuredSavedObjectsClient update fails and invalidates newly created API key', async () => {
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '234', api_key: 'abc' },
     });
     unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
     await expect(
-      alertsClient.update({
+      rulesClient.update({
         id: '1',
         data: {
           schedule: { interval: '10s' },
@@ -1166,7 +1166,7 @@ describe('update()', () => {
 
       mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
 
-      await alertsClient.update({
+      await rulesClient.update({
         id: alertId,
         data: {
           schedule: { interval: '10s' },
@@ -1198,7 +1198,7 @@ describe('update()', () => {
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
 
-      await alertsClient.update({
+      await rulesClient.update({
         id: alertId,
         data: {
           schedule: { interval: '10s' },
@@ -1235,7 +1235,7 @@ describe('update()', () => {
       taskManager.runNow.mockReset();
       taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
 
-      await alertsClient.update({
+      await rulesClient.update({
         id: alertId,
         data: {
           schedule: { interval: '10s' },
@@ -1271,7 +1271,7 @@ describe('update()', () => {
       taskManager.runNow.mockReset();
       taskManager.runNow.mockRejectedValue(new Error('Failed to run alert'));
 
-      await alertsClient.update({
+      await rulesClient.update({
         id: alertId,
         data: {
           schedule: { interval: '10s' },
@@ -1296,7 +1296,7 @@ describe('update()', () => {
 
       expect(taskManager.runNow).toHaveBeenCalled();
 
-      expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
         `Alert update failed to run its underlying task. TaskManager runNow failed with Error: Failed to run alert`
       );
     });
@@ -1339,7 +1339,7 @@ describe('update()', () => {
     ]);
 
     await expect(
-      alertsClient.update({
+      rulesClient.update({
         id: '1',
         data: {
           schedule: { interval: '10s' },
@@ -1403,7 +1403,7 @@ describe('update()', () => {
     });
 
     test('ensures user is authorised to update this type of alert under the consumer', async () => {
-      await alertsClient.update({
+      await rulesClient.update({
         id: '1',
         data: {
           schedule: { interval: '10s' },
@@ -1432,7 +1432,7 @@ describe('update()', () => {
       );
 
       await expect(
-        alertsClient.update({
+        rulesClient.update({
           id: '1',
           data: {
             schedule: { interval: '10s' },
@@ -1480,7 +1480,7 @@ describe('update()', () => {
     });
 
     test('logs audit event when updating a rule', async () => {
-      await alertsClient.update({
+      await rulesClient.update({
         id: '1',
         data: {
           schedule: { interval: '10s' },
@@ -1510,7 +1510,7 @@ describe('update()', () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
-        alertsClient.update({
+        rulesClient.update({
           id: '1',
           data: {
             schedule: { interval: '10s' },

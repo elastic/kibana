@@ -36,8 +36,8 @@ describe('create_rules_bulk', () => {
     ml = mlServicesMock.createSetupContract();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
-    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
+    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
+    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
@@ -53,7 +53,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting!.getRulesClient = jest.fn();
       const response = await server.inject(getReadBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -109,7 +109,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);
@@ -124,7 +124,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.alertsClient.create.mockImplementation(async () => {
+      clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getReadBulkRequest(), context);

@@ -91,7 +91,7 @@ describe('add_prepackaged_rules_route', () => {
     mockExceptionsClient = listMock.getExceptionListClient();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -118,7 +118,7 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting!.getRulesClient = jest.fn();
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -160,7 +160,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('responses', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -301,7 +301,7 @@ describe('add_prepackaged_rules_route', () => {
       await createPrepackagedRules(
         context,
         siemMockClient,
-        clients.alertsClient,
+        clients.rulesClient,
         {} as FrameworkRequest,
         1200,
         mockExceptionsClient
@@ -317,7 +317,7 @@ describe('add_prepackaged_rules_route', () => {
       await createPrepackagedRules(
         myContext,
         siemMockClient,
-        clients.alertsClient,
+        clients.rulesClient,
         {} as FrameworkRequest,
         1200,
         mockExceptionsClient

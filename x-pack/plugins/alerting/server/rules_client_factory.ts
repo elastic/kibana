@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
-import { AlertsClient } from './alerts_client';
+import { RulesClient } from './rules_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
@@ -20,7 +20,7 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { IEventLogClientService } from '../../../plugins/event_log/server';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { ALERTS_FEATURE_ID } from '../common';
-export interface AlertsClientFactoryOpts {
+export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   alertTypeRegistry: AlertTypeRegistry;
@@ -35,7 +35,7 @@ export interface AlertsClientFactoryOpts {
   authorization: AlertingAuthorizationClientFactory;
 }
 
-export class AlertsClientFactory {
+export class RulesClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private taskManager!: TaskManagerStartContract;
@@ -50,9 +50,9 @@ export class AlertsClientFactory {
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
 
-  public initialize(options: AlertsClientFactoryOpts) {
+  public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
-      throw new Error('AlertsClientFactory already initialized');
+      throw new Error('RulesClientFactory already initialized');
     }
     this.isInitialized = true;
     this.logger = options.logger;
@@ -69,7 +69,7 @@ export class AlertsClientFactory {
     this.authorization = options.authorization;
   }
 
-  public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
+  public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
     const { securityPluginSetup, securityPluginStart, actions, eventLog } = this;
     const spaceId = this.getSpaceId(request);
 
@@ -77,7 +77,7 @@ export class AlertsClientFactory {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
     }
 
-    return new AlertsClient({
+    return new RulesClient({
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,

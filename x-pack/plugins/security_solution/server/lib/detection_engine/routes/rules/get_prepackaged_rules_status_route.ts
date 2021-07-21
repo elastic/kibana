@@ -45,17 +45,17 @@ export const getPrepackagedRulesStatusRoute = (
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
       try {
         const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
         const customRules = await findRules({
-          alertsClient,
+          rulesClient,
           perPage: 1,
           page: 1,
           sortField: 'enabled',
@@ -64,7 +64,7 @@ export const getPrepackagedRulesStatusRoute = (
           fields: undefined,
         });
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
+        const prepackagedRules = await getExistingPrepackagedRules({ rulesClient });
 
         const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);

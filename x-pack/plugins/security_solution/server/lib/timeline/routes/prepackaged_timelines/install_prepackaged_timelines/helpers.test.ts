@@ -48,7 +48,7 @@ describe('installPrepackagedTimelines', () => {
     } as unknown) as SecurityPluginSetup;
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     jest.doMock('./helpers', () => {
       return {

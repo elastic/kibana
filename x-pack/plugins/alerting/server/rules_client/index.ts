@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './alerts_client';
+export * from './rules_client';

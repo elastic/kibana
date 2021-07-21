@@ -67,7 +67,7 @@ export const installPrepackagedRules = async ({
       // @ts-expect-error
       context,
       appClient,
-      alerts.getAlertsClientWithRequest(request),
+      alerts.getRulesClientWithRequest(request),
       frameworkRequest,
       maxTimelineImportExportSize,
       exceptionsClient

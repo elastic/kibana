@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 
-import { AlertsClient, ConstructorOptions } from './alerts_client';
+import { RulesClient, ConstructorOptions } from './rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
@@ -21,7 +21,7 @@ import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '../../../plugins/task_manager/server/task';
 import { RecoveredActionGroup } from '../common';
 
-let alertsClient: AlertsClient;
+let rulesClient: RulesClient;
 
 const MockAlertId = 'alert-id';
 
@@ -37,7 +37,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const logger = loggingSystemMock.create().get();
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -54,10 +54,10 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
 };
 
-// this suite consists of two suites running tests against mutable alertsClient APIs:
+// this suite consists of two suites running tests against mutable RulesClient APIs:
 // - one to run tests where an SO update conflicts once
 // - one to run tests where an SO update conflicts too many times
-describe('alerts_client_conflict_retries', () => {
+describe('rules_client_conflict_retries', () => {
   // tests that mutable operations work if only one SO conflict occurs
   describe(`1 retry works for method`, () => {
     beforeEach(() => {
@@ -91,14 +91,14 @@ describe('alerts_client_conflict_retries', () => {
   });
 });
 
-// alertsClients methods being tested
-// - success is passed as an indication if the alertsClient method
+// RulesClients methods being tested
+// - success is passed as an indication if the RulesClient method
 //   is expected to succeed or not, based on the number of conflicts
 //   set up in the `beforeEach()` method
 
 async function update(success: boolean) {
   try {
-    await alertsClient.update({
+    await rulesClient.update({
       id: MockAlertId,
       data: {
         schedule: { interval: '5s' },
@@ -112,20 +112,18 @@ async function update(success: boolean) {
     });
   } catch (err) {
     // only checking the warn messages in this test
-    expect(logger.warn).lastCalledWith(
-      `alertsClient.update('alert-id') conflict, exceeded retries`
-    );
+    expect(logger.warn).lastCalledWith(`rulesClient.update('alert-id') conflict, exceeded retries`);
     return expectConflict(success, err, 'create');
   }
   expectSuccess(success, 3, 'create');
 
   // only checking the debug messages in this test
-  expect(logger.debug).nthCalledWith(1, `alertsClient.update('alert-id') conflict, retrying ...`);
+  expect(logger.debug).nthCalledWith(1, `rulesClient.update('alert-id') conflict, retrying ...`);
 }
 
 async function updateApiKey(success: boolean) {
   try {
-    await alertsClient.updateApiKey({ id: MockAlertId });
+    await rulesClient.updateApiKey({ id: MockAlertId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -137,7 +135,7 @@ async function enable(success: boolean) {
   setupRawAlertMocks({}, { enabled: false });
 
   try {
-    await alertsClient.enable({ id: MockAlertId });
+    await rulesClient.enable({ id: MockAlertId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -149,7 +147,7 @@ async function enable(success: boolean) {
 
 async function disable(success: boolean) {
   try {
-    await alertsClient.disable({ id: MockAlertId });
+    await rulesClient.disable({ id: MockAlertId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -159,7 +157,7 @@ async function disable(success: boolean) {
 
 async function muteAll(success: boolean) {
   try {
-    await alertsClient.muteAll({ id: MockAlertId });
+    await rulesClient.muteAll({ id: MockAlertId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -169,7 +167,7 @@ async function muteAll(success: boolean) {
 
 async function unmuteAll(success: boolean) {
   try {
-    await alertsClient.unmuteAll({ id: MockAlertId });
+    await rulesClient.unmuteAll({ id: MockAlertId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -179,7 +177,7 @@ async function unmuteAll(success: boolean) {
 
 async function muteInstance(success: boolean) {
   try {
-    await alertsClient.muteInstance({ alertId: MockAlertId, alertInstanceId: 'instance-id' });
+    await rulesClient.muteInstance({ alertId: MockAlertId, alertInstanceId: 'instance-id' });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -190,7 +188,7 @@ async function muteInstance(success: boolean) {
 async function unmuteInstance(success: boolean) {
   setupRawAlertMocks({}, { mutedInstanceIds: ['instance-id'] });
   try {
-    await alertsClient.unmuteInstance({ alertId: MockAlertId, alertInstanceId: 'instance-id' });
+    await rulesClient.unmuteInstance({ alertId: MockAlertId, alertInstanceId: 'instance-id' });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -307,8 +305,8 @@ function setupRawAlertMocks(
 beforeEach(() => {
   jest.resetAllMocks();
 
-  alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
-  alertsClientParams.getUserName.mockResolvedValue('elastic');
+  rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
+  rulesClientParams.getUserName.mockResolvedValue('elastic');
 
   taskManager.runNow.mockResolvedValue({ id: '' });
   taskManager.schedule.mockResolvedValue({
@@ -327,7 +325,7 @@ beforeEach(() => {
 
   const actionsClient = actionsClientMock.create();
   actionsClient.getBulk.mockResolvedValue([]);
-  alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
+  rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
 
   alertTypeRegistry.get.mockImplementation((id) => ({
     id: '123',
@@ -353,7 +351,7 @@ beforeEach(() => {
     producer: 'alerts',
   });
 
-  alertsClient = new AlertsClient(alertsClientParams);
+  rulesClient = new RulesClient(rulesClientParams);
 
   setupRawAlertMocks();
 });

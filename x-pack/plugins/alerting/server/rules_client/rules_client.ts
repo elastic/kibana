@@ -54,7 +54,7 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import { IEventLogClient } from '../../../../plugins/event_log/server';
+import { IEventLogClient } from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../../event_log/server';
@@ -187,7 +187,7 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
 };
-export class AlertsClient {
+export class RulesClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
@@ -443,7 +443,7 @@ export class AlertsClient {
       events = queryResults.data;
     } catch (err) {
       this.logger.debug(
-        `alertsClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+        `rulesClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
       );
       events = [];
     }
@@ -659,7 +659,7 @@ export class AlertsClient {
   }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.update('${id}')`,
+      `rulesClient.update('${id}')`,
       async () => await this.updateWithOCC<Params>({ id, data })
     );
   }
@@ -828,7 +828,7 @@ export class AlertsClient {
   public async updateApiKey({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.updateApiKey('${id}')`,
+      `rulesClient.updateApiKey('${id}')`,
       async () => await this.updateApiKeyWithOCC({ id })
     );
   }
@@ -933,7 +933,7 @@ export class AlertsClient {
   public async enable({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.enable('${id}')`,
+      `rulesClient.enable('${id}')`,
       async () => await this.enableWithOCC({ id })
     );
   }
@@ -1051,7 +1051,7 @@ export class AlertsClient {
   public async disable({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.disable('${id}')`,
+      `rulesClient.disable('${id}')`,
       async () => await this.disableWithOCC({ id })
     );
   }
@@ -1143,7 +1143,7 @@ export class AlertsClient {
   public async muteAll({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.muteAll('${id}')`,
+      `rulesClient.muteAll('${id}')`,
       async () => await this.muteAllWithOCC({ id })
     );
   }
@@ -1205,7 +1205,7 @@ export class AlertsClient {
   public async unmuteAll({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.unmuteAll('${id}')`,
+      `rulesClient.unmuteAll('${id}')`,
       async () => await this.unmuteAllWithOCC({ id })
     );
   }
@@ -1267,7 +1267,7 @@ export class AlertsClient {
   public async muteInstance({ alertId, alertInstanceId }: MuteOptions): Promise<void> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.muteInstance('${alertId}')`,
+      `rulesClient.muteInstance('${alertId}')`,
       async () => await this.muteInstanceWithOCC({ alertId, alertInstanceId })
     );
   }
@@ -1329,7 +1329,7 @@ export class AlertsClient {
   public async unmuteInstance({ alertId, alertInstanceId }: MuteOptions): Promise<void> {
     return await retryIfConflicts(
       this.logger,
-      `alertsClient.unmuteInstance('${alertId}')`,
+      `rulesClient.unmuteInstance('${alertId}')`,
       async () => await this.unmuteInstanceWithOCC({ alertId, alertInstanceId })
     );
   }
@@ -1495,7 +1495,7 @@ export class AlertsClient {
 
     if (actionsUsingConnectorsWithMissingSecrets.length) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.alertsClient.validateActions.misconfiguredConnector', {
+        i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
           defaultMessage: 'Invalid connectors: {groups}',
           values: {
             groups: actionsUsingConnectorsWithMissingSecrets
@@ -1515,7 +1515,7 @@ export class AlertsClient {
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.alertsClient.validateActions.invalidGroups', {
+        i18n.translate('xpack.alerting.rulesClient.validateActions.invalidGroups', {
           defaultMessage: 'Invalid action groups: {groups}',
           values: {
             groups: invalidActionGroups.join(', '),
@@ -1593,7 +1593,7 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   const parsedDate = parseIsoOrRelativeDate(dateString);
   if (parsedDate === undefined) {
     throw Boom.badRequest(
-      i18n.translate('xpack.alerting.alertsClient.invalidDate', {
+      i18n.translate('xpack.alerting.rulesClient.invalidDate', {
         defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
         values: {
           field: propertyName,

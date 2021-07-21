@@ -45,18 +45,18 @@ export const createRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
+        const rulesClient = context.alerting?.getRulesClient();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
-            alertsClient,
+            rulesClient,
             ruleId: request.body.rule_id,
             id: undefined,
           });
@@ -92,13 +92,13 @@ export const createRulesRoute = (
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        const createdRule = await alertsClient.create({
+        const createdRule = await rulesClient.create({
           data: internalRule,
         });
 
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,
-          alertsClient,
+          rulesClient,
           savedObjectsClient,
           enabled: createdRule.enabled,
           actions: request.body.actions,

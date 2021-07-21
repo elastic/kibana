@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { TaskStatus } from '../../../../task_manager/server';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
-import { getBeforeSetup, setGlobalDate } from './lib';
+import { getBeforeSetup } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -45,15 +44,12 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
 });
 
-setGlobalDate();
-
-describe('get()', () => {
+describe('getAlertState()', () => {
   test('calls saved objects client with given params', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -63,8 +59,6 @@ describe('get()', () => {
         params: {
           bar: true,
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -74,7 +68,6 @@ describe('get()', () => {
             },
           },
         ],
-        notifyWhen: 'onActiveAlert',
       },
       references: [
         {
@@ -84,31 +77,22 @@ describe('get()', () => {
         },
       ],
     });
-    const result = await alertsClient.get({ id: '1' });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "group": "default",
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "createdAt": 2019-02-12T21:01:22.479Z,
-        "id": "1",
-        "notifyWhen": "onActiveAlert",
-        "params": Object {
-          "bar": true,
-        },
-        "schedule": Object {
-          "interval": "10s",
-        },
-        "updatedAt": 2019-02-12T21:01:22.479Z,
-      }
-    `);
+
+    taskManager.get.mockResolvedValueOnce({
+      id: '1',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+
+    await rulesClient.getAlertState({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
@@ -118,8 +102,11 @@ describe('get()', () => {
                                                                             `);
   });
 
-  test(`throws an error when references aren't found`, async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+  test('gets the underlying task from TaskManager', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+
+    const scheduledTaskId = 'task-123';
+
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -138,12 +125,39 @@ describe('get()', () => {
             },
           },
         ],
+        enabled: true,
+        scheduledTaskId,
+        mutedInstanceIds: [],
+        muteAll: true,
       },
-      references: [],
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
     });
-    await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action reference \\"action_0\\" not found in alert id: 1"`
-    );
+
+    taskManager.get.mockResolvedValueOnce({
+      id: scheduledTaskId,
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {
+        alertId: '1',
+      },
+      ownerId: null,
+    });
+
+    await rulesClient.getAlertState({ id: '1' });
+    expect(taskManager.get).toHaveBeenCalledTimes(1);
+    expect(taskManager.get).toHaveBeenCalledWith(scheduledTaskId);
   });
 
   describe('authorization', () => {
@@ -176,93 +190,53 @@ describe('get()', () => {
           },
         ],
       });
+
+      taskManager.get.mockResolvedValueOnce({
+        id: '1',
+        taskType: 'alerting:123',
+        scheduledAt: new Date(),
+        attempts: 1,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        state: {},
+        params: {},
+        ownerId: null,
+      });
     });
 
     test('ensures user is authorised to get this type of alert under the consumer', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      await alertsClient.get({ id: '1' });
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.getAlertState({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'get',
+        operation: 'getRuleState',
         ruleTypeId: 'myType',
       });
     });
 
-    test('throws when user is not authorised to get this type of alert', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "myType" alert for "myApp"`)
+    test('throws when user is not authorised to getAlertState this type of alert', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+      // `get` check
+      authorization.ensureAuthorized.mockResolvedValueOnce();
+      // `getRuleState` check
+      authorization.ensureAuthorized.mockRejectedValueOnce(
+        new Error(`Unauthorized to getRuleState a "myType" alert for "myApp"`)
       );
 
-      await expect(alertsClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "myType" alert for "myApp"]`
+      await expect(rulesClient.getAlertState({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to getRuleState a "myType" alert for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'get',
+        operation: 'getRuleState',
         ruleTypeId: 'myType',
       });
-    });
-  });
-
-  describe('auditLogger', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          alertTypeId: '123',
-          schedule: { interval: '10s' },
-          params: {
-            bar: true,
-          },
-          actions: [],
-        },
-        references: [],
-      });
-    });
-
-    test('logs audit event when getting a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
-      await alertsClient.get({ id: '1' });
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'rule_get',
-            outcome: 'success',
-          }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
-        })
-      );
-    });
-
-    test('logs audit event when not authorised to get a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
-      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
-
-      await expect(alertsClient.get({ id: '1' })).rejects.toThrow();
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'rule_get',
-            outcome: 'failure',
-          }),
-          kibana: {
-            saved_object: {
-              id: '1',
-              type: 'alert',
-            },
-          },
-          error: {
-            code: 'Error',
-            message: 'Unauthorized',
-          },
-        })
-      );
     });
   });
 });
