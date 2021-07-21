@@ -4,48 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
-import { PackagePolicy } from '../../../../../fleet/common';
-import {
-  NewPackagePolicy,
-  PackagePolicyCreateExtensionComponentProps,
-} from '../../../../../fleet/public';
-import {
-  callApmApi,
-  APIReturnType,
-} from '../../../services/rest/createCallApmApi';
+import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
+import { SettingsForm } from './settings_form';
+import { apmSettings } from './settings/apm_settings';
+import { rumSettings } from './settings/rum_settings';
+import { tlsSettings } from './settings/tls_settings';
+
+export type PackagePolicyValues = Record<
+  string,
+  PackagePolicyConfigRecordEntry
+>;
 
 interface Props {
-  policy?: PackagePolicy;
-  newPolicy: NewPackagePolicy;
-  onChange: PackagePolicyCreateExtensionComponentProps['onChange'];
+  onChange: (newVars: PackagePolicyValues) => void;
+  values?: PackagePolicyValues;
 }
 
-type ApiResponse = APIReturnType<'GET /api/apm/fleet/package_info/inputs'>;
-function fetchPackageInputs(name: string, version: string) {
-  return callApmApi({
-    endpoint: 'GET /api/apm/fleet/package_info/inputs',
-    params: {
-      query: {
-        pkgName: name,
-        pkgVersion: version,
-      },
-    },
-    signal: null,
-  });
-}
-
-export function APMPolicyForm({ policy, newPolicy }: Props) {
-  const [inputs, setInputs] = useState<ApiResponse>();
-  useEffect(() => {
-    async function callFetchPackageInputs() {
-      const { name, version } = newPolicy.package || {};
-      if (name && version) {
-        const response = await fetchPackageInputs(name, version);
-        setInputs(response);
-      }
-    }
-    callFetchPackageInputs();
-  }, [newPolicy]);
-  return <div>FORM</div>;
+export function APMPolicyForm({ values = {}, onChange }: Props) {
+  function handleChange(key: string, value: any) {
+    values[key] = { ...values[key], value };
+    onChange(values);
+  }
+  return (
+    <>
+      <SettingsForm
+        settings={apmSettings}
+        values={values}
+        onChange={handleChange}
+      />
+      <EuiSpacer />
+      <SettingsForm
+        settings={rumSettings}
+        values={values}
+        onChange={handleChange}
+      />
+      <EuiSpacer />
+      <SettingsForm
+        settings={tlsSettings}
+        values={values}
+        onChange={handleChange}
+      />
+    </>
+  );
 }

@@ -15,7 +15,6 @@ import {
 } from '../../common/apm_saved_object_constants';
 import { createCloudApmPackgePolicy } from '../lib/fleet/create_cloud_apm_package_policy';
 import { getFleetAgents } from '../lib/fleet/get_agents';
-import { getApmPackageInfo } from '../lib/fleet/get_apm_package_info';
 import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import {
   getApmPackagePolicy,
@@ -191,40 +190,13 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   },
 });
 
-const packageInfoInputsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/package_info/inputs',
-  options: { tags: [] },
-  params: t.type({
-    query: t.type({
-      pkgName: t.string,
-      pkgVersion: t.string,
-    }),
-  }),
-  handler: async ({ core, plugins, params }) => {
-    const fleetPluginStart = await plugins.fleet?.start();
-    if (!fleetPluginStart) {
-      throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
-    }
-    const { pkgName, pkgVersion } = params.query;
-    const packageInfo = await getApmPackageInfo({
-      core,
-      fleetPluginStart,
-      pkgName,
-      pkgVersion,
-    });
-
-    return { inputs: packageInfo?.policy_templates?.[0].inputs };
-  },
-});
-
 export const apmFleetRouteRepository = createApmServerRouteRepository()
   .add(hasFleetDataRoute)
   .add(fleetAgentsRoute)
   .add(saveApmServerSchemaRoute)
   .add(getUnsupportedApmServerSchemaRoute)
   .add(getMigrationCheckRoute)
-  .add(createCloudApmPackagePolicyRoute)
-  .add(packageInfoInputsRoute);
+  .add(createCloudApmPackagePolicyRoute);
 
 const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.fleetSecurityRequired',
