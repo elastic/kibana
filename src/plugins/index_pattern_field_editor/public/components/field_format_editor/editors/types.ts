@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatEditorFactory } from '../types';
-import { formatId } from './constants';
+import type { DefaultFormatEditor } from './default';
 
-export type { HistogramFormatEditor } from './histogram';
-export const histogramFormatEditorFactory: FieldFormatEditorFactory = () =>
-  import('./histogram').then((m) => m.HistogramFormatEditor);
-histogramFormatEditorFactory.formatId = formatId;
+export type FieldFormatEditor = typeof DefaultFormatEditor;
+export type FieldFormatEditorFactory = (() => Promise<FieldFormatEditor>) & {
+  formatId: string;
+};

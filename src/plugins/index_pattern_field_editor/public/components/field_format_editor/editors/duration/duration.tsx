@@ -18,9 +18,10 @@ import {
   defaultState,
   FormatEditorProps,
   FormatEditorState,
-} from '../default';
+} from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;
@@ -49,7 +50,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
   DurationFormatEditorFormatParams,
   DurationFormatEditorState
 > {
-  static formatId = 'duration';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [-123, 1, 12, 123, 658, 1988, 3857, 123292, 923528271],

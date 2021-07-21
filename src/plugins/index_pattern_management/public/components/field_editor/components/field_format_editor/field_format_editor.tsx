@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent, Fragment } from 'react';
-import type { DefaultFormatEditor } from 'src/plugins/index_pattern_field_editor/public';
+import React, { ComponentType, LazyExoticComponent, PureComponent } from 'react';
+import memoize from 'lodash/memoize';
+import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import type {
+  DefaultFormatEditor,
+  FieldFormatEditorFactory,
+} from 'src/plugins/index_pattern_field_editor/public';
 
 export interface FieldFormatEditorProps {
   fieldType: string;
@@ -28,8 +33,20 @@ interface EditorComponentProps {
 }
 
 interface FieldFormatEditorState {
-  EditorComponent: React.FC<EditorComponentProps>;
+  EditorComponent: LazyExoticComponent<ComponentType<EditorComponentProps>> | null;
 }
+
+// use memoize to get stable reference
+const unwrapEditor = memoize(
+  (editorFactory: FieldFormatEditorFactory | null): FieldFormatEditorState['EditorComponent'] => {
+    if (!editorFactory) return null;
+
+    // @ts-ignore
+    // TODO: Type '(change: { [key: string]: any; fieldType: string; }) => void' is not assignable to type '(newParams: Record<string, any>) => void'.
+    // https://github.com/elastic/kibana/issues/104637
+    return React.lazy(() => editorFactory().then((editor) => ({ default: editor })));
+  }
+);
 
 export class FieldFormatEditor extends PureComponent<
   FieldFormatEditorProps,
@@ -38,13 +55,13 @@ export class FieldFormatEditor extends PureComponent<
   constructor(props: FieldFormatEditorProps) {
     super(props);
     this.state = {
-      EditorComponent: props.fieldFormatEditors.getById(props.fieldFormatId),
+      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId)),
     };
   }
 
   static getDerivedStateFromProps(nextProps: FieldFormatEditorProps) {
     return {
-      EditorComponent: nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId) || null,
+      EditorComponent: unwrapEditor(nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId)),
     };
   }
 
@@ -53,17 +70,25 @@ export class FieldFormatEditor extends PureComponent<
     const { fieldType, fieldFormat, fieldFormatParams, onChange, onError } = this.props;
 
     return (
-      <Fragment>
+      <>
         {EditorComponent ? (
-          <EditorComponent
-            fieldType={fieldType}
-            format={fieldFormat}
-            formatParams={fieldFormatParams}
-            onChange={onChange}
-            onError={onError}
-          />
+          <React.Suspense
+            fallback={
+              <EuiDelayRender>
+                <EuiLoadingContent lines={4} style={{ marginTop: 8, display: 'block' }} />
+              </EuiDelayRender>
+            }
+          >
+            <EditorComponent
+              fieldType={fieldType}
+              format={fieldFormat}
+              formatParams={fieldFormatParams}
+              onChange={onChange}
+              onError={onError}
+            />
+          </React.Suspense>
         ) : null}
-      </Fragment>
+      </>
     );
   }
 }

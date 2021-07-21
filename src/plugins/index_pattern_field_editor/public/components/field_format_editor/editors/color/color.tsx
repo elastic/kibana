@@ -12,7 +12,8 @@ import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } fro
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, FormatEditorProps } from '../default';
+import { DefaultFormatEditor, FormatEditorProps } from '../default/default';
+import { formatId } from './constants';
 
 import { fieldFormats } from '../../../../../../data/public';
 
@@ -32,7 +33,7 @@ interface ColorFormatEditorFormatParams {
 }
 
 export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorFormatParams> {
-  static formatId = 'color';
+  static formatId = formatId;
   constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
     this.onChange({

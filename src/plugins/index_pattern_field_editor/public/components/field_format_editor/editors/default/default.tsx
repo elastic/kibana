@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
 import { Sample, SampleInput } from '../../types';
 import { FormatSelectEditorProps } from '../../field_format_editor';
+import { formatId } from './constants';
 
 export const convertSampleInput = (
   converter: (input: SampleInput) => string,
@@ -72,7 +73,7 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
   FormatEditorProps<P>,
   FormatEditorState & S
 > {
-  static formatId = 'default';
+  static formatId = formatId;
   state = defaultState as FormatEditorState & S;
 
   static getDerivedStateFromProps(nextProps: FormatEditorProps<{}>, state: FormatEditorState) {

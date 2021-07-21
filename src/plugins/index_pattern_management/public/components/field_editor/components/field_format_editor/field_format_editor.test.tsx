@@ -26,7 +26,7 @@ const formatEditors = {
     ip: TestEditor,
     number: TestEditor,
   },
-  getById: jest.fn(() => TestEditor),
+  getById: jest.fn(() => () => Promise.resolve(TestEditor)),
 };
 
 describe('FieldFormatEditor', () => {
@@ -43,6 +43,7 @@ describe('FieldFormatEditor', () => {
       />
     );
 
+    component.update();
     expect(component).toMatchSnapshot();
   });
 

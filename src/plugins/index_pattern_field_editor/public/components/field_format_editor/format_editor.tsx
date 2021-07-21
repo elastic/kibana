@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import memoize from 'lodash/memoize';
+import React, { PureComponent, LazyExoticComponent, ComponentType } from 'react';
 import { FieldFormat } from 'src/plugins/data/public';
+import { FieldFormatEditorFactory } from './editors';
 
 export interface FormatEditorProps {
   fieldType: string;
@@ -28,21 +31,33 @@ interface EditorComponentProps {
 }
 
 interface FormatEditorState {
-  EditorComponent: React.FC<EditorComponentProps>;
+  EditorComponent: LazyExoticComponent<ComponentType<EditorComponentProps>> | null;
   fieldFormatId?: string;
 }
+
+// use memoize to get stable reference
+const unwrapEditor = memoize(
+  (editorFactory: FieldFormatEditorFactory | null): FormatEditorState['EditorComponent'] => {
+    if (!editorFactory) return null;
+
+    // @ts-ignore
+    // TODO: Type '(change: { [key: string]: any; fieldType: string; }) => void' is not assignable to type '(newParams: Record<string, any>) => void'.
+    // https://github.com/elastic/kibana/issues/104637
+    return React.lazy(() => editorFactory().then((editor) => ({ default: editor })));
+  }
+);
 
 export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorState> {
   constructor(props: FormatEditorProps) {
     super(props);
     this.state = {
-      EditorComponent: props.fieldFormatEditors.getById(props.fieldFormatId),
+      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId)),
     };
   }
 
   static getDerivedStateFromProps(nextProps: FormatEditorProps) {
     return {
-      EditorComponent: nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId) || null,
+      EditorComponent: unwrapEditor(nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId)),
     };
   }
 
@@ -51,17 +66,25 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
     const { fieldType, fieldFormat, fieldFormatParams, onChange, onError } = this.props;
 
     return (
-      <Fragment>
+      <>
         {EditorComponent ? (
-          <EditorComponent
-            fieldType={fieldType}
-            format={fieldFormat}
-            formatParams={fieldFormatParams}
-            onChange={onChange}
-            onError={onError}
-          />
+          <React.Suspense
+            fallback={
+              <EuiDelayRender>
+                <EuiLoadingContent lines={4} style={{ marginTop: 8, display: 'block' }} />
+              </EuiDelayRender>
+            }
+          >
+            <EditorComponent
+              fieldType={fieldType}
+              format={fieldFormat}
+              formatParams={fieldFormatParams}
+              onChange={onChange}
+              onError={onError}
+            />
+          </React.Suspense>
         ) : null}
-      </Fragment>
+      </>
     );
   }
 }
