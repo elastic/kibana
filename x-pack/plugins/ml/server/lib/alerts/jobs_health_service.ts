@@ -16,7 +16,6 @@ import {
 } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
 import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
-import { MlJobsResponse } from '../../../common/types/job_service';
 import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../../shared_services/shared_services';
 import { AnomalyDetectionJobsHealthAlertContext } from './register_jobs_monitoring_rule_type';
@@ -48,7 +47,7 @@ export function jobsHealthServiceProvider(
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (
-      await mlClient.getJobs<MlJobsResponse>({
+      await mlClient.getJobs({
         ...(includeAllJobs ? {} : { job_id: jobAndGroupIds }),
       })
     ).body.jobs;
@@ -61,7 +60,7 @@ export function jobsHealthServiceProvider(
         ...(excludeJobs?.groupIds ?? []),
       ];
       const excludedJobsResponse = (
-        await mlClient.getJobs<MlJobsResponse>({
+        await mlClient.getJobs({
           job_id: excludedJobAndGroupIds,
         })
       ).body.jobs;
