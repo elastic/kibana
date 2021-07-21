@@ -13,15 +13,15 @@
 
 ```typescript
 esQuery: {
-    buildEsQuery: typeof import("@kbn/es-query").buildEsQuery;
+    buildEsQuery: typeof import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").buildEsQuery;
     getEsQueryConfig: typeof getEsQueryConfig;
-    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
+    buildQueryFromFilters: (filters: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[] | undefined, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
         must: never[];
-        filter: import("@kbn/es-query").Filter[];
+        filter: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[];
         should: never[];
-        must_not: import("@kbn/es-query").Filter[];
+        must_not: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[];
     };
-    luceneStringToDsl: typeof import("@kbn/es-query").luceneStringToDsl;
-    decorateQuery: typeof import("@kbn/es-query").decorateQuery;
+    luceneStringToDsl: typeof import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").luceneStringToDsl;
+    decorateQuery: typeof import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").decorateQuery;
 }
 ```

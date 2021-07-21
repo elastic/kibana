@@ -37,7 +37,7 @@ export declare class IndexPatternField implements IFieldType
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.indexpatternfield.sortable.md) |  | <code>boolean</code> |  |
 |  [spec](./kibana-plugin-plugins-data-public.indexpatternfield.spec.md) |  | <code>FieldSpec</code> |  |
-|  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>import(&quot;@kbn/es-query&quot;).IFieldSubType &#124; undefined</code> |  |
+|  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>import(&quot;../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types&quot;).IFieldSubType &#124; undefined</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpatternfield.type.md) |  | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-public.indexpatternfield.visualizable.md) |  | <code>boolean</code> |  |
 

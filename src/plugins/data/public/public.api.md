@@ -276,7 +276,7 @@ export class AggConfigs {
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
     // (undocumented)
-    getSearchSourceTimeFilter(forceNow?: Date): import("@kbn/es-query").RangeFilter[] | {
+    getSearchSourceTimeFilter(forceNow?: Date): import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter[] | {
         meta: {
             index: string | undefined;
             params: {};
@@ -816,23 +816,23 @@ export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<typ
 export const esFilters: {
     FilterLabel: (props: import("./ui/filter_bar/filter_editor/lib/filter_label").FilterLabelProps) => JSX.Element;
     FilterItem: (props: import("./ui/filter_bar/filter_item").FilterItemProps) => JSX.Element;
-    FILTERS: typeof import("@kbn/es-query").FILTERS;
+    FILTERS: typeof import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").FILTERS;
     FilterStateStore: typeof FilterStateStore;
-    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
-    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: any[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
-    buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
-    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: any, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
-    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query").QueryStringFilter;
-    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
-    isPhraseFilter: (filter: any) => filter is import("@kbn/es-query").PhraseFilter;
-    isExistsFilter: (filter: any) => filter is import("@kbn/es-query").ExistsFilter;
-    isPhrasesFilter: (filter: any) => filter is import("@kbn/es-query").PhrasesFilter;
-    isRangeFilter: (filter: any) => filter is import("@kbn/es-query").RangeFilter;
-    isMatchAllFilter: (filter: any) => filter is import("@kbn/es-query").MatchAllFilter;
-    isMissingFilter: (filter: any) => filter is import("@kbn/es-query").MissingFilter;
-    isQueryStringFilter: (filter: any) => filter is import("@kbn/es-query").QueryStringFilter;
-    isFilterPinned: (filter: import("@kbn/es-query").Filter) => boolean | undefined;
-    toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
+    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter;
+    buildPhrasesFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: any[], indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhrasesFilter;
+    buildExistsFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").ExistsFilter;
+    buildPhraseFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, value: any, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhraseFilter;
+    buildQueryFilter: (query: any, index: string, alias: string) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").QueryStringFilter;
+    buildRangeFilter: (field: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternFieldBase, params: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilterParams, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase, formattedValue?: string | undefined) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter;
+    isPhraseFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhraseFilter;
+    isExistsFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").ExistsFilter;
+    isPhrasesFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhrasesFilter;
+    isRangeFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter;
+    isMatchAllFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").MatchAllFilter;
+    isMissingFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").MissingFilter;
+    isQueryStringFilter: (filter: any) => filter is import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").QueryStringFilter;
+    isFilterPinned: (filter: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter) => boolean | undefined;
+    toggleFilterNegated: (filter: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter) => {
         meta: {
             negate: boolean;
             alias: string | null;
@@ -845,20 +845,20 @@ export const esFilters: {
             params?: any;
             value?: string | undefined;
         };
-        $state?: import("@kbn/es-query/target_types/filters/types").FilterState | undefined;
+        $state?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/filters/types").FilterState | undefined;
         query?: any;
     };
-    disableFilter: (filter: import("@kbn/es-query").Filter) => import("@kbn/es-query").Filter;
-    getPhraseFilterField: (filter: import("@kbn/es-query").PhraseFilter) => string;
-    getPhraseFilterValue: (filter: import("@kbn/es-query").PhraseFilter) => string | number | boolean;
+    disableFilter: (filter: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter;
+    getPhraseFilterField: (filter: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhraseFilter) => string;
+    getPhraseFilterValue: (filter: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").PhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
-    compareFilters: (first: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], second: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
+    compareFilters: (first: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter | import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[], second: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter | import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
     COMPARE_ALL_OPTIONS: import("../common").FilterCompareOptions;
     generateFilters: typeof generateFilters;
-    onlyDisabledFiltersChanged: (newFilters?: import("@kbn/es-query").Filter[] | undefined, oldFilters?: import("@kbn/es-query").Filter[] | undefined) => boolean;
+    onlyDisabledFiltersChanged: (newFilters?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[] | undefined, oldFilters?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[] | undefined) => boolean;
     changeTimeFilter: typeof changeTimeFilter;
     convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
-    mapAndFlattenFilters: (filters: import("@kbn/es-query").Filter[]) => import("@kbn/es-query").Filter[];
+    mapAndFlattenFilters: (filters: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[]) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[];
     extractTimeFilter: typeof extractTimeFilter;
     extractTimeRange: typeof extractTimeRange;
 };
@@ -867,25 +867,25 @@ export const esFilters: {
 //
 // @public @deprecated (undocumented)
 export const esKuery: {
-    nodeTypes: import("@kbn/es-query/target_types/kuery/node_types").NodeTypes;
-    fromKueryExpression: (expression: any, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
-    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
+    nodeTypes: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/kuery/node_types").NodeTypes;
+    fromKueryExpression: (expression: any, parseOptions?: Partial<import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").KueryNode;
+    toElasticsearchQuery: (node: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").KueryNode, indexPattern?: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public @deprecated (undocumented)
 export const esQuery: {
-    buildEsQuery: typeof import("@kbn/es-query").buildEsQuery;
+    buildEsQuery: typeof import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").buildEsQuery;
     getEsQueryConfig: typeof getEsQueryConfig;
-    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
+    buildQueryFromFilters: (filters: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[] | undefined, indexPattern: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
         must: never[];
-        filter: import("@kbn/es-query").Filter[];
+        filter: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[];
         should: never[];
-        must_not: import("@kbn/es-query").Filter[];
+        must_not: import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").Filter[];
     };
-    luceneStringToDsl: typeof import("@kbn/es-query").luceneStringToDsl;
-    decorateQuery: typeof import("@kbn/es-query").decorateQuery;
+    luceneStringToDsl: typeof import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").luceneStringToDsl;
+    decorateQuery: typeof import("../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").decorateQuery;
 };
 
 // Warning: (ae-missing-release-tag) "EsQueryConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1160,7 +1160,7 @@ export function getSearchParamsFromRequest(searchRequest: SearchRequest, depende
 export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
     forceNow?: Date;
     fieldName?: string;
-}): import("@kbn/es-query").RangeFilter | undefined;
+}): import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").RangeFilter | undefined;
 
 // Warning: (ae-missing-release-tag) "IAggConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1550,7 +1550,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     readonly spec: FieldSpec;
     // (undocumented)
-    get subType(): import("@kbn/es-query").IFieldSubType | undefined;
+    get subType(): import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IFieldSubType | undefined;
     // (undocumented)
     toJSON(): {
         count: number;
@@ -1564,7 +1564,7 @@ export class IndexPatternField implements IFieldType {
         searchable: boolean;
         aggregatable: boolean;
         readFromDocValues: boolean;
-        subType: import("@kbn/es-query").IFieldSubType | undefined;
+        subType: import("../../../../../../bazel-out/k8-fastbuild/bin/packages/kbn-es-query/target_types").IFieldSubType | undefined;
         customLabel: string | undefined;
     };
     // (undocumented)
