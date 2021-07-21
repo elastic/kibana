@@ -213,7 +213,7 @@ export const getSummaryColumns = (
       field: 'title',
       truncateText: false,
       render: getTitle,
-      width: '160px',
+      width: '33%',
       name: '',
     },
     {
