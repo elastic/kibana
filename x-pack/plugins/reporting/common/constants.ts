@@ -113,3 +113,5 @@ export enum JOB_STATUSES {
   CANCELLED = 'cancelled',
   WARNINGS = 'completed_with_warnings',
 }
+
+export const UNVERSIONED_VERSION = '7.14.0';

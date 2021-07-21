@@ -102,6 +102,7 @@ export interface BaseParams {
   layout?: LayoutParams;
   objectType: string;
   title: string;
+  version: string; // version of the last supported release, in case the params need migration for forward-compatibility
 }
 
 export type JobId = string;
