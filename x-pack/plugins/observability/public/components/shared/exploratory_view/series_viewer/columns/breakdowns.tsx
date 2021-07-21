@@ -59,7 +59,7 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
   }
 
   const options = items.map(({ id, label }) => ({
-    inputDisplay: id === NO_BREAKDOWN ? label : <strong>{label}</strong>,
+    inputDisplay: label,
     value: id,
     dropdownDisplay: label,
   }));
