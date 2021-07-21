@@ -29,6 +29,7 @@ const securityPluginStart = securityMock.createStart();
 const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> = {
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpace: jest.fn(),
+  getSpaceId: jest.fn(),
   features,
 };
 

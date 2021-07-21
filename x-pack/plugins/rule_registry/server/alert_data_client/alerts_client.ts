@@ -74,6 +74,7 @@ export class AlertsClient {
     this.authorization = authorization;
     this.esClient = esClient;
     this.auditLogger = auditLogger;
+
     this.spaceId = this.authorization.getSpaceId();
   }
 

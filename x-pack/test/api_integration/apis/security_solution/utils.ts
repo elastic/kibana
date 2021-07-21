@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject, JsonArray } from '@kbn/common-utils';
 
 export const getSpaceUrlPrefix = (spaceId?: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
@@ -83,7 +83,7 @@ export const getFieldsToRequest = (): string[] => [
  * This can be a good choice when returning a fairly small number of fields that support doc values,
  * such as keywords and dates.
  */
-export const getDocValueFields = (): Array<{ field: string; format?: string }> => [
+export const getDocValueFields = (): JsonArray => [
   {
     field: '@timestamp',
   },

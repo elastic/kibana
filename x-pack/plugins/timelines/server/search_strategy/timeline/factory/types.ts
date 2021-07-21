@@ -6,7 +6,10 @@
  */
 
 import { JsonObject } from '@kbn/common-utils';
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import {
+  IEsSearchResponse,
+  ISearchRequestParams,
+} from '../../../../../../../src/plugins/data/common';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyRequestType,
@@ -14,7 +17,7 @@ import {
 } from '../../../../common/search_strategy/timeline';
 
 export interface TimelineFactory<T extends TimelineFactoryQueryTypes> {
-  buildDsl: (options: TimelineStrategyRequestType<T>) => unknown;
+  buildDsl: (options: TimelineStrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: TimelineStrategyRequestType<T>,
     response: IEsSearchResponse,

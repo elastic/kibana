@@ -35,6 +35,7 @@ const auditLogger = alertingAuthorizationAuditLoggerMock.create();
 const realAuditLogger = new AlertingAuthorizationAuditLogger();
 
 const getSpace = jest.fn();
+const getSpaceId = jest.fn();
 
 const exemptConsumerIds: string[] = [];
 
@@ -233,6 +234,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -248,6 +250,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -271,6 +274,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -297,6 +301,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -353,6 +358,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -409,6 +415,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds: ['exemptConsumer'],
       });
 
@@ -471,6 +478,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds: ['exemptConsumer'],
       });
 
@@ -539,6 +547,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -604,6 +613,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -663,6 +673,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -721,6 +732,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -783,6 +795,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -841,6 +854,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
 
@@ -932,6 +946,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       const {
@@ -943,6 +958,7 @@ describe('AlertingAuthorization', () => {
           ruleTypeId: 'ruleId',
           consumer: 'consumer',
         },
+        includeSpaceId: false,
       });
       expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
       expect(filter).toEqual(undefined);
@@ -954,6 +970,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
@@ -964,6 +981,7 @@ describe('AlertingAuthorization', () => {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
+          includeSpaceId: false,
         }
       );
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
@@ -988,6 +1006,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -999,6 +1018,7 @@ describe('AlertingAuthorization', () => {
               ruleTypeId: 'path.to.rule.id',
               consumer: 'consumer-field',
             },
+            includeSpaceId: false,
           })
         ).filter
       ).toEqual(
@@ -1050,6 +1070,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1061,6 +1082,7 @@ describe('AlertingAuthorization', () => {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
+          includeSpaceId: false,
         }
       );
       expect(() => {
@@ -1123,6 +1145,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1134,6 +1157,7 @@ describe('AlertingAuthorization', () => {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
+          includeSpaceId: false,
         }
       );
       expect(() => {
@@ -1197,6 +1221,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1209,6 +1234,7 @@ describe('AlertingAuthorization', () => {
           ruleTypeId: 'ruleId',
           consumer: 'consumer',
         },
+        includeSpaceId: false,
       });
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
@@ -1274,6 +1300,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1355,6 +1382,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds: ['exemptConsumerA', 'exemptConsumerB'],
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1488,6 +1516,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1593,6 +1622,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds: ['exemptConsumerA'],
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1689,6 +1719,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds: ['exemptConsumerA'],
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1794,6 +1825,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -1903,6 +1935,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -2009,6 +2042,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
@@ -2083,6 +2117,7 @@ describe('AlertingAuthorization', () => {
         features,
         auditLogger,
         getSpace,
+        getSpaceId,
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);

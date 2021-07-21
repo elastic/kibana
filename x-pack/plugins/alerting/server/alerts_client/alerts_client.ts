@@ -190,6 +190,7 @@ const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
+  includeSpaceId: false,
 };
 export class AlertsClient {
   private readonly logger: Logger;
@@ -573,8 +574,7 @@ export class AlertsClient {
           logSuccessfulAuthorization,
         } = await this.authorization.getFindAuthorizationFilter(
           AlertingAuthorizationEntity.Rule,
-          alertingAuthorizationFilterOpts,
-          false
+          alertingAuthorizationFilterOpts
         );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`

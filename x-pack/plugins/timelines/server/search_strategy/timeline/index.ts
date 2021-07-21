@@ -94,9 +94,8 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
 }) => {
-  const { entityType, alertConsumers, ...rest } = request;
   const dsl = queryFactory.buildDsl(request);
-  return es.search({ request: { ...rest }, params: dsl }, options, deps).pipe(
+  return es.search({ ...request, params: dsl }, options, deps).pipe(
     map((response) => {
       return {
         ...response,

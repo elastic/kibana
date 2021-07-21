@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { JsonObject } from '@kbn/common-utils';
 
 import { User } from '../../../rule_registry/common/lib/authentication/types';
-import { EntityType } from '../../../../plugins/timelines/common';
+import { TimelineEdges, TimelineNonEcsData } from '../../../../plugins/timelines/common/';
 import {
   superUser,
   globalRead,
@@ -80,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
     defaultIndex: ['auditbeat-*'],
     docValueFields: getDocValueFields(),
     factoryQueryType: TimelineEventsQueries.all,
-    entityType: EntityType.EVENTS,
+    entityType: 'events',
     fieldRequested: getFieldsToRequest(),
     fields: [],
     filterQuery: getFilterValue(HOST_NAME, FROM, TO),
@@ -139,10 +139,13 @@ export default function ({ getService }: FtrProviderContext) {
           const timeline = resp.body;
 
           expect(
-            timeline.edges.every((hit) => {
-              const data = hit.node.data;
+            timeline.edges.every((hit: TimelineEdges) => {
+              const data: TimelineNonEcsData[] = hit.node.data;
               return data.some(({ field, value }) => {
-                return field === 'kibana.rac.alert.owner' && featureIds.includes(value[0]);
+                return (
+                  field === 'kibana.rac.alert.owner' &&
+                  featureIds.includes((value && value[0]) ?? '')
+                );
               });
             })
           ).to.equal(true);
@@ -254,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: {
             ...getPostBody(),
             defaultIndex: ['.alerts-*'],
-            entityType: EntityType.ALERTS,
+            entityType: 'alerts',
             alertConsumers: ['siem'],
             filterQuery: {
               bool: {
@@ -289,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: {
             ...getPostBody(),
             defaultIndex: ['.alerts-*'],
-            entityType: EntityType.ALERTS,
+            entityType: 'alerts',
             alertConsumers: ['siem'],
             filterQuery: {
               bool: {
@@ -326,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: {
             ...getPostBody(),
             defaultIndex: ['.alerts-*'],
-            entityType: EntityType.ALERTS,
+            entityType: 'alerts',
             alertConsumers: ['apm'],
             filterQuery: {
               bool: {
@@ -364,7 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: {
             ...getPostBody(),
             defaultIndex: ['.alerts-*'],
-            entityType: EntityType.ALERTS,
+            entityType: 'alerts',
             alertConsumers: ['apm'],
             filterQuery: {
               bool: {
@@ -410,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],
-              entityType: EntityType.ALERTS,
+              entityType: 'alerts',
               alertConsumers: ['siem', 'apm'],
               filterQuery: {
                 bool: {
@@ -436,7 +439,7 @@ export default function ({ getService }: FtrProviderContext) {
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],
-              entityType: EntityType.ALERTS,
+              entityType: 'alerts',
               alertConsumers: ['siem', 'apm'],
               filterQuery: {
                 bool: {
@@ -464,7 +467,7 @@ export default function ({ getService }: FtrProviderContext) {
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],
-              entityType: EntityType.ALERTS,
+              entityType: 'alerts',
               alertConsumers: ['siem', 'apm'],
               filterQuery: {
                 bool: {
@@ -489,7 +492,7 @@ export default function ({ getService }: FtrProviderContext) {
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],
-              entityType: EntityType.ALERTS,
+              entityType: 'alerts',
               alertConsumers: ['siem', 'apm'],
               filterQuery: {
                 bool: {
@@ -513,7 +516,7 @@ export default function ({ getService }: FtrProviderContext) {
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],
-              entityType: EntityType.ALERTS,
+              entityType: 'alerts',
               alertConsumers: ['siem', 'apm'],
               filterQuery: {
                 bool: {
