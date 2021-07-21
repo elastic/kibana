@@ -140,6 +140,7 @@ export class ExpressionLoader {
       searchSessionId: params.searchSessionId,
       debug: params.debug,
       syncColors: params.syncColors,
+      executionContext: params.executionContext,
     });
     this.subscription = this.execution
       .getData()
@@ -185,6 +186,8 @@ export class ExpressionLoader {
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;
+
+    this.params.executionContext = params.executionContext;
   }
 }
 

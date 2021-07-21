@@ -6,10 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { image, ImageMode } from '../../../canvas_plugin_src/functions/common/image';
+import { image } from '../../../canvas_plugin_src/functions/common/image';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
-import { URL, BASE64 } from '../../constants';
+import {
+  URL,
+  BASE64,
+  IMAGE_MODE_CONTAIN,
+  IMAGE_MODE_COVER,
+  IMAGE_MODE_STRETCH,
+} from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof image>> = {
   help: i18n.translate('xpack.canvas.functions.imageHelpText', {
@@ -35,9 +41,9 @@ export const help: FunctionHelp<FunctionFactory<typeof image>> = {
         '{cover} fills the container with the image, cropping from the sides or bottom as needed. ' +
         '{stretch} resizes the height and width of the image to 100% of the container.',
       values: {
-        contain: `\`"${ImageMode.CONTAIN}"\``,
-        cover: `\`"${ImageMode.COVER}"\``,
-        stretch: `\`"${ImageMode.STRETCH}"\``,
+        contain: `\`"${IMAGE_MODE_CONTAIN}"\``,
+        cover: `\`"${IMAGE_MODE_COVER}"\``,
+        stretch: `\`"${IMAGE_MODE_STRETCH}"\``,
       },
     }),
   },
@@ -49,9 +55,9 @@ export const errors = {
       i18n.translate('xpack.canvas.functions.image.invalidImageModeErrorMessage', {
         defaultMessage: '"mode" must be "{contain}", "{cover}", or "{stretch}"',
         values: {
-          contain: ImageMode.CONTAIN,
-          cover: ImageMode.COVER,
-          stretch: ImageMode.STRETCH,
+          contain: IMAGE_MODE_CONTAIN,
+          cover: IMAGE_MODE_COVER,
+          stretch: IMAGE_MODE_STRETCH,
         },
       })
     ),
