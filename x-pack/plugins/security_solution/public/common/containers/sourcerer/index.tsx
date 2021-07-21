@@ -72,7 +72,8 @@ export const useInitSourcerer = (
       );
     } else if (
       signalIndexNameSelector != null &&
-      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
+      (activeTimeline == null ||
+        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;

@@ -44,7 +44,6 @@ import {
   DEFAULT_ALERTS_INDEX,
   APP_ICON_SOLUTION,
   DEFAULT_INDEX_PATTERN_ID,
-  DEFAULT_INDEX_PATTERN,
   DEFAULT_TIME_FIELD,
 } from '../common/constants';
 
@@ -338,7 +337,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     } catch (e) {
       indexPattern = (await indexPatternsService.createAndSave({
         id: DEFAULT_INDEX_PATTERN_ID,
-        title: [...DEFAULT_INDEX_PATTERN, ...defaultIndicesName].join(','),
+        title: defaultIndicesName.join(','),
         timeFieldName: DEFAULT_TIME_FIELD,
       })) as KibanaIndexPattern; // types are messy here ^^
     }

@@ -11,10 +11,13 @@ import { initialSourcererState, SourcererScopeName } from './model';
 let defaultArgs: Args = {
   eventType: 'all',
   id: SourcererScopeName.default,
-  selectedPatterns: ['auditbeat-*', 'packetbeat-*'],
+  selectedPatterns: ['journalbeat-*'],
   state: {
     ...initialSourcererState,
-    kibanaIndexPatterns: [{ id: '123', title: 'journalbeat-*' }],
+    kibanaIndexPatterns: [
+      initialSourcererState.defaultIndexPattern,
+      { id: '123', title: 'journalbeat-*' },
+    ],
     signalIndexName: 'signals-*',
   },
 };
@@ -26,18 +29,18 @@ const ids: Array<Args['id']> = [
 ];
 describe('createDefaultIndexPatterns', () => {
   ids.forEach((id) => {
-    eventTypes.forEach((et) => {
-      describe(`id: ${id}, eventType: ${et}`, () => {
+    eventTypes.forEach((eventType) => {
+      describe(`id: ${id}, eventType: ${eventType}`, () => {
         beforeEach(() => {
           defaultArgs = {
             ...defaultArgs,
             id,
-            eventType: et,
+            eventType,
           };
         });
         it('Selected patterns', () => {
           const result = createDefaultIndexPatterns(defaultArgs);
-          expect(result).toEqual(['auditbeat-*', 'packetbeat-*']);
+          expect(result).toEqual(['journalbeat-*']);
         });
         it('No selected patterns', () => {
           const newArgs = {
@@ -47,13 +50,14 @@ describe('createDefaultIndexPatterns', () => {
           const result = createDefaultIndexPatterns(newArgs);
           if (
             id === SourcererScopeName.detections ||
-            (id === SourcererScopeName.timeline && (et === 'alert' || et === 'signal'))
+            (id === SourcererScopeName.timeline &&
+              (eventType === 'alert' || eventType === 'signal'))
           ) {
             expect(result).toEqual(['signals-*']);
-          } else if (id === SourcererScopeName.timeline && et === 'all') {
-            expect(result).toEqual(['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'signals-*']);
+          } else if (id === SourcererScopeName.timeline && eventType === 'all') {
+            expect(result).toEqual([initialSourcererState.defaultIndexPattern.title, 'signals-*']);
           } else {
-            expect(result).toEqual(['filebeat-*', 'auditbeat-*', 'packetbeat-*']);
+            expect(result).toEqual([initialSourcererState.defaultIndexPattern.title]);
           }
         });
       });

@@ -31,6 +31,7 @@ import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
+import { getPatternList } from '../store/sourcerer/helpers';
 
 export const mockGlobalState: State = {
   app: {
@@ -265,7 +266,7 @@ export const mockGlobalState: State = {
       ...initialSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
+        selectedPatterns: getPatternList(initialSourcererState.defaultIndexPattern),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,
@@ -273,7 +274,7 @@ export const mockGlobalState: State = {
       },
       [SourcererScopeName.timeline]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
+        selectedPatterns: getPatternList(initialSourcererState.defaultIndexPattern),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,

@@ -13,6 +13,7 @@ import {
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_PATTERN,
 } from '../../../../common/search_strategy/index_fields';
+import { DEFAULT_INDEX_PATTERN, DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
 
 export type ErrorModel = Error[];
 
@@ -67,7 +68,7 @@ export const initSourcererScope = {
 };
 
 export const initialSourcererState: SourcererModel = {
-  defaultIndexPattern: { id: '', title: '' }, // instantiated in plugin.tsx `getKibanaIndexPattern`
+  defaultIndexPattern: { id: DEFAULT_INDEX_PATTERN_ID, title: DEFAULT_INDEX_PATTERN.join(',') }, // instantiated in plugin.tsx `getKibanaIndexPattern`
   kibanaIndexPatterns: [],
   signalIndexName: null,
   sourcererScopes: {

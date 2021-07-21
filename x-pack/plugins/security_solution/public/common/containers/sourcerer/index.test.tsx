@@ -27,7 +27,7 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -154,7 +154,10 @@ describe('Sourcerer Hooks', () => {
       });
       expect(mockDispatch.mock.calls[3][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
-        payload: { id: 'timeline', selectedPatterns: ['signals-*'] },
+        payload: {
+          id: 'timeline',
+          selectedPatterns: [initialSourcererState.defaultIndexPattern.title, 'signals-*'],
+        },
       });
     });
   });
@@ -173,7 +176,8 @@ describe('Sourcerer Hooks', () => {
       );
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      // not sure why this wasn't like this before since it calls useIndexFields twice in a row...?
+      expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
         payload: { id: 'detections', selectedPatterns: ['signals-*'] },
       });

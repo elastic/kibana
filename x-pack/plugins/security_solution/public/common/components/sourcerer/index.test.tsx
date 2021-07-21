@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from './index';
-import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
@@ -19,8 +18,7 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore, State } from '../../store';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
+import { getPatternList } from '../../store/sourcerer/helpers';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -31,18 +29,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
-const mockOptions = [
-  { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
-  { label: 'auditbeat-*', value: 'auditbeat-*' },
-  { label: 'endgame-*', value: 'endgame-*' },
-  { label: 'filebeat-*', value: 'filebeat-*' },
-  { label: 'logs-*', value: 'logs-*' },
-  { label: 'packetbeat-*', value: 'packetbeat-*' },
-  { label: 'traces-apm*', value: 'traces-apm*' },
-  { label: 'winlogbeat-*', value: 'winlogbeat-*' },
-];
-
 const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
@@ -52,6 +38,30 @@ describe('Sourcerer component', () => {
     jest.restoreAllMocks();
   });
   const state: State = mockGlobalState;
+  const defaultAsList = getPatternList(state.sourcerer.defaultIndexPattern);
+  const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => {
+    return {
+      availableOptionCount: wrapper.find(`[data-test-subj="kip-option"]`).length,
+      optionsSelected: patterns.every((pattern) =>
+        wrapper
+          .find(`[data-test-subj="indexPattern-switcher"] span[title="${pattern}"]`)
+          .first()
+          .exists()
+      ),
+    };
+  };
+
+  const mockOptions = [
+    {
+      label: state.sourcerer.defaultIndexPattern.title,
+      value: state.sourcerer.defaultIndexPattern.title,
+    },
+    {
+      label: 'filebeat-*',
+      value: 'filebeat-*',
+    },
+  ];
+
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -59,8 +69,6 @@ describe('Sourcerer component', () => {
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
-  // Using props callback instead of simulating clicks,
-  // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
   it('Mounts with all options selected', () => {
     const wrapper = mount(
       <TestProviders store={store}>
@@ -70,19 +78,24 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     expect(
       wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('selectedOptions')
-    ).toEqual(mockOptions);
+    ).toEqual([mockOptions[0]]);
   });
-  it('Mounts with some options selected', () => {
+  it('Mounts with multiple options selected', () => {
     const state2 = {
       ...mockGlobalState,
       sourcerer: {
         ...mockGlobalState.sourcerer,
+        kibanaIndexPatterns: [
+          state.sourcerer.defaultIndexPattern,
+          { id: '1234', title: 'auditbeat-*' },
+          { id: '1234', title: 'packetbeat-*' },
+        ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
           [SourcererScopeName.default]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
             loading: false,
-            selectedPatterns: [DEFAULT_INDEX_PATTERN[0]],
+            selectedPatterns: [...defaultAsList, 'auditbeat-*'],
           },
         },
       },
@@ -95,43 +108,24 @@ describe('Sourcerer component', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
     expect(
-      wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('selectedOptions')
-    ).toEqual([mockOptions[0]]);
+      checkOptionsAndSelections(wrapper, ['auditbeat-*', state.sourcerer.defaultIndexPattern.title])
+    ).toEqual({
+      availableOptionCount: 1,
+      optionsSelected: true,
+    });
   });
   it('onChange calls updateSourcererScopeIndices', async () => {
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <Sourcerer {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')
-    ).toBeTruthy();
-    await waitFor(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([mockOptions[0], mockOptions[1]]);
-      wrapper.update();
-    });
-    wrapper.find(`[data-test-subj="add-index"]`).first().simulate('click');
-    expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')).toBeFalsy();
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      sourcererActions.setSelectedIndexPatterns({
-        id: SourcererScopeName.default,
-        selectedPatterns: [mockOptions[0].value, mockOptions[1].value],
-      })
-    );
-  });
-  it('resets to config index patterns', async () => {
     store = createStore(
       {
         ...state,
         sourcerer: {
           ...state.sourcerer,
-          kibanaIndexPatterns: [{ id: '1234', title: 'auditbeat-*' }],
+          kibanaIndexPatterns: [
+            state.sourcerer.defaultIndexPattern,
+            { id: '1234', title: 'filebeat-*' },
+          ],
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -144,16 +138,81 @@ describe('Sourcerer component', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    expect(wrapper.find(`[data-test-subj="config-option"]`).first().exists()).toBeFalsy();
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
+    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
+      {
+        availableOptionCount: 1,
+        optionsSelected: true,
+      }
+    );
+
+    wrapper.find(`[data-test-subj="kip-option"]`).first().simulate('click');
+    expect(
+      checkOptionsAndSelections(wrapper, [mockOptions[0].label, mockOptions[1].label])
+    ).toEqual({
+      availableOptionCount: 0,
+      optionsSelected: true,
+    });
+    wrapper.find(`[data-test-subj="add-index"]`).first().simulate('click');
+    expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')).toBeFalsy();
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sourcererActions.setSelectedIndexPatterns({
+        id: SourcererScopeName.default,
+        selectedPatterns: [mockOptions[0].value, mockOptions[1].value],
+      })
+    );
+  });
+  it('resets to default index pattern', async () => {
+    store = createStore(
+      {
+        ...state,
+        sourcerer: {
+          ...state.sourcerer,
+          kibanaIndexPatterns: [
+            state.sourcerer.defaultIndexPattern,
+            { id: '1234', title: 'auditbeat-*' },
+          ],
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
+
+    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
+      {
+        availableOptionCount: 1,
+        optionsSelected: true,
+      }
+    );
     wrapper
       .find(
-        `[data-test-subj="indexPattern-switcher"] [title="packetbeat-*"] button.euiBadge__iconButton`
+        `[data-test-subj="indexPattern-switcher"] [title="${defaultAsList}"] button.euiBadge__iconButton`
       )
       .first()
       .simulate('click');
-    expect(wrapper.find(`[data-test-subj="config-option"]`).first().exists()).toBeTruthy();
+    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
+      {
+        availableOptionCount: 2,
+        optionsSelected: false,
+      }
+    );
+
     wrapper.find(`[data-test-subj="sourcerer-reset"]`).first().simulate('click');
-    expect(wrapper.find(`[data-test-subj="config-option"]`).first().exists()).toBeFalsy();
+    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
+      {
+        availableOptionCount: 1,
+        optionsSelected: true,
+      }
+    );
   });
   it('disables saving when no index patterns are selected', () => {
     store = createStore(
@@ -161,7 +220,10 @@ describe('Sourcerer component', () => {
         ...state,
         sourcerer: {
           ...state.sourcerer,
-          kibanaIndexPatterns: [{ id: '1234', title: 'auditbeat-*' }],
+          kibanaIndexPatterns: [
+            state.sourcerer.defaultIndexPattern,
+            { id: '1234', title: 'auditbeat-*' },
+          ],
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -176,75 +238,5 @@ describe('Sourcerer component', () => {
     wrapper.find('[data-test-subj="sourcerer-trigger"]').first().simulate('click');
     wrapper.find('[data-test-subj="comboBoxClearButton"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="add-index"]').first().prop('disabled')).toBeTruthy();
-  });
-  it('returns index pattern options for kibanaIndexPatterns and configIndexPatterns', () => {
-    store = createStore(
-      {
-        ...state,
-        sourcerer: {
-          ...state.sourcerer,
-          kibanaIndexPatterns: [{ id: '1234', title: 'auditbeat-*' }],
-        },
-      },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <Sourcerer {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    expect(wrapper.find(`[data-test-subj="config-option"]`).first().exists()).toBeFalsy();
-    wrapper
-      .find(
-        `[data-test-subj="indexPattern-switcher"] [title="auditbeat-*"] button.euiBadge__iconButton`
-      )
-      .first()
-      .simulate('click');
-    wrapper.update();
-    expect(wrapper.find(`[data-test-subj="kip-option"]`).first().text()).toEqual(' auditbeat-*');
-    wrapper
-      .find(
-        `[data-test-subj="indexPattern-switcher"] [title="packetbeat-*"] button.euiBadge__iconButton`
-      )
-      .first()
-      .simulate('click');
-    wrapper.update();
-    expect(wrapper.find(`[data-test-subj="config-option"]`).first().text()).toEqual('packetbeat-*');
-  });
-  it('combines index pattern options for kibanaIndexPatterns and configIndexPatterns', () => {
-    store = createStore(
-      {
-        ...state,
-        sourcerer: {
-          ...state.sourcerer,
-          kibanaIndexPatterns: [
-            { id: '1234', title: 'auditbeat-*' },
-            { id: '5678', title: 'packetbeat-*' },
-          ],
-        },
-      },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <Sourcerer {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    wrapper
-      .find(
-        `[data-test-subj="indexPattern-switcher"] [title="packetbeat-*"] button.euiBadge__iconButton`
-      )
-      .first()
-      .simulate('click');
-    wrapper.update();
-    expect(
-      wrapper.find(`[title="packetbeat-*"] [data-test-subj="kip-option"]`).first().text()
-    ).toEqual(' packetbeat-*');
   });
 });

@@ -107,20 +107,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
 
   const indexesPatternOptions = useMemo(
-    () =>
-      // TODO: Steph/sourcerer double check this
-      kibanaIndexPatterns.reduce<Array<EuiComboBoxOptionOption<string>>>(
-        (acc, { title: index }) => {
-          if (index != null && !acc.some((o) => o.label.includes(index))) {
-            return [...acc, { label: index, value: index }];
-          }
-          return acc;
-        },
-        []
-      ),
+    () => kibanaIndexPatterns.map(({ title: index }) => ({ label: index, value: index })),
     [kibanaIndexPatterns]
   );
-
   const trigger = useMemo(
     () => (
       <EuiButtonEmpty
