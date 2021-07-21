@@ -44,12 +44,14 @@ export function urlparam(): ExpressionFunctionDefinition<
     fn: (input, args) => {
       let viewParams;
       const url = new URL(window.location.href);
-      let query = url.searchParams;
+      const query = url.searchParams;
 
       if (url.hash !== '') {
-        viewParams = new URLSearchParams(url.hash.includes('?') ? url.hash.substring(url.hash.indexOf('?'), url.hash.length) : '');
-        for (let param of viewParams.entries()) {
-          query.append(param[0],param[1]);
+        viewParams = new URLSearchParams(
+          url.hash.includes('?') ? url.hash.substring(url.hash.indexOf('?'), url.hash.length) : ''
+        );
+        for (const param of viewParams.entries()) {
+          query.append(param[0], param[1]);
         }
       }
       return query.get(args.param) || args.default;
