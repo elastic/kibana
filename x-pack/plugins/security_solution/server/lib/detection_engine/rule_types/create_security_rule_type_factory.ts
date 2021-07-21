@@ -55,7 +55,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       } = options;
       let runState = state;
       const { from, maxSignals, meta, outputIndex, ruleId, timestampOverride, to } = params;
-      const { savedObjectsClient, scopedClusterClient } = services;
+      const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
       const esClient = scopedClusterClient.asCurrentUser;
@@ -179,7 +179,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           lists: (params.exceptionsList as ListArray) ?? [],
         });
 
-        const bulkCreate = bulkCreateFactory(logger, ruleDataClient, buildRuleMessage, refresh);
+        const bulkCreate = bulkCreateFactory(
+          logger,
+          alertWithPersistence,
+          buildRuleMessage,
+          refresh
+        );
 
         const wrapHits = wrapHitsFactory({
           ruleSO,

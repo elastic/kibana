@@ -18,26 +18,22 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
         services: { alertInstanceFactory },
       } = options;
 
-      const currentAlerts: Array<Record<string, unknown>> = [];
-
       const state = await type.executor({
         ...options,
         services: {
           ...options.services,
           alertWithPersistence: async (alerts) => {
-            alerts.forEach((alert) => currentAlerts.push(alert));
-
-            const numAlerts = currentAlerts.length;
+            const numAlerts = alerts.length;
             logger.debug(`Found ${numAlerts} alerts.`);
 
             if (ruleDataClient.isWriteEnabled() && numAlerts) {
               const response = await ruleDataClient.getWriter().bulk({
-                body: currentAlerts.flatMap((event) => [{ index: {} }, event]),
+                body: alerts.flatMap((event) => [{ index: {} }, event]),
               });
-              alerts.map((alert) =>
-                alertInstanceFactory(alert['kibana.rac.alert.uuid']! as string)
-              );
-              return response;
+              return {
+                instances: alerts.map((alert) => alertInstanceFactory(alert.id)),
+                response,
+              };
             }
           },
         },

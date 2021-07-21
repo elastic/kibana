@@ -19,10 +19,19 @@ import {
 import { AlertTypeWithExecutor } from '../types';
 import { RuleDataClient } from '../../target/types/server';
 
-export type PersistenceAlertService<TAlertInstanceContext extends Record<string, unknown>> = (
-  alerts: Array<Record<string, unknown>>
-  // ) => Array<AlertInstance<AlertInstanceState, TAlertInstanceContext, string>>;
-) => Promise<ApiResponse<BulkResponse, unknown>>;
+export type PersistenceAlertService<
+  TState extends AlertInstanceState = never,
+  TContext extends AlertInstanceContext = never,
+  TActionGroupIds extends string = never
+> = (
+  alerts: Array<{
+    id: string;
+    fields: Record<string, unknown>;
+  }>
+) => Promise<{
+  instances: Array<AlertInstance<TState, TContext, TActionGroupIds>>;
+  response: ApiResponse<BulkResponse, unknown>;
+}>;
 
 export type PersistenceAlertQueryService = (
   query: ESSearchRequest
