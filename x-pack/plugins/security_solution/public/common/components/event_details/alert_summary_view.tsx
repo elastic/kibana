@@ -36,6 +36,7 @@ import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
+import { TimelineEventsDetailsItem } from '../../../../common';
 import { EventFieldsData } from './types';
 
 export const Indent = styled.div`
@@ -88,11 +89,16 @@ const getDescription = ({
   if (isEmpty(values)) {
     return <>{getEmptyValue()}</>;
   }
+
+  const eventFieldsData = {
+    ...data,
+    ...(fieldFromBrowserField ? fieldFromBrowserField : {}),
+  } as EventFieldsData;
   return (
     <>
       <FieldValueCell
         contextId={timelineId}
-        data={data}
+        data={eventFieldsData}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
@@ -100,7 +106,7 @@ const getDescription = ({
       />
       <ActionCell
         contextId={timelineId}
-        data={data}
+        data={eventFieldsData}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
@@ -117,13 +123,13 @@ const getSummaryRows = ({
   timelineId,
   eventId,
 }: {
-  data: EventFieldsData[];
+  data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
 }) => {
   const categoryField = find({ category: 'event', field: 'event.category' }, data) as
-    | EventFieldsData
+    | TimelineEventsDetailsItem
     | undefined;
   const eventCategory = Array.isArray(categoryField?.originalValue)
     ? categoryField?.originalValue[0]
@@ -223,7 +229,7 @@ const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns
 
 const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
-  data: EventFieldsData[];
+  data: TimelineEventsDetailsItem[];
   eventId: string;
   timelineId: string;
   title?: string;
@@ -244,13 +250,13 @@ const AlertSummaryViewComponent: React.FC<{
   const agentStatusRow = {
     title: i18n.AGENT_STATUS,
     description: {
-      data: endpointId ?? ({} as EventFieldsData),
+      data: endpointId ?? ({} as TimelineEventsDetailsItem),
       eventId,
       timelineId,
       values: endpointId?.values,
       linkValue: undefined,
     },
-  };
+  } as AlertSummaryRow;
 
   const summaryRowsWithAgentStatus = [...summaryRows, agentStatusRow];
 
