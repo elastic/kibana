@@ -10,7 +10,7 @@ import { CommonAlertStatus } from '../../../common/types/alerts';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
 
 export function shouldShowAlertBadge(
-  alerts: { [alertTypeId: string]: CommonAlertStatus },
+  alerts: { [alertTypeId: string]: CommonAlertStatus[] },
   alertTypeIds: string[],
   context?: ISetupModeContext
 ) {
@@ -18,5 +18,8 @@ export function shouldShowAlertBadge(
     return false;
   }
   const inSetupMode = isInSetupMode(context);
-  return inSetupMode || alertTypeIds.find((name) => alerts[name] && alerts[name].states.length);
+  const alertExists = alertTypeIds.find(
+    (name) => alerts[name] && alerts[name].find((rule) => rule.states.length > 0)
+  );
+  return inSetupMode || alertExists;
 }

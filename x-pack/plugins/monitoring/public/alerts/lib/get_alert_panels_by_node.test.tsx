@@ -37,7 +37,6 @@ jest.mock('../../../common/formatting', () => ({
 }));
 
 const mockAlert = {
-  id: '',
   enabled: true,
   tags: [],
   consumer: '',
@@ -90,6 +89,7 @@ describe('getAlertPanelsByNode', () => {
 
     return {
       rawAlert: {
+        id: `${type}_${firingCount}`,
         alertTypeId: type,
         name: `${type}_label`,
         ...mockAlert,
@@ -106,6 +106,17 @@ describe('getAlertPanelsByNode', () => {
       getAlert(ALERT_NODES_CHANGED, 2),
       getAlert(ALERT_DISK_USAGE, 1),
       getAlert(ALERT_LICENSE_EXPIRATION, 2),
+      {
+        states: [
+          { firing: true, meta: {}, state: { cluster, ui, nodeId: 'es1', nodeName: 'es_name_1' } },
+        ],
+        rawAlert: {
+          id: `${ALERT_NODES_CHANGED}_3`,
+          alertTypeId: ALERT_NODES_CHANGED,
+          name: `${ALERT_NODES_CHANGED}_label_2`,
+          ...mockAlert,
+        },
+      },
     ];
     const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
     expect(result).toMatchSnapshot();

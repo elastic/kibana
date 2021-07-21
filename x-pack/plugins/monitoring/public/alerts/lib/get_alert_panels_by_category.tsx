@@ -10,73 +10,89 @@ import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import { ALERT_PANEL_MENU } from '../../../common/constants';
 import { getDateFromNow, getCalendar } from '../../../common/formatting';
-import { IAlertsContext } from '../context';
-import { AlertState, CommonAlertStatus } from '../../../common/types/alerts';
+import {
+  AlertState,
+  CommonAlert,
+  CommonAlertState,
+  CommonAlertStatus,
+} from '../../../common/types/alerts';
 import { PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 import { Legacy } from '../../legacy_shims';
 
+interface MenuAlert {
+  alert: CommonAlert;
+  alertName: string;
+  states: CommonAlertState[];
+}
+interface MenuItem {
+  alertCount: number;
+  label: string;
+  alerts: MenuAlert[];
+}
 export function getAlertPanelsByCategory(
   panelTitle: string,
   inSetupMode: boolean,
   alerts: CommonAlertStatus[],
-  alertsContext: IAlertsContext,
   stateFilter: (state: AlertState) => boolean
 ) {
-  const menu = [];
-  for (const category of ALERT_PANEL_MENU) {
-    let categoryFiringAlertCount = 0;
-    if (inSetupMode) {
-      const alertsInCategory = [];
-      for (const categoryAlert of category.alerts) {
-        if (
-          Boolean(alerts.find(({ rawAlert }) => rawAlert.alertTypeId === categoryAlert.alertName))
-        ) {
-          alertsInCategory.push(categoryAlert);
-        }
-      }
-      if (alertsInCategory.length > 0) {
-        menu.push({
-          ...category,
-          alerts: alertsInCategory.map(({ alertName }) => {
-            const alertStatus = alertsContext.allAlerts[alertName];
-            return {
-              alert: alertStatus.rawAlert,
-              states: [],
-              alertName,
-            };
-          }),
-          alertCount: 0,
-        });
-      }
-    } else {
-      const firingAlertsInCategory = [];
-      for (const { alertName } of category.alerts) {
-        const foundAlert = alerts.find(
-          ({ rawAlert: { alertTypeId } }) => alertName === alertTypeId
+  const menu = inSetupMode
+    ? ALERT_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
+        const alertsInCategory = category.alerts.filter((alert) =>
+          alerts.find(({ rawAlert }) => rawAlert.alertTypeId === alert.alertName)
         );
-        if (foundAlert && foundAlert.states.length > 0) {
-          const states = foundAlert.states.filter(({ state }) => stateFilter(state));
-          if (states.length > 0) {
-            firingAlertsInCategory.push({
-              alert: foundAlert.rawAlert,
-              states: foundAlert.states,
-              alertName,
+        if (alertsInCategory.length > 0) {
+          acc.push({
+            ...category,
+            alerts: alertsInCategory
+              .map(({ alertName }) => {
+                return alerts
+                  .filter(({ rawAlert }) => rawAlert.alertTypeId === alertName)
+                  .map((alert) => {
+                    return {
+                      alert: alert.rawAlert,
+                      states: [],
+                      alertName,
+                    };
+                  });
+              })
+              .flat(),
+            alertCount: 0,
+          });
+        }
+        return acc;
+      }, [])
+    : ALERT_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
+        const firingAlertsInCategory: MenuAlert[] = [];
+        let categoryFiringAlertCount = 0;
+        for (const { alertName } of category.alerts) {
+          const foundAlerts = alerts.filter(
+            ({ rawAlert, states }) => alertName === rawAlert.alertTypeId && states.length > 0
+          );
+          if (foundAlerts.length > 0) {
+            foundAlerts.forEach((foundAlert) => {
+              const states = foundAlert.states.filter(({ state }) => stateFilter(state));
+              if (states.length > 0) {
+                firingAlertsInCategory.push({
+                  alert: foundAlert.rawAlert,
+                  states,
+                  alertName,
+                });
+                categoryFiringAlertCount += states.length;
+              }
             });
-            categoryFiringAlertCount += states.length;
           }
         }
-      }
 
-      if (firingAlertsInCategory.length > 0) {
-        menu.push({
-          ...category,
-          alertCount: categoryFiringAlertCount,
-          alerts: firingAlertsInCategory,
-        });
-      }
-    }
-  }
+        if (firingAlertsInCategory.length > 0) {
+          acc.push({
+            ...category,
+            alertCount: categoryFiringAlertCount,
+            alerts: firingAlertsInCategory,
+          });
+        }
+        return acc;
+      }, []);
 
   for (const item of menu) {
     for (const alert of item.alerts) {
@@ -107,7 +123,6 @@ export function getAlertPanelsByCategory(
       ],
     },
   ];
-
   if (inSetupMode) {
     let secondaryPanelIndex = menu.length;
     let tertiaryPanelIndex = menu.length;
@@ -116,25 +131,24 @@ export function getAlertPanelsByCategory(
       panels.push({
         id: nodeIndex + 1,
         title: `${category.label}`,
-        items: category.alerts.map(({ alertName }) => {
-          const alertStatus = alertsContext.allAlerts[alertName];
-          return {
-            name: <EuiText>{alertStatus.rawAlert.name}</EuiText>,
-            panel: ++secondaryPanelIndex,
-          };
-        }),
+        items: category.alerts
+          .map((alert) => {
+            return {
+              name: <EuiText>{alert.alert.name}</EuiText>,
+              panel: ++secondaryPanelIndex,
+            };
+          })
+          .flat(),
       });
       nodeIndex++;
     }
-
     for (const category of menu) {
-      for (const { alert, alertName } of category.alerts) {
-        const alertStatus = alertsContext.allAlerts[alertName];
+      for (const { alert } of category.alerts) {
         panels.push({
           id: ++tertiaryPanelIndex,
           title: `${alert.name}`,
           width: 400,
-          content: <AlertPanel alert={alertStatus.rawAlert} />,
+          content: <AlertPanel alert={alert} />,
         });
       }
     }
@@ -145,14 +159,13 @@ export function getAlertPanelsByCategory(
       panels.push({
         id: nodeIndex + 1,
         title: `${category.label}`,
-        items: category.alerts.map(({ alertName, states }) => {
+        items: category.alerts.map(({ alert, alertName, states }) => {
           const filteredStates = states.filter(({ state }) => stateFilter(state));
-          const alertStatus = alertsContext.allAlerts[alertName];
           const name = inSetupMode ? (
-            <EuiText>{alertStatus.rawAlert.name}</EuiText>
+            <EuiText>{alert.name}</EuiText>
           ) : (
             <EuiText>
-              {alertStatus.rawAlert.name} ({filteredStates.length})
+              {alert.name} ({filteredStates.length})
             </EuiText>
           );
           return {
@@ -208,7 +221,6 @@ export function getAlertPanelsByCategory(
         });
       }
     }
-
     let tertiaryPanelIndex2 = menu.reduce((count, category) => {
       count += category.alerts.length;
       return count;
@@ -226,6 +238,5 @@ export function getAlertPanelsByCategory(
       }
     }
   }
-
   return panels;
 }

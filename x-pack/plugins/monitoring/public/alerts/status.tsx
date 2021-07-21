@@ -16,7 +16,7 @@ import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 interface Props {
-  alerts: { [alertTypeId: string]: CommonAlertStatus };
+  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
   showBadge: boolean;
   showOnlyCount?: boolean;
   stateFilter?: (state: AlertState) => boolean;
@@ -30,25 +30,27 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   let atLeastOneDanger = false;
-  const count = Object.values(alerts).reduce((cnt, alertStatus) => {
-    const firingStates = alertStatus.states.filter((state) => state.firing);
-    const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
-    cnt += firingAndFilterStates.length;
-    if (firingStates.length) {
-      if (!atLeastOneDanger) {
-        for (const state of alertStatus.states) {
-          if (
-            stateFilter(state.state) &&
-            (state.state as AlertState).ui.severity === AlertSeverity.Danger
-          ) {
-            atLeastOneDanger = true;
-            break;
+  const count = Object.values(alerts)
+    .flat()
+    .reduce((cnt, alertStatus) => {
+      const firingStates = alertStatus.states.filter((state) => state.firing);
+      const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
+      cnt += firingAndFilterStates.length;
+      if (firingStates.length) {
+        if (!atLeastOneDanger) {
+          for (const state of alertStatus.states) {
+            if (
+              stateFilter(state.state) &&
+              (state.state as AlertState).ui.severity === AlertSeverity.Danger
+            ) {
+              atLeastOneDanger = true;
+              break;
+            }
           }
         }
       }
-    }
-    return cnt;
-  }, 0);
+      return cnt;
+    }, 0);
 
   if (count === 0 && (!inSetupMode || showOnlyCount)) {
     return (
@@ -75,7 +77,6 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   if (showBadge || inSetupMode) {
     return <AlertsBadge alerts={alerts} stateFilter={stateFilter} />;
   }
-
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;
 
   const tooltipText = (() => {

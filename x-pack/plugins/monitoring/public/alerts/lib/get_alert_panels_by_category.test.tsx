@@ -6,7 +6,6 @@
  */
 
 import {
-  ALERTS,
   ALERT_CPU_USAGE,
   ALERT_LOGSTASH_VERSION_MISMATCH,
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
@@ -19,7 +18,6 @@ import {
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
 } from '../../../common/constants';
-import { AlertsByName } from '../types';
 import { AlertExecutionStatusValues } from '../../../../alerting/common';
 import { AlertState } from '../../../common/types/alerts';
 
@@ -62,20 +60,6 @@ const mockAlert = {
   notifyWhen: null,
 };
 
-function getAllAlerts() {
-  return ALERTS.reduce((accum: AlertsByName, alertType) => {
-    accum[alertType] = {
-      states: [],
-      rawAlert: {
-        alertTypeId: alertType,
-        name: `${alertType}_label`,
-        ...mockAlert,
-      },
-    };
-    return accum;
-  }, {});
-}
-
 describe('getAlertPanelsByCategory', () => {
   const ui = {
     isFiring: false,
@@ -117,10 +101,6 @@ describe('getAlertPanelsByCategory', () => {
     };
   }
 
-  const alertsContext = {
-    allAlerts: getAllAlerts(),
-  };
-
   const stateFilter = (state: AlertState) => true;
   const panelTitle = 'Alerts';
 
@@ -131,25 +111,13 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_DISK_USAGE, 1),
         getAlert(ALERT_LICENSE_EXPIRATION, 2),
       ];
-      const result = getAlertPanelsByCategory(
-        panelTitle,
-        false,
-        alerts,
-        alertsContext,
-        stateFilter
-      );
+      const result = getAlertPanelsByCategory(panelTitle, false, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should properly group for alerts in a single category', () => {
       const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
-      const result = getAlertPanelsByCategory(
-        panelTitle,
-        false,
-        alerts,
-        alertsContext,
-        stateFilter
-      );
+      const result = getAlertPanelsByCategory(panelTitle, false, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
@@ -159,26 +127,14 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_CPU_USAGE, 0),
         getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
       ];
-      const result = getAlertPanelsByCategory(
-        panelTitle,
-        false,
-        alerts,
-        alertsContext,
-        stateFilter
-      );
+      const result = getAlertPanelsByCategory(panelTitle, false, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should allow for state filtering', () => {
       const alerts = [getAlert(ALERT_CPU_USAGE, 2)];
       const customStateFilter = (state: AlertState) => state.nodeName === 'es_name_0';
-      const result = getAlertPanelsByCategory(
-        panelTitle,
-        false,
-        alerts,
-        alertsContext,
-        customStateFilter
-      );
+      const result = getAlertPanelsByCategory(panelTitle, false, alerts, customStateFilter);
       expect(result).toMatchSnapshot();
     });
   });
@@ -190,13 +146,13 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_DISK_USAGE, 1),
         getAlert(ALERT_LICENSE_EXPIRATION, 2),
       ];
-      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should properly group for alerts in a single category', () => {
       const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
-      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
@@ -206,7 +162,7 @@ describe('getAlertPanelsByCategory', () => {
         getAlert(ALERT_CPU_USAGE, 0),
         getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
       ];
-      const result = getAlertPanelsByCategory(panelTitle, true, alerts, alertsContext, stateFilter);
+      const result = getAlertPanelsByCategory(panelTitle, true, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
   });
