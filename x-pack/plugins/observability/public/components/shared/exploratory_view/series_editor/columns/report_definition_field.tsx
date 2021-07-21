@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
+import { ExistsFilter } from '@kbn/es-query';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
-import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 import { buildPhrasesFilter } from '../../configurations/utils';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';

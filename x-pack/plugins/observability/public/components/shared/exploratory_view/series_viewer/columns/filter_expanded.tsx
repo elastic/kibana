@@ -19,6 +19,7 @@ import { rgba } from 'polished';
 import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { map } from 'lodash';
+import { ExistsFilter } from '@kbn/es-query';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
@@ -26,7 +27,6 @@ import { useValuesList } from '../../../../../hooks/use_values_list';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
-import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 
 interface Props {
   seriesId: number;
