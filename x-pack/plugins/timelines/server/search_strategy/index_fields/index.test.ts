@@ -845,7 +845,7 @@ describe('Fields Provider', () => {
     });
 
     it('should search apm index fields', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: false,
@@ -861,19 +861,23 @@ describe('Fields Provider', () => {
     });
 
     it('should check apm index exists with data', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValueOnce({
+      esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 1 } } },
       });
       const response = await requestIndexFieldSearch(request, deps, beatFields);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[1],
         body: { query: { match_all: {} }, size: 0 },
       });
       expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
@@ -883,13 +887,13 @@ describe('Fields Provider', () => {
     });
 
     it('should check apm index exists with no data', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValueOnce({
+      esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 0 } } },
       });
 
@@ -897,6 +901,10 @@ describe('Fields Provider', () => {
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[1],
         body: { query: { match_all: {} }, size: 0 },
       });
       expect(getFieldsForWildcardMock).not.toHaveBeenCalled();

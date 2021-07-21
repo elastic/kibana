@@ -40,6 +40,7 @@ import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown
 const CommonUseField = getUseField({ component: Field });
 
 interface QueryFlyoutProps {
+  uniqueQueryIds: string[];
   defaultValue?: UseScheduledQueryGroupQueryFormProps['defaultValue'] | undefined;
   integrationPackageVersion?: string | undefined;
   onSave: (payload: OsqueryManagerPackagePolicyConfigRecord) => Promise<void>;
@@ -47,6 +48,7 @@ interface QueryFlyoutProps {
 }
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
+  uniqueQueryIds,
   defaultValue,
   integrationPackageVersion,
   onSave,
@@ -54,6 +56,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 }) => {
   const [isEditMode] = useState(!!defaultValue);
   const { form } = useScheduledQueryGroupQueryForm({
+    uniqueQueryIds,
     defaultValue,
     handleSubmit: (payload, isValid) =>
       new Promise((resolve) => {
@@ -65,16 +68,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       }),
   });
 
-  /* Platform and version fields are supported since osquer_manger@0.3.0 */
+  /* Platform and version fields are supported since osquery_manager@0.3.0 */
   const isFieldSupported = useMemo(
     () => (integrationPackageVersion ? satisfies(integrationPackageVersion, '>=0.3.0') : false),
     [integrationPackageVersion]
   );
 
-  const { submit, setFieldValue } = form;
+  const { submit, setFieldValue, reset } = form;
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
+      if (!savedQuery) {
+        return reset();
+      }
+
       setFieldValue('id', savedQuery.id);
       setFieldValue('query', savedQuery.query);
 
@@ -94,7 +101,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         setFieldValue('version', [savedQuery.version]);
       }
     },
-    [isFieldSupported, setFieldValue]
+    [isFieldSupported, setFieldValue, reset]
   );
 
   return (

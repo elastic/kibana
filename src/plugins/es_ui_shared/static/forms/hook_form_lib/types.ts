@@ -36,6 +36,8 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   /** Access the fields on the form. */
   getFields: () => FieldsMap;
+  /** Access the defaultValue for a specific field */
+  getFieldDefaultValue: (path: string) => unknown;
   /**
    * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
    * If you are only interested in the raw form data, pass `unflatten: false` to the handler
@@ -53,13 +55,14 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (
-    fieldNames: string[]
+    fieldNames: string[],
+    /** Run only blocking validations */
+    onlyBlocking?: boolean
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
   __getFormDefaultValue: () => FormData;
-  __getFieldDefaultValue: (path: string) => unknown;
   __getFieldsRemoved: () => FieldsMap;
 }
 
@@ -141,6 +144,7 @@ export interface FieldHook<T = unknown, I = T> {
     formData?: any;
     value?: I;
     validationType?: string;
+    onlyBlocking?: boolean;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
   // Flag to indicate if the field value will be included in the form data outputted

@@ -15,6 +15,7 @@ import {
   FieldValidateResponse,
   ValidationError,
   FormData,
+  ValidationConfig,
 } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
@@ -190,10 +191,12 @@ export const useField = <T, FormType = FormData, I = T>(
       {
         formData,
         value: valueToValidate,
+        onlyBlocking: runOnlyBlockingValidations,
         validationTypeToValidate,
       }: {
         formData: any;
         value: I;
+        onlyBlocking: boolean;
         validationTypeToValidate?: string;
       },
       clearFieldErrors: FieldHook['clearErrors']
@@ -204,9 +207,30 @@ export const useField = <T, FormType = FormData, I = T>(
 
       // By default, for fields that have an asynchronous validation
       // we will clear the errors as soon as the field value changes.
-      clearFieldErrors([VALIDATION_TYPES.FIELD, VALIDATION_TYPES.ASYNC]);
+      clearFieldErrors([
+        validationTypeToValidate ?? VALIDATION_TYPES.FIELD,
+        VALIDATION_TYPES.ASYNC,
+      ]);
 
       cancelInflightValidation();
+
+      const doByPassValidation = ({
+        type: validationType,
+        isBlocking,
+      }: ValidationConfig<FormType, string, I>) => {
+        if (
+          typeof validationTypeToValidate !== 'undefined' &&
+          validationType !== validationTypeToValidate
+        ) {
+          return true;
+        }
+
+        if (runOnlyBlockingValidations && isBlocking === false) {
+          return true;
+        }
+
+        return false;
+      };
 
       const runAsync = async () => {
         const validationErrors: ValidationError[] = [];
@@ -220,10 +244,7 @@ export const useField = <T, FormType = FormData, I = T>(
             type: validationType = VALIDATION_TYPES.FIELD,
           } = validation;
 
-          if (
-            typeof validationTypeToValidate !== 'undefined' &&
-            validationType !== validationTypeToValidate
-          ) {
+          if (doByPassValidation(validation)) {
             continue;
           }
 
@@ -266,10 +287,7 @@ export const useField = <T, FormType = FormData, I = T>(
             type: validationType = VALIDATION_TYPES.FIELD,
           } = validation;
 
-          if (
-            typeof validationTypeToValidate !== 'undefined' &&
-            validationType !== validationTypeToValidate
-          ) {
+          if (doByPassValidation(validation)) {
             continue;
           }
 
@@ -345,6 +363,7 @@ export const useField = <T, FormType = FormData, I = T>(
         formData = __getFormData$().value,
         value: valueToValidate = value,
         validationType,
+        onlyBlocking = false,
       } = validationData;
 
       setIsValidated(true);
@@ -378,6 +397,7 @@ export const useField = <T, FormType = FormData, I = T>(
           formData,
           value: valueToValidate,
           validationTypeToValidate: validationType,
+          onlyBlocking,
         },
         clearErrors
       );
