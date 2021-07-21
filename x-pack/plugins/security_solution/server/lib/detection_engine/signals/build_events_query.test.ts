@@ -529,5 +529,11 @@ describe('create_signals', () => {
         unmapped_type: 'date',
       },
     });
+    expect(query.body.sort[1]).toEqual({
+      '@timestamp': {
+        order: 'desc',
+        unmapped_type: 'date',
+      },
+    });
   });
 });

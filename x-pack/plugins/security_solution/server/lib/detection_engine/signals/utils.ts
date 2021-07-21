@@ -797,7 +797,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
       },
       aggregations: newAggregations,
       hits: {
-        total: calculateTotal(prev, next),
+        total: calculateTotal(prev.hits.total, next.hits.total),
         max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },
@@ -805,30 +805,23 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
   });
 };
 
-export const createTotalHitsFromSearchResult = ({
-  searchResult,
-}: {
-  searchResult: { hits: { total: number | { value: number } } };
-}): number | undefined => {
-  if (typeof searchResult.hits.total === 'undefined') {
-    return undefined;
-  }
-  return typeof searchResult.hits.total === 'number'
-    ? searchResult.hits.total
-    : searchResult.hits.total.value;
-};
+export const getTotalHitsValue = (totalHits: number | { value: number } | undefined): number =>
+  typeof totalHits === 'undefined'
+    ? -1
+    : typeof totalHits === 'number'
+    ? totalHits
+    : totalHits.value;
 
-const calculateTotal = (prev: SignalSearchResponse, next: SignalSearchResponse): number => {
-  if (
-    typeof createTotalHitsFromSearchResult({ searchResult: prev }) === 'number' &&
-    typeof createTotalHitsFromSearchResult({ searchResult: next }) === 'number'
-  ) {
-    return (
-      createTotalHitsFromSearchResult({ searchResult: prev })! +
-      createTotalHitsFromSearchResult({ searchResult: next })!
-    );
+export const calculateTotal = (
+  prevTotal: number | { value: number } | undefined,
+  nextTotal: number | { value: number } | undefined
+): number => {
+  const prevTotalHits = getTotalHitsValue(prevTotal);
+  const nextTotalHits = getTotalHitsValue(nextTotal);
+  if (prevTotalHits === -1 || nextTotalHits === -1) {
+    return -1;
   }
-  return -1;
+  return prevTotalHits + nextTotalHits;
 };
 
 export const calculateThresholdSignalUuid = (
