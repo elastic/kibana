@@ -9,9 +9,10 @@ import type {
   Datatable,
   DatatableColumn,
   DatatableRow,
-} from '../../../../../src/plugins/expressions';
-import type { FieldFormat } from '../../../../../src/plugins/data/common';
-import type { ColumnConfig, ColumnConfigArg, DatatableArgs } from '../../common/expressions';
+} from '../../../../../../src/plugins/expressions';
+import type { FieldFormat } from '../../../../../../src/plugins/data/common';
+import type { DatatableArgs } from './datatable';
+import type { ColumnConfig, ColumnConfigArg } from './datatable_column';
 
 const TRANSPOSE_SEPARATOR = '---';
 

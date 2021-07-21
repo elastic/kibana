@@ -7,8 +7,8 @@
 
 import type { FieldFormat } from 'src/plugins/data/public';
 import type { Datatable } from 'src/plugins/expressions';
+import { DatatableArgs } from './datatable';
 
-import type { DatatableArgs } from '../../common/expressions';
 import { transposeTable } from './transpose_helpers';
 
 describe('transpose_helpes', () => {

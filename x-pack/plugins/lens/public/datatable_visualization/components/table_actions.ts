@@ -10,8 +10,8 @@ import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../../types';
 import type { LensMultiTable } from '../../../common';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
-import { ColumnConfig, LensGridDirection } from '../../../common/expressions';
-import { getOriginalId } from '../transpose_helpers';
+import type { ColumnConfig, LensGridDirection } from '../../../common/expressions';
+import { getOriginalId } from '../../../common/expressions';
 
 export const createGridResizeHandler = (
   columnConfig: ColumnConfig,

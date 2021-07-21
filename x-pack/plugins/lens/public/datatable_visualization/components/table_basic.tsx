@@ -41,8 +41,7 @@ import {
   createTransposeColumnFilterHandler,
 } from './table_actions';
 import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
-import { getOriginalId } from '../transpose_helpers';
-import { getFinalSummaryConfiguration } from '../summary';
+import { getOriginalId, getFinalSummaryConfiguration } from '../../../common/expressions';
 
 export const DataContext = React.createContext<DataContextType>({});
 

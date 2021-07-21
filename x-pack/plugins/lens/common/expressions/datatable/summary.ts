@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FieldFormat } from '../../../../../src/plugins/data/common';
-import type { Datatable } from '../../../../../src/plugins/expressions/common';
-import type { ColumnConfigArg } from '../../common/expressions';
+import type { FieldFormat } from '../../../../../../src/plugins/data/common';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common';
+import { ColumnConfigArg } from './datatable_column';
 import { getOriginalId } from './transpose_helpers';
 import { isNumericFieldForDatatable } from './utils';
 

@@ -7,4 +7,4 @@
 
 export * from './heatmap_grid';
 export * from './heatmap_legend';
-export * from './types';
+export * from './heatmap_chart';

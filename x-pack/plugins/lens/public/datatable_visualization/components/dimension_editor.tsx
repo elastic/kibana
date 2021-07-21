@@ -33,15 +33,15 @@ import {
   findMinMaxByColumnId,
 } from '../../shared_components/';
 import type { ColumnState } from '../../../common/expressions';
-
-import './dimension_editor.scss';
-import { isNumericFieldForDatatable } from '../utils';
 import {
+  isNumericFieldForDatatable,
   getDefaultSummaryLabel,
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
-} from '../summary';
-import { getOriginalId } from '../transpose_helpers';
+  getOriginalId,
+} from '../../../common/expressions';
+
+import './dimension_editor.scss';
 
 const idPrefix = htmlIdGenerator()();
 

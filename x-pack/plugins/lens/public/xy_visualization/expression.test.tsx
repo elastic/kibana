@@ -22,13 +22,7 @@ import {
   LayoutDirection,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import {
-  calculateMinInterval,
-  XYChart,
-  XYChartRenderProps,
-  xyChart,
-  XYChartProps,
-} from './expression';
+import { calculateMinInterval, XYChart, XYChartRenderProps, xyChart } from './expression';
 import type { LensMultiTable } from '../../common';
 import {
   layerConfig,
@@ -39,6 +33,7 @@ import {
   LegendConfig,
   LayerArgs,
   AxesSettingsConfig,
+  XYChartProps,
 } from '../../common/expressions';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
