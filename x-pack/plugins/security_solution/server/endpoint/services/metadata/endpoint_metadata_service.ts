@@ -133,7 +133,9 @@ export class EndpointMetadataService {
    */
   async getFleetAgent(esClient: ElasticsearchClient, agentId: string): Promise<Agent> {
     try {
-      return this.agentService.getAgent(esClient, agentId);
+      const agent = await this.agentService.getAgent(esClient, agentId);
+      agent.status = this.agentService.getStatusForAgent(agent);
+      return agent;
     } catch (error) {
       if (error instanceof AgentNotFoundError) {
         throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
