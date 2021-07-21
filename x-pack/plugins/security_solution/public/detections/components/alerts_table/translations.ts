@@ -18,6 +18,12 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
   }
 );
 
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });
+
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {

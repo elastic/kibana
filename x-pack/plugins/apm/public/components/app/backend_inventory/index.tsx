@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export interface ApmServiceNameAgg {
-  total_service_names: {
-    value: number;
-  };
+import React from 'react';
+import { SearchBar } from '../../shared/search_bar';
+
+export function BackendInventory() {
+  return <SearchBar showTimeComparison />;
 }
