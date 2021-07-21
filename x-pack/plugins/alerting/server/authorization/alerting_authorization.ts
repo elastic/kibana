@@ -68,6 +68,7 @@ export interface ConstructorOptions {
   request: KibanaRequest;
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
+  getSpaceId: (request: KibanaRequest) => string | undefined;
   auditLogger: AlertingAuthorizationAuditLogger;
   exemptConsumerIds: string[];
   authorization?: SecurityPluginSetup['authz'];
@@ -81,7 +82,7 @@ export class AlertingAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly exemptConsumerIds: string[];
-  private readonly getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
+  private readonly spaceId: string | undefined;
 
   constructor({
     alertTypeRegistry,
@@ -90,6 +91,7 @@ export class AlertingAuthorization {
     features,
     auditLogger,
     getSpace,
+    getSpaceId,
     exemptConsumerIds,
   }: ConstructorOptions) {
     this.request = request;
@@ -101,7 +103,8 @@ export class AlertingAuthorization {
     // An example of this is the Rules Management `consumer` as we don't want to have to
     // manually authorize each rule type in the management UI.
     this.exemptConsumerIds = exemptConsumerIds;
-    this.getSpace = getSpace;
+
+    this.spaceId = getSpaceId(request);
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -140,16 +143,8 @@ export class AlertingAuthorization {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async getSpaceId(): Promise<string | undefined> {
-    /*
-     * This function is wanting to get the request's space id, without
-     * asking the question of "is this user authorized for this space".
-     * There isn't currently a method exposed by the security plugin to
-     * get this, once this ticket is resolved, we should clean this code up.
-     * https://github.com/elastic/kibana/issues/106476
-     * For now, consumers of this function will need to deal with thrown errors
-     */
-    return this.getSpace(this.request).then((maybeSpace) => maybeSpace?.id);
+  public getSpaceId(): string | undefined {
+    return this.spaceId;
   }
 
   /*
@@ -309,10 +304,8 @@ export class AlertingAuthorization {
       );
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
-      const spaceId = await this.getSpaceId();
-
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, spaceId),
+        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, this.spaceId),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(

@@ -7,9 +7,8 @@
 
 import { remove } from 'lodash';
 import { JsonObject } from '@kbn/common-utils';
-import { EsQueryConfig, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
+import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
-import { KueryNode } from '../../../../../src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
@@ -39,37 +38,26 @@ const esQueryConfig: EsQueryConfig = {
 export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
   opts: AlertingAuthorizationFilterOpts,
-  spaceId?: string | undefined
+  spaceId: string | undefined
 ): KueryNode | JsonObject {
   const kueryNode = nodeBuilder.or(
     Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('ruleTypeId', id);
+      const andNodes = [
+        nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
+        nodeBuilder.or(
+          Object.keys(authorizedConsumers).map((consumer) => {
+            ensureFieldIsSafeForQuery('consumer', consumer);
+            return nodeBuilder.is(opts.fieldNames.consumer, consumer);
+          })
+        ),
+      ];
+
       if (opts.includeSpaceId && opts.fieldNames.spaceIds != null && spaceId != null) {
-        filters.push(
-          nodeBuilder.and([
-            nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
-            nodeBuilder.is(opts.fieldNames.spaceIds, spaceId),
-            nodeBuilder.or(
-              Object.keys(authorizedConsumers).map((consumer) => {
-                ensureFieldIsSafeForQuery('consumer', consumer);
-                return nodeBuilder.is(opts.fieldNames.consumer, consumer);
-              })
-            ),
-          ])
-        );
-      } else {
-        filters.push(
-          nodeBuilder.and([
-            nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
-            nodeBuilder.or(
-              Object.keys(authorizedConsumers).map((consumer) => {
-                ensureFieldIsSafeForQuery('consumer', consumer);
-                return nodeBuilder.is(opts.fieldNames.consumer, consumer);
-              })
-            ),
-          ])
-        );
+        andNodes.push(nodeBuilder.is(opts.fieldNames.spaceIds, spaceId));
       }
+
+      filters.push(nodeBuilder.and(andNodes));
 
       return filters;
     }, [])

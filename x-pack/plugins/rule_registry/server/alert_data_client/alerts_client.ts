@@ -67,7 +67,7 @@ export class AlertsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
-  private readonly spaceId: Promise<string | undefined>;
+  private readonly spaceId: string | undefined;
 
   constructor({ auditLogger, authorization, logger, esClient }: ConstructorOptions) {
     this.logger = logger;
@@ -93,7 +93,7 @@ export class AlertsClient {
     index,
   }: GetAlertParams): Promise<(AlertType & { _version: string | undefined }) | null | undefined> {
     try {
-      const alertSpaceId = await this.spaceId;
+      const alertSpaceId = this.spaceId;
       if (alertSpaceId == null) {
         this.logger.error('Failed to acquire spaceId from authorization client');
         return;

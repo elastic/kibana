@@ -39,7 +39,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-        }
+          includeSpaceId: false,
+        },
+        'space1'
       )
     ).toEqual(
       esKuery.fromKueryExpression(`((path.to.rule.id:myAppAlertType and consumer-field:(myApp)))`)
@@ -73,7 +75,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-        }
+          includeSpaceId: false,
+        },
+        'space1'
       )
     ).toEqual(
       esKuery.fromKueryExpression(
@@ -144,11 +148,127 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-        }
+          includeSpaceId: false,
+        },
+        'space1'
       )
     ).toEqual(
       esKuery.fromKueryExpression(
         `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+      )
+    );
+  });
+
+  test('constructs KQL filter with spaceId filter when "includeSpaceId" is true', async () => {
+    expect(
+      asFiltersByRuleTypeAndConsumer(
+        new Set([
+          {
+            actionGroups: [],
+            defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            isExportable: true,
+            recoveryActionGroup: RecoveredActionGroup,
+            id: 'myAppAlertType',
+            name: 'myAppAlertType',
+            producer: 'myApp',
+            authorizedConsumers: {
+              alerts: { read: true, all: true },
+              myApp: { read: true, all: true },
+              myOtherApp: { read: true, all: true },
+              myAppWithSubFeature: { read: true, all: true },
+            },
+            enabledInLicense: true,
+          },
+          {
+            actionGroups: [],
+            defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            isExportable: true,
+            recoveryActionGroup: RecoveredActionGroup,
+            id: 'myOtherAppAlertType',
+            name: 'myOtherAppAlertType',
+            producer: 'alerts',
+            authorizedConsumers: {
+              alerts: { read: true, all: true },
+              myApp: { read: true, all: true },
+              myOtherApp: { read: true, all: true },
+              myAppWithSubFeature: { read: true, all: true },
+            },
+            enabledInLicense: true,
+          },
+        ]),
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+            spaceIds: 'path.to.spaceIds',
+          },
+          includeSpaceId: true,
+        },
+        'space1'
+      )
+    ).toEqual(
+      esKuery.fromKueryExpression(
+        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1))`
+      )
+    );
+  });
+
+  test('constructs KQL filter without spaceId filter when "includeSpaceId" is true, but spaceId is undefined', async () => {
+    expect(
+      asFiltersByRuleTypeAndConsumer(
+        new Set([
+          {
+            actionGroups: [],
+            defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            isExportable: true,
+            recoveryActionGroup: RecoveredActionGroup,
+            id: 'myAppAlertType',
+            name: 'myAppAlertType',
+            producer: 'myApp',
+            authorizedConsumers: {
+              alerts: { read: true, all: true },
+              myApp: { read: true, all: true },
+              myOtherApp: { read: true, all: true },
+              myAppWithSubFeature: { read: true, all: true },
+            },
+            enabledInLicense: true,
+          },
+          {
+            actionGroups: [],
+            defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            isExportable: true,
+            recoveryActionGroup: RecoveredActionGroup,
+            id: 'myOtherAppAlertType',
+            name: 'myOtherAppAlertType',
+            producer: 'alerts',
+            authorizedConsumers: {
+              alerts: { read: true, all: true },
+              myApp: { read: true, all: true },
+              myOtherApp: { read: true, all: true },
+              myAppWithSubFeature: { read: true, all: true },
+            },
+            enabledInLicense: true,
+          },
+        ]),
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+            spaceIds: 'path.to.spaceIds',
+          },
+          includeSpaceId: true,
+        },
+        undefined
+      )
+    ).toEqual(
+      esKuery.fromKueryExpression(
+        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
       )
     );
   });
@@ -180,7 +300,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-        }
+          includeSpaceId: false,
+        },
+        'space1'
       )
     ).toEqual({
       bool: {
@@ -241,7 +363,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-        }
+          includeSpaceId: false,
+        },
+        'space1'
       )
     ).toEqual({
       bool: {
@@ -344,7 +468,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-        }
+          includeSpaceId: false,
+        },
+        'space1'
       )
     ).toEqual({
       bool: {

@@ -573,7 +573,8 @@ export class AlertsClient {
           logSuccessfulAuthorization,
         } = await this.authorization.getFindAuthorizationFilter(
           AlertingAuthorizationEntity.Rule,
-          alertingAuthorizationFilterOpts
+          alertingAuthorizationFilterOpts,
+          false
         );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
