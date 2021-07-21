@@ -29,10 +29,10 @@ interface Props {
 }
 
 export function APMPolicyForm({ values = {}, onChange }: Props) {
-  function handleChange(key: string, value: any, isValid: boolean) {
+  function handleChange(key: string, value: any) {
     onChange({
       newVars: { ...values, [key]: { ...values[key], value } },
-      isValid,
+      isValid: true,
     });
   }
   return (
