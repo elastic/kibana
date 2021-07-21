@@ -6,10 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
-import {
-  SortOrderOrUndefined,
-  TimestampOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -18,7 +15,7 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: estypes.QueryDslQueryContainer;
   size: number;
-  sortOrder?: SortOrderOrUndefined;
+  sortOrder?: estypes.SearchSortOrder;
   searchAfterSortIds: estypes.SearchSortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
   trackTotalHits?: boolean;
