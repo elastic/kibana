@@ -180,6 +180,12 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes gridlines',
       }),
     },
+    labelsOrientation: {
+      types: ['lens_xy_labelsOrientationConfig'],
+      help: i18n.translate('xpack.lens.xyChart.labelsOrientation.help', {
+        defaultMessage: 'Defines the orientation of x and y axes',
+      }),
+    },
     axisTitlesVisibilitySettings: {
       types: ['lens_xy_axisTitlesVisibilityConfig'],
       help: i18n.translate('xpack.lens.xyChart.axisTitlesSettings.help', {
@@ -425,6 +431,12 @@ export function XYChart({
     yRight: true,
   };
 
+  const labelsOrientation = args.labelsOrientation || {
+    x: 0,
+    yLeft: 0,
+    yRight: 0,
+  };
+
   const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
 
   const chartHasMoreThanOneBarSeries =
@@ -466,6 +478,10 @@ export function XYChart({
           groupId === 'right'
             ? tickLabelsVisibilitySettings?.yRight
             : tickLabelsVisibilitySettings?.yLeft,
+        rotation:
+          groupId === 'right'
+            ? args.labelsOrientation?.yRight || 0
+            : args.labelsOrientation?.yLeft || 0,
       },
       axisTitle: {
         visible:
@@ -664,6 +680,7 @@ export function XYChart({
         style={{
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
+            rotation: labelsOrientation?.x,
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,

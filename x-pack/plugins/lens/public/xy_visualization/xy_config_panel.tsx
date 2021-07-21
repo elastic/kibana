@@ -223,6 +223,25 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  const labelsOrientation = {
+    x: state?.labelsOrientation?.x ?? 0,
+    yLeft: state?.labelsOrientation?.yLeft ?? 0,
+    yRight: state?.labelsOrientation?.yRight ?? 0,
+  };
+
+  const onLabelsOrientationChange = (axis: AxesSettingsConfigKeys, orientation: number): void => {
+    const newLabelsOrientation = {
+      ...labelsOrientation,
+      ...{
+        [axis]: orientation,
+      },
+    };
+    setState({
+      ...state,
+      labelsOrientation: newLabelsOrientation,
+    });
+  };
+
   const axisTitlesVisibilitySettings = {
     x: state?.axisTitlesVisibilitySettings?.x ?? true,
     yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
@@ -428,6 +447,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               isDisabled={
                 Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
               }
+              orientation={labelsOrientation.yLeft}
+              setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yLeftExtent || { mode: 'full' }}
@@ -446,6 +467,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.x}
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            orientation={labelsOrientation.x}
+            setOrientation={onLabelsOrientationChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
@@ -480,6 +503,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length ===
                 0
               }
+              orientation={labelsOrientation.yRight}
+              setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}

@@ -42,6 +42,8 @@ import {
   AxesSettingsConfig,
   tickLabelsConfig,
   gridlinesConfig,
+  labelsOrientationConfig,
+  LabelsOrientationConfig,
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
@@ -287,6 +289,12 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     yLeft: false,
     yRight: false,
   },
+  labelsOrientation: {
+    type: 'lens_xy_labelsOrientationConfig',
+    x: 0,
+    yLeft: -90,
+    yRight: -45,
+  },
   yLeftExtent: {
     mode: 'full',
     type: 'lens_xy_axisExtentConfig',
@@ -367,6 +375,21 @@ describe('xy_expression', () => {
 
     expect(result).toEqual({
       type: 'lens_xy_tickLabelsConfig',
+      ...args,
+    });
+  });
+
+  test('labelsOrientationConfig produces the correct arguments', () => {
+    const args: LabelsOrientationConfig = {
+      x: 0,
+      yLeft: -90,
+      yRight: -45,
+    };
+
+    const result = labelsOrientationConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_labelsOrientationConfig',
       ...args,
     });
   });
@@ -1945,6 +1968,27 @@ describe('xy_expression', () => {
       });
     });
 
+    test('it should set the tickLabel orientation on the x axis', () => {
+      const { data, args } = sampleArgs();
+
+      args.labelsOrientation = {
+        x: -45,
+        yLeft: 0,
+        yRight: -90,
+        type: 'lens_xy_labelsOrientationConfig',
+      };
+
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+
+      const axisStyle = instance.find(Axis).first().prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          rotation: -45,
+        },
+      });
+    });
+
     test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
       const { data, args } = sampleArgs();
 
@@ -1962,6 +2006,27 @@ describe('xy_expression', () => {
       expect(axisStyle).toMatchObject({
         tickLabel: {
           visible: false,
+        },
+      });
+    });
+
+    test('it should set the tickLabel orientation on the y axis', () => {
+      const { data, args } = sampleArgs();
+
+      args.labelsOrientation = {
+        x: -45,
+        yLeft: -90,
+        yRight: -90,
+        type: 'lens_xy_labelsOrientationConfig',
+      };
+
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+
+      const axisStyle = instance.find(Axis).at(1).prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          rotation: -90,
         },
       });
     });
@@ -2057,6 +2122,12 @@ describe('xy_expression', () => {
           yLeft: false,
           yRight: false,
         },
+        labelsOrientation: {
+          type: 'lens_xy_labelsOrientationConfig',
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
+        },
         yLeftExtent: {
           mode: 'full',
           type: 'lens_xy_axisExtentConfig',
@@ -2138,6 +2209,12 @@ describe('xy_expression', () => {
           x: true,
           yLeft: false,
           yRight: false,
+        },
+        labelsOrientation: {
+          type: 'lens_xy_labelsOrientationConfig',
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
         },
         yLeftExtent: {
           mode: 'full',

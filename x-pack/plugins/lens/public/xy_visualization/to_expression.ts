@@ -254,6 +254,22 @@ export const buildExpression = (
               ],
             },
           ],
+          labelsOrientation: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_labelsOrientationConfig',
+                  arguments: {
+                    x: [state?.labelsOrientation?.x ?? 0],
+                    yLeft: [state?.labelsOrientation?.yLeft ?? 0],
+                    yRight: [state?.labelsOrientation?.yRight ?? 0],
+                  },
+                },
+              ],
+            },
+          ],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],

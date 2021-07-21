@@ -171,6 +171,58 @@ export const tickLabelsConfig: ExpressionFunctionDefinition<
   },
 };
 
+export interface LabelsOrientationConfig {
+  x: number;
+  yLeft: number;
+  yRight: number;
+}
+
+type LabelsOrientationConfigResult = LabelsOrientationConfig & {
+  type: 'lens_xy_labelsOrientationConfig';
+};
+
+export const labelsOrientationConfig: ExpressionFunctionDefinition<
+  'lens_xy_labelsOrientationConfig',
+  null,
+  LabelsOrientationConfig,
+  LabelsOrientationConfigResult
+> = {
+  name: 'lens_xy_labelsOrientationConfig',
+  aliases: [],
+  type: 'lens_xy_labelsOrientationConfig',
+  help: `Configure the xy chart's tick labels orientation`,
+  inputTypes: ['null'],
+  args: {
+    x: {
+      types: ['number'],
+      options: [0, -90, -45],
+      help: i18n.translate('xpack.lens.xyChart.xAxisLabelsOrientation.help', {
+        defaultMessage: 'Specifies the labels orientation of the x-axis.',
+      }),
+    },
+    yLeft: {
+      types: ['number'],
+      options: [0, -90, -45],
+      help: i18n.translate('xpack.lens.xyChart.yLeftAxisLabelsOrientation.help', {
+        defaultMessage: 'Specifies the labels orientation of the left y-axis.',
+      }),
+    },
+    yRight: {
+      types: ['number'],
+      options: [0, -90, -45],
+      help: i18n.translate('xpack.lens.xyChart.yRightAxisLabelsOrientation.help', {
+        defaultMessage: 'Specifies the labels orientation of the right y-axis.',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: LabelsOrientationConfig) {
+    return {
+      type: 'lens_xy_labelsOrientationConfig',
+      ...args,
+    };
+  },
+};
+
 type GridlinesConfigResult = AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
 
 export const gridlinesConfig: ExpressionFunctionDefinition<
@@ -507,6 +559,7 @@ export interface XYArgs {
   };
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
+  labelsOrientation?: LabelsOrientationConfig & { type: 'lens_xy_labelsOrientationConfig' };
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -530,6 +583,7 @@ export interface XYState {
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
+  labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
