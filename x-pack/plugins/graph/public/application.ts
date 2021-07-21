@@ -28,6 +28,7 @@ import {
   ToastsStart,
   OverlayStart,
   AppMountParameters,
+  IUiSettingsClient,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
@@ -75,6 +76,7 @@ export interface GraphDependencies {
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  uiSettings: IUiSettingsClient;
 }
 
 export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
