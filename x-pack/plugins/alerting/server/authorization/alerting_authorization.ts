@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { JsonObject } from '@kbn/common-utils';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
@@ -17,7 +18,6 @@ import { Space } from '../../../spaces/server';
 import {
   asFiltersByRuleTypeAndConsumer,
   AlertingAuthorizationFilterOpts,
-  BooleanFilter,
 } from './alerting_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 
@@ -277,9 +277,10 @@ export class AlertingAuthorization {
 
   public async getFindAuthorizationFilter(
     authorizationEntity: AlertingAuthorizationEntity,
-    filterOpts: AlertingAuthorizationFilterOpts
+    filterOpts: AlertingAuthorizationFilterOpts,
+    includeSpaceId = false
   ): Promise<{
-    filter?: KueryNode | BooleanFilter;
+    filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
@@ -306,11 +307,15 @@ export class AlertingAuthorization {
       );
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
-      const alertsSpaceId =
-        authorizationEntity === AlertingAuthorizationEntity.Alert ? await this.spaceId : undefined;
+      const spaceId = await this.spaceId;
 
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, alertsSpaceId),
+        filter: asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          filterOpts,
+          includeSpaceId,
+          spaceId
+        ),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(

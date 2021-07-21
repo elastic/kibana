@@ -225,12 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(timeline.edges[0]!.node.ecs.host!.name).to.eql([HOST_NAME]);
     });
 
-    // TODO - These tests work when rule registry flag for security solution
-    // is enabled. Unskip these tests once rule registry flag is removed
-    // To run, add the following to test config kbnTestServer.serverArgs :
-    // '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
-    // '--xpack.ruleRegistry.write.enabled=true',
-    describe.skip('alerts authentication', () => {
+    describe('alerts authentication', () => {
       const authorizedSecSpace1 = [secOnly, secOnlyRead];
       const authorizedObsSpace1 = [obsOnly, obsOnlyRead];
       const authorizedSecObsSpace1 = [obsSec, obsSecRead];
@@ -246,7 +241,12 @@ export default function ({ getService }: FtrProviderContext) {
       const authorizedInAllSpaces = [superUser, globalRead];
       const unauthorized = [noKibanaPrivileges];
 
-      describe('Querying for Security Solution alerts only', () => {
+      // TODO - These tests work when rule registry flag for security solution
+      // is enabled. Unskip these tests once rule registry flag is removed
+      // To run, add the following to test config kbnTestServer.serverArgs :
+      // '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
+      // '--xpack.ruleRegistry.write.enabled=true',
+      describe.skip('Querying for Security Solution alerts only', () => {
         addTests({
           space: SPACE_1,
           featureIds: ['siem'],
@@ -338,18 +338,22 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
+          // TODO - These tests work when rule registry flag for security solution
+          // is enabled. Uncomment out these users once rule registry flag is removed
+          // To run, add the following to test config kbnTestServer.serverArgs :
+          // '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
           authorizedUsers: [
             ...authorizedObsSpace1,
-            ...authorizedSecObsSpace1,
+            // ...authorizedSecObsSpace1,
             ...authorizedObsInAllSpaces,
-            ...authorizedSecObsInAllSpaces,
+            // ...authorizedSecObsInAllSpaces,
             ...authorizedInAllSpaces,
           ],
-          usersWithoutAllPrivileges: [...authorizedSecSpace1, ...authorizedSecInAllSpaces],
+          // usersWithoutAllPrivileges: [...authorizedSecSpace1, ...authorizedSecInAllSpaces],
           unauthorizedUsers: [
-            ...authorizedSecSpace2,
+            // ...authorizedSecSpace2,
             ...authorizedObsSpace2,
-            ...authorizedSecObsSpace2,
+            // ...authorizedSecObsSpace2,
             ...unauthorized,
           ],
         });
@@ -372,24 +376,32 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
+          // TODO - These tests work when rule registry flag for security solution
+          // is enabled. Uncomment out these users once rule registry flag is removed
+          // To run, add the following to test config kbnTestServer.serverArgs :
+          // '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
           authorizedUsers: [
             ...authorizedObsSpace2,
-            ...authorizedSecObsSpace2,
+            // ...authorizedSecObsSpace2,
             ...authorizedObsInAllSpaces,
-            ...authorizedSecObsInAllSpaces,
+            // ...authorizedSecObsInAllSpaces,
             ...authorizedInAllSpaces,
           ],
-          usersWithoutAllPrivileges: [...authorizedSecSpace2, ...authorizedSecInAllSpaces],
+          // usersWithoutAllPrivileges: [...authorizedSecSpace2, ...authorizedSecInAllSpaces],
           unauthorizedUsers: [
-            ...authorizedSecSpace1,
+            // ...authorizedSecSpace1,
             ...authorizedObsSpace1,
-            ...authorizedSecObsSpace1,
+            // ...authorizedSecObsSpace1,
             ...unauthorized,
           ],
         });
       });
 
-      describe('Querying for multiple solutions', () => {
+      // TODO - These tests work when rule registry flag for security solution
+      // is enabled. Unskip these tests once rule registry flag is removed
+      // To run, add the following to test config kbnTestServer.serverArgs :
+      // '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
+      describe.skip('Querying for multiple solutions', () => {
         describe('authorized for both security solution and apm', () => {
           addTests({
             space: SPACE_1,
