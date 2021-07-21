@@ -43,14 +43,14 @@ export function urlparam(): ExpressionFunctionDefinition<
     },
     fn: (input, args) => {
       let viewParams;
-
       const url = new URL(window.location.href);
+      let query = url.searchParams;
+
       if (url.hash !== '') {
         viewParams = new URLSearchParams(url.hash.includes('?') ? url.hash.substring(url.hash.indexOf('?'), url.hash.length) : '');
-      }
-      let query = url.searchParams;
-      for (let param of viewParams) {
-        query.append(param[0],param[1]);
+        for (let param of viewParams.entries()) {
+          query.append(param[0],param[1]);
+        }
       }
       return query.get(args.param) || args.default;
     },
