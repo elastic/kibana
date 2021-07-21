@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import qs from 'query-string';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -43,15 +42,17 @@ export function urlparam(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      let viewParam: { [index: string]: any } = {};
+      let viewParams;
+
       const url = new URL(window.location.href);
-      if (url.hash != "") {
-        viewParam = qs.parse(
-          url.hash.includes('?') ? url.hash.substring(url.hash.indexOf('?'), url.hash.length) : ''
-        );
+      if (url.hash !== '') {
+        viewParams = new URLSearchParams(url.hash.includes('?') ? url.hash.substring(url.hash.indexOf('?'), url.hash.length) : '');
       }
-      const query = { ...url.searchParams, ...viewParam };
-      return query[args.param] || args.default;
+      let query = url.searchParams;
+      for (let param of viewParams) {
+        query.append(param[0],param[1]);
+      }
+      return query.get(args.param) || args.default;
     },
   };
 }
