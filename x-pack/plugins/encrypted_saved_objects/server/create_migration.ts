@@ -91,13 +91,10 @@ export const getCreateMigration = (
     const decryptDescriptor = { id, type, namespace: decryptDescriptorNamespace };
     const encryptDescriptor = { id, type, namespace: encryptedDoc.namespace };
 
-    let shouldEncrypt = true;
-
     // decrypt the attributes using the input type definition
     // if an error occurs during decryption, use the shouldMigrateIfDecryptionFails flag
-    // to determine whether to throw the error or return the un-decrypted document for migration
-    // if we are migrating the un-decrypted document, set `shouldEncrypt` to false to avoid encrypting
-    // an un-decrypted document
+    // to determine whether to throw the error or continue the migration
+    // if we are continuing the migration, strip encrypted attributes from the document using stripOrDecryptAttributesSync
     const documentToMigrate = mapAttributes(encryptedDoc, (inputAttributes) => {
       try {
         const decryptedAttributes = inputService.decryptAttributesSync<any>(
@@ -105,7 +102,6 @@ export const getCreateMigration = (
           inputAttributes,
           { convertToMultiNamespaceType }
         );
-        shouldEncrypt = true;
         return decryptedAttributes;
       } catch (err) {
         if (!shouldMigrateIfDecryptionFails || !(err instanceof EncryptionError)) {
@@ -115,17 +111,20 @@ export const getCreateMigration = (
         context.log.warn(
           `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Migration will be applied to the original encrypted document but this may cause decryption errors later on.`
         );
-        shouldEncrypt = false;
-        return inputAttributes;
+        const { attributes: strippedAttributes } = inputService.stripOrDecryptAttributesSync<any>(
+          decryptDescriptor,
+          inputAttributes,
+          {
+            convertToMultiNamespaceType,
+          }
+        );
+        return strippedAttributes;
       }
     });
 
-    // migrate the document
-    // then if `shouldEncrypt` is true, encrypt the attributes using the migration type definition
+    // migrate and encrypt the document
     return mapAttributes(migration(documentToMigrate, context), (migratedAttributes) => {
-      return shouldEncrypt
-        ? migratedService.encryptAttributesSync<any>(encryptDescriptor, migratedAttributes)
-        : migratedAttributes;
+      return migratedService.encryptAttributesSync<any>(encryptDescriptor, migratedAttributes);
     });
   };
 };

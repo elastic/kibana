@@ -456,12 +456,20 @@ export class TaskRunner<
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
-    let apiKey: string | null;
+    let apiKey: string | null | undefined;
     try {
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
+
+    if (apiKey === undefined) {
+      throw new ErrorWithReason(
+        AlertExecutionStatusErrorReasons.Decrypt,
+        new Error('Unable to decrypt attribute "apiKey" because "apiKey" is undefined.')
+      );
+    }
+
     const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
     let alert: SanitizedAlert<Params>;

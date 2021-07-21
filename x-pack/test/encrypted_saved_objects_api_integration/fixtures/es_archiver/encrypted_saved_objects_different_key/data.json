@@ -67,7 +67,6 @@
         "actionTypeId" : ".email",
         "name" : "email connector",
         "config" : {
-          "hasAuth" : true,
           "from" : "admin@company.com",
           "host" : "mail.company.com",
           "port" : 465,

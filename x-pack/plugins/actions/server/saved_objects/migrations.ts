@@ -136,7 +136,7 @@ const addHasAuthConfigurationObject = (
   if (doc.attributes.actionTypeId !== '.email' && doc.attributes.actionTypeId !== '.webhook') {
     return doc;
   }
-  const hasAuth = !!doc.attributes.secrets.user || !!doc.attributes.secrets.password;
+  const hasAuth = !!doc.attributes.secrets?.user || !!doc.attributes.secrets?.password;
   return {
     ...doc,
     attributes: {

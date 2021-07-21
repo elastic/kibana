@@ -212,6 +212,7 @@ describe('createMigration()', () => {
         { convertToMultiNamespaceType: false }
       );
 
+      expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).not.toHaveBeenCalled();
       expect(migrationFunc).not.toHaveBeenCalled();
       expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
     });
@@ -236,6 +237,10 @@ describe('createMigration()', () => {
 
       const attributes = {
         firstAttr: 'first_attr',
+        attrToStrip: 'secret',
+      };
+      const strippedAttributes = {
+        firstAttr: 'first_attr',
       };
 
       encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
@@ -245,6 +250,10 @@ describe('createMigration()', () => {
           EncryptionErrorOperation.Decryption,
           new Error('decryption failed')
         );
+      });
+
+      encryptionSavedObjectService.stripOrDecryptAttributesSync.mockReturnValueOnce({
+        attributes: strippedAttributes,
       });
 
       noopMigration(
@@ -257,7 +266,7 @@ describe('createMigration()', () => {
         migrationContext
       );
 
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+      expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).toHaveBeenCalledWith(
         {
           id: '123',
           type: 'known-type-1',
@@ -268,7 +277,14 @@ describe('createMigration()', () => {
       );
 
       expect(migrationFunc).toHaveBeenCalled();
-      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        strippedAttributes
+      );
     });
 
     it('throws error on migration failure', () => {
