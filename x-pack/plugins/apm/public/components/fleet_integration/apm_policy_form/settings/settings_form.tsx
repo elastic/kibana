@@ -31,22 +31,22 @@ export interface Settings {
   title: string;
   subtitle: string;
   requiredErrorMessage?: string;
-  fields: Field[];
+  fields: SettingsField[];
 }
 
-type Field =
-  | {
-      key: string;
-      title?: string;
-      description?: string;
-      label?: string;
-      helpText?: string;
-      type: 'text' | 'bool' | 'select' | 'area';
-      required: boolean;
-      fields?: Field[];
-      prependIcon?: string;
-    }
-  | AdvancedOptionsField;
+export interface Field {
+  key: string;
+  title?: string;
+  description?: string;
+  label?: string;
+  helpText?: string;
+  type: 'text' | 'bool' | 'select' | 'area';
+  required: boolean;
+  fields?: SettingsField[];
+  prependIcon?: string;
+}
+
+type SettingsField = Field | AdvancedOptionsField;
 
 export type FormRowOnChange = (key: string, value: any) => void;
 
@@ -62,7 +62,7 @@ function FormRow({
   onChange,
   requiredErrorMessage,
 }: {
-  field: Field;
+  field: SettingsField;
   values?: PackagePolicyValues;
   onChange: FormRowOnChange;
   requiredErrorMessage?: string;

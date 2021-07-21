@@ -8,9 +8,9 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
 import { SettingsForm } from './settings/settings_form';
-import { apmSettings } from './settings/apm_settings';
-import { rumSettings } from './settings/rum_settings';
-import { tlsSettings } from './settings/tls_settings';
+import { apmSettings, validateAPMForm } from './settings/apm_settings';
+import { rumSettings, validateRumForm } from './settings/rum_settings';
+import { tlsSettings, validateTLSForm } from './settings/tls_settings';
 
 export type PackagePolicyValues = Record<
   string,
@@ -29,10 +29,16 @@ interface Props {
 }
 
 export function APMPolicyForm({ values = {}, onChange }: Props) {
-  function handleChange(key: string, value: any) {
+  function handleChange(
+    key: string,
+    value: any,
+    validateForm: (newValues: PackagePolicyValues) => boolean
+  ) {
+    const newValues = { ...values, [key]: { ...values[key], value } };
+    const isValid = validateForm(newValues);
     onChange({
-      newVars: { ...values, [key]: { ...values[key], value } },
-      isValid: true,
+      newVars: newValues,
+      isValid,
     });
   }
   return (
@@ -40,19 +46,25 @@ export function APMPolicyForm({ values = {}, onChange }: Props) {
       <SettingsForm
         settings={apmSettings}
         values={values}
-        onChange={handleChange}
+        onChange={(key, value) => {
+          handleChange(key, value, validateAPMForm);
+        }}
       />
       <EuiSpacer />
       <SettingsForm
         settings={rumSettings}
         values={values}
-        onChange={handleChange}
+        onChange={(key, value) => {
+          handleChange(key, value, validateRumForm);
+        }}
       />
       <EuiSpacer />
       <SettingsForm
         settings={tlsSettings}
         values={values}
-        onChange={handleChange}
+        onChange={(key, value) => {
+          handleChange(key, value, validateTLSForm);
+        }}
       />
     </>
   );
