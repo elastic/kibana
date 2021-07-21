@@ -37,7 +37,7 @@ export const AddDomainFlyout: React.FC = () => {
     <>
       <EuiButton
         size="s"
-        color="secondary"
+        color="success"
         iconType="plusInCircle"
         onClick={() => setIsFlyoutVisible(true)}
       >
@@ -66,16 +66,13 @@ export const AddDomainFlyout: React.FC = () => {
             </EuiFlyoutHeader>
             <EuiFlyoutBody banner={<AddDomainFormErrors />}>
               <EuiText>
-                {
-                  // TODO This should probably say something about validation.
-                  i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.description',
-                    {
-                      defaultMessage:
-                        'You can add multiple domains to this engine\'s web crawler. Add another domain here and modify the entry points and crawl rules from the "Manage" page.',
-                    }
-                  )
-                }
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.description',
+                  {
+                    defaultMessage:
+                      'You can add multiple domains to this engine\'s web crawler. Add another domain here and modify the entry points and crawl rules from the "Manage" page.',
+                  }
+                )}
                 <p />
               </EuiText>
               <EuiSpacer size="l" />
