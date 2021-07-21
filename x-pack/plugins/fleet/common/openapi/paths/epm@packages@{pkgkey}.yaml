@@ -23,7 +23,7 @@ get:
                 required:
                   - status
                   - savedObject
-  operationId: get-epm-package-pkgkey
+  operationId: get-package
   security:
     - basicAuth: []
 parameters:
@@ -57,7 +57,7 @@ post:
                     - type
             required:
               - response
-  operationId: post-epm-install-pkgkey
+  operationId: install-package
   description: ''
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
@@ -86,7 +86,7 @@ delete:
                     - type
             required:
               - response
-  operationId: post-epm-delete-pkgkey
+  operationId: delete-package
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   requestBody:

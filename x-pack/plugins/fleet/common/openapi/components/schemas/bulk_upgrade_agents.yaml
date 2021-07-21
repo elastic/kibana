@@ -1,4 +1,4 @@
-title: BulkUpgradeAgents
+title: Bulk upgrade agents
 oneOf:
   - type: object
     properties:

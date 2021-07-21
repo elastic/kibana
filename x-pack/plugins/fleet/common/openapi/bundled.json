@@ -56,7 +56,7 @@
             }
           }
         },
-        "operationId": "post-setup",
+        "operationId": "setup",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -66,7 +66,7 @@
     },
     "/epm/categories": {
       "get": {
-        "summary": "Packages - Categories",
+        "summary": "Package categories",
         "tags": [],
         "responses": {
           "200": {
@@ -99,7 +99,7 @@
             }
           }
         },
-        "operationId": "get-epm-categories"
+        "operationId": "get-package-categories"
       }
     },
     "/epm/packages": {
@@ -121,7 +121,7 @@
             }
           }
         },
-        "operationId": "get-epm-list"
+        "operationId": "list-all-packages"
       },
       "parameters": []
     },
@@ -168,7 +168,7 @@
             }
           }
         },
-        "operationId": "get-epm-package-pkgkey",
+        "operationId": "get-package",
         "security": [
           {
             "basicAuth": []
@@ -223,7 +223,7 @@
             }
           }
         },
-        "operationId": "post-epm-install-pkgkey",
+        "operationId": "install-package",
         "description": "",
         "parameters": [
           {
@@ -269,7 +269,7 @@
             }
           }
         },
-        "operationId": "post-epm-delete-pkgkey",
+        "operationId": "delete-package",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -315,7 +315,7 @@
             }
           }
         },
-        "operationId": "get-agents-setup",
+        "operationId": "get-agents-setup-status",
         "security": [
           {
             "basicAuth": []
@@ -324,7 +324,7 @@
       },
       "post": {
         "summary": "Agents setup - Create",
-        "operationId": "post-agents-setup",
+        "operationId": "setup-agents",
         "responses": {
           "200": {
             "description": "OK",
@@ -425,7 +425,7 @@
             }
           }
         },
-        "operationId": "get-fleet-agent-status",
+        "operationId": "get-agent-status",
         "parameters": [
           {
             "schema": {
@@ -477,7 +477,7 @@
             }
           }
         },
-        "operationId": "get-fleet-agents",
+        "operationId": "get-agents",
         "security": [
           {
             "basicAuth": []
@@ -511,7 +511,7 @@
             }
           }
         },
-        "operationId": "post-fleet-agents-bulk-upgrade",
+        "operationId": "bulk-upgrade-agents",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -563,7 +563,7 @@
             }
           }
         },
-        "operationId": "get-fleet-agents-agentId"
+        "operationId": "get-agent"
       },
       "put": {
         "summary": "Agent - Update",
@@ -588,7 +588,7 @@
             }
           }
         },
-        "operationId": "put-fleet-agents-agentId",
+        "operationId": "update-agent",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -621,7 +621,7 @@
             }
           }
         },
-        "operationId": "delete-fleet-agents-agentId",
+        "operationId": "delete-agent",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -679,7 +679,7 @@
             }
           }
         },
-        "operationId": "post-fleet-agents-unenroll",
+        "operationId": "unenroll-agents",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -740,7 +740,7 @@
             }
           }
         },
-        "operationId": "post-fleet-agents-upgrade",
+        "operationId": "upgrade-agents",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -831,7 +831,7 @@
             }
           }
         },
-        "operationId": "post-agent-policy",
+        "operationId": "create-agent-policy",
         "requestBody": {
           "content": {
             "application/json": {
@@ -910,7 +910,7 @@
             }
           }
         },
-        "operationId": "put-agent-policy-agentPolicyId",
+        "operationId": "update-agent-policy",
         "requestBody": {
           "content": {
             "application/json": {
@@ -992,7 +992,7 @@
     "/agent_policies/delete": {
       "post": {
         "summary": "Agent policy - Delete",
-        "operationId": "post-agent-policy-delete",
+        "operationId": "delete-agent-policy",
         "responses": {
           "200": {
             "description": "OK",
@@ -1084,7 +1084,7 @@
             }
           }
         },
-        "operationId": "get-fleet-enrollment-api-keys",
+        "operationId": "get-enrollment-api-keys",
         "parameters": []
       },
       "post": {
@@ -1113,7 +1113,7 @@
             }
           }
         },
-        "operationId": "post-fleet-enrollment-api-keys",
+        "operationId": "create-enrollment-api-keys",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1155,7 +1155,7 @@
             }
           }
         },
-        "operationId": "get-fleet-enrollment-api-keys-keyId"
+        "operationId": "get-enrollment-api-key"
       },
       "delete": {
         "summary": "Enrollment API Key - Delete",
@@ -1183,7 +1183,7 @@
             }
           }
         },
-        "operationId": "delete-fleet-enrollment-api-keys-keyId",
+        "operationId": "delete-enrollment-api-key",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1227,14 +1227,14 @@
             }
           }
         },
-        "operationId": "get-packagePolicies",
+        "operationId": "get-package-policies",
         "security": [],
         "parameters": []
       },
       "parameters": [],
       "post": {
         "summary": "Package policy - Create",
-        "operationId": "post-packagePolicies",
+        "operationId": "create-package-policies",
         "responses": {
           "200": {
             "description": "OK"
@@ -1280,7 +1280,7 @@
             }
           }
         },
-        "operationId": "get-packagePolicies-packagePolicyId"
+        "operationId": "get-package-policy"
       },
       "parameters": [
         {
@@ -1294,7 +1294,7 @@
       ],
       "put": {
         "summary": "Package policy - Update",
-        "operationId": "put-packagePolicies-packagePolicyId",
+        "operationId": "update-package-policy",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1394,7 +1394,7 @@
     },
     "schemas": {
       "search_result": {
-        "title": "SearchResult",
+        "title": "Search result",
         "type": "object",
         "properties": {
           "description": {
@@ -1441,7 +1441,7 @@
         ]
       },
       "package_info": {
-        "title": "PackageInfo",
+        "title": "Package information",
         "type": "object",
         "properties": {
           "name": {
@@ -1620,7 +1620,7 @@
       },
       "agent_type": {
         "type": "string",
-        "title": "AgentType",
+        "title": "Agent type",
         "enum": [
           "PERMANENT",
           "EPHEMERAL",
@@ -1628,12 +1628,12 @@
         ]
       },
       "agent_metadata": {
-        "title": "AgentMetadata",
+        "title": "Agent metadata",
         "type": "object"
       },
       "agent_status": {
         "type": "string",
-        "title": "AgentStatus",
+        "title": "Agent status",
         "enum": [
           "offline",
           "error",
@@ -1708,7 +1708,7 @@
         ]
       },
       "bulk_upgrade_agents": {
-        "title": "BulkUpgradeAgents",
+        "title": "Bulk upgrade agents",
         "oneOf": [
           {
             "type": "object",
@@ -1770,7 +1770,7 @@
         ]
       },
       "upgrade_agent": {
-        "title": "UpgradeAgent",
+        "title": "Upgrade agent",
         "oneOf": [
           {
             "type": "object",
@@ -1800,7 +1800,7 @@
         ]
       },
       "new_agent_policy": {
-        "title": "NewAgentPolicy",
+        "title": "New agent policy",
         "type": "object",
         "properties": {
           "name": {
@@ -1815,7 +1815,7 @@
         }
       },
       "new_package_policy": {
-        "title": "NewPackagePolicy",
+        "title": "New package policy",
         "type": "object",
         "description": "",
         "properties": {
@@ -1900,7 +1900,7 @@
         ]
       },
       "package_policy": {
-        "title": "PackagePolicy",
+        "title": "Package policy",
         "allOf": [
           {
             "type": "object",
@@ -1982,7 +1982,7 @@
         ]
       },
       "enrollment_api_key": {
-        "title": "EnrollmentApiKey",
+        "title": "Enrollment API key",
         "type": "object",
         "properties": {
           "id": {
@@ -2016,7 +2016,7 @@
         ]
       },
       "update_package_policy": {
-        "title": "UpdatePackagePolicy",
+        "title": "Update package policy",
         "allOf": [
           {
             "type": "object",

@@ -13,12 +13,12 @@ get:
                 type: boolean
             required:
               - isInitialized
-  operationId: get-agents-setup
+  operationId: get-agents-setup-status
   security:
     - basicAuth: []
 post:
   summary: Agents setup - Create
-  operationId: post-agents-setup
+  operationId: setup-agents
   responses:
     '200':
       description: OK

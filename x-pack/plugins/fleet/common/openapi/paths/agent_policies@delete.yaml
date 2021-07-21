@@ -1,6 +1,6 @@
 post:
   summary: Agent policy - Delete
-  operationId: post-agent-policy-delete
+  operationId: delete-agent-policy
   responses:
     '200':
       description: OK

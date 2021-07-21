@@ -36,12 +36,12 @@ paths:
                 properties:
                   message:
                     type: string
-      operationId: post-setup
+      operationId: setup
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /epm/categories:
     get:
-      summary: Packages - Categories
+      summary: Package categories
       tags: []
       responses:
         '200':
@@ -63,7 +63,7 @@ paths:
                     - id
                     - title
                     - count
-      operationId: get-epm-categories
+      operationId: get-package-categories
   /epm/packages:
     get:
       summary: Packages - List
@@ -77,7 +77,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/search_result'
-      operationId: get-epm-list
+      operationId: list-all-packages
     parameters: []
   '/epm/packages/{pkgkey}':
     get:
@@ -105,7 +105,7 @@ paths:
                     required:
                       - status
                       - savedObject
-      operationId: get-epm-package-pkgkey
+      operationId: get-package
       security:
         - basicAuth: []
     parameters:
@@ -139,7 +139,7 @@ paths:
                         - type
                 required:
                   - response
-      operationId: post-epm-install-pkgkey
+      operationId: install-package
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -168,7 +168,7 @@ paths:
                         - type
                 required:
                   - response
-      operationId: post-epm-delete-pkgkey
+      operationId: delete-package
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -195,12 +195,12 @@ paths:
                     type: boolean
                 required:
                   - isInitialized
-      operationId: get-agents-setup
+      operationId: get-agents-setup-status
       security:
         - basicAuth: []
     post:
       summary: Agents setup - Create
-      operationId: post-agents-setup
+      operationId: setup-agents
       responses:
         '200':
           description: OK
@@ -265,7 +265,7 @@ paths:
                   - other
                   - total
                   - updating
-      operationId: get-fleet-agent-status
+      operationId: get-agent-status
       parameters:
         - schema:
             type: string
@@ -299,7 +299,7 @@ paths:
                   - total
                   - page
                   - perPage
-      operationId: get-fleet-agents
+      operationId: get-agents
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -319,7 +319,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/upgrade_agent'
-      operationId: post-fleet-agents-bulk-upgrade
+      operationId: bulk-upgrade-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -350,7 +350,7 @@ paths:
                     $ref: '#/components/schemas/agent'
                 required:
                   - item
-      operationId: get-fleet-agents-agentId
+      operationId: get-agent
     put:
       summary: Agent - Update
       tags: []
@@ -366,7 +366,7 @@ paths:
                     $ref: '#/components/schemas/agent'
                 required:
                   - item
-      operationId: put-fleet-agents-agentId
+      operationId: update-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     delete:
@@ -386,7 +386,7 @@ paths:
                       - deleted
                 required:
                   - action
-      operationId: delete-fleet-agents-agentId
+      operationId: delete-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   '/agents/{agentId}/unenroll':
@@ -421,7 +421,7 @@ paths:
                     type: number
                     enum:
                       - 400
-      operationId: post-fleet-agents-unenroll
+      operationId: unenroll-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -457,7 +457,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/upgrade_agent'
-      operationId: post-fleet-agents-upgrade
+      operationId: upgrade-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -512,7 +512,7 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/agent_policy'
-      operationId: post-agent-policy
+      operationId: create-agent-policy
       requestBody:
         content:
           application/json:
@@ -561,7 +561,7 @@ paths:
                     $ref: '#/components/schemas/agent_policy'
                 required:
                   - item
-      operationId: put-agent-policy-agentPolicyId
+      operationId: update-agent-policy
       requestBody:
         content:
           application/json:
@@ -609,7 +609,7 @@ paths:
   /agent_policies/delete:
     post:
       summary: Agent policy - Delete
-      operationId: post-agent-policy-delete
+      operationId: delete-agent-policy
       responses:
         '200':
           description: OK
@@ -667,7 +667,7 @@ paths:
                   - page
                   - perPage
                   - total
-      operationId: get-fleet-enrollment-api-keys
+      operationId: get-enrollment-api-keys
       parameters: []
     post:
       summary: Enrollment API Key - Create
@@ -686,7 +686,7 @@ paths:
                     type: string
                     enum:
                       - created
-      operationId: post-fleet-enrollment-api-keys
+      operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   '/enrollment-api-keys/{keyId}':
@@ -711,7 +711,7 @@ paths:
                     $ref: '#/components/schemas/enrollment_api_key'
                 required:
                   - item
-      operationId: get-fleet-enrollment-api-keys-keyId
+      operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
       tags: []
@@ -729,7 +729,7 @@ paths:
                       - deleted
                 required:
                   - action
-      operationId: delete-fleet-enrollment-api-keys-keyId
+      operationId: delete-enrollment-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /package_policies:
@@ -756,13 +756,13 @@ paths:
                     type: number
                 required:
                   - items
-      operationId: get-packagePolicies
+      operationId: get-package-policies
       security: []
       parameters: []
     parameters: []
     post:
       summary: Package policy - Create
-      operationId: post-packagePolicies
+      operationId: create-package-policies
       responses:
         '200':
           description: OK
@@ -789,7 +789,7 @@ paths:
                     $ref: '#/components/schemas/package_policy'
                 required:
                   - item
-      operationId: get-packagePolicies-packagePolicyId
+      operationId: get-package-policy
     parameters:
       - schema:
           type: string
@@ -798,7 +798,7 @@ paths:
         required: true
     put:
       summary: Package policy - Update
-      operationId: put-packagePolicies-packagePolicyId
+      operationId: update-package-policy
       requestBody:
         content:
           application/json:
@@ -866,7 +866,7 @@ components:
         type: string
   schemas:
     search_result:
-      title: SearchResult
+      title: Search result
       type: object
       properties:
         description:
@@ -900,7 +900,7 @@ components:
         - version
         - status
     package_info:
-      title: PackageInfo
+      title: Package information
       type: object
       properties:
         name:
@@ -1020,17 +1020,17 @@ components:
         - path
     agent_type:
       type: string
-      title: AgentType
+      title: Agent type
       enum:
         - PERMANENT
         - EPHEMERAL
         - TEMPORARY
     agent_metadata:
-      title: AgentMetadata
+      title: Agent metadata
       type: object
     agent_status:
       type: string
-      title: AgentStatus
+      title: Agent status
       enum:
         - offline
         - error
@@ -1083,7 +1083,7 @@ components:
         - id
         - status
     bulk_upgrade_agents:
-      title: BulkUpgradeAgents
+      title: Bulk upgrade agents
       oneOf:
         - type: object
           properties:
@@ -1121,7 +1121,7 @@ components:
             - version
             - agents
     upgrade_agent:
-      title: UpgradeAgent
+      title: Upgrade agent
       oneOf:
         - type: object
           properties:
@@ -1138,7 +1138,7 @@ components:
           required:
             - version
     new_agent_policy:
-      title: NewAgentPolicy
+      title: New agent policy
       type: object
       properties:
         name:
@@ -1148,7 +1148,7 @@ components:
         description:
           type: string
     new_package_policy:
-      title: NewPackagePolicy
+      title: New package policy
       type: object
       description: ''
       properties:
@@ -1207,7 +1207,7 @@ components:
         - policy_id
         - name
     package_policy:
-      title: PackagePolicy
+      title: Package policy
       allOf:
         - type: object
           properties:
@@ -1255,7 +1255,7 @@ components:
             - id
             - status
     enrollment_api_key:
-      title: EnrollmentApiKey
+      title: Enrollment API key
       type: object
       properties:
         id:
@@ -1279,7 +1279,7 @@ components:
         - active
         - created_at
     update_package_policy:
-      title: UpdatePackagePolicy
+      title: Update package policy
       allOf:
         - type: object
           properties:
