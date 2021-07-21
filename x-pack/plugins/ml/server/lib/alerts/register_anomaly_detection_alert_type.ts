@@ -52,6 +52,7 @@ export function registerAnomalyDetectionAlertType({
 }: RegisterAlertParams) {
   alerting.registerType<
     MlAnomalyDetectionAlertParams,
+    never, // Only use if defining useSavedObjectReferences hook
     AlertTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
