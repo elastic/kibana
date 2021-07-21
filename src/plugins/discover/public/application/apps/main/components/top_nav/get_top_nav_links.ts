@@ -37,6 +37,7 @@ export const getTopNavLinks = ({
   state,
   onOpenInspector,
   searchSource,
+  columns,
 }: {
   indexPattern: IndexPattern;
   navigateTo: (url: string) => void;
@@ -45,6 +46,7 @@ export const getTopNavLinks = ({
   state: GetStateReturn;
   onOpenInspector: () => void;
   searchSource: ISearchSource;
+  columns: string[];
 }) => {
   const options = {
     id: 'options',
@@ -182,6 +184,10 @@ export const getTopNavLinks = ({
         timeRange,
         refreshInterval,
       };
+
+      if (columns) {
+        params.visibleFieldNames = columns;
+      }
       if (extractedQuery) {
         const queryLanguage = extractedQuery.language;
         const qryString = extractedQuery.query;

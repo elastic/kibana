@@ -21,6 +21,7 @@ export type DiscoverTopNavProps = Pick<
   savedQuery?: string;
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   stateContainer: GetStateReturn;
+  columns: string[];
 };
 
 export const DiscoverTopNav = ({
@@ -34,6 +35,7 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   services,
+  columns,
 }: DiscoverTopNavProps) => {
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = services.navigation.ui;
@@ -47,8 +49,18 @@ export const DiscoverTopNav = ({
         state: stateContainer,
         onOpenInspector,
         searchSource,
+        columns,
       }),
-    [indexPattern, navigateTo, onOpenInspector, searchSource, stateContainer, savedSearch, services]
+    [
+      columns,
+      indexPattern,
+      navigateTo,
+      onOpenInspector,
+      searchSource,
+      stateContainer,
+      savedSearch,
+      services,
+    ]
   );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
