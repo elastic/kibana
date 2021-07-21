@@ -22,7 +22,7 @@ const ApplicationRequiredCalloutComponent: React.FC = () => {
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout',
           {
             defaultMessage:
-              'The Elastic App is not installed. Please go to the ServiceNow Store and install the application.',
+              'The Elastic App is not installed. Please install the application from the ServiceNow Store.',
           }
         )}
       />
