@@ -308,6 +308,21 @@ export const Library: React.FC = () => {
           <EuiSpacer />
 
           <EuiTitle size="s">
+            <h3>With unreorderable items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            unreorderableItems={[{ id: 4 }, { id: 5 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
             <h3>Using the rowProps prop to apply dynamic properties to each row</h3>
           </EuiTitle>
           <EuiSpacer />

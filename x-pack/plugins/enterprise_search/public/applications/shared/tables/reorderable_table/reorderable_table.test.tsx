@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
+import { Cell } from './cell';
 import { DraggableBodyRow } from './draggable_body_row';
 import { DraggableBodyRows } from './draggable_body_rows';
 import { HeaderRow } from './header_row';
@@ -58,6 +59,7 @@ describe('ReorderableTable', () => {
     it('can append additional properties to each row, which can be dynamically calculated from the item in that row', () => {
       const wrapper = shallow(
         <ReorderableTable
+          noItemsMessage={<p>No Items</p>}
           items={items}
           columns={columns}
           rowProps={(item) => ({
@@ -103,6 +105,30 @@ describe('ReorderableTable', () => {
       );
       const onReorder = wrapper.find(DraggableBodyRows).prop('onReorder');
       expect(onReorder([], [])).toBeUndefined();
+    });
+
+    it('will render items that cant be reordered', () => {
+      const unreorderableItems = [{ id: 3 }];
+      const wrapper = shallow(
+        <ReorderableTable
+          noItemsMessage={<p>No Items</p>}
+          items={items}
+          unreorderableItems={unreorderableItems}
+          columns={columns}
+        />
+      );
+      const bodyRows = wrapper.find(BodyRows);
+      expect(bodyRows.exists()).toBe(true);
+      expect(bodyRows.prop('items')).toEqual(unreorderableItems);
+
+      const renderedRow = bodyRows.renderProp('renderItem')({ id: 1 }, 0);
+      expect(renderedRow.type()).toEqual(BodyRow);
+      expect(renderedRow.props()).toEqual({
+        columns,
+        item: { id: 1 },
+        additionalProps: {},
+        firstCell: expect.anything(),
+      });
     });
   });
 

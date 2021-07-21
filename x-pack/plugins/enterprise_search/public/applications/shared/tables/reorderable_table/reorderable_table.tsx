@@ -11,7 +11,7 @@ import classNames from 'classnames';
 
 import './reorderable_table.scss';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
@@ -26,6 +26,7 @@ interface ReorderableTableProps<Item> {
   columns: Array<Column<Item>>;
   items: Item[];
   noItemsMessage: React.ReactNode;
+  unreorderableItems?: Item[];
   className?: string;
   disableDragging?: boolean;
   disableReordering?: boolean;
@@ -37,6 +38,7 @@ export const ReorderableTable = <Item extends object>({
   columns,
   items,
   noItemsMessage,
+  unreorderableItems = [],
   className = '',
   disableDragging = false,
   disableReordering = false,
@@ -59,20 +61,36 @@ export const ReorderableTable = <Item extends object>({
       )}
 
       {items.length > 0 && !disableReordering && (
-        <DraggableBodyRows
-          items={items}
-          renderItem={(item, itemIndex) => (
-            <DraggableBodyRow
-              key={`table_draggable_row_${itemIndex}`}
-              columns={columns}
-              item={item}
-              additionalProps={rowProps(item)}
-              disableDragging={disableDragging}
-              rowIndex={itemIndex}
+        <>
+          <DraggableBodyRows
+            items={items}
+            renderItem={(item, itemIndex) => (
+              <DraggableBodyRow
+                key={`table_draggable_row_${itemIndex}`}
+                columns={columns}
+                item={item}
+                additionalProps={rowProps(item)}
+                disableDragging={disableDragging}
+                rowIndex={itemIndex}
+              />
+            )}
+            onReorder={onReorder}
+          />
+          {unreorderableItems.length > 0 && (
+            <BodyRows
+              items={unreorderableItems}
+              renderItem={(item, itemIndex) => (
+                <BodyRow
+                  key={`table_draggable_row_${itemIndex}`}
+                  columns={columns}
+                  item={item}
+                  additionalProps={rowProps(item)}
+                  firstCell={<Cell {...DRAGGABLE_UX_STYLE} />}
+                />
+              )}
             />
           )}
-          onReorder={onReorder}
-        />
+        </>
       )}
 
       {items.length > 0 && disableReordering && (
