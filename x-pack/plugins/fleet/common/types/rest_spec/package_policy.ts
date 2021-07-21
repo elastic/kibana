@@ -63,13 +63,18 @@ export type DeletePackagePoliciesResponse = Array<{
   success: boolean;
 }>;
 
-export interface UpgradePackagePolicyDryRunResponse {
-  hasErrors: boolean;
-  diff: [PackagePolicy, DryRunPackagePolicy];
+export interface UpgradePackagePolicyBaseResponse {
+  name?: string;
 }
 
-export type UpgradePackagePolicyResponse = Array<{
+export interface UpgradePackagePolicyDryRunResponse extends UpgradePackagePolicyBaseResponse {
+  hasErrors: boolean;
+  diff?: [PackagePolicy, DryRunPackagePolicy];
+}
+
+export interface UpgradePackagePolicyResponseItem extends UpgradePackagePolicyBaseResponse {
   id: string;
-  name?: string;
   success: boolean;
-}>;
+}
+
+export type UpgradePackagePolicyResponse = UpgradePackagePolicyResponseItem[];

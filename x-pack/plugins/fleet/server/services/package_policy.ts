@@ -532,30 +532,38 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<UpgradePackagePolicyDryRunResponse> {
-    const { packagePolicy, installedPkgInfo } = await this.getUpgradePackagePolicyInfo(
-      soClient,
-      id
-    );
+    try {
+      const { packagePolicy, installedPkgInfo } = await this.getUpgradePackagePolicyInfo(
+        soClient,
+        id
+      );
 
-    const updatedPackagePolicy = overridePackageInputs(
-      {
-        ...omit(packagePolicy, 'id'),
-        inputs: packageToPackagePolicyInputs(installedPkgInfo),
-        package: {
-          ...packagePolicy.package,
-          version: installedPkgInfo.version,
+      const updatedPackagePolicy = overridePackageInputs(
+        {
+          ...omit(packagePolicy, 'id'),
+          inputs: packageToPackagePolicyInputs(installedPkgInfo),
+          package: {
+            ...packagePolicy.package,
+            version: installedPkgInfo.version,
+          },
         },
-      },
-      packagePolicy.inputs as InputsOverride[],
-      true
-    );
+        packagePolicy.inputs as InputsOverride[],
+        true
+      );
 
-    const hasErrors = 'errors' in updatedPackagePolicy;
+      const hasErrors = 'errors' in updatedPackagePolicy;
 
-    return {
-      diff: [packagePolicy, updatedPackagePolicy],
-      hasErrors,
-    };
+      return {
+        name: updatedPackagePolicy.name,
+        diff: [packagePolicy, updatedPackagePolicy],
+        hasErrors,
+      };
+    } catch (error) {
+      return {
+        hasErrors: true,
+        ...ingestErrorToResponseOptions(error),
+      };
+    }
   }
 
   public async buildPackagePolicyFromPackage(
