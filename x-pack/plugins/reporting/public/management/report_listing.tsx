@@ -20,22 +20,18 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
-
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
-
 import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
-
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
-import type { SharePluginSetup } from '../shared_imports';
-import { useKibana } from '../shared_imports';
 import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient, useInternalApiClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
-
+import type { SharePluginSetup } from '../shared_imports';
+import { useKibana } from '../shared_imports';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { IlmPolicyLink } from './ilm_policy_link';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';

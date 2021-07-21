@@ -10,24 +10,19 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
-
 import type { NotificationsSetup } from '../../../../../src/core/public';
 import {
+  applicationServiceMock,
   httpServiceMock,
   notificationServiceMock,
-  applicationServiceMock,
 } from '../../../../../src/core/public/mocks';
 import type { LocatorPublic, SharePluginSetup } from '../../../../../src/plugins/share/public';
-
 import type { ILicense } from '../../../licensing/public';
-
 import { IlmPolicyMigrationStatus, ReportApiJSON } from '../../common/types';
-
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
-import { KibanaContextProvider } from '../shared_imports';
 import { InternalApiClientClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
-
+import { KibanaContextProvider } from '../shared_imports';
 import { Props, ReportListing } from './report_listing';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
