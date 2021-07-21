@@ -26,7 +26,7 @@ import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters'
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null // TODO: Use this for RAC (otherwise delete it)
 ): void => {
   router.post(
     {
