@@ -7,11 +7,15 @@
  */
 
 import { driverInstanceMock, storageInstanceMock } from './api.test.mocks';
+
 import moment from 'moment';
 import { getApi } from './api';
 import { TestScheduler } from 'rxjs/testing';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 import { take } from 'rxjs/operators';
+
+import { NewsfeedApiDriver as MockNewsfeedApiDriver } from './driver';
+import { NeverFetchNewsfeedApiDriver as MockNeverFetchNewsfeedApiDriver } from './never_fetch_driver';
 
 const kibanaVersion = '8.0.0';
 const newsfeedId = 'test';
@@ -46,6 +50,8 @@ describe('getApi', () => {
   afterEach(() => {
     storageInstanceMock.isAnyUnread$.mockReset();
     driverInstanceMock.fetchNewsfeedItems.mockReset();
+    (MockNewsfeedApiDriver as jest.Mock).mockClear();
+    (MockNeverFetchNewsfeedApiDriver as jest.Mock).mockClear();
   });
 
   it('merges the newsfeed and unread observables', () => {
@@ -60,7 +66,7 @@ describe('getApi', () => {
           a: createFetchResult({ feedItems: ['item' as any] }),
         })
       );
-      const api = getApi(createConfig(1000), kibanaVersion, newsfeedId);
+      const api = getApi(createConfig(1000), kibanaVersion, newsfeedId, false);
 
       expectObservable(api.fetchResults$.pipe(take(1))).toBe('(a|)', {
         a: createFetchResult({
@@ -83,7 +89,7 @@ describe('getApi', () => {
           a: createFetchResult({ feedItems: ['item' as any] }),
         })
       );
-      const api = getApi(createConfig(2), kibanaVersion, newsfeedId);
+      const api = getApi(createConfig(2), kibanaVersion, newsfeedId, false);
 
       expectObservable(api.fetchResults$.pipe(take(2))).toBe('a-(b|)', {
         a: createFetchResult({
@@ -111,7 +117,7 @@ describe('getApi', () => {
           a: createFetchResult({}),
         })
       );
-      const api = getApi(createConfig(10), kibanaVersion, newsfeedId);
+      const api = getApi(createConfig(10), kibanaVersion, newsfeedId, false);
 
       expectObservable(api.fetchResults$.pipe(take(2))).toBe('a--(b|)', {
         a: createFetchResult({
@@ -122,5 +128,17 @@ describe('getApi', () => {
         }),
       });
     });
+  });
+
+  it('uses the news feed API driver if in not screenshot mode', () => {
+    getApi(createConfig(10), kibanaVersion, newsfeedId, false);
+    expect(MockNewsfeedApiDriver).toHaveBeenCalled();
+    expect(MockNeverFetchNewsfeedApiDriver).not.toHaveBeenCalled();
+  });
+
+  it('uses the never fetch news feed API driver if in not screenshot mode', () => {
+    getApi(createConfig(10), kibanaVersion, newsfeedId, true);
+    expect(MockNewsfeedApiDriver).not.toHaveBeenCalled();
+    expect(MockNeverFetchNewsfeedApiDriver).toHaveBeenCalled();
   });
 });

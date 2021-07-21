@@ -6,7 +6,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { noop } from 'lodash/fp';
+import styled from 'styled-components';
+
 import {
   eventHasNotes,
   getEventType,
@@ -22,45 +26,14 @@ import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { timelineSelectors } from '../../../../store/timeline';
+import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
+import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
-import { Ecs } from '../../../../../../common/ecs';
-import { inputsModel } from '../../../../../common/store';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
-import { RowCellRender } from '../control_columns';
 
-interface Props {
-  ariaRowindex: number;
-  action?: RowCellRender;
-  width?: number;
-  columnId: string;
-  columnValues: string;
-  checked: boolean;
-  onRowSelected: OnRowSelected;
-  eventId: string;
-  loadingEventIds: Readonly<string[]>;
-  onEventDetailsPanelOpened: () => void;
-  showCheckboxes: boolean;
-  data: TimelineNonEcsData[];
-  ecsData: Ecs;
-  index: number;
-  eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  isEventPinned: boolean;
-  isEventViewer?: boolean;
-  onPinEvent: OnPinEvent;
-  onUnPinEvent: OnUnPinEvent;
-  refetch: inputsModel.Refetch;
-  rowIndex: number;
-  onRuleChange?: () => void;
-  showNotes: boolean;
-  tabType?: TimelineTabs;
-  timelineId: string;
-  toggleShowNotes: () => void;
-}
-
-export type ActionProps = Props;
+const ActionsContainer = styled.div`
+  align-items: center;
+  display: flex;
+`;
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
@@ -75,9 +48,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   isEventViewer = false,
   loadingEventIds,
   onEventDetailsPanelOpened,
-  onPinEvent,
   onRowSelected,
-  onUnPinEvent,
   refetch,
   onRuleChange,
   showCheckboxes,
@@ -85,8 +56,19 @@ const ActionsComponent: React.FC<ActionProps> = ({
   timelineId,
   toggleShowNotes,
 }) => {
+  const dispatch = useDispatch();
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const onPinEvent: OnPinEvent = useCallback(
+    (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
+    [dispatch, timelineId]
+  );
+
+  const onUnPinEvent: OnPinEvent = useCallback(
+    (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
+    [dispatch, timelineId]
+  );
 
   const handleSelectEvent = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -99,7 +81,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const handlePinClicked = useCallback(
     () =>
       getPinOnClick({
-        allowUnpinning: !eventHasNotes(eventIdToNoteIds[eventId]),
+        allowUnpinning: eventIdToNoteIds ? !eventHasNotes(eventIdToNoteIds[eventId]) : true,
         eventId,
         onPinEvent,
         onUnPinEvent,
@@ -112,13 +94,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
-  const isEventContextMenuEnabled = useMemo(
-    () => !!ecsData.event?.kind && ecsData.event?.kind[0] === 'event',
-    [ecsData.event?.kind]
+  const isEventContextMenuEnabledForEndpoint = useMemo(
+    () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
+    [ecsData.event?.kind, ecsData.agent?.type]
   );
 
   return (
-    <>
+    <ActionsContainer>
       {showCheckboxes && (
         <div key="select-event-container" data-test-subj="select-event-container">
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
@@ -164,12 +146,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
           />
         )}
 
-        {!isEventViewer && (
+        {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
-              showNotes={showNotes}
+              showNotes={showNotes ?? false}
               toggleShowNotes={toggleShowNotes}
               timelineType={timelineType}
             />
@@ -177,7 +159,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
               key="pin-event"
               onPinClicked={handlePinClicked}
-              noteIds={eventIdToNoteIds[eventId] || emptyNotes}
+              noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
               eventIsPinned={isEventPinned}
               timelineType={timelineType}
             />
@@ -199,12 +181,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && !isEventContextMenuEnabled}
-          refetch={refetch}
+          disabled={eventType !== 'signal' && !isEventContextMenuEnabledForEndpoint}
+          refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
       </>
-    </>
+    </ActionsContainer>
   );
 };
 

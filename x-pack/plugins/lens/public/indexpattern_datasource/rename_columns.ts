@@ -49,9 +49,9 @@ export const renameColumns: ExpressionFunctionDefinition<
 
         Object.entries(row).forEach(([id, value]) => {
           if (id in idMap) {
-            mappedRow[idMap[id].id] = sanitizeValue(value);
+            mappedRow[idMap[id].id] = value;
           } else {
-            mappedRow[id] = sanitizeValue(value);
+            mappedRow[id] = value;
           }
         });
 
@@ -85,14 +85,4 @@ function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColum
   }
 
   return originalColumn.label;
-}
-
-function sanitizeValue(value: unknown) {
-  if (value === '') {
-    return i18n.translate('xpack.lens.indexpattern.emptyTextColumnValue', {
-      defaultMessage: '(empty)',
-    });
-  }
-
-  return value;
 }

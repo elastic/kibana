@@ -19,7 +19,6 @@ import { errors as joinRows } from './dict/join_rows';
 import { errors as ply } from './dict/ply';
 import { errors as pointseries } from './dict/pointseries';
 import { errors as progress } from './dict/progress';
-import { errors as revealImage } from './dict/reveal_image';
 import { errors as timefilter } from './dict/timefilter';
 import { errors as to } from './dict/to';
 
@@ -38,7 +37,6 @@ export const getFunctionErrors = () => ({
   ply,
   pointseries,
   progress,
-  revealImage,
   timefilter,
   to,
 });

@@ -81,12 +81,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            href={getHref('fleet_agent_list')}
-            flush="left"
-            size="xs"
-          >
+          <EuiButtonEmpty iconType="arrowLeft" href={getHref('agent_list')} flush="left" size="xs">
             <FormattedMessage
               id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"
@@ -198,6 +193,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 isAgentPolicyLoading || agentPolicyData?.item?.is_managed ? undefined : (
                   <AgentDetailsActionMenu
                     agent={agentData.item}
+                    agentPolicy={agentPolicyData?.item}
                     assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
                     onCancelReassign={
                       routeState && routeState.onDoneNavigateTo
@@ -232,7 +228,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
           defaultMessage: 'Agent details',
         }),
-        href: getHref('fleet_agent_details', { agentId, tabId: 'details' }),
+        href: getHref('agent_details', { agentId, tabId: 'details' }),
         isSelected: !tabId || tabId === 'details',
       },
       {
@@ -240,7 +236,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.logsTab', {
           defaultMessage: 'Logs',
         }),
-        href: getHref('fleet_agent_details', { agentId, tabId: 'logs' }),
+        href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
     ];
@@ -299,7 +295,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
-  useBreadcrumbs('fleet_agent_details', {
+  useBreadcrumbs('agent_list', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
       typeof agent.local_metadata.host.hostname === 'string'
@@ -309,13 +305,13 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   return (
     <Switch>
       <Route
-        path={FLEET_ROUTING_PATHS.fleet_agent_details_logs}
+        path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {
-          return <AgentLogs agent={agent} />;
+          return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route
-        path={FLEET_ROUTING_PATHS.fleet_agent_details}
+        path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
           return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}

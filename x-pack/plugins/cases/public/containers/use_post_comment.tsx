@@ -91,12 +91,13 @@ export const usePostComment = (): UsePostComment => {
     [toasts]
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       isCancelledRef.current = true;
       abortCtrlRef.current.abort();
-    };
-  }, []);
+    },
+    []
+  );
 
   return { ...state, postComment: postMyComment };
 };

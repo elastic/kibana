@@ -8,11 +8,30 @@
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
-import { ComponentStrings } from '../../../i18n/components';
 import { ShortcutStrings } from '../../../i18n/shortcuts';
 
-const { SidebarHeader: strings } = ComponentStrings;
+const strings = {
+  getBringForwardAriaLabel: () =>
+    i18n.translate('xpack.canvas.sidebarHeader.bringForwardArialLabel', {
+      defaultMessage: 'Move element up one layer',
+    }),
+  getBringToFrontAriaLabel: () =>
+    i18n.translate('xpack.canvas.sidebarHeader.bringToFrontArialLabel', {
+      defaultMessage: 'Move element to top layer',
+    }),
+  getSendBackwardAriaLabel: () =>
+    i18n.translate('xpack.canvas.sidebarHeader.sendBackwardArialLabel', {
+      defaultMessage: 'Move element down one layer',
+    }),
+  getSendToBackAriaLabel: () =>
+    i18n.translate('xpack.canvas.sidebarHeader.sendToBackArialLabel', {
+      defaultMessage: 'Move element to bottom layer',
+    }),
+};
+
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
 
 interface Props {

@@ -17,14 +17,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { TransactionList } from './TransactionList';
+import { TransactionList } from './transaction_list';
 import { useRedirect } from './useRedirect';
 import { useTransactionListFetcher } from './use_transaction_list';
 
@@ -50,20 +49,14 @@ function getRedirectLocation({
   }
 }
 
-interface TransactionOverviewProps {
-  serviceName: string;
-}
-
-export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
+export function TransactionOverview() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
-  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
-  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
   const {
     transactionListData,
     transactionListStatus,
@@ -79,7 +72,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     <>
       <TransactionCharts />
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasBorder={true}>
         <EuiTitle size="xs">
           <h3>Transactions</h3>
         </EuiTitle>

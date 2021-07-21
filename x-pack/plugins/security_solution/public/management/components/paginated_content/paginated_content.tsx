@@ -16,6 +16,7 @@ import React, {
   useCallback,
   useMemo,
   useState,
+  useEffect,
 } from 'react';
 import {
   CommonProps,
@@ -151,6 +152,12 @@ export const PaginatedContent = memo(
       () => Math.ceil((pagination?.totalItemCount || 1) / (pagination?.pageSize || 1)),
       [pagination?.pageSize, pagination?.totalItemCount]
     );
+
+    useEffect(() => {
+      if (pageCount > 0 && pageCount < (pagination?.pageIndex || 0) + 1) {
+        onChange({ pageIndex: pageCount - 1, pageSize: pagination?.pageSize || 0 });
+      }
+    }, [pageCount, onChange, pagination]);
 
     const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
       (pageSize) => {

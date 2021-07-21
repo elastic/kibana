@@ -47,6 +47,7 @@ describe('has()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -56,7 +57,7 @@ describe('has()', () => {
 
 describe('register()', () => {
   test('throws if AlertType Id contains invalid characters', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -67,6 +68,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -88,7 +90,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType Id isnt a string', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: (123 as unknown) as string,
       name: 'Test',
       actionGroups: [
@@ -99,6 +101,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -110,7 +113,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType action groups contains reserved group id', () => {
-    const alertType: AlertType<never, never, never, never, 'default' | 'NotReserved'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -129,6 +132,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -142,7 +146,7 @@ describe('register()', () => {
   });
 
   test('allows an AlertType to specify a custom recovery group', () => {
-    const alertType: AlertType<never, never, never, never, 'default', 'backToAwesome'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default', 'backToAwesome'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -159,6 +163,7 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
     };
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
@@ -178,6 +183,7 @@ describe('register()', () => {
 
   test('throws if the custom recovery group is contained in the AlertType action groups', () => {
     const alertType: AlertType<
+      never,
       never,
       never,
       never,
@@ -203,6 +209,7 @@ describe('register()', () => {
       },
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -216,7 +223,7 @@ describe('register()', () => {
   });
 
   test('registers the executor with the task manager', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -227,6 +234,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -246,7 +254,7 @@ describe('register()', () => {
   });
 
   test('shallow clones the given alert type', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -257,6 +265,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -279,6 +288,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -294,6 +304,7 @@ describe('register()', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
       })
@@ -315,6 +326,7 @@ describe('get()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -339,6 +351,7 @@ describe('get()', () => {
         "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
+        "isExportable": true,
         "minimumLicenseRequired": "basic",
         "name": "Test",
         "producer": "alerts",
@@ -377,6 +390,7 @@ describe('list()', () => {
         },
       ],
       defaultActionGroupId: 'testActionGroup',
+      isExportable: true,
       minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
@@ -403,6 +417,7 @@ describe('list()', () => {
           "defaultActionGroupId": "testActionGroup",
           "enabledInLicense": false,
           "id": "test",
+          "isExportable": true,
           "minimumLicenseRequired": "basic",
           "name": "Test",
           "producer": "alerts",
@@ -467,6 +482,7 @@ describe('ensureAlertTypeEnabled', () => {
       defaultActionGroupId: 'default',
       executor: jest.fn(),
       producer: 'alerts',
+      isExportable: true,
       minimumLicenseRequired: 'basic',
       recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     });
@@ -491,12 +507,13 @@ function alertTypeWithVariables<ActionGroupIds extends string>(
   id: ActionGroupIds,
   context: string,
   state: string
-): AlertType<never, never, never, never, ActionGroupIds> {
-  const baseAlert: AlertType<never, never, never, never, ActionGroupIds> = {
+): AlertType<never, never, never, never, never, ActionGroupIds> {
+  const baseAlert: AlertType<never, never, never, never, never, ActionGroupIds> = {
     id,
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
+    isExportable: true,
     minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',

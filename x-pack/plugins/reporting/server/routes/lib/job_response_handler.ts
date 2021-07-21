@@ -35,16 +35,14 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
     try {
       const { docId } = params;
 
-      const doc = await jobsQuery.get(user, docId, { includeContent: !opts.excludeContent });
+      const doc = await jobsQuery.getContent(user, docId);
       if (!doc) {
         return res.notFound();
       }
 
-      const { jobtype: jobType } = doc._source;
-
-      if (!validJobTypes.includes(jobType)) {
+      if (!validJobTypes.includes(doc.jobtype)) {
         return res.unauthorized({
-          body: `Sorry, you are not authorized to download ${jobType} reports`,
+          body: `Sorry, you are not authorized to download ${doc.jobtype} reports`,
         });
       }
 
@@ -81,13 +79,13 @@ export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;
-    const doc = await jobsQuery.get(user, docId, { includeContent: false });
+    const doc = await jobsQuery.get(user, docId);
 
     if (!doc) {
       return res.notFound();
     }
 
-    const { jobtype: jobType } = doc._source;
+    const { jobtype: jobType } = doc;
 
     if (!validJobTypes.includes(jobType)) {
       return res.unauthorized({
@@ -96,7 +94,7 @@ export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
     }
 
     try {
-      const docIndex = doc._index;
+      const docIndex = doc.index;
       await jobsQuery.delete(docIndex, docId);
       return res.ok({
         body: { deleted: true },

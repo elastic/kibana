@@ -13,5 +13,6 @@ export function useStartServices(): FleetStartServices {
   if (services === null) {
     throw new Error('KibanaContextProvider not initialized');
   }
+
   return services;
 }

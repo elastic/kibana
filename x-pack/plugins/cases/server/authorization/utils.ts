@@ -7,7 +7,7 @@
 
 import { remove, uniq } from 'lodash';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
-import { OWNER_FIELD } from '../../common/api';
+import { OWNER_FIELD } from '../../common';
 
 export const getOwnersFilter = (
   savedObjectType: string,

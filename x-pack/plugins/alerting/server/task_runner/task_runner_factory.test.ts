@@ -26,6 +26,7 @@ const alertType: UntypedNormalizedAlertType = {
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -78,6 +79,8 @@ describe('Task Runner Factory', () => {
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry: alertTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
+    supportsEphemeralTasks: true,
+    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
   };
 
   beforeEach(() => {

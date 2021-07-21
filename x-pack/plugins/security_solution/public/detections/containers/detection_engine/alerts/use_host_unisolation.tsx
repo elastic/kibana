@@ -16,13 +16,13 @@ interface HostUnisolationStatus {
 }
 
 interface UseHostIsolationProps {
-  agentId: string;
+  endpointId: string;
   comment: string;
   caseIds?: string[];
 }
 
 export const useHostUnisolation = ({
-  agentId,
+  endpointId,
   comment,
   caseIds,
 }: UseHostIsolationProps): HostUnisolationStatus => {
@@ -32,7 +32,7 @@ export const useHostUnisolation = ({
   const unIsolateHost = useCallback(async () => {
     try {
       setLoading(true);
-      const isolationStatus = await createHostUnIsolation({ agentId, comment, caseIds });
+      const isolationStatus = await createHostUnIsolation({ endpointId, comment, caseIds });
       setLoading(false);
       return isolationStatus.action ? true : false;
     } catch (error) {
@@ -40,6 +40,6 @@ export const useHostUnisolation = ({
       addError(error.message, { title: HOST_ISOLATION_FAILURE });
       return false;
     }
-  }, [agentId, comment, caseIds, addError]);
+  }, [endpointId, comment, caseIds, addError]);
   return { loading, unIsolateHost };
 };

@@ -8,18 +8,15 @@
 import React, { useEffect, useState, Fragment, FC, useMemo, useCallback } from 'react';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 
 import {
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
-  EuiTitle,
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
@@ -176,6 +173,19 @@ export const JobsListPage: FC<{
     defaultMessage: 'Analytics jobs docs',
   });
 
+  const docsLink = (
+    <EuiButtonEmpty
+      href={
+        currentTabId === 'anomaly_detection_jobs' ? anomalyDetectionJobsUrl : dataFrameAnalyticsUrl
+      }
+      target="_blank"
+      iconType="help"
+      data-test-subj="documentationLink"
+    >
+      {currentTabId === 'anomaly_detection_jobs' ? anomalyDetectionDocsLabel : analyticsDocsLabel}
+    </EuiButtonEmpty>
+  );
+
   function renderTabs() {
     return (
       <EuiTabbedContent
@@ -209,62 +219,42 @@ export const JobsListPage: FC<{
         >
           <ContextWrapper feature={PLUGIN_ID}>
             <Router history={history}>
-              <EuiPageContent
+              <EuiPageHeader
+                pageTitle={
+                  <FormattedMessage
+                    id="xpack.ml.management.jobsList.jobsListTitle"
+                    defaultMessage="Machine Learning Jobs"
+                  />
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.ml.management.jobsList.jobsListTagline"
+                    defaultMessage="View machine learning analytics and anomaly detection jobs."
+                  />
+                }
+                rightSideItems={[docsLink]}
+                bottomBorder
+              />
+
+              <EuiSpacer size="l" />
+
+              <EuiPageContentBody
                 id="kibanaManagementMLSection"
                 data-test-subj="mlPageStackManagementJobsList"
               >
-                <EuiTitle size="l">
-                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <h1>
-                        {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
-                          defaultMessage: 'Machine Learning Jobs',
-                        })}
-                      </h1>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        target="_blank"
-                        iconType="help"
-                        iconSide="left"
-                        color="primary"
-                        href={
-                          currentTabId === 'anomaly_detection_jobs'
-                            ? anomalyDetectionJobsUrl
-                            : dataFrameAnalyticsUrl
-                        }
-                      >
-                        {currentTabId === 'anomaly_detection_jobs'
-                          ? anomalyDetectionDocsLabel
-                          : analyticsDocsLabel}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiTitle size="s">
-                  <EuiText color="subdued">
-                    {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
-                      defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
-                    })}
-                  </EuiText>
-                </EuiTitle>
-                <EuiSpacer size="l" />
-                <EuiPageContentBody>
-                  {spacesEnabled && (
-                    <>
-                      <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
-                        {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                          defaultMessage: 'Synchronize saved objects',
-                        })}
-                      </EuiButtonEmpty>
-                      {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                      <EuiSpacer size="s" />
-                    </>
-                  )}
-                  {renderTabs()}
-                </EuiPageContentBody>
-              </EuiPageContent>
+                {spacesEnabled && (
+                  <>
+                    <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
+                      {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                        defaultMessage: 'Synchronize saved objects',
+                      })}
+                    </EuiButtonEmpty>
+                    {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+                {renderTabs()}
+              </EuiPageContentBody>
             </Router>
           </ContextWrapper>
         </KibanaContextProvider>

@@ -86,6 +86,8 @@ export const ERROR_PAGE_URL = 'error.page.url';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
+export const METRIC_SYSTEM_MEMORY_USAGE = 'system.memory.usage';
+export const METRIC_SYSTEM_CPU_USAGE = 'system.cpu.usage';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';

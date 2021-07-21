@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { SharedGlobalConfig } from 'kibana/server';
+import type { Observable } from 'rxjs';
+import type { SharedGlobalConfig } from 'kibana/server';
 import type { IRouter, IUiSettingsClient, KibanaRequest } from 'src/core/server';
 import type {
   DataRequestHandlerContext,
@@ -15,9 +15,10 @@ import type {
   IndexPatternsService,
 } from '../../data/server';
 import type { FieldFormatsRegistry } from '../../data/common';
-import type { VisPayload } from '../common/types';
+import type { Series, VisPayload } from '../common/types';
 import type { SearchStrategyRegistry } from './lib/search_strategies';
 import type { CachedIndexPatternFetcher } from './lib/search_strategies/lib/cached_index_pattern_fetcher';
+import type { FetchedIndexPattern } from '../common/types';
 
 export type ConfigObservable = Observable<SharedGlobalConfig>;
 
@@ -37,4 +38,13 @@ export interface VisTypeTimeseriesRequestServices {
   searchStrategyRegistry: SearchStrategyRegistry;
   cachedIndexPatternFetcher: CachedIndexPatternFetcher;
   fieldFormatService: FieldFormatsRegistry;
+  buildSeriesMetaParams: (
+    index: FetchedIndexPattern,
+    useKibanaIndexes: boolean,
+    series?: Series
+  ) => Promise<{
+    maxBars: number;
+    timeField?: string;
+    interval: string;
+  }>;
 }

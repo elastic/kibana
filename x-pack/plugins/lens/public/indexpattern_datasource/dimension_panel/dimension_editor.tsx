@@ -109,24 +109,22 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const selectedOperationDefinition =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
+  const updateLayer = useCallback(
+    (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    [layerId, setState]
+  );
+
   const setStateWrapper = (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => {
-    const prevOperationType =
-      operationDefinitionMap[state.layers[layerId].columns[columnId]?.operationType]?.input;
-
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
-    const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
     setState(
       (prevState) => {
         const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
         return mergeLayer({ state: prevState, layerId, newLayer: layer });
       },
       {
-        isDimensionComplete:
-          prevOperationType === 'fullReference'
-            ? !hasIncompleteColumns
-            : Boolean(hypotheticalLayer.columns[columnId]),
+        isDimensionComplete: Boolean(hypotheticalLayer.columns[columnId]),
       }
     );
   };
@@ -136,8 +134,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   };
 
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
-  const incompleteOperation = incompleteInfo?.operationType;
-  const incompleteField = incompleteInfo?.sourceField ?? null;
+  const {
+    operationType: incompleteOperation,
+    sourceField: incompleteField = null,
+    ...incompleteParams
+  } = incompleteInfo || {};
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
 
@@ -146,6 +147,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
       .filter(({ hidden }) => !hidden)
+      .filter(
+        (operationDefinition) =>
+          !('selectionStyle' in operationDefinition) ||
+          operationDefinition.selectionStyle !== 'hidden'
+      )
       .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
@@ -158,7 +164,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
-  const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
+  const operationsWithCompatibility = possibleOperations.map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
     const currentField =
@@ -395,19 +401,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 <ReferenceEditor
                   key={index}
                   layer={state.layers[layerId]}
+                  layerId={layerId}
+                  activeData={props.activeData}
                   columnId={referenceId}
                   updateLayer={(
                     setter:
                       | IndexPatternLayer
                       | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
                   ) => {
-                    setState(
-                      mergeLayer({
-                        state,
-                        layerId,
-                        newLayer:
-                          typeof setter === 'function' ? setter(state.layers[layerId]) : setter,
-                      })
+                    updateLayer(
+                      typeof setter === 'function' ? setter(state.layers[layerId]) : setter
                     );
                   }}
                   validation={validation}
@@ -479,6 +482,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     field: currentIndexPattern.getFieldByName(choice.field),
                     visualizationGroups: dimensionGroups,
                     targetGroup: props.groupId,
+                    incompleteParams,
                   })
                 );
               }}
@@ -489,6 +493,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         {shouldDisplayExtraOptions && ParamEditor && (
           <ParamEditor
             layer={state.layers[layerId]}
+            layerId={layerId}
+            activeData={props.activeData}
             updateLayer={setStateWrapper}
             columnId={columnId}
             currentColumn={state.layers[layerId].columns[columnId]}
@@ -603,6 +609,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const formulaTab = ParamEditor ? (
     <ParamEditor
       layer={state.layers[layerId]}
+      layerId={layerId}
+      activeData={props.activeData}
       updateLayer={setStateWrapper}
       columnId={columnId}
       currentColumn={state.layers[layerId].columns[columnId]}
@@ -618,20 +626,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const onFormatChange = useCallback(
     (newFormat) => {
-      setState(
-        mergeLayer({
-          state,
-          layerId,
-          newLayer: updateColumnParam({
-            layer: state.layers[layerId],
-            columnId,
-            paramName: 'format',
-            value: newFormat,
-          }),
+      updateLayer(
+        updateColumnParam({
+          layer: state.layers[layerId],
+          columnId,
+          paramName: 'format',
+          value: newFormat,
         })
       );
     },
-    [columnId, layerId, setState, state]
+    [columnId, layerId, state.layers, updateLayer]
   );
 
   return (
@@ -691,27 +695,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: {
-                      columns: {
-                        ...state.layers[layerId].columns,
-                        [columnId]: {
-                          ...selectedColumn,
-                          label: value,
-                          customLabel:
-                            operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                              selectedColumn,
-                              state.indexPatterns[state.layers[layerId].indexPatternId],
-                              state.layers[layerId].columns
-                            ) !== value,
-                        },
-                      },
+                updateLayer({
+                  columns: {
+                    ...state.layers[layerId].columns,
+                    [columnId]: {
+                      ...selectedColumn,
+                      label: value,
+                      customLabel:
+                        operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                          selectedColumn,
+                          state.indexPatterns[state.layers[layerId].indexPatternId],
+                          state.layers[layerId].columns
+                        ) !== value,
                     },
-                  })
-                );
+                  },
+                });
               }}
             />
           )}
@@ -720,9 +718,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
-              setColumns={(columnOrder) =>
-                setState(mergeLayer({ state, layerId, newLayer: { columnOrder } }))
-              }
+              setColumns={(columnOrder) => updateLayer({ columnOrder })}
               getFieldByName={currentIndexPattern.getFieldByName}
             />
           )}
@@ -747,7 +743,7 @@ function getErrorMessage(
   if (selectedColumn && incompleteOperation) {
     if (input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-        defaultMessage: 'To use this function, select a different field.',
+        defaultMessage: 'This field does not work with the selected function.',
       });
     }
     return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {

@@ -8,9 +8,10 @@
 import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
 import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
-import { EuiPageContent, Query } from '@elastic/eui';
+import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { EuiSpacer } from '@elastic/eui';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener } from '../components/edition_modal';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
@@ -192,8 +193,9 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   );
 
   return (
-    <EuiPageContent horizontalPosition="center">
+    <>
       <Header canCreate={capabilities.create} onCreate={openCreateModal} />
+      <EuiSpacer size="l" />
       <TagTable
         loading={loading}
         tags={filteredTags}
@@ -215,6 +217,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
           showTagRelations(tag);
         }}
       />
-    </EuiPageContent>
+    </>
   );
 };

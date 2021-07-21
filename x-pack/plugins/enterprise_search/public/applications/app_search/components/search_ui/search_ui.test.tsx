@@ -6,13 +6,16 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import '../../__mocks__/engine_logic.mock';
 
-import { setMockActions } from '../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
+import { mockEngineValues } from '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
+
+import { SearchUIForm } from './components/search_ui_form';
+import { SearchUIGraphic } from './components/search_ui_graphic';
 
 import { SearchUI } from './';
 
@@ -24,11 +27,13 @@ describe('SearchUI', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(actions);
+    setMockValues(mockEngineValues);
   });
 
   it('renders', () => {
-    shallow(<SearchUI />);
-    // TODO: Check for form
+    const wrapper = shallow(<SearchUI />);
+    expect(wrapper.find(SearchUIForm).exists()).toBe(true);
+    expect(wrapper.find(SearchUIGraphic).exists()).toBe(true);
   });
 
   it('initializes data on mount', () => {

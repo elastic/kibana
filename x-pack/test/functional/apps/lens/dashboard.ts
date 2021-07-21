@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const security = getService('security');
   const panelActions = getService('dashboardPanelActions');
+  const inspector = getService('inspector');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
@@ -68,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await clickInChart(5, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+      await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
 
       await retry.try(async () => {
         await testSubjects.click('applyFiltersPopoverButton');
@@ -158,6 +159,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail(ACTION_TEST_SUBJ);
     });
 
+    it('should show all data from all layers in the inspector', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickCreateNewLink();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer();
+
+      expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
+
+      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        },
+        1
+      );
+
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'median',
+          field: 'bytes',
+        },
+        1
+      );
+      await PageObjects.lens.saveAndReturn();
+
+      await panelActions.openContextMenu();
+      await panelActions.clickContextMenuMoreItem();
+      await testSubjects.click('embeddablePanelAction-openInspector');
+      await inspector.openInspectorRequestsView();
+      const requests = await inspector.getRequestNames();
+      expect(requests.split(',').length).to.be(2);
+    });
+
     it('unlink lens panel from embeddable library', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
@@ -223,10 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // remove the x dimension to trigger the validation error
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-      await PageObjects.lens.saveAndReturn();
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddable-lens-failure');
+      await PageObjects.lens.expectSaveAndReturnButtonDisabled();
     });
   });
 }

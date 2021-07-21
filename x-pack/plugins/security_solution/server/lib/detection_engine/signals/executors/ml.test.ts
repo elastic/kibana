@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { mlExecutor } from './ml';
@@ -26,7 +27,13 @@ describe('ml_executor', () => {
   const exceptionItems = [getExceptionListItemSchemaMock()];
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
-  const mlSO = sampleRuleSO(getMlRuleParams());
+  const params = getMlRuleParams();
+  const mlSO = sampleRuleSO(params);
+  const tuple = {
+    from: dateMath.parse(params.from)!,
+    to: dateMath.parse(params.to)!,
+    maxSignals: params.maxSignals,
+  };
   const buildRuleMessage = buildRuleMessageFactory({
     id: mlSO.id,
     ruleId: mlSO.attributes.params.ruleId,
@@ -60,6 +67,7 @@ describe('ml_executor', () => {
     await expect(
       mlExecutor({
         rule: mlSO,
+        tuple,
         ml: undefined,
         exceptionItems,
         services: alertServices,
@@ -76,6 +84,7 @@ describe('ml_executor', () => {
     jobsSummaryMock.mockResolvedValue([]);
     const response = await mlExecutor({
       rule: mlSO,
+      tuple,
       ml: mlMock,
       exceptionItems,
       services: alertServices,
@@ -101,6 +110,7 @@ describe('ml_executor', () => {
 
     const response = await mlExecutor({
       rule: mlSO,
+      tuple,
       ml: mlMock,
       exceptionItems,
       services: alertServices,

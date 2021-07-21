@@ -37,10 +37,10 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
+import { getIndexPatternFromFilter } from '../../../query';
 import { IIndexPattern, IFieldType } from '../../..';
 import {
   Filter,
-  getIndexPatternFromFilter,
   FieldFilter,
   buildFilter,
   buildCustomFilter,

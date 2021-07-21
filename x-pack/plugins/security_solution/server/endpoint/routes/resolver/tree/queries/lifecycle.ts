@@ -6,8 +6,8 @@
  */
 
 import { IScopedClusterClient } from 'src/core/server';
+import { JsonObject, JsonValue } from '@kbn/common-utils';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
 interface LifecycleParams {

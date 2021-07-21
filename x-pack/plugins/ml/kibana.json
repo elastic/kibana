@@ -27,7 +27,6 @@
     "management",
     "licenseManagement",
     "maps",
-    "lens",
     "usageCollection"
   ],
   "server": true,
@@ -44,5 +43,10 @@
   ],
   "extraPublicDirs": [
     "common"
-  ]
+  ],
+  "owner": {
+    "name": "Machine Learning UI",
+    "githubTeam": "ml-ui"
+  },
+  "description": "This plugin provides access to the machine learning features provided by Elastic."
 }

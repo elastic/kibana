@@ -7,12 +7,23 @@
 
 import { Logger, SavedObject, SavedObjectReference } from 'kibana/server';
 
+import { KueryNode } from '../../../../../../src/plugins/data/common';
 import {
+  AttributesTypeAlerts,
+  CASE_COMMENT_SAVED_OBJECT,
   CommentAttributes as AttachmentAttributes,
   CommentPatchAttributes as AttachmentPatchAttributes,
-} from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+  CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+  CommentType,
+} from '../../../common';
 import { ClientArgs } from '..';
+import { buildFilter, combineFilters } from '../../client/utils';
+
+interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
+  caseId: string;
+  filter?: KueryNode;
+}
 
 interface GetAttachmentArgs extends ClientArgs {
   attachmentId: string;
@@ -38,6 +49,46 @@ interface BulkUpdateAttachmentArgs extends ClientArgs {
 
 export class AttachmentService {
   constructor(private readonly log: Logger) {}
+
+  /**
+   * Retrieves all the alerts attached to a case.
+   */
+  public async getAllAlertsAttachToCase({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+  }: GetAllAlertsAttachToCaseArgs): Promise<Array<SavedObject<AttributesTypeAlerts>>> {
+    try {
+      this.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
+      const alertsFilter = buildFilter({
+        filters: [CommentType.alert, CommentType.generatedAlert],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([alertsFilter, filter]);
+
+      const finder = unsecuredSavedObjectsClient.createPointInTimeFinder<AttributesTypeAlerts>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter: combinedFilter,
+        perPage: MAX_DOCS_PER_PAGE,
+      });
+
+      let result: Array<SavedObject<AttributesTypeAlerts>> = [];
+      for await (const userActionSavedObject of finder.find()) {
+        result = result.concat(userActionSavedObject.saved_objects);
+      }
+
+      return result;
+    } catch (error) {
+      this.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
 
   public async get({
     unsecuredSavedObjectsClient,

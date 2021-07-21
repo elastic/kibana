@@ -22,7 +22,7 @@ Parameters for retrieving all attachments of a case
 
 The case ID to retrieve all attachments for
 
-Defined in: [attachments/get.ts:62](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/get.ts#L62)
+Defined in: [attachments/get.ts:61](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L61)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 Optionally include the attachments associated with a sub case
 
-Defined in: [attachments/get.ts:66](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/get.ts#L66)
+Defined in: [attachments/get.ts:65](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L65)
 
 ___
 
@@ -42,4 +42,4 @@ ___
 
 If included the case ID will be ignored and the attachments will be retrieved from the specified ID of the sub case
 
-Defined in: [attachments/get.ts:70](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/get.ts#L70)
+Defined in: [attachments/get.ts:69](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L69)

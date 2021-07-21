@@ -342,12 +342,24 @@ Object {
           "type": "index_template",
         },
         Object {
+          "id": "logs-apache.access@custom",
+          "type": "component_template",
+        },
+        Object {
           "id": "metrics-apache.status",
           "type": "index_template",
         },
         Object {
+          "id": "metrics-apache.status@custom",
+          "type": "component_template",
+        },
+        Object {
           "id": "logs-apache.error",
           "type": "index_template",
+        },
+        Object {
+          "id": "logs-apache.error@custom",
+          "type": "component_template",
         },
       ],
       "installed_kibana": Array [

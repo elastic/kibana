@@ -8,14 +8,14 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
-
-import { EuiIcon, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
-  EDIT_LAYER_LABEL,
+  EDIT_LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
 } from './action_labels';
 import { ILayer } from '../../../../../classes/layers/layer';
@@ -31,6 +31,7 @@ export interface ReduxStateProps {
   hasDirtyStateSelector: boolean;
   isLegendDetailsOpen: boolean;
   isEditButtonDisabled: boolean;
+  editModeActiveForLayer: boolean;
 }
 
 export interface ReduxDispatchProps {
@@ -39,6 +40,7 @@ export interface ReduxDispatchProps {
   hideTOCDetails: (layerId: string) => void;
   showTOCDetails: (layerId: string) => void;
   toggleVisible: (layerId: string) => void;
+  cancelEditing: () => void;
 }
 
 export interface OwnProps {
@@ -196,11 +198,11 @@ export class TOCEntry extends Component<Props, State> {
     if (!this.props.isReadOnly) {
       quickActions.push(
         <EuiButtonIcon
-          key="edit"
+          key="settings"
           isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
-          aria-label={EDIT_LAYER_LABEL}
-          title={EDIT_LAYER_LABEL}
+          aria-label={EDIT_LAYER_SETTINGS_LABEL}
+          title={EDIT_LAYER_SETTINGS_LABEL}
           onClick={this._openLayerPanelWithCheck}
         />
       );
@@ -277,9 +279,10 @@ export class TOCEntry extends Component<Props, State> {
           layer={layer}
           displayName={this.state.displayName}
           escapedDisplayName={escapeLayerName(this.state.displayName)}
-          editLayer={this._openLayerPanelWithCheck}
+          openLayerSettings={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
           supportsFitToBounds={this.state.supportsFitToBounds}
+          editModeActiveForLayer={this.props.editModeActiveForLayer}
         />
 
         {this._renderQuickActions()}
@@ -314,6 +317,7 @@ export class TOCEntry extends Component<Props, State> {
       'mapTocEntry-isSelected':
         this.props.layer.isPreviewLayer() ||
         (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
+      'mapTocEntry-isInEditingMode': this.props.editModeActiveForLayer,
     });
 
     return (
@@ -329,6 +333,24 @@ export class TOCEntry extends Component<Props, State> {
         {this._renderDetailsToggle()}
 
         {this._renderCancelModal()}
+
+        {this.props.editModeActiveForLayer && (
+          <div className="mapTocEntry-isInEditingMode__row">
+            <EuiIcon type="vector" size="s" />
+            <span className="mapTocEntry-isInEditingMode__editFeatureText">
+              <FormattedMessage
+                id="xpack.maps.layerControl.tocEntry.EditFeatures"
+                defaultMessage="Edit features"
+              />
+            </span>
+            <EuiButtonEmpty size="xs" flush="both" onClick={this.props.cancelEditing}>
+              <FormattedMessage
+                id="xpack.maps.layerControl.tocEntry.exitEditModeAriaLabel"
+                defaultMessage="Exit"
+              />
+            </EuiButtonEmpty>
+          </div>
+        )}
       </div>
     );
   }

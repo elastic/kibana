@@ -12,7 +12,7 @@ import {
   LensSavedObjectAttributes,
   LensByValueInput,
   LensByReferenceInput,
-} from './editor_frame_service/embeddable/embeddable';
+} from './embeddable/embeddable';
 import { SavedObjectIndexStore, Document } from './persistence';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common';

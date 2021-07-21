@@ -27,9 +27,9 @@ export type SeriesData = {
   [key: string]: PanelSeries;
 };
 
-interface PanelSeries {
+export interface PanelSeries {
   annotations: {
-    [key: string]: unknown[];
+    [key: string]: Annotation[];
   };
   id: string;
   series: PanelData[];
@@ -45,4 +45,9 @@ export interface PanelData {
   splitByLabel: string;
   isSplitByTerms: boolean;
   error?: string;
+}
+
+export interface Annotation {
+  key: number;
+  docs: Array<Record<string, string>>;
 }

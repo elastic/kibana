@@ -111,6 +111,9 @@ export class HeatmapLayer extends AbstractLayer {
         },
         syncContext,
         source: this.getSource(),
+        getUpdateDueToTimeslice: () => {
+          return true;
+        },
       });
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {

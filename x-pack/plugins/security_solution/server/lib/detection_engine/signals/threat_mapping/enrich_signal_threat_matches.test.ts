@@ -7,6 +7,7 @@
 
 import { get } from 'lodash';
 import { INDICATOR_DESTINATION_PATH } from '../../../../../common/constants';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 import { getThreatListItemMock } from './build_threat_mapping_filter.mock';
 import {
@@ -158,14 +159,14 @@ describe('buildMatchedIndicator', () => {
     expect(get(indicator, 'matched.field')).toEqual('event.field');
   });
 
-  it('returns the type of the matched indicator as matched.type', () => {
+  it('returns the type of the enrichment as an indicator match type', () => {
     const [indicator] = buildMatchedIndicator({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(indicator, 'matched.type')).toEqual('type_1');
+    expect(get(indicator, 'matched.type')).toEqual(ENRICHMENT_TYPES.IndicatorMatchRule);
   });
 
   it('returns indicators for each provided query', () => {
@@ -216,7 +217,7 @@ describe('buildMatchedIndicator', () => {
           id: '123',
           index: 'threat-index',
           field: 'event.field',
-          type: 'type_1',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         other: 'other_1',
         type: 'type_1',
@@ -263,7 +264,7 @@ describe('buildMatchedIndicator', () => {
           id: '123',
           index: 'threat-index',
           field: 'event.field',
-          type: 'indicator_type',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         type: 'indicator_type',
         event: {
@@ -294,7 +295,7 @@ describe('buildMatchedIndicator', () => {
           id: '123',
           index: 'threat-index',
           field: 'event.field',
-          type: undefined,
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
     ]);
@@ -321,7 +322,7 @@ describe('buildMatchedIndicator', () => {
           id: '123',
           index: 'threat-index',
           field: 'event.field',
-          type: undefined,
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
     ]);
@@ -359,7 +360,7 @@ describe('buildMatchedIndicator', () => {
           id: '123',
           index: 'threat-index',
           field: 'event.field',
-          type: 'first',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         type: 'first',
         event: {
@@ -478,7 +479,7 @@ describe('enrichSignalThreatMatches', () => {
           id: '123',
           index: 'indicator_index',
           field: 'event.field',
-          type: 'type_1',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         other: 'other_1',
         type: 'type_1',
@@ -510,7 +511,7 @@ describe('enrichSignalThreatMatches', () => {
           id: '123',
           index: 'indicator_index',
           field: 'event.field',
-          type: undefined,
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
     ]);
@@ -543,7 +544,7 @@ describe('enrichSignalThreatMatches', () => {
           id: '123',
           index: 'indicator_index',
           field: 'event.field',
-          type: 'type_1',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         other: 'other_1',
         type: 'type_1',
@@ -608,7 +609,7 @@ describe('enrichSignalThreatMatches', () => {
           id: '123',
           index: 'custom_index',
           field: 'event.field',
-          type: 'custom_type',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         other: 'custom_other',
         type: 'custom_type',
@@ -670,7 +671,7 @@ describe('enrichSignalThreatMatches', () => {
           id: '123',
           index: 'indicator_index',
           field: 'event.field',
-          type: 'type_1',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         event: {
           category: 'threat',
@@ -685,7 +686,7 @@ describe('enrichSignalThreatMatches', () => {
           id: '456',
           index: 'other_custom_index',
           field: 'event.other',
-          type: 'type_2',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
         event: {
           category: 'bad',

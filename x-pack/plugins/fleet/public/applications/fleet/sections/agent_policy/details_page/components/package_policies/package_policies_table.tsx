@@ -18,9 +18,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
+import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
-import { useCapabilities, useLink } from '../../../../../hooks';
+import { useCapabilities, useStartServices } from '../../../../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
@@ -49,7 +51,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   agentPolicy,
   ...rest
 }) => {
-  const { getHref } = useLink();
+  const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
 
   // With the package policies provided on input, generate the list of package policies
@@ -194,8 +196,13 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               <EuiButton
                 key="addPackagePolicyButton"
                 isDisabled={!hasWriteCapabilities}
-                iconType="plusInCircle"
-                href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
+                iconType="refresh"
+                onClick={() => {
+                  application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+                    path: `#${pagePathGetters.integrations_all()[1]}`,
+                    state: { forAgentPolicyId: agentPolicy.id },
+                  });
+                }}
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.addPackagePolicyButtonText"

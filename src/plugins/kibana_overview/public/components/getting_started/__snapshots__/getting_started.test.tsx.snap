@@ -49,7 +49,7 @@ exports[`GettingStarted dark mode on 1`] = `
           >
             <EuiCard
               description="Analyze data in dashboards."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -69,7 +69,7 @@ exports[`GettingStarted dark mode on 1`] = `
           >
             <EuiCard
               description="Search and find insights."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -89,7 +89,7 @@ exports[`GettingStarted dark mode on 1`] = `
           >
             <EuiCard
               description="Design pixel-perfect reports."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -109,7 +109,7 @@ exports[`GettingStarted dark mode on 1`] = `
           >
             <EuiCard
               description="Plot geographic data."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -129,7 +129,7 @@ exports[`GettingStarted dark mode on 1`] = `
           >
             <EuiCard
               description="Model, predict, and detect."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -149,7 +149,7 @@ exports[`GettingStarted dark mode on 1`] = `
           >
             <EuiCard
               description="Reveal patterns and relationships."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -244,7 +244,7 @@ exports[`GettingStarted render 1`] = `
           >
             <EuiCard
               description="Analyze data in dashboards."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -264,7 +264,7 @@ exports[`GettingStarted render 1`] = `
           >
             <EuiCard
               description="Search and find insights."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -284,7 +284,7 @@ exports[`GettingStarted render 1`] = `
           >
             <EuiCard
               description="Design pixel-perfect reports."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -304,7 +304,7 @@ exports[`GettingStarted render 1`] = `
           >
             <EuiCard
               description="Plot geographic data."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -324,7 +324,7 @@ exports[`GettingStarted render 1`] = `
           >
             <EuiCard
               description="Model, predict, and detect."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"
@@ -344,7 +344,7 @@ exports[`GettingStarted render 1`] = `
           >
             <EuiCard
               description="Reveal patterns and relationships."
-              display="plain"
+              display="transparent"
               icon={
                 <EuiIcon
                   color="text"

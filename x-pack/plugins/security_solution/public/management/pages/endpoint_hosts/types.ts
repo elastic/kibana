@@ -13,9 +13,9 @@ import {
   HostPolicyResponse,
   AppLocation,
   PolicyData,
-  MetadataQueryStrategyVersions,
   HostStatus,
   HostIsolationResponse,
+  EndpointPendingActions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../fleet/common';
@@ -37,8 +37,14 @@ export interface EndpointState {
   error?: ServerApiError;
   endpointDetails: {
     activityLog: {
-      page: number;
-      pageSize: number;
+      paging: {
+        disabled?: boolean;
+        page: number;
+        pageSize: number;
+        startDate?: string;
+        endDate?: string;
+        isInvalidDateRange: boolean;
+      };
       logData: AsyncResourceState<ActivityLog>;
     };
     hostDetails: {
@@ -65,7 +71,7 @@ export interface EndpointState {
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
   /** Endpoint package info */
-  endpointPackageInfo?: GetPackagesResponse['response'][0];
+  endpointPackageInfo: AsyncResourceState<GetPackagesResponse['response'][0]>;
   /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
   /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/
@@ -88,15 +94,21 @@ export interface EndpointState {
   endpointsTotal: number;
   /** api error for total, actual Endpoints */
   endpointsTotalError?: ServerApiError;
-  /** The query strategy version that informs whether the transform for KQL is enabled or not */
-  queryStrategyVersion?: MetadataQueryStrategyVersions;
   /** The policy IDs and revision number of the corresponding agent, and endpoint. May be more recent than what's running */
   policyVersionInfo?: HostInfo['policy_info'];
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
   hostStatus?: HostStatus;
-  /* Host isolation state */
+  /** Host isolation request state for a single endpoint */
   isolationRequestState: AsyncResourceState<HostIsolationResponse>;
+  /**
+   * Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view
+   * Getting pending endpoint actions is "supplemental" data, so there is no need to show other Async
+   * states other than Loaded
+   */
+  endpointPendingActions: AsyncResourceState<AgentIdsPendingActions>;
 }
+
+export type AgentIdsPendingActions = Map<string, EndpointPendingActions['pending_actions']>;
 
 /**
  * packagePolicy contains a list of Package Policy IDs (received via Endpoint metadata policy response) mapped to a boolean whether they exist or not.

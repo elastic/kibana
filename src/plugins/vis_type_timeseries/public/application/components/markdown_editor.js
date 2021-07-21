@@ -15,10 +15,9 @@ import React, { Component } from 'react';
 import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';
-import 'brace/mode/markdown';
-import 'brace/theme/github';
+import { CodeEditor, MarkdownLang } from '../../../../kibana_react/public';
 
-import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle, EuiCodeEditor } from '@elastic/eui';
+import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDataStart } from '../../services';
@@ -118,14 +117,13 @@ export class MarkdownEditor extends Component {
     return (
       <div className="tvbMarkdownEditor">
         <div className="tvbMarkdownEditor__editor">
-          <EuiCodeEditor
-            onLoad={this.handleOnLoad}
-            mode="markdown"
-            theme="github"
-            width="100%"
-            height="100%"
-            name={`ace-${model.id}`}
-            setOptions={{ wrap: true, fontSize: '14px' }}
+          <CodeEditor
+            editorDidMount={this.handleOnLoad}
+            languageId={MarkdownLang.ID}
+            options={{
+              fontSize: '14px',
+              wordWrap: 'on',
+            }}
             value={model.markdown}
             onChange={this.handleChange}
           />

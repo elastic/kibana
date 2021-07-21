@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -14,7 +14,6 @@ import useMount from 'react-use/lib/useMount';
 import { AlertDropdown } from '../../alerting/log_threshold';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
-import { Header } from '../../components/header';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useLogSourceContext } from '../../containers/logs/log_source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
@@ -25,6 +24,7 @@ import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { useLinkProps } from '../../hooks/use_link_props';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -33,6 +33,8 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const { initialize } = useLogSourceContext();
 
   const kibana = useKibana();
+
+  useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
   useMount(() => {
     initialize();
@@ -76,39 +78,22 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       {setHeaderActionMenu && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-          <EuiFlexGroup gutterSize={'none'} alignItems={'center'} responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
-                {settingsTabTitle}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AlertDropdown />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={kibana.services?.application?.getUrlForApp(
-                  '/home#/tutorial_directory/logging'
-                )}
-                size="s"
-                color="primary"
-                iconType="indexOpen"
-              >
-                {ADD_DATA_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiHeaderLinks gutterSize="xs">
+            <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+              {settingsTabTitle}
+            </EuiHeaderLink>
+            <AlertDropdown />
+            <EuiHeaderLink
+              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
+              color="primary"
+              iconType="indexOpen"
+            >
+              {ADD_DATA_LABEL}
+            </EuiHeaderLink>
+          </EuiHeaderLinks>
         </HeaderMenuPortal>
       )}
 
-      <Header
-        breadcrumbs={[
-          {
-            text: pageTitle,
-          },
-        ]}
-        readOnlyBadge={!uiCapabilities?.logs?.save}
-      />
       <Switch>
         <Route path={streamTab.pathname} component={StreamPage} />
         <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />

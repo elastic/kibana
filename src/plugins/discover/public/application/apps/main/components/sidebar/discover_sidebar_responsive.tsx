@@ -106,15 +106,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   useNewFieldsApi?: boolean;
   /**
-   * an object containing properties for proper handling of unmapped fields
-   */
-  unmappedFieldsConfig?: {
-    /**
-     * determines whether to display unmapped fields
-     */
-    showUnmappedFields: boolean;
-  };
-  /**
    * callback to execute on edit runtime field
    */
   onEditRuntimeField: () => void;

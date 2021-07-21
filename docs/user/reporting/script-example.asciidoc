@@ -1,12 +1,7 @@
-To automatically generate reports from a script, you'll make a request to the `POST` URL.
-The response from this request will be JSON, and will contain a `path` property with a
-URL to use to download the generated report. Use the `GET` method in the HTTP request to
-download the report.
+To automatically generate reports from a script, make a request to the `POST` URL. The request returns a JSON and contains a `path` property with a
+URL that you use to download the report. Use the `GET` method in the HTTP request to download the report.
 
-The request method must be `POST` and it must include a `kbn-xsrf` header for Kibana
-to allow the request.
-
-The following example queues CSV report generation using the `POST` URL with cURL:
+To queue CSV report generation using the `POST` URL with cURL:
 
 ["source","sh",subs="attributes"]
 ---------------------------------------------------------
@@ -18,14 +13,12 @@ curl \
 ---------------------------------------------------------
 // CONSOLE
 
-<1> `POST` method is required.
-<2> Provide user credentials for a user with permission to access Kibana and
-{report-features}.
-<3> The `kbn-xsrf` header is required for all `POST` requests to Kibana. For more information, see <<api-request-headers, API Request
-Headers>>.
-<4> The POST URL. You can copy and paste the URL for any report from the Kibana UI.
+<1> The required `POST` method.
+<2> The user credentials for a user with permission to access {kib} and {report-features}.
+<3> The required `kbn-xsrf` header for all `POST` requests to {kib}. For more information, refer to <<api-request-headers, API Request Headers>>.
+<4> The POST URL. You can copy and paste the URL for any report.
 
-Here is an example response for a successfully queued report:
+An example response for a successfully queued report:
 
 [source,json]
 ---------------------------------------------------------
@@ -44,6 +37,5 @@ Here is an example response for a successfully queued report:
 ---------------------------------------------------------
 // CONSOLE
 
-<1> The relative path on the Kibana host for downloading the report.
-<2> (Not included in the example) Internal representation of the reporting job, as
-found in the `.reporting-*` index.
+<1> The relative path on the {kib} host for downloading the report.
+<2> (Not included in the example) Internal representation of the reporting job, as found in the `.reporting-*` index.

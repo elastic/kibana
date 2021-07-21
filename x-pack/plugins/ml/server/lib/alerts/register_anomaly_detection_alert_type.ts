@@ -46,6 +46,7 @@ export function registerAnomalyDetectionAlertType({
 }: RegisterAlertParams) {
   alerting.registerType<
     MlAnomalyDetectionAlertParams,
+    never, // Only use if defining useSavedObjectReferences hook
     AlertTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
@@ -119,6 +120,7 @@ export function registerAnomalyDetectionAlertType({
     },
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
+    isExportable: true,
     async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
       const fakeRequest = {} as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(

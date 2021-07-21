@@ -13,20 +13,19 @@ import {
   selectCase,
 } from '../../tasks/timeline';
 import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../screens/create_new_case';
-import { case1 } from '../../objects/case';
-import { timeline } from '../../objects/timeline';
+import { getCase1 } from '../../objects/case';
+import { getTimeline } from '../../objects/timeline';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import { createCase } from '../../tasks/api_calls/cases';
 
-// TODO: enable once attach timeline to cases is re-enabled
-describe.skip('attach timeline to case', () => {
+describe('attach timeline to case', () => {
   context('without cases created', () => {
     beforeEach(() => {
       cleanKibana();
-      createTimeline(timeline).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline')
-      );
+      createTimeline(getTimeline()).then((response) => {
+        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
+      });
     });
 
     it('attach timeline to a new case', function () {
@@ -58,10 +57,10 @@ describe.skip('attach timeline to case', () => {
   context('with cases created', () => {
     before(() => {
       cleanKibana();
-      createTimeline(timeline).then((response) =>
+      createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
-      createCase(case1).then((response) => cy.wrap(response.body.id).as('caseId'));
+      createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
     });
 
     it('attach timeline to an existing case', function () {
@@ -72,7 +71,9 @@ describe.skip('attach timeline to case', () => {
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${timeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.timelineId}%27,isOpen:!t))`
+          `[${getTimeline().title}](${origin}/app/security/timelines?timeline=(id:%27${
+            this.timelineId
+          }%27,isOpen:!t))`
         );
       });
     });

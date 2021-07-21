@@ -22,8 +22,6 @@ jest.mock('../../app_logic', () => ({
 }));
 import { AppLogic } from '../../app_logic';
 
-import { NOT_FOUND_PATH } from '../../routes';
-
 import { SourceLogic } from './source_logic';
 
 describe('SourceLogic', () => {
@@ -176,47 +174,55 @@ describe('SourceLogic', () => {
         expect(initializeFederatedSummarySpy).toHaveBeenCalledWith(contentSource.id);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.initializeSource(contentSource.id);
-        await expectedAsyncError(promise);
+      describe('errors', () => {
+        it('handles generic errors', async () => {
+          const mockError = Promise.reject('error');
+          http.get.mockReturnValue(mockError);
 
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
-      });
+          SourceLogic.actions.initializeSource(contentSource.id);
+          await expectedAsyncError(mockError);
 
-      it('handles not found state', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 404,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.initializeSource(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(navigateToUrl).toHaveBeenCalledWith(NOT_FOUND_PATH);
-      });
-
-      it('renders error messages passed in success response from server', async () => {
-        const errors = ['ERROR'];
-        const promise = Promise.resolve({
-          ...contentSource,
-          errors,
+          expect(flashAPIErrors).toHaveBeenCalledWith('error');
         });
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.initializeSource(contentSource.id);
-        await promise;
 
-        expect(setErrorMessage).toHaveBeenCalledWith(errors);
+        describe('404s', () => {
+          const mock404 = Promise.reject({ response: { status: 404 } });
+
+          it('redirects to the organization sources page on organization views', async () => {
+            AppLogic.values.isOrganization = true;
+            http.get.mockReturnValue(mock404);
+
+            SourceLogic.actions.initializeSource('404ing_org_source');
+            await expectedAsyncError(mock404);
+
+            expect(navigateToUrl).toHaveBeenCalledWith('/sources');
+            expect(setErrorMessage).toHaveBeenCalledWith('Source not found.');
+          });
+
+          it('redirects to the personal dashboard sources page on personal views', async () => {
+            AppLogic.values.isOrganization = false;
+            http.get.mockReturnValue(mock404);
+
+            SourceLogic.actions.initializeSource('404ing_personal_source');
+            await expectedAsyncError(mock404);
+
+            expect(navigateToUrl).toHaveBeenCalledWith('/p/sources');
+            expect(setErrorMessage).toHaveBeenCalledWith('Source not found.');
+          });
+        });
+
+        it('renders error messages passed in success response from server', async () => {
+          const errors = ['ERROR'];
+          const promise = Promise.resolve({
+            ...contentSource,
+            errors,
+          });
+          http.get.mockReturnValue(promise);
+          SourceLogic.actions.initializeSource(contentSource.id);
+          await promise;
+
+          expect(setErrorMessage).toHaveBeenCalledWith(errors);
+        });
       });
     });
 

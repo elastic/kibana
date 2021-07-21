@@ -9,7 +9,7 @@ import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State, SeriesType, XYLayerConfig } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -132,8 +132,7 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      const mockFrame = createMockFramePublicAPI();
-      const initialState = xyVisualization.initialize(mockFrame);
+      const initialState = xyVisualization.initialize(() => 'l1');
 
       expect(initialState.layers).toHaveLength(1);
       expect(initialState.layers[0].xAccessor).not.toBeDefined();
@@ -144,7 +143,7 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "layerId": "",
+              "layerId": "l1",
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
@@ -162,9 +161,7 @@ describe('xy_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(createMockFramePublicAPI(), exampleState())).toEqual(
-        exampleState()
-      );
+      expect(xyVisualization.initialize(() => 'first', exampleState())).toEqual(exampleState());
     });
   });
 
@@ -869,6 +866,59 @@ describe('xy_visualization', () => {
           shortMessage: 'Wrong data type for Horizontal axis.',
           longMessage:
             'Data type mismatch for the Horizontal axis. Cannot mix date and number interval types.',
+        },
+      ]);
+    });
+
+    it('should return an error if string and date histogram xAccessors (multiple layers) are used together', () => {
+      // current incompatibility is only for date and numeric histograms as xAccessors
+      const datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+        second: createMockDatasource('testDatasource').publicAPIMock,
+      };
+      datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'a'
+          ? (({
+              dataType: 'date',
+              scale: 'interval',
+            } as unknown) as Operation)
+          : null
+      );
+      datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'e'
+          ? (({
+              dataType: 'string',
+              scale: 'ordinal',
+            } as unknown) as Operation)
+          : null
+      );
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b'],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'e',
+                accessors: ['b'],
+              },
+            ],
+          },
+          datasourceLayers
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Wrong data type for Horizontal axis.',
+          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
         },
       ]);
     });

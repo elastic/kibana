@@ -13,18 +13,24 @@ import {
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  getEnvironmentLabel,
+  getEnvironmentEsField,
+} from '../../../common/environment_filter_values';
+import {
+  AlertType,
+  APM_SERVER_FEATURE_ID,
+  ALERT_TYPES_CONFIG,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -75,8 +81,9 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.interval,
       ],
     },
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const alertParams = params;
@@ -150,20 +157,14 @@ export function registerTransactionDurationAlertType({
           transactionDuration
         ).formatted;
 
-        const environmentParsed = parseEnvironmentUrlParam(
-          alertParams.environment
-        );
-
         services
           .alertWithLifecycle({
-            id: `${AlertType.TransactionDuration}_${environmentParsed.text}`,
+            id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
+              alertParams.environment
+            )}`,
             fields: {
               [SERVICE_NAME]: alertParams.serviceName,
-              ...(environmentParsed.esFieldValue
-                ? {
-                    [SERVICE_ENVIRONMENT]: environmentParsed.esFieldValue,
-                  }
-                : {}),
+              ...getEnvironmentEsField(alertParams.environment),
               [TRANSACTION_TYPE]: alertParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
@@ -173,7 +174,7 @@ export function registerTransactionDurationAlertType({
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {
             transactionType: alertParams.transactionType,
             serviceName: alertParams.serviceName,
-            environment: environmentParsed.text,
+            environment: getEnvironmentLabel(alertParams.environment),
             threshold,
             triggerValue: transactionDurationFormatted,
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,

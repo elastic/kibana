@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, MutableRefObject } from 'react';
+import React, { FC, MutableRefObject, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiPanel,
@@ -17,17 +17,46 @@ import {
   EuiLink,
   EuiPortal,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
-import { ComponentStrings } from '../../../i18n';
+
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { ExpressionFunction } from '../../../types';
 import { FormState } from './';
 
-const { Expression: strings } = ComponentStrings;
-
-const { useRef } = React;
+const strings = {
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getCloseButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.closeButtonLabel', {
+      defaultMessage: 'Close',
+    }),
+  getLearnLinkText: () =>
+    i18n.translate('xpack.canvas.expression.learnLinkText', {
+      defaultMessage: 'Learn expression syntax',
+    }),
+  getMaximizeButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.maximizeButtonLabel', {
+      defaultMessage: 'Maximize editor',
+    }),
+  getMinimizeButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.minimizeButtonLabel', {
+      defaultMessage: 'Minimize Editor',
+    }),
+  getRunButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.runButtonLabel', {
+      defaultMessage: 'Run',
+    }),
+  getRunTooltip: () =>
+    i18n.translate('xpack.canvas.expression.runTooltip', {
+      defaultMessage: 'Run the expression',
+    }),
+};
 
 const shortcut = (
   ref: MutableRefObject<ExpressionInput | null>,

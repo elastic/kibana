@@ -7,8 +7,10 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { elasticLogo } from '../lib/elastic_logo';
-import { isValidUrl } from '../../common/lib/url';
+import {
+  getElasticLogo,
+  isValidUrl,
+} from '../../../../../src/plugins/presentation_util/common/lib';
 import { Return as Arguments } from '../functions/common/image';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory } from '../../types';
@@ -20,7 +22,8 @@ export const image: RendererFactory<Arguments> = () => ({
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render(domNode, config, handlers) {
+  render: async (domNode, config, handlers) => {
+    const { elasticLogo } = await getElasticLogo();
     const dataurl = isValidUrl(config.dataurl) ? config.dataurl : elasticLogo;
 
     const style = {

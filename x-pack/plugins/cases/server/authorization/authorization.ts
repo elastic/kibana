@@ -9,11 +9,10 @@ import { KibanaRequest, Logger } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AuthFilterHelpers, GetSpaceFn } from './types';
+import { AuthFilterHelpers, GetSpaceFn, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
 import { createCaseError } from '../common';
-import { OwnerEntity } from './types';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions

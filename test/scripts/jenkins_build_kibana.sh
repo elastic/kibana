@@ -33,12 +33,12 @@ node x-pack/scripts/functional_tests --assert-none-excluded \
 # Do not build kibana for code coverage run
 if [[ -z "$CODE_COVERAGE" ]] ; then
   echo " -> building and extracting default Kibana distributable for use in functional tests"
-  node scripts/build --debug --no-oss
+  node scripts/build --debug
 
   echo " -> shipping metrics from build to ci-stats"
   node scripts/ship_ci_stats \
     --metrics target/optimizer_bundle_metrics.json \
-    --metrics packages/kbn-ui-shared-deps/target/metrics.json
+    --metrics node_modules/@kbn/ui-shared-deps/shared_built_assets/metrics.json
 
   linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
   installDir="$KIBANA_DIR/install/kibana"

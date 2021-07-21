@@ -47,7 +47,6 @@ import { hasMlAdminPermissions } from '../../../../../../common/machine_learning
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
-import { LastUpdatedAt } from '../../../../../common/components/last_updated';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { AllRulesTabs } from '.';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
@@ -104,6 +103,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         application: {
           capabilities: { actions },
         },
+        timelines,
       },
     } = useKibana();
 
@@ -148,6 +148,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
+    const { navigateToApp } = useKibana().services.application;
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -279,6 +280,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
             ? loadingRuleIds
             : [],
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges: hasActionsPrivileges,
@@ -294,11 +296,12 @@ export const RulesTables = React.memo<RulesTableProps>(
       history,
       loadingRuleIds,
       loadingRulesAction,
+      navigateToApp,
       reFetchRules,
     ]);
 
-    const monitoringColumns = useMemo(() => getMonitoringColumns(history, formatUrl), [
-      history,
+    const monitoringColumns = useMemo(() => getMonitoringColumns(navigateToApp, formatUrl), [
+      navigateToApp,
       formatUrl,
     ]);
 
@@ -473,12 +476,10 @@ export const RulesTables = React.memo<RulesTableProps>(
               split
               growLeftSplit={false}
               title={i18n.ALL_RULES}
-              subtitle={
-                <LastUpdatedAt
-                  showUpdating={loading || isLoadingRules || isLoadingRulesStatuses}
-                  updatedAt={lastUpdated}
-                />
-              }
+              subtitle={timelines.getLastUpdated({
+                showUpdating: loading || isLoadingRules || isLoadingRulesStatuses,
+                updatedAt: lastUpdated,
+              })}
             >
               {shouldShowRulesTable && (
                 <RulesTableFilters

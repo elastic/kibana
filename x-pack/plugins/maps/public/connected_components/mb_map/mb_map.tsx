@@ -7,19 +7,17 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
-
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
-
-import { DrawFilterControl } from './draw_control';
+import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
@@ -27,15 +25,22 @@ import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { MapSettings } from '../../reducers/map';
-import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
+import {
+  Goto,
+  MapCenterAndZoom,
+  TileMetaFeature,
+  Timeslice,
+} from '../../../common/descriptor_types';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
+  LAYER_TYPE,
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
 import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
+
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
@@ -46,6 +51,8 @@ import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
+import { DrawFeatureControl } from './draw_control/draw_feature_control';
+import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
 
 export interface Props {
   isMapReady: boolean;
@@ -69,39 +76,29 @@ export interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
+  timeslice?: Timeslice;
+  updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
+  featureModeActive: boolean;
+  filterModeActive: boolean;
 }
 
 interface State {
-  prevLayerList: ILayer[] | undefined;
-  hasSyncedLayerList: boolean;
   mbMap: MapboxMap | undefined;
 }
 
-export class MBMap extends Component<Props, State> {
+export class MbMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
   private _prevDisableInteractive?: boolean;
+  private _prevLayerList?: ILayer[];
+  private _prevTimeslice?: Timeslice;
   private _navigationControl = new mapboxgl.NavigationControl({ showCompass: false });
   private _tileStatusTracker?: TileStatusTracker;
 
   state: State = {
-    prevLayerList: undefined,
-    hasSyncedLayerList: false,
     mbMap: undefined,
   };
-
-  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    const nextLayerList = nextProps.layerList;
-    if (nextLayerList !== prevState.prevLayerList) {
-      return {
-        prevLayerList: nextLayerList,
-        hasSyncedLayerList: false,
-      };
-    }
-
-    return null;
-  }
 
   componentDidMount() {
     this._initializeMap();
@@ -109,11 +106,8 @@ export class MBMap extends Component<Props, State> {
   }
 
   componentDidUpdate() {
-    if (this.state.mbMap) {
-      // do not debounce syncing of map-state
-      this._syncMbMapWithMapState();
-      this._debouncedSync();
-    }
+    this._syncMbMapWithMapState(); // do not debounce syncing of map-state
+    this._debouncedSync();
   }
 
   componentWillUnmount() {
@@ -131,18 +125,25 @@ export class MBMap extends Component<Props, State> {
     this.props.onMapDestroyed();
   }
 
+  // This keeps track of the latest update calls, per layerId
+  _queryForMeta = (layer: ILayer) => {
+    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
+      const mbFeatures = (layer as TiledVectorLayer).queryTileMetaFeatures(this.state.mbMap);
+      if (mbFeatures !== null) {
+        this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
+      }
+    }
+  };
+
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
-      if (!this.state.hasSyncedLayerList) {
-        this.setState(
-          {
-            hasSyncedLayerList: true,
-          },
-          () => {
-            this._syncMbMapWithLayerList();
-            this._syncMbMapWithInspector();
-          }
-        );
+      const hasLayerListChanged = this._prevLayerList !== this.props.layerList; // Comparing re-select memoized instance so no deep equals needed
+      const hasTimesliceChanged = !_.isEqual(this._prevTimeslice, this.props.timeslice);
+      if (hasLayerListChanged || hasTimesliceChanged) {
+        this._prevLayerList = this.props.layerList;
+        this._prevTimeslice = this.props.timeslice;
+        this._syncMbMapWithLayerList();
+        this._syncMbMapWithInspector();
       }
       this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
       this._syncSettings();
@@ -202,7 +203,10 @@ export class MBMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        setAreTilesLoaded: this.props.setAreTilesLoaded,
+        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => {
+          this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
+          this._queryForMeta(layer);
+        },
       });
 
       const tooManyFeaturesImageSrc =
@@ -268,6 +272,7 @@ export class MBMap extends Component<Props, State> {
         this.props.extentChanged(this._getMapState());
       }, 100)
     );
+
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.settings.hideViewControl) {
       const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {
@@ -345,7 +350,9 @@ export class MBMap extends Component<Props, State> {
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
-    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap!));
+    this.props.layerList.forEach((layer) =>
+      layer.syncLayerWithMB(this.state.mbMap!, this.props.timeslice)
+    );
     syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 
@@ -417,11 +424,16 @@ export class MBMap extends Component<Props, State> {
 
   render() {
     let drawFilterControl;
+    let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawFilterControl = this.props.addFilters ? (
-        <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+      drawFilterControl =
+        this.props.addFilters && this.props.filterModeActive ? (
+          <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+        ) : null;
+      drawFeatureControl = this.props.featureModeActive ? (
+        <DrawFeatureControl mbMap={this.state.mbMap} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
@@ -445,6 +457,7 @@ export class MBMap extends Component<Props, State> {
         data-test-subj="mapContainer"
       >
         {drawFilterControl}
+        {drawFeatureControl}
         {scaleControl}
         {tooltipControl}
       </div>

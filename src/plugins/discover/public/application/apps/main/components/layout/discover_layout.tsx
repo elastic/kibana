@@ -36,10 +36,8 @@ import { SortPairArr } from '../../../../angular/doc_table/lib/get_sort';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
-  MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
@@ -52,7 +50,6 @@ import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
-import { getSwitchIndexPatternAppState } from '../../utils/get_switch_index_pattern_app_state';
 import { FetchStatus } from '../../../../types';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
@@ -72,26 +69,20 @@ export function DiscoverLayout({
   indexPattern,
   indexPatternList,
   navigateTo,
+  onChangeIndexPattern,
+  onUpdateQuery,
   savedSearchRefetch$,
   resetQuery,
   savedSearchData$,
   savedSearch,
-  searchSessionManager,
   searchSource,
   services,
   state,
   stateContainer,
 }: DiscoverLayoutProps) {
-  const {
-    trackUiMetric,
-    capabilities,
-    indexPatterns,
-    data,
-    uiSettings: config,
-    filterManager,
-  } = services;
+  const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager } = services;
 
-  const sampleSize = useMemo(() => config.get(SAMPLE_SIZE_SETTING), [config]);
+  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -121,42 +112,21 @@ export function DiscoverLayout({
     };
   }, [savedSearchData$, fetchState]);
 
-  const isMobile = () => {
-    // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
-    return collapseIcon && !collapseIcon.current;
-  };
+  // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
+  const isMobile = () => collapseIcon && !collapseIcon.current;
   const timeField = useMemo(() => {
     return indexPatternsUtils.isDefault(indexPattern) ? indexPattern.timeFieldName : undefined;
   }, [indexPattern]);
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const isLegacy = useMemo(() => services.uiSettings.get(DOC_TABLE_LEGACY), [services]);
-  const useNewFieldsApi = useMemo(() => !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [
-    services,
-  ]);
-
-  const unmappedFieldsConfig = useMemo(
-    () => ({
-      showUnmappedFields: useNewFieldsApi,
-    }),
-    [useNewFieldsApi]
-  );
+  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const resultState = useMemo(() => getResultState(fetchStatus, rows!), [fetchStatus, rows]);
 
-  const updateQuery = useCallback(
-    (_payload, isUpdate?: boolean) => {
-      if (isUpdate === false) {
-        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        savedSearchRefetch$.next();
-      }
-    },
-    [savedSearchRefetch$, searchSessionManager]
-  );
-
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
-    config,
+    config: uiSettings,
     indexPattern,
     indexPatterns,
     setAppState: stateContainer.setAppState,
@@ -243,42 +213,8 @@ export function DiscoverLayout({
 
   const contentCentered = resultState === 'uninitialized';
   const showTimeCol = useMemo(
-    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [config, indexPattern.timeFieldName]
-  );
-
-  const onChangeIndexPattern = useCallback(
-    async (id: string) => {
-      const nextIndexPattern = await indexPatterns.get(id);
-      if (nextIndexPattern && indexPattern) {
-        /**
-         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-         *  from a index pattern without to a index pattern with time filter for a brief moment
-         *  That's because appState is updated before savedSearchData$
-         *  The following line of code catches this, but should be improved
-         */
-        savedSearchData$.next({ rows: [], state: FetchStatus.LOADING, fieldCounts: {} });
-
-        const nextAppState = getSwitchIndexPatternAppState(
-          indexPattern,
-          nextIndexPattern,
-          state.columns || [],
-          (state.sort || []) as SortPairArr[],
-          config.get(MODIFY_COLUMNS_ON_SWITCH),
-          config.get(SORT_DEFAULT_ORDER_SETTING)
-        );
-        stateContainer.setAppState(nextAppState);
-      }
-    },
-    [
-      config,
-      indexPattern,
-      indexPatterns,
-      savedSearchData$,
-      state.columns,
-      state.sort,
-      stateContainer,
-    ]
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
+    [uiSettings, indexPattern.timeFieldName]
   );
 
   return (
@@ -294,7 +230,7 @@ export function DiscoverLayout({
           searchSource={searchSource}
           services={services}
           stateContainer={stateContainer}
-          updateQuery={updateQuery}
+          updateQuery={onUpdateQuery}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
@@ -316,7 +252,6 @@ export function DiscoverLayout({
                 state={state}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
-                unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
                 onEditRuntimeField={onEditRuntimeField}
               />
@@ -373,7 +308,7 @@ export function DiscoverLayout({
                   >
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
-                        config={config}
+                        config={uiSettings}
                         chartData={fetchState.chartData}
                         bucketInterval={fetchState.bucketInterval}
                         data={data}

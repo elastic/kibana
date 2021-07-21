@@ -17,5 +17,5 @@ export const parseQueryFilterToKQL = (filter: string, fields: Readonly<string[]>
     )
     .join(' OR ');
 
-  return kuery;
+  return `(${kuery})`;
 };

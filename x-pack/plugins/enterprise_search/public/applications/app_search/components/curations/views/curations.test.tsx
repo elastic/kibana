@@ -6,17 +6,16 @@
  */
 
 import { mockKibanaValues, setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/react_router';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { EuiPageHeader, EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
-import { mountWithIntl } from '../../../../test_helpers';
-import { EmptyState } from '../components';
+import { mountWithIntl, getPageTitle } from '../../../../test_helpers';
 
 import { Curations, CurationsTable } from './curations';
 
@@ -61,32 +60,34 @@ describe('Curations', () => {
   it('renders', () => {
     const wrapper = shallow(<Curations />);
 
-    expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual('Curated results');
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
     expect(wrapper.find(CurationsTable)).toHaveLength(1);
   });
 
-  it('renders a loading component on page load', () => {
-    setMockValues({ ...values, dataLoading: true, curations: [] });
-    const wrapper = shallow(<Curations />);
+  describe('loading state', () => {
+    it('renders a full-page loading state on initial page load', () => {
+      setMockValues({ ...values, dataLoading: true, curations: [] });
+      const wrapper = shallow(<Curations />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+      expect(wrapper.prop('isLoading')).toEqual(true);
+    });
+
+    it('does not re-render a full-page loading state after initial page load (uses component-level loading state instead)', () => {
+      setMockValues({ ...values, dataLoading: true, curations: [{}] });
+      const wrapper = shallow(<Curations />);
+
+      expect(wrapper.prop('isLoading')).toEqual(false);
+    });
   });
 
   it('calls loadCurations on page load', () => {
+    setMockValues({ ...values, myRole: {} }); // Required for AppSearchPageTemplate to load
     mountWithIntl(<Curations />);
 
     expect(actions.loadCurations).toHaveBeenCalledTimes(1);
   });
 
   describe('CurationsTable', () => {
-    it('renders an empty state', () => {
-      setMockValues({ ...values, curations: [] });
-      const table = shallow(<CurationsTable />).find(EuiBasicTable);
-      const noItemsMessage = table.prop('noItemsMessage') as React.ReactElement;
-
-      expect(noItemsMessage.type).toEqual(EmptyState);
-    });
-
     it('passes loading prop based on dataLoading', () => {
       setMockValues({ ...values, dataLoading: true });
       const wrapper = shallow(<CurationsTable />);

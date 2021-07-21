@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { thresholdExecutor } from './threshold';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
 import { getThresholdRuleParams } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
+import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
+  const params = getThresholdRuleParams();
   const thresholdSO = {
     id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     type: 'alert',
@@ -34,9 +39,14 @@ describe('threshold_executor', () => {
         interval: '5m',
       },
       throttle: 'no_actions',
-      params: getThresholdRuleParams(),
+      params,
     },
     references: [],
+  };
+  const tuple = {
+    from: dateMath.parse(params.from)!,
+    to: dateMath.parse(params.to)!,
+    maxSignals: params.maxSignals,
   };
   const buildRuleMessage = buildRuleMessageFactory({
     id: thresholdSO.id,
@@ -47,6 +57,9 @@ describe('threshold_executor', () => {
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+    );
     logger = loggingSystemMock.createLogger();
   });
 
@@ -55,14 +68,20 @@ describe('threshold_executor', () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await thresholdExecutor({
         rule: thresholdSO,
-        tuples: [],
+        tuple,
         exceptionItems,
         services: alertServices,
         version,
         logger,
         buildRuleMessage,
         startedAt: new Date(),
-        bulkCreate: jest.fn(),
+        bulkCreate: jest.fn().mockImplementation((hits) => ({
+          errors: [],
+          success: true,
+          bulkCreateDuration: '0',
+          createdItemsCount: 0,
+          createdItems: [],
+        })),
         wrapHits: jest.fn(),
       });
       expect(response.warningMessages.length).toEqual(1);

@@ -27,16 +27,8 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   created_at: ReportSource['created_at'];
   created_by: ReportSource['created_by'];
   jobtype: ReportSource['jobtype'];
-  max_attempts: ReportSource['max_attempts'];
   attempts: ReportSource['attempts'];
   meta: ReportSource['meta'];
-}
-
-export interface ReportingExecuteTaskInstance /* extends TaskInstanceWithDeprecatedFields */ {
-  state: object;
-  taskType: string;
-  params: ReportTaskParams;
-  runAt?: Date;
 }
 
 export enum ReportingTaskStatus {
@@ -52,6 +44,5 @@ export interface ReportingTask {
     maxAttempts: number;
     timeout: string;
   };
-
   getStatus: () => ReportingTaskStatus;
 }

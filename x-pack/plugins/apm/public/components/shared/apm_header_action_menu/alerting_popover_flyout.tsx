@@ -18,7 +18,7 @@ import { AlertType } from '../../../../common/alert_types';
 import { AlertingFlyout } from '../../alerting/alerting_flyout';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'Alerts and rules',
 });
 const transactionDurationLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionDuration',
@@ -33,11 +33,11 @@ const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
 });
 const createThresholdAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createThresholdAlert',
-  { defaultMessage: 'Create threshold alert' }
+  { defaultMessage: 'Create threshold rule' }
 );
 const createAnomalyAlertAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createAnomalyAlert',
-  { defaultMessage: 'Create anomaly alert' }
+  { defaultMessage: 'Create anomaly rule' }
 );
 
 const CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID =
@@ -66,7 +66,7 @@ export function AlertingPopoverAndFlyout({
 
   const button = (
     <EuiHeaderLink
-      color="primary"
+      color="text"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
@@ -101,7 +101,7 @@ export function AlertingPopoverAndFlyout({
               {
                 name: i18n.translate(
                   'xpack.apm.home.alertsMenu.viewActiveAlerts',
-                  { defaultMessage: 'View active alerts' }
+                  { defaultMessage: 'Manage rules' }
                 ),
                 href: basePath.prepend(
                   '/app/management/insightsAndAlerting/triggersActions/alerts'

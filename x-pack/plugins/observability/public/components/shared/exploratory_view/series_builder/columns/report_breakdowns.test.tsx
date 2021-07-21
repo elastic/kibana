@@ -15,13 +15,13 @@ import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fiel
 describe('Series Builder ReportBreakdowns', function () {
   const seriesId = 'test-series-id';
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'dist',
+    reportType: 'data-distribution',
     dataType: 'ux',
     indexPattern: mockIndexPattern,
   });
 
   it('should render properly', function () {
-    render(<ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    render(<ReportBreakdowns seriesConfig={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Select an option: , is selected');
     screen.getAllByText('Browser family');
@@ -29,7 +29,7 @@ describe('Series Builder ReportBreakdowns', function () {
 
   it('should set new series breakdown on change', function () {
     const { setSeries } = render(
-      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+      <ReportBreakdowns seriesConfig={dataViewSeries} seriesId={seriesId} />
     );
 
     const btn = screen.getByRole('button', {
@@ -45,13 +45,13 @@ describe('Series Builder ReportBreakdowns', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: USER_AGENT_OS,
       dataType: 'ux',
-      reportType: 'dist',
+      reportType: 'data-distribution',
       time: { from: 'now-15m', to: 'now' },
     });
   });
   it('should set undefined on new series on no select breakdown', function () {
     const { setSeries } = render(
-      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+      <ReportBreakdowns seriesConfig={dataViewSeries} seriesId={seriesId} />
     );
 
     const btn = screen.getByRole('button', {
@@ -67,7 +67,7 @@ describe('Series Builder ReportBreakdowns', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: undefined,
       dataType: 'ux',
-      reportType: 'dist',
+      reportType: 'data-distribution',
       time: { from: 'now-15m', to: 'now' },
     });
   });

@@ -11,7 +11,7 @@ import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   ESSearchRequest,
   ESFilter,
-} from '../../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest } from '.';
 import {
   ApmIndicesConfig,

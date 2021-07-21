@@ -7,9 +7,14 @@
 
 import React, { FC } from 'react';
 import { EuiPanel, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n/components';
+import { i18n } from '@kbn/i18n';
 
-const { CanvasLoading: strings } = ComponentStrings;
+const strings = {
+  getLoadingLabel: () =>
+    i18n.translate('xpack.canvas.canvasLoading.loadingMessage', {
+      defaultMessage: 'Loading',
+    }),
+};
 
 export const CanvasLoading: FC<{ msg?: string }> = ({
   msg = `${strings.getLoadingLabel()}...`,

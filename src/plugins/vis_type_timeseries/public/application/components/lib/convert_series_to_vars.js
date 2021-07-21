@@ -9,7 +9,7 @@
 import { set } from '@elastic/safer-lodash-set';
 import { startsWith, snakeCase, last } from 'lodash';
 import { getLastValue } from '../../../../common/last_value_utils';
-import { emptyLabel } from '../../../../common/empty_label';
+import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
 import { createFieldFormatter } from './create_field_formatter';
 import { labelDateFormatter } from './label_date_formatter';
@@ -27,7 +27,12 @@ export const convertSeriesToVars = (
     series
       .filter((row) => startsWith(row.id, seriesModel.id))
       .forEach((row) => {
-        const label = row.label ? snakeCase(row.label) : emptyLabel;
+        let label = getValueOrEmpty(row.label);
+
+        if (label !== emptyLabel) {
+          label = snakeCase(label);
+        }
+
         const varName = [label, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
         const formatter = seriesModel.ignore_field_formatting

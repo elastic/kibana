@@ -8,10 +8,12 @@
 
 export * from './bad_request_error';
 export * from './create_boostrap_index';
+export * from './decode_version';
 export * from './delete_all_index';
 export * from './delete_policy';
 export * from './delete_template';
 export * from './elasticsearch_client';
+export * from './encode_hit_version';
 export * from './get_index_aliases';
 export * from './get_index_count';
 export * from './get_index_exists';

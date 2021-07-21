@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, switchMap, tap } from 'rxjs/operators';
+import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
@@ -80,6 +80,7 @@ import { registerBsearchRoute } from './routes/bsearch';
 import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
+import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -157,7 +158,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
 
-    registerBsearchRoute(bfetch, (request: KibanaRequest) => this.asScoped(request));
+    registerBsearchRoute(
+      bfetch,
+      (request: KibanaRequest) => this.asScoped(request),
+      core.executionContext
+    );
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
@@ -287,24 +292,48 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         options.strategy
       );
 
-      const getSearchRequest = async () =>
-        !options.sessionId || !options.isRestore || request.id
-          ? request
-          : {
+      const getSearchRequest = async () => {
+        if (!options.sessionId || !options.isRestore || request.id) {
+          return request;
+        } else {
+          try {
+            const id = await deps.searchSessionsClient.getId(request, options);
+            this.logger.debug(`Found search session id for request ${id}`);
+            return {
               ...request,
-              id: await deps.searchSessionsClient.getId(request, options),
+              id,
             };
+          } catch (e) {
+            if (e instanceof NoSearchIdInSessionError) {
+              this.logger.debug('Ignoring missing search ID');
+              return request;
+            } else {
+              throw e;
+            }
+          }
+        }
+      };
 
-      return from(getSearchRequest()).pipe(
+      const searchRequest$ = from(getSearchRequest());
+      const search$ = searchRequest$.pipe(
         switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
-        tap((response) => {
-          if (!options.sessionId || !response.id || options.isRestore) return;
+        withLatestFrom(searchRequest$),
+        tap(([response, requestWithId]) => {
+          if (!options.sessionId || !response.id || (options.isRestore && requestWithId.id)) return;
           // intentionally swallow tracking error, as it shouldn't fail the search
           deps.searchSessionsClient.trackId(request, response.id, options).catch((trackErr) => {
             this.logger.error(trackErr);
           });
+        }),
+        map(([response, requestWithId]) => {
+          return {
+            ...response,
+            isRestored: !!requestWithId.id,
+          };
         })
       );
+
+      return search$;
     } catch (e) {
       return throwError(e);
     }

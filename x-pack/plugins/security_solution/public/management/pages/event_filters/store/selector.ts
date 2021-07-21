@@ -59,6 +59,13 @@ export const getListItems: EventFiltersSelector<
   return apiResponseData?.data || [];
 });
 
+export const getTotalCountListItems: EventFiltersSelector<Immutable<number>> = createSelector(
+  getListApiSuccessResponse,
+  (apiResponseData) => {
+    return apiResponseData?.total || 0;
+  }
+);
+
 /**
  * Will return the query that was used with the currently displayed list of content. If a new page
  * of content is being loaded, this selector will then attempt to use the previousState to return
@@ -177,8 +184,7 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
     return (
       forceRefresh ||
       location.page_index + 1 !== currentQuery.page ||
-      location.page_size !== currentQuery.perPage ||
-      location.filter !== currentQuery.filter
+      location.page_size !== currentQuery.perPage
     );
   }
 );

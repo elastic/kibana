@@ -15,7 +15,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-} from '../../mocks';
+} from '../../../mocks';
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
 jest.mock('../../../debounced_component', () => {
   return {
@@ -24,7 +24,6 @@ jest.mock('../../../debounced_component', () => {
 });
 
 import { WorkspacePanel } from './workspace_panel';
-import { mountWithIntl as mount } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter/common';
@@ -56,7 +55,6 @@ const defaultProps = {
   framePublicAPI: createMockFramePublicAPI(),
   activeVisualizationId: 'vis',
   visualizationState: {},
-  dispatch: () => {},
   ExpressionRenderer: createExpressionRendererMock(),
   core: createCoreStartWithPermissions(),
   plugins: {
@@ -104,7 +102,8 @@ describe('workspace_panel', () => {
         }}
         ExpressionRenderer={expressionRendererMock}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
     expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
@@ -119,7 +118,8 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => null },
         }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -135,7 +135,8 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -169,7 +170,7 @@ describe('workspace_panel', () => {
         }}
         ExpressionRenderer={expressionRendererMock}
       />,
-      defaultProps.plugins.data
+      { data: defaultProps.plugins.data }
     );
 
     instance = mounted.instance;
@@ -209,7 +210,8 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         plugins={{ ...props.plugins, uiActions: uiActionsMock }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -229,7 +231,6 @@ describe('workspace_panel', () => {
     };
     mockDatasource.toExpression.mockReturnValue('datasource');
     mockDatasource.getLayers.mockReturnValue(['first']);
-    const dispatch = jest.fn();
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -247,10 +248,10 @@ describe('workspace_panel', () => {
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        dispatch={dispatch}
         ExpressionRenderer={expressionRendererMock}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
 
     instance = mounted.instance;
@@ -261,8 +262,8 @@ describe('workspace_panel', () => {
     onData(undefined, { tables: { tables: tableData } });
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/onActiveDataChange',
-      payload: { activeData: tableData },
+      type: 'lens/onActiveDataChange',
+      payload: tableData,
     });
   });
 
@@ -302,7 +303,8 @@ describe('workspace_panel', () => {
         }}
         ExpressionRenderer={expressionRendererMock}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -377,7 +379,8 @@ describe('workspace_panel', () => {
           }}
           ExpressionRenderer={expressionRendererMock}
         />,
-        defaultProps.plugins.data
+
+        { data: defaultProps.plugins.data }
       );
       instance = mounted.instance;
     });
@@ -430,7 +433,8 @@ describe('workspace_panel', () => {
           }}
           ExpressionRenderer={expressionRendererMock}
         />,
-        defaultProps.plugins.data
+
+        { data: defaultProps.plugins.data }
       );
       instance = mounted.instance;
     });
@@ -481,7 +485,8 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -520,7 +525,8 @@ describe('workspace_panel', () => {
           management: { kibana: { indexPatterns: true } },
         })}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -559,7 +565,8 @@ describe('workspace_panel', () => {
           management: { kibana: { indexPatterns: false } },
         })}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -595,7 +602,8 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -632,7 +640,8 @@ describe('workspace_panel', () => {
           vis: mockVisualization,
         }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -671,7 +680,8 @@ describe('workspace_panel', () => {
           vis: mockVisualization,
         }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -707,7 +717,8 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
       />,
-      defaultProps.plugins.data
+
+      { data: defaultProps.plugins.data }
     );
     instance = mounted.instance;
 
@@ -742,7 +753,8 @@ describe('workspace_panel', () => {
           }}
           ExpressionRenderer={expressionRendererMock}
         />,
-        defaultProps.plugins.data
+
+        { data: defaultProps.plugins.data }
       );
       instance = mounted.instance;
     });
@@ -783,7 +795,8 @@ describe('workspace_panel', () => {
           }}
           ExpressionRenderer={expressionRendererMock}
         />,
-        defaultProps.plugins.data
+
+        { data: defaultProps.plugins.data }
       );
       instance = mounted.instance;
     });
@@ -805,7 +818,6 @@ describe('workspace_panel', () => {
   });
 
   describe('suggestions from dropping in workspace panel', () => {
-    let mockDispatch: jest.Mock;
     let mockGetSuggestionForField: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
@@ -813,12 +825,11 @@ describe('workspace_panel', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDispatch = jest.fn();
       mockGetSuggestionForField = jest.fn();
     });
 
-    function initComponent(draggingContext = draggedField) {
-      instance = mount(
+    async function initComponent(draggingContext = draggedField) {
+      const mounted = await mountWithProvider(
         <ChildDragDropProvider
           dragging={draggingContext}
           setDragging={() => {}}
@@ -846,11 +857,12 @@ describe('workspace_panel', () => {
               vis: mockVisualization,
               vis2: mockVisualization2,
             }}
-            dispatch={mockDispatch}
             getSuggestionForField={mockGetSuggestionForField}
           />
         </ChildDragDropProvider>
       );
+      instance = mounted.instance;
+      return mounted;
     }
 
     it('should immediately transition if exactly one suggestion is returned', async () => {
@@ -860,32 +872,34 @@ describe('workspace_panel', () => {
         datasourceId: 'mock',
         visualizationState: {},
       });
-      initComponent();
+      const { lensStore } = await initComponent();
 
       instance.find(DragDrop).prop('onDrop')!(draggedField, 'field_replace');
 
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'SWITCH_VISUALIZATION',
-        newVisualizationId: 'vis',
-        initialState: {},
-        datasourceState: {},
-        datasourceId: 'mock',
+      expect(lensStore.dispatch).toHaveBeenCalledWith({
+        type: 'lens/switchVisualization',
+        payload: {
+          newVisualizationId: 'vis',
+          initialState: {},
+          datasourceState: {},
+          datasourceId: 'mock',
+        },
       });
     });
 
-    it('should allow to drop if there are suggestions', () => {
+    it('should allow to drop if there are suggestions', async () => {
       mockGetSuggestionForField.mockReturnValue({
         visualizationId: 'vis',
         datasourceState: {},
         datasourceId: 'mock',
         visualizationState: {},
       });
-      initComponent();
+      await initComponent();
       expect(instance.find(DragDrop).prop('dropTypes')).toBeTruthy();
     });
 
-    it('should refuse to drop if there are no suggestions', () => {
-      initComponent();
+    it('should refuse to drop if there are no suggestions', async () => {
+      await initComponent();
       expect(instance.find(DragDrop).prop('dropType')).toBeFalsy();
     });
   });

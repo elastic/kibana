@@ -51,9 +51,10 @@ const servicesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params, logger } = resources;
     const { environment, kuery } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getServices({
       environment,
@@ -405,9 +406,10 @@ const serviceThroughputRoute = createApmServerRoute({
       comparisonStart,
       comparisonEnd,
     } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     const { start, end } = setup;
 
@@ -477,9 +479,10 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       comparisonEnd,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     const { start, end } = setup;
 
@@ -552,9 +555,10 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       latencyAggregationType,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
 
     return getServiceInstancesDetailedStatisticsPeriods({
       environment,
@@ -580,31 +584,17 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { serviceName, serviceNodeName } = resources.params.path;
-    const { transactionType, environment, kuery } = resources.params.query;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
 
     return await getServiceInstanceMetadataDetails({
-      searchAggregatedTransactions,
       setup,
       serviceName,
       serviceNodeName,
-      transactionType,
-      environment,
-      kuery,
     });
   },
 });

@@ -11,7 +11,7 @@ import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/
 import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../common';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 import { createStatsSubClient, StatsSubClient } from './stats/client';
 
@@ -30,7 +30,7 @@ export class CasesClient {
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
-    this._attachments = createAttachmentsSubClient(args, this._casesClientInternal);
+    this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
     this._userActions = createUserActionsSubClient(args);
     this._subCases = createSubCasesClient(args, this._casesClientInternal);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);

@@ -14,6 +14,8 @@ import type {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
+import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 import type {
   DataPublicPluginSetup,
@@ -24,14 +26,16 @@ import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public'
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
+import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
-import { FLEET_BASE_PATH } from './constants';
+import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
+import { createPackageSearchProvider } from './search_provider';
 import {
   TutorialDirectoryNotice,
   TutorialDirectoryHeaderLink,
@@ -39,6 +43,7 @@ import {
 } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
+import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
 export { FleetConfigType } from '../common/types';
 
@@ -60,10 +65,12 @@ export interface FleetSetupDeps {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface FleetStartDeps {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
@@ -176,17 +183,21 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       deps.home.featureCatalogue.register({
         id: 'fleet',
         title: i18n.translate('xpack.fleet.featureCatalogueTitle', {
-          defaultMessage: 'Add Elastic Agent',
+          defaultMessage: 'Add Elastic Agent integrations',
         }),
         description: i18n.translate('xpack.fleet.featureCatalogueDescription', {
-          defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
+          defaultMessage: 'Add and manage integrations with Elastic Agent',
         }),
         icon: 'indexManagementApp',
         showOnHomePage: true,
-        path: FLEET_BASE_PATH,
+        path: INTEGRATIONS_BASE_PATH,
         category: FeatureCatalogueCategory.DATA,
         order: 510,
       });
+    }
+
+    if (deps.globalSearch) {
+      deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
     }
 
     return {};
@@ -194,6 +205,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
   public start(core: CoreStart): FleetStart {
     let successPromise: ReturnType<FleetStart['isInitialized']>;
+    const registerExtension = createExtensionRegistrationCallback(this.extensions);
+
+    registerExtension({
+      package: CUSTOM_LOGS_INTEGRATION_NAME,
+      view: 'package-detail-assets',
+      Component: LazyCustomLogsAssetsExtension,
+    });
 
     return {
       isInitialized: () => {
@@ -219,8 +237,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
         return successPromise;
       },
-
-      registerExtension: createExtensionRegistrationCallback(this.extensions),
+      registerExtension,
     };
   }
 

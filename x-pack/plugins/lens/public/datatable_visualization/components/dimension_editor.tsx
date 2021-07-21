@@ -30,9 +30,9 @@ import {
   FIXED_PROGRESSION,
   getStopsForFixedMode,
   useDebouncedValue,
+  PalettePanelContainer,
+  findMinMaxByColumnId,
 } from '../../shared_components/';
-import { PalettePanelContainer } from './palette_panel_container';
-import { findMinMaxByColumnId } from './shared_utils';
 import './dimension_editor.scss';
 import {
   getDefaultSummaryLabel,
@@ -84,7 +84,7 @@ export function TableDimensionEditor(
       onChange: onSummaryLabelChangeToDebounce,
       value: column?.summaryLabel,
     },
-    { allowEmptyString: true } // empty string is a valid label for this feature
+    { allowFalsyValue: true } // falsy values are valid for this feature
   );
 
   if (!column) return null;
@@ -104,6 +104,11 @@ export function TableDimensionEditor(
     currentData
   );
 
+  const datasource = frame.datasourceLayers[state.layerId];
+  const showDynamicColoringFeature = Boolean(
+    isNumeric && !datasource?.getOperationForColumnId(accessor)?.isBucketed
+  );
+
   const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
 
   const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
@@ -111,7 +116,7 @@ export function TableDimensionEditor(
     ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
       []
     : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
   const currentMinMax = minMaxByColumnId[accessor];
 
   const activePalette = column?.palette || {
@@ -260,7 +265,7 @@ export function TableDimensionEditor(
           )}
         </>
       )}
-      {isNumeric && (
+      {showDynamicColoringFeature && (
         <>
           <EuiFormRow
             display="columnCompressed"

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { FieldFormat } from 'src/plugins/data/public';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { UrlFormatEditor } from './url';
 import { coreMock } from 'src/core/public/mocks';
 import { createKibanaReactContext } from '../../../../../../kibana_react/public';

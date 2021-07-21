@@ -8,6 +8,7 @@
 
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
+import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
@@ -18,7 +19,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -32,6 +33,14 @@ function getColor(rules, colorKey, value) {
     });
   }
   return color;
+}
+
+function sanitizeUrl(url) {
+  // eslint-disable-next-line no-script-url
+  if (parseUrl(url).protocol === 'javascript:') {
+    return '';
+  }
+  return url;
 }
 
 class TableVis extends Component {
@@ -50,10 +59,13 @@ class TableVis extends Component {
 
   renderRow = (row) => {
     const { model, fieldFormatMap } = this.props;
-    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
+
+    let rowDisplay = getValueOrEmpty(
+      model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
+    );
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
-      rowDisplay = <a href={url}>{rowDisplay}</a>;
+      rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
     }
     const columns = row.series
       .filter((item) => item)
@@ -88,7 +100,7 @@ class TableVis extends Component {
       });
     return (
       <tr key={row.key}>
-        <td>{rowDisplay || emptyLabel}</td>
+        <td>{rowDisplay}</td>
         {columns}
       </tr>
     );

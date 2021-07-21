@@ -93,14 +93,18 @@ describe('Endpoint Action Status', () => {
       };
 
       havingActionsAndResponses = (actions: MockAction[], responses: MockResponse[]) => {
-        esClientMock.asCurrentUser.search = jest
-          .fn()
-          .mockImplementationOnce(() =>
-            Promise.resolve(mockSearchResult(actions.map((a) => a.build())))
-          )
-          .mockImplementationOnce(() =>
-            Promise.resolve(mockSearchResult(responses.map((r) => r.build())))
-          );
+        esClientMock.asCurrentUser.search = jest.fn().mockImplementation((req) => {
+          const size = req.size ? req.size : 10;
+
+          const items: any[] =
+            req.index === '.fleet-actions' ? actions.splice(0, size) : responses.splice(0, size);
+
+          if (items.length > 0) {
+            return Promise.resolve(mockSearchResult(items.map((x) => x.build())));
+          } else {
+            return Promise.resolve(mockSearchResult());
+          }
+        });
       };
     });
 
@@ -119,6 +123,29 @@ describe('Endpoint Action Status', () => {
       expect(response.ok).toBeCalled();
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
+    });
+
+    it('should include total counts for large (more than a page) action counts', async () => {
+      const mockID = 'XYZABC-000';
+      const actions = [];
+      for (let i = 0; i < 1400; i++) {
+        // putting more than a single page of results in
+        actions.push(aMockAction().withAgent(mockID));
+      }
+      havingActionsAndResponses(actions, []);
+
+      const response = await getPendingStatus({
+        query: {
+          agent_ids: [mockID],
+        },
+      });
+
+      expect(response.ok).toBeCalled();
+      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
+      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
+      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
+        1400
+      );
     });
 
     it('should respond with a valid pending action', async () => {

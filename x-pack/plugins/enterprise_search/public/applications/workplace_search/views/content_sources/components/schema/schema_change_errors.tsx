@@ -12,6 +12,8 @@ import { useActions, useValues } from 'kea';
 
 import { SchemaErrorsAccordion } from '../../../../../shared/schema';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
+import { NAV } from '../../../../constants';
+import { SourceLayout } from '../source_layout';
 
 import { SCHEMA_ERRORS_HEADING } from './constants';
 import { SchemaLogic } from './schema_logic';
@@ -30,9 +32,12 @@ export const SchemaChangeErrors: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <SourceLayout
+      pageChrome={[NAV.SCHEMA, SCHEMA_ERRORS_HEADING]}
+      pageViewTelemetry="source_schema"
+    >
       <ViewContentHeader title={SCHEMA_ERRORS_HEADING} />
       <SchemaErrorsAccordion fieldCoercionErrors={fieldCoercionErrors} schema={serverSchema} />
-    </>
+    </SourceLayout>
   );
 };

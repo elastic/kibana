@@ -24,24 +24,28 @@ Array [
     <div
       class="euiText euiText--small"
     >
-      <p>
-        In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.
-      </p>
-      <a
-        class="euiButton euiButton--primary"
-        href="/app/management/stack/license_management/home"
-        rel="noreferrer"
+      <div
+        class="euiTextColor euiTextColor--default"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <p>
+          In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.
+        </p>
+        <a
+          class="euiButton euiButton--primary"
+          href="/app/management/stack/license_management/home"
+          rel="noreferrer"
         >
           <span
-            class="euiButton__text"
+            class="euiButtonContent euiButton__content"
           >
-            Start free 14-day trial
+            <span
+              class="euiButton__text"
+            >
+              Start free 14-day trial
+            </span>
           </span>
-        </span>
-      </a>
+        </a>
+      </div>
     </div>
   </div>,
   <div

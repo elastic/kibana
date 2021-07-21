@@ -53,7 +53,7 @@ describe('locators', () => {
 
     expect(location).toEqual({
       app: 'test_app',
-      route: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=21',
+      path: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=21',
       state: { isFlyoutOpen: true },
     });
   });
@@ -97,7 +97,7 @@ describe('locators', () => {
       expect(deps.navigate).toHaveBeenCalledWith(
         {
           app: 'test_app',
-          route: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=1',
+          path: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=1',
           state: {
             isFlyoutOpen: false,
           },
@@ -130,7 +130,7 @@ describe('locators', () => {
       expect(deps.navigate).toHaveBeenCalledWith(
         {
           app: 'test_app',
-          route: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=1',
+          path: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=1',
           state: {
             isFlyoutOpen: false,
           },
@@ -153,7 +153,7 @@ describe('locators', () => {
       expect(deps.navigate).toHaveBeenCalledWith(
         {
           app: 'test_app',
-          route: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=2',
+          path: '/my-object/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?page=2',
           state: {
             isFlyoutOpen: false,
           },

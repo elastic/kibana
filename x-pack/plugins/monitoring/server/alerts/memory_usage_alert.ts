@@ -51,15 +51,9 @@ export class MemoryUsageAlert extends BaseAlert {
       },
       actionVariables: [
         {
-          name: 'nodes',
-          description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.nodes', {
-            defaultMessage: 'The list of nodes reporting high memory usage.',
-          }),
-        },
-        {
-          name: 'count',
-          description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.count', {
-            defaultMessage: 'The number of nodes reporting high memory usage.',
+          name: 'node',
+          description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.node', {
+            defaultMessage: 'The node reporting high memory usage.',
           }),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
@@ -180,61 +174,64 @@ export class MemoryUsageAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    const firingNodes = alertStates.filter(
-      (alertState) => alertState.ui.isFiring
-    ) as AlertMemoryUsageState[];
-    const firingCount = firingNodes.length;
-
-    if (firingCount > 0) {
-      const shortActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.shortAction', {
-        defaultMessage: 'Verify memory usage levels across affected nodes.',
-      });
-      const fullActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.fullAction', {
-        defaultMessage: 'View nodes',
-      });
-
-      const ccs = alertStates.find((state) => state.ccs)?.ccs;
-      const globalStateLink = this.createGlobalStateLink(
-        'elasticsearch/nodes',
-        cluster.clusterUuid,
-        ccs
-      );
-      const action = `[${fullActionText}](${globalStateLink})`;
-      const internalShortMessage = i18n.translate(
-        'xpack.monitoring.alerts.memoryUsage.firing.internalShortMessage',
-        {
-          defaultMessage: `Memory usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
-          values: {
-            count: firingCount,
-            clusterName: cluster.clusterName,
-            shortActionText,
-          },
-        }
-      );
-      const internalFullMessage = i18n.translate(
-        'xpack.monitoring.alerts.memoryUsage.firing.internalFullMessage',
-        {
-          defaultMessage: `Memory usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
-          values: {
-            count: firingCount,
-            clusterName: cluster.clusterName,
-            action,
-          },
-        }
-      );
-
-      instance.scheduleActions('default', {
-        internalShortMessage,
-        internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
-        state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes
-          .map((state) => `${state.nodeName}:${state.memoryUsage.toFixed(2)}`)
-          .join(','),
-        count: firingCount,
-        clusterName: cluster.clusterName,
-        action,
-        actionPlain: shortActionText,
-      });
+    if (alertStates.length === 0) {
+      return;
     }
+    const firingNode = alertStates[0] as AlertMemoryUsageState;
+    if (!firingNode || !firingNode.ui.isFiring) {
+      return;
+    }
+
+    const shortActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.shortAction', {
+      defaultMessage: 'Verify memory usage level of node.',
+    });
+    const fullActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.fullAction', {
+      defaultMessage: 'View node',
+    });
+
+    const ccs = alertStates.find((state) => state.ccs)?.ccs;
+    const globalStateLink = this.createGlobalStateLink(
+      `elasticsearch/nodes/${firingNode.nodeId}`,
+      cluster.clusterUuid,
+      ccs
+    );
+    const action = `[${fullActionText}](${globalStateLink})`;
+    const internalShortMessage = i18n.translate(
+      'xpack.monitoring.alerts.memoryUsage.firing.internalShortMessage',
+      {
+        defaultMessage: `Memory usage alert is firing for node {nodeName} in cluster: {clusterName}. {shortActionText}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          shortActionText,
+        },
+      }
+    );
+    const internalFullMessage = i18n.translate(
+      'xpack.monitoring.alerts.memoryUsage.firing.internalFullMessage',
+      {
+        defaultMessage: `Memory usage alert is firing for node {nodeName} in cluster: {clusterName}. {action}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          action,
+        },
+      }
+    );
+
+    instance.scheduleActions('default', {
+      internalShortMessage,
+      internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
+      state: AlertingDefaults.ALERT_STATE.firing,
+      /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544 
+        see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
+        */
+      nodes: `${firingNode.nodeName}:${firingNode.memoryUsage.toFixed(2)}`,
+      count: 1,
+      node: `${firingNode.nodeName}:${firingNode.memoryUsage.toFixed(2)}`,
+      clusterName: cluster.clusterName,
+      action,
+      actionPlain: shortActionText,
+    });
   }
 }

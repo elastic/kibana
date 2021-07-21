@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchHit } from '../../../../../../typings/elasticsearch';
+import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
 
 import type { Artifact, ArtifactElasticsearchProperties, NewArtifact } from './types';
 import { ARTIFACT_DOWNLOAD_RELATIVE_PATH } from './constants';

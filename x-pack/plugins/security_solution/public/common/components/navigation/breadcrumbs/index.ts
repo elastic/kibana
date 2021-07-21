@@ -28,16 +28,29 @@ import { getAppOverviewUrl } from '../../link_to';
 
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
-import { GetUrlForApp, SearchNavTab } from '../types';
+import { GetUrlForApp, NavigateToUrl, SearchNavTab } from '../types';
 
 export const setBreadcrumbs = (
   spyState: RouteSpyState & TabNavigationProps,
   chrome: StartServices['chrome'],
-  getUrlForApp: GetUrlForApp
+  getUrlForApp: GetUrlForApp,
+  navigateToUrl: NavigateToUrl
 ) => {
   const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
   if (breadcrumbs) {
-    chrome.setBreadcrumbs(breadcrumbs);
+    chrome.setBreadcrumbs(
+      breadcrumbs.map((breadcrumb) => ({
+        ...breadcrumb,
+        ...(breadcrumb.href && !breadcrumb.onClick
+          ? {
+              onClick: (ev) => {
+                ev.preventDefault();
+                navigateToUrl(breadcrumb.href!);
+              },
+            }
+          : {}),
+      }))
+    );
   }
 };
 
@@ -53,19 +66,23 @@ const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSp
 const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.case;
 
-const isAlertsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SecurityPageName.detections;
-
 const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.administration;
 
+const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
+  spyState != null && spyState.pageName === SecurityPageName.rules;
+
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
-  object: RouteSpyState & TabNavigationProps,
+  objectParam: RouteSpyState & TabNavigationProps,
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
-  const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
+  const spyState: RouteSpyState = omit('navTabs', objectParam);
+
+  // Sets `timeline.isOpen` to false in the state to avoid reopening the timeline on breadcrumb click. https://github.com/elastic/kibana/issues/100322
+  const object = { ...objectParam, timeline: { ...objectParam.timeline, isOpen: false } };
+
+  const overviewPath = getUrlForApp(APP_ID, { deepLinkId: SecurityPageName.overview });
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getAppOverviewUrl(overviewPath),
@@ -76,6 +93,7 @@ export const getBreadcrumbsForRoute = (
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
+
     return [
       siemRootBreadcrumb,
       ...getHostDetailsBreadcrumbs(
@@ -106,8 +124,8 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
-  if (isAlertsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
+  if (isRulesRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: SecurityPageName.rules, isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
@@ -125,6 +143,7 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
+
   if (isCaseRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'case', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
@@ -162,23 +181,7 @@ export const getBreadcrumbsForRoute = (
   }
 
   if (isAdminRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'administration', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-
-    return [
-      siemRootBreadcrumb,
-      ...getAdminBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
+    return [siemRootBreadcrumb, ...getAdminBreadcrumbs(spyState)];
   }
 
   if (

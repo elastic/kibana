@@ -4,45 +4,150 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { makeDefaultServices, mockLensStore } from '../mocks';
+import { makeDefaultServices, makeLensStore, defaultDoc, createMockVisualization } from '../mocks';
+import { createMockDatasource, DatasourceMock } from '../mocks';
 import { act } from 'react-dom/test-utils';
-import { loadDocument } from './mounter';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
+import { loadInitialStore } from './mounter';
+import { LensEmbeddableInput } from '../embeddable/embeddable';
 
 const defaultSavedObjectId = '1234';
+const preloadedState = {
+  isLoading: true,
+  visualization: {
+    state: null,
+    activeId: 'testVis',
+  },
+};
 
 describe('Mounter', () => {
   const byValueFlag = { allowByValueEmbeddables: true };
-  describe('loadDocument', () => {
+  const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
+  const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
+  const datasourceMap = {
+    testDatasource2: mockDatasource2,
+    testDatasource: mockDatasource,
+  };
+  const mockVisualization = {
+    ...createMockVisualization(),
+    id: 'testVis',
+    visualizationTypes: [
+      {
+        icon: 'empty',
+        id: 'testVis',
+        label: 'TEST1',
+        groupLabel: 'testVisGroup',
+      },
+    ],
+  };
+  const mockVisualization2 = {
+    ...createMockVisualization(),
+    id: 'testVis2',
+    visualizationTypes: [
+      {
+        icon: 'empty',
+        id: 'testVis2',
+        label: 'TEST2',
+        groupLabel: 'testVis2Group',
+      },
+    ],
+  };
+  const visualizationMap = {
+    testVis: mockVisualization,
+    testVis2: mockVisualization2,
+  };
+
+  it('should initialize initial datasource', async () => {
+    const services = makeDefaultServices();
+    const redirectCallback = jest.fn();
+    services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
+
+    const lensStore = await makeLensStore({
+      data: services.data,
+      preloadedState,
+    });
+    await act(async () => {
+      await loadInitialStore(
+        redirectCallback,
+        undefined,
+        services,
+        lensStore,
+        undefined,
+        byValueFlag,
+        datasourceMap,
+        visualizationMap
+      );
+    });
+    expect(mockDatasource.initialize).toHaveBeenCalled();
+  });
+
+  it('should have initialized only the initial datasource and visualization', async () => {
+    const services = makeDefaultServices();
+    const redirectCallback = jest.fn();
+    services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
+
+    const lensStore = await makeLensStore({ data: services.data, preloadedState });
+    await act(async () => {
+      await loadInitialStore(
+        redirectCallback,
+        undefined,
+        services,
+        lensStore,
+        undefined,
+        byValueFlag,
+        datasourceMap,
+        visualizationMap
+      );
+    });
+    expect(mockDatasource.initialize).toHaveBeenCalled();
+    expect(mockDatasource2.initialize).not.toHaveBeenCalled();
+
+    expect(mockVisualization.initialize).toHaveBeenCalled();
+    expect(mockVisualization2.initialize).not.toHaveBeenCalled();
+  });
+
+  // it('should initialize all datasources with state from doc', async () => {})
+  // it('should pass the datasource api for each layer to the visualization', async () => {})
+  // it('should create a separate datasource public api for each layer', async () => {})
+  // it('should not initialize visualization before datasource is initialized', async () => {})
+  // it('should pass the public frame api into visualization initialize', async () => {})
+  // it('should fetch suggestions of currently active datasource when initializes from visualization trigger', async () => {})
+  // it.skip('should pass the datasource api for each layer to the visualization', async () => {})
+  // it('displays errors from the frame in a toast', async () => {
+
+  describe('loadInitialStore', () => {
     it('does not load a document if there is no initial input', async () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
-      const lensStore = mockLensStore({ data: services.data });
-      await loadDocument(redirectCallback, undefined, services, lensStore, undefined, byValueFlag);
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
+      await loadInitialStore(
+        redirectCallback,
+        undefined,
+        services,
+        lensStore,
+        undefined,
+        byValueFlag,
+        datasourceMap,
+        visualizationMap
+      );
       expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
     });
 
     it('loads a document and uses query and filters if initial input is provided', async () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
-      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
-        savedObjectId: defaultSavedObjectId,
-        state: {
-          query: 'fake query',
-          filters: [{ query: { match_phrase: { src: 'test' } } }],
-        },
-        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      });
+      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
 
-      const lensStore = await mockLensStore({ data: services.data });
+      const lensStore = await makeLensStore({ data: services.data, preloadedState });
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
@@ -50,21 +155,16 @@ describe('Mounter', () => {
         savedObjectId: defaultSavedObjectId,
       });
 
-      expect(services.data.indexPatterns.get).toHaveBeenCalledWith('1');
-
       expect(services.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
         { query: { match_phrase: { src: 'test' } } },
       ]);
 
       expect(lensStore.getState()).toEqual({
-        app: expect.objectContaining({
-          persistedDoc: expect.objectContaining({
-            savedObjectId: defaultSavedObjectId,
-            state: expect.objectContaining({
-              query: 'fake query',
-              filters: [{ query: { match_phrase: { src: 'test' } } }],
-            }),
-          }),
+        lens: expect.objectContaining({
+          persistedDoc: { ...defaultDoc, type: 'lens' },
+          query: 'kuery',
+          isLoading: false,
+          activeDatasourceId: 'testDatasource',
         }),
       });
     });
@@ -72,40 +172,46 @@ describe('Mounter', () => {
     it('does not load documents on sequential renders unless the id changes', async () => {
       const redirectCallback = jest.fn();
       const services = makeDefaultServices();
-      const lensStore = mockLensStore({ data: services.data });
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: '5678' } as LensEmbeddableInput,
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
@@ -116,18 +222,20 @@ describe('Mounter', () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
 
-      const lensStore = mockLensStore({ data: services.data });
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
 
       services.attributeService.unwrapAttributes = jest.fn().mockRejectedValue('failed to load');
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -141,15 +249,17 @@ describe('Mounter', () => {
       const redirectCallback = jest.fn();
 
       const services = makeDefaultServices();
-      const lensStore = mockLensStore({ data: services.data });
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput,
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 

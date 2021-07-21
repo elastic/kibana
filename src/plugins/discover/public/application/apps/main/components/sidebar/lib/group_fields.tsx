@@ -24,9 +24,9 @@ export function groupFields(
   popularLimit: number,
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState,
-  useNewFieldsApi: boolean,
-  showUnmappedFields = true
+  useNewFieldsApi: boolean
 ): GroupedFields {
+  const showUnmappedFields = useNewFieldsApi;
   const result: GroupedFields = {
     selected: [],
     popular: [],

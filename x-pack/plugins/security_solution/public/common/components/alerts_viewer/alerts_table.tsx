@@ -6,17 +6,19 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-
+import { useDispatch } from 'react-redux';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
 import { useKibana } from '../../lib/kibana';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 
 export interface OwnProps {
   end: string;
@@ -70,22 +72,33 @@ const AlertsTableComponent: React.FC<Props> = ({
   startDate,
   pageFilters = [],
 }) => {
+  const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { filterManager } = useKibana().services.data.query;
-  const { initializeTimeline } = useManageTimeline();
+
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
   useEffect(() => {
-    initializeTimeline({
-      id: timelineId,
-      documentType: i18n.ALERTS_DOCUMENT_TYPE,
-      filterManager,
-      defaultModel: alertsDefaultModel,
-      footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-      title: i18n.ALERTS_TABLE_TITLE,
-      unit: i18n.UNIT,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    dispatch(
+      timelineActions.initializeTGridSettings({
+        id: timelineId,
+        documentType: i18n.ALERTS_DOCUMENT_TYPE,
+        filterManager,
+        defaultColumns: alertsDefaultModel.columns.map((c) =>
+          !tGridEnabled && c.initialWidth == null
+            ? {
+                ...c,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+              }
+            : c
+        ),
+        excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds,
+        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+        title: i18n.ALERTS_TABLE_TITLE,
+        // TODO: avoid passing this through the store
+      })
+    );
+  }, [dispatch, filterManager, tGridEnabled, timelineId]);
 
   return (
     <StatefulEventsViewer

@@ -36,7 +36,8 @@ interface Props {
   children: React.ReactNode;
   isNew: boolean;
   disabled: boolean;
-  closeRoleMappingFlyout(): void;
+  formLoading: boolean;
+  closeUsersAndRolesFlyout(): void;
   handleSaveMapping(): void;
 }
 
@@ -44,13 +45,14 @@ export const RoleMappingFlyout: React.FC<Props> = ({
   children,
   isNew,
   disabled,
-  closeRoleMappingFlyout,
+  formLoading,
+  closeUsersAndRolesFlyout,
   handleSaveMapping,
 }) => (
   <EuiPortal>
     <EuiFlyout
       ownFocus
-      onClose={closeRoleMappingFlyout}
+      onClose={closeUsersAndRolesFlyout}
       size="s"
       aria-labelledby="flyoutLargeTitle"
     >
@@ -71,11 +73,14 @@ export const RoleMappingFlyout: React.FC<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeRoleMappingFlyout}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={closeUsersAndRolesFlyout}>
+              {CANCEL_BUTTON_LABEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               disabled={disabled}
+              isLoading={formLoading}
               onClick={handleSaveMapping}
               fill
               data-test-subj="FlyoutButton"

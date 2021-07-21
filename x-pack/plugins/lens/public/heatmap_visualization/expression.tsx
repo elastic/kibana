@@ -261,6 +261,7 @@ export const getHeatmapRenderer = (dependencies: {
             timeZone={dependencies.timeZone}
             formatFactory={formatFactory}
             chartsThemeService={dependencies.chartsThemeService}
+            paletteService={dependencies.paletteService}
           />
         }
       </I18nProvider>,

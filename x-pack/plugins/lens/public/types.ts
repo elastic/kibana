@@ -7,7 +7,7 @@
 
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import { MutableRefObject } from 'react';
 import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
@@ -45,12 +45,13 @@ export interface PublicAPIProps<T> {
 }
 
 export interface EditorFrameProps {
-  onError: ErrorCallback;
-  initialContext?: VisualizeFieldContext;
   showNoDataPopover: () => void;
 }
+
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
 }
 
 export interface EditorFrameSetup {
@@ -524,20 +525,10 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
-
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
   searchSessionId: string;
-
-  /**
-   * A map of all available palettes (keys being the ids).
-   */
-  availablePalettes: PaletteRegistry;
-
-  // Adds a new layer. This has a side effect of updating the datasource state
-  addNewLayer: () => string;
-  removeLayers: (layerIds: string[]) => void;
 }
 
 /**
@@ -570,9 +561,9 @@ export interface VisualizationType {
    */
   sortPriority?: number;
   /**
-   * Indicates if visualization is in the beta stage.
+   * Indicates if visualization is in the experimental stage.
    */
-  showBetaBadge?: boolean;
+  showExperimentalBadge?: boolean;
 }
 
 export interface Visualization<T = unknown> {
@@ -585,7 +576,7 @@ export interface Visualization<T = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: T, mainPalette?: PaletteOutput) => T;
+  initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
 
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 
@@ -734,6 +725,7 @@ interface LensEditContextMapping {
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
 }
+
 type LensEditSupportedActions = keyof LensEditContextMapping;
 
 export type LensEditPayload<T extends LensEditSupportedActions> = {
@@ -746,6 +738,7 @@ export interface LensEditEvent<T> {
   name: 'edit';
   data: EditPayloadContext<T>;
 }
+
 export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: RowClickContext['data'];

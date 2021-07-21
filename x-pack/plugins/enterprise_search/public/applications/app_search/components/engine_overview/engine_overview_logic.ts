@@ -11,8 +11,6 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-const POLLING_DURATION = 5000;
-
 interface EngineOverviewApiData {
   documentCount: number;
   startDate: string;
@@ -23,95 +21,74 @@ interface EngineOverviewApiData {
 }
 interface EngineOverviewValues extends EngineOverviewApiData {
   dataLoading: boolean;
-  timeoutId: number | null;
 }
 
 interface EngineOverviewActions {
-  setPolledData(engineMetrics: EngineOverviewApiData): EngineOverviewApiData;
-  setTimeoutId(timeoutId: number): { timeoutId: number };
-  pollForOverviewMetrics(): void;
-  onPollingSuccess(engineMetrics: EngineOverviewApiData): EngineOverviewApiData;
+  loadOverviewMetrics(): void;
+  onOverviewMetricsLoad(response: EngineOverviewApiData): EngineOverviewApiData;
 }
 
 export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, EngineOverviewActions>>({
   path: ['enterprise_search', 'app_search', 'engine_overview_logic'],
   actions: () => ({
-    setPolledData: (engineMetrics) => engineMetrics,
-    setTimeoutId: (timeoutId) => ({ timeoutId }),
-    pollForOverviewMetrics: true,
-    onPollingSuccess: (engineMetrics) => engineMetrics,
+    loadOverviewMetrics: true,
+    onOverviewMetricsLoad: (engineMetrics) => engineMetrics,
   }),
   reducers: () => ({
     dataLoading: [
       true,
       {
-        setPolledData: () => false,
+        onOverviewMetricsLoad: () => false,
       },
     ],
     startDate: [
       '',
       {
-        setPolledData: (_, { startDate }) => startDate,
+        onOverviewMetricsLoad: (_, { startDate }) => startDate,
       },
     ],
     queriesPerDay: [
       [],
       {
-        setPolledData: (_, { queriesPerDay }) => queriesPerDay,
+        onOverviewMetricsLoad: (_, { queriesPerDay }) => queriesPerDay,
       },
     ],
     operationsPerDay: [
       [],
       {
-        setPolledData: (_, { operationsPerDay }) => operationsPerDay,
+        onOverviewMetricsLoad: (_, { operationsPerDay }) => operationsPerDay,
       },
     ],
     totalQueries: [
       0,
       {
-        setPolledData: (_, { totalQueries }) => totalQueries,
+        onOverviewMetricsLoad: (_, { totalQueries }) => totalQueries,
       },
     ],
     totalClicks: [
       0,
       {
-        setPolledData: (_, { totalClicks }) => totalClicks,
+        onOverviewMetricsLoad: (_, { totalClicks }) => totalClicks,
       },
     ],
     documentCount: [
       0,
       {
-        setPolledData: (_, { documentCount }) => documentCount,
-      },
-    ],
-    timeoutId: [
-      null,
-      {
-        setTimeoutId: (_, { timeoutId }) => timeoutId,
+        onOverviewMetricsLoad: (_, { documentCount }) => documentCount,
       },
     ],
   }),
   listeners: ({ actions }) => ({
-    pollForOverviewMetrics: async () => {
+    loadOverviewMetrics: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/overview`);
-        actions.onPollingSuccess(response);
+        actions.onOverviewMetricsLoad(response);
       } catch (e) {
         flashAPIErrors(e);
       }
-    },
-    onPollingSuccess: (engineMetrics) => {
-      const timeoutId = window.setTimeout(actions.pollForOverviewMetrics, POLLING_DURATION);
-      actions.setTimeoutId(timeoutId);
-      actions.setPolledData(engineMetrics);
-    },
-  }),
-  events: ({ values }) => ({
-    beforeUnmount() {
-      if (values.timeoutId !== null) clearTimeout(values.timeoutId);
     },
   }),
 });

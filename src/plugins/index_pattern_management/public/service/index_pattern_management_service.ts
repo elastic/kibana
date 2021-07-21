@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '../../../../core/public';
-import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
-import { IndexPatternListManager, IndexPatternListConfig } from './list';
-interface SetupDependencies {
-  httpClient: HttpSetup;
+import { HttpStart, CoreStart } from '../../../../core/public';
+import { IndexPatternCreationManager } from './creation';
+import { IndexPatternListManager } from './list';
+
+interface StartDependencies {
+  httpClient: HttpStart;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 /**
@@ -27,23 +29,12 @@ export class IndexPatternManagementService {
     this.indexPatternListConfig = new IndexPatternListManager();
   }
 
-  public setup({ httpClient }: SetupDependencies) {
-    const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
-    creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
+  public setup() {}
 
-    const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
-    indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
-
+  public start({ httpClient, uiSettings }: StartDependencies) {
     return {
-      creation: creationManagerSetup,
-      list: indexPatternListConfigSetup,
-    };
-  }
-
-  public start() {
-    return {
-      creation: this.indexPatternCreationManager.start(),
-      list: this.indexPatternListConfig.start(),
+      creation: this.indexPatternCreationManager.start({ httpClient, uiSettings }),
+      list: this.indexPatternListConfig.start({ uiSettings }),
     };
   }
 

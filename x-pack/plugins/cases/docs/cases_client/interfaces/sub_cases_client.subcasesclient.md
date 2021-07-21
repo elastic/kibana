@@ -31,7 +31,7 @@ Deletes the specified entities and their attachments.
 
 **Returns:** *Promise*<void\>
 
-Defined in: [sub_cases/client.ts:60](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/sub_cases/client.ts#L60)
+Defined in: [sub_cases/client.ts:68](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/sub_cases/client.ts#L68)
 
 ___
 
@@ -49,7 +49,7 @@ Retrieves the sub cases matching the search criteria.
 
 **Returns:** *Promise*<[*ISubCasesFindResponse*](typedoc_interfaces.isubcasesfindresponse.md)\>
 
-Defined in: [sub_cases/client.ts:64](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/sub_cases/client.ts#L64)
+Defined in: [sub_cases/client.ts:72](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/sub_cases/client.ts#L72)
 
 ___
 
@@ -67,7 +67,7 @@ Retrieves a single sub case.
 
 **Returns:** *Promise*<[*ISubCaseResponse*](typedoc_interfaces.isubcaseresponse.md)\>
 
-Defined in: [sub_cases/client.ts:68](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/sub_cases/client.ts#L68)
+Defined in: [sub_cases/client.ts:76](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/sub_cases/client.ts#L76)
 
 ___
 
@@ -86,4 +86,4 @@ Updates the specified sub cases to the new values included in the request.
 
 **Returns:** *Promise*<[*ISubCasesResponse*](typedoc_interfaces.isubcasesresponse.md)\>
 
-Defined in: [sub_cases/client.ts:72](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/sub_cases/client.ts#L72)
+Defined in: [sub_cases/client.ts:80](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/sub_cases/client.ts#L80)

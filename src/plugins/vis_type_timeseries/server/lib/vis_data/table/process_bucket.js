@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildProcessorFunction } from '../build_processor_function';
+import { _legacyBuildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/table';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { first, get } from 'lodash';
@@ -46,7 +46,7 @@ export function processBucket(
           overwrite(bucket, series.id, { meta, timeseries });
         }
 
-        const processor = buildProcessorFunction(
+        const processor = _legacyBuildProcessorFunction(
           processors,
           bucket,
           panel,

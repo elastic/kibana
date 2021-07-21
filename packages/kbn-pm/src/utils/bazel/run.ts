@@ -29,7 +29,7 @@ async function runBazelCommandWithRunner(
     stdio: 'pipe',
   };
 
-  if (offline || !offline) {
+  if (offline) {
     bazelArgs = [...bazelArgs, '--config=offline'];
   }
 

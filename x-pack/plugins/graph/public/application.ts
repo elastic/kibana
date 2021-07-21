@@ -31,7 +31,7 @@ import {
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
-import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
+import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';

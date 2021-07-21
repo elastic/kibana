@@ -308,3 +308,29 @@ This content has moved. Refer to <<discover-view-surrounding-documents>>.
 
 This content has moved. Refer to <<string-field-formatters>>.
 
+[role="exclude",id="embedding"]
+== Embed {kib} content in a web page
+
+This content has moved. Refer to <<embedded-content-authentication>> and <<embed-code>>.
+
+[role="exclude",id="reporting-troubleshooting-system-dependencies"]
+== System dependencies
+
+This content has moved. Refer to <<install-reporting-packages>>.
+
+[role="exclude",id="profiler-getting-started"]
+== Getting start with Search Profiler
+
+This content has moved. Refer to <<xpack-profiler>>.
+
+
+[role="exclude",id="profiler-complicated"]
+== Profiling a more complicated querying
+
+This content has moved. Refer to <<xpack-profiler>>.
+
+
+[role="exclude",id="profiler-render"]
+== Rendering pre-captured profiler JSON
+
+This content has moved. Refer to <<xpack-profiler>>.

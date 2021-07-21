@@ -10,7 +10,8 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router } from 'react-router-dom';
+import { Route as ReactRouterRoute } from 'react-router-dom';
+import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
@@ -66,19 +67,21 @@ function UxApp() {
       })}
     >
       <div data-test-subj="csmMainContainer" role="main">
-        <Route component={ScrollToTopOnPathChange} />
+        <ReactRouterRoute component={ScrollToTopOnPathChange} />
         <RumHome />
       </div>
     </ThemeProvider>
   );
 }
 
+const uxRouter = createRouter([]);
+
 export function UXAppRoot({
   appMountParameters,
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps, observability },
+  corePlugins: { embeddable, maps, observability, data },
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -103,14 +106,16 @@ export function UXAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins, embeddable }}>
+        <KibanaContextProvider
+          services={{ ...core, ...plugins, embeddable, data }}
+        >
           <i18nCore.Context>
-            <Router history={history}>
+            <RouterProvider history={history} router={uxRouter}>
               <UrlParamsProvider>
                 <UxApp />
                 <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>
-            </Router>
+            </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
+import { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -39,7 +39,7 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
@@ -49,12 +49,12 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): DataSerie
     },
     yAxisColumns: [
       {
-        sourceField: 'business.kpi',
+        sourceField: REPORT_METRIC_FIELD,
         operationType: 'median',
       },
     ],
     hasOperationType: false,
-    defaultFilters: [
+    filterFields: [
       {
         field: TRANSACTION_URL,
         isNegated: false,
@@ -67,44 +67,32 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): DataSerie
         nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
-    filters: [
+    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
-    reportDefinitions: [
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+    metricOptions: [
+      { field: RECORDS_FIELD, id: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
       {
-        field: SERVICE_NAME,
-        required: true,
+        label: PAGE_LOAD_TIME_LABEL,
+        field: TRANSACTION_DURATION,
+        id: TRANSACTION_DURATION,
+        columnType: OPERATION_COLUMN,
       },
       {
-        field: SERVICE_ENVIRONMENT,
+        label: BACKEND_TIME_LABEL,
+        field: TRANSACTION_TIME_TO_FIRST_BYTE,
+        id: TRANSACTION_TIME_TO_FIRST_BYTE,
+        columnType: OPERATION_COLUMN,
       },
-      {
-        field: 'business.kpi',
-        custom: true,
-        options: [
-          { field: RECORDS_FIELD, id: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
-          {
-            label: PAGE_LOAD_TIME_LABEL,
-            field: TRANSACTION_DURATION,
-            id: TRANSACTION_DURATION,
-            columnType: OPERATION_COLUMN,
-          },
-          {
-            label: BACKEND_TIME_LABEL,
-            field: TRANSACTION_TIME_TO_FIRST_BYTE,
-            id: TRANSACTION_TIME_TO_FIRST_BYTE,
-            columnType: OPERATION_COLUMN,
-          },
-          { label: FCP_LABEL, field: FCP_FIELD, id: FCP_FIELD, columnType: OPERATION_COLUMN },
-          { label: TBT_LABEL, field: TBT_FIELD, id: TBT_FIELD, columnType: OPERATION_COLUMN },
-          { label: LCP_LABEL, field: LCP_FIELD, id: LCP_FIELD, columnType: OPERATION_COLUMN },
-          { label: FID_LABEL, field: FID_FIELD, id: FID_FIELD, columnType: OPERATION_COLUMN },
-          { label: CLS_LABEL, field: CLS_FIELD, id: CLS_FIELD, columnType: OPERATION_COLUMN },
-        ],
-      },
+      { label: FCP_LABEL, field: FCP_FIELD, id: FCP_FIELD, columnType: OPERATION_COLUMN },
+      { label: TBT_LABEL, field: TBT_FIELD, id: TBT_FIELD, columnType: OPERATION_COLUMN },
+      { label: LCP_LABEL, field: LCP_FIELD, id: LCP_FIELD, columnType: OPERATION_COLUMN },
+      { label: FID_LABEL, field: FID_FIELD, id: FID_FIELD, columnType: OPERATION_COLUMN },
+      { label: CLS_LABEL, field: CLS_FIELD, id: CLS_FIELD, columnType: OPERATION_COLUMN },
     ],
   };
 }

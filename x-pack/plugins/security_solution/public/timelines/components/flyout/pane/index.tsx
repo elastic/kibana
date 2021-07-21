@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -20,18 +20,19 @@ import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
+  visible?: boolean;
 }
 
-const EuiFlyoutContainer = styled.div`
-  .timeline-flyout {
-    z-index: ${({ theme }) => theme.eui.euiZLevel8};
-    min-width: 150px;
-    width: 100%;
-    animation: none;
-  }
+const StyledEuiFlyout = styled(EuiFlyout)<EuiFlyoutProps>`
+  animation: none;
+  min-width: 150px;
+  z-index: ${({ theme }) => theme.eui.euiZLevel4};
 `;
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
+  timelineId,
+  visible = true,
+}) => {
   const dispatch = useDispatch();
   const handleClose = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
@@ -39,22 +40,24 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId })
   }, [dispatch, timelineId]);
 
   return (
-    <EuiFlyoutContainer data-test-subj="flyout-pane">
-      <EuiFlyout
+    <div data-test-subj="flyout-pane" style={{ visibility: visible ? 'visible' : 'hidden' }}>
+      <StyledEuiFlyout
         aria-label={i18n.TIMELINE_DESCRIPTION}
         className="timeline-flyout"
         data-test-subj="eui-flyout"
         hideCloseButton={true}
         onClose={handleClose}
-        size="l"
+        size="100%"
+        ownFocus={false}
+        style={{ visibility: visible ? 'visible' : 'hidden' }}
       >
         <StatefulTimeline
           renderCellValue={DefaultCellRenderer}
           rowRenderers={defaultRowRenderers}
           timelineId={timelineId}
         />
-      </EuiFlyout>
-    </EuiFlyoutContainer>
+      </StyledEuiFlyout>
+    </div>
   );
 };
 

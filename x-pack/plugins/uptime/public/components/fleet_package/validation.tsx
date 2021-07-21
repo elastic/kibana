@@ -48,10 +48,6 @@ function validateTimeout({
 
 // validation functions return true when invalid
 const validateCommon = {
-  [ConfigKeys.MAX_REDIRECTS]: (value: unknown) =>
-    (!!value && !`${value}`.match(digitsOnly)) ||
-    parseFloat(value as ICustomFields[ConfigKeys.MAX_REDIRECTS]) < 0,
-  [ConfigKeys.MONITOR_TYPE]: (value: unknown) => !value,
   [ConfigKeys.SCHEDULE]: (value: unknown) => {
     const { number, unit } = value as ICustomFields[ConfigKeys.SCHEDULE];
     const parsedFloat = parseFloat(number);
@@ -84,6 +80,9 @@ const validateHTTP = {
     const headers = value as ICustomFields[ConfigKeys.REQUEST_HEADERS_CHECK];
     return validateHeaders<ICustomFields[ConfigKeys.REQUEST_HEADERS_CHECK]>(headers);
   },
+  [ConfigKeys.MAX_REDIRECTS]: (value: unknown) =>
+    (!!value && !`${value}`.match(digitsOnly)) ||
+    parseFloat(value as ICustomFields[ConfigKeys.MAX_REDIRECTS]) < 0,
   [ConfigKeys.URLS]: (value: unknown) => !value,
   ...validateCommon,
 };

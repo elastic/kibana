@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -24,12 +24,12 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useDebounceWithOptions } from '../../../../../shared_components';
+import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
 import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
-  LensMathSuggestion,
+  LensMathSuggestions,
   SUGGESTION_TYPE,
   suggest,
   getSuggestion,
@@ -47,8 +47,22 @@ import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
 import { filterByVisibleOperation } from '../util';
+import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
-export const MemoizedFormulaEditor = React.memo(FormulaEditor);
+export const WrappedFormulaEditor = ({
+  activeData,
+  ...rest
+}: ParamEditorProps<FormulaIndexPatternColumn>) => {
+  const dateHistogramInterval = getDateHistogramInterval(
+    rest.layer,
+    rest.indexPattern,
+    activeData,
+    rest.layerId
+  );
+  return <MemoizedFormulaEditor {...rest} dateHistogramInterval={dateHistogramInterval} />;
+};
+
+const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
 export function FormulaEditor({
   layer,
@@ -61,7 +75,10 @@ export function FormulaEditor({
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
-}: ParamEditorProps<FormulaIndexPatternColumn>) {
+  dateHistogramInterval,
+}: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
+  dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
+}) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<
     Array<{ severity: monaco.MarkerSeverity; message: string }>
@@ -77,6 +94,13 @@ export function FormulaEditor({
   const visibleOperationsMap = useMemo(() => filterByVisibleOperation(operationDefinitionMap), [
     operationDefinitionMap,
   ]);
+
+  const baseInterval =
+    'interval' in dateHistogramInterval
+      ? dateHistogramInterval.interval?.asMilliseconds()
+      : undefined;
+  const baseIntervalRef = useRef(baseInterval);
+  baseIntervalRef.current = baseInterval;
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -227,6 +251,7 @@ export function FormulaEditor({
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
         const markers: monaco.editor.IMarkerData[] = managedColumns
           .flatMap(([id, column]) => {
+            const newWarnings: monaco.editor.IMarkerData[] = [];
             if (locations[id]) {
               const def = visibleOperationsMap[column.operationType];
               if (def.getErrorMessage) {
@@ -239,20 +264,32 @@ export function FormulaEditor({
                 if (messages) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);
                   const endPosition = offsetToRowColumn(text, locations[id].max);
-                  return [
-                    {
-                      message: messages.join(', '),
-                      startColumn: startPosition.column + 1,
-                      startLineNumber: startPosition.lineNumber,
-                      endColumn: endPosition.column + 1,
-                      endLineNumber: endPosition.lineNumber,
-                      severity: monaco.MarkerSeverity.Warning,
-                    },
-                  ];
+                  newWarnings.push({
+                    message: messages.join(', '),
+                    startColumn: startPosition.column + 1,
+                    startLineNumber: startPosition.lineNumber,
+                    endColumn: endPosition.column + 1,
+                    endLineNumber: endPosition.lineNumber,
+                    severity: monaco.MarkerSeverity.Warning,
+                  });
                 }
               }
+              if (def.shiftable && column.timeShift) {
+                const startPosition = offsetToRowColumn(text, locations[id].min);
+                const endPosition = offsetToRowColumn(text, locations[id].max);
+                newWarnings.push(
+                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column).map((message) => ({
+                    message,
+                    startColumn: startPosition.column + 1,
+                    startLineNumber: startPosition.lineNumber,
+                    endColumn: endPosition.column + 1,
+                    endLineNumber: endPosition.lineNumber,
+                    severity: monaco.MarkerSeverity.Warning,
+                  }))
+                );
+              }
             }
-            return [];
+            return newWarnings;
           })
           .filter((marker) => marker);
         setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
@@ -292,7 +329,7 @@ export function FormulaEditor({
       context: monaco.languages.CompletionContext
     ) => {
       const innerText = model.getValue();
-      let aSuggestions: { list: LensMathSuggestion[]; type: SUGGESTION_TYPE } = {
+      let aSuggestions: LensMathSuggestions = {
         list: [],
         type: SUGGESTION_TYPE.FIELD,
       };
@@ -313,6 +350,7 @@ export function FormulaEditor({
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
             data,
+            dateHistogramInterval: baseIntervalRef.current,
           });
         }
       } else {
@@ -323,16 +361,23 @@ export function FormulaEditor({
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
           data,
+          dateHistogramInterval: baseIntervalRef.current,
         });
       }
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(s, aSuggestions.type, visibleOperationsMap, context.triggerCharacter)
+          getSuggestion(
+            s,
+            aSuggestions.type,
+            visibleOperationsMap,
+            context.triggerCharacter,
+            aSuggestions.range
+          )
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, data]
+    [indexPattern, visibleOperationsMap, data, baseIntervalRef]
   );
 
   const provideSignatureHelp = useCallback(
@@ -417,7 +462,9 @@ export function FormulaEditor({
             !tokenInfo ||
             typeof tokenInfo.ast === 'number' ||
             tokenInfo.ast.type !== 'namedArgument' ||
-            (tokenInfo.ast.name !== 'kql' && tokenInfo.ast.name !== 'lucene') ||
+            (tokenInfo.ast.name !== 'kql' &&
+              tokenInfo.ast.name !== 'lucene' &&
+              tokenInfo.ast.name !== 'shift') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -437,7 +484,7 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (char === "'") {
+          if (char === "'" && tokenInfo.ast.name !== 'shift') {
             editOperation = {
               range: {
                 ...currentPosition,
@@ -538,7 +585,6 @@ export function FormulaEditor({
             <div className="lnsFormula__editorHeader">
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup">
-                  {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
                   <EuiToolTip
                     content={
                       isWordWrapped
@@ -552,7 +598,7 @@ export function FormulaEditor({
                     position="top"
                   >
                     <EuiButtonIcon
-                      iconType="bolt"
+                      iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                       display={!isWordWrapped ? 'fill' : undefined}
                       color={'text'}
                       aria-label={
@@ -576,7 +622,6 @@ export function FormulaEditor({
                 </EuiFlexItem>
 
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
-                  {/* TODO: Replace `bolt` with `fullScreenExit` icon (after latest EUI is deployed). */}
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
@@ -584,7 +629,7 @@ export function FormulaEditor({
                       setIsHelpOpen(!isFullscreen);
                       trackUiEvent('toggle_formula_fullscreen');
                     }}
-                    iconType={isFullscreen ? 'bolt' : 'fullScreen'}
+                    iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
                     size="xs"
                     color="text"
                     flush="right"
@@ -678,16 +723,21 @@ export function FormulaEditor({
                         color="text"
                         onClick={() => setIsHelpOpen(!isHelpOpen)}
                       >
-                        <EuiIcon type="help" />
+                        <EuiIcon type="documentation" />
                         <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
                       </EuiLink>
                     </EuiToolTip>
                   ) : (
-                    <EuiToolTip
-                      content={i18n.translate('xpack.lens.formula.editorHelpOverlayToolTip', {
-                        defaultMessage: 'Function reference',
-                      })}
+                    <TooltipWrapper
+                      tooltipContent={i18n.translate(
+                        'xpack.lens.formula.editorHelpOverlayToolTip',
+                        {
+                          defaultMessage: 'Function reference',
+                        }
+                      )}
+                      condition={!isHelpOpen}
                       position="top"
+                      delay="regular"
                     >
                       <EuiPopover
                         panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
@@ -699,10 +749,14 @@ export function FormulaEditor({
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
-                            onClick={() => setIsHelpOpen(!isHelpOpen)}
-                            iconType="help"
+                            onClick={() => {
+                              if (!isHelpOpen) {
+                                trackUiEvent('open_formula_popover');
+                              }
+                              setIsHelpOpen(!isHelpOpen);
+                            }}
+                            iconType="documentation"
                             color="text"
-                            size="s"
                             aria-label={i18n.translate(
                               'xpack.lens.formula.editorHelpInlineShowToolTip',
                               {
@@ -718,7 +772,7 @@ export function FormulaEditor({
                           operationDefinitionMap={visibleOperationsMap}
                         />
                       </EuiPopover>
-                    </EuiToolTip>
+                    </TooltipWrapper>
                   )}
                 </EuiFlexItem>
 

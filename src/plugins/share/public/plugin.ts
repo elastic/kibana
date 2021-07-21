@@ -19,6 +19,7 @@ import {
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
+import { RedirectManager } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -68,15 +69,28 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     core.application.register(createShortUrlRedirectApp(core, window.location));
 
     this.url = new UrlService({
-      navigate: async (location, { replace = false } = {}) => {
+      navigate: async ({ app, path, state }, { replace = false } = {}) => {
         const [start] = await core.getStartServices();
-        await start.application.navigateToApp(location.app, {
-          path: location.route,
-          state: location.state,
+        await start.application.navigateToApp(app, {
+          path,
+          state,
           replace,
         });
       },
+      getUrl: async ({ app, path }, { absolute }) => {
+        const start = await core.getStartServices();
+        const url = start[0].application.getUrlForApp(app, {
+          path,
+          absolute,
+        });
+        return url;
+      },
     });
+
+    const redirectManager = new RedirectManager({
+      url: this.url,
+    });
+    redirectManager.registerRedirectApp(core);
 
     return {
       ...this.shareMenuRegistry.setup(),

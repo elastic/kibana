@@ -16,6 +16,7 @@ import {
   SavedObject,
   PluginInitializerContext,
   SavedObjectsUtils,
+  SavedObjectAttributes,
 } from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
@@ -63,7 +64,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
-import { alertAuditEvent, AlertAuditAction } from './audit_events';
+import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
@@ -183,6 +184,9 @@ export interface GetAlertInstanceSummaryParams {
   dateStart?: string;
 }
 
+// NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
+const extractedSavedObjectParamReferenceNamePrefix = 'param:';
+
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
@@ -253,8 +257,8 @@ export class AlertsClient {
       });
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.CREATE,
+        ruleAuditEvent({
+          action: RuleAuditAction.CREATE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -284,9 +288,14 @@ export class AlertsClient {
 
     await this.validateActions(alertType, data.actions);
 
-    const createTime = Date.now();
-    const { references, actions } = await this.denormalizeActions(data.actions);
+    // Extract saved object references for this rule
+    const { references, params: updatedParams, actions } = await this.extractReferences(
+      alertType,
+      data.actions,
+      validatedAlertTypeParams
+    );
 
+    const createTime = Date.now();
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawAlert: RawAlert = {
@@ -297,7 +306,7 @@ export class AlertsClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      params: validatedAlertTypeParams as RawAlert['params'],
+      params: updatedParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
@@ -305,8 +314,8 @@ export class AlertsClient {
     };
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.CREATE,
+      ruleAuditEvent({
+        action: RuleAuditAction.CREATE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -357,7 +366,12 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw<Params>(createdAlert.id, createdAlert.attributes, references);
+    return this.getAlertFromRaw<Params>(
+      createdAlert.id,
+      createdAlert.attributes.alertTypeId,
+      createdAlert.attributes,
+      references
+    );
   }
 
   public async get<Params extends AlertTypeParams = never>({
@@ -375,8 +389,8 @@ export class AlertsClient {
       });
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.GET,
+        ruleAuditEvent({
+          action: RuleAuditAction.GET,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -384,12 +398,17 @@ export class AlertsClient {
       throw error;
     }
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.GET,
+      ruleAuditEvent({
+        action: RuleAuditAction.GET,
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
+    return this.getAlertFromRaw<Params>(
+      result.id,
+      result.attributes.alertTypeId,
+      result.attributes,
+      result.references
+    );
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -467,8 +486,8 @@ export class AlertsClient {
       );
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.FIND,
+        ruleAuditEvent({
+          action: RuleAuditAction.FIND,
           error,
         })
       );
@@ -508,8 +527,8 @@ export class AlertsClient {
         );
       } catch (error) {
         this.auditLogger?.log(
-          alertAuditEvent({
-            action: AlertAuditAction.FIND,
+          ruleAuditEvent({
+            action: RuleAuditAction.FIND,
             savedObject: { type: 'alert', id },
             error,
           })
@@ -518,6 +537,7 @@ export class AlertsClient {
       }
       return this.getAlertFromRaw<Params>(
         id,
+        attributes.alertTypeId,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
         references
       );
@@ -525,8 +545,8 @@ export class AlertsClient {
 
     authorizedData.forEach(({ id }) =>
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.FIND,
+        ruleAuditEvent({
+          action: RuleAuditAction.FIND,
           savedObject: { type: 'alert', id },
         })
       )
@@ -620,8 +640,8 @@ export class AlertsClient {
       });
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.DELETE,
+        ruleAuditEvent({
+          action: RuleAuditAction.DELETE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -630,8 +650,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.DELETE,
+      ruleAuditEvent({
+        action: RuleAuditAction.DELETE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -694,8 +714,8 @@ export class AlertsClient {
       });
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.UPDATE,
+        ruleAuditEvent({
+          action: RuleAuditAction.UPDATE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -704,8 +724,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.UPDATE,
+      ruleAuditEvent({
+        action: RuleAuditAction.UPDATE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -760,7 +780,13 @@ export class AlertsClient {
     );
     await this.validateActions(alertType, data.actions);
 
-    const { actions, references } = await this.denormalizeActions(data.actions);
+    // Extract saved object references for this rule
+    const { references, params: updatedParams, actions } = await this.extractReferences(
+      alertType,
+      data.actions,
+      validatedAlertTypeParams
+    );
+
     const username = await this.getUserName();
 
     let createdAPIKey = null;
@@ -780,7 +806,7 @@ export class AlertsClient {
       ...attributes,
       ...data,
       ...apiKeyAttributes,
-      params: validatedAlertTypeParams as RawAlert['params'],
+      params: updatedParams as RawAlert['params'],
       actions,
       notifyWhen,
       updatedBy: username,
@@ -807,7 +833,12 @@ export class AlertsClient {
       throw e;
     }
 
-    return this.getPartialAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
+    return this.getPartialAlertFromRaw(
+      id,
+      alertType,
+      updatedObject.attributes,
+      updatedObject.references
+    );
   }
 
   private apiKeyAsAlertAttributes(
@@ -870,8 +901,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.UPDATE_API_KEY,
+        ruleAuditEvent({
+          action: RuleAuditAction.UPDATE_API_KEY,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -900,8 +931,8 @@ export class AlertsClient {
     });
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.UPDATE_API_KEY,
+      ruleAuditEvent({
+        action: RuleAuditAction.UPDATE_API_KEY,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -976,8 +1007,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.ENABLE,
+        ruleAuditEvent({
+          action: RuleAuditAction.ENABLE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -986,8 +1017,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.ENABLE,
+      ruleAuditEvent({
+        action: RuleAuditAction.ENABLE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -1090,8 +1121,8 @@ export class AlertsClient {
       });
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.DISABLE,
+        ruleAuditEvent({
+          action: RuleAuditAction.DISABLE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -1100,8 +1131,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.DISABLE,
+      ruleAuditEvent({
+        action: RuleAuditAction.DISABLE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -1167,8 +1198,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.MUTE,
+        ruleAuditEvent({
+          action: RuleAuditAction.MUTE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -1177,8 +1208,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.MUTE,
+      ruleAuditEvent({
+        action: RuleAuditAction.MUTE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -1229,8 +1260,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.UNMUTE,
+        ruleAuditEvent({
+          action: RuleAuditAction.UNMUTE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -1239,8 +1270,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.UNMUTE,
+      ruleAuditEvent({
+        action: RuleAuditAction.UNMUTE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
@@ -1291,8 +1322,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.MUTE_INSTANCE,
+        ruleAuditEvent({
+          action: RuleAuditAction.MUTE_ALERT,
           savedObject: { type: 'alert', id: alertId },
           error,
         })
@@ -1301,8 +1332,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.MUTE_INSTANCE,
+      ruleAuditEvent({
+        action: RuleAuditAction.MUTE_ALERT,
         outcome: 'unknown',
         savedObject: { type: 'alert', id: alertId },
       })
@@ -1358,8 +1389,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.UNMUTE_INSTANCE,
+        ruleAuditEvent({
+          action: RuleAuditAction.UNMUTE_ALERT,
           savedObject: { type: 'alert', id: alertId },
           error,
         })
@@ -1368,8 +1399,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.UNMUTE_INSTANCE,
+      ruleAuditEvent({
+        action: RuleAuditAction.UNMUTE_ALERT,
         outcome: 'unknown',
         savedObject: { type: 'alert', id: alertId },
       })
@@ -1436,18 +1467,29 @@ export class AlertsClient {
 
   private getAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
+    ruleTypeId: string,
     rawAlert: RawAlert,
     references: SavedObjectReference[] | undefined
   ): Alert {
+    const ruleType = this.alertTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references) as Alert;
+    return this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references) as Alert;
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
-    { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
+    ruleType: UntypedNormalizedAlertType,
+    {
+      createdAt,
+      updatedAt,
+      meta,
+      notifyWhen,
+      scheduledTaskId,
+      params,
+      ...rawAlert
+    }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert<Params> {
     // Not the prettiest code here, but if we want to use most of the
@@ -1460,6 +1502,7 @@ export class AlertsClient {
     };
     delete rawAlertWithoutExecutionStatus.executionStatus;
     const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
+
     return {
       id,
       notifyWhen,
@@ -1470,6 +1513,7 @@ export class AlertsClient {
       actions: rawAlert.actions
         ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
         : [],
+      params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
@@ -1521,6 +1565,73 @@ export class AlertsClient {
             groups: invalidActionGroups.join(', '),
           },
         })
+      );
+    }
+  }
+
+  private async extractReferences<
+    Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams
+  >(
+    ruleType: UntypedNormalizedAlertType,
+    ruleActions: NormalizedAlertAction[],
+    ruleParams: Params
+  ): Promise<{
+    actions: RawAlert['actions'];
+    params: ExtractedParams;
+    references: SavedObjectReference[];
+  }> {
+    const { references: actionReferences, actions } = await this.denormalizeActions(ruleActions);
+
+    // Extracts any references using configured reference extractor if available
+    const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences
+      ? ruleType.useSavedObjectReferences.extractReferences(ruleParams)
+      : null;
+    const extractedReferences = extractedRefsAndParams?.references ?? [];
+    const params = (extractedRefsAndParams?.params as ExtractedParams) ?? ruleParams;
+
+    // Prefix extracted references in order to avoid clashes with framework level references
+    const paramReferences = extractedReferences.map((reference: SavedObjectReference) => ({
+      ...reference,
+      name: `${extractedSavedObjectParamReferenceNamePrefix}${reference.name}`,
+    }));
+
+    const references = [...actionReferences, ...paramReferences];
+
+    return {
+      actions,
+      params,
+      references,
+    };
+  }
+
+  private injectReferencesIntoParams<
+    Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams
+  >(
+    ruleId: string,
+    ruleType: UntypedNormalizedAlertType,
+    ruleParams: SavedObjectAttributes | undefined,
+    references: SavedObjectReference[]
+  ): Params {
+    try {
+      const paramReferences = references
+        .filter((reference: SavedObjectReference) =>
+          reference.name.startsWith(extractedSavedObjectParamReferenceNamePrefix)
+        )
+        .map((reference: SavedObjectReference) => ({
+          ...reference,
+          name: reference.name.replace(extractedSavedObjectParamReferenceNamePrefix, ''),
+        }));
+      return ruleParams && ruleType?.useSavedObjectReferences?.injectReferences
+        ? (ruleType.useSavedObjectReferences.injectReferences(
+            ruleParams as ExtractedParams,
+            paramReferences
+          ) as Params)
+        : (ruleParams as Params);
+    } catch (err) {
+      throw Boom.badRequest(
+        `Error injecting reference into rule params for rule id ${ruleId} - ${err.message}`
       );
     }
   }

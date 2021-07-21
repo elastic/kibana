@@ -277,7 +277,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
           requestBody: {
             type: 'xml',
-            value: '<samplexml>samplexml',
+            value: '<samplexml>samplexml<samplexml>',
           },
           indexResponseBody: false,
           indexResponseHeaders: false,
@@ -308,7 +308,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               },
               'check.response.headers': advancedConfig.responseHeaders,
               'check.response.status': [advancedConfig.responseStatusCheck],
-              'check.request.body': `${advancedConfig.requestBody.value}</samplexml>`, // code editor adds closing tag
+              'check.request.body': advancedConfig.requestBody.value,
               'check.response.body.positive': [advancedConfig.responseBodyCheckPositive],
               'check.response.body.negative': [advancedConfig.responseBodyCheckNegative],
               'response.include_body': advancedConfig.indexResponseBody ? 'on_error' : 'never',

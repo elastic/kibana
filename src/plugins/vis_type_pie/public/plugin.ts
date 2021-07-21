@@ -12,7 +12,7 @@ import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { LEGACY_CHARTS_LIBRARY } from '../../visualizations/common/constants';
+import { LEGACY_PIE_CHARTS_LIBRARY } from '../common';
 import { pieLabels as pieLabelsExpressionFunction } from './expression_functions/pie_labels';
 import { createPieVisFn } from './pie_fn';
 import { getPieVisRenderer } from './pie_renderer';
@@ -43,7 +43,7 @@ export class VisTypePiePlugin {
     core: CoreSetup<VisTypePiePluginStartDependencies>,
     { expressions, visualizations, charts, usageCollection }: VisTypePieSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
+    if (!core.uiSettings.get(LEGACY_PIE_CHARTS_LIBRARY, false)) {
       const getStartDeps = async () => {
         const [coreStart, deps] = await core.getStartServices();
         return {

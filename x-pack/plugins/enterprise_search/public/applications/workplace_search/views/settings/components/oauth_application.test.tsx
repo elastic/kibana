@@ -14,10 +14,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiModal, EuiForm } from '@elastic/eui';
+import { EuiForm } from '@elastic/eui';
+
+import { getPageDescription } from '../../../../test_helpers';
 
 import { CredentialItem } from '../../../components/shared/credential_item';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { OAUTH_DESCRIPTION, REDIRECT_INSECURE_ERROR_TEXT } from '../../../constants';
 
 import { OauthApplication } from './oauth_application';
@@ -77,7 +78,7 @@ describe('OauthApplication', () => {
   it('handles form submission', () => {
     const wrapper = shallow(<OauthApplication />);
     const preventDefault = jest.fn();
-    wrapper.find('form').simulate('submit', { preventDefault });
+    wrapper.find(EuiForm).simulate('submit', { preventDefault });
 
     expect(updateOauthApplication).toHaveBeenCalled();
   });
@@ -95,25 +96,55 @@ describe('OauthApplication', () => {
     expect(wrapper.find(CredentialItem)).toHaveLength(2);
   });
 
-  it('renders license modal', () => {
-    setMockValues({
-      hasPlatinumLicense: false,
-      oauthApplication,
+  describe('non-platinum license content', () => {
+    beforeEach(() => {
+      setMockValues({
+        hasPlatinumLicense: false,
+        oauthApplication,
+      });
     });
-    const wrapper = shallow(<OauthApplication />);
 
-    expect(wrapper.find(EuiModal)).toHaveLength(1);
-  });
+    it('renders pageTitle', () => {
+      const wrapper = shallow(<OauthApplication />);
 
-  it('closes license modal', () => {
-    setMockValues({
-      hasPlatinumLicense: false,
-      oauthApplication,
+      expect(wrapper.prop('pageHeader').pageTitle).toMatchInlineSnapshot(`
+        <React.Fragment>
+          <LicenseBadge />
+          <EuiSpacer
+            size="s"
+          />
+          <EuiTitle
+            size="l"
+          >
+            <h1>
+              Configuring OAuth for Custom Search Applications
+            </h1>
+          </EuiTitle>
+        </React.Fragment>
+      `);
     });
-    const wrapper = shallow(<OauthApplication />);
-    wrapper.find(EuiModal).prop('onClose')();
 
-    expect(wrapper.find(EuiModal)).toHaveLength(0);
+    it('renders description', () => {
+      const wrapper = shallow(<OauthApplication />);
+
+      expect(wrapper.prop('pageHeader').description).toMatchInlineSnapshot(`
+        <React.Fragment>
+          <EuiText
+            color="subdued"
+          >
+            Configure an OAuth application for secure use of the Workplace Search Search API. Upgrade to a Platinum license to enable the Search API and create your OAuth application.
+          </EuiText>
+          <EuiSpacer />
+          <EuiLink
+            external={true}
+            href="/license-management.html"
+            target="_blank"
+          >
+            Explore Platinum features
+          </EuiLink>
+        </React.Fragment>
+      `);
+    });
   });
 
   it('handles conditional copy', () => {
@@ -127,7 +158,7 @@ describe('OauthApplication', () => {
     });
     const wrapper = shallow(<OauthApplication />);
 
-    expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(OAUTH_DESCRIPTION);
+    expect(getPageDescription(wrapper)).toEqual(OAUTH_DESCRIPTION);
     expect(wrapper.find('[data-test-subj="RedirectURIsRow"]').prop('error')).toEqual(
       REDIRECT_INSECURE_ERROR_TEXT
     );

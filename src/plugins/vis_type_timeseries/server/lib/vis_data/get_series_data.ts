@@ -8,8 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-// not typed yet
-// @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { handleResponseBody } from './series/handle_response_body';
@@ -53,6 +51,8 @@ export async function getSeriesData(
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
   };
+
+  const handleError = handleErrorResponse(panel);
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) =>
@@ -107,14 +107,9 @@ export async function getSeriesData(
       },
     };
   } catch (err) {
-    if (err.body) {
-      err.response = err.body;
-
-      return {
-        ...meta,
-        ...handleErrorResponse(panel)(err),
-      };
-    }
-    return meta;
+    return {
+      ...meta,
+      ...handleError(err),
+    };
   }
 }

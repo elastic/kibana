@@ -57,6 +57,7 @@ export class VisualizePageObject extends FtrService {
       defaultIndex: 'logstash-*',
       [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
     });
   }
 
@@ -448,6 +449,14 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
     await this.testSubjects.click('visualizesaveAndReturnButton');
+  }
+
+  public async getDeprecationWarningStatus() {
+    if (await this.visChart.isNewChartsLibraryEnabled()) {
+      await this.testSubjects.missingOrFail('vizDeprecationWarning');
+    } else {
+      await this.testSubjects.existOrFail('vizDeprecationWarning');
+    }
   }
 
   public async linkedToOriginatingApp() {

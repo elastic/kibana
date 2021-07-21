@@ -14,6 +14,6 @@ export default createTestConfig('spaces_only', {
   enableActionsProxy: false,
   rejectUnauthorized: false,
   verificationMode: undefined,
-  customizeLocalHostTls: true,
+  customizeLocalHostSsl: true,
   preconfiguredAlertHistoryEsIndex: true,
 });

@@ -12,6 +12,7 @@ import { resolve } from 'path';
 import { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
+import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 
 const stats = {
   ...Stats.presetToOptions('minimal'),
@@ -19,7 +20,6 @@ const stats = {
   errorDetails: true,
   errors: true,
   moduleTrace: true,
-  warningsFilter: /(export .* was not found in)|(entrypoint size limit)/,
 };
 
 // Extend the Storybook Webpack config with some customizations
@@ -70,12 +70,14 @@ export default function ({ config: storybookConfig }: { config: Configuration })
         },
       ],
     },
+    plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
-      // Tell Webpack about the scss extension
-      extensions: ['.scss'],
+      extensions: ['.js', '.ts', '.tsx', '.json'],
+      mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
       },
+      symlinks: false,
     },
     stats,
   };
@@ -93,7 +95,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     return plugin.options && typeof plugin.options.template === 'string';
   });
   if (htmlWebpackPlugin) {
-    htmlWebpackPlugin.options.template = require.resolve('../lib/templates/index.ejs');
+    htmlWebpackPlugin.options.template = require.resolve('../templates/index.ejs');
   }
 
   return webpackMerge(storybookConfig, config);

@@ -67,6 +67,7 @@ describe('find()', () => {
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
@@ -126,6 +127,7 @@ describe('find()', () => {
           recoveryActionGroup: RecoveredActionGroup,
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
+          isExportable: true,
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -187,6 +189,335 @@ describe('find()', () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     await alertsClient.find({ options: { sortField: 'name' } });
     expect(jest.requireMock('../lib/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
+  });
+
+  test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
+    jest.resetAllMocks();
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      ensureRuleTypeIsAuthorized() {},
+      logSuccessfulAuthorization() {},
+    });
+    const injectReferencesFn = jest.fn().mockReturnValue({
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    });
+    alertTypeRegistry.list.mockReturnValue(
+      new Set([
+        ...listedTypes,
+        {
+          actionGroups: [],
+          recoveryActionGroup: RecoveredActionGroup,
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          id: '123',
+          name: 'myType',
+          producer: 'myApp',
+          enabledInLicense: true,
+        },
+      ])
+    );
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: 'myType',
+      name: 'myType',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'myApp',
+    }));
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: 'alert',
+          attributes: {
+            alertTypeId: '123',
+            schedule: { interval: '20s' },
+            params: {
+              bar: true,
+              parameterThatIsSavedObjectRef: 'soRef_0',
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+            {
+              name: 'param:soRef_0',
+              type: 'someSavedObjectType',
+              id: '9',
+            },
+          ],
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const result = await alertsClient.find({ options: {} });
+
+    expect(injectReferencesFn).toHaveBeenCalledTimes(1);
+    expect(injectReferencesFn).toHaveBeenCalledWith(
+      {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      [{ id: '9', name: 'soRef_0', type: 'someSavedObjectType' }]
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+    Object {
+      "data": Array [
+        Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "1",
+              "params": Object {
+                "foo": true,
+              },
+            },
+          ],
+          "alertTypeId": "myType",
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "id": "1",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+          },
+          "schedule": Object {
+            "interval": "10s",
+          },
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "1",
+              "params": Object {
+                "foo": true,
+              },
+            },
+          ],
+          "alertTypeId": "123",
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "id": "2",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+            "parameterThatIsSavedObjectId": "9",
+          },
+          "schedule": Object {
+            "interval": "20s",
+          },
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        },
+      ],
+      "page": 1,
+      "perPage": 10,
+      "total": 2,
+    }
+    `);
+  });
+
+  test('throws an error if useSavedObjectReferences.injectReferences throws an error', async () => {
+    jest.resetAllMocks();
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      ensureRuleTypeIsAuthorized() {},
+      logSuccessfulAuthorization() {},
+    });
+    const injectReferencesFn = jest.fn().mockImplementation(() => {
+      throw new Error('something went wrong!');
+    });
+    alertTypeRegistry.list.mockReturnValue(
+      new Set([
+        ...listedTypes,
+        {
+          actionGroups: [],
+          recoveryActionGroup: RecoveredActionGroup,
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          id: '123',
+          name: 'myType',
+          producer: 'myApp',
+          enabledInLicense: true,
+        },
+      ])
+    );
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: 'myType',
+      name: 'myType',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'myApp',
+    }));
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: 'alert',
+          attributes: {
+            alertTypeId: '123',
+            schedule: { interval: '20s' },
+            params: {
+              bar: true,
+              parameterThatIsSavedObjectRef: 'soRef_0',
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+            {
+              name: 'soRef_0',
+              type: 'someSavedObjectType',
+              id: '9',
+            },
+          ],
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+    await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error injecting reference into rule params for rule id 2 - something went wrong!"`
+    );
   });
 
   describe('authorization', () => {
@@ -255,6 +586,7 @@ describe('find()', () => {
               "actions": Array [],
               "id": "1",
               "notifyWhen": undefined,
+              "params": undefined,
               "schedule": undefined,
               "tags": Array [
                 "myTag",
@@ -277,13 +609,13 @@ describe('find()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when searching alerts', async () => {
+    test('logs audit event when searching rules', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       await alertsClient.find();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_find',
+            action: 'rule_find',
             outcome: 'success',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -291,7 +623,7 @@ describe('find()', () => {
       );
     });
 
-    test('logs audit event when not authorised to search alerts', async () => {
+    test('logs audit event when not authorised to search rules', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
@@ -299,7 +631,7 @@ describe('find()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_find',
+            action: 'rule_find',
             outcome: 'failure',
           }),
           error: {
@@ -310,7 +642,7 @@ describe('find()', () => {
       );
     });
 
-    test('logs audit event when not authorised to search alert type', async () => {
+    test('logs audit event when not authorised to search rule type', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         ensureRuleTypeIsAuthorized: jest.fn(() => {
@@ -323,7 +655,7 @@ describe('find()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_find',
+            action: 'rule_find',
             outcome: 'failure',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },

@@ -63,6 +63,7 @@ describe('executeActionRoute', () => {
         someData: 'data',
       },
       source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
     });
 
     expect(res.ok).toHaveBeenCalled();
@@ -100,6 +101,7 @@ describe('executeActionRoute', () => {
       actionId: '1',
       params: {},
       source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
     });
 
     expect(res.ok).not.toHaveBeenCalled();

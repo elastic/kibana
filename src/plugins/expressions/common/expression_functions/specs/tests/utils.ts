@@ -224,4 +224,72 @@ const stringTable: Datatable = {
   ],
 };
 
-export { emptyTable, testTable, stringTable };
+const tableWithNulls: Datatable = {
+  type: 'datatable',
+  columns: [
+    {
+      id: 'name',
+      name: 'name label',
+      meta: { type: 'string' },
+    },
+    {
+      id: 'time',
+      name: 'time label',
+      meta: { type: 'date' },
+    },
+    {
+      id: 'price',
+      name: 'price label',
+      meta: { type: 'number' },
+    },
+  ],
+  rows: [
+    {
+      name: 'product1',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: null,
+    },
+    {
+      name: 'product1',
+      time: 1517929200950, // 06 Feb 2018 15:00:00 GMT
+      price: null,
+    },
+    {
+      name: 'product1',
+      time: 1518015600950, // 07 Feb 2018 15:00:00 GMT
+      price: 420,
+    },
+    {
+      name: 'product2',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: 216,
+    },
+    {
+      name: 'product2',
+      time: 1517929200950, // 06 Feb 2018 15:00:00 GMT
+      price: 200,
+    },
+    {
+      name: 'product2',
+      time: 1518015600950, // 07 Feb 2018 15:00:00 GMT
+      price: 190,
+    },
+    {
+      name: 'product3',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: null,
+    },
+    {
+      name: 'product4',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: 311,
+    },
+    {
+      name: 'product5',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: 288,
+    },
+  ],
+};
+
+export { emptyTable, testTable, stringTable, tableWithNulls };

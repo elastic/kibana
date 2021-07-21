@@ -18,11 +18,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { useStartServices } from '../hooks';
+
 interface Props {
   onClose: () => void;
 }
 
 export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
+  const { docLinks } = useStartServices();
+
   return (
     <EuiFlyout onClose={onClose} size="m" maxWidth={640}>
       <EuiFlyoutHeader hasBorder aria-labelledby="AlphaMessagingFlyoutTitle">
@@ -49,11 +53,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               defaultMessage="Read our {docsLink} or go to our {forumLink} for questions or feedback."
               values={{
                 docsLink: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/fleet/current/index.html"
-                    external
-                    target="_blank"
-                  >
+                  <EuiLink href={docLinks.links.fleet.guide} external target="_blank">
                     <FormattedMessage
                       id="xpack.fleet.alphaMessaging.docsLink"
                       defaultMessage="documentation"

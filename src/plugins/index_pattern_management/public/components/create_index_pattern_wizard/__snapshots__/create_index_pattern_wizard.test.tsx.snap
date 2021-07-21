@@ -14,46 +14,46 @@ exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
 
 exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
 <Fragment>
-  <EuiPageContent>
-    <Header
-      docLinks={
+  <Header
+    docLinks={
+      Object {
+        "DOC_LINK_VERSION": "jest",
+        "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
+        "links": Object {
+          "indexPatterns": Object {},
+          "runtimeFields": Object {},
+          "scriptedFields": Object {},
+        },
+      }
+    }
+    indexPatternName="name"
+    isBeta={false}
+    prompt={null}
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <StepIndexPattern
+    allIndices={
+      Array [
         Object {
-          "DOC_LINK_VERSION": "jest",
-          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
-          "links": Object {
-            "indexPatterns": Object {},
-            "runtimeFields": Object {},
-            "scriptedFields": Object {},
-          },
-        }
+          "name": "myIndexPattern",
+        },
+      ]
+    }
+    goToNextStep={[Function]}
+    indexPatternCreationType={
+      IndexPatternCreationConfig {
+        "httpClient": null,
+        "isBeta": false,
+        "key": "default",
+        "name": "name",
+        "showSystemIndices": true,
+        "type": "default",
       }
-      indexPatternName="name"
-      isBeta={false}
-      prompt={null}
-    />
-    <EuiHorizontalRule />
-    <StepIndexPattern
-      allIndices={
-        Array [
-          Object {
-            "name": "myIndexPattern",
-          },
-        ]
-      }
-      goToNextStep={[Function]}
-      indexPatternCreationType={
-        IndexPatternCreationConfig {
-          "httpClient": null,
-          "isBeta": false,
-          "key": "default",
-          "name": "name",
-          "showSystemIndices": true,
-          "type": "default",
-        }
-      }
-      showSystemIndices={true}
-    />
-  </EuiPageContent>
+    }
+    showSystemIndices={true}
+  />
   <EuiGlobalToastList
     dismissToast={[Function]}
     side="right"
@@ -65,40 +65,40 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
 
 exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
 <Fragment>
-  <EuiPageContent>
-    <Header
-      docLinks={
-        Object {
-          "DOC_LINK_VERSION": "jest",
-          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
-          "links": Object {
-            "indexPatterns": Object {},
-            "runtimeFields": Object {},
-            "scriptedFields": Object {},
-          },
-        }
+  <Header
+    docLinks={
+      Object {
+        "DOC_LINK_VERSION": "jest",
+        "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
+        "links": Object {
+          "indexPatterns": Object {},
+          "runtimeFields": Object {},
+          "scriptedFields": Object {},
+        },
       }
-      indexPatternName="name"
-      isBeta={false}
-      prompt={null}
-    />
-    <EuiHorizontalRule />
-    <StepIndexPattern
-      allIndices={Array []}
-      goToNextStep={[Function]}
-      indexPatternCreationType={
-        IndexPatternCreationConfig {
-          "httpClient": null,
-          "isBeta": false,
-          "key": "default",
-          "name": "name",
-          "showSystemIndices": true,
-          "type": "default",
-        }
+    }
+    indexPatternName="name"
+    isBeta={false}
+    prompt={null}
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <StepIndexPattern
+    allIndices={Array []}
+    goToNextStep={[Function]}
+    indexPatternCreationType={
+      IndexPatternCreationConfig {
+        "httpClient": null,
+        "isBeta": false,
+        "key": "default",
+        "name": "name",
+        "showSystemIndices": true,
+        "type": "default",
       }
-      showSystemIndices={true}
-    />
-  </EuiPageContent>
+    }
+    showSystemIndices={true}
+  />
   <EuiGlobalToastList
     dismissToast={[Function]}
     side="right"
@@ -110,40 +110,40 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
 
 exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
 <Fragment>
-  <EuiPageContent>
-    <Header
-      docLinks={
-        Object {
-          "DOC_LINK_VERSION": "jest",
-          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
-          "links": Object {
-            "indexPatterns": Object {},
-            "runtimeFields": Object {},
-            "scriptedFields": Object {},
-          },
-        }
+  <Header
+    docLinks={
+      Object {
+        "DOC_LINK_VERSION": "jest",
+        "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
+        "links": Object {
+          "indexPatterns": Object {},
+          "runtimeFields": Object {},
+          "scriptedFields": Object {},
+        },
       }
-      indexPatternName="name"
-      isBeta={false}
-      prompt={null}
-    />
-    <EuiHorizontalRule />
-    <StepTimeField
-      createIndexPattern={[Function]}
-      goToPreviousStep={[Function]}
-      indexPattern=""
-      indexPatternCreationType={
-        IndexPatternCreationConfig {
-          "httpClient": null,
-          "isBeta": false,
-          "key": "default",
-          "name": "name",
-          "showSystemIndices": true,
-          "type": "default",
-        }
+    }
+    indexPatternName="name"
+    isBeta={false}
+    prompt={null}
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <StepTimeField
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    indexPattern=""
+    indexPatternCreationType={
+      IndexPatternCreationConfig {
+        "httpClient": null,
+        "isBeta": false,
+        "key": "default",
+        "name": "name",
+        "showSystemIndices": true,
+        "type": "default",
       }
-    />
-  </EuiPageContent>
+    }
+  />
   <EuiGlobalToastList
     dismissToast={[Function]}
     side="right"
@@ -155,40 +155,40 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
 
 exports[`CreateIndexPatternWizard renders when there are no indices but there are remote clusters 1`] = `
 <Fragment>
-  <EuiPageContent>
-    <Header
-      docLinks={
-        Object {
-          "DOC_LINK_VERSION": "jest",
-          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
-          "links": Object {
-            "indexPatterns": Object {},
-            "runtimeFields": Object {},
-            "scriptedFields": Object {},
-          },
-        }
+  <Header
+    docLinks={
+      Object {
+        "DOC_LINK_VERSION": "jest",
+        "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
+        "links": Object {
+          "indexPatterns": Object {},
+          "runtimeFields": Object {},
+          "scriptedFields": Object {},
+        },
       }
-      indexPatternName="name"
-      isBeta={false}
-      prompt={null}
-    />
-    <EuiHorizontalRule />
-    <StepIndexPattern
-      allIndices={Array []}
-      goToNextStep={[Function]}
-      indexPatternCreationType={
-        IndexPatternCreationConfig {
-          "httpClient": null,
-          "isBeta": false,
-          "key": "default",
-          "name": "name",
-          "showSystemIndices": true,
-          "type": "default",
-        }
+    }
+    indexPatternName="name"
+    isBeta={false}
+    prompt={null}
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <StepIndexPattern
+    allIndices={Array []}
+    goToNextStep={[Function]}
+    indexPatternCreationType={
+      IndexPatternCreationConfig {
+        "httpClient": null,
+        "isBeta": false,
+        "key": "default",
+        "name": "name",
+        "showSystemIndices": true,
+        "type": "default",
       }
-      showSystemIndices={true}
-    />
-  </EuiPageContent>
+    }
+    showSystemIndices={true}
+  />
   <EuiGlobalToastList
     dismissToast={[Function]}
     side="right"
@@ -200,46 +200,46 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
 
 exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
 <Fragment>
-  <EuiPageContent>
-    <Header
-      docLinks={
+  <Header
+    docLinks={
+      Object {
+        "DOC_LINK_VERSION": "jest",
+        "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
+        "links": Object {
+          "indexPatterns": Object {},
+          "runtimeFields": Object {},
+          "scriptedFields": Object {},
+        },
+      }
+    }
+    indexPatternName="name"
+    isBeta={false}
+    prompt={null}
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <StepIndexPattern
+    allIndices={
+      Array [
         Object {
-          "DOC_LINK_VERSION": "jest",
-          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
-          "links": Object {
-            "indexPatterns": Object {},
-            "runtimeFields": Object {},
-            "scriptedFields": Object {},
-          },
-        }
+          "name": ".kibana ",
+        },
+      ]
+    }
+    goToNextStep={[Function]}
+    indexPatternCreationType={
+      IndexPatternCreationConfig {
+        "httpClient": null,
+        "isBeta": false,
+        "key": "default",
+        "name": "name",
+        "showSystemIndices": true,
+        "type": "default",
       }
-      indexPatternName="name"
-      isBeta={false}
-      prompt={null}
-    />
-    <EuiHorizontalRule />
-    <StepIndexPattern
-      allIndices={
-        Array [
-          Object {
-            "name": ".kibana ",
-          },
-        ]
-      }
-      goToNextStep={[Function]}
-      indexPatternCreationType={
-        IndexPatternCreationConfig {
-          "httpClient": null,
-          "isBeta": false,
-          "key": "default",
-          "name": "name",
-          "showSystemIndices": true,
-          "type": "default",
-        }
-      }
-      showSystemIndices={true}
-    />
-  </EuiPageContent>
+    }
+    showSystemIndices={true}
+  />
   <EuiGlobalToastList
     dismissToast={[Function]}
     side="right"

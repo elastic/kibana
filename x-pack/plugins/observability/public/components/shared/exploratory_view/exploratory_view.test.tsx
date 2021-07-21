@@ -51,8 +51,9 @@ describe('ExploratoryView', () => {
     const initSeries = {
       data: {
         'ux-series': {
+          isNew: true,
           dataType: 'ux' as const,
-          reportType: 'dist' as const,
+          reportType: 'data-distribution' as const,
           breakdown: 'user_agent .name',
           reportDefinitions: { 'service.name': ['elastic-co'] },
           time: { from: 'now-15m', to: 'now' },
@@ -63,7 +64,7 @@ describe('ExploratoryView', () => {
     render(<ExploratoryView />, { initSeries });
 
     expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
-    expect(await screen.findByText('Performance Distribution')).toBeInTheDocument();
+    expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
 
     await waitFor(() => {

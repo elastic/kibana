@@ -13,44 +13,49 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useUrlParams } from '../url_params_context/use_url_params';
 import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
-import { IUrlParams } from '../url_params_context/types';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
+import { useApmParams } from '../../hooks/use_apm_params';
 
 export type APMServiceAlert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
 export const APMServiceContext = createContext<{
+  serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
-}>({ transactionTypes: [], alerts: [] });
+}>({ serviceName: '', transactionTypes: [], alerts: [] });
 
 export function ApmServiceContextProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const { urlParams } = useUrlParams();
-  const { agentName } = useServiceAgentNameFetcher();
+  const {
+    path: { serviceName },
+    query,
+  } = useApmParams('/services/:serviceName');
 
-  const transactionTypes = useServiceTransactionTypesFetcher();
+  const { agentName } = useServiceAgentNameFetcher(serviceName);
+
+  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
 
   const transactionType = getTransactionType({
-    urlParams,
+    transactionType: query.transactionType,
     transactionTypes,
     agentName,
   });
 
-  const { alerts } = useServiceAlertsFetcher(transactionType);
+  const { alerts } = useServiceAlertsFetcher({ serviceName, transactionType });
 
   return (
     <APMServiceContext.Provider
       value={{
+        serviceName,
         agentName,
         transactionType,
         transactionTypes,
@@ -62,16 +67,16 @@ export function ApmServiceContextProvider({
 }
 
 export function getTransactionType({
-  urlParams,
+  transactionType,
   transactionTypes,
   agentName,
 }: {
-  urlParams: IUrlParams;
+  transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
 }) {
-  if (urlParams.transactionType) {
-    return urlParams.transactionType;
+  if (transactionType) {
+    return transactionType;
   }
 
   if (!agentName || transactionTypes.length === 0) {

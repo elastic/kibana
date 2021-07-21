@@ -54,6 +54,9 @@ import { getEsErrorMessage } from '../lib/errors';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
+// 1,000,000 nanoseconds in 1 millisecond
+const Millis2Nanos = 1000 * 1000;
+
 type Event = Exclude<IEvent, undefined>;
 
 interface AlertTaskRunResult {
@@ -67,6 +70,7 @@ interface AlertTaskInstance extends ConcreteTaskInstance {
 
 export class TaskRunner<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -78,6 +82,7 @@ export class TaskRunner<
   private taskInstance: AlertTaskInstance;
   private alertType: NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -89,6 +94,7 @@ export class TaskRunner<
   constructor(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -168,6 +174,7 @@ export class TaskRunner<
   ) {
     return createExecutionHandler<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -187,6 +194,8 @@ export class TaskRunner<
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
+      supportsEphemeralTasks: this.context.supportsEphemeralTasks,
+      maxEphemeralActionsPerAlert: this.context.maxEphemeralActionsPerAlert,
     });
   }
 
@@ -489,15 +498,17 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    const runDate = new Date().toISOString();
-    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDate}`);
+    const runDate = new Date();
+    const runDateString = runDate.toISOString();
+    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
+    const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
     const event: IEvent = {
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
-      '@timestamp': runDate,
+      '@timestamp': runDateString,
       event: {
         action: EVENT_LOG_ACTIONS.execute,
         kind: 'alert',
@@ -513,16 +524,30 @@ export class TaskRunner<
             namespace,
           },
         ],
+        task: {
+          scheduled: this.taskInstance.runAt.toISOString(),
+          schedule_delay: Millis2Nanos * scheduleDelay,
+        },
       },
       rule: {
         id: alertId,
         license: this.alertType.minimumLicenseRequired,
         category: this.alertType.id,
         ruleset: this.alertType.producer,
-        namespace,
       },
     };
+
     eventLogger.startTiming(event);
+
+    const startEvent = cloneDeep({
+      ...event,
+      event: {
+        ...event.event,
+        action: EVENT_LOG_ACTIONS.executeStart,
+      },
+      message: `alert execution start: "${alertId}"`,
+    });
+    eventLogger.logEvent(startEvent);
 
     const { state, schedule } = await errorAsAlertTaskRunResult(
       this.loadAlertAttributesAndRun(event)
@@ -683,6 +708,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   namespace: string | undefined;
   ruleType: NormalizedAlertType<
     AlertTypeParams,
+    AlertTypeParams,
     AlertTypeState,
     {
       [x: string]: unknown;
@@ -803,7 +829,6 @@ function generateNewAndRecoveredInstanceEvents<
         license: ruleType.minimumLicenseRequired,
         category: ruleType.id,
         ruleset: ruleType.producer,
-        namespace,
         name: rule.name,
       },
     };

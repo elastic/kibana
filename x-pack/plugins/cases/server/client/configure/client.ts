@@ -16,25 +16,26 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
-import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
 import {
+  CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
+  CasesConfigurationsResponse,
   CasesConfigurePatch,
+  CasesConfigurePatchRt,
   CasesConfigureRequest,
   CasesConfigureResponse,
+  ConnectorMappings,
   ConnectorMappingsAttributes,
+  ESCasesConfigureAttributes,
   excess,
   GetConfigureFindRequest,
   GetConfigureFindRequestRt,
+  MAX_CONCURRENT_SEARCHES,
+  SUPPORTED_CONNECTORS,
   throwErrors,
-  CasesConfigurationsResponse,
-  CaseConfigurationsResponseRt,
-  CasesConfigurePatchRt,
-  ConnectorMappings,
-  ESCasesConfigureAttributes,
-} from '../../../common/api';
-import { createCaseError } from '../../common/error';
+} from '../../../common';
 import {
+  createCaseError,
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../../common';

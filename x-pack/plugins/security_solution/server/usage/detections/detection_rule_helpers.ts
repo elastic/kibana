@@ -177,6 +177,8 @@ export const updateDetectionRuleUsage = (
   return updatedUsage;
 };
 
+const MAX_RESULTS_WINDOW = 10_000; // elasticsearch index.max_result_window default value
+
 export const getDetectionRuleMetrics = async (
   kibanaIndex: string,
   signalsIndex: string,
@@ -189,14 +191,14 @@ export const getDetectionRuleMetrics = async (
     filterPath: [],
     ignoreUnavailable: true,
     index: kibanaIndex,
-    size: 10_000, // elasticsearch index.max_result_window default value
+    size: MAX_RESULTS_WINDOW,
   };
 
   try {
     const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
     const { body: detectionAlertsResp } = (await esClient.search({
       index: `${signalsIndex}*`,
-      size: 0,
+      size: MAX_RESULTS_WINDOW,
       body: {
         aggs: {
           detectionAlerts: {
@@ -224,7 +226,7 @@ export const getDetectionRuleMetrics = async (
       type: 'cases-comments',
       fields: [],
       page: 1,
-      perPage: 10_000,
+      perPage: MAX_RESULTS_WINDOW,
       filter: 'cases-comments.attributes.type: alert',
     });
 

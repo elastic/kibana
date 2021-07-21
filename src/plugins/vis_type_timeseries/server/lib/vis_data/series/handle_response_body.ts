@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Panel } from '../../../../common/types';
-import { buildProcessorFunction } from '../build_processor_function';
+import { _legacyBuildProcessorFunction } from '../build_processor_function';
 // @ts-expect-error
 import { processors } from '../response_processors/series';
 import {
@@ -51,7 +51,7 @@ export function handleResponseBody(
 
     const extractFields = createFieldsFetcher(req, services);
 
-    const processor = buildProcessorFunction(
+    const processor = _legacyBuildProcessorFunction(
       processors,
       resp,
       panel,

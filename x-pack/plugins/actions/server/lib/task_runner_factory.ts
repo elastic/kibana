@@ -16,6 +16,7 @@ import {
   KibanaRequest,
   SavedObjectReference,
   IBasePath,
+  SavedObject,
 } from '../../../../../src/core/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
@@ -27,9 +28,12 @@ import {
   ActionTypeRegistryContract,
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
+  ActionTaskExecutorParams,
+  isPersistedActionTask,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
+import { validatedRelatedSavedObjects } from './related_saved_objects';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -71,18 +75,22 @@ export class TaskRunnerFactory {
       getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
+    const taskInfo = {
+      scheduled: taskInstance.runAt,
+    };
+
     return {
       async run() {
-        const { spaceId, actionTaskParamsId } = taskInstance.params as Record<string, string>;
-        const namespace = spaceIdToNamespace(spaceId);
+        const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
+        const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey },
+          attributes: { actionId, params, apiKey, relatedSavedObjects },
           references,
-        } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-          actionTaskParamsId,
-          { namespace }
+        } = await getActionTaskParams(
+          actionTaskExecutorParams,
+          encryptedSavedObjectsClient,
+          spaceIdToNamespace
         );
 
         const requestHeaders: Record<string, string> = {};
@@ -114,9 +122,12 @@ export class TaskRunnerFactory {
         try {
           executorResult = await actionExecutor.execute({
             params,
-            actionId,
+            actionId: actionId as string,
+            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),
+            taskInfo,
+            relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
           if (e instanceof ActionTypeDisabledError) {
@@ -137,23 +148,43 @@ export class TaskRunnerFactory {
         }
 
         // Cleanup action_task_params object now that we're done with it
-        try {
-          // If the request has reached this far we can assume the user is allowed to run clean up
-          // We would idealy secure every operation but in order to support clean up of legacy alerts
-          // we allow this operation in an unsecured manner
-          // Once support for legacy alert RBAC is dropped, this can be secured
-          await getUnsecuredSavedObjectsClient(fakeRequest).delete(
-            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-            actionTaskParamsId
-          );
-        } catch (e) {
-          // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
-          logger.error(
-            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskParamsId}"]: ${e.message}`
-          );
+        if (isPersistedActionTask(actionTaskExecutorParams)) {
+          try {
+            // If the request has reached this far we can assume the user is allowed to run clean up
+            // We would idealy secure every operation but in order to support clean up of legacy alerts
+            // we allow this operation in an unsecured manner
+            // Once support for legacy alert RBAC is dropped, this can be secured
+            await getUnsecuredSavedObjectsClient(fakeRequest).delete(
+              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+              actionTaskExecutorParams.actionTaskParamsId
+            );
+          } catch (e) {
+            // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
+            logger.error(
+              `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
+            );
+          }
         }
       },
     };
+  }
+}
+
+async function getActionTaskParams(
+  executorParams: ActionTaskExecutorParams,
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
+  spaceIdToNamespace: SpaceIdToNamespaceFunction
+): Promise<Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>> {
+  const { spaceId } = executorParams;
+  const namespace = spaceIdToNamespace(spaceId);
+  if (isPersistedActionTask(executorParams)) {
+    return encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      executorParams.actionTaskParamsId,
+      { namespace }
+    );
+  } else {
+    return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
   }
 }
 

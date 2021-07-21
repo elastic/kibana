@@ -41,6 +41,7 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
+import { RunNowResult } from '../../task_manager/server';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -68,7 +69,8 @@ interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer;
+  executionEnqueuer: ExecutionEnqueuer<void>;
+  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -88,7 +90,8 @@ export class ActionsClient {
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
-  private readonly executionEnqueuer: ExecutionEnqueuer;
+  private readonly executionEnqueuer: ExecutionEnqueuer<void>;
+  private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
 
   constructor({
@@ -99,6 +102,7 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
+    ephemeralExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
@@ -110,6 +114,7 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
+    this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
@@ -469,6 +474,7 @@ export class ActionsClient {
     actionId,
     params,
     source,
+    relatedSavedObjects,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
@@ -476,7 +482,13 @@ export class ActionsClient {
     ) {
       await this.authorization.ensureAuthorized('execute');
     }
-    return this.actionExecutor.execute({ actionId, params, source, request: this.request });
+    return this.actionExecutor.execute({
+      actionId,
+      params,
+      source,
+      request: this.request,
+      relatedSavedObjects,
+    });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
@@ -488,6 +500,17 @@ export class ActionsClient {
       await this.authorization.ensureAuthorized('execute');
     }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
+  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
+    const { source } = options;
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {

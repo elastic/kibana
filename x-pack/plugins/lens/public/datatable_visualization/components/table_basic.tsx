@@ -21,7 +21,7 @@ import {
 import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
 import { FormatFactory, LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder } from '../../shared_components';
+import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { ColumnState } from '../visualization';
 import {
@@ -41,9 +41,9 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { findMinMaxByColumnId } from './shared_utils';
 import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
 import { getFinalSummaryConfiguration } from '../summary';
+import { getOriginalId } from '../transpose_helpers';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -180,34 +180,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, setColumnConfig, columnConfig]
   );
 
-  const columns: EuiDataGridColumn[] = useMemo(
-    () =>
-      createGridColumns(
-        bucketColumns,
-        firstLocalTable,
-        handleFilterClick,
-        handleTransposedColumnClick,
-        isReadOnlySorted,
-        columnConfig,
-        visibleColumns,
-        formatFactory,
-        onColumnResize,
-        onColumnHide
-      ),
-    [
-      bucketColumns,
-      firstLocalTable,
-      handleFilterClick,
-      handleTransposedColumnClick,
-      isReadOnlySorted,
-      columnConfig,
-      visibleColumns,
-      formatFactory,
-      onColumnResize,
-      onColumnHide,
-    ]
-  );
-
   const isNumericMap: Record<string, boolean> = useMemo(() => {
     const numericMap: Record<string, boolean> = {};
     for (const column of firstLocalTable.columns) {
@@ -233,9 +205,40 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter(({ columnId }) => isNumericMap[columnId])
         .map(({ columnId }) => columnId),
-      firstTable
+      firstTable,
+      getOriginalId
     );
   }, [firstTable, isNumericMap, columnConfig]);
+
+  const columns: EuiDataGridColumn[] = useMemo(
+    () =>
+      createGridColumns(
+        bucketColumns,
+        firstLocalTable,
+        handleFilterClick,
+        handleTransposedColumnClick,
+        isReadOnlySorted,
+        columnConfig,
+        visibleColumns,
+        formatFactory,
+        onColumnResize,
+        onColumnHide,
+        alignments
+      ),
+    [
+      bucketColumns,
+      firstLocalTable,
+      handleFilterClick,
+      handleTransposedColumnClick,
+      isReadOnlySorted,
+      columnConfig,
+      visibleColumns,
+      formatFactory,
+      onColumnResize,
+      onColumnHide,
+      alignments,
+    ]
+  );
 
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
@@ -278,9 +281,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [formatters, columnConfig, props.uiSettings]
   );
 
-  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns: () => {} }), [
-    visibleColumns,
-  ]);
+  const columnVisibility = useMemo(
+    () => ({
+      visibleColumns,
+      setVisibleColumns: () => {},
+    }),
+    [visibleColumns]
+  );
 
   const sorting = useMemo<EuiDataGridSorting>(
     () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),

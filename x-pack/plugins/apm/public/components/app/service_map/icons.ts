@@ -11,7 +11,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { getAgentIcon } from '../../shared/AgentIcon/get_agent_icon';
+import { getAgentIcon } from '../../shared/agent_icon/get_agent_icon';
 import { getSpanIcon } from '../../shared/span_icon/get_span_icon';
 
 export function iconForNode(node: cytoscape.NodeSingular) {

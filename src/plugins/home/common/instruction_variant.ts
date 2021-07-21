@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const INSTRUCTION_VARIANT = {
   ESC: 'esc',
   OSX: 'osx',
@@ -24,6 +26,7 @@ export const INSTRUCTION_VARIANT = {
   DOTNET: 'dotnet',
   LINUX: 'linux',
   PHP: 'php',
+  FLEET: 'fleet',
 };
 
 const DISPLAY_MAP = {
@@ -44,6 +47,9 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.DOTNET]: '.NET',
   [INSTRUCTION_VARIANT.LINUX]: 'Linux',
   [INSTRUCTION_VARIANT.PHP]: 'PHP',
+  [INSTRUCTION_VARIANT.FLEET]: i18n.translate('home.tutorial.instruction_variant.fleet', {
+    defaultMessage: 'Elastic APM (beta) in Fleet',
+  }),
 };
 
 /**

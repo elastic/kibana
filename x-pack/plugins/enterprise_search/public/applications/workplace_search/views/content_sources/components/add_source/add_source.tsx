@@ -13,9 +13,12 @@ import { i18n } from '@kbn/i18n';
 
 import { setSuccessMessage } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
-import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { staticSourceData } from '../../source_data';
@@ -71,8 +74,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     return resetSourceState;
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
@@ -99,9 +100,10 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   };
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
+  const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}
@@ -158,6 +160,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
         <Reauthenticate name={name} header={header} />
       )}
-    </>
+    </Layout>
   );
 };

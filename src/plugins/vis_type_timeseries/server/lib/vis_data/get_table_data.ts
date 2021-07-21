@@ -12,7 +12,6 @@ import { get } from 'lodash';
 // not typed yet
 // @ts-expect-error
 import { buildRequestBody } from './table/build_request_body';
-// @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
 // @ts-expect-error
 import { processBucket } from './table/process_bucket';
@@ -20,6 +19,7 @@ import { processBucket } from './table/process_bucket';
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { createFieldFormatAccessor } from './create_field_format_accessor';
 import { extractFieldLabel } from '../../../common/fields_utils';
+
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
@@ -77,6 +77,8 @@ export async function getTableData(
     uiRestrictions: capabilities.uiRestrictions,
   };
 
+  const handleError = handleErrorResponse(panel);
+
   try {
     const body = await buildRequestBody(
       req,
@@ -84,7 +86,8 @@ export async function getTableData(
       esQueryConfig,
       panelIndex,
       capabilities,
-      uiSettings
+      uiSettings,
+      () => services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes))
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
@@ -120,14 +123,9 @@ export async function getTableData(
       series,
     };
   } catch (err) {
-    if (err.body) {
-      err.response = err.body;
-
-      return {
-        ...meta,
-        ...handleErrorResponse(panel)(err),
-      };
-    }
-    return meta;
+    return {
+      ...meta,
+      ...handleError(err),
+    };
   }
 }

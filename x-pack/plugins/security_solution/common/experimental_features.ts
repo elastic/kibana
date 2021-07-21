@@ -15,6 +15,7 @@ const allowedExperimentalValues = Object.freeze({
   trustedAppsByPolicyEnabled: false,
   metricsEntitiesEnabled: false,
   ruleRegistryEnabled: false,
+  tGridEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

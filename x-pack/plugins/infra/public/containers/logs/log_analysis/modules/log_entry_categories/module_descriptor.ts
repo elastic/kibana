@@ -124,6 +124,7 @@ const setUpModule = async (
       jobOverrides,
       datafeedOverrides,
       query,
+      useDedicatedIndex: true,
     },
     fetch
   );

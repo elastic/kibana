@@ -5,13 +5,19 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiText, EuiBetaBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { i18n } from '@kbn/i18n';
+
+import styled, { useTheme } from 'styled-components';
+
+import type { EuiTheme } from 'src/plugins/kibana_react/common';
 
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
 
-import { HeroImage } from '../sections/epm/screens/home/header';
+import { useLinks } from '../hooks';
 
 import { WithHeaderLayout } from './';
 
@@ -20,6 +26,30 @@ interface Props {
   children?: React.ReactNode;
 }
 
+const Illustration = styled(EuiImage)`
+  margin-bottom: -68px;
+  width: 80%;
+`;
+
+const HeroImage = memo(() => {
+  const { toAssets } = useLinks();
+  const theme = useTheme() as EuiTheme;
+  const IS_DARK_THEME = theme.darkMode;
+
+  return (
+    <Illustration
+      alt={i18n.translate('xpack.fleet.epm.illustrationAltText', {
+        defaultMessage: 'Illustration of an integration',
+      })}
+      url={
+        IS_DARK_THEME
+          ? toAssets('illustration_integrations_darkmode.svg')
+          : toAssets('illustration_integrations_lightmode.svg')
+      }
+    />
+  );
+});
+
 export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, children }) => {
   const { getHref } = useLink();
 
@@ -27,20 +57,29 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
     <WithHeaderLayout
       rightColumn={<HeroImage />}
       leftColumn={
-        <EuiText>
-          <h1>
-            <FormattedMessage id="xpack.fleet.integrationsAppTitle" defaultMessage="Integrations" />{' '}
-            <EuiBetaBadge
-              label={<FormattedMessage id="xpack.fleet.betaLabel" defaultMessage="Beta" />}
-              tooltipContent={
+        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+          <EuiText>
+            <h1>
+              <FormattedMessage
+                id="xpack.fleet.integrationsAppTitle"
+                defaultMessage="Integrations"
+              />
+            </h1>
+          </EuiText>
+
+          <EuiSpacer size="s" />
+
+          <EuiFlexItem grow={false}>
+            <EuiText size="m" color="subdued">
+              <p>
                 <FormattedMessage
-                  id="xpack.fleet.integrationsBetaDescription"
-                  defaultMessage="Fleet is not recommended for production environments."
+                  id="xpack.fleet.epm.pageSubtitle"
+                  defaultMessage="Collect data from popular apps and services."
                 />
-              }
-            />
-          </h1>
-        </EuiText>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       tabs={[
         {
