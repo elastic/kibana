@@ -81,10 +81,17 @@ export const syncDashboardIndexPatterns = ({
       map(() => dashboardContainer!.getChildIds()),
       distinctUntilChanged(deepEqual),
       switchMap((newChildIds: string[]) =>
-        merge(...newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$()))
-      ),
-      // Embeddables often throw errors into their output streams.
-      catchError(() => EMPTY)
+        merge(
+          ...newChildIds.map((childId) =>
+            dashboardContainer!
+              .getChild(childId)
+              .getOutput$()
+              // Embeddables often throw errors into their output streams.
+              // This should not affect dashboard loading
+              .pipe(catchError(() => EMPTY))
+          )
+        )
+      )
     )
   )
     .pipe(
