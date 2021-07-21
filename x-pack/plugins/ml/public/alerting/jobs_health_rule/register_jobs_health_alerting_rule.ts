@@ -23,7 +23,7 @@ export function registerJobsHealthAlertingRule(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/machine-learning/${docLinks.DOC_LINK_VERSION}/ml-configuring-alerts.html`;
+      return docLinks.links.ml.alertingRules;
     },
     alertParamsExpression: lazy(() => import('./anomaly_detection_jobs_health_rule_trigger')),
     validate: (alertParams: MlAnomalyDetectionJobsHealthRuleParams) => {

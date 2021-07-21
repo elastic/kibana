@@ -27,7 +27,7 @@ export function registerMlAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/machine-learning/${docLinks.DOC_LINK_VERSION}/ml-configuring-alerts.html`;
+      return docLinks.links.ml.alertingRules;
     },
     alertParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
     validate: (alertParams: MlAnomalyDetectionAlertParams) => {
