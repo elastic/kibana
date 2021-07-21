@@ -11,7 +11,6 @@ import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getPrepackagedRulesStatusRequest,
-  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
 import { SecurityPluginSetup } from '../../../../../../security/server';
@@ -74,7 +73,6 @@ describe('get_prepackaged_rule_status_route', () => {
       authz: {},
     } as unknown) as SecurityPluginSetup;
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
     getPrepackagedRulesStatusRoute(server.router, createMockConfig(), securitySetup);

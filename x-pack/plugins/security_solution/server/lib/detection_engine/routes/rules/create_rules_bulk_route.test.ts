@@ -10,7 +10,6 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getReadBulkRequest,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
   getEmptyFindResult,
   getAlertMock,
@@ -35,12 +34,10 @@ describe('create_rules_bulk', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
     clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
     createRulesBulkRoute(server.router, ml);
@@ -90,8 +87,7 @@ describe('create_rules_bulk', () => {
     });
 
     it('returns an error object if the index does not exist', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(getReadBulkRequest(), context);

@@ -12,7 +12,6 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getFindResultWithSingleHit,
-  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
@@ -45,11 +44,9 @@ describe('import_rules_route', () => {
     request = getImportRulesRequest(hapiStream);
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
     importRulesRoute(server.router, config, ml);
@@ -130,8 +127,7 @@ describe('import_rules_route', () => {
 
     test('returns an error if the index does not exist', async () => {
       clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(request, context);
@@ -144,8 +140,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns an error when cluster throws error', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise({
           body: new Error('Test error'),
         })

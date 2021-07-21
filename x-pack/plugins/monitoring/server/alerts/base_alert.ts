@@ -81,7 +81,7 @@ export class BaseAlert {
     this.scopedLogger = Globals.app.getLogger(alertOptions.id);
   }
 
-  public getAlertType(): AlertType<never, never, never, never, 'default'> {
+  public getAlertType(): AlertType<never, never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.alertOptions;
     return {
       id,

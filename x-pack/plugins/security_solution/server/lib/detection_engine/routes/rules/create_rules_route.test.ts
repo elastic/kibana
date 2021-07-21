@@ -11,7 +11,6 @@ import {
   getAlertMock,
   getCreateRequest,
   getFindResultStatus,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
   createMlRuleRequest,
 } from '../__mocks__/request_responses';
@@ -37,13 +36,11 @@ describe('create_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
     createRulesRoute(server.router, ml);
@@ -108,8 +105,7 @@ describe('create_rules', () => {
 
   describe('unhappy paths', () => {
     test('it returns a 400 if the index does not exist', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(getCreateRequest(), context);

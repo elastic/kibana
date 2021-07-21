@@ -17,16 +17,34 @@ import { siemMock } from '../../../../mocks';
 
 const createMockClients = () => ({
   rulesClient: rulesClientMock.create(),
-  clusterClient: elasticsearchServiceMock.createLegacyScopedClusterClient(),
   licensing: { license: licensingMock.createLicenseMock() },
-  newClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+  clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   appClient: siemMock.createClient(),
 });
 
+/**
+ * Adds mocking to the interface so we don't have to cast everywhere
+ */
+type SecuritySolutionRequestHandlerContextMock = SecuritySolutionRequestHandlerContext & {
+  core: {
+    elasticsearch: {
+      client: {
+        asCurrentUser: {
+          updateByQuery: jest.Mock;
+          search: jest.Mock;
+          transport: {
+            request: jest.Mock;
+          };
+        };
+      };
+    };
+  };
+};
+
 const createRequestContextMock = (
   clients: ReturnType<typeof createMockClients> = createMockClients()
-) => {
+): SecuritySolutionRequestHandlerContextMock => {
   const coreContext = coreMock.createRequestHandlerContext();
   return ({
     alerting: { getRulesClient: jest.fn(() => clients.rulesClient) },
@@ -34,14 +52,13 @@ const createRequestContextMock = (
       ...coreContext,
       elasticsearch: {
         ...coreContext.elasticsearch,
-        client: clients.newClusterClient,
-        legacy: { ...coreContext.elasticsearch.legacy, client: clients.clusterClient },
+        client: clients.clusterClient,
       },
       savedObjects: { client: clients.savedObjectsClient },
     },
     licensing: clients.licensing,
     securitySolution: { getAppClient: jest.fn(() => clients.appClient) },
-  } as unknown) as SecuritySolutionRequestHandlerContext;
+  } as unknown) as SecuritySolutionRequestHandlerContextMock;
 };
 
 const createTools = () => {

@@ -24,6 +24,12 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
+jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+  SavedObjectsUtils: {
+    generateId: () => 'mock-saved-object-id',
+  },
+}));
+
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -399,6 +405,172 @@ describe('update()', () => {
     `);
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
+  });
+
+  test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
+    const ruleParams = {
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    };
+    const extractReferencesFn = jest.fn().mockReturnValue({
+      params: {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      references: [
+        {
+          name: 'soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    const injectReferencesFn = jest.fn().mockReturnValue({
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    });
+    alertTypeRegistry.get.mockImplementation(() => ({
+      id: 'myType',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: extractReferencesFn,
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+          parameterThatIsSavedObjectRef: 'soRef_0',
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    const result = await alertsClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '10s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: ruleParams,
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        consumer: 'myApp',
+        enabled: true,
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        schedule: { interval: '10s' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [
+          { id: '1', name: 'action_0', type: 'action' },
+          { id: '9', name: 'param:soRef_0', type: 'someSavedObjectType' },
+        ],
+        version: '123',
+      }
+    );
+
+    expect(injectReferencesFn).toHaveBeenCalledWith(
+      {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      [{ id: '9', name: 'soRef_0', type: 'someSavedObjectType' }]
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+          "parameterThatIsSavedObjectId": "9",
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
   });
 
   it('calls the createApiKey function', async () => {
