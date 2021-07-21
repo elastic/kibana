@@ -116,6 +116,14 @@ export const apmConfigMapping: Record<
     name: 'rum_event_rate_lru_size',
     type: 'integer',
   },
+  'apm-server.rum.library_pattern': {
+    name: 'rum_library_pattern',
+    type: 'text',
+  },
+  'apm-server.rum.exclude_from_grouping': {
+    name: 'rum_exclude_from_grouping',
+    type: 'text',
+  },
   'apm-server.api_key.limit': {
     name: 'api_key_limit',
     type: 'integer',
