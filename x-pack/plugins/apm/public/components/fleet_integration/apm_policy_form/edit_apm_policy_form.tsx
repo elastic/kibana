@@ -23,11 +23,15 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
-  function handleChange(
-    newVars: Record<string, PackagePolicyConfigRecordEntry>
-  ) {
+  function handleChange({
+    newVars,
+    isValid,
+  }: {
+    newVars: Record<string, PackagePolicyConfigRecordEntry>;
+    isValid: boolean;
+  }) {
     onChange({
-      isValid: true,
+      isValid,
       updatedPolicy: {
         inputs: [{ ...firstInput, vars: newVars }, ...restInputs],
       },

@@ -18,13 +18,22 @@ export type PackagePolicyValues = Record<
 >;
 
 interface Props {
-  onChange: (newVars: PackagePolicyValues) => void;
+  onChange: ({
+    newVars,
+    isValid,
+  }: {
+    newVars: Record<string, PackagePolicyConfigRecordEntry>;
+    isValid: boolean;
+  }) => void;
   values?: PackagePolicyValues;
 }
 
 export function APMPolicyForm({ values = {}, onChange }: Props) {
-  function handleChange(key: string, value: any) {
-    onChange({ ...values, [key]: { ...values[key], value } });
+  function handleChange(key: string, value: any, isValid: boolean) {
+    onChange({
+      newVars: { ...values, [key]: { ...values[key], value } },
+      isValid,
+    });
   }
   return (
     <>
