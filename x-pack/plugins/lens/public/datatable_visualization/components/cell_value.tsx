@@ -9,9 +9,10 @@ import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { IUiSettingsClient } from 'kibana/public';
 import type { FormatFactory } from '../../../common';
-import { getOriginalId, ColumnConfig } from '../../../common/expressions';
+import { ColumnConfig } from '../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor, getNumericValue } from '../../shared_components/coloring/utils';
+import { getOriginalId } from '../transpose_helpers';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,

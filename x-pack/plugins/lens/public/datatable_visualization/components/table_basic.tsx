@@ -20,11 +20,7 @@ import {
 } from '@elastic/eui';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
-import {
-  getFinalSummaryConfiguration,
-  getOriginalId,
-  LensGridDirection,
-} from '../../../common/expressions';
+import { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
@@ -45,6 +41,8 @@ import {
   createTransposeColumnFilterHandler,
 } from './table_actions';
 import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
+import { getOriginalId } from '../transpose_helpers';
+import { getFinalSummaryConfiguration } from '../summary';
 
 export const DataContext = React.createContext<DataContextType>({});
 
