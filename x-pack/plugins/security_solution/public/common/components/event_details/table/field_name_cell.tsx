@@ -61,7 +61,7 @@ export const FieldNameCell = React.memo(
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <EuiText size="xs" data-test-subj="security-solution-field-name">
+              <EuiText size="xs" data-test-subj="field-name">
                 {field}
               </EuiText>
             </EuiToolTip>
