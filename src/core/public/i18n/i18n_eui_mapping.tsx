@@ -9,14 +9,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
   [key: string]: any;
 }
 
 export const getEuiContextMapping = () => {
-  const euiContextMapping: EuiTokensObject = {
+  const euiContextMapping = {
     'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
       defaultMessage: 'Loading',
     }),
@@ -40,7 +39,7 @@ export const getEuiContextMapping = () => {
       page,
       pageCount,
     }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableDescriptionWithoutPagination', {
+      i18n.translate('core.euiBasicTable.tableAutoCaptionWithPagination', {
         defaultMessage:
           'This table contains {itemCount} rows out of {totalItemCount} rows; Page {page} of {pageCount}.',
         values: { itemCount, totalItemCount, page, pageCount },
@@ -144,6 +143,12 @@ export const getEuiContextMapping = () => {
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
     ),
+    'euiCollapsibleNav.closeButtonLabel': i18n.translate(
+      'core.euiCollapsibleNav.closeButtonLabel',
+      {
+        defaultMessage: 'close',
+      }
+    ),
     'euiColorPicker.screenReaderAnnouncement': i18n.translate(
       'core.euiColorPicker.screenReaderAnnouncement',
       {
@@ -219,6 +224,9 @@ export const getEuiContextMapping = () => {
         description:
           'Screen reader text to describe the composite behavior of the color stops component.',
       }),
+    'euiColumnActions.hideColumn': i18n.translate('core.euiColumnActions.hideColumn', {
+      defaultMessage: 'Hide column',
+    }),
     'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
       i18n.translate('core.euiColumnActions.sort', {
         defaultMessage: 'Sort {schemaLabel}',
@@ -229,9 +237,6 @@ export const getEuiContextMapping = () => {
     }),
     'euiColumnActions.moveRight': i18n.translate('core.euiColumnActions.moveRight', {
       defaultMessage: 'Move right',
-    }),
-    'euiColumnActions.hideColumn': i18n.translate('core.euiColumnActions.hideColumn', {
-      defaultMessage: 'Hide column',
     }),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
       defaultMessage: 'Hide all',
@@ -369,12 +374,6 @@ export const getEuiContextMapping = () => {
     'euiControlBar.screenReaderHeading': i18n.translate('core.euiControlBar.screenReaderHeading', {
       defaultMessage: 'Page level controls',
     }),
-    'euiControlBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
-      i18n.translate('core.euiControlBar.customScreenReaderAnnouncement', {
-        defaultMessage:
-          'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
-        values: { landmarkHeading },
-      }),
     'euiControlBar.screenReaderAnnouncement': i18n.translate(
       'core.euiControlBar.screenReaderAnnouncement',
       {
@@ -382,6 +381,12 @@ export const getEuiContextMapping = () => {
           'There is a new region landmark with page level controls at the end of the document.',
       }
     ),
+    'euiControlBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
+      i18n.translate('core.euiControlBar.customScreenReaderAnnouncement', {
+        defaultMessage:
+          'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
+        values: { landmarkHeading },
+      }),
     'euiDataGrid.screenReaderNotice': i18n.translate('core.euiDataGrid.screenReaderNotice', {
       defaultMessage: 'Cell contains interactive content.',
     }),
@@ -466,13 +471,13 @@ export const getEuiContextMapping = () => {
       }
     ),
     'euiDataGridSchema.dateSortTextAsc': i18n.translate('core.euiDataGridSchema.dateSortTextAsc', {
-      defaultMessage: 'New-Old',
+      defaultMessage: 'Old-New',
       description: 'Ascending date label',
     }),
     'euiDataGridSchema.dateSortTextDesc': i18n.translate(
       'core.euiDataGridSchema.dateSortTextDesc',
       {
-        defaultMessage: 'Old-New',
+        defaultMessage: 'New-Old',
         description: 'Descending date label',
       }
     ),
@@ -519,8 +524,8 @@ export const getEuiContextMapping = () => {
     }),
     'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
       i18n.translate('core.euiFilterButton.filterBadge', {
-        defaultMessage: '${count} ${filterCountLabel} filters',
-        values: { count, filterCountLabel: hasActiveFilters ? 'active' : 'available' },
+        defaultMessage: '{count} {hasActiveFilters} filters',
+        values: { count, hasActiveFilters: hasActiveFilters ? 'active' : 'available' },
       }),
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
@@ -642,18 +647,18 @@ export const getEuiContextMapping = () => {
     'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
       defaultMessage: 'Closes this modal window',
     }),
-    'euiNotificationEventMessages.accordionButtonText': ({
+    'euiNotificationEventMessages.accordionButtonText': ({ messagesLength }: EuiValues) =>
+      i18n.translate('core.euiNotificationEventMessages.accordionButtonText', {
+        defaultMessage: '+ {messagesLength} more',
+        values: { messagesLength },
+      }),
+    'euiNotificationEventMessages.accordionAriaLabelButtonText': ({
       messagesLength,
       eventName,
     }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionButtonText', {
+      i18n.translate('core.euiNotificationEventMessages.accordionAriaLabelButtonText', {
         defaultMessage: '+ {messagesLength} messages for {eventName}',
         values: { messagesLength, eventName },
-      }),
-    'euiNotificationEventMessages.accordionAriaLabelButtonText': ({ messagesLength }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionAriaLabelButtonText', {
-        defaultMessage: '+ {messagesLength} more',
-        values: { messagesLength },
       }),
     'euiNotificationEventMeta.contextMenuButton': ({ eventName }: EuiValues) =>
       i18n.translate('core.euiNotificationEventMeta.contextMenuButton', {
@@ -682,25 +687,6 @@ export const getEuiContextMapping = () => {
         defaultMessage: 'Mark as unread',
       }
     ),
-    'euiNotificationEventReadIcon.readAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadIcon.readAria', {
-        defaultMessage: '{eventName} is read',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadIcon.unreadAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadIcon.unreadAria', {
-        defaultMessage: '{eventName} is unread',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadIcon.read': i18n.translate('core.euiNotificationEventReadIcon.read', {
-      defaultMessage: 'Read',
-    }),
-    'euiNotificationEventReadIcon.unread': i18n.translate(
-      'core.euiNotificationEventReadIcon.unread',
-      {
-        defaultMessage: 'Unread',
-      }
-    ),
     'euiNotificationEventMessages.accordionHideText': i18n.translate(
       'core.euiNotificationEventMessages.accordionHideText',
       {
@@ -712,13 +698,11 @@ export const getEuiContextMapping = () => {
         defaultMessage: 'Next page, {page}',
         values: { page },
       }),
-    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiPagination.pageOfTotalCompressed"
-        defaultMessage="{page} of {total}"
-        values={{ page, total }}
-      />
-    ),
+    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) =>
+      i18n.translate('core.euiPagination.pageOfTotalCompressed', {
+        defaultMessage: '{page} of {total}',
+        values: { page, total },
+      }),
     'euiPagination.previousPage': ({ page }: EuiValues) =>
       i18n.translate('core.euiPagination.previousPage', {
         defaultMessage: 'Previous page, {page}',
@@ -881,7 +865,7 @@ export const getEuiContextMapping = () => {
       description: 'Placeholder message while data is asynchronously loaded',
     }),
     'euiSelectable.noAvailableOptions': i18n.translate('core.euiSelectable.noAvailableOptions', {
-      defaultMessage: "There aren't any options available",
+      defaultMessage: 'No options available',
     }),
     'euiSelectable.noMatchingOptions': ({ searchValue }: EuiValues) => (
       <FormattedMessage
@@ -914,7 +898,7 @@ export const getEuiContextMapping = () => {
     'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
       'core.euiSelectableListItem.excludedOptionInstructions',
       {
-        defaultMessage: 'To deselect this option, press enter',
+        defaultMessage: 'To deselect this option, press enter.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1039,7 +1023,7 @@ export const getEuiContextMapping = () => {
     'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
       i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
         defaultMessage:
-          'You are in a form selector of {optionsCount} items and must select a single option. Use the Up and Down keys to navigate or Escape to close.',
+          'You are in a form selector of {optionsCount} items and must select a single option. Use the up and down keys to navigate or escape to close.',
         values: { optionsCount },
       }),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
@@ -1086,6 +1070,7 @@ export const getEuiContextMapping = () => {
       i18n.translate('core.euiTableHeaderCell.titleTextWithDesc', {
         defaultMessage: '{innerText}; {description}',
         values: { innerText, description },
+        description: 'Displayed in a cell in the header of the table to describe the field',
       }),
     'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
       defaultMessage: 'Rows per page',
@@ -1111,6 +1096,15 @@ export const getEuiContextMapping = () => {
       defaultMessage: 'Notification',
       description: 'ARIA label on an element containing a notification',
     }),
+    'euiTourStep.endTour': i18n.translate('core.euiTourStep.endTour', {
+      defaultMessage: 'End tour',
+    }),
+    'euiTourStep.skipTour': i18n.translate('core.euiTourStep.skipTour', {
+      defaultMessage: 'Skip tour',
+    }),
+    'euiTourStep.closeTour': i18n.translate('core.euiTourStep.closeTour', {
+      defaultMessage: 'Close tour',
+    }),
     'euiTourStepIndicator.isActive': i18n.translate('core.euiTourStepIndicator.isActive', {
       defaultMessage: 'active',
       description: 'Text for an active tour step',
@@ -1122,15 +1116,6 @@ export const getEuiContextMapping = () => {
     'euiTourStepIndicator.isIncomplete': i18n.translate('core.euiTourStepIndicator.isIncomplete', {
       defaultMessage: 'incomplete',
       description: 'Text for an incomplete tour step',
-    }),
-    'euiTourStep.endTour': i18n.translate('core.euiTourStep.endTour', {
-      defaultMessage: 'End tour',
-    }),
-    'euiTourStep.skipTour': i18n.translate('core.euiTourStep.skipTour', {
-      defaultMessage: 'Skip tour',
-    }),
-    'euiTourStep.closeTour': i18n.translate('core.euiTourStep.closeTour', {
-      defaultMessage: 'Close tour',
     }),
     'euiTourStepIndicator.ariaLabel': ({ status, number }: EuiValues) =>
       i18n.translate('core.euiTourStepIndicator.ariaLabel', {
