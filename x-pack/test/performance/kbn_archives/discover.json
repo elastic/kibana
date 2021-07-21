@@ -1,0 +1,19 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "025f7440-e9b3-11eb-8de4-b56663b60e92",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-07-20T23:34:21.316Z",
+  "version": "WzYsMl0="
+}
