@@ -8,13 +8,13 @@
 
 ```typescript
 esQuery: {
-    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../common").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean) => {
+    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
         must: never[];
-        filter: import("../common").Filter[];
+        filter: import("@kbn/es-query").Filter[];
         should: never[];
-        must_not: import("../common").Filter[];
+        must_not: import("@kbn/es-query").Filter[];
     };
     getEsQueryConfig: typeof getEsQueryConfig;
-    buildEsQuery: typeof buildEsQuery;
+    buildEsQuery: typeof import("@kbn/es-query").buildEsQuery;
 }
 ```
