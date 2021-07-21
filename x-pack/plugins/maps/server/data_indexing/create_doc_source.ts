@@ -20,24 +20,15 @@ const DEFAULT_META = {
     created_by: MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
   },
 };
-const OPT_IN_DEFAULT_MAPPINGS = {
-  '@timestamp': {
-    type: 'date',
-  },
-  user: {
-    type: 'keyword',
-  },
-};
 
 export async function createDocSource(
   index: string,
-  applyDefaultMappings: boolean,
   mappings: IndexSourceMappings,
   { asCurrentUser }: IScopedClusterClient,
   indexPatternsService: IndexPatternsCommonService
 ): Promise<CreateDocSourceResp> {
   try {
-    await createIndex(index, applyDefaultMappings, mappings, asCurrentUser);
+    await createIndex(index, mappings, asCurrentUser);
     const { id: indexPatternId } = await indexPatternsService.createAndSave({ title: index }, true);
 
     return {
@@ -54,7 +45,6 @@ export async function createDocSource(
 
 async function createIndex(
   indexName: string,
-  applyDefaultMappings: boolean,
   mappings: IndexSourceMappings,
   asCurrentUser: ElasticsearchClient
 ) {
@@ -62,10 +52,6 @@ async function createIndex(
     mappings: {
       ...DEFAULT_META,
       ...mappings,
-      properties: {
-        ...mappings.properties,
-        ...(applyDefaultMappings ? OPT_IN_DEFAULT_MAPPINGS : {}),
-      },
     },
     settings: DEFAULT_SETTINGS,
   };

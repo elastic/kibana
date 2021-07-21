@@ -10,22 +10,22 @@ import { CreateDocSourceResp, INDEX_SOURCE_API_PATH } from '../../../../common';
 
 export const createNewIndexAndPattern = async ({
   indexName,
-  applyDefaultMappings = false,
+  defaultMappings = {},
 }: {
   indexName: string;
-  applyDefaultMappings: boolean;
+  defaultMappings: Record<string, Record<string, string>>;
 }) => {
   return await getHttp().fetch<CreateDocSourceResp>({
     path: `/${INDEX_SOURCE_API_PATH}`,
     method: 'POST',
     body: JSON.stringify({
       index: indexName,
-      applyDefaultMappings,
       mappings: {
         properties: {
           coordinates: {
             type: 'geo_shape',
           },
+          ...defaultMappings,
         },
       },
     }),

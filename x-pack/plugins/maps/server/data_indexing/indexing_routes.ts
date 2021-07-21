@@ -27,7 +27,6 @@ export function initIndexingRoutes({
   router,
   logger,
   dataPlugin,
-  securityPlugin,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
@@ -40,7 +39,6 @@ export function initIndexingRoutes({
       validate: {
         body: schema.object({
           index: schema.string(),
-          applyDefaultMappings: schema.boolean({ defaultValue: false }),
           mappings: schema.any(),
         }),
       },
@@ -51,14 +49,13 @@ export function initIndexingRoutes({
       },
     },
     async (context, request, response) => {
-      const { index, applyDefaultMappings, mappings } = request.body;
+      const { index, mappings } = request.body;
       const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
         context.core.savedObjects.client,
         context.core.elasticsearch.client.asCurrentUser
       );
       const result = await createDocSource(
         index,
-        applyDefaultMappings,
         mappings,
         context.core.elasticsearch.client,
         indexPatternsService
@@ -84,7 +81,6 @@ export function initIndexingRoutes({
         body: schema.object({
           index: schema.string(),
           data: schema.any(),
-          applyDefaultFields: schema.boolean({ defaultValue: false }),
         }),
       },
       options: {
@@ -98,10 +94,7 @@ export function initIndexingRoutes({
       const result = await writeDataToIndex(
         request.body.index,
         request.body.data,
-        context.core.elasticsearch.client.asCurrentUser,
-        request.body.applyDefaultFields,
-        request,
-        securityPlugin
+        context.core.elasticsearch.client.asCurrentUser
       );
       if (result.success) {
         return response.ok({ body: result });

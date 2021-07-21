@@ -22,6 +22,15 @@ interface State {
   createIndexError: string;
 }
 
+const DEFAULT_MAPPINGS = {
+  '@timestamp': {
+    type: 'date',
+  },
+  user: {
+    type: 'keyword',
+  },
+};
+
 export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
   private _isMounted: boolean = false;
 
@@ -61,7 +70,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     try {
       const response = await createNewIndexAndPattern({
         indexName: this.state.indexName,
-        applyDefaultMappings: true,
+        defaultMappings: DEFAULT_MAPPINGS,
       });
       indexPatternId = response.indexPatternId;
     } catch (e) {

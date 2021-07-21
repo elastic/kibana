@@ -58,7 +58,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
   let emsClient;
   let lastLicenseId;
   const router = core.http.createRouter();
-  const [, { data: dataPlugin, security: securityPlugin }] = await core.getStartServices();
+  const [, { data: dataPlugin }] = await core.getStartServices();
 
   function getEMSClient() {
     const currentLicenseId = getLicenseId();
@@ -617,5 +617,5 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
   }
 
   initMVTRoutes({ router, logger });
-  initIndexingRoutes({ router, logger, dataPlugin, securityPlugin });
+  initIndexingRoutes({ router, logger, dataPlugin });
 }

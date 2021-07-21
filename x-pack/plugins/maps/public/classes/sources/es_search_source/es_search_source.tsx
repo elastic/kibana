@@ -12,7 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
+import {
+  getHttp,
+  getSearchService,
+  getSecurityService,
+  getTimeFilter,
+} from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -436,7 +441,19 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return matchingIndexes.length === 1;
   }
 
-  async isDrawingIndex(): Promise<boolean> {
+  async getDefaultFields(): Promise<Record<string, string>> {
+    if (!(await this._isDrawingIndex())) {
+      return {};
+    }
+    const user = await getSecurityService()?.authc.getCurrentUser();
+    const timestamp = new Date().toISOString();
+    return {
+      ...(user ? { user: user.username } : {}),
+      '@timestamp': timestamp,
+    };
+  }
+
+  async _isDrawingIndex(): Promise<boolean> {
     await this.getIndexPattern();
     if (!(this.indexPattern && this.indexPattern.title)) {
       return false;
@@ -717,9 +734,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
-  async addFeature(geometry: Geometry | Position[], addDefaultFields: boolean) {
+  async addFeature(geometry: Geometry | Position[], defaultFields: Record<string, string>) {
     const indexPattern = await this.getIndexPattern();
-    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName(), addDefaultFields);
+    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName(), defaultFields);
   }
 
   async deleteFeature(featureId: string) {

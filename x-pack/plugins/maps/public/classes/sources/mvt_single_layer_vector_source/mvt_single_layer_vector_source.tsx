@@ -98,7 +98,7 @@ export class MVTSingleLayerVectorSource
     });
   }
 
-  addFeature(geometry: Geometry | Position[], addDefaultFields: boolean): Promise<void> {
+  addFeature(geometry: Geometry | Position[]): Promise<void> {
     throw new Error('Does not implement addFeature');
   }
 
@@ -240,8 +240,8 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  async isDrawingIndex(): Promise<boolean> {
-    return false;
+  async getDefaultFields(): Promise<Record<string, string>> {
+    return {};
   }
 }
 
