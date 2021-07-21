@@ -11,7 +11,9 @@ import { PackagePolicyEditExtensionComponent } from '../../../../fleet/public';
 
 export const getLazyAPMPolicyEditExtension = (coreStart: CoreStart) => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
-    const { EditAPMPolicy } = await import('./apm_policy_form/edit_apm_policy');
+    const { EditAPMPolicyForm } = await import(
+      './apm_policy_form/edit_apm_policy_form'
+    );
 
     const { createCallApmApi } = await import(
       '../../services/rest/createCallApmApi'
@@ -19,6 +21,6 @@ export const getLazyAPMPolicyEditExtension = (coreStart: CoreStart) => {
 
     createCallApmApi(coreStart);
 
-    return { default: EditAPMPolicy };
+    return { default: EditAPMPolicyForm };
   });
 };

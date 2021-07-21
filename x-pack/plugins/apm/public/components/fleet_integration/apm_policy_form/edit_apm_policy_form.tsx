@@ -6,20 +6,22 @@
  */
 import React from 'react';
 import { APMPolicyForm } from '.';
-import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
+import { PackagePolicyEditExtensionComponentProps } from '../../../../../fleet/public';
 import {
-  NewPackagePolicy,
-  PackagePolicyCreateExtensionComponentProps,
-} from '../../../../../fleet/public';
+  PackagePolicy,
+  PackagePolicyConfigRecordEntry,
+} from '../../../../../fleet/common';
 
 interface Props {
-  newPolicy: NewPackagePolicy;
-  onChange: PackagePolicyCreateExtensionComponentProps['onChange'];
+  policy: PackagePolicy;
+  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
 }
 
-export function CreateAPMPolicy({ newPolicy, onChange }: Props) {
-  const [firstInput, ...restInputs] = newPolicy?.inputs;
+export function EditAPMPolicyForm({ policy, onChange }: Props) {
+  const [firstInput, ...restInputs] = policy?.inputs;
   const vars = firstInput?.vars;
+
+  const { compiled_input: compiledInput, ...restFirstInput } = firstInput;
 
   function handleChange(
     newVars: Record<string, PackagePolicyConfigRecordEntry>
@@ -27,8 +29,7 @@ export function CreateAPMPolicy({ newPolicy, onChange }: Props) {
     onChange({
       isValid: true,
       updatedPolicy: {
-        ...newPolicy,
-        inputs: [{ ...firstInput, vars: newVars }, ...restInputs],
+        inputs: [{ ...restFirstInput, vars: newVars }, ...restInputs],
       },
     });
   }
