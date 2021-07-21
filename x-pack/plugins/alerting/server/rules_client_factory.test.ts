@@ -16,7 +16,7 @@ import {
   loggingSystemMock,
 } from '../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { AuthenticatedUser } from '../../../plugins/security/common/model';
+import { AuthenticatedUser } from '../../security/common/model';
 import { securityMock } from '../../security/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '../../actions/server';
 import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';

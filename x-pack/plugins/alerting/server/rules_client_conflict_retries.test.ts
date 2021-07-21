@@ -18,7 +18,7 @@ import { AlertingAuthorization } from './authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../actions/server';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
-import { TaskStatus } from '../../../plugins/task_manager/server/task';
+import { TaskStatus } from '../../task_manager/server/task';
 import { RecoveredActionGroup } from '../common';
 
 let rulesClient: RulesClient;
