@@ -11,6 +11,8 @@ import classNames from 'classnames';
 
 import './reorderable_table.scss';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
 import { Cell } from './cell';
@@ -23,6 +25,7 @@ import { Column } from './types';
 interface ReorderableTableProps<Item> {
   columns: Array<Column<Item>>;
   items: Item[];
+  noItemsMessage: React.ReactNode;
   className?: string;
   disableDragging?: boolean;
   disableReordering?: boolean;
@@ -33,10 +36,10 @@ interface ReorderableTableProps<Item> {
 export const ReorderableTable = <Item extends object>({
   columns,
   items,
+  noItemsMessage,
   className = '',
   disableDragging = false,
   disableReordering = false,
-
   onReorder = () => undefined,
   rowProps = () => ({}),
 }: ReorderableTableProps<Item>) => {
@@ -47,7 +50,15 @@ export const ReorderableTable = <Item extends object>({
         firstCell={!disableReordering ? <Cell {...DRAGGABLE_UX_STYLE} /> : undefined}
       />
 
-      {!disableReordering ? (
+      {items.length === 0 && (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem data-test-subj="NoItems" className="reorderableTableNoItems">
+            {noItemsMessage}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
+      {items.length > 0 && !disableReordering && (
         <DraggableBodyRows
           items={items}
           renderItem={(item, itemIndex) => (
@@ -62,7 +73,9 @@ export const ReorderableTable = <Item extends object>({
           )}
           onReorder={onReorder}
         />
-      ) : (
+      )}
+
+      {items.length > 0 && disableReordering && (
         <BodyRows
           items={items}
           renderItem={(item, itemIndex) => (

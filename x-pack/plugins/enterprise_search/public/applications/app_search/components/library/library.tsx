@@ -19,12 +19,17 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiButtonIconColor,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema, SchemaType } from '../../../shared/schema/types';
 import { ReorderableTable } from '../../../shared/tables/reorderable_table';
 import { Result } from '../result';
+
+const NO_ITEMS = (
+  <EuiEmptyPrompt iconType="clock" title={<h2>No Items</h2>} body={<p>No Items</p>} />
+);
 
 export const Library: React.FC = () => {
   const props = {
@@ -263,6 +268,7 @@ export const Library: React.FC = () => {
           <EuiSpacer />
 
           <ReorderableTable
+            noItemsMessage={NO_ITEMS}
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
@@ -277,6 +283,7 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <ReorderableTable
             disableReordering
+            noItemsMessage={NO_ITEMS}
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
@@ -291,6 +298,7 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <ReorderableTable
             disableDragging
+            noItemsMessage={NO_ITEMS}
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
@@ -309,7 +317,22 @@ export const Library: React.FC = () => {
                 backgroundColor: item.id % 2 === 0 ? 'red' : 'green',
               },
             })}
+            noItemsMessage={NO_ITEMS}
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With no items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
               { name: 'Whatever', render: (item) => <div>Whatever</div> },

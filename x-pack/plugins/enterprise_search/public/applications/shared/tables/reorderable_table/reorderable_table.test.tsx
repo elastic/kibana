@@ -22,12 +22,14 @@ interface Foo {
 }
 
 describe('ReorderableTable', () => {
-  describe('when the table is reorderable', () => {
-    const items: Foo[] = [];
-    const columns: Array<Column<Foo>> = [];
+  const items: Foo[] = [{ id: 1 }, { id: 2 }];
+  const columns: Array<Column<Foo>> = [];
 
+  describe('when the table is reorderable', () => {
     it('renders with a header that has an additional column injected as the first column, which is empty', () => {
-      const wrapper = shallow(<ReorderableTable items={items} columns={columns} />);
+      const wrapper = shallow(
+        <ReorderableTable noItemsMessage={<p>No Items</p>} items={items} columns={columns} />
+      );
       const header = wrapper.find(HeaderRow);
       expect(header.exists()).toEqual(true);
       expect(header.prop('columns')).toEqual(columns);
@@ -35,7 +37,9 @@ describe('ReorderableTable', () => {
     });
 
     it('renders draggable rows inside of the reorderable table', () => {
-      const wrapper = shallow(<ReorderableTable items={items} columns={columns} />);
+      const wrapper = shallow(
+        <ReorderableTable noItemsMessage={<p>No Items</p>} items={items} columns={columns} />
+      );
       const bodyRows = wrapper.find(DraggableBodyRows);
       expect(bodyRows.exists()).toBe(true);
       expect(bodyRows.prop('items')).toEqual(items);
@@ -68,7 +72,14 @@ describe('ReorderableTable', () => {
     });
 
     it('will disableDragging on individual rows if disableDragging is enabled', () => {
-      const wrapper = shallow(<ReorderableTable items={items} columns={columns} disableDragging />);
+      const wrapper = shallow(
+        <ReorderableTable
+          noItemsMessage={<p>No Items</p>}
+          items={items}
+          columns={columns}
+          disableDragging
+        />
+      );
       const renderedRow = wrapper.find(DraggableBodyRows).renderProp('renderItem')({ id: 1 }, 0);
       expect(renderedRow.prop('disableDragging')).toEqual(true);
     });
@@ -76,25 +87,34 @@ describe('ReorderableTable', () => {
     it('will accept a callback which will be triggered every time a row is reordered', () => {
       const onReorder = jest.fn();
       const wrapper = shallow(
-        <ReorderableTable items={items} columns={columns} onReorder={onReorder} />
+        <ReorderableTable
+          noItemsMessage={<p>No Items</p>}
+          items={items}
+          columns={columns}
+          onReorder={onReorder}
+        />
       );
       expect(wrapper.find(DraggableBodyRows).prop('onReorder')).toEqual(onReorder);
     });
 
     it('will provide a default callback for reordered if none is provided, which does nothing', () => {
-      const wrapper = shallow(<ReorderableTable items={items} columns={columns} />);
+      const wrapper = shallow(
+        <ReorderableTable noItemsMessage={<p>No Items</p>} items={items} columns={columns} />
+      );
       const onReorder = wrapper.find(DraggableBodyRows).prop('onReorder');
       expect(onReorder([], [])).toBeUndefined();
     });
   });
 
   describe('when reorderable is turned off on the table', () => {
-    const items: Foo[] = [];
-    const columns: Array<Column<Foo>> = [];
-
     it('renders a table with a header and non-reorderable rows', () => {
       const wrapper = shallow(
-        <ReorderableTable items={items} columns={columns} disableReordering />
+        <ReorderableTable
+          noItemsMessage={<p>No Items</p>}
+          items={items}
+          columns={columns}
+          disableReordering
+        />
       );
       const bodyRows = wrapper.find(BodyRows);
       expect(bodyRows.exists()).toBe(true);
@@ -112,6 +132,7 @@ describe('ReorderableTable', () => {
     it('can append additional properties to each row, which can be dynamically calculated from the item in that row', () => {
       const wrapper = shallow(
         <ReorderableTable
+          noItemsMessage={<p>No Items</p>}
           items={items}
           columns={columns}
           rowProps={(item) => ({
@@ -128,7 +149,18 @@ describe('ReorderableTable', () => {
   });
 
   it('appends an additional className if specified', () => {
-    const wrapper = shallow(<ReorderableTable items={[]} columns={[]} className="foo" />);
+    const wrapper = shallow(
+      <ReorderableTable noItemsMessage={<p>No Items</p>} items={[]} columns={[]} className="foo" />
+    );
     expect(wrapper.hasClass('foo')).toBe(true);
+  });
+
+  it('will show a no items message when there are no items', () => {
+    const wrapper = shallow(
+      <ReorderableTable noItemsMessage={<p>No Items</p>} items={[]} columns={columns} />
+    );
+    expect(wrapper.find('[data-test-subj="NoItems"]').exists()).toBe(true);
+    expect(wrapper.find(BodyRows).exists()).toBe(false);
+    expect(wrapper.find(DraggableBodyRows).exists()).toBe(false);
   });
 });
