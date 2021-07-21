@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Settings } from '../settings_form';
+import { Settings } from './settings_form';
 
 export const apmSettings: Settings = {
   title: 'General',
