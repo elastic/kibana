@@ -44,8 +44,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         >
           {actions}
         </HeaderPage>
-
-        <EuiPanelStyled hasBorder>{children}</EuiPanelStyled>
+        {children}
 
         <SpyRoute pageName={SecurityPageName.administration} />
       </SecuritySolutionPageWrapper>

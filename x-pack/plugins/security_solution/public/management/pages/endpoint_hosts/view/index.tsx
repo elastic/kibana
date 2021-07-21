@@ -12,7 +12,7 @@ import {
   EuiBasicTableColumn,
   EuiText,
   EuiLink,
-  EuiBadge,
+  EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
   EuiSuperDatePicker,
@@ -31,7 +31,7 @@ import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
-import { POLICY_STATUS_TO_BADGE_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
@@ -64,24 +64,11 @@ const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
-  isBadge?: boolean;
   dataTestSubj: string;
-}>(({ name, href, route, isBadge = false, dataTestSubj }) => {
+}>(({ name, href, route, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
-  const theme = useContext(ThemeContext);
 
-  return isBadge ? (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      data-test-subj={dataTestSubj}
-      className="eui-textTruncate"
-      href={href}
-      onClick={clickHandler}
-      style={{ color: theme.eui.euiColorInk }}
-    >
-      {name}
-    </EuiLink>
-  ) : (
+  return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
       data-test-subj={dataTestSubj}
@@ -123,6 +110,7 @@ export const EndpointList = () => {
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { getAppUrl } = useAppUrl();
+  const theme = useContext(ThemeContext);
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -244,7 +232,7 @@ export const EndpointList = () => {
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
-      defaultMessage: 'Last Active',
+      defaultMessage: 'Last active',
     });
 
     return [
@@ -252,7 +240,7 @@ export const EndpointList = () => {
         field: 'metadata',
         width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
-          defaultMessage: 'Hostname',
+          defaultMessage: 'Endpoint',
         }),
         render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
           const toRoutePath = getEndpointDetailsPath(
@@ -280,7 +268,7 @@ export const EndpointList = () => {
         field: 'host_status',
         width: '14%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
-          defaultMessage: 'Agent Status',
+          defaultMessage: 'Agent status',
         }),
         // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
@@ -293,7 +281,7 @@ export const EndpointList = () => {
         field: 'metadata.Endpoint.policy.applied',
         width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
-          defaultMessage: 'Integration Policy',
+          defaultMessage: 'Policy',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
@@ -334,7 +322,7 @@ export const EndpointList = () => {
         field: 'metadata.Endpoint.policy.applied',
         width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
-          defaultMessage: 'Policy Status',
+          defaultMessage: 'Policy status',
         }),
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           const toRoutePath = getEndpointDetailsPath({
@@ -344,8 +332,8 @@ export const EndpointList = () => {
           });
           const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
-            <EuiBadge
-              color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
+            <EuiHealth
+              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
               className="eui-textTruncate"
               data-test-subj="rowPolicyStatus"
             >
@@ -353,10 +341,9 @@ export const EndpointList = () => {
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
-                isBadge
                 dataTestSubj="policyStatusCellLink"
               />
-            </EuiBadge>
+            </EuiHealth>
           );
         },
       },
@@ -364,7 +351,7 @@ export const EndpointList = () => {
         field: 'metadata.host.os.name',
         width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
-          defaultMessage: 'Operating System',
+          defaultMessage: 'OS',
         }),
         truncateText: true,
       },
@@ -391,7 +378,7 @@ export const EndpointList = () => {
         field: 'metadata.agent.version',
         width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
-          defaultMessage: 'Version',
+          defaultMessage: 'Sensor',
         }),
       },
       {
@@ -507,10 +494,14 @@ export const EndpointList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running Endpoint Security"
+          defaultMessage="Hosts running endpoint security"
         />
       }
     >
+      <EuiHorizontalRule
+        margin="none"
+        style={{ margin: `0 0 ${theme.eui.ruleMargins.marginLarge} 0` }}
+      />
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
@@ -570,13 +561,13 @@ export const EndpointList = () => {
             {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.totalCount.limited"
-                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# Host} other {# Hosts}}"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# endpoint} other {# endpoints}}"
                 values={{ totalItemCount, limit: MAX_PAGINATED_ITEM + 1 }}
               />
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.totalCount"
-                defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+                defaultMessage="Showing {totalItemCount, plural, one {# endpoint} other {# endpoints}}"
                 values={{ totalItemCount }}
               />
             )}
