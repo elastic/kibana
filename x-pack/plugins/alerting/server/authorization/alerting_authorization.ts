@@ -81,7 +81,7 @@ export class AlertingAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly exemptConsumerIds: string[];
-  private readonly spaceId: Promise<string | undefined>;
+  private readonly getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
 
   constructor({
     alertTypeRegistry,
@@ -101,6 +101,7 @@ export class AlertingAuthorization {
     // An example of this is the Rules Management `consumer` as we don't want to have to
     // manually authorize each rule type in the management UI.
     this.exemptConsumerIds = exemptConsumerIds;
+    this.getSpace = getSpace;
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -125,12 +126,6 @@ export class AlertingAuthorization {
         return new Set();
       });
 
-    this.spaceId = getSpace(request)
-      .then((maybeSpace) => maybeSpace?.id)
-      .catch((e) => {
-        return undefined;
-      });
-
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
       return featuresIds.size
         ? asAuthorizedConsumers([...this.exemptConsumerIds, ...featuresIds], {
@@ -146,7 +141,15 @@ export class AlertingAuthorization {
   }
 
   public async getSpaceId(): Promise<string | undefined> {
-    return this.spaceId;
+    /*
+     * This function is wanting to get the request's space id, without
+     * asking the question of "is this user authorized for this space".
+     * There isn't currently a method exposed by the security plugin to
+     * get this, once this ticket is resolved, we should clean this code up.
+     * https://github.com/elastic/kibana/issues/106476
+     * For now, consumers of this function will need to deal with thrown errors
+     */
+    return this.getSpace(this.request).then((maybeSpace) => maybeSpace?.id);
   }
 
   /*
@@ -277,8 +280,7 @@ export class AlertingAuthorization {
 
   public async getFindAuthorizationFilter(
     authorizationEntity: AlertingAuthorizationEntity,
-    filterOpts: AlertingAuthorizationFilterOpts,
-    includeSpaceId = false
+    filterOpts: AlertingAuthorizationFilterOpts
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
@@ -307,15 +309,10 @@ export class AlertingAuthorization {
       );
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
-      const spaceId = await this.spaceId;
+      const spaceId = await this.getSpaceId();
 
       return {
-        filter: asFiltersByRuleTypeAndConsumer(
-          authorizedRuleTypes,
-          filterOpts,
-          includeSpaceId,
-          spaceId
-        ),
+        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, spaceId),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(

@@ -20,6 +20,7 @@ export enum AlertingAuthorizationFilterType {
 export interface AlertingAuthorizationFilterOpts {
   type: AlertingAuthorizationFilterType;
   fieldNames: AlertingAuthorizationFilterFieldNames;
+  includeSpaceId: boolean;
 }
 
 interface AlertingAuthorizationFilterFieldNames {
@@ -38,13 +39,12 @@ const esQueryConfig: EsQueryConfig = {
 export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
   opts: AlertingAuthorizationFilterOpts,
-  includeSpaceId = false,
   spaceId?: string | undefined
 ): KueryNode | JsonObject {
   const kueryNode = nodeBuilder.or(
     Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('ruleTypeId', id);
-      if (includeSpaceId && opts.fieldNames.spaceIds != null && spaceId != null) {
+      if (opts.includeSpaceId && opts.fieldNames.spaceIds != null && spaceId != null) {
         filters.push(
           nodeBuilder.and([
             nodeBuilder.is(opts.fieldNames.ruleTypeId, id),

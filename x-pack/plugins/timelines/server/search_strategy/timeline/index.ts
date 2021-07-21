@@ -140,18 +140,15 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   const alertingAuthorizationClient = alerting.getAlertingAuthorizationWithRequest(deps.request);
 
   const getAuthFilter = async () =>
-    alertingAuthorizationClient.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Alert,
-      {
-        type: AlertingAuthorizationFilterType.ESDSL,
-        fieldNames: {
-          consumer: OWNER,
-          ruleTypeId: RULE_ID,
-          spaceIds: SPACE_IDS,
-        },
+    alertingAuthorizationClient.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alert, {
+      type: AlertingAuthorizationFilterType.ESDSL,
+      fieldNames: {
+        consumer: OWNER,
+        ruleTypeId: RULE_ID,
+        spaceIds: SPACE_IDS,
       },
-      true
-    );
+      includeSpaceId: true,
+    });
 
   return from(getAuthFilter()).pipe(
     mergeMap(({ filter }) => {
