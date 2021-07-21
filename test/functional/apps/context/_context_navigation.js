@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104364
-  describe.skip('discover - context - back navigation', function contextSize() {
+  describe('discover - context - back navigation', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });

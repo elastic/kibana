@@ -20,7 +20,7 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 
 export interface DefaultDraggableType {
   id: string;
-  isDraggableDisabled?: boolean;
+  isDraggable?: boolean;
   field: string;
   value?: string | null;
   name?: string | null;
@@ -80,7 +80,7 @@ Content.displayName = 'Content';
  * that's only displayed when the specified value is non-`null`.
  *
  * @param id - a unique draggable id, which typically follows the format `${contextId}-${eventId}-${field}-${value}`
- * @param isDraggableDisabled - optional prop to disable drag & drop and  it will defaulted to true
+ * @param isDraggable - optional prop to disable drag & drop and  it will defaulted to true
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
  * @param name - defaulting to `field`, this optional human readable name is used by the `DataProvider` that represents the data
@@ -92,7 +92,7 @@ Content.displayName = 'Content';
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
   ({
     id,
-    isDraggableDisabled = true,
+    isDraggable = true,
     field,
     value,
     name,
@@ -137,7 +137,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     return (
       <DraggableWrapper
         dataProvider={dataProviderProp}
-        isDraggableDisabled={isDraggableDisabled}
+        isDraggable={isDraggable}
         render={renderCallback}
         timelineId={timelineId}
       />

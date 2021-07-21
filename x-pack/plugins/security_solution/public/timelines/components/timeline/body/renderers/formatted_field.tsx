@@ -50,6 +50,7 @@ const FormattedFieldValueComponent: React.FC<{
   fieldFormat?: string;
   fieldName: string;
   fieldType?: string;
+  isDraggable?: boolean;
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
@@ -60,6 +61,7 @@ const FormattedFieldValueComponent: React.FC<{
   fieldName,
   fieldType,
   isObjectArray = false,
+  isDraggable = true,
   truncate,
   value,
   linkValue,
@@ -72,6 +74,7 @@ const FormattedFieldValueComponent: React.FC<{
         eventId={eventId}
         contextId={contextId}
         fieldName={fieldName}
+        isDraggable={isDraggable}
         value={!isNumber(value) ? value : String(value)}
         truncate={truncate}
       />
@@ -79,30 +82,58 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldType === GEO_FIELD_TYPE) {
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
-    return (
+    return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        isDraggableDisabled={false}
+        isDraggable={false}
         tooltipContent={null}
         value={`${value}`}
       >
         <FormattedDate fieldName={fieldName} value={value} />
       </DefaultDraggable>
+    ) : (
+      <FormattedDate fieldName={fieldName} value={value} />
     );
   } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (
-      <Port contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+      <Port
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={`${value}`}
+      />
     );
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return (
-      <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+      <Duration
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={`${value}`}
+      />
     );
   } else if (fieldName === HOST_NAME_FIELD_NAME) {
-    return <HostName contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />;
+    return (
+      <HostName
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={value}
+      />
+    );
   } else if (fieldFormat === BYTES_FORMAT) {
     return (
-      <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+      <Bytes
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={`${value}`}
+      />
     );
   } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
     return (
@@ -110,16 +141,31 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        isDraggable={isDraggable}
         linkValue={linkValue}
         truncate={truncate}
         value={value}
       />
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
-    return renderEventModule({ contextId, eventId, fieldName, linkValue, truncate, value });
+    return renderEventModule({
+      contextId,
+      eventId,
+      fieldName,
+      isDraggable,
+      linkValue,
+      truncate,
+      value,
+    });
   } else if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
     return (
-      <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
+      <RuleStatus
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={value}
+      />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
@@ -127,6 +173,7 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        isDraggable={isDraggable}
         value={typeof value === 'string' ? value : ''}
       />
     );
@@ -138,8 +185,8 @@ const FormattedFieldValueComponent: React.FC<{
       INDICATOR_REFERENCE,
     ].includes(fieldName)
   ) {
-    return renderUrl({ contextId, eventId, fieldName, linkValue, truncate, value });
-  } else if (columnNamesNotDraggable.includes(fieldName)) {
+    return renderUrl({ contextId, eventId, fieldName, linkValue, isDraggable, truncate, value });
+  } else if (columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
@@ -168,7 +215,7 @@ const FormattedFieldValueComponent: React.FC<{
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        isDraggableDisabled={false}
+        isDraggable={false}
         value={`${value}`}
         tooltipContent={
           fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME

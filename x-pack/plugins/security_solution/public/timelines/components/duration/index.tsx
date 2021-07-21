@@ -20,19 +20,24 @@ export const Duration = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
-  <DefaultDraggable
-    id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-    isDraggableDisabled={false}
-    // @ts-expect-error
-    name={name}
-    field={fieldName}
-    tooltipContent={null}
-    value={value}
-  >
+}>(({ contextId, eventId, fieldName, isDraggable, value }) =>
+  isDraggable ? (
+    <DefaultDraggable
+      id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      // @ts-expect-error
+      isDraggable={isDraggable}
+      name={name}
+      field={fieldName}
+      tooltipContent={null}
+      value={value}
+    >
+      <FormattedDuration maybeDurationNanoseconds={value} tooltipTitle={fieldName} />
+    </DefaultDraggable>
+  ) : (
     <FormattedDuration maybeDurationNanoseconds={value} tooltipTitle={fieldName} />
-  </DefaultDraggable>
-));
+  )
+);
 
 Duration.displayName = 'Duration';

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { debug } from './debug';
-import { error } from './error';
 import { image } from './image';
 import { markdown } from './markdown';
 import { metric } from './metric';
@@ -14,13 +12,10 @@ import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
 import { repeatImage } from './repeat_image';
-import { shape } from './shape';
 import { table } from './table';
 import { text } from './text';
 
 export const renderFunctions = [
-  debug,
-  error,
   image,
   markdown,
   metric,
@@ -28,7 +23,6 @@ export const renderFunctions = [
   plot,
   progress,
   repeatImage,
-  shape,
   table,
   text,
 ];

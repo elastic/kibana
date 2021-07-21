@@ -62,7 +62,6 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.module',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
     linkField: 'rule.reference',
   },
   {
@@ -70,32 +69,26 @@ export const columns: Array<
     category: 'event',
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.action',
-    initialWidth: 140,
     type: 'string',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.category',
-    initialWidth: 150,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'host.name',
-    initialWidth: 120,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'user.name',
-    initialWidth: 120,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'source.ip',
-    initialWidth: 120,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
-    initialWidth: 140,
   },
 ];

@@ -26,21 +26,30 @@ interface Props {
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   value: string | number | undefined | null;
 }
 
-const RuleStatusComponent: React.FC<Props> = ({ contextId, eventId, fieldName, value }) => {
+const RuleStatusComponent: React.FC<Props> = ({
+  contextId,
+  eventId,
+  fieldName,
+  isDraggable,
+  value,
+}) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
-  return (
+  return isDraggable ? (
     <DefaultDraggable
       field={fieldName}
       id={`alert-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-      isDraggableDisabled={false}
+      isDraggable={false}
       value={`${value}`}
       tooltipContent={fieldName}
     >
       <StyledEuiBadge color={color}>{value}</StyledEuiBadge>
     </DefaultDraggable>
+  ) : (
+    <StyledEuiBadge color={color}>{value}</StyledEuiBadge>
   );
 };
 

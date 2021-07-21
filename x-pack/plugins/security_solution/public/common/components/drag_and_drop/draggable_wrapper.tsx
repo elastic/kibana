@@ -95,7 +95,7 @@ type RenderFunctionProp = (
 interface Props {
   dataProvider: DataProvider;
   disabled?: boolean;
-  isDraggableDisabled?: boolean;
+  isDraggable?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
   timelineId?: string;
@@ -439,7 +439,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
 
 const DraggableWrapperComponent: React.FC<Props> = ({
   dataProvider,
-  isDraggableDisabled = true,
+  isDraggable = false,
   onFilterAdded,
   render,
   timelineId,
@@ -483,7 +483,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     ),
     [dataProvider, render, setContainerRef, truncate]
   );
-  if (isDraggableDisabled) {
+  if (!isDraggable) {
     return (
       <WithHoverActions
         alwaysShow={showTopN || hoverActionsOwnFocus}
