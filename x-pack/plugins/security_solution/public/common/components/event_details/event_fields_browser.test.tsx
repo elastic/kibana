@@ -10,7 +10,6 @@ import React from 'react';
 import '../../mock/match_media';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
-import { timelineActions } from '../../../timelines/store/timeline';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -164,7 +163,7 @@ describe('EventFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="hover-actions-copy"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBeTruthy();
     });
   });
 

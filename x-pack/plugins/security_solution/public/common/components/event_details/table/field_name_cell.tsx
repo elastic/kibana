@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import * as i18n from '../translations';
 import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -61,7 +61,9 @@ export const FieldNameCell = React.memo(
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <span data-test-subj="field-name">{field}</span>
+              <EuiText size="xs" data-test-subj="security-solution-field-name">
+                {field}
+              </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
           {isMultiField && (
