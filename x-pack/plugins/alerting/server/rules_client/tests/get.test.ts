@@ -139,7 +139,7 @@ describe('get()', () => {
         injectReferences: injectReferencesFn,
       },
     }));
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -176,7 +176,7 @@ describe('get()', () => {
         },
       ],
     });
-    const result = await alertsClient.get({ id: '1' });
+    const result = await rulesClient.get({ id: '1' });
 
     expect(injectReferencesFn).toHaveBeenCalledWith(
       {
@@ -259,7 +259,7 @@ describe('get()', () => {
         injectReferences: injectReferencesFn,
       },
     }));
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -296,7 +296,7 @@ describe('get()', () => {
         },
       ],
     });
-    await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
     );
   });

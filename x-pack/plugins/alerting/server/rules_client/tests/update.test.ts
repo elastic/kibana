@@ -482,7 +482,7 @@ describe('update()', () => {
         },
       ],
     });
-    const result = await alertsClient.update({
+    const result = await rulesClient.update({
       id: '1',
       data: {
         schedule: { interval: '10s' },
