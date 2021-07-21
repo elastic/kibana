@@ -368,7 +368,7 @@ describe('alerts_list component with items', () => {
   it('sorts alerts when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -382,6 +382,28 @@ describe('alerts_list component with items', () => {
         sort: {
           field: 'name',
           direction: 'desc',
+        },
+      })
+    );
+  });
+
+  it('sorts alerts when clicking the enabled column', async () => {
+    await setup();
+    wrapper
+      .find('[data-test-subj="tableHeaderCell_enabled_0"] .euiTableHeaderButton')
+      .first()
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAlerts).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: 'enabled',
+          direction: 'asc',
         },
       })
     );

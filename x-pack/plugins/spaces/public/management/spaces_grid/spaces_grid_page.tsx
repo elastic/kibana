@@ -153,7 +153,7 @@ export class SpacesGridPage extends Component<Props, State> {
       >
         <FormattedMessage
           id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-          defaultMessage="Create a space"
+          defaultMessage="Create space"
         />
       </EuiButton>
     );

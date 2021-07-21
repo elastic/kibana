@@ -41,6 +41,7 @@ function getCraftFilter(craft: string) {
 
 export const alertType: AlertType<
   { outerSpaceCapacity: number; craft: string; op: string },
+  never,
   { peopleInSpace: number },
   { craft: string },
   never,
