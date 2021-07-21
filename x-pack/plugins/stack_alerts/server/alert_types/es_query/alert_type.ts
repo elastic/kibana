@@ -27,7 +27,14 @@ export const ConditionMetAlertInstanceId = 'query matched';
 
 export function getAlertType(
   logger: Logger
-): AlertType<EsQueryAlertParams, EsQueryAlertState, {}, ActionContext, typeof ActionGroupId> {
+): AlertType<
+  EsQueryAlertParams,
+  never, // Only use if defining useSavedObjectReferences hook
+  EsQueryAlertState,
+  {},
+  ActionContext,
+  typeof ActionGroupId
+> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
   });

@@ -235,6 +235,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('switch panel interval test', () => {
+      beforeEach(async () => {
+        await PageObjects.visualBuilder.resetPage();
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 19, 2015 @ 06:31:44.000',
+          'Sep 22, 2015 @ 18:31:44.000'
+        );
+      });
+
+      it('should be able to switch to gte interval (>=2d)', async () => {
+        await PageObjects.visualBuilder.setIntervalValue('>=2d');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        expect(newValue).to.eql('9,371');
+      });
+
+      it('should be able to switch to fixed interval (1d)', async () => {
+        await PageObjects.visualBuilder.setIntervalValue('1d');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        expect(newValue).to.eql('4,614');
+      });
+
+      it('should be able to switch to auto interval', async () => {
+        await PageObjects.visualBuilder.setIntervalValue('auto');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        expect(newValue).to.eql('156');
+      });
+    });
+
     describe('browser history changes', () => {
       it('should activate previous/next chart tab and panel config', async () => {
         await PageObjects.visualBuilder.resetPage();

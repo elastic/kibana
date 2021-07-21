@@ -18,11 +18,13 @@ export const AgentStatuses = React.memo(
     fieldName,
     contextId,
     eventId,
+    isDraggable,
     value,
   }: {
     fieldName: string;
     contextId: string;
     eventId: string;
+    isDraggable: boolean;
     value: string;
   }) => {
     const {
@@ -36,14 +38,18 @@ export const AgentStatuses = React.memo(
       <EuiFlexGroup gutterSize="none">
         {agentStatus !== undefined ? (
           <EuiFlexItem grow={false}>
-            <DefaultDraggable
-              field={fieldName}
-              id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-              tooltipContent={fieldName}
-              value={`${agentStatus}`}
-            >
+            {isDraggable ? (
+              <DefaultDraggable
+                field={fieldName}
+                id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+                tooltipContent={fieldName}
+                value={`${agentStatus}`}
+              >
+                <AgentStatus hostStatus={agentStatus} />
+              </DefaultDraggable>
+            ) : (
               <AgentStatus hostStatus={agentStatus} />
-            </DefaultDraggable>
+            )}
           </EuiFlexItem>
         ) : (
           <EuiText>
