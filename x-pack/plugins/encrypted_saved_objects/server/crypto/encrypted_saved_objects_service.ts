@@ -223,6 +223,63 @@ export class EncryptedSavedObjectsService {
     return { attributes: clonedAttributes as T, error: decryptionError };
   }
 
+  public stripOrDecryptAttributesSync<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    originalAttributes?: T,
+    params?: DecryptParameters
+  ) {
+    const typeDefinition = this.typeDefinitions.get(descriptor.type);
+    if (typeDefinition === undefined) {
+      return { attributes };
+    }
+
+    let decryptedAttributes: T | null = null;
+    let decryptionError: Error | undefined;
+    const clonedAttributes: Record<string, unknown> = {};
+    for (const [attributeName, attributeValue] of Object.entries(attributes)) {
+      // We should strip encrypted attribute if definition explicitly mandates that or decryption
+      // failed.
+      if (
+        typeDefinition.shouldBeStripped(attributeName) ||
+        (!!decryptionError && typeDefinition.shouldBeEncrypted(attributeName))
+      ) {
+        continue;
+      }
+
+      // If attribute isn't supposed to be encrypted, just copy it to the resulting attribute set.
+      if (!typeDefinition.shouldBeEncrypted(attributeName)) {
+        clonedAttributes[attributeName] = attributeValue;
+      } else if (originalAttributes) {
+        // If attribute should be decrypted, but we have original attributes used to create object
+        // we should get raw unencrypted value from there to avoid performance penalty.
+        clonedAttributes[attributeName] = originalAttributes[attributeName];
+      } else {
+        // Otherwise just try to decrypt attribute. We decrypt all attributes at once, cache it and
+        // reuse for any other attributes.
+        if (decryptedAttributes === null) {
+          try {
+            decryptedAttributes = this.decryptAttributesSync(
+              descriptor,
+              // Decrypt only attributes that are supposed to be exposed.
+              Object.fromEntries(
+                Object.entries(attributes).filter(([key]) => !typeDefinition.shouldBeStripped(key))
+              ) as T,
+              params
+            );
+          } catch (err) {
+            decryptionError = err;
+            continue;
+          }
+        }
+
+        clonedAttributes[attributeName] = decryptedAttributes[attributeName];
+      }
+    }
+
+    return { attributes: clonedAttributes as T, error: decryptionError };
+  }
+
   private *attributesToEncryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
