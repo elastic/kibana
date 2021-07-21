@@ -52,9 +52,10 @@ const RowActionComponent = ({
   timelineId,
   width,
 }: Props) => {
-  const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data[
-    rowIndex
-  ];
+  const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = useMemo(
+    () => data[rowIndex],
+    [data, rowIndex]
+  );
 
   const dispatch = useDispatch();
 

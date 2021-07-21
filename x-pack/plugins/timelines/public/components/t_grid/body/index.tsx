@@ -73,7 +73,7 @@ const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
 const EmptyHeaderCellRender: ComponentType = () => null;
 
-const gridStyle: EuiDataGridStyle = { border: 'none', header: 'underline' };
+const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
 
 const transformControlColumns = ({
   actionColumnsWidth,
