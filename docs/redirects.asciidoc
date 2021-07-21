@@ -328,12 +328,10 @@ This content has moved. Refer to <<xpack-graph>>.
 
 This content has moved. Refer to <<graph-troubleshooting>>.
 
-=======
 [role="exclude",id="profiler-getting-started"]
 == Getting start with Search Profiler
 
 This content has moved. Refer to <<xpack-profiler>>.
-
 
 [role="exclude",id="profiler-complicated"]
 == Profiling a more complicated querying
@@ -344,4 +342,3 @@ This content has moved. Refer to <<xpack-profiler>>.
 == Rendering pre-captured profiler JSON
 
 This content has moved. Refer to <<xpack-profiler>>.
-
