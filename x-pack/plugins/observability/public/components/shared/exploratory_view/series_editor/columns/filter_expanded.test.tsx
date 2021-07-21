@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
-import { FilterExpanded } from './filter_expanded';
-import { mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
+import { mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
+import { FilterExpanded } from './filter_expanded';
 
-describe('FilterExpanded', function () {
-  it('should render properly', async function () {
+describe('FilterExpanded', () => {
+  it('renders', async () => {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
     mockAppIndexPattern();
 
@@ -27,9 +27,12 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    screen.getByText('Browser Family');
+    await waitFor(() => {
+      expect(screen.getByText('Browser Family')).toBeInTheDocument();
+    });
   });
-  it('should call go back on click', async function () {
+
+  it('calls goBack on click', async () => {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
     const goBack = jest.fn();
 
@@ -46,11 +49,13 @@ describe('FilterExpanded', function () {
 
     fireEvent.click(screen.getByText('Browser Family'));
 
-    expect(goBack).toHaveBeenCalledTimes(1);
-    expect(goBack).toHaveBeenCalledWith();
+    await waitFor(() => {
+      expect(goBack).toHaveBeenCalledTimes(1);
+      expect(goBack).toHaveBeenCalledWith();
+    });
   });
 
-  it('should call useValuesList on load', async function () {
+  it('calls useValuesList on load', async () => {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 
     const { spy } = mockUseValuesList([
@@ -71,14 +76,17 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toBeCalledWith(
-      expect.objectContaining({
-        time: { from: 'now-15m', to: 'now' },
-        sourceField: USER_AGENT_NAME,
-      })
-    );
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toBeCalledWith(
+        expect.objectContaining({
+          time: { from: 'now-15m', to: 'now' },
+          sourceField: USER_AGENT_NAME,
+        })
+      );
+    });
   });
+
   it('should filter display values', async function () {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 

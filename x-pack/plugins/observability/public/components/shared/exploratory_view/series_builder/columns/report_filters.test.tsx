@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { screen } from '@testing-library/react';
-import { ReportFilters } from './report_filters';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { mockIndexPattern, render } from '../../rtl_helpers';
+import { ReportFilters } from './report_filters';
 
-describe('Series Builder ReportFilters', function () {
-  const seriesId = 'test-series-id';
+describe('ReportFilters', () => {
+  it('renders', async () => {
+    const seriesId = 'test-series-id';
 
-  const dataViewSeries = getDefaultConfigs({
-    reportType: 'data-distribution',
-    indexPattern: mockIndexPattern,
-    dataType: 'ux',
-  });
+    const dataViewSeries = getDefaultConfigs({
+      reportType: 'data-distribution',
+      indexPattern: mockIndexPattern,
+      dataType: 'ux',
+    });
 
-  it('should render properly', function () {
     render(<ReportFilters seriesConfig={dataViewSeries} seriesId={seriesId} />);
 
-    screen.getByText('Add filter');
+    await waitFor(() => {
+      expect(screen.getByText('Add filter')).toBeInTheDocument();
+    });
   });
 });
