@@ -1,27 +1,80 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+coming::[7.14.0]
 
-* {kibana-ref-all}/7.11/whats-new.html[7.11]
-* {kibana-ref-all}/7.10/whats-new.html[7.10]
-* {kibana-ref-all}/7.9/whats-new.html[7.9]
-* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the <<release-notes, release notes>>.
 
-For the full list of changes in {minor-version}, refer to the <<release-notes>>.
+Other versions: {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] | {kibana-ref-all}/7.10/whats-new.html[7.10] |
+{kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+[[alerting-7-14]]
+=== Alerting&mdash;import and export rules & connectors
+
+7.14 adds the ability to export and import rules and connectors between {kib} deployments and spaces.
+This increases support for {kib}’s multi-tenancy paradigm as well as reusability.
+Write your rules once and reuse them fast and effortlessly according to your organization’s needs.
+
+[role="screenshot"]
+image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
+
+We also improved the observability of alerting by enhancing:
+
+* The Task Manager health API with the ability to log stats over time when a
+problem occurs and an (experimental) capacity estimation.
+* The event log with more fields (rule fields, start, end and duration of alert, reference to rule ID, task drift)
+and a log at the start of a rule or connector execution.
+* The server logs with a log warning when disabling an alert task due to not finding the
+rule saved object.
+* The documentation with example event log queries and an enhanced *Alerting* and *Task Manager* <<alerting-troubleshooting,troubleshooting page>>.
+
+[float]
+[[lens-7-14]]
+=== Lens&mdash;custom formulas, time shifts, & more
+
+[float]
+==== Custom formulas
+
+With formulas, you can combine math operations and aggregated fields to author
+your own metrics at query time. With the easy-to-use, autocompleting formula editor, you can:
+
+* Mix and match filtered and time shifted {es} aggregations
+* Add report-time calculations on the fly, such as cumulative sum or moving average
+* Build comparisons to the overall summary data using the new overall functions
+
+[role="screenshot"]
+image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
+
+Want to learn more? Check out the searchable in-product reference documentation,
+which also includes common use cases. When you’re ready, use full screen mode to create your own formulas.
+
+[float]
+==== Time shifts
+
+Make easy and powerful comparisons between two time periods by adding time shifted
+metrics to your visualizations. Time shifted metrics help to reduce the distraction
+caused by the seasonal or behavioral changes in your data.
+
+role="screenshot"]
+image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
+
+[float]
+==== Table enhancements
+
+Color by value
+Visually emphasize specific metric values with flexible conditional coloring. Kibana provides you with an out-of-the-box palette, or you can define your own custom color palette. To dynamically apply colors, specify the color stops by percent or number values. For values that are outside the specified range, control how to apply colors with color continuity.
+
+
 
 // end::notable-highlights[]
