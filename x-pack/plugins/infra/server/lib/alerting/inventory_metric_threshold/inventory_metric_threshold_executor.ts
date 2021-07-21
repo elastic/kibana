@@ -234,7 +234,7 @@ const buildReasonWithVerboseMetricName = (
 
 const buildAlertData = (inventoryItem: any, nextState: any): AlertData => {
   const threshold =
-    nextState === AlertStates.WARNING ? inventoryItem.warningThreshold! : resultItem.threshold;
+    nextState === AlertStates.WARNING ? inventoryItem.warningThreshold! : inventoryItem.threshold;
   return {
     value: inventoryItem.currentValue,
     threshold,
