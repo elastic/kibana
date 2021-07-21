@@ -14,11 +14,11 @@ import { ReportingAPIClient } from '../lib/reporting_api_client';
 interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
-  record: ListingJob;
+  job: ListingJob;
 }
 
 export const ReportErrorButton = (props: Props) => {
-  const { record, intl } = props;
+  const { job, intl } = props;
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
@@ -30,7 +30,7 @@ export const ReportErrorButton = (props: Props) => {
     }
   };
 
-  const errorMessage = record.getError();
+  const errorMessage = job.getError();
   if (!errorMessage) {
     return null;
   }

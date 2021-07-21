@@ -15,19 +15,19 @@ import { ReportingAPIClient } from '../lib/reporting_api_client';
 interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
-  record: ListingJob;
+  job: ListingJob;
 }
 
 export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => {
-  const { record, apiClient, intl } = props;
+  const { job, apiClient, intl } = props;
 
-  if (record.status !== JOB_STATUSES.COMPLETED && record.status !== JOB_STATUSES.WARNINGS) {
+  if (job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS) {
     return null;
   }
 
   const button = (
     <EuiButtonIcon
-      onClick={() => apiClient.downloadReport(record.id)}
+      onClick={() => apiClient.downloadReport(job.id)}
       iconType="importAction"
       aria-label={intl.formatMessage({
         id: 'xpack.reporting.listing.table.downloadReportAriaLabel',
@@ -36,7 +36,7 @@ export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => 
     />
   );
 
-  const warnings = record.getWarnings();
+  const warnings = job.getWarnings();
   if (warnings) {
     return (
       <EuiToolTip

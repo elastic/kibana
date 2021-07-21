@@ -171,9 +171,9 @@ class ReportListingUi extends Component<Props, State> {
     this.setState((current) => ({ ...current, selectedJobs: jobs }));
   };
 
-  private removeRecord = (record: Job) => {
+  private removeJob = (job: Job) => {
     const { jobs } = this.state;
-    const filtered = jobs.filter((j) => j.id !== record.id);
+    const filtered = jobs.filter((j) => j.id !== job.id);
     this.setState((current) => ({ ...current, jobs: filtered }));
   };
 
@@ -182,17 +182,17 @@ class ReportListingUi extends Component<Props, State> {
     if (selectedJobs.length === 0) return undefined;
 
     const performDelete = async () => {
-      for (const record of selectedJobs) {
+      for (const job of selectedJobs) {
         try {
-          await this.props.apiClient.deleteReport(record.id);
-          this.removeRecord(record);
+          await this.props.apiClient.deleteReport(job.id);
+          this.removeJob(job);
           this.props.toasts.addSuccess(
             this.props.intl.formatMessage(
               {
                 id: 'xpack.reporting.listing.table.deleteConfim',
                 defaultMessage: `The {reportTitle} report was deleted`,
               },
-              { reportTitle: record.title }
+              { reportTitle: job.title }
             )
           );
         } catch (error) {
@@ -285,12 +285,12 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.reportTitle',
           defaultMessage: 'Report',
         }),
-        render: (objectTitle: string, record: Job) => {
+        render: (objectTitle: string, job: Job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
               <div>{objectTitle}</div>
               <EuiText size="s">
-                <EuiTextColor color="subdued">{record.objectType}</EuiTextColor>
+                <EuiTextColor color="subdued">{job.objectType}</EuiTextColor>
               </EuiText>
             </div>
           );
@@ -302,7 +302,7 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.createdAtTitle',
           defaultMessage: 'Created at',
         }),
-        render: (_createdAt: string, record: Job) => record.getCreatedAtLabel(),
+        render: (_createdAt: string, job: Job) => job.getCreatedAtLabel(),
       },
       {
         field: 'status',
@@ -310,7 +310,7 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.statusTitle',
           defaultMessage: 'Status',
         }),
-        render: (_status: string, record: Job) => record.getStatusLabel(),
+        render: (_status: string, job: Job) => job.getStatusLabel(),
       },
       {
         name: intl.formatMessage({
@@ -319,13 +319,13 @@ class ReportListingUi extends Component<Props, State> {
         }),
         actions: [
           {
-            render: (record: Job) => {
+            render: (job: Job) => {
               return (
                 <div>
-                  <ReportInfoButton {...this.props} record={record} />
-                  <ReportWarningsButton {...this.props} record={record} />
-                  <ReportErrorButton {...this.props} record={record} />
-                  <ReportDownloadButton {...this.props} record={record} />
+                  <ReportInfoButton {...this.props} job={job} />
+                  <ReportWarningsButton {...this.props} job={job} />
+                  <ReportErrorButton {...this.props} job={job} />
+                  <ReportDownloadButton {...this.props} job={job} />
                 </div>
               );
             },

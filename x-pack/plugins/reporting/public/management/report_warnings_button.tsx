@@ -11,10 +11,10 @@ import React, { useState } from 'react';
 import { Job as ListingJob } from '../lib/job';
 import { Props as ListingProps } from './report_listing';
 
-type Props = { record: ListingJob } & ListingProps;
+type Props = { job: ListingJob } & ListingProps;
 
 export const ReportWarningsButton: FunctionComponent<Props> = (props: Props) => {
-  const { record, intl } = props;
+  const { job, intl } = props;
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
@@ -26,7 +26,7 @@ export const ReportWarningsButton: FunctionComponent<Props> = (props: Props) => 
     }
   };
 
-  const warnings = record.getWarnings();
+  const warnings = job.getWarnings();
   if (!warnings) {
     return null;
   }

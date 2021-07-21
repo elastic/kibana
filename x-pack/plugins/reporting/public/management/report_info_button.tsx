@@ -26,7 +26,7 @@ import { Props as ListingProps } from './report_listing';
 
 interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
   apiClient: ReportingAPIClient;
-  record: Job;
+  job: Job;
 }
 
 interface State {
@@ -183,10 +183,10 @@ class ReportInfoButtonUi extends Component<Props, State> {
       id: 'xpack.reporting.listing.table.reportInfoButtonTooltip',
       defaultMessage: 'See report info',
     });
-    if (this.props.record.getWarnings()) {
+    if (this.props.job.getWarnings()) {
       message = this.props.intl.formatMessage({
         id: 'xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip',
-        defaultMessage: 'See record info and warnings',
+        defaultMessage: 'See job info and warnings',
       });
     }
 
@@ -209,7 +209,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
   private loadInfo = async () => {
     this.setState({ isLoading: true });
     try {
-      const info = await this.props.apiClient.getInfo(this.props.record.id);
+      const info = await this.props.apiClient.getInfo(this.props.job.id);
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }

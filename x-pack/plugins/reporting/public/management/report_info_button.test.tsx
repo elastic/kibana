@@ -40,7 +40,7 @@ describe('ReportInfoButton', () => {
       status: 'pending',
       timeout: 300000,
     });
-    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} record={job} />);
+    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} job={job} />);
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
     expect(input).toMatchSnapshot();
   });
@@ -70,7 +70,7 @@ describe('ReportInfoButton', () => {
       status: 'processing',
       timeout: 300000,
     });
-    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} record={job} />);
+    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} job={job} />);
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
 
     input.simulate('click');
@@ -114,7 +114,7 @@ describe('ReportInfoButton', () => {
       status: 'completed',
       timeout: 300000,
     });
-    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} record={job} />);
+    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} job={job} />);
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
 
     input.simulate('click');
