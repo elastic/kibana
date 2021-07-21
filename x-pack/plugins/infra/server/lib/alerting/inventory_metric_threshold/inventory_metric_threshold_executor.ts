@@ -53,7 +53,7 @@ export type InventoryMetricThresholdAlertInstanceContext = AlertInstanceContext;
 type InventoryMetricThresholdAlertInstance = AlertInstance<
   InventoryMetricThresholdAlertInstanceState,
   InventoryMetricThresholdAlertInstanceContext,
-  InventoryMetricThresholdActionGroups
+  InventoryMetricThresholdAllowedActionGroups
 >;
 type InventoryMetricThresholdAlertInstanceFactory = (
   id: string,
@@ -61,13 +61,18 @@ type InventoryMetricThresholdAlertInstanceFactory = (
   value: number | undefined
 ) => InventoryMetricThresholdAlertInstance;
 
+interface AlertData {
+  threshold: number | undefined;
+  value: number | undefined;
+}
+
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
     InventoryMetricThresholdAlertTypeParams,
     InventoryMetricThresholdAlertTypeState,
     InventoryMetricThresholdAlertInstanceState,
     InventoryMetricThresholdAlertInstanceContext,
-    InventoryMetricThresholdActionGroups
+    InventoryMetricThresholdAllowedActionGroups
   >(async ({ services, params }) => {
     const {
       criteria,
@@ -105,7 +110,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       .catch(() => undefined);
 
     const compositeSize = libs.configuration.inventory.compositeSize;
-
     const results = await Promise.all(
       criteria.map((condition) =>
         evaluateCondition({
@@ -119,14 +123,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         })
       )
     );
-
     const inventoryItems = Object.keys(first(results)!);
+
     for (const item of inventoryItems) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) =>
+      const shouldAlertFire = results.every((result) => {
         // Grab the result of the most recent bucket
-        last(result[item].shouldFire)
-      );
+        return last(result[item].shouldFire);
+      });
       const shouldAlertWarn = results.every((result) => last(result[item].shouldWarn));
 
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
@@ -144,23 +148,15 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         ? AlertStates.WARNING
         : AlertStates.OK;
       let reason;
-      let threshold;
-      let value;
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = results
-          .map((result) => {
-            const resultItem = result[item];
-            value = resultItem.currentValue;
-            threshold =
-              nextState === AlertStates.WARNING
-                ? resultItem.warningThreshold!
-                : resultItem.threshold;
-            return buildReasonWithVerboseMetricName(
-              resultItem,
+          .map((result) =>
+            buildReasonWithVerboseMetricName(
+              result[item],
               buildFiredAlertReason,
               nextState === AlertStates.WARNING
-            );
-          })
+            )
+          )
           .join('\n');
         /*
          * Custom recovery actions aren't yet available in the alerting framework
@@ -192,7 +188,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alertInstance = alertInstanceFactory(`${item}`, threshold, value);
+        const alertData = buildAlertData(first(results)![item], nextState);
+        const alertInstance = alertInstanceFactory(`${item}`, alertData.threshold, alertData.value);
         alertInstance.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
@@ -233,6 +230,15 @@ const buildReasonWithVerboseMetricName = (
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);
+};
+
+const buildAlertData = (inventoryItem: any, nextState: any): AlertData => {
+  const threshold =
+    nextState === AlertStates.WARNING ? inventoryItem.warningThreshold! : resultItem.threshold;
+  return {
+    value: inventoryItem.currentValue,
+    threshold,
+  };
 };
 
 const mapToConditionsLookup = (
