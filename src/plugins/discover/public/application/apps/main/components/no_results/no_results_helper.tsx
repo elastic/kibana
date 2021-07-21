@@ -29,7 +29,7 @@ export function getTimeFieldMessage() {
         <EuiDescriptionListDescription>
           <FormattedMessage
             id="discover.noResults.queryMayNotMatchTitle"
-            defaultMessage="Try searching over a larger period of time."
+            defaultMessage="Try searching over a longer period of time."
           />
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
