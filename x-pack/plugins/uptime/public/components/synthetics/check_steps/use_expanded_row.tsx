@@ -40,17 +40,18 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
     for (const expandedRowKeyStr in expandedRows) {
       if (expandedRows.hasOwnProperty(expandedRowKeyStr)) {
         const expandedRowKey = Number(expandedRowKeyStr);
+        const step = steps.find((stepF) => stepF.synthetics?.step?.index !== expandedRowKey);
 
-        const step = steps.find((stepF) => stepF.synthetics?.step?.index !== expandedRowKey)!;
-
-        expandedRowsN[expandedRowKey] = (
-          <ExecutedStep
-            step={step}
-            browserConsole={getBrowserConsole(expandedRowKey)}
-            index={step.synthetics?.step?.index!}
-            loading={loading}
-          />
-        );
+        if (step) {
+          expandedRowsN[expandedRowKey] = (
+            <ExecutedStep
+              step={step}
+              browserConsole={getBrowserConsole(expandedRowKey)}
+              index={step.synthetics?.step?.index!}
+              loading={loading}
+            />
+          );
+        }
       }
     }
 
