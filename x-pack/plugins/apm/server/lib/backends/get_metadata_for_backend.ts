@@ -7,11 +7,7 @@
 
 import { maybe } from '../../../common/utils/maybe';
 import { ProcessorEvent } from '../../../common/processor_event';
-import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-} from '../../../common/elasticsearch_fieldnames';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
 
@@ -55,7 +51,7 @@ export async function getMetadataForBackend({
   const sample = maybe(sampleResponse.hits.hits[0])?._source;
 
   return {
-    [SPAN_TYPE]: sample?.span.type,
-    [SPAN_SUBTYPE]: sample?.span.subtype,
+    'span.type': sample?.span.type,
+    'span.subtype': sample?.span.subtype,
   };
 }

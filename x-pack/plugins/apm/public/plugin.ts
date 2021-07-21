@@ -247,6 +247,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'services', title: servicesTitle, path: '/services' },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
+        { id: 'backends', title: backendsTitle, path: '/backends' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
