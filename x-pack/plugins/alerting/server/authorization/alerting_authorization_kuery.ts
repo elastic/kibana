@@ -83,7 +83,7 @@ export const buildRuleTypeFilter = (
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
   opts: AlertingAuthorizationFilterOpts,
   alertSpaceId?: string
-): JsonObject => {
+): BooleanFilter => {
   const allFilters = Array.from(ruleTypes).map(({ id, authorizedConsumers }) => {
     const ruleIdFilter = {
       bool: {

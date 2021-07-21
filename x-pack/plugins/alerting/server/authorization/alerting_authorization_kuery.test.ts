@@ -525,7 +525,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
                 should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
               },
             },
-            { bool: { filter: [{ term: { 'path.to.space.ids': 'space1' } }] } },
+            { term: { 'path.to.space.ids': 'space1' } },
             {
               bool: { minimum_should_match: 1, should: [{ match: { 'consumer-field': 'myApp' } }] },
             },
@@ -574,7 +574,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
                 should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
               },
             },
-            { bool: { filter: [{ term: { 'path.to.space.ids': 'space1' } }] } },
+            { term: { 'path.to.space.ids': 'space1' } },
             {
               bool: {
                 minimum_should_match: 1,
@@ -708,17 +708,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
                       ],
                     },
                   },
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'path.to.space.ids': 'space1',
-                          },
-                        },
-                      ],
-                    },
-                  },
+                  { term: { 'path.to.space.ids': 'space1' } },
                   {
                     bool: {
                       minimum_should_match: 1,
@@ -792,17 +782,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
                       ],
                     },
                   },
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'path.to.space.ids': 'space1',
-                          },
-                        },
-                      ],
-                    },
-                  },
+                  { term: { 'path.to.space.ids': 'space1' } },
                   {
                     bool: {
                       minimum_should_match: 1,
@@ -876,17 +856,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
                       ],
                     },
                   },
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'path.to.space.ids': 'space1',
-                          },
-                        },
-                      ],
-                    },
-                  },
+                  { term: { 'path.to.space.ids': 'space1' } },
                   {
                     bool: {
                       minimum_should_match: 1,

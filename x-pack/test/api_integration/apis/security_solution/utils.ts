@@ -6,6 +6,10 @@
  */
 import { JsonObject } from '@kbn/common-utils';
 
+export const getSpaceUrlPrefix = (spaceId?: string) => {
+  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+};
+
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {
     filter: [

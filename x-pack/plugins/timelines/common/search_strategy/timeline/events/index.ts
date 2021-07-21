@@ -20,5 +20,4 @@ export enum TimelineEventsQueries {
 export enum EntityType {
   ALERTS = 'alerts',
   EVENTS = 'events',
-  ALL = 'all',
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OWNER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils/target/technical_field_names';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 import {
@@ -132,7 +133,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   }
 
   const indices = alertConsumers.flatMap((consumer) => mapConsumerToIndexName[consumer]);
-  const requestWithAlertsIndices = { ...request, defaultIndex: indices };
+  const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
   // Note: Alerts RBAC are built off of the alerting's authorization class, which
   // is why we are pulling from alerting, not ther alertsClient here
@@ -142,9 +143,9 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     alertingAuthorizationClient.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alert, {
       type: AlertingAuthorizationFilterType.ESDSL,
       fieldNames: {
-        consumer: 'kibana.rac.alert.owner',
-        ruleTypeId: 'rule.id',
-        spaceIds: 'kibana.space_ids',
+        consumer: OWNER,
+        ruleTypeId: RULE_ID,
+        spaceIds: SPACE_IDS,
       },
     });
 

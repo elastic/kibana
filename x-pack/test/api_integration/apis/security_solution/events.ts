@@ -39,7 +39,7 @@ import {
   TimelineEventsQueries,
 } from '../../../../plugins/security_solution/common/search_strategy';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getDocValueFields, getFieldsToRequest, getFilterValue } from './utils';
+import { getDocValueFields, getFieldsToRequest, getFilterValue, getSpaceUrlPrefix } from './utils';
 
 interface TestCase {
   /** The space where the alert exists */
@@ -72,10 +72,6 @@ const ACTIVE_PAGE = 0;
 const PAGE_SIZE = 25;
 const LIMITED_PAGE_SIZE = 2;
 
-const getSpaceUrlPrefix = (spaceId?: string) => {
-  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-};
-
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -84,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
     defaultIndex: ['auditbeat-*'],
     docValueFields: getDocValueFields(),
     factoryQueryType: TimelineEventsQueries.all,
-    entityType: EntityType.ALL,
+    entityType: EntityType.EVENTS,
     fieldRequested: getFieldsToRequest(),
     fields: [],
     filterQuery: getFilterValue(HOST_NAME, FROM, TO),
@@ -184,6 +180,8 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .set('Content-Type', 'application/json')
             .send({ ...body })
+            // TODO - This should be updated to be a 403 once this ticket is resolved
+            // https://github.com/elastic/kibana/issues/106005
             .expect(500);
         });
       });
@@ -227,7 +225,12 @@ export default function ({ getService }: FtrProviderContext) {
       expect(timeline.edges[0]!.node.ecs.host!.name).to.eql([HOST_NAME]);
     });
 
-    describe('alerts authentication', () => {
+    // TODO - These tests work when rule registry flag for security solution
+    // is enabled. Unskip these tests once rule registry flag is removed
+    // To run, add the following to test config kbnTestServer.serverArgs :
+    // '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
+    // '--xpack.ruleRegistry.write.enabled=true',
+    describe.skip('alerts authentication', () => {
       const authorizedSecSpace1 = [secOnly, secOnlyRead];
       const authorizedObsSpace1 = [obsOnly, obsOnlyRead];
       const authorizedSecObsSpace1 = [obsSec, obsSecRead];
