@@ -7,10 +7,12 @@
 
 import React from 'react';
 
-import { EuiTable, EuiTableBody } from '@elastic/eui';
+import { EuiTable, EuiTableBody, EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 
-import { TableHeader } from '../../../../shared/table_header/table_header';
+import { ACTIONS_HEADER } from '../../../../shared/constants';
+import { SOURCE, DOCUMENTS_HEADER, SEARCHABLE_HEADER } from '../../../constants';
 import { ContentSourceDetails } from '../../../types';
+import { STATUS_HEADER } from '../../../views/content_sources/constants';
 import { SourceRow, ISourceRow } from '../source_row';
 
 interface SourcesTableProps extends ISourceRow {
@@ -23,12 +25,15 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
   isOrganization,
   onSearchableToggle,
 }) => {
-  const headerItems = ['Source', 'Status', 'Documents'];
-  if (onSearchableToggle) headerItems.push('Searchable');
-
   return (
     <EuiTable responsive={false}>
-      <TableHeader extraCell headerItems={headerItems} />
+      <EuiTableHeader>
+        <EuiTableHeaderCell>{SOURCE}</EuiTableHeaderCell>
+        <EuiTableHeaderCell>{STATUS_HEADER}</EuiTableHeaderCell>
+        <EuiTableHeaderCell>{DOCUMENTS_HEADER}</EuiTableHeaderCell>
+        {onSearchableToggle && <EuiTableHeaderCell>{SEARCHABLE_HEADER}</EuiTableHeaderCell>}
+        <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>
+      </EuiTableHeader>
       <EuiTableBody>
         {sources.map((source) => (
           <SourceRow
