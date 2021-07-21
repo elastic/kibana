@@ -7,7 +7,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
-import { SettingsForm } from './settings_form';
+import { SettingsForm } from './settings/settings_form';
 import { apmSettings } from './settings/apm_settings';
 import { rumSettings } from './settings/rum_settings';
 import { tlsSettings } from './settings/tls_settings';
