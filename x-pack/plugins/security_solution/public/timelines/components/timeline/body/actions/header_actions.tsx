@@ -51,6 +51,11 @@ const SortingColumnsContainer = styled.div`
   }
 `;
 
+const ActionsContainer = styled.div`
+  align-items: center;
+  display: flex;
+`;
+
 const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   width,
   browserFields,
@@ -111,35 +116,36 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   const sortedColumns = useMemo(
     () => ({
       onSort: onSortColumns,
-      columns: sort.map<{ id: string; direction: 'asc' | 'desc' }>(
-        ({ columnId, sortDirection }) => ({
+      columns:
+        sort?.map<{ id: string; direction: 'asc' | 'desc' }>(({ columnId, sortDirection }) => ({
           id: columnId,
           direction: sortDirection as 'asc' | 'desc',
-        })
-      ),
+        })) ?? [],
     }),
     [onSortColumns, sort]
   );
   const displayValues = useMemo(
-    () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}),
+    () =>
+      columnHeaders?.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}) ??
+      {},
     [columnHeaders]
   );
 
   const myColumns = useMemo(
     () =>
-      columnHeaders.map(({ aggregatable, displayAsText, id, type }) => ({
+      columnHeaders?.map(({ aggregatable, displayAsText, id, type }) => ({
         id,
         isSortable: aggregatable,
         displayAsText,
         schema: type,
-      })),
+      })) ?? [],
     [columnHeaders]
   );
 
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
   return (
-    <>
+    <ActionsContainer>
       {showSelectAllCheckbox && (
         <EventsTh role="checkbox">
           <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
@@ -207,10 +213,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
           </EventsThContent>
         </EventsTh>
       )}
-    </>
+    </ActionsContainer>
   );
 };
-
 HeaderActionsComponent.displayName = 'HeaderActionsComponent';
 
 export const HeaderActions = React.memo(HeaderActionsComponent);
