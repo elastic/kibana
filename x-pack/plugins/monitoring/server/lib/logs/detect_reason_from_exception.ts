@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function detectReasonFromException(exception) {
+export function detectReasonFromException(exception: Error & { status: number }) {
   const reason = { correctIndexName: true };
 
   if (exception) {

@@ -7,11 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
+// @ts-ignore
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
-import { LegacyRequest } from '../../../../types';
+import { LegacyRequest, LegacyServer } from '../../../../types';
 
-export function clusterRoute(server) {
+export function clusterRoute(server: LegacyServer) {
   /*
    * Cluster Overview
    */
@@ -37,7 +38,7 @@ export function clusterRoute(server) {
       const config = server.config();
 
       const indexPatterns = getIndexPatterns(server, {
-        filebeatIndexPattern: config.get('monitoring.ui.logs.index'),
+        filebeatIndexPattern: config.get('monitoring.ui.logs.index')!,
       });
       const options = {
         clusterUuid: req.params.clusterUuid,

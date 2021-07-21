@@ -108,7 +108,7 @@ export async function getLogstashPipelineIds(
     }
     return {
       id: bucket.key,
-      nodeIds: nodeBuckets.map((item) => item.key),
+      nodeIds: nodeBuckets.map((item: Bucket) => item.key),
     };
   });
 }

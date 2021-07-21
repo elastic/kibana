@@ -18,7 +18,7 @@ import {
 export function getIndexPatterns(
   server: LegacyServer,
   additionalPatterns: Record<string, string> = {},
-  cc: string = '*'
+  ccs: string = '*'
 ) {
   const config = server.config();
   const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);

@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import { LegacyRequest } from '../../types';
 import { createTimeFilter } from '../create_query';
-import { get } from 'lodash';
+
+interface Opts {
+  start: number;
+  end: number;
+  clusterUuid?: string;
+  nodeUuid?: string;
+  indexUuid?: string;
+}
 
 async function doesFilebeatIndexExist(
-  req,
-  filebeatIndexPattern,
-  { start, end, clusterUuid, nodeUuid, indexUuid }
+  req: LegacyRequest,
+  filebeatIndexPattern: string,
+  { start, end, clusterUuid, nodeUuid, indexUuid }: Opts
 ) {
   const metric = { timestampField: '@timestamp' };
   const filter = [createTimeFilter({ start, end, metric })];
@@ -122,18 +130,18 @@ async function doesFilebeatIndexExist(
   } = await callWithRequest(req, 'msearch', { body });
 
   return {
-    indexPatternExists: get(indexPatternExistsResponse, 'hits.total.value', 0) > 0,
+    indexPatternExists: indexPatternExistsResponse?.hits?.total.value ?? 0 > 0,
     indexPatternInTimeRangeExists:
-      get(indexPatternExistsInTimeRangeResponse, 'hits.total.value', 0) > 0,
-    typeExistsAtAnyTime: get(typeExistsAtAnyTimeResponse, 'hits.total.value', 0) > 0,
-    typeExists: get(typeExistsResponse, 'hits.total.value', 0) > 0,
-    usingStructuredLogs: get(usingStructuredLogsResponse, 'hits.total.value', 0) > 0,
-    clusterExists: clusterUuid ? get(clusterExistsResponse, 'hits.total.value', 0) > 0 : null,
-    nodeExists: nodeUuid ? get(nodeExistsResponse, 'hits.total.value', 0) > 0 : null,
-    indexExists: indexUuid ? get(indexExistsResponse, 'hits.total.value', 0) > 0 : null,
+      indexPatternExistsInTimeRangeResponse?.hits?.total.value ?? 0 > 0,
+    typeExistsAtAnyTime: typeExistsAtAnyTimeResponse?.hits?.total.value ?? 0 > 0,
+    typeExists: typeExistsResponse?.hits?.total.value ?? 0 > 0,
+    usingStructuredLogs: usingStructuredLogsResponse?.hits?.total.value ?? 0 > 0,
+    clusterExists: clusterUuid ? clusterExistsResponse?.hits?.total.value ?? 0 > 0 : null,
+    nodeExists: nodeUuid ? nodeExistsResponse?.hits?.total.value ?? 0 > 0 : null,
+    indexExists: indexUuid ? indexExistsResponse?.hits?.total.value ?? 0 > 0 : null,
   };
 }
 
-export async function detectReason(req, filebeatIndexPattern, opts) {
+export async function detectReason(req: LegacyRequest, filebeatIndexPattern: string, opts: Opts) {
   return await doesFilebeatIndexExist(req, filebeatIndexPattern, opts);
 }

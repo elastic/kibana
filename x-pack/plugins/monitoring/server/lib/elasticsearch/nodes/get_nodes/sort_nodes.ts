@@ -7,7 +7,9 @@
 
 import { orderBy } from 'lodash';
 
-export function sortNodes(nodes, sort) {
+type Node = Record<string, any>;
+
+export function sortNodes(nodes: Node[], sort?: { field: string; direction: 'asc' | 'desc' }) {
   if (!sort || !sort.field) {
     return nodes;
   }

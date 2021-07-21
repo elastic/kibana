@@ -13,7 +13,7 @@ import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
 import { LegacyRequest } from '../../types';
 
-type Metric = string | { keys: string; name: string };
+type Metric = string | { keys: string | string[]; name: string };
 
 export async function getMetrics(
   req: LegacyRequest,
@@ -52,8 +52,8 @@ export async function getMetrics(
 
     return Bluebird.map(metricNames, (metricName) => {
       return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
-        min: String(min),
-        max: String(max),
+        min,
+        max,
         bucketSize,
         timezone,
       });

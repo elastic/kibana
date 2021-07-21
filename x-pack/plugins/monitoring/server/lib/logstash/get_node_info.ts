@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
+import { checkParam, MissingRequiredError } from '../error_missing_required';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
@@ -20,8 +20,12 @@ export function handleResponse(resp: ElasticsearchResponse) {
   const legacyStats = resp.hits?.hits[0]?._source?.logstash_stats;
   const mbStats = resp.hits?.hits[0]?._source?.logstash?.node?.stats;
   const logstash = mbStats?.logstash ?? legacyStats?.logstash;
+  const availabilityTimestamp = mbStats?.timestamp ?? legacyStats?.timestamp;
+  if (!availabilityTimestamp) {
+    throw new MissingRequiredError('timestamp');
+  }
   const info = merge(logstash, {
-    availability: calculateAvailability(mbStats?.timestamp ?? legacyStats?.timestamp),
+    availability: calculateAvailability(availabilityTimestamp),
     events: mbStats?.events ?? legacyStats?.events,
     reloads: mbStats?.reloads ?? legacyStats?.reloads,
     queue_type: mbStats?.queue?.type ?? legacyStats?.queue?.type,

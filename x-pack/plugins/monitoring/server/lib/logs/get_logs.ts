@@ -83,7 +83,7 @@ export async function getLogs(
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
   const metric = { timestampField: '@timestamp' };
-  const filter = [
+  const filter: any[] = [
     { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric }),
   ];

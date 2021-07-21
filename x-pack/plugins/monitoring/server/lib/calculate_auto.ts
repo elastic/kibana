@@ -41,7 +41,7 @@ function find(
       const rule = rules[i];
       const resp = check(rule[0], rule[1], target);
 
-      if (resp === null) {
+      if (resp === null || resp === undefined) {
         if (lastResp) {
           return lastResp;
         }

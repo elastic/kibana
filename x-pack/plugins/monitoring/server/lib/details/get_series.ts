@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Bucket } from '../../types';
@@ -65,7 +66,7 @@ function getUuid(req: LegacyRequest, metric: Metric) {
 }
 
 function defaultCalculation(bucket: SeriesBucket, key: string) {
-  const legacyValue = Reflect.get(bucket, key) ?? null;
+  const legacyValue = get(bucket, key, null);
   const mbValue = bucket.metric_mb_deriv?.normalized_value ?? null;
   let value;
   if (mbValue !== null && !isNaN(mbValue) && mbValue > 0) {
@@ -116,8 +117,8 @@ async function fetchSeries(
   metric: Metric,
   metricOptions: any,
   groupBy: string | Record<string, any> | null,
-  min: string,
-  max: string,
+  min: string | number,
+  max: string | number,
   bucketSize: number,
   filters: Array<Record<string, any>>
 ) {
@@ -199,7 +200,7 @@ async function fetchSeries(
  * @param {String} min Max timestamp for results to exist within.
  * @return {Number} Index position to use for the first bucket. {@code buckets.length} if none should be used.
  */
-function findFirstUsableBucketIndex(buckets: SeriesBucket[], min: string) {
+function findFirstUsableBucketIndex(buckets: SeriesBucket[], min: string | number) {
   const minInMillis = moment.utc(min).valueOf();
 
   for (let i = 0; i < buckets.length; ++i) {
@@ -229,7 +230,7 @@ function findFirstUsableBucketIndex(buckets: SeriesBucket[], min: string) {
  */
 function findLastUsableBucketIndex(
   buckets: SeriesBucket[],
-  max: string,
+  max: string | number,
   firstUsableBucketIndex: number,
   bucketSizeInMillis: number = 0
 ) {
@@ -258,8 +259,8 @@ const formatBucketSize = (bucketSizeInSeconds: number) => {
 function handleSeries(
   metric: Metric,
   groupBy: string | Record<string, any> | null,
-  min: string,
-  max: string,
+  min: string | number,
+  max: string | number,
   bucketSizeInSeconds: number,
   timezone: string,
   response: ElasticsearchResponse
@@ -337,7 +338,7 @@ export async function getSeries(
     max,
     bucketSize,
     timezone,
-  }: { min: string; max: string; bucketSize: number; timezone: string }
+  }: { min: string | number; max: string | number; bucketSize: number; timezone: string }
 ) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 

@@ -7,7 +7,6 @@
 
 import { defaults } from 'lodash';
 import moment from 'moment';
-import { BeatsMetricFields } from './metrics';
 import { MissingRequiredError } from './error_missing_required';
 import { standaloneClusterFilter } from './standalone_clusters';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
@@ -23,8 +22,8 @@ export interface TimerangeFilter {
 }
 
 export function createTimeFilter(options: {
-  start?: Date | number;
-  end?: Date | number;
+  start?: number;
+  end?: number;
   metric?: { timestampField: string };
 }) {
   const { start, end } = options;
@@ -71,9 +70,9 @@ export function createQuery(options: {
   filters?: any[];
   clusterUuid: string;
   uuid?: string;
-  start?: Date | number;
-  end?: Date | number;
-  metric: BeatsMetricFields;
+  start?: number;
+  end?: number;
+  metric: { uuidField?: string; timestampField: string };
 }) {
   const { type, types, clusterUuid, uuid, filters } = defaults(options, { filters: [] });
 
