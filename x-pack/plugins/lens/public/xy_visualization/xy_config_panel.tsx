@@ -8,7 +8,7 @@
 import './xy_config_panel.scss';
 import React, { useMemo, useState, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType } from '@elastic/charts';
+import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -61,7 +61,11 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   };
 }
 
-const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+const legendOptions: Array<{
+  id: string;
+  value: 'auto' | 'show' | 'hide';
+  label: string;
+}> = [
   {
     id: `xy_legend_auto`,
     value: 'auto',
@@ -319,30 +323,70 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
+            location={state?.legend.isInside ? 'inside' : 'outside'}
+            onLocationChange={(location) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  isInside: location === 'inside',
+                },
+              });
+            }}
             onDisplayChange={(optionId) => {
               const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
               if (newMode === 'auto') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: false,
+                  },
                 });
               } else if (newMode === 'show') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: true,
+                  },
                 });
               } else if (newMode === 'hide') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: false,
+                    showSingleSeries: false,
+                  },
                 });
               }
             }}
             position={state?.legend.position}
+            horizontalAlignment={state?.legend.horizontalAlignment}
+            verticalAlignment={state?.legend.verticalAlignment}
+            floatingColumns={state?.legend.floatingColumns}
+            onFloatingColumnsChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, floatingColumns: val },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,
                 legend: { ...state.legend, position: id as Position },
+              });
+            }}
+            onAlignmentChange={(value) => {
+              const [vertical, horizontal] = value.split('_');
+              const verticalAlignment = vertical as VerticalAlignment;
+              const horizontalAlignment = horizontal as HorizontalAlignment;
+              setState({
+                ...state,
+                legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
             renderValueInLegendSwitch={nonOrdinalXAxis}

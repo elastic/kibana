@@ -9,7 +9,6 @@ import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
-  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
@@ -90,7 +89,6 @@ describe('add_prepackaged_rules_route', () => {
 
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
@@ -102,8 +100,7 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
     addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
@@ -131,8 +128,7 @@ describe('add_prepackaged_rules_route', () => {
 
     test('it returns a 400 if the index does not exist', async () => {
       const request = addPrepackagedRulesRequest();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(request, context);
@@ -187,8 +183,7 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('catches errors if payloads cause errors to be thrown', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
       );
       const request = addPrepackagedRulesRequest();
@@ -297,6 +292,7 @@ describe('add_prepackaged_rules_route', () => {
         getExceptionListClient: jest.fn(),
         getListClient: jest.fn(),
       };
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         context,
@@ -304,6 +300,8 @@ describe('add_prepackaged_rules_route', () => {
         clients.alertsClient,
         {} as FrameworkRequest,
         1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 
@@ -313,6 +311,7 @@ describe('add_prepackaged_rules_route', () => {
 
     test('uses passed in exceptions list client when lists client not available in context', async () => {
       const { lists, ...myContext } = context;
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         myContext,
@@ -320,6 +319,8 @@ describe('add_prepackaged_rules_route', () => {
         clients.alertsClient,
         {} as FrameworkRequest,
         1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 

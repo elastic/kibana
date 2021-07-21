@@ -1,0 +1,13 @@
+{
+  "id": "expressionShape",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": [
+    "common"
+  ],
+  "requiredPlugins": ["expressions", "presentationUtil"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

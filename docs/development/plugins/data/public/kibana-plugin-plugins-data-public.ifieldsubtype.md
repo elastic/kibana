@@ -2,18 +2,15 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md)
 
-## IFieldSubType interface
+## IFieldSubType type
+
+> Warning: This API is now obsolete.
+> 
+> Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+> 
 
 <b>Signature:</b>
 
 ```typescript
-export interface IFieldSubType 
+declare type IFieldSubType = oldIFieldSubType;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [multi](./kibana-plugin-plugins-data-public.ifieldsubtype.multi.md) | <code>{</code><br/><code>        parent: string;</code><br/><code>    }</code> |  |
-|  [nested](./kibana-plugin-plugins-data-public.ifieldsubtype.nested.md) | <code>{</code><br/><code>        path: string;</code><br/><code>    }</code> |  |
-
