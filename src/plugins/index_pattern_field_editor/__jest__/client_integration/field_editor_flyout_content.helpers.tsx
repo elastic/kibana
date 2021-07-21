@@ -34,21 +34,18 @@ export const setIndexPatternFields = (fields: Array<{ name: string; displayName:
 };
 
 const getActions = (testBed: TestBed) => {
-  // Add TS overload function types
-  function getRenderedIndexPatternFields(returnWrappers?: boolean): ReactWrapper;
-  function getRenderedIndexPatternFields(
-    returnWrappers?: boolean
-  ): Array<{ key: string; value: string }>;
-
-  function getRenderedIndexPatternFields(returnWrappers = false) {
+  const getWrapperRenderedIndexPatternFields = (): ReactWrapper | null => {
     if (testBed.find('indexPatternFieldList').length === 0) {
-      return [];
+      return null;
     }
+    return testBed.find('indexPatternFieldList.listItem');
+  };
 
-    const allFields = testBed.find('indexPatternFieldList.listItem');
+  const getRenderedIndexPatternFields = (): Array<{ key: string; value: string }> => {
+    const allFields = getWrapperRenderedIndexPatternFields();
 
-    if (returnWrappers === true) {
-      return allFields;
+    if (allFields === null) {
+      return [];
     }
 
     return allFields.map((field) => {
@@ -56,7 +53,7 @@ const getActions = (testBed: TestBed) => {
       const value = testBed.find('value', field).text();
       return { key, value };
     });
-  }
+  };
 
   function getRenderedFieldsPreview() {
     if (testBed.find('fieldPreviewItem').length === 0) {
@@ -97,12 +94,32 @@ const getActions = (testBed: TestBed) => {
     throw new Error(`Can't access the latest preview HTTP request as it hasn't been called.`);
   };
 
+  const goToNextDocument = async () => {
+    await act(async () => {
+      testBed.find('goToNextDocButton').simulate('click');
+    });
+    testBed.component.update();
+  };
+
+  const goToPreviousDocument = async () => {
+    await act(async () => {
+      testBed.find('goToPrevDocButton').simulate('click');
+    });
+    testBed.component.update();
+  };
+
+  const loadCustomDocument = (docId: string) => {};
+
   return {
     ...getCommonActions(testBed),
+    getWrapperRenderedIndexPatternFields,
     getRenderedIndexPatternFields,
     getRenderedFieldsPreview,
     setFilterFieldsValue,
     getLatestPreviewHttpRequest,
+    goToNextDocument,
+    goToPreviousDocument,
+    loadCustomDocument,
   };
 };
 

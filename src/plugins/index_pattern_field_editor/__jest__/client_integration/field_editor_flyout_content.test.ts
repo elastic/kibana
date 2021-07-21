@@ -198,6 +198,8 @@ describe('<FieldEditorFlyoutContent />', () => {
       },
     ];
 
+    const [doc1, doc2, doc3] = mockDocuments;
+
     const indexPatternFields: Array<{ name: string; displayName: string }> = [
       {
         name: 'title',
@@ -354,14 +356,24 @@ describe('<FieldEditorFlyoutContent />', () => {
       const {
         find,
         component,
-        actions: { toggleFormRow, fields, getRenderedIndexPatternFields },
+        actions: {
+          toggleFormRow,
+          fields,
+          getWrapperRenderedIndexPatternFields,
+          getRenderedIndexPatternFields,
+        },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
 
-      const fieldsRendered = getRenderedIndexPatternFields(true);
-      expect(fieldsRendered.length).toBe(3);
+      const fieldsRendered = getWrapperRenderedIndexPatternFields();
+
+      if (fieldsRendered === null) {
+        throw new Error('No index pattern field rendered.');
+      }
+
+      expect(fieldsRendered.length).toBe(Object.keys(doc1._source).length);
       // make sure that the last one if the "description" field
       expect(fieldsRendered.at(2).text()).toBe('descriptionFirst doc - description');
 
@@ -571,6 +583,86 @@ describe('<FieldEditorFlyoutContent />', () => {
         expect(exists('fieldPreviewItem')).toBe(true);
         expect(find('indexPatternFieldList.listItem').length).toBeGreaterThan(0);
         expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'ok' }]);
+      });
+    });
+
+    describe('Cluster document load and navigation', () => {
+      test('should update the field list when the document changes', async () => {
+        const {
+          actions: {
+            toggleFormRow,
+            fields,
+            getRenderedIndexPatternFields,
+            goToNextDocument,
+            goToPreviousDocument,
+          },
+        } = testBed;
+
+        await toggleFormRow('value');
+        await fields.updateName('myRuntimeField');
+
+        expect(getRenderedIndexPatternFields()[0]).toEqual({
+          key: 'title',
+          value: doc1._source.title,
+        });
+
+        await goToNextDocument();
+        expect(getRenderedIndexPatternFields()[0]).toEqual({
+          key: 'title',
+          value: doc2._source.title,
+        });
+
+        await goToNextDocument();
+        expect(getRenderedIndexPatternFields()[0]).toEqual({
+          key: 'title',
+          value: doc3._source.title,
+        });
+
+        // We are back to the first document of the list
+        await goToNextDocument();
+        expect(getRenderedIndexPatternFields()[0]).toEqual({
+          key: 'title',
+          value: doc1._source.title,
+        });
+
+        // Let's go backward
+        await goToPreviousDocument();
+        expect(getRenderedIndexPatternFields()[0]).toEqual({
+          key: 'title',
+          value: doc3._source.title,
+        });
+
+        await goToPreviousDocument();
+        expect(getRenderedIndexPatternFields()[0]).toEqual({
+          key: 'title',
+          value: doc2._source.title,
+        });
+      });
+
+      test('should update the field preview value when the document changes', async () => {
+        httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['valueDoc1'] });
+        const {
+          actions: {
+            toggleFormRow,
+            fields,
+            waitForPreviewUpdate,
+            getRenderedFieldsPreview,
+            goToNextDocument,
+          },
+        } = testBed;
+
+        await toggleFormRow('value');
+        await fields.updateName('myRuntimeField');
+        await fields.updateScript('echo("hello world")');
+        await waitForPreviewUpdate();
+
+        expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'valueDoc1' }]);
+
+        httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['valueDoc2'] });
+        await goToNextDocument();
+        await waitForPreviewUpdate();
+
+        expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'valueDoc2' }]);
       });
     });
   });
