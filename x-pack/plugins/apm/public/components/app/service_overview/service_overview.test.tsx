@@ -32,9 +32,10 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { uiSettingsServiceMock } from '../../../../../../../src/core/public/mocks';
 
-const KibanaReactContext = createKibanaReactContext({
+const KibanaReactContext = createKibanaReactContext(({
+  uiSettings: { get: () => true },
   usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+} as unknown) as Partial<CoreStart>);
 
 const mockParams = {
   rangeFrom: 'now-15m',

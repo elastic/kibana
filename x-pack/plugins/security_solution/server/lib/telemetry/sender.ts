@@ -7,7 +7,8 @@
 
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
-import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
+import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { URL } from 'url';
 import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
@@ -47,7 +48,6 @@ export class TelemetryEventsSender {
   private readonly checkIntervalMs = 60 * 1000;
   private readonly max_records = 10_000;
   private readonly logger: Logger;
-  private core?: CoreStart;
   private maxQueueSize = 100;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
@@ -82,7 +82,6 @@ export class TelemetryEventsSender {
     endpointContextService?: EndpointAppContextService
   ) {
     this.telemetryStart = telemetryStart;
-    this.core = core;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
@@ -125,36 +124,44 @@ export class TelemetryEventsSender {
         sort: [
           {
             'event.ingested': {
-              order: 'desc',
+              order: 'desc' as const,
             },
           },
         ],
       },
     };
 
-    if (!this.core) {
-      throw Error('could not fetch diagnostic alerts. core is not available');
+    if (this.esClient === undefined) {
+      throw Error('could not fetch diagnostic alerts. es client is not available');
     }
-    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-    return callCluster('search', query);
+
+    return (await this.esClient.search<TelemetryEvent>(query)).body;
   }
 
-  public async fetchEndpointMetrics() {
+  public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    const query = {
+    const query: SearchRequest = {
       expand_wildcards: 'open,hidden',
-      index: `.ds-metrics-endpoint.metrics*`,
+      index: `.ds-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
+          },
+        },
         aggs: {
           endpoint_agents: {
             terms: {
+              field: 'agent.id',
               size: this.max_records,
-              field: 'agent.id.keyword',
             },
             aggs: {
               latest_metrics: {
@@ -175,7 +182,6 @@ export class TelemetryEventsSender {
       },
     };
 
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
     return this.esClient.search(query);
   }
 
@@ -192,35 +198,38 @@ export class TelemetryEventsSender {
     });
   }
 
-  public async fetchEndpointPolicyConfigs(id: string) {
+  public async fetchPolicyConfigs(id: string) {
     if (this.savedObjectClient === undefined) {
       throw Error('could not fetch endpoint policy configs. saved object client is not available');
     }
 
-    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
+    return this.agentPolicyService?.get(this.savedObjectClient, id);
   }
 
-  public async fetchFailedEndpointPolicyResponses() {
+  public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    const query = {
+    const query: SearchRequest = {
       expand_wildcards: 'open,hidden',
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
         query: {
-          match: {
-            'Endpoint.policy.applied.status': 'failure',
+          range: {
+            '@timestamp': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
           },
         },
         aggs: {
           policy_responses: {
             terms: {
               size: this.max_records,
-              field: 'Endpoint.policy.applied.id.keyword',
+              field: 'Endpoint.policy.applied.id',
             },
             aggs: {
               latest_response: {
@@ -241,7 +250,6 @@ export class TelemetryEventsSender {
       },
     };
 
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
     return this.esClient.search(query);
   }
 
@@ -364,11 +372,10 @@ export class TelemetryEventsSender {
   }
 
   private async fetchClusterInfo(): Promise<ESClusterInfo> {
-    if (!this.core) {
-      throw Error("Couldn't fetch cluster info because core is not available");
+    if (this.esClient === undefined) {
+      throw Error("Couldn't fetch cluster info. es client is not available");
     }
-    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-    return getClusterInfo(callCluster);
+    return getClusterInfo(this.esClient);
   }
 
   private async fetchTelemetryUrl(channel: string): Promise<string> {
@@ -380,12 +387,11 @@ export class TelemetryEventsSender {
   }
 
   private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
-    if (!this.core) {
+    if (!this.esClient) {
       return undefined;
     }
     try {
-      const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-      const ret = await getLicense(callCluster, true);
+      const ret = await getLicense(this.esClient, true);
       return ret.license;
     } catch (err) {
       this.logger.warn(`Error retrieving license: ${err}`);
@@ -605,13 +611,15 @@ export interface ESClusterInfo {
 
 /**
  * Get the cluster info from the connected cluster.
- *
+ * Copied from:
+ * src/plugins/telemetry/server/telemetry_collection/get_cluster_info.ts
  * This is the equivalent to GET /
  *
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
+ * @param {function} esClient The asInternalUser handler (exposed for testing)
  */
-function getClusterInfo(callCluster: LegacyAPICaller) {
-  return callCluster<ESClusterInfo>('info');
+export async function getClusterInfo(esClient: ElasticsearchClient) {
+  const { body } = await esClient.info();
+  return body;
 }
 
 // From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
@@ -629,14 +637,19 @@ export interface ESLicense {
   start_date_in_millis?: number;
 }
 
-function getLicense(callCluster: LegacyAPICaller, local: boolean) {
-  return callCluster<{ license: ESLicense }>('transport.request', {
-    method: 'GET',
-    path: '/_license',
-    query: {
-      local,
-      // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-      accept_enterprise: 'true',
-    },
-  });
+async function getLicense(
+  esClient: ElasticsearchClient,
+  local: boolean
+): Promise<{ license: ESLicense }> {
+  return (
+    await esClient.transport.request({
+      method: 'GET',
+      path: '/_license',
+      querystring: {
+        local,
+        // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
+        accept_enterprise: 'true',
+      },
+    })
+  ).body as Promise<{ license: ESLicense }>; // Note: We have to as cast since transport.request doesn't have generics
 }
