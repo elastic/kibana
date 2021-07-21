@@ -45,6 +45,7 @@ export function registerJobsMonitoringRuleType({
 }: RegisterAlertParams) {
   alerting.registerType<
     AnomalyDetectionJobsHealthRuleParams,
+    never, // Only use if defining useSavedObjectReferences hook
     AlertTypeState,
     AlertInstanceState,
     AnomalyDetectionJobsHealthAlertContext,
