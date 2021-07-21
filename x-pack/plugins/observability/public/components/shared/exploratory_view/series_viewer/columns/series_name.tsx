@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesUrl } from '../../types';
@@ -29,6 +29,10 @@ export function SeriesName({ series, seriesId }: Props) {
       setSeries(seriesId, { ...series, name: value });
     }
   };
+
+  useEffect(() => {
+    setValue(series.name);
+  }, [series.name]);
 
   return <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={onSave} />;
 }

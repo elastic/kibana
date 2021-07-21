@@ -108,7 +108,7 @@ export const SeriesEditor = React.memo(function () {
           );
         }
       });
-      return newEditorItems;
+      return [...newEditorItems];
     });
 
     setItemIdToExpandedRowMap((prevState) => {
@@ -120,7 +120,13 @@ export const SeriesEditor = React.memo(function () {
     setItemIdToExpandedRowMap((prevState) => {
       const itemIdToExpandedRowMapValues = { ...prevState };
 
-      editorItems.forEach((item) => {
+      const newEditorItems = getSeriesToEdit({
+        reportType,
+        allSeries,
+        indexPatterns,
+      });
+
+      newEditorItems.forEach((item) => {
         if (itemIdToExpandedRowMapValues[item.id]) {
           itemIdToExpandedRowMapValues[item.id] = (
             <ExpandedSeriesRow
@@ -133,7 +139,7 @@ export const SeriesEditor = React.memo(function () {
       });
       return itemIdToExpandedRowMapValues;
     });
-  }, [allSeries, editorItems]);
+  }, [allSeries, editorItems, indexPatterns, reportType]);
 
   const toggleDetails = (item: BuilderItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -239,8 +245,8 @@ export const SeriesEditor = React.memo(function () {
       align: 'center' as const,
       width: '8%',
       field: 'id',
-      render: (seriesId: number, { series }: BuilderItem) => (
-        <SeriesActions seriesId={seriesId} series={series} editorMode={true} />
+      render: (seriesId: number, { series, seriesConfig }: BuilderItem) => (
+        <SeriesActions seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
     },
   ];
@@ -279,6 +285,8 @@ export const SeriesEditor = React.memo(function () {
     for (let i = totalSeries; i >= 0; i--) {
       removeSeries(i);
     }
+    setEditorItems([]);
+    setItemIdToExpandedRowMap({});
   };
 
   return (

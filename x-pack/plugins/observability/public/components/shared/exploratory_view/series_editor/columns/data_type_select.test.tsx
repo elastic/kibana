@@ -28,10 +28,8 @@ describe('DataTypeSelect', function () {
 
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
-      breakdown: 'user_agent.name',
       dataType: 'synthetics',
-      name: 'performance-distribution',
-      reportDefinitions: {},
+      name: 'synthetics-series-1',
       time: {
         from: 'now-15m',
         to: 'now',

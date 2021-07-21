@@ -17,7 +17,10 @@ import {
 
 import { PersistableFilter } from '../../../../../lens/common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import {
+  ExistsFilter,
+  PhraseFilter,
+} from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -55,7 +58,7 @@ export interface SeriesConfig {
   defaultSeriesType: SeriesType;
   filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  baseFilters?: PersistableFilter[] | ExistsFilter[];
+  baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
   definitionFields: string[];
   metricOptions?: MetricOption[];
   labels: Record<string, string>;

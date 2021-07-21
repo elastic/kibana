@@ -6,13 +6,15 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FilterLabel } from '../components/filter_label';
 import { SeriesConfig, SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 
 interface Props {
   seriesId: number;
@@ -20,6 +22,10 @@ interface Props {
   seriesConfig: SeriesConfig;
 }
 export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
+  const { setSeries } = useSeriesStorage();
+
+  const isPreview = !!useRouteMatch('/exploratory-view/preview');
+
   const { reportDefinitions = {} } = series;
 
   const { labels } = seriesConfig;
@@ -39,60 +45,88 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
 
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
-  return (filters.length > 0 || definitionFilters.length > 0) && indexPattern ? (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup wrap gutterSize="xs">
-        {filters.map(({ field, values, notValues }) => (
-          <Fragment key={field}>
-            {(values ?? []).map((val) => (
-              <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
-                <FilterLabel
-                  seriesId={seriesId}
-                  series={series}
-                  field={field}
-                  label={labels[field]}
-                  value={val}
-                  removeFilter={() => removeFilter({ field, value: val, negate: false })}
-                  negate={false}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-            ))}
-            {(notValues ?? []).map((val) => (
-              <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
-                <FilterLabel
-                  series={series}
-                  seriesId={seriesId}
-                  field={field}
-                  label={labels[field]}
-                  value={val}
-                  negate={true}
-                  removeFilter={() => removeFilter({ field, value: val, negate: true })}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-            ))}
-          </Fragment>
-        ))}
+  if ((filters.length === 0 && definitionFilters.length === 0) || !indexPattern) {
+    return null;
+  }
 
-        {definitionFilters.map(({ field, values }) =>
-          values ? (
-            <EuiFlexItem key={field} grow={false} style={{ maxWidth: 350 }}>
+  return (
+    <EuiFlexGroup wrap gutterSize="xs">
+      {filters.map(({ field, values, notValues }) => (
+        <Fragment key={field}>
+          {(values ?? []).length > 0 && (
+            <EuiFlexItem grow={false} style={{ maxWidth: 300 }}>
+              <FilterLabel
+                seriesId={seriesId}
+                series={series}
+                field={field}
+                label={labels[field]}
+                value={values ?? []}
+                removeFilter={() => {
+                  values?.forEach((val) => {
+                    removeFilter({ field, value: val, negate: false });
+                  });
+                }}
+                negate={false}
+                indexPattern={indexPattern}
+              />
+            </EuiFlexItem>
+          )}
+          {(notValues ?? []).length > 0 && (
+            <EuiFlexItem key={field} grow={false} style={{ maxWidth: 300 }}>
               <FilterLabel
                 series={series}
                 seriesId={seriesId}
                 field={field}
                 label={labels[field]}
-                value={values}
-                removeFilter={() => {}}
-                negate={false}
-                definitionFilter={true}
+                value={notValues ?? []}
+                negate={true}
+                removeFilter={() => {
+                  values?.forEach((val) => {
+                    removeFilter({ field, value: val, negate: false });
+                  });
+                }}
                 indexPattern={indexPattern}
               />
             </EuiFlexItem>
-          ) : null
-        )}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  ) : null;
+          )}
+        </Fragment>
+      ))}
+
+      {definitionFilters.map(({ field, values }) =>
+        values ? (
+          <EuiFlexItem key={field} grow={false} style={{ maxWidth: 350 }}>
+            <FilterLabel
+              series={series}
+              seriesId={seriesId}
+              field={field}
+              label={labels[field]}
+              value={values}
+              removeFilter={() => {}}
+              negate={false}
+              definitionFilter={true}
+              indexPattern={indexPattern}
+            />
+          </EuiFlexItem>
+        ) : null
+      )}
+
+      {(series.filters ?? []).length > 0 && !isPreview && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            flush="left"
+            color="text"
+            iconType="cross"
+            onClick={() => {
+              setSeries(seriesId, { ...series, filters: undefined });
+            }}
+            size="s"
+          >
+            {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {
+              defaultMessage: 'Clear filters',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 }

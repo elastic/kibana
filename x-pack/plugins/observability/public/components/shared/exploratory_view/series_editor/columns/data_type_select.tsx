@@ -58,12 +58,13 @@ export function DataTypesSelect({ seriesId, series }: Props) {
   const { setSeries, reportType } = useSeriesStorage();
 
   const onDataTypeChange = (dataType: AppDataType) => {
-    setSeries(seriesId, {
-      ...series,
-      dataType,
-      reportDefinitions: {},
-      selectedMetricField: undefined,
-    });
+    if (String(dataType) !== SELECT_DATA_TYPE) {
+      setSeries(seriesId, {
+        dataType,
+        time: series.time,
+        name: `${dataType}-series-${seriesId + 1}`,
+      });
+    }
   };
 
   const options = dataTypes

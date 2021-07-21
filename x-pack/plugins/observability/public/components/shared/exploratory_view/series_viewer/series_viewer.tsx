@@ -8,16 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { SeriesFilter } from './columns/series_filter';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { SeriesName } from './columns/series_name';
 import { SeriesInfo } from './columns/series_info';
-import { Breakdowns } from './columns/breakdowns';
 import { SeriesDatePicker } from '../components/series_date_picker';
+import { NO_BREAK_DOWN_LABEL } from './columns/breakdowns';
 
 interface EditItem {
   id: number;
@@ -43,16 +42,14 @@ export function SeriesViewer() {
       }),
       field: 'id',
       width: '15%',
-      render: (seriesId: number, { series }: EditItem) => (
-        <SeriesName seriesId={seriesId} series={series} />
-      ),
+      render: (seriesId: number, { series }: EditItem) => <EuiText>{series.name}</EuiText>,
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesEditor.filters', {
         defaultMessage: 'Filters',
       }),
       field: 'id',
-      width: '25%',
+      width: '35%',
       render: (seriesId: number, { series, seriesConfig }: EditItem) => (
         <SeriesFilter seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
       ),
@@ -63,15 +60,15 @@ export function SeriesViewer() {
       }),
       field: 'seriesId',
       width: '10%',
-      render: (seriesId: number, { seriesConfig, series }: EditItem) => (
-        <Breakdowns seriesId={seriesId} seriesConfig={seriesConfig} series={series} />
+      render: (seriesId: number, { seriesConfig: { labels }, series }: EditItem) => (
+        <EuiText>{series.breakdown ? labels[series.breakdown] : NO_BREAK_DOWN_LABEL}</EuiText>
       ),
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesEditor.time', {
         defaultMessage: 'Time',
       }),
-      width: '35%',
+      width: '30%',
       field: 'id',
       render: (seriesId: number, { series }: EditItem) => (
         <SeriesDatePicker seriesId={seriesId} series={series} readonly={true} />
@@ -115,7 +112,7 @@ export function SeriesViewer() {
             verticalAlign: 'top',
           },
         }}
-        tableLayout="fixed"
+        tableLayout="auto"
       />
       <EuiSpacer />
     </>

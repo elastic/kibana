@@ -39,16 +39,20 @@ export function ExpandedSeriesRow({ seriesId, series, seriesConfig }: Props) {
 
   return (
     <div style={{ width: '100%' }}>
-      <ReportDefinitionCol seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
-      <EuiSpacer />
       <EuiFlexGroup>
-        <EuiFlexItem grow={false} style={{ minWidth: 600 }}>
-          <EuiFormRow label={FILTERS_LABEL}>
-            <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
-          </EuiFormRow>
+        <EuiFlexItem>
+          <ReportDefinitionCol seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem style={{ minWidth: 600 }}>
+              <EuiFormRow label={FILTERS_LABEL} fullWidth>
+                <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         {(hasOperationType || columnType === 'operation') && (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ minWidth: 200 }}>
             <EuiFormRow label={OPERATION_LABEL}>
               <OperationTypeSelect
                 seriesId={seriesId}

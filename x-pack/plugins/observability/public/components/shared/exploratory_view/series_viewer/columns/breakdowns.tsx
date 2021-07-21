@@ -54,9 +54,7 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
   if (!hasUseBreakdownColumn) {
     items.push({
       id: NO_BREAKDOWN,
-      label: i18n.translate('xpack.observability.exp.breakDownFilter.noBreakdown', {
-        defaultMessage: 'No breakdown',
-      }),
+      label: NO_BREAK_DOWN_LABEL,
     });
   }
 
@@ -82,3 +80,10 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     </div>
   );
 }
+
+export const NO_BREAK_DOWN_LABEL = i18n.translate(
+  'xpack.observability.exp.breakDownFilter.noBreakdown',
+  {
+    defaultMessage: 'No breakdown',
+  }
+);

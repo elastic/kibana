@@ -10,18 +10,21 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesUrl } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
+import { useDiscoverLink } from '../../hooks/use_discover_link';
 
 interface Props {
   seriesId: number;
   series: SeriesUrl;
-  editorMode?: boolean;
+  seriesConfig: SeriesConfig;
 }
-export function SeriesActions({ seriesId, series, editorMode = false }: Props) {
+export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
   const { setSeries, allSeries } = useSeriesStorage();
 
+  const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
+
   const copySeries = () => {
-    let copySeriesId: string = `${seriesId}-copy`;
+    let copySeriesId: string = `${series.name}-copy`;
     if (allSeries.find(({ name }) => name === copySeriesId)) {
       copySeriesId = copySeriesId + allSeries.length;
     }
@@ -38,44 +41,61 @@ export function SeriesActions({ seriesId, series, editorMode = false }: Props) {
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-      {editorMode && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.observability.seriesEditor.hide', {
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('xpack.observability.seriesEditor.sampleDocuments', {
+            defaultMessage: 'View sample documents in new tab',
+          })}
+        >
+          <EuiButtonIcon
+            iconType="discoverApp"
+            aria-label={i18n.translate('xpack.observability.seriesEditor.sampleDocuments', {
+              defaultMessage: 'View sample documents in new tab',
+            })}
+            size="s"
+            color="text"
+            target="_blank"
+            href={discoverHref}
+            isDisabled={!series.dataType || !series.selectedMetricField}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('xpack.observability.seriesEditor.hide', {
+            defaultMessage: 'Hide series',
+          })}
+        >
+          <EuiButtonIcon
+            iconType={series.hidden ? 'eyeClosed' : 'eye'}
+            aria-label={i18n.translate('xpack.observability.seriesEditor.hide', {
               defaultMessage: 'Hide series',
             })}
-          >
-            <EuiButtonIcon
-              iconType={series.hidden ? 'eyeClosed' : 'eye'}
-              aria-label={i18n.translate('xpack.observability.seriesEditor.hide', {
-                defaultMessage: 'Hide series',
-              })}
-              size="s"
-              color="text"
-              onClick={toggleSeries}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {editorMode && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.observability.seriesEditor.clone', {
+            size="s"
+            color="text"
+            onClick={toggleSeries}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('xpack.observability.seriesEditor.clone', {
+            defaultMessage: 'Copy series',
+          })}
+        >
+          <EuiButtonIcon
+            iconType={'copy'}
+            color="text"
+            aria-label={i18n.translate('xpack.observability.seriesEditor.clone', {
               defaultMessage: 'Copy series',
             })}
-          >
-            <EuiButtonIcon
-              iconType={'copy'}
-              color="text"
-              aria-label={i18n.translate('xpack.observability.seriesEditor.clone', {
-                defaultMessage: 'Copy series',
-              })}
-              size="s"
-              onClick={copySeries}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+            size="s"
+            onClick={copySeries}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <RemoveSeries seriesId={seriesId} />
       </EuiFlexItem>

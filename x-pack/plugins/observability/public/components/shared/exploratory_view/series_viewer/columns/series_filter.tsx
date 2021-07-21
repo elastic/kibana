@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiFilterGroup } from '@elastic/eui';
+import { EuiFilterGroup, EuiSpacer } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { FilterExpanded } from './filter_expanded';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: number;
@@ -44,46 +42,28 @@ export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
     };
   });
 
-  const { setSeries } = useSeriesStorage();
-
-  const mainPanel = (
-    <EuiFilterGroup>
-      {options.map((opt) => (
-        <FilterExpanded
-          series={series}
-          key={opt.label}
-          seriesId={seriesId}
-          field={opt.field}
-          label={opt.label}
-          nestedField={opt.nested}
-          isNegated={opt.isNegated}
-          filters={seriesConfig.baseFilters}
-        />
-      ))}
-    </EuiFilterGroup>
-  );
-
   return (
-    <EuiFlexGroup wrap gutterSize="xs" alignItems="flexStart">
-      {!isPreview && <EuiFlexItem>{mainPanel}</EuiFlexItem>}
-      <SelectedFilters seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
-      {(series.filters ?? []).length > 0 && !isPreview && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            flush="left"
-            color="text"
-            iconType="cross"
-            onClick={() => {
-              setSeries(seriesId, { ...series, filters: undefined });
-            }}
-            size="s"
-          >
-            {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {
-              defaultMessage: 'Clear filters',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+    <>
+      {!isPreview && (
+        <>
+          <EuiFilterGroup>
+            {options.map((opt) => (
+              <FilterExpanded
+                series={series}
+                key={opt.label}
+                seriesId={seriesId}
+                field={opt.field}
+                label={opt.label}
+                nestedField={opt.nested}
+                isNegated={opt.isNegated}
+                filters={seriesConfig.baseFilters}
+              />
+            ))}
+          </EuiFilterGroup>
+          <EuiSpacer size="s" />
+        </>
       )}
-    </EuiFlexGroup>
+      <SelectedFilters seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
+    </>
   );
 }

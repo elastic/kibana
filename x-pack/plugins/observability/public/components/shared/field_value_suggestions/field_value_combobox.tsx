@@ -19,7 +19,11 @@ import { FieldValueSelectionProps } from './types';
 export const ALL_VALUES_SELECTED = 'ALL_VALUES';
 const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {
   const uniqueValues = Array.from(
-    new Set(allowAllValuesSelection ? ['ALL_VALUES', ...(values ?? [])] : values)
+    new Set(
+      allowAllValuesSelection && (values ?? []).length > 0
+        ? ['ALL_VALUES', ...(values ?? [])]
+        : values
+    )
   );
 
   return (uniqueValues ?? []).map((label) => ({
