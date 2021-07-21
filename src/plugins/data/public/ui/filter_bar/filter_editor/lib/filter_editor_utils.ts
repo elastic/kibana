@@ -7,15 +7,9 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { Filter, FieldFilter } from '@kbn/es-query';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import {
-  isFilterable,
-  IIndexPattern,
-  IFieldType,
-  IpAddress,
-  Filter,
-  FieldFilter,
-} from '../../../../../common';
+import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find((field) => field.name === filter.meta.key);
