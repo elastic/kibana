@@ -55,5 +55,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
     });
+
+    describe('alerts flyouts', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+      });
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
+
+      it('should open and close inventory alert flyout', async () => {
+        await pageObjects.infraHome.openInventoryAlertFlyout();
+        await pageObjects.infraHome.closeAlertFlyout();
+      });
+
+      it('should open and close inventory alert flyout', async () => {
+        await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
+        await pageObjects.infraHome.closeAlertFlyout();
+      });
+    });
   });
 };
