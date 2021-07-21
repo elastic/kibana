@@ -242,7 +242,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
           <b>{value ? (value as string[]).length : '0'}</b>
         </EuiText>
       );
-    } else if (fieldName === 'modified_date' && value) {
+    } else if (fieldName === 'modifiedDate' && value) {
       return moment(value).format('YYYY-MM-DD HH:mm:ss');
     }
     return value;

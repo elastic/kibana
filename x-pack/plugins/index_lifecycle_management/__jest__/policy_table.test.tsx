@@ -32,11 +32,14 @@ initHttp(
 );
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
+const testDate = '2021-07-21T14:16:58.666Z';
+const testDateFormatted = moment(testDate).format('YYYY-MM-DD HH:mm:ss');
+
 const policies: PolicyFromES[] = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modifiedDate: moment().subtract(i, 'days').toISOString(),
+    modifiedDate: i === 0 ? testDate : moment().subtract(i, 'days').toISOString(),
     indices: i % 2 === 0 ? [`index${i}`] : [],
     name: `testy${i}`,
     policy: {
@@ -59,6 +62,10 @@ const names = (rendered: ReactWrapper) => {
 };
 const namesText = (rendered: ReactWrapper): string[] => {
   return (names(rendered) as ReactWrapper).map((button) => button.text());
+};
+
+const rowText = (rendered: ReactWrapper, rowIndex: number): string => {
+  return findTestSubject(rendered, 'policyTableRow').at(rowIndex).text();
 };
 
 const testSort = (headerName: string) => {
@@ -173,5 +180,12 @@ describe('policy table', () => {
     deleteButton.simulate('click');
     rendered.update();
     expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
+  });
+  test('displays policy properties', () => {
+    const rendered = mountWithIntl(component);
+    const firstRow = rowText(rendered, 0);
+    const version = 0;
+    const numberOfIndices = 1;
+    expect(firstRow).toBe(`testy0${numberOfIndices}${version}${testDateFormatted}Actions`);
   });
 });
