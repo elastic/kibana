@@ -12,6 +12,7 @@ export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       name: {
