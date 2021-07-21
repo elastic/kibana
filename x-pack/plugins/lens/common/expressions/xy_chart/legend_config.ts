@@ -39,7 +39,7 @@ export interface LegendConfig {
   floatingColumns?: number;
 }
 
-type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
+export type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
 
 export const legendConfig: ExpressionFunctionDefinition<
   'lens_xy_legendConfig',
