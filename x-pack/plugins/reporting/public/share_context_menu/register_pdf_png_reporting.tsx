@@ -8,41 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
-import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
 import { ShareContext } from 'src/plugins/share/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
-import type { LayoutParams } from '../../common/types';
 import type { JobParamsPNG } from '../../server/export_types/png/types';
 import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
 import { checkLicense } from '../lib/license_check';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
+import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 
-interface JobParamsProviderOptions {
-  shareableUrl: string;
-  apiClient: ReportingAPIClient;
-  objectType: string;
-  browserTimezone: string;
-  sharingData: Record<string, unknown>;
-}
-
-const jobParamsProvider = ({
-  objectType,
-  browserTimezone,
-  sharingData,
-}: JobParamsProviderOptions) => {
-  return {
-    objectType,
-    browserTimezone,
-    layout: sharingData.layout as LayoutParams,
-    title: sharingData.title as string,
-    version: '7.14.0',
-  };
-};
-
-const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => {
+const getPdfJobParams = (
+  opts: JobParamsProviderOptions,
+  kibanaVersion: string
+) => (): JobParamsPDF => {
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
@@ -51,12 +27,18 @@ const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => 
   );
 
   return {
-    ...jobParamsProvider(opts),
+    ...opts,
+    title: opts.sharingData.title,
+    layout: opts.sharingData.layout,
     relativeUrls: [relativeUrl], // multi URL for PDF
+    version: kibanaVersion,
   };
 };
 
-const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
+const getPngJobParams = (
+  opts: JobParamsProviderOptions,
+  kibanaVersion: string
+) => (): JobParamsPNG => {
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
     window.location.origin + opts.apiClient.getServerBasePath(),
@@ -64,26 +46,23 @@ const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => 
   );
 
   return {
-    ...jobParamsProvider(opts),
+    ...opts,
+    title: opts.sharingData.title,
+    layout: opts.sharingData.layout,
     relativeUrl, // single URL for PNG
+    version: kibanaVersion,
   };
 };
 
 export const reportingScreenshotShareProvider = ({
+  kibanaVersion,
   apiClient,
   toasts,
   license$,
   startServices$,
   uiSettings,
   usesUiCapabilities,
-}: {
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  license$: LicensingPluginSetup['license$'];
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
-  uiSettings: IUiSettingsClient;
-  usesUiCapabilities: boolean;
-}) => {
+}: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
   let licenseDisabled = true;
   let licenseHasScreenshotReporting = false;
@@ -123,10 +102,10 @@ export const reportingScreenshotShareProvider = ({
   const getShareMenuItems = ({
     objectType,
     objectId,
-    sharingData,
     isDirty,
     onClose,
     shareableUrl,
+    ...shareOpts
   }: ShareContext) => {
     if (!licenseHasScreenshotReporting) {
       return [];
@@ -144,6 +123,7 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
+    const { sharingData } = (shareOpts as unknown) as { sharingData: ReportingSharingData };
     const shareActions = [];
 
     const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
@@ -169,13 +149,16 @@ export const reportingScreenshotShareProvider = ({
             reportType="png"
             objectId={objectId}
             requiresSavedState={true}
-            getJobParams={getPngJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              browserTimezone,
-              sharingData,
-            })}
+            getJobParams={getPngJobParams(
+              {
+                shareableUrl,
+                apiClient,
+                objectType,
+                browserTimezone,
+                sharingData,
+              },
+              kibanaVersion
+            )}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -207,13 +190,16 @@ export const reportingScreenshotShareProvider = ({
             objectId={objectId}
             requiresSavedState={true}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getPdfJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              browserTimezone,
-              sharingData,
-            })}
+            getJobParams={getPdfJobParams(
+              {
+                shareableUrl,
+                apiClient,
+                objectType,
+                browserTimezone,
+                sharingData,
+              },
+              kibanaVersion
+            )}
             isDirty={isDirty}
             onClose={onClose}
           />

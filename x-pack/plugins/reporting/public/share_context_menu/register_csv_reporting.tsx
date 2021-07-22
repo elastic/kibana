@@ -8,27 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
-import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
 import type { SearchSourceFields } from 'src/plugins/data/common';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
 import type { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
 import { checkLicense } from '../lib/license_check';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
-
-interface ShareOpts {
-  kibanaVersion: string;
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  license$: LicensingPluginSetup['license$'];
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
-  uiSettings: IUiSettingsClient;
-  usesUiCapabilities: boolean;
-}
+import { ExportPanelShareOpts } from '.';
 
 export const ReportingCsvShareProvider = ({
   kibanaVersion,
@@ -38,7 +24,7 @@ export const ReportingCsvShareProvider = ({
   startServices$,
   uiSettings,
   usesUiCapabilities,
-}: ShareOpts) => {
+}: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
   let licenseHasCsvReporting = false;
   let licenseDisabled = true;

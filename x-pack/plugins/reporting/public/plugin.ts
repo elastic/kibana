@@ -204,6 +204,7 @@ export class ReportingPublicPlugin
 
     share.register(
       reportingScreenshotShareProvider({
+        kibanaVersion,
         apiClient,
         toasts,
         license$,
