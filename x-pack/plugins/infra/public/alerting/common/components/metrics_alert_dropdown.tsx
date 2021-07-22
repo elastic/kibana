@@ -36,14 +36,9 @@ export const MetricsAlertDropdown = () => {
     setPopoverOpen(false);
   }, [setPopoverOpen]);
 
-  const openPopover = useCallback(() => {
-    if (popoverOpen) {
-      setPopoverOpen(false);
-    } else {
-      setPopoverOpen(true);
-    }
+  const togglePopover = useCallback(() => {
+    setPopoverOpen(!popoverOpen);
   }, [setPopoverOpen, popoverOpen]);
-
   const infrastructureAlertsPanel = useMemo(
     () => ({
       id: 1,
