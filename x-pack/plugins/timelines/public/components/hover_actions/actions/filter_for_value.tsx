@@ -23,11 +23,16 @@ export const filterForValueFn = ({
   filterManager,
   onFilterAdded,
 }: FilterValueFnArgs): void => {
-  const filter = value?.length === 0 ? createFilter(field, undefined) : createFilter(field, value);
+  const makeFilter = (currentVal: string | null | undefined) =>
+    currentVal?.length === 0 ? createFilter(field, undefined) : createFilter(field, currentVal);
+  const filters = Array.isArray(value)
+    ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
+    : makeFilter(value);
+
   const activeFilterManager = filterManager;
 
   if (activeFilterManager != null) {
-    activeFilterManager.addFilters(filter);
+    activeFilterManager.addFilters(filters);
     if (onFilterAdded != null) {
       onFilterAdded();
     }

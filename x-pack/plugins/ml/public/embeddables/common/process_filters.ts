@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
-import { Query } from '../../../../../../src/plugins/data/common/query';
+import { Filter, Query } from '@kbn/es-query';
 import { esKuery, esQuery } from '../../../../../../src/plugins/data/public';
 
 export function processFilters(filters: Filter[], query: Query, controlledBy?: string) {
