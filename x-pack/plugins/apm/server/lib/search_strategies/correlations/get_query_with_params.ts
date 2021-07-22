@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { getOrElse } from 'fp-ts/lib/Either';
-import { failure } from 'io-ts/lib/PathReporter';
-import * as t from 'io-ts';
-
 import type { estypes } from '@elastic/elasticsearch';
+import { getOrElse } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import { failure } from 'io-ts/lib/PathReporter';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 import { rangeRt } from '../../../routes/default_api_types';
-
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-
 import { getCorrelationsFilters } from '../../correlations/get_filters';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 const getPercentileThresholdValueQuery = (
   percentileThresholdValue: number | undefined
@@ -43,7 +40,7 @@ export const getTermsQuery = (
 };
 
 interface QueryParams {
-  params: SearchServiceParams;
+  params: SearchServiceFetchParams;
   fieldName?: string;
   fieldValue?: string;
 }

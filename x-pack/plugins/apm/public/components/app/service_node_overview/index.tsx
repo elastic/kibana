@@ -17,6 +17,7 @@ import {
   asInteger,
   asPercent,
 } from '../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { truncate, unit } from '../../../utils/style';
@@ -31,14 +32,12 @@ const ServiceNodeName = euiStyled.div`
   ${truncate(8 * unit)}
 `;
 
-interface ServiceNodeOverviewProps {
-  serviceName: string;
-}
-
-function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
+function ServiceNodeOverview() {
   const {
     urlParams: { kuery, start, end },
   } = useUrlParams();
+
+  const { serviceName } = useApmServiceContext();
 
   const { data } = useFetcher(
     (callApmApi) => {

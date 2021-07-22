@@ -2,6 +2,11 @@
   "id": "reporting",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Kibana Reporting Services",
+    "githubTeam": "kibana-reporting-services"
+  },
+  "description": "Reporting Services enables applications to feature reports that the user can automate with Watcher and download later.",
   "optionalPlugins": ["security", "spaces", "usageCollection"],
   "configPath": ["xpack", "reporting"],
   "requiredPlugins": [
