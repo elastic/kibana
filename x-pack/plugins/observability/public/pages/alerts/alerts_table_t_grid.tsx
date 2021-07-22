@@ -65,6 +65,14 @@ export const columns: Array<
 > = [
   {
     columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
+      defaultMessage: 'Status',
+    }),
+    id: ALERT_STATUS,
+    initialWidth: 79,
+  },
+  {
+    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
       defaultMessage: 'Triggered',
     }),
@@ -74,7 +82,7 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.durationColumnDescription', {
-      defaultMessage: 'Alert duration',
+      defaultMessage: 'Duration',
     }),
     id: ALERT_DURATION,
     initialWidth: 116,
