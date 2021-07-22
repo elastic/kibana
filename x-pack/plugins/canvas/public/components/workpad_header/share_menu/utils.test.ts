@@ -46,6 +46,7 @@ test('getPdfJobParams returns the correct job params for canvas layout', () => {
         "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/12",
       ],
       "title": "base workpad",
+      "version": undefined,
     }
   `);
 });
