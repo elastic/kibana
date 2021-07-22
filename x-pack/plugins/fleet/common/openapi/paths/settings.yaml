@@ -9,3 +9,14 @@ get:
           schema:
             $ref: ../components/schemas/fleet_settings_response.yaml
   operationId: get-settings
+post:
+  summary: Settings - Update
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/fleet_settings_response.yaml
+  operationId: update-settings

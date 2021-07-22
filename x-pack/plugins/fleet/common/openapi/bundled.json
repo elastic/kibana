@@ -76,6 +76,23 @@
           }
         },
         "operationId": "get-settings"
+      },
+      "post": {
+        "summary": "Settings - Update",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fleet_settings_response"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "update-settings"
       }
     },
     "/epm/categories": {
@@ -1919,37 +1936,41 @@
           "nonFatalErrors"
         ]
       },
-      "fleet_settings_response": {
-        "title": "Fleet Setup response",
+      "settings": {
+        "title": "Settings",
         "type": "object",
         "properties": {
-          "response": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "has_seen_add_data_notice": {
-                "type": "boolean"
-              },
-              "has_seen_fleet_migration_notice": {
-                "type": "boolean"
-              },
-              "fleet_server_hosts": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "required": [
-              "fleet_server_hosts",
-              "id"
-            ]
+          "id": {
+            "type": "string"
+          },
+          "has_seen_add_data_notice": {
+            "type": "boolean"
+          },
+          "has_seen_fleet_migration_notice": {
+            "type": "boolean"
+          },
+          "fleet_server_hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "response"
+          "fleet_server_hosts",
+          "id"
+        ]
+      },
+      "fleet_settings_response": {
+        "title": "Fleet settings response",
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/settings"
+          }
+        },
+        "required": [
+          "item"
         ]
       },
       "search_result": {
