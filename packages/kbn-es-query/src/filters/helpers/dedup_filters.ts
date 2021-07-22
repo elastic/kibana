@@ -7,8 +7,8 @@
  */
 
 import { filter, find } from 'lodash';
+import { Filter } from '..';
 import { compareFilters, FilterCompareOptions } from './compare_filters';
-import { Filter } from '../../es_query';
 
 /**
  * Combine 2 filter collections, removing duplicates

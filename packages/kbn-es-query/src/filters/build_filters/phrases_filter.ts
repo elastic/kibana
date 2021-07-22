@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta } from './types';
+import { Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript } from './phrase_filter';
-import { FILTERS } from './index';
-import { IndexPatternFieldBase, IndexPatternBase } from '../es_query';
+import { IndexPatternFieldBase, IndexPatternBase } from '../..';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values

@@ -6,21 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta, FilterState, FilterStateStore } from './types';
-
-export const buildEmptyFilter = (isPinned: boolean, index?: string): Filter => {
-  const meta: FilterMeta = {
-    disabled: false,
-    negate: false,
-    alias: null,
-    index,
-  };
-  const $state: FilterState = {
-    store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
-  };
-
-  return { meta, $state };
-};
+import { omit, get } from 'lodash';
+import { Filter, FilterStateStore } from '../build_filters';
 
 export const isFilterPinned = (filter: Filter) => {
   return filter.$state && filter.$state.store === FilterStateStore.GLOBAL_STATE;
@@ -68,3 +55,12 @@ export const isFilter = (x: unknown): x is Filter =>
 
 export const isFilters = (x: unknown): x is Filter[] =>
   Array.isArray(x) && !x.find((y) => !isFilter(y));
+
+/**
+ * Clean out any invalid attributes from the filters
+ * @param {object} filter The filter to clean
+ * @returns {object}
+ */
+export const cleanFilter = (filter: Filter): Filter => omit(filter, ['meta', '$state']) as Filter;
+
+export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.disabled', false);

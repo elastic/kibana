@@ -6,31 +6,74 @@
  * Side Public License, v 1.
  */
 
-import { omit, get } from 'lodash';
-import { Filter } from './types';
+export {
+  dedupFilters,
+  uniqFilters,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  FilterCompareOptions,
+  cleanFilter,
+  isFilter,
+  isFilters,
+  pinFilter,
+  isFilterPinned,
+  onlyDisabledFiltersChanged,
+  enableFilter,
+  disableFilter,
+  isFilterDisabled,
+  toggleFilterNegated,
+  toggleFilterDisabled,
+  toggleFilterPinned,
+  unpinFilter,
+} from './helpers';
 
-export * from './build_filters';
-export * from './custom_filter';
-export * from './exists_filter';
-export * from './geo_bounding_box_filter';
-export * from './geo_polygon_filter';
-export * from './get_filter_field';
-export * from './get_filter_params';
-export * from './match_all_filter';
-export * from './meta_filter';
-export * from './missing_filter';
-export * from './phrase_filter';
-export * from './phrases_filter';
-export * from './query_string_filter';
-export * from './range_filter';
+export {
+  isExistsFilter,
+  isMatchAllFilter,
+  isGeoBoundingBoxFilter,
+  isGeoPolygonFilter,
+  isMissingFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
+  isRangeFilter,
+  isQueryStringFilter,
+  getFilterField,
+  buildQueryFilter,
+  buildPhrasesFilter,
+  buildPhraseFilter,
+  buildRangeFilter,
+  buildCustomFilter,
+  buildFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  getRangeScript,
+  getPhraseScript,
+  getConvertedValueForField,
+  getPhraseFilterValue,
+  getPhraseFilterField,
+  isScriptedPhraseFilter,
+  isScriptedRangeFilter,
+  getFilterParams,
+} from './build_filters';
 
-export { Query, Filter, FILTERS, LatLon, FilterStateStore, FieldFilter, FilterMeta } from './types';
+export type {
+  Query,
+  Filter,
+  FilterState,
+  LatLon,
+  FieldFilter,
+  FilterMeta,
+  ExistsFilter,
+  RangeFilter,
+  PhraseFilter,
+  PhrasesFilter,
+  RangeFilterParams,
+  RangeFilterMeta,
+  GeoPolygonFilter,
+  MatchAllFilter,
+  CustomFilter,
+  MissingFilter,
+  GeoBoundingBoxFilter,
+} from './build_filters';
 
-/**
- * Clean out any invalid attributes from the filters
- * @param {object} filter The filter to clean
- * @returns {object}
- */
-export const cleanFilter = (filter: Filter): Filter => omit(filter, ['meta', '$state']) as Filter;
-
-export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.disabled', false);
+export { FilterStateStore, FILTERS } from './build_filters/types';

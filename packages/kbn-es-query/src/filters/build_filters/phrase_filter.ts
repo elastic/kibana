@@ -8,7 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './types';
-import { IndexPatternFieldBase, IndexPatternBase } from '..';
+import { IndexPatternFieldBase, IndexPatternBase } from '../..';
+import { getConvertedValueForField } from './get_converted_value_for_field';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {
@@ -98,32 +99,6 @@ export const getPhraseScript = (field: IndexPatternFieldBase, value: string) => 
 
 /**
  * @internal
- * See issues bellow for the reason behind this change.
- * Values need to be converted to correct types for boolean \ numeric fields.
- * https://github.com/elastic/kibana/issues/74301
- * https://github.com/elastic/kibana/issues/8677
- * https://github.com/elastic/elasticsearch/issues/20941
- * https://github.com/elastic/elasticsearch/pull/22201
- **/
-export const getConvertedValueForField = (field: IndexPatternFieldBase, value: any) => {
-  if (typeof value !== 'boolean' && field.type === 'boolean') {
-    if ([1, 'true'].includes(value)) {
-      return true;
-    } else if ([0, 'false'].includes(value)) {
-      return false;
-    } else {
-      throw new Error(`${value} is not a valid boolean value for boolean field ${field.name}`);
-    }
-  }
-
-  if (typeof value !== 'number' && field.type === 'number') {
-    return Number(value);
-  }
-  return value;
-};
-
-/**
- * @internal
  * Takes a scripted field and returns an inline script appropriate for use in a script query.
  * Handles lucene expression and Painless scripts. Other langs aren't guaranteed to generate valid
  * scripts.
@@ -131,7 +106,7 @@ export const getConvertedValueForField = (field: IndexPatternFieldBase, value: a
  * @param {object} scriptedField A Field object representing a scripted field
  * @returns {string} The inline script string
  */
-export const buildInlineScriptForPhraseFilter = (scriptedField: any) => {
+const buildInlineScriptForPhraseFilter = (scriptedField: any) => {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
     return (

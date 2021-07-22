@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  Filter,
-  FILTERS,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  buildExistsFilter,
-} from '.';
-import { IndexPatternFieldBase, IndexPatternBase } from '..';
+import { Filter, FILTERS } from './types';
+
+import { buildPhraseFilter } from './phrase_filter';
+import { buildPhrasesFilter } from './phrases_filter';
+import { buildRangeFilter } from './range_filter';
+import { buildExistsFilter } from './exists_filter';
+
+import { IndexPatternFieldBase, IndexPatternBase } from '../..';
 import { FilterMeta, FilterStateStore } from './types';
 
 export function buildFilter(

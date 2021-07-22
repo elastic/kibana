@@ -10,6 +10,9 @@ export { getEsQueryConfig } from './get_es_query_config';
 
 // NOTE: Trick to deprecate exports https://stackoverflow.com/a/49152018/372086
 import {
+  enableFilter as oldEnableFilter,
+  pinFilter as oldPinFilter,
+  toggleFilterDisabled as oldToggleFilterDisabled,
   isFilterDisabled as oldIsFilterDisabled,
   disableFilter as oldDisableFilter,
   fromKueryExpression as oldFromKueryExpression,
@@ -59,7 +62,12 @@ import {
   FILTERS as oldFILTERS,
   IFieldSubType as oldIFieldSubType,
   EsQueryConfig as oldEsQueryConfig,
+  compareFilters as oldCompareFilters,
+  COMPARE_ALL_OPTIONS as OLD_COMPARE_ALL_OPTIONS,
+  dedupFilters as oldDedupFilters,
   isFilter as oldIsFilter,
+  onlyDisabledFiltersChanged as oldOnlyDisabledFiltersChanged,
+  uniqFilters as oldUniqFilters,
   FilterStateStore,
 } from '@kbn/es-query';
 
@@ -128,6 +136,16 @@ const nodeBuilder = oldNodeBuilder;
  * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
  */
 const isFilters = oldIsFilters;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
+const uniqFilters = oldUniqFilters;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
+const onlyDisabledFiltersChanged = oldOnlyDisabledFiltersChanged;
 
 /**
  * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
@@ -222,6 +240,36 @@ const toggleFilterNegated = oldtoggleFilterNegated;
 /**
  * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
  */
+const enableFilter = oldEnableFilter;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
+const pinFilter = oldPinFilter;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
+const toggleFilterDisabled = oldToggleFilterDisabled;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
+const compareFilters = oldCompareFilters;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
+const dedupFilters = oldDedupFilters;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
+const COMPARE_ALL_OPTIONS = OLD_COMPARE_ALL_OPTIONS;
+
+/**
+ * @deprecated Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
 const FILTERS = oldFILTERS;
 
 /**
@@ -309,6 +357,11 @@ type EsQueryConfig = oldEsQueryConfig;
  */
 
 export {
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+  enableFilter,
+  pinFilter,
+  toggleFilterDisabled,
   disableFilter,
   fromKueryExpression,
   toElasticsearchQuery,
@@ -343,6 +396,9 @@ export {
   FILTERS,
   isFilter,
   isFilterDisabled,
+  dedupFilters,
+  onlyDisabledFiltersChanged,
+  uniqFilters,
   FilterStateStore,
   Filter,
   RangeFilterMeta,

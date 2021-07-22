@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from './types';
 import { getExistsFilterField, isExistsFilter } from './exists_filter';
 import { getGeoBoundingBoxFilterField, isGeoBoundingBoxFilter } from './geo_bounding_box_filter';
 import { getGeoPolygonFilterField, isGeoPolygonFilter } from './geo_polygon_filter';
-import { getPhraseFilterField, isPhraseFilter } from './phrase_filter';
-import { getPhrasesFilterField, isPhrasesFilter } from './phrases_filter';
-import { getRangeFilterField, isRangeFilter } from './range_filter';
 import { getMissingFilterField, isMissingFilter } from './missing_filter';
+import { getPhrasesFilterField, isPhrasesFilter } from './phrases_filter';
+import { getPhraseFilterField, isPhraseFilter } from './phrase_filter';
+import { getRangeFilterField, isRangeFilter } from './range_filter';
+import { Filter } from './types';
 
 export const getFilterField = (filter: Filter) => {
   if (isExistsFilter(filter)) {

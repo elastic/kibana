@@ -7,27 +7,33 @@
  */
 
 import { dedupFilters } from './dedup_filters';
-import { Filter, buildRangeFilter, buildQueryFilter, FilterStateStore } from '../../es_query';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IndexPatternBase, IndexPatternFieldBase } from '../es_query';
+import { Filter, FilterStateStore } from './types';
+import { buildRangeFilter, buildQueryFilter } from '.';
 
 describe('filter manager utilities', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternBase;
 
   beforeEach(() => {
     indexPattern = {
       id: 'index',
-    } as IIndexPattern;
+    } as IndexPatternBase;
   });
 
   describe('dedupFilters(existing, filters)', () => {
     test('should return only filters which are not in the existing', () => {
       const existing: Filter[] = [
-        buildRangeFilter({ name: 'bytes' } as IFieldType, { from: 0, to: 1024 }, indexPattern, ''),
+        buildRangeFilter(
+          { name: 'bytes' } as IndexPatternFieldBase,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       ];
       const filters: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IFieldType,
+          { name: 'bytes' } as IndexPatternFieldBase,
           { from: 1024, to: 2048 },
           indexPattern,
           ''
@@ -42,7 +48,12 @@ describe('filter manager utilities', () => {
 
     test('should ignore the disabled attribute when comparing ', () => {
       const existing: Filter[] = [
-        buildRangeFilter({ name: 'bytes' } as IFieldType, { from: 0, to: 1024 }, indexPattern, ''),
+        buildRangeFilter(
+          { name: 'bytes' } as IndexPatternFieldBase,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         {
           ...buildQueryFilter(
             { match: { _term: { query: 'apache', type: 'phrase' } } },
@@ -54,7 +65,7 @@ describe('filter manager utilities', () => {
       ];
       const filters: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IFieldType,
+          { name: 'bytes' } as IndexPatternFieldBase,
           { from: 1024, to: 2048 },
           indexPattern,
           ''
@@ -69,7 +80,12 @@ describe('filter manager utilities', () => {
 
     test('should ignore $state attribute', () => {
       const existing: Filter[] = [
-        buildRangeFilter({ name: 'bytes' } as IFieldType, { from: 0, to: 1024 }, indexPattern, ''),
+        buildRangeFilter(
+          { name: 'bytes' } as IndexPatternFieldBase,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         {
           ...buildQueryFilter(
             { match: { _term: { query: 'apache', type: 'phrase' } } },
@@ -81,7 +97,7 @@ describe('filter manager utilities', () => {
       ];
       const filters: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IFieldType,
+          { name: 'bytes' } as IndexPatternFieldBase,
           { from: 1024, to: 2048 },
           indexPattern,
           ''

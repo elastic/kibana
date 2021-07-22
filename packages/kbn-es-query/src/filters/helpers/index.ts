@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { dedupFilters } from './dedup_filters';
-export { uniqFilters } from './uniq_filters';
-export { compareFilters, COMPARE_ALL_OPTIONS, FilterCompareOptions } from './compare_filters';
+export * from './compare_filters';
+export * from './dedup_filters';
+export * from './uniq_filters';
+export * from './meta_filter';
+export * from './only_disabled';

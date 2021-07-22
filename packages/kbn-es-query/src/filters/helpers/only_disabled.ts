@@ -7,7 +7,8 @@
  */
 
 import { filter } from 'lodash';
-import { Filter, compareFilters, COMPARE_ALL_OPTIONS } from '../../../../common';
+import { Filter } from '..';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
 
 const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
 
