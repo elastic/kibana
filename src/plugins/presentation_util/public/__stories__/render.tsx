@@ -31,13 +31,11 @@ interface RenderAdditionalProps {
   handlers?: IInterpreterRenderHandlers;
 }
 
-export const Render = <Renderer,>({
-  renderer,
-  config,
-  ...rest
-}: Renderer extends () => ExpressionRenderDefinition<infer Config>
-  ? { renderer: Renderer; config: Config } & RenderAdditionalProps
-  : { renderer: undefined; config: undefined } & RenderAdditionalProps) => {
+export type RenderProps<T> = T extends () => ExpressionRenderDefinition<infer Config>
+  ? { renderer: T; config: Config } & RenderAdditionalProps
+  : { renderer: undefined; config: undefined } & RenderAdditionalProps;
+
+export const Render = <Renderer,>({ renderer, config, ...rest }: RenderProps<Renderer>) => {
   const { height, width, handlers } = {
     height: '200px',
     width: '200px',
