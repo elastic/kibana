@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { phraseFilter, phrasesFilter, rangeFilter, existsFilter } from './stubs';
+import { phraseFilter, phrasesFilter, rangeFilter, existsFilter } from '../stubs';
 import { getFilterParams } from './get_filter_params';
 
 describe('getFilterParams', () => {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternBase } from '../../es_query';
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
-import { IndexPatternBase } from '..';
-import { fields } from './stubs/fields.mocks';
+import { fields } from '../stubs';
 
 describe('phrases filter', function () {
   const indexPattern: IndexPatternBase = {

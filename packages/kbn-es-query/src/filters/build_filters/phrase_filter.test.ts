@@ -11,8 +11,8 @@ import {
   buildPhraseFilter,
   getPhraseFilterField,
 } from './phrase_filter';
-import { fields, getField } from '../filters/stubs';
-import { IndexPatternBase } from '../es_query';
+import { fields, getField } from '../stubs';
+import { IndexPatternBase } from '../../es_query';
 
 describe('Phrase filter builder', () => {
   let indexPattern: IndexPatternBase;

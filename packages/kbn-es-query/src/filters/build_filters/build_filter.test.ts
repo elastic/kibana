@@ -7,8 +7,8 @@
  */
 
 import { buildFilter, FilterStateStore, FILTERS } from '.';
-import { IndexPatternBase } from '..';
-import { fields as stubFields } from './stubs';
+import { IndexPatternBase } from '../..';
+import { fields as stubFields } from '../stubs';
 
 describe('buildFilter', () => {
   const stubIndexPattern: IndexPatternBase = {

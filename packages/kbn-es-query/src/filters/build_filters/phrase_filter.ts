@@ -106,7 +106,7 @@ export const getPhraseScript = (field: IndexPatternFieldBase, value: string) => 
  * @param {object} scriptedField A Field object representing a scripted field
  * @returns {string} The inline script string
  */
-const buildInlineScriptForPhraseFilter = (scriptedField: any) => {
+export const buildInlineScriptForPhraseFilter = (scriptedField: any) => {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
     return (

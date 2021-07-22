@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Filter } from '../build_filters';
 import { onlyDisabledFiltersChanged } from './only_disabled';
-import { Filter } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('onlyDisabledFiltersChanged()', () => {

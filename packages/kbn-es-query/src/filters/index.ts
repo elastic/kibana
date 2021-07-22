@@ -56,7 +56,7 @@ export {
   getFilterParams,
 } from './build_filters';
 
-export type {
+export {
   Query,
   Filter,
   FilterState,
@@ -67,13 +67,13 @@ export type {
   RangeFilter,
   PhraseFilter,
   PhrasesFilter,
-  RangeFilterParams,
   RangeFilterMeta,
   GeoPolygonFilter,
   MatchAllFilter,
   CustomFilter,
   MissingFilter,
   GeoBoundingBoxFilter,
+  RangeFilterParams,
 } from './build_filters';
 
 export { FilterStateStore, FILTERS } from './build_filters/types';

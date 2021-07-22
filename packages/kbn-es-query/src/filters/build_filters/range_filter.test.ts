@@ -7,9 +7,9 @@
  */
 
 import { each } from 'lodash';
+import { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
+import { fields, getField } from '../stubs';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
-import { fields, getField } from '../filters/stubs';
-import { IndexPatternBase, IndexPatternFieldBase } from '../es_query';
 
 describe('Range filter builder', () => {
   let indexPattern: IndexPatternBase;

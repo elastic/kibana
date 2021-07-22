@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { buildQueryFilter, Filter, FilterStateStore } from '../build_filters';
 import { uniqFilters } from './uniq_filters';
-import { buildQueryFilter, Filter, FilterStateStore } from '../../es_query';
 
 describe('filter manager utilities', () => {
   describe('niqFilter', () => {

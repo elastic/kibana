@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
+import { buildQueryFilter, buildRangeFilter, Filter, FilterStateStore } from '../build_filters';
 import { dedupFilters } from './dedup_filters';
-import { IndexPatternBase, IndexPatternFieldBase } from '../es_query';
-import { Filter, FilterStateStore } from './types';
-import { buildRangeFilter, buildQueryFilter } from '.';
 
 describe('filter manager utilities', () => {
   let indexPattern: IndexPatternBase;
