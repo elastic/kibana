@@ -31,7 +31,7 @@ export interface UseActionCellDataProvider {
   eventId?: string;
   field: string;
   fieldFormat?: string;
-  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
   fieldType?: string;
   isObjectArray?: boolean;
   linkValue?: string | null;
