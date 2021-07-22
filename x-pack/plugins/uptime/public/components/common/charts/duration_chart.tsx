@@ -94,7 +94,13 @@ export const DurationChartComponent = ({
   const monitor = useSelector(monitorStatusSelector);
 
   return (
-    <ChartWrapper height={MONITOR_CHART_HEIGHT} loading={loading}>
+    <ChartWrapper
+      aria-label={i18n.translate('xpack.uptime.monitorCharts.durationChart.wrapper.label', {
+        defaultMessage: `A chart displaying the monitor's ping duration, grouped by location.`,
+      })}
+      height={MONITOR_CHART_HEIGHT}
+      loading={loading}
+    >
       {hasLines && typeof monitor?.monitor?.type === 'string' ? (
         <Chart>
           <Settings
