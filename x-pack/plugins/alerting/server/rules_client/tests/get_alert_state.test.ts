@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -26,7 +26,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -44,12 +44,12 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
 });
 
 describe('getAlertState()', () => {
   test('calls saved objects client with given params', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -92,7 +92,7 @@ describe('getAlertState()', () => {
       ownerId: null,
     });
 
-    await alertsClient.getAlertState({ id: '1' });
+    await rulesClient.getAlertState({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
@@ -103,7 +103,7 @@ describe('getAlertState()', () => {
   });
 
   test('gets the underlying task from TaskManager', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
 
     const scheduledTaskId = 'task-123';
 
@@ -155,7 +155,7 @@ describe('getAlertState()', () => {
       ownerId: null,
     });
 
-    await alertsClient.getAlertState({ id: '1' });
+    await rulesClient.getAlertState({ id: '1' });
     expect(taskManager.get).toHaveBeenCalledTimes(1);
     expect(taskManager.get).toHaveBeenCalledWith(scheduledTaskId);
   });
@@ -207,8 +207,8 @@ describe('getAlertState()', () => {
     });
 
     test('ensures user is authorised to get this type of alert under the consumer', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      await alertsClient.getAlertState({ id: '1' });
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.getAlertState({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -219,7 +219,7 @@ describe('getAlertState()', () => {
     });
 
     test('throws when user is not authorised to getAlertState this type of alert', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
+      const rulesClient = new RulesClient(rulesClientParams);
       // `get` check
       authorization.ensureAuthorized.mockResolvedValueOnce();
       // `getRuleState` check
@@ -227,7 +227,7 @@ describe('getAlertState()', () => {
         new Error(`Unauthorized to getRuleState a "myType" alert for "myApp"`)
       );
 
-      await expect(alertsClient.getAlertState({ id: '1' })).rejects.toMatchInlineSnapshot(
+      await expect(rulesClient.getAlertState({ id: '1' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to getRuleState a "myType" alert for "myApp"]`
       );
 

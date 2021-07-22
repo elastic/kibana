@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './tool_bar_pager_text.scss';
 
 interface Props {
   startItem: number;

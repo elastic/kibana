@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -30,7 +30,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -48,11 +48,11 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
 });
 
 describe('listAlertTypes', () => {
-  let alertsClient: AlertsClient;
+  let rulesClient: RulesClient;
   const alertingAlertType: RegistryAlertType = {
     actionGroups: [],
     actionVariables: undefined,
@@ -86,7 +86,7 @@ describe('listAlertTypes', () => {
   };
 
   beforeEach(() => {
-    alertsClient = new AlertsClient(alertsClientParams);
+    rulesClient = new RulesClient(rulesClientParams);
   });
 
   test('should return a list of AlertTypes that exist in the registry', async () => {
@@ -97,7 +97,7 @@ describe('listAlertTypes', () => {
         { ...alertingAlertType, authorizedConsumers },
       ])
     );
-    expect(await alertsClient.listAlertTypes()).toEqual(
+    expect(await rulesClient.listAlertTypes()).toEqual(
       new Set([
         { ...myAppAlertType, authorizedConsumers },
         { ...alertingAlertType, authorizedConsumers },
@@ -154,7 +154,7 @@ describe('listAlertTypes', () => {
       ]);
       authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);
 
-      expect(await alertsClient.listAlertTypes()).toEqual(authorizedTypes);
+      expect(await rulesClient.listAlertTypes()).toEqual(authorizedTypes);
     });
   });
 });

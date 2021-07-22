@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -28,7 +28,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -46,7 +46,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -54,7 +54,7 @@ setGlobalDate();
 
 describe('get()', () => {
   test('calls saved objects client with given params', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -85,7 +85,7 @@ describe('get()', () => {
         },
       ],
     });
-    const result = await alertsClient.get({ id: '1' });
+    const result = await rulesClient.get({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -139,7 +139,7 @@ describe('get()', () => {
         injectReferences: injectReferencesFn,
       },
     }));
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -176,7 +176,7 @@ describe('get()', () => {
         },
       ],
     });
-    const result = await alertsClient.get({ id: '1' });
+    const result = await rulesClient.get({ id: '1' });
 
     expect(injectReferencesFn).toHaveBeenCalledWith(
       {
@@ -213,7 +213,7 @@ describe('get()', () => {
   });
 
   test(`throws an error when references aren't found`, async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -235,7 +235,7 @@ describe('get()', () => {
       },
       references: [],
     });
-    await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action reference \\"action_0\\" not found in alert id: 1"`
     );
   });
@@ -259,7 +259,7 @@ describe('get()', () => {
         injectReferences: injectReferencesFn,
       },
     }));
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -296,7 +296,7 @@ describe('get()', () => {
         },
       ],
     });
-    await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
     );
   });
@@ -334,8 +334,8 @@ describe('get()', () => {
     });
 
     test('ensures user is authorised to get this type of alert under the consumer', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      await alertsClient.get({ id: '1' });
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.get({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -346,12 +346,12 @@ describe('get()', () => {
     });
 
     test('throws when user is not authorised to get this type of alert', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
+      const rulesClient = new RulesClient(rulesClientParams);
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to get a "myType" alert for "myApp"`)
       );
 
-      await expect(alertsClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
+      await expect(rulesClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to get a "myType" alert for "myApp"]`
       );
 
@@ -382,8 +382,8 @@ describe('get()', () => {
     });
 
     test('logs audit event when getting a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
-      await alertsClient.get({ id: '1' });
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+      await rulesClient.get({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -396,10 +396,10 @@ describe('get()', () => {
     });
 
     test('logs audit event when not authorised to get a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(alertsClient.get({ id: '1' })).rejects.toThrow();
+      await expect(rulesClient.get({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({

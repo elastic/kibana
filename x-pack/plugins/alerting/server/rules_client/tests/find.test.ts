@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -31,7 +31,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -49,7 +49,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -139,8 +139,8 @@ describe('find()', () => {
   });
 
   test('calls saved objects client with given params', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.find({ options: {} });
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.find({ options: {} });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Array [
@@ -186,8 +186,8 @@ describe('find()', () => {
   });
 
   test('calls mapSortField', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    await alertsClient.find({ options: { sortField: 'name' } });
+    const rulesClient = new RulesClient(rulesClientParams);
+    await rulesClient.find({ options: { sortField: 'name' } });
     expect(jest.requireMock('../lib/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
   });
 
@@ -319,8 +319,8 @@ describe('find()', () => {
         },
       ],
     });
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.find({ options: {} });
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.find({ options: {} });
 
     expect(injectReferencesFn).toHaveBeenCalledTimes(1);
     expect(injectReferencesFn).toHaveBeenCalledWith(
@@ -514,8 +514,8 @@ describe('find()', () => {
         },
       ],
     });
-    const alertsClient = new AlertsClient(alertsClientParams);
-    await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
+    const rulesClient = new RulesClient(rulesClientParams);
+    await expect(rulesClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error injecting reference into rule params for rule id 2 - something went wrong!"`
     );
   });
@@ -531,8 +531,8 @@ describe('find()', () => {
         logSuccessfulAuthorization() {},
       });
 
-      const alertsClient = new AlertsClient(alertsClientParams);
-      await alertsClient.find({ options: { filter: 'someTerm' } });
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.find({ options: { filter: 'someTerm' } });
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
       expect(options.filter).toEqual(
@@ -542,9 +542,9 @@ describe('find()', () => {
     });
 
     test('throws if user is not authorized to find any types', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
+      const rulesClient = new RulesClient(rulesClientParams);
       authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('not authorized'));
-      await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(rulesClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
         `"not authorized"`
       );
     });
@@ -578,8 +578,8 @@ describe('find()', () => {
         ],
       });
 
-      const alertsClient = new AlertsClient(alertsClientParams);
-      expect(await alertsClient.find({ options: { fields: ['tags'] } })).toMatchInlineSnapshot(`
+      const rulesClient = new RulesClient(rulesClientParams);
+      expect(await rulesClient.find({ options: { fields: ['tags'] } })).toMatchInlineSnapshot(`
         Object {
           "data": Array [
             Object {
@@ -610,8 +610,8 @@ describe('find()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when searching rules', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
-      await alertsClient.find();
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+      await rulesClient.find();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -624,10 +624,10 @@ describe('find()', () => {
     });
 
     test('logs audit event when not authorised to search rules', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(alertsClient.find()).rejects.toThrow();
+      await expect(rulesClient.find()).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -643,7 +643,7 @@ describe('find()', () => {
     });
 
     test('logs audit event when not authorised to search rule type', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         ensureRuleTypeIsAuthorized: jest.fn(() => {
           throw new Error('Unauthorized');
@@ -651,7 +651,7 @@ describe('find()', () => {
         logSuccessfulAuthorization: jest.fn(),
       });
 
-      await expect(async () => await alertsClient.find()).rejects.toThrow();
+      await expect(async () => await rulesClient.find()).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({

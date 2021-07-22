@@ -8,7 +8,7 @@
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { IEventLogClient } from '../../../../event_log/server';
 import { actionsClientMock } from '../../../../actions/server/mocks';
-import { ConstructorOptions } from '../alerts_client';
+import { ConstructorOptions } from '../rules_client';
 import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { AlertTypeRegistry } from '../../alert_type_registry';
 import { RecoveredActionGroup } from '../../../common';
@@ -42,14 +42,14 @@ export function setGlobalDate() {
 }
 
 export function getBeforeSetup(
-  alertsClientParams: jest.Mocked<ConstructorOptions>,
+  rulesClientParams: jest.Mocked<ConstructorOptions>,
   taskManager: ReturnType<typeof taskManagerMock.createStart>,
   alertTypeRegistry: jest.Mocked<Pick<AlertTypeRegistry, 'get' | 'has' | 'register' | 'list'>>,
   eventLogClient?: jest.Mocked<IEventLogClient>
 ) {
   jest.resetAllMocks();
-  alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
-  alertsClientParams.getUserName.mockResolvedValue('elastic');
+  rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
+  rulesClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runNow.mockResolvedValue({ id: '' });
   const actionsClient = actionsClientMock.create();
 
@@ -79,7 +79,7 @@ export function getBeforeSetup(
       name: 'test',
     },
   ]);
-  alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
+  rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
 
   alertTypeRegistry.get.mockImplementation(() => ({
     id: '123',
@@ -92,7 +92,7 @@ export function getBeforeSetup(
     async executor() {},
     producer: 'alerts',
   }));
-  alertsClientParams.getEventLogClient.mockResolvedValue(
+  rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()
   );
 }

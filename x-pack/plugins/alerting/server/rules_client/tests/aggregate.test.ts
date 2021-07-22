@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -28,7 +28,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -46,7 +46,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
 });
 
 setGlobalDate();
@@ -124,8 +124,8 @@ describe('aggregate()', () => {
   });
 
   test('calls saved objects client with given params to perform aggregation', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.aggregate({ options: {} });
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.aggregate({ options: {} });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "alertExecutionStatus": Object {
@@ -154,8 +154,8 @@ describe('aggregate()', () => {
   });
 
   test('supports filters when aggregating', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    await alertsClient.aggregate({ options: { filter: 'someTerm' } });
+    const rulesClient = new RulesClient(rulesClientParams);
+    await rulesClient.aggregate({ options: { filter: 'someTerm' } });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(
       AlertExecutionStatusValues.length

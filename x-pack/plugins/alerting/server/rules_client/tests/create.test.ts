@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AlertsClient, ConstructorOptions, CreateOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -36,7 +36,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -55,7 +55,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -92,12 +92,12 @@ function getMockData(
 }
 
 describe('create()', () => {
-  let alertsClient: AlertsClient;
+  let rulesClient: RulesClient;
   let actionsClient: jest.Mocked<ActionsClient>;
 
   beforeEach(async () => {
-    alertsClient = new AlertsClient(alertsClientParams);
-    actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    rulesClient = new RulesClient(rulesClientParams);
+    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       {
@@ -116,7 +116,7 @@ describe('create()', () => {
         isPreconfigured: false,
       },
     ]);
-    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
+    rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
   });
 
   describe('authorization', () => {
@@ -183,7 +183,7 @@ describe('create()', () => {
         ],
       });
 
-      return alertsClient.create(options);
+      return rulesClient.create(options);
     }
 
     test('ensures user is authorised to create this type of alert under the consumer', async () => {
@@ -237,7 +237,7 @@ describe('create()', () => {
         attributes: data,
         references: [],
       });
-      await alertsClient.create({ data });
+      await rulesClient.create({ data });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -253,7 +253,7 @@ describe('create()', () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
-        alertsClient.create({
+        rulesClient.create({
           data: getMockData({
             enabled: false,
             actions: [],
@@ -347,7 +347,7 @@ describe('create()', () => {
         },
       ],
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
     expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
       entity: 'rule',
       consumer: 'bar',
@@ -537,7 +537,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    const result = await alertsClient.create({ data, options: { id: '123' } });
+    const result = await rulesClient.create({ data, options: { id: '123' } });
     expect(result.id).toEqual('123');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
@@ -691,7 +691,7 @@ describe('create()', () => {
       },
       references: [],
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -770,7 +770,7 @@ describe('create()', () => {
         },
       ],
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -900,7 +900,7 @@ describe('create()', () => {
       },
       references: [],
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
 
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -1077,7 +1077,7 @@ describe('create()', () => {
       },
       references: [],
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
 
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -1203,8 +1203,8 @@ describe('create()', () => {
       ownerId: null,
     });
 
-    await alertsClient.create({ data });
-    expect(alertsClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my alert name');
+    await rulesClient.create({ data });
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my alert name');
   });
 
   test('should create alert with given notifyWhen value if notifyWhen is not null', async () => {
@@ -1259,7 +1259,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
@@ -1399,7 +1399,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
@@ -1539,7 +1539,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    const result = await alertsClient.create({ data });
+    const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
@@ -1651,7 +1651,7 @@ describe('create()', () => {
       async executor() {},
       producer: 'alerts',
     });
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
@@ -1661,7 +1661,7 @@ describe('create()', () => {
     // Reset from default behaviour
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
@@ -1670,7 +1670,7 @@ describe('create()', () => {
 
   test('throws error and add API key to invalidatePendingApiKey SO when create saved object fails', async () => {
     const data = getMockData();
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
@@ -1685,7 +1685,7 @@ describe('create()', () => {
       },
       references: [],
     });
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1728,7 +1728,7 @@ describe('create()', () => {
     });
     taskManager.schedule.mockRejectedValueOnce(new Error('Test failure'));
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
@@ -1774,10 +1774,10 @@ describe('create()', () => {
     unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(
       new Error('Saved object delete error')
     );
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Task manager error"`
     );
-    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to cleanup alert "1" after scheduling task failed. Error: Saved object delete error'
     );
   });
@@ -1787,14 +1787,14 @@ describe('create()', () => {
     alertTypeRegistry.get.mockImplementation(() => {
       throw new Error('Invalid type');
     });
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid type"`
     );
   });
 
   test('calls the API key function', async () => {
     const data = getMockData();
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
@@ -1854,9 +1854,9 @@ describe('create()', () => {
         },
       ],
     });
-    await alertsClient.create({ data });
+    await rulesClient.create({ data });
 
-    expect(alertsClientParams.createAPIKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
@@ -1965,9 +1965,9 @@ describe('create()', () => {
         },
       ],
     });
-    await alertsClient.create({ data });
+    await rulesClient.create({ data });
 
-    expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
@@ -2020,11 +2020,11 @@ describe('create()', () => {
 
   test('throws an error if API key creation throws', async () => {
     const data = getMockData();
-    alertsClientParams.createAPIKey.mockImplementation(() => {
+    rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
     expect(
-      async () => await alertsClient.create({ data })
+      async () => await rulesClient.create({ data })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error creating rule: could not create API key - no"`
     );
@@ -2035,9 +2035,7 @@ describe('create()', () => {
     alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
     });
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail"`
-    );
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 
   test('throws error when adding action using connector with missing secrets', async () => {
@@ -2061,7 +2059,7 @@ describe('create()', () => {
         isPreconfigured: false,
       },
     ]);
-    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid connectors: email connector"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
