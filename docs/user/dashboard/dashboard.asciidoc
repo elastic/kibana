@@ -323,7 +323,7 @@ To improve the dashboard loading time, enable the *Defer loading panels below th
 
 . In the toolbar, click *Labs*.
 +
-To enable *Labs*, contact your administrator, or configure the <<Advanced Settings,advanced-options>>. 
+To enable *Labs*, contact your administrator, or configure the <<advanced-options,Advanced Settings>>. 
 
 . To specify how you want to enable the lab, use the following actions:
 
