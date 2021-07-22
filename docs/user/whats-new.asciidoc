@@ -25,7 +25,7 @@ Other versions: {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.
 beta[] You can now manage your Enterprise Search deployments without leaving {kib}!
 7.14 introduces *App Search* and *Workplace Search* management dashboards for
 {kib}, so you can experience the full power of Elastic from a single interface.
-Get started by selecting Enterprise Search from the main menu or {kib} Home screen.
+Get started by selecting Enterprise Search from the main menu or {kib} home page.
 Learn more in
 https://www.elastic.co/guide/en/enterprise-search/7.14/user-interfaces.html#user-interfaces-management-kibana[Setting up Enterprise Search in {kib}].
 
@@ -43,11 +43,11 @@ Write your rules once and reuse them fast and effortlessly according to your org
 [role="screenshot"]
 image::user/images/new-alerting.png[How to export and import rules and connectors]
 
-We also improved the observability of alerting by enhancing the following:
+This release also improves the observability of alerting by enhancing the following:
 
 * The Task Manager health API with the ability to log stats over time when a
 problem occurs and an (experimental) capacity estimation.
-* The event log with more fields (rule fields, start, end and duration of alert, reference to rule ID, task drift)
+* The event log with more fields (rule fields, start, end, and duration of alert, reference to rule ID, task drift)
 and a log at the start of a rule or connector execution.
 * The server logs with a log warning when disabling an alert task due to not finding the
 rule saved object.
@@ -87,7 +87,7 @@ image::user/images/new-lens-time-shifts.png[Time shift metrics in Lens]
 [float]
 ==== Table enhancements
 
-Notable table enhancements include:
+Enhancements to tables include:
 
 * *Summary rows*. Add a row to your table that summarizes the column values,
 and customize how you want the summary aggregation and label to appear.
@@ -107,20 +107,21 @@ image::user/images/new-lens-color-by-value.png[Metrics values in table emphaized
 * experimental[] *Heatmaps*. Create heatmaps, sometimes called swim lanes,
 which are useful for showing a single metric at the intersection of two dimensions.
 
-* *Improved editing performance*. Notice the extremely fast switching between
-visualization authoring & dashboard for an improved authoring workflow.
+* *Improved editing performance*. Notice how fast it is to switch between
+visualization authoring and dashboard, improving the authoring workflow.
 
 * *Legend values on hover*. Configure legends to display the values on hover.
-This helps you clearly see the legend values with dense data sets.
+This helps you clearly see the legend values for dense data sets.
 
 * *Custom axis controls*. Create consistent scales across your visualizations
 on a dashboard. Represent the possible range of values--even when those values
-may not be returned in the current data set.
+might not be returned in the current data set.
 
-* *Opacity slider in area charts*. To make it easier to analyze the area chart
-data that frequently overlaps, you can now adjust the transparency with the Fill opacity slider.
+* *Opacity slider in area charts*. Adjust the transparency with the
+Fill opacity slider. This makes it easier to analyze the area chart
+data that frequently overlaps.
 
-* *Quickly navigate to Maps*>
+* *Quickly navigate to Maps*
 Select a geospatial field in the *Available fields* list to open and visualize it in *Maps*,
 including any filters you’ve applied.
 
@@ -142,11 +143,10 @@ The migration system for saved objects, the data structures that underpin much o
 has improved. Now upgrading from prior versions is quicker and more seamless,
 even for the largest of deployments. In addition, when problems arise, the error logging
 is now more clear, so administrators can get migration back on track faster.
-Finally, to help a bit more, we’ve clarified our migration documentation.
 
 [float]
 [[maps-7-14]]
-=== Maps&mdash;new time slider and drawing tools
+=== Maps&mdash;time slider and drawing tools
 
 [float]
 ==== Time slider
@@ -182,7 +182,7 @@ documents that are within 10 kilometers of a specific location.
 
 [float]
 [[discover-7-14]]
-=== Discover&mdash;new community-requested features
+=== Discover&mdash;community-requested features
 
 *Discover* debuts several community-requested features: a multi-fields toggle,
 enhanced *Lens* integration, and source views in the document viewer.
@@ -195,15 +195,16 @@ accessibility, and usability.  For more information on the most-used app in {kib
 
 With *Labs*, you can now try out and provide feedback on the
 *Canvas* and *Dashboard* features that are in progress or experimental.
-When enabled, you’ll see *Labs* in the toolbar.
+To enable *Labs*, go to {kibana-ref}/advanced-options.html[Advanced Settings].
+Once enabled, you’ll see *Labs* in the toolbar.
 
 [role="screenshot"]
 image::user/images/new-labs.png[Dashboard app showing how to access Labs from the toolbar]
 
 The first *Labs* project is *Defer loading panels below the fold*. To improve dashboard loading time,
-the dashboard panels that users must scroll to see are loaded when they first
-become visible on the dashboard. The result is a dashboard whose initial load is much faster.
-Go to {kibana-ref}/advanced-options.html[Advanced Settings] to enable *Labs*, give *Defer loading* a try,
+the dashboard panels that users must scroll to see aren't loaded until they
+become visible on the dashboard.
+Give *Defer loading* a try,
 and let us know what you think.
 
 [float]
@@ -215,7 +216,7 @@ handle arrays in retrieved data. If the data for the SQL expression includes an 
 the first entry of the array is returned in the result set.
 
 Additionally, the SQL expression function now supports passing parameters into the query,
-making it much easier to pass in variable values to your SQL queries on your workpad.
+making it easier to pass in variable values to your SQL queries on your workpad.
 
 [role="screenshot"]
 image::user/images/new-canvas.png[Canvas Elasticsearch SQL expression function]
@@ -229,7 +230,7 @@ image::user/images/new-canvas.png[Canvas Elasticsearch SQL expression function]
 ==== Choropleth maps for anomalies
 
 Choropleth maps are now available in the *Anomaly Explorer* and the *Data Visualizer*
-for fields such as country and region codes, zip codes, or states. The integration
+for fields such as country and region codes, zip codes, and states. The integration
 relies on a new service provided by the *Maps* plugin, which automatically
 identifies fields that store location data based on sample values or
 contextual knowledge about the data.
@@ -258,7 +259,7 @@ image::user/images/new-ml-delayed-data.png[Delayed data visualization for anomal
 
 [float]
 ==== Rare job wizard for anomaly detection
-From 7.13, you can create rare detector jobs by using the new {anomaly-job} wizard.
+Beginning in 7.13, you can create rare detector jobs by using the new {anomaly-job} wizard.
 https://www.elastic.co/blog/using-elastic-machine-learning-rare-analysis-to-hunt-for-the-unusual[Three general detector types are available]:
 rare, rare in population, and frequently rare in population. The latter two require
 a population field to select, and it’s also possible to add a split field to any of the choices.
