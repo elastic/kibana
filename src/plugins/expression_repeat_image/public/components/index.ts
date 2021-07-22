@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
-
-export * from './labs';
-export * from './types';
+export * from './repeat_image_component';

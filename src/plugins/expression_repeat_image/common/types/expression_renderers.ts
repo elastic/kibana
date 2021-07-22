@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+export type OriginString = 'bottom' | 'left' | 'top' | 'right';
+export interface RepeatImageRendererConfig {
+  max: number;
+  count: number;
+  emptyImage: string;
+  image: string;
+  size: number;
+}
 
-export * from './labs';
-export * from './types';
+export interface NodeDimensions {
+  width: number;
+  height: number;
+}

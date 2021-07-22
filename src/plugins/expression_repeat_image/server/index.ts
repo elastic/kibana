@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+import { ExpressionRepeatImagePlugin } from './plugin';
 
-export * from './labs';
-export * from './types';
+export type { ExpressionRepeatImagePluginSetup, ExpressionRepeatImagePluginStart } from './plugin';
+
+export function plugin() {
+  return new ExpressionRepeatImagePlugin();
+}

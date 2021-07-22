@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+import { repeatImageRenderer } from './repeat_image_renderer';
 
-export * from './labs';
-export * from './types';
+export const renderers = [repeatImageRenderer];
+
+export { repeatImageRenderer };

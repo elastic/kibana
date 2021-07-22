@@ -9,7 +9,6 @@ import React, { FC, RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   LazyShapeDrawer,
-  Shape,
   ShapeDrawerComponentProps,
   getDefaultShapeData,
   SvgConfig,
@@ -19,7 +18,7 @@ import {
 import { withSuspense } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
-  shape?: Shape;
+  shape?: string;
 }
 
 const ShapeDrawer = withSuspense<ShapeDrawerComponentProps, ShapeRef>(LazyShapeDrawer);
@@ -58,5 +57,5 @@ export const ShapePreview: FC<Props> = ({ shape }) => {
 };
 
 ShapePreview.propTypes = {
-  shape: PropTypes.string,
+  shape: PropTypes.func,
 };
