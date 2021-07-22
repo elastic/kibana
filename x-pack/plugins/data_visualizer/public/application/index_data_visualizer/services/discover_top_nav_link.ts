@@ -32,7 +32,7 @@ export class DiscoverNavLinkRegistrar {
   }
 
   registerDiscoverTopNavLink: Parameters<
-    DiscoverSetup['addData']['registerTopNavLinkGetter']
+    DiscoverSetup['addTopNavData']['registerTopNavLinkGetter']
   >[1] = async (args) => {
     if (!this.locator) {
       throw Error('IndexDataVisualizerLocator not available');

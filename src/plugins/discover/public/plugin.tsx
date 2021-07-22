@@ -120,7 +120,7 @@ export interface DiscoverSetup {
    */
   readonly locator: undefined | DiscoverAppLocator;
   // @todo: add documentation
-  addData: AddTopNavDataServiceSetup;
+  addTopNavData: AddTopNavDataServiceSetup;
 }
 
 export interface DiscoverStart {
@@ -213,7 +213,7 @@ export class DiscoverPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
-  private readonly addDataService = new AddTopNavDataService();
+  private readonly addTopNavDataService = new AddTopNavDataService();
   /**
    * @deprecated
    */
@@ -395,7 +395,7 @@ export class DiscoverPlugin
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
       locator: this.locator,
-      addData: { ...this.addDataService.setup() },
+      addTopNavData: { ...this.addTopNavDataService.setup() },
     };
   }
 
@@ -432,7 +432,7 @@ export class DiscoverPlugin
         plugins,
         this.initializerContext,
         this.getEmbeddableInjector,
-        this.addDataService
+        this.addTopNavDataService
       );
       setServices(services);
       this.servicesInitialized = true;

@@ -36,11 +36,11 @@ import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
-import { AddTopNavDataService } from './application/apps/main/services/add_top_nav_links';
+import type { AddTopNavDataService } from './application/apps/main/services/add_top_nav_data';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
-  addDataService: AddTopNavDataService;
+  addTopNavDataService: AddTopNavDataService;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -71,7 +71,7 @@ export async function buildServices(
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
   getEmbeddableInjector: () => Promise<auto.IInjectorService>,
-  addDataService: AddTopNavDataService
+  addTopNavDataService: AddTopNavDataService
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
@@ -81,7 +81,7 @@ export async function buildServices(
   const { usageCollection } = plugins;
 
   return {
-    addDataService,
+    addTopNavDataService,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,

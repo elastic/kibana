@@ -68,9 +68,9 @@ export class DataVisualizerPlugin
       this.locator = plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
     }
 
-    if (plugins.discover?.addData && this.locator) {
+    if (plugins.discover?.addTopNavData && this.locator) {
       const discoverNavLinkRegistrar = new DiscoverNavLinkRegistrar(this.locator);
-      plugins.discover.addData.registerTopNavLinkGetter(
+      plugins.discover.addTopNavData.registerTopNavLinkGetter(
         discoverNavLinkRegistrar.id,
         discoverNavLinkRegistrar.registerDiscoverTopNavLink
       );

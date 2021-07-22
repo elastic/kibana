@@ -7,6 +7,7 @@
  */
 
 import { DiscoverSetup, DiscoverStart } from '.';
+import { addTopNavDataServiceMock } from './application/apps/main/services/add_top_nav_data.mock';
 
 export type Setup = jest.Mocked<DiscoverSetup>;
 export type Start = jest.Mocked<DiscoverStart>;
@@ -26,6 +27,7 @@ const createSetupContract = (): Setup => {
       telemetry: jest.fn(),
       migrations: {},
     },
+    addTopNavData: addTopNavDataServiceMock.createSetup(),
   };
   return setupContract;
 };

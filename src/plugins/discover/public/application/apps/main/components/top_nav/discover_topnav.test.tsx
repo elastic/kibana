@@ -33,6 +33,7 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     updateQuery: jest.fn(),
     onOpenInspector: jest.fn(),
     searchSource: {} as ISearchSource,
+    columns: [],
   };
 }
 

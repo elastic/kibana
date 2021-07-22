@@ -46,27 +46,29 @@ export const DiscoverTopNav = ({
     let unmounted = false;
 
     const loadRegisteredTopNavLinks = async () => {
-      const callbacks = services.addDataService.getTopNavLinkGetters();
-      const params = {
-        indexPattern,
-        onOpenInspector,
-        query,
-        savedQuery,
-        stateContainer,
-        updateQuery,
-        searchSource,
-        navigateTo,
-        savedSearch,
-        services,
-        columns,
-      };
-      const links = await Promise.all(
-        callbacks.map((cb) => {
-          return cb(params);
-        })
-      );
-      if (!unmounted) {
-        setRegisteredTopNavLinks(links);
+      if (services?.addTopNavDataService) {
+        const callbacks = services.addTopNavDataService.getTopNavLinkGetters();
+        const params = {
+          indexPattern,
+          onOpenInspector,
+          query,
+          savedQuery,
+          stateContainer,
+          updateQuery,
+          searchSource,
+          navigateTo,
+          savedSearch,
+          services,
+          columns,
+        };
+        const links = await Promise.all(
+          callbacks.map((cb) => {
+            return cb(params);
+          })
+        );
+        if (!unmounted) {
+          setRegisteredTopNavLinks(links);
+        }
       }
     };
     loadRegisteredTopNavLinks();
@@ -75,7 +77,7 @@ export const DiscoverTopNav = ({
       unmounted = true;
     };
   }, [
-    services?.addDataService,
+    services?.addTopNavDataService,
     indexPattern,
     onOpenInspector,
     query,
