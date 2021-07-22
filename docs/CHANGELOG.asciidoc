@@ -20,41 +20,167 @@ This section summarizes the changes in each release.
 
 coming[8.0.0]
 
-[[release-notes-8.0.0]]
-== {kib} 8.0.0
-
-coming::[8.0.0]
-
-For information about the {kib} 8.0.0 release, review the following information.
+The following changes have been released for the first time in {kib} 8.0.0-alpha1.
 
 [float]
 [[breaking-changes-8.0.0]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance.
-Before you upgrade to 8.0.0, review the breaking changes, then mitigate the impact to your application.
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 8.0.0, review the breaking changes, then mitigate the impact to your application.
 
 // tag::notable-breaking-changes[]
 
+[float]
+[[enterprise-search-change]]
+==== Enterprise Search changes
+
 [discrete]
 [[breaking-106307]]
-.Require security plugin in 8.0
+.Required security plugin in 8.0
 [%collapsible]
 ====
 *Details* +
-Enterprise Search now requires X-Pack Security to be enabled. For more information, refer to {kibana-pull}106307[#106307]
+Enterprise Search now requires that you enable X-Pack Security. For more information, refer to {kibana-pull}106307[#106307]
 
 *Impact* +
 Enable X-Pack Security.
 ====
-      
+
+[float]
+[[index-pattern-change]]
+==== Index pattern changes
+
 [discrete]
-[[breaking-106061]]
-.Provide sensible defaults 
+[[breaking-35173]]
+.Removed support for time-based interval index patterns
 [%collapsible]
 ====
 *Details* +
-The default values for for `xpack.security.session.{lifespan|idleTimeout}` session timeout settings have changed. For more information, refer to {kibana-pull}106061[#106061]
+Time-based interval index patterns were deprecated in 5.x. In 6.x, you could no longer create time-based interval index patterns, but they continued to function as expected. Support for these index patterns has been removed in 8.0. For more information, refer to {kibana-pull}35173[#35173]
+
+*Impact* +
+You must migrate your time_based index patterns to a wildcard pattern. For example, logstash-*. 
+====
+
+[float]
+[[operations-changes]]
+==== Operations changes
+
+[discrete]
+[[breaking-93835]]
+.Removed platform from archive root directory
+[%collapsible]
+====
+*Details* +
+For the `.tar.gz` and `.zip` archives, `platform` has been removed from the `root` folder name. For more information, refer to {kibana-pull}93835[#93835]
+
+*Impact* +
+The `root` folder name now appears as `kibana-8.0.0-SNAPSHOT-linux-aarch64.tar.gz -> kibana-8.0.0-SNAPSHOT`.
+====
+      
+[discrete]
+[[breaking-90511]]
+.Removed default support for TLS v1.0 and v1.1
+[%collapsible]
+====
+*Details* +
+The default support for TLS v1.0 and v1.1 has been removed. For more information, refer to {kibana-pull}90511[#90511]
+
+*Impact* +
+To enable support, set the environment variable to `NODE_OPTIONS=--tls-min-1.0`.
+====
+           
+[discrete]
+[[breaking-74424]]
+.Removed support for sysv init
+[%collapsible]
+====
+*Details* +
+Systems that don't have `service` aliased to use kibana.service are unable to use `service start kibana`. For more information, refer to {kibana-pull}74424[#74424]
+
+*Impact* +
+If your system doesn't have `service` aliased to use kibana.service, use `systemctl start kibana.service`.
+====
+       
+[discrete]
+[[breaking-42353]]
+.Disabled response logging as a default
+[%collapsible]
+====
+*Details* +
+By default, responses are not logged. Previously, responses were logged if `logging.json` was set to `true`, `logging.dest` was specified, or a TTY was detected. For more information, refer to {kibana-pull}42353[#42353]
+
+*Impact* +
+To log responses, set `logging.events.response=*` in kibana.yml.
+====
+
+[float]
+[[reporting-changes-8.0.0-alpha1]]
+==== Reporting changes
+
+[discrete]
+[[breaking-64853]]
+.Task Manager integration for Reporting
+[%collapsible]
+====
+*Details* +
+The ES-Queue subservice of *Reporting* has been removed and replaced with *Task Manager* integration. For more information, refer to {kibana-pull}64853[#64853]
+
+*Impact* +
+Before you upgrade, make sure there are no pending reporting jobs. Any pending reporting jobs will remain in the pending state.
+====
+      
+[discrete]
+[[breaking-52539]]
+.Removed legacy Reporting job params compatibility shim
+[%collapsible]
+====
+*Details* +
+*Reporting* is no longer compatible with POST URL snippets generated with {kib} 6.2.0 and earlier. For more information, refer to {kibana-pull}52539[#52539]
+
+*Impact* +
+If you use POST URL snippets to automatically generate PDF reports, regenerate the POST URL strings.
+====
+
+[float]
+[[rest-api-changes]]
+==== Security changes
+
+[discrete]
+[[breaking-47929]]
+.Removed `/api/security/v1/saml` route
+[%collapsible]
+====
+*Details* +
+The `/api/security/v1/saml` route has been removed and is reflected in the kibana.yml `server.xsrf.whitelist` setting, {es}, and the Identity Provider SAML settings. For more information, refer to {kibana-pull}47929[#47929]
+
+*Impact* +
+Use the `/api/security/saml/callback` route.
+====
+
+[discrete]
+[[breaking-41700]]
+.Reject legacy browsers by default
+[%collapsible]
+====
+*Details* +
+To provide the maximum level of protection for most installations, the csp.strict config is now enabled by default. Legacy browsers, such as IE11, are unable to access {kib} unless explicitly enabled. For more information, refer to {kibana-pull}41700[#41700]
+
+*Impact* +
+To enable support for legacy browsers, set `csp.strict: false` in kibana.yml.
+====
+
+[float]
+[[settings-changes-8.0.0-alpha1]]
+==== Settings changes
+      
+[discrete]
+[[breaking-106061]]
+.Use new session timeout defaults 
+[%collapsible]
+====
+*Details* +
+The default values for the session timeout `xpack.security.session.{lifespan|idleTimeout}` settings have changed. For more information, refer to {kibana-pull}106061[#106061]
 
 *Impact* +
 Use the following default values:
@@ -62,157 +188,42 @@ Use the following default values:
 * `xpack.security.session.idleTimeout: 1h`
 * `xpack.security.session.lifespan: 30d`
 ====
-      
-[discrete]
-[[breaking-93835]]
-.Remove platform from archive root directory
-[%collapsible]
-====
-*Details* +
-For the `.tar.gz` and `.zip` archives, `platform` has been removed from the `root` folder name. For more information, refer to {kibana-pull}93835[#93835]
 
-*Impact* +
-Before:
-
-`kibana-8.0.0-SNAPSHOT-linux-aarch64.tar.gz -> kibana-8.0.0-SNAPSHOT-aarch64`
-
-After:
-
-`kibana-8.0.0-SNAPSHOT-linux-aarch64.tar.gz -> kibana-8.0.0-SNAPSHOT`
-====
-      
-[discrete]
-[[breaking-90511]]
-.Remove default support for TLS v1.0 and v1.1
-[%collapsible]
-====
-*Details* +
-Removes the default support for TLS v1.0 and v1.1. For more information, refer to {kibana-pull}90511[#90511]
-
-*Impact* +
-To enable support, set the environment variable to `NODE_OPTIONS=--tls-min-1.0`.
-====
-      
 [discrete]
 [[breaking-87114]]
-.Remove support for setting server.host to '0' (breaking)
+.Removed support for setting `server.host` to '0'
 [%collapsible]
 ====
 *Details* +
-Removes support for configuring {kib} with `0` as the `server.host`. For more information, refer to {kibana-pull}87114[#87114]
+Support for configuring {kib} with `0` as the `server.host` has been removed. For more information, refer to {kibana-pull}87114[#87114]
 
 *Impact* +
 You are now unable to use `0` as the `server.host`.
 ====
-      
-[discrete]
-[[breaking-74424]]
-.Remove sysv
-[%collapsible]
-====
-*Details* +
-Systems that don't have service aliased to use kibana.service are unable to use should use `service start kibana`. For more information, refer to {kibana-pull}74424[#74424]
 
-*Impact* +
-If your system doesn't have service aliased to use kibana.service, use `systemctl start kibana.service`.
-====
-      
-[discrete]
-[[breaking-64853]]
-.Switch Reporting to Task Manager
-[%collapsible]
-====
-*Details* +
-Removes the ES-Queue subservice of *Reporting*, and replaces the functionality with *Task Manager* integration. For more information, refer to {kibana-pull}64853[#64853]
-
-*Impact* +
-Before you upgrade to 8.0.0, make sure there are no pending reporting jobs. If you have pending reporting jobs, they will indefinitely remain in the pending state.
-====
-      
-[discrete]
-[[breaking-52539]]
-.Remove legacy Reporting job params compatibility shim
-[%collapsible]
-====
-*Details* +
-*Reporting* is no longer compatible with POST URL snippets generated with {kib} 6.2.0 and earlier. For more information, refer to {kibana-pull}52539[#52539]
-
-*Impact* +
-If you depend on POST URL snippets to automatically generate PDF reports, regenerate the POST URL strings.
-====
-      
-[discrete]
-[[breaking-47929]]
-.Drop `/api/security/v1/saml` route in favour of `/api/security/saml/callback`
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}47929[#47929]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-42353]]
-.Disables response logging as a default
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}42353[#42353]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-41700]]
-.Reject legacy browsers by default
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}41700[#41700]
-
-*Impact* +
-!!TODO!!
-====
-      
 [discrete]
 [[breaking-38657]]
-.Make `xpack.security.authc.saml.realm` mandatory and completely remove `xpack.security.authProviders` and `xpack.security.public`
+.Removed `xpack.security.authProviders` and `xpack.security.public`
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}38657[#38657]
+The `xpack.security.public` and `xpack.security.authProviders` settings have been removed. For more information, refer to {kibana-pull}38657[#38657]
 
 *Impact* +
-!!TODO!!
+Use the `xpack.security.authc.saml.realm` setting.
 ====
-      
-[discrete]
-[[breaking-35173]]
-.Remove support for time-based interval index patterns
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}35173[#35173]
 
-*Impact* +
-!!TODO!!
-====
-      
 [discrete]
 [[breaking-22696]]
-.Remove useUTC deprecation, set default timezone to local
+.Removed useUTC deprecation
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}22696[#22696]
+The `logging.useUTC` setting has been removed. For more information, refer to {kibana-pull}22696[#22696]
 
 *Impact* +
-!!TODO!!
-====
-      
+The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.  
+====  
 
 // end::notable-breaking-changes[]
 
@@ -220,244 +231,43 @@ If you depend on POST URL snippets to automatically generate PDF reports, regene
 [[deprecations-8.0.0]]
 === Deprecations
 
-The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0.
-Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
-you make the necessary updates after you upgrade to 8.0.0.
+The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0. Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you upgrade to 8.0.0.
 
 [discrete]
 [[deprecation-74424]]
-.Remove sysv
+.Removed support for SysV init
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}74424[#74424]
+Systems that don't have `service` aliased to use kibana.service are unable to use `service start kibana`. For more information, refer to {kibana-pull}74424[#74424]
 
 *Impact* +
-!!TODO!!
+If your system doesn't have `service` aliased to use kibana.service, use `systemctl start kibana.service`.
 ====
       
 [discrete]
 [[deprecation-33603]]
-.Remove deprecated xpack:defaultAdminEmail
+.Removed `xpack:defaultAdminEmail` setting
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}33603[#33603]
+The `xpack:default_admin_email` setting for monitoring use has been removed. For more information, refer to {kibana-pull}33603[#33603]
 
 *Impact* +
-!!TODO!!
+Use the `xpack.monitoring.clusterAlertsEmail` in kibana.yml.
 ====
-      
 
-For more information about the features introduced in 8.0.0, refer to <<whats-new,What's new in 8.0>>.
-
+[float]
 [[enhancements-and-bug-fixes-v8.0.0]]
-=== Enhancements and bug fixes
+=== Bug fix
 
-For detailed information about the 8.0.0 release, review the enhancements and bug fixes.
+The 8.0.0-alpha1 release includes the following bug fix.
 
-[float]
-[[breaking-v8.0.0]]
-=== Breaking
-[discrete]
-[[breaking-106307]]
-.Require security plugin in 8.0
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}106307[#106307]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-106061]]
-.Provide sensible defaults for `xpack.security.session.{lifespan|idleTimeout}`
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}106061[#106061]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-93835]]
-.Removes platform from root folder name for `.tar.gz` and `.zip` archives
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}93835[#93835]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-90511]]
-.Remove default support for TLS v1.0 and v1.1
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}90511[#90511]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-87114]]
-.Remove support for setting server.host to '0' (breaking)
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}87114[#87114]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-74424]]
-.Remove sysv
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}74424[#74424]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-64853]]
-.Switch Reporting to Task Manager
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}64853[#64853]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-52539]]
-.Remove reporting legacy job params compatibility shim
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}52539[#52539]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-47929]]
-.Drop `/api/security/v1/saml` route in favour of `/api/security/saml/callback`
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}47929[#47929]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-42353]]
-.Disables response logging as a default
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}42353[#42353]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-41700]]
-.Reject legacy browsers by default
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}41700[#41700]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-38657]]
-.Make `xpack.security.authc.saml.realm` mandatory and completely remove `xpack.security.authProviders` and `xpack.security.public`
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}38657[#38657]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-35173]]
-.Remove support for time-based interval index patterns
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}35173[#35173]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-22696]]
-.Remove useUTC deprecation, set default timezone to local
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}22696[#22696]
-
-*Impact* +
-!!TODO!!
-====
-      
-
-[float]
-[[deprecation-v8.0.0]]
-=== Deprecations
-[discrete]
-[[deprecation-74424]]
-.Remove sysv
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}74424[#74424]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-33603]]
-.Remove deprecated xpack:defaultAdminEmail
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}33603[#33603]
-
-*Impact* +
-!!TODO!!
-====
-      
-
-[float]
-[[fixes-v8.0.0]]
-=== Bug Fixes
 Operations::
-* Move systemd service to /usr/lib/systemd/system {kibana-pull}83571[#83571]
+* Moves systemd service to /usr/lib/systemd/system {kibana-pull}83571[#83571]
+
+[[release-notes-8.0.0]]
+== {kib} 8.0.0
+
+coming::[8.0.0]
+
