@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { Job } from '../lib/job';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { Props as ListingProps } from './report_listing';
+import { ListingProps } from '.';
 
 interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
   apiClient: ReportingAPIClient;
@@ -84,7 +84,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
     const jobInfo = [
       { title: 'Title', description: info.title || NA },
       { title: 'Created At', description: info.getCreatedAtLabel() },
-      { title: 'Status', description: info.getStatusLabel() },
+      { title: 'Status', description: info.getStatus() },
       { title: 'Timezone', description: info.browserTimezone || NA },
     ];
 
@@ -124,10 +124,20 @@ class ReportInfoButtonUi extends Component<Props, State> {
     ];
 
     const warnings = info.getWarnings();
-    const warningsInfo = warnings && [{ title: 'Warnings', description: warnings }];
+    const warningsInfo = warnings && [
+      {
+        title: <EuiText color="danger">Warnings</EuiText>,
+        description: <EuiText color="warning">{warnings}</EuiText>,
+      },
+    ];
 
     const errored = info.getError();
-    const errorInfo = errored && [{ title: 'Error', description: errored }];
+    const errorInfo = errored && [
+      {
+        title: <EuiText color="danger">Error</EuiText>,
+        description: <EuiText color="danger">{errored}</EuiText>,
+      },
+    ];
 
     return (
       <>
@@ -165,6 +175,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
   }
 
   public render() {
+    const job = this.props.job;
     let flyout;
 
     if (this.state.isFlyoutVisible) {
@@ -194,16 +205,26 @@ class ReportInfoButtonUi extends Component<Props, State> {
       id: 'xpack.reporting.listing.table.reportInfoButtonTooltip',
       defaultMessage: 'See report info',
     });
-    if (this.props.job.getError()) {
+    if (job.getError()) {
       message = this.props.intl.formatMessage({
         id: 'xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip',
         defaultMessage: 'See report info and error message',
       });
-    } else if (this.props.job.getWarnings()) {
+    } else if (job.getWarnings()) {
       message = this.props.intl.formatMessage({
         id: 'xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip',
         defaultMessage: 'See report info and warnings',
       });
+    }
+
+    let buttonIconType = 'iInCircle';
+    let buttonColor: 'primary' | 'danger' | 'warning' = 'primary';
+    if (job.getWarnings() || job.getError()) {
+      buttonIconType = 'alert';
+      buttonColor = 'danger';
+    }
+    if (job.getWarnings()) {
+      buttonColor = 'warning';
     }
 
     return (
@@ -211,10 +232,13 @@ class ReportInfoButtonUi extends Component<Props, State> {
         <EuiToolTip position="top" content={message}>
           <EuiButtonIcon
             onClick={this.showFlyout}
-            iconType="iInCircle"
-            color={'primary'}
+            iconType={buttonIconType}
+            color={buttonColor}
             data-test-subj="reportInfoButton"
-            aria-label="Show report info"
+            aria-label={this.props.intl.formatMessage({
+              id: 'xpack.reporting.listing.table.showReportInfoAriaLabel',
+              defaultMessage: 'Show report info',
+            })}
           />
         </EuiToolTip>
         {flyout}

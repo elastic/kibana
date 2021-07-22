@@ -83,27 +83,32 @@ export class Job {
 
   getStatusMessage() {
     let smallMessage;
+    if (status === PENDING) {
+      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.pendingStatusReachedText', {
+        defaultMessage: 'waiting for job to be processed',
+      });
+    }
     if (status === PROCESSING) {
-      smallMessage = i18n.translate('xpack.reporting.listing.tableValue.statusDetail.attemptXofY', {
+      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.attemptXofY', {
         defaultMessage: 'Attempt {attempts} of {max_attempts}',
         values: { attempts: this.attempts, max_attempts: this.max_attempts },
       });
     }
-    if (this.getError()) {
-      smallMessage = i18n.translate('xpack.reporting.listing.tableValue.statusDetail.errorText', {
-        defaultMessage: 'See report info for error details.',
+    if (this.getWarnings()) {
+      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.errorText', {
+        defaultMessage: 'See report info for warnings.',
       });
     }
-    if (this.getWarnings()) {
-      smallMessage = i18n.translate('xpack.reporting.listing.tableValue.statusDetail.errorText', {
-        defaultMessage: 'See report info for warnings.',
+    if (this.getError()) {
+      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.errorText', {
+        defaultMessage: 'See report info for error details.',
       });
     }
 
     if (smallMessage) {
       return (
         <EuiText size="s">
-          <EuiTextColor color="subdued"> {smallMessage} </EuiTextColor>
+          <EuiTextColor color="subdued">{smallMessage}</EuiTextColor>
         </EuiText>
       );
     }
@@ -111,30 +116,35 @@ export class Job {
     return null;
   }
 
-  getStatusLabel() {
-    const statusLabel = jobStatusLabelsMap.get(this.status);
+  getStatus() {
+    const statusLabel = jobStatusLabelsMap.get(this.status) as string;
     const statusTimestamp = this.getStatusTimestamp();
 
     if (statusTimestamp) {
       return (
-        <>
-          <FormattedMessage
-            id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
-            defaultMessage="{statusLabel} at {statusTimestamp}"
-            values={{
-              statusLabel,
-              statusTimestamp: (
-                <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
-              ),
-            }}
-          />
-          {this.getStatusMessage()}
-        </>
+        <FormattedMessage
+          id="xpack.reporting.jobStatusDetail.statusTimestampText"
+          defaultMessage="{statusLabel} at {statusTimestamp}"
+          values={{
+            statusLabel,
+            statusTimestamp: (
+              <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
+            ),
+          }}
+        />
       );
     }
 
-    // unknown status
-    return statusLabel as string;
+    return statusLabel;
+  }
+
+  getStatusLabel() {
+    return (
+      <>
+        {this.getStatus()}
+        {this.getStatusMessage()}
+      </>
+    );
   }
 
   getCreatedAtLabel() {

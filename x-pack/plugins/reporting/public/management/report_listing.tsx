@@ -16,41 +16,25 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
-import { ApplicationStart, ToastsSetup } from 'src/core/public';
-import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
+import { ILicense } from '../../../licensing/public';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
-import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
+import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
-import { ReportingAPIClient, useInternalApiClient } from '../lib/reporting_api_client';
-import { ClientConfigType } from '../plugin';
-import type { SharePluginSetup } from '../shared_imports';
+import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
 import { IlmPolicyLink } from './ilm_policy_link';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import { ReportDeleteButton } from './report_delete_button';
 import { ReportDiagnostic } from './report_diagnostic';
 import { ReportDownloadButton } from './report_download_button';
-import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
-
-export interface Props {
-  intl: InjectedIntl;
-  apiClient: ReportingAPIClient;
-  capabilities: ApplicationStart['capabilities'];
-  license$: LicensingPluginSetup['license$'];
-  pollConfig: ClientConfigType['poll'];
-  redirect: ApplicationStart['navigateToApp'];
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  toasts: ToastsSetup;
-  urlService: SharePluginSetup['url'];
-  ilmPolicyContextValue: UseIlmPolicyStatusReturn;
-}
+import { ListingProps as Props } from './';
 
 interface State {
   page: number;
@@ -330,9 +314,8 @@ class ReportListingUi extends Component<Props, State> {
             render: (job: Job) => {
               return (
                 <div data-test-subj="reportJobActions">
-                  <ReportInfoButton {...this.props} job={job} />
-                  <ReportErrorButton {...this.props} job={job} />
                   <ReportDownloadButton {...this.props} job={job} />
+                  <ReportInfoButton {...this.props} job={job} />
                 </div>
               );
             },
