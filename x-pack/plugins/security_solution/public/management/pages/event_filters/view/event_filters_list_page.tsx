@@ -44,7 +44,7 @@ import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
 import { SearchBar } from '../../../components/search_bar';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
-import { SUBTITLE } from './translations';
+import { ABOUT_EVENT_FILTERS } from './translations';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -196,7 +196,7 @@ export const EventFiltersListPage = memo(() => {
           defaultMessage="Event Filters"
         />
       }
-      subtitle={SUBTITLE}
+      subtitle={ABOUT_EVENT_FILTERS}
       actions={
         doesDataExist && (
           <EuiButton

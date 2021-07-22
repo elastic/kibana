@@ -34,7 +34,7 @@ import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../
 import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
-import { SUBTITLE } from '../../translations';
+import { ABOUT_EVENT_FILTERS } from '../../translations';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -199,8 +199,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     return !isIndexPatternLoading && exception ? (
       <EuiForm component="div">
-        <EuiText size="xs">{SUBTITLE}</EuiText>
-        <EuiSpacer size="m" />
+        {!exception || !exception.item_id ? (
+          <EuiText color="subdued" size="xs">
+            {ABOUT_EVENT_FILTERS}
+            <EuiSpacer size="m" />
+          </EuiText>
+        ) : null}
         {nameInputMemo}
         <EuiSpacer size="m" />
         {allowSelectOs ? (
