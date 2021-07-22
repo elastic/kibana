@@ -34,7 +34,7 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
 
 import { buildSiemResponse } from '../utils';
-import { AlertsClient } from '../../../../../../alerting/server';
+import { RulesClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 
 import { ExceptionListClient } from '../../../../../../lists/server';
@@ -65,17 +65,17 @@ export const addPrepackedRulesRoute = (
       const frameworkRequest = await buildFrameworkRequest(context, security, _);
 
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
+        const rulesClient = context.alerting?.getRulesClient();
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         const validated = await createPrepackagedRules(
           context,
           siemClient,
-          alertsClient,
+          rulesClient,
           frameworkRequest,
           config.maxTimelineImportExportSize,
           config.prebuiltRulesFromFileSystem,
@@ -104,7 +104,7 @@ class PrepackagedRulesError extends Error {
 export const createPrepackagedRules = async (
   context: SecuritySolutionRequestHandlerContext,
   siemClient: AppClient,
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   frameworkRequest: FrameworkRequest,
   maxTimelineImportExportSize: ConfigType['maxTimelineImportExportSize'],
   prebuiltRulesFromFileSystem: ConfigType['prebuiltRulesFromFileSystem'],
@@ -116,7 +116,7 @@ export const createPrepackagedRules = async (
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
   const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-  if (!siemClient || !alertsClient) {
+  if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
   }
 
@@ -130,7 +130,7 @@ export const createPrepackagedRules = async (
     prebuiltRulesFromFileSystem,
     prebuiltRulesFromSavedObjects
   );
-  const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
+  const prepackagedRules = await getExistingPrepackagedRules({ rulesClient });
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
@@ -144,7 +144,7 @@ export const createPrepackagedRules = async (
     }
   }
 
-  await Promise.all(installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex));
+  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall, signalsIndex));
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -154,7 +154,7 @@ export const createPrepackagedRules = async (
     timeline,
     importTimelineResultSchema
   );
-  await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);
+  await updatePrepackagedRules(rulesClient, savedObjectsClient, rulesToUpdate, signalsIndex);
 
   const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {
     rules_installed: rulesToInstall.length,
