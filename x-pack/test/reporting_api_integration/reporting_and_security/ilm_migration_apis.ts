@@ -15,8 +15,10 @@ import { ILM_POLICY_NAME } from '../../../plugins/reporting/common/constants';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const supertestNoAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
+  const security = getService('security');
 
   describe('ILM policy migration APIs', () => {
     before(async () => {
@@ -38,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('ok');
 
       // try creating a report
-      await supertestNoAuth
+      await supertest
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
@@ -51,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       // TODO: Remove "any" when no longer through type issue "policy_id" missing
       await es.ilm.deleteLifecycle({ policy: ILM_POLICY_NAME } as any);
 
-      await supertestNoAuth
+      await supertest
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
@@ -64,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('detects when reporting indices should be migrated due to unmanaged indices', async () => {
       await reportingAPI.makeAllReportingIndicesUnmanaged();
-      await supertestNoAuth
+      await supertest
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
         .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
@@ -110,6 +112,33 @@ export default function ({ getService }: FtrProviderContext) {
       } = await es.ilm.getLifecycle({ policy: ILM_POLICY_NAME });
 
       expect(policy).to.eql(customLifecycle.policy);
+    });
+
+    it('is not available to unauthorized users', async () => {
+      const UNAUTHZD_TEST_USERNAME = 'UNAUTHZD_TEST_USERNAME';
+      const UNAUTHZD_TEST_USER_PASSWORD = 'UNAUTHZD_TEST_USER_PASSWORD';
+
+      await security.user.create(UNAUTHZD_TEST_USERNAME, {
+        password: UNAUTHZD_TEST_USER_PASSWORD,
+        roles: [],
+        full_name: 'an unauthzd user',
+      });
+
+      try {
+        await supertestWithoutAuth
+          .put(reportingAPI.routes.API_MIGRATE_ILM_POLICY_URL)
+          .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
+          .set('kbn-xsrf', 'xxx')
+          .expect(404);
+
+        await supertestWithoutAuth
+          .get(reportingAPI.routes.API_GET_ILM_POLICY_STATUS)
+          .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
+          .set('kbn-xsrf', 'xxx')
+          .expect(404);
+      } finally {
+        await security.user.delete(UNAUTHZD_TEST_USERNAME);
+      }
     });
   });
 }
