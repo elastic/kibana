@@ -17,6 +17,9 @@ import {
   XYChartSeriesIdentifier,
   SeriesNameFn,
   Fit,
+  HorizontalAlignment,
+  VerticalAlignment,
+  LayoutDirection,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import {
@@ -2249,6 +2252,30 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it should populate the correct legendPosition if isInside is set', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          data={{ ...data }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
+            legend: { ...args.legend, isVisible: true, isInside: true },
+          }}
+        />
+      );
+
+      expect(component.find(Settings).prop('legendPosition')).toEqual({
+        vAlign: VerticalAlignment.Top,
+        hAlign: HorizontalAlignment.Right,
+        direction: LayoutDirection.Vertical,
+        floating: true,
+        floatingColumns: 1,
+      });
     });
 
     test('it not show legend if isVisible is set to false', () => {
