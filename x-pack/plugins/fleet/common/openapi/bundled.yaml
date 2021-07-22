@@ -1031,6 +1031,60 @@ paths:
                   perPage:
                     type: integer
       operationId: get-outputs
+  '/outputs/{outputId}':
+    get:
+      summary: Output - Info
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output'
+                required:
+                  - item
+      operationId: get-output
+    parameters:
+      - schema:
+          type: string
+        name: outputId
+        in: path
+        required: true
+    put:
+      summary: Output - Update
+      operationId: update-output
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hosts:
+                  type: string
+                ca_sha256:
+                  type: string
+                config:
+                  type: object
+                config_yaml:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output'
+                required:
+                  - item
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
   '/epm/packages/{pkgName}/stats':
     get:
       summary: Get stats for a package
@@ -1588,10 +1642,6 @@ components:
       title: Output
       type: object
       properties:
-        hosts:
-          type: array
-          items:
-            type: string
         id:
           type: string
         is_default:
@@ -1600,8 +1650,21 @@ components:
           type: string
         type:
           type: string
+          enum:
+            - elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        ca_sha256:
+          type: string
+        api_key:
+          type: string
+        config:
+          type: object
+        config_yaml:
+          type: string
       required:
-        - hosts
         - id
         - is_default
         - name

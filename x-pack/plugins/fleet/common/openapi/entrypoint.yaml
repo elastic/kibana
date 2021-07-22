@@ -66,6 +66,8 @@ paths:
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
   /outputs:
     $ref: paths/outputs.yaml
+  /outputs/{outputId}:
+    $ref: paths/outputs@{output_id}.yaml
   '/epm/packages/{pkgName}/stats':
     $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
 components:
