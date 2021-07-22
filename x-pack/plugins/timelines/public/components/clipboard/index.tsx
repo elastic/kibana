@@ -66,6 +66,7 @@ export const Clipboard = ({
       aria-label={i18n.COPY_TO_THE_CLIPBOARD}
       className={className}
       data-test-subj="clipboard"
+      iconSize="s"
       iconType="copyClipboard"
       onClick={onClick}
     >
