@@ -18,7 +18,6 @@ import {
   Filter,
   TimefilterContract,
 } from '../../../../plugins/data/public';
-import { getFilterAsArray } from '../../../../plugins/data/common';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -219,12 +218,6 @@ export class VisualizeEmbeddable
     }
   }
 
-  private mergeSearchSourceFiltersWith(incomingFilters: undefined | Filter[] = []) {
-    const searchSourceFilters = getFilterAsArray(this.vis.data.searchSource?.getFields().filter);
-    // Filters earlier in the array take precedence
-    return [...searchSourceFilters, ...incomingFilters];
-  }
-
   private handleChanges(): boolean {
     this.transferCustomizationsToUiState();
 
@@ -392,7 +385,7 @@ export class VisualizeEmbeddable
       searchContext: {
         timeRange: this.timeRange,
         query: this.input.query,
-        filters: this.mergeSearchSourceFiltersWith(this.input.filters),
+        filters: this.input.filters,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,

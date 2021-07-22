@@ -11,7 +11,6 @@ export { injectReferences } from './inject_references';
 export { extractReferences } from './extract_references';
 export { parseSearchSourceJSON } from './parse_json';
 export { getResponseInspectorStats } from './inspect';
-export { getFilterAsArray } from './get_filter_as_array';
 export * from './fetch';
 export * from './legacy';
 export * from './search_source';
