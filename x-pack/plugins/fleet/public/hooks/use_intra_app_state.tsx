@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useContext, useMemo } from 'react';
-import type { AppMountParameters } from 'kibana/public';
 import { useLocation } from 'react-router-dom';
 
 import type { AnyIntraAppRouteState } from '../types';
@@ -16,9 +14,7 @@ import type { AnyIntraAppRouteState } from '../types';
  * This state can be used by other Kibana Apps to influence certain behaviours in Ingest, for example,
  * redirecting back to an given Application after a craete action.
  */
-export function useIntraAppState<S = AnyIntraAppRouteState>():
-  | IntraAppState<S>['routeState']
-  | undefined {
+export function useIntraAppState<S = AnyIntraAppRouteState>(): S | undefined {
   const location = useLocation();
 
   return location.state as S;
