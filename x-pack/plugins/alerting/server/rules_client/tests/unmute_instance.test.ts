@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -27,7 +27,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -45,50 +45,82 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
 
-describe('muteAll()', () => {
-  test('mutes an alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+describe('unmuteInstance()', () => {
+  test('unmutes an alert instance', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
-        actions: [
-          {
-            group: 'default',
-            id: '1',
-            actionTypeId: '1',
-            actionRef: '1',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-        muteAll: false,
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: ['2'],
       },
-      references: [],
       version: '123',
+      references: [],
     });
 
-    await alertsClient.muteAll({ id: '1' });
+    await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
-        muteAll: true,
         mutedInstanceIds: [],
-        updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
       },
-      {
-        version: '123',
-      }
+      { version: '123' }
     );
+  });
+
+  test('skips unmuting when alert instance not muted', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: [],
+      },
+      references: [],
+    });
+
+    await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  test('skips unmuting when alert is muted', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: [],
+        muteAll: true,
+      },
+      references: [],
+    });
+
+    await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   describe('authorization', () => {
@@ -108,80 +140,74 @@ describe('muteAll()', () => {
               },
             },
           ],
+          alertTypeId: 'myType',
           consumer: 'myApp',
           schedule: { interval: '10s' },
-          alertTypeId: 'myType',
-          apiKey: null,
-          apiKeyOwner: null,
-          enabled: false,
-          scheduledTaskId: null,
-          updatedBy: 'elastic',
-          muteAll: false,
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: ['2'],
         },
+        version: '123',
         references: [],
       });
     });
 
-    test('ensures user is authorised to muteAll this type of alert under the consumer', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      await alertsClient.muteAll({ id: '1' });
+    test('ensures user is authorised to unmuteInstance this type of alert under the consumer', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
 
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'muteAll',
+        operation: 'unmuteAlert',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
-    test('throws when user is not authorised to muteAll this type of alert', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
+    test('throws when user is not authorised to unmuteInstance this type of alert', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to muteAll a "myType" alert for "myApp"`)
+        new Error(`Unauthorized to unmuteAlert a "myType" alert for "myApp"`)
       );
 
-      await expect(alertsClient.muteAll({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to muteAll a "myType" alert for "myApp"]`
+      await expect(
+        rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to unmuteAlert a "myType" alert for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'muteAll',
+        operation: 'unmuteAlert',
         ruleTypeId: 'myType',
       });
     });
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when muting a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+    test('logs audit event when unmuting an alert', async () => {
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
-          actions: [
-            {
-              group: 'default',
-              id: '1',
-              actionTypeId: '1',
-              actionRef: '1',
-              params: {
-                foo: true,
-              },
-            },
-          ],
-          muteAll: false,
+          actions: [],
+          schedule: { interval: '10s' },
+          alertTypeId: '2',
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: [],
         },
-        references: [],
         version: '123',
+        references: [],
       });
-      await alertsClient.muteAll({ id: '1' });
+      await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_mute',
+            action: 'rule_alert_unmute',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -189,35 +215,31 @@ describe('muteAll()', () => {
       );
     });
 
-    test('logs audit event when not authorised to mute a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+    test('logs audit event when not authorised to unmute an alert', async () => {
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
-          actions: [
-            {
-              group: 'default',
-              id: '1',
-              actionTypeId: '1',
-              actionRef: '1',
-              params: {
-                foo: true,
-              },
-            },
-          ],
-          muteAll: false,
+          actions: [],
+          schedule: { interval: '10s' },
+          alertTypeId: '2',
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: [],
         },
-        references: [],
         version: '123',
+        references: [],
       });
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(alertsClient.muteAll({ id: '1' })).rejects.toThrow();
+      await expect(
+        rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' })
+      ).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_mute',
+            action: 'rule_alert_unmute',
             outcome: 'failure',
           }),
           kibana: {
