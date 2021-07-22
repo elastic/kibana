@@ -19,6 +19,7 @@ import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
 import type { FleetAppContext } from '../plugin';
+import { getAgentStatus } from '../../common/services/agent_status';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
@@ -98,7 +99,7 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
-    getStatusForAgent: jest.fn(),
+    getStatusForAgent: jest.fn(getAgentStatus),
     authenticateAgentWithAccessToken: jest.fn(),
     getAgent: jest.fn(),
     listAgents: jest.fn(),
