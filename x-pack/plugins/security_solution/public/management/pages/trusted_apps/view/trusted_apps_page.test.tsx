@@ -173,9 +173,9 @@ describe('When on the Trusted Apps Page', () => {
       expect(addButton.textContent).toBe('Add Trusted Application');
     });
 
-    it('should display the searchbar', async () => {
+    it('should display the searchExceptions', async () => {
       const renderResult = await renderWithListData();
-      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
+      expect(await renderResult.findByTestId('searchExceptions')).not.toBeNull();
     });
 
     describe('and the Grid view is being displayed', () => {
@@ -888,12 +888,12 @@ describe('When on the Trusted Apps Page', () => {
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
     });
 
-    it('should not display the searchbar', async () => {
+    it('should not display the searchExceptions', async () => {
       const renderResult = render();
       await act(async () => {
         await waitForAction('trustedAppsExistStateChanged');
       });
-      expect(renderResult.queryByTestId('searchBar')).toBeNull();
+      expect(renderResult.queryByTestId('searchExceptions')).toBeNull();
     });
   });
 

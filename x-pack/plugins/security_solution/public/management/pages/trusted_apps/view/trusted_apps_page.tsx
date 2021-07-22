@@ -40,7 +40,7 @@ import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { AppAction } from '../../../../common/store/actions';
 import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
-import { SearchBar } from '../../../components/search_bar';
+import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -123,7 +123,7 @@ export const TrustedAppsPage = memo(() => {
 
       {doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist) ? (
         <>
-          <SearchBar
+          <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}

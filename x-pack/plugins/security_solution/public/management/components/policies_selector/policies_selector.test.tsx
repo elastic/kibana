@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { SearchBar } from '.';
+import { PoliciesSelector } from '.';
 
 let onSearchMock: jest.Mock;
 
@@ -22,7 +22,10 @@ describe('Search bar', () => {
   });
 
   const getElement = (defaultValue: string = '') => (
-    <SearchBar defaultValue={defaultValue} onSearch={onSearchMock} placeholder={'placeholder'} />
+    // <PoliciesSelector
+
+    // />
+    <></>
   );
 
   it('should have a default value', () => {
@@ -45,7 +48,7 @@ describe('Search bar', () => {
     searchFieldProps.onSearch(expectedDefaultValue);
 
     expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue);
+    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
   });
 
   it('should dispatch search action when click on button', () => {
@@ -55,6 +58,6 @@ describe('Search bar', () => {
 
     element.find('[data-test-subj="searchButton"]').first().simulate('click');
     expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue);
+    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
   });
 });

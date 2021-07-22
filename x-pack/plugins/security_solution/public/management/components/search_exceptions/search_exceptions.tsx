@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Item, PoliciesSelector } from '../policies_selector';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 
-export interface SearchBarProps {
+export interface SearchExceptionsProps {
   defaultValue?: string;
   placeholder: string;
   hasPolicyFilter?: boolean;
@@ -21,7 +21,7 @@ export interface SearchBarProps {
   onSearch(query: string, includedPolicies?: string, excludedPolicies?: string): void;
 }
 
-export const SearchBar = memo<SearchBarProps>(
+export const SearchExceptions = memo<SearchExceptionsProps>(
   ({
     defaultValue = '',
     onSearch,
@@ -70,7 +70,12 @@ export const SearchBar = memo<SearchBarProps>(
     );
 
     return (
-      <EuiFlexGroup data-test-subj="searchBar" direction="row" alignItems="center" gutterSize="m">
+      <EuiFlexGroup
+        data-test-subj="searchExceptions"
+        direction="row"
+        alignItems="center"
+        gutterSize="m"
+      >
         <EuiFlexItem>
           <EuiFieldSearch
             defaultValue={defaultValue}
@@ -105,4 +110,4 @@ export const SearchBar = memo<SearchBarProps>(
   }
 );
 
-SearchBar.displayName = 'SearchBar';
+SearchExceptions.displayName = 'SearchExceptions';
