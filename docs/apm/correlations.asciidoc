@@ -3,8 +3,6 @@
 === Find latency and error correlations
 
 **Correlations** surface attributes of your data that are potentially correlated with high-latency or erroneous transactions.
-By default, a number of attributes commonly known to cause performance issues, like version,
-infrastructure, and location, are included, but all are completely customizable to your APM data.
 Find something interesting? A quick click of a button will auto-query your data as you work to resolve the underlying issue.
 
 For example, a site reliability engineer, who is responsible for keeping production systems up and running,
@@ -34,32 +32,32 @@ If a correlated field seems noteworthy, use the **Filter** quick links:
 [[correlations-latency]]
 ==== Find high-latency correlations
 
-Correlations help you discover which fields are contributing to increased service latency.
+Correlations help you discover which transaction attributes are contributing to increased service latency.
 
 A latency distribution chart visualizes the overall latency of the selected service's transactions.
-Correlated attributes are sorted by _Impact_–a visual representation of the
-{ref}/search-aggregations-bucket-significantterms-aggregation.html[significant terms aggregation]
-score that powers correlations.
-Attributes with a high impact, or attributes present in a large percentage of slow transactions,
-may contribute to increased latency.
+Correlated attributes are sorted by a _Correlation_ score ranging from 0 to 1 – the greater the score, the more the attribute value is a commonality of slow transactions.
+Field values with a high score may contribute to increased latency.
 
 To find high-latency correlations, hover over each potentially correlated attribute to
 compare the latency distribution of transactions with and without the selected attribute.
 
-For example, in the screenshot below, the field `user_agent.name` and value `HeadlessChrome`
-exists primarily in higher-latency transactions between 3.7 and 8.7 seconds.
+For example, in the screenshot below of the "createOrder" transaction of an ecommerce site, the attribute `labels.orderPriceRange` with value `large`
+exists primarily in higher-latency transactions exceeding 900ms. This insight suggests that only orders of expensive shopping carts are impacted by high latency.
 
 [role="screenshot"]
 image::apm/images/correlations-hover.png[Correlations hover effect]
 
 Select the `+` filter to create a new query in the APM app for transactions with
-`user_agent.name: HeadlessChrome`. With the "noise" now filtered out,
+`labels.orderPriceRange: large`. With the "noise" now filtered out,
 you can begin viewing sample traces to continue your investigation.
 
 As you sift through high-latency transactions, you'll likely notice other interesting attributes.
-Return to the correlations fly-out and select *Customize fields* to search on these new attributes.
+Return to the correlations fly-out to search on these new attributes.
 You may need to do this a few times–each time filtering out more and more noise and bringing you
 closer to a diagnosis.
+On the example screenshot above of the "createOrder" transaction of an eCommerce website, the
+payment method mays also be a crontributing factor as the attribute value
+`labels.paymentMethod: AMEX` also has a noticeable correlation score of 0.34.
 
 [discrete]
 [[correlations-error-rate]]
@@ -94,10 +92,10 @@ closer to a diagnosis.
 
 [discrete]
 [[correlations-customize-fields]]
-====  Customize fields
+====  Customize fields used for error rate correlations
 
 Correlations are only as good as the data they're searching for.
-By default, a handful of attributes commonly known to cause performance issues are included.
+By default, a handful of attributes commonly known to cause performance issues are included in error rate correlations analysis.
 During the course of an investigation however, you may to need to add and remove fields from
 this list multiple times as you narrow in on a diagnosis.
 
