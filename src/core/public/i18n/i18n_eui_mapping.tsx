@@ -14,7 +14,9 @@ interface EuiValues {
   [key: string]: any;
 }
 
-export const getEuiContextMapping = () => {
+type EuiTokensObject = Record<string, string | (values: EuiValues) => string>;
+
+export const getEuiContextMapping = (): EuiTokensObject => {
   return {
     'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
       defaultMessage: 'Loading',
