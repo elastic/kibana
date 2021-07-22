@@ -31,7 +31,12 @@ export class EnhancedDataServerPlugin
   public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
     core.savedObjects.registerType(searchSessionSavedObjectType);
 
-    this.sessionService = new SearchSessionService(this.logger, this.config, deps.security);
+    this.sessionService = new SearchSessionService(
+      this.logger,
+      this.config,
+      this.initializerContext.env.packageInfo.version,
+      deps.security
+    );
 
     deps.data.__enhance({
       search: {
