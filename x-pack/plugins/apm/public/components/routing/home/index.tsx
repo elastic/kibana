@@ -9,6 +9,8 @@ import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { BackendDetailOverview } from '../../app/backend_detail_overview';
+import { BackendInventory } from '../../app/backend_inventory';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMap } from '../../app/service_map';
@@ -41,6 +43,13 @@ export const ServiceInventoryTitle = i18n.translate(
   }
 );
 
+export const BackendInventoryTitle = i18n.translate(
+  'xpack.apm.views.backendInventory.title',
+  {
+    defaultMessage: 'Backends',
+  }
+);
+
 export const home = {
   path: '/',
   element: <Outlet />,
@@ -48,6 +57,8 @@ export const home = {
     query: t.partial({
       rangeFrom: t.string,
       rangeTo: t.string,
+      environment: t.string,
+      kuery: t.string,
     }),
   }),
   children: [
@@ -70,6 +81,26 @@ export const home = {
       }),
       element: <ServiceMap />,
     }),
+    {
+      path: '/backends',
+      element: <Outlet />,
+      children: [
+        {
+          path: '/:backendName/overview',
+          element: <BackendDetailOverview />,
+          params: t.type({
+            path: t.type({
+              backendName: t.string,
+            }),
+          }),
+        },
+        page({
+          path: '/',
+          title: BackendInventoryTitle,
+          element: <BackendInventory />,
+        }),
+      ],
+    },
     {
       path: '/',
       element: <Redirect to="/services" />,
