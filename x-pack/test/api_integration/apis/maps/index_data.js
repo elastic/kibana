@@ -66,29 +66,6 @@ export default function ({ getService }) {
       expect(resp.body.success).to.be(true);
     });
 
-    it('should permit use of default fields', async () => {
-      await supertest
-        .post(`/api/maps/docSource`)
-        .set('kbn-xsrf', 'kibana')
-        .send({
-          index: 'index-with-default-mappings1',
-          mappings: { properties: { coordinates: { type: 'geo_point' } } },
-          applyDefaultMappings: true,
-        });
-
-      const resp = await supertest
-        .post(`/api/maps/feature`)
-        .set('kbn-xsrf', 'kibana')
-        .send({
-          index: 'index-with-default-mappings1',
-          data: { coordinates: [125.6, 10.1], name: 'Dinagat Islands' },
-          applyDefaultFields: true,
-        })
-        .expect(200);
-
-      expect(resp.body.success).to.be(true);
-    });
-
     it('should fail if data is invalid', async () => {
       await supertest
         .post(`/api/maps/docSource`)
