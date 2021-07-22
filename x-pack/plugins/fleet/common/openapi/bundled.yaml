@@ -828,7 +828,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/new_package_policy'
+              allOf:
+                - $ref: '#/components/schemas/new_package_policy'
+                - type: object
+                  properties:
+                    id:
+                      type: string
+                - type: object
+                  properties:
+                    force:
+                      type: boolean
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /package_policies/delete:
