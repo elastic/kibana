@@ -26,7 +26,7 @@
   }
 
   @include kbnThemeStyle('v8') {
-    outline: $euiFocusRingSize solid currentColor;
+    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
     outline-style: auto; // Chrome
   }
 }

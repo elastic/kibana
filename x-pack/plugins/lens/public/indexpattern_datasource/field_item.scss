@@ -14,24 +14,44 @@
       transition: opacity $euiAnimSpeedFast ease-in-out 1s;
     }
   }
+}
 
-  &:focus,
-  &:focus-within,
-  .kbnFieldButton__button:focus:focus-visible,
-  &.kbnFieldButton-isActive {
+.lnsFieldItem .kbnFieldButton__button {
+  &:focus {
     @include kbnThemeStyle('v7') {
       animation: none !important; // sass-lint:disable-line no-important
     }
+
     @include kbnThemeStyle('v8') {
-      outline: none !important; // sass-lint:disable-line no-important
+      outline: none;
+
+      &:focus-visible {
+        outline-style: none;
+      }
     }
   }
 
-  &:focus .kbnFieldButton__name span,
-  &:focus-within .kbnFieldButton__name span,
-  &.kbnFieldButton-isActive .kbnFieldButton__name span {
-    background-color: transparentize($euiColorVis1, .9) !important;
-    text-decoration: underline !important;
+  &:focus .kbnFieldButton__name > span {
+    @include euiFocusBackground;
+    text-decoration: underline;
+
+    @include kbnThemeStyle('v7') {
+      @include euiFocusRing;
+    }
+
+    @include kbnThemeStyle('v8') {
+      outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+    }
+  }
+
+  @include kbnThemeStyle('v8') {
+    &:focus:focus-visible .kbnFieldButton__name > span {
+      outline-style: auto; // Chrome
+    }
+
+    &:focus:not(:focus-visible) .kbnFieldButton__name > span {
+      outline: none;
+    }
   }
 }
 
