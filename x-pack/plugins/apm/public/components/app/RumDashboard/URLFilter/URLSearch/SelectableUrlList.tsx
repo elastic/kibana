@@ -72,7 +72,7 @@ interface Props {
   searchValue: string;
   popoverIsOpen: boolean;
   initialValue?: string;
-  setPopoverIsOpen: React.Dispatch<SetStateAction<boolean | undefined>>;
+  setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
 }
 
 export function SelectableUrlList({
@@ -93,6 +93,8 @@ export function SelectableUrlList({
 
   const titleRef = useRef<HTMLDivElement>(null);
 
+  const formattedOptions = formatOptions(data.items ?? []);
+
   const onEnterKey = (evt: KeyboardEvent<HTMLInputElement>) => {
     if (evt.key.toLowerCase() === 'enter') {
       onTermChange();
@@ -103,9 +105,6 @@ export function SelectableUrlList({
       }
     }
   };
-
-  // @ts-ignore - not sure, why it's not working
-  useEvent('keydown', onEnterKey, searchRef);
 
   const onInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
     setPopoverIsOpen(true);
@@ -119,14 +118,17 @@ export function SelectableUrlList({
     setPopoverIsOpen(true);
   };
 
-  const formattedOptions = formatOptions(data.items ?? []);
-
   const closePopover = () => {
     setPopoverIsOpen(false);
     if (searchRef) {
       searchRef.blur();
     }
   };
+
+  // @ts-ignore - not sure, why it's not working
+  useEvent('keydown', onEnterKey, searchRef);
+  useEvent('escape', () => setPopoverIsOpen(false), searchRef);
+  useEvent('blur', () => setPopoverIsOpen(false), searchRef);
 
   useEffect(() => {
     if (searchRef && initialValue) {
