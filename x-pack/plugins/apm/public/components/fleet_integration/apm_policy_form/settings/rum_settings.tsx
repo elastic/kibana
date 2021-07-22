@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { isEmpty } from 'lodash';
-import { PackagePolicyValues } from '..';
-import { Settings, Field } from './settings_form';
+import { OnFormChangeFn, PackagePolicyValues } from '../typings';
+import { Settings, Field, SettingsForm } from './settings_form';
+import { handleFormChange } from './utils';
 
 const basicFields: Field[] = [
   {
@@ -70,7 +72,7 @@ const advancedFields: Field[] = [
 ];
 
 const ENABLE_RUM_KEY = 'enable_rum';
-export const rumSettings: Settings = {
+const rumSettings: Settings = {
   title: 'Real User Monitoring',
   subtitle: 'Manage the configuration of the RUM JS agent.',
   fields: [
@@ -93,7 +95,7 @@ export const rumSettings: Settings = {
 
 const rumFields = [...basicFields, ...advancedFields];
 
-export function validateRumForm(values: PackagePolicyValues) {
+function validateRUMForm(values: PackagePolicyValues) {
   // if RUM is disable it means that its form is valid
   if (!values[ENABLE_RUM_KEY].value) {
     return true;
@@ -101,4 +103,27 @@ export function validateRumForm(values: PackagePolicyValues) {
   return rumFields
     .filter((field) => field.required)
     .every((field) => !isEmpty(values[field.key].value));
+}
+
+interface Props {
+  values: PackagePolicyValues;
+  onChange: OnFormChangeFn;
+}
+
+export function RUMSettingsForm({ values, onChange }: Props) {
+  return (
+    <SettingsForm
+      settings={rumSettings}
+      values={values}
+      onChange={(key, value) => {
+        const { newValues, isValid } = handleFormChange({
+          values,
+          key,
+          value,
+          validateForm: validateRUMForm,
+        });
+        onChange(newValues, isValid);
+      }}
+    />
+  );
 }

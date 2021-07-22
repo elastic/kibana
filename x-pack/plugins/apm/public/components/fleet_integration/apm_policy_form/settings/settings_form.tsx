@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { PackagePolicyValues } from '../';
+import { PackagePolicyValues } from '../typings';
 
 interface AdvancedOptionsField {
   type: 'advanced_option';

@@ -9,9 +9,9 @@ import { APMPolicyForm } from '.';
 import {
   NewPackagePolicy,
   PackagePolicy,
-  PackagePolicyConfigRecordEntry,
-} from '../../../../../fleet/common';
-import { PackagePolicyEditExtensionComponentProps } from '../../../../../fleet/public';
+  PackagePolicyEditExtensionComponentProps,
+  PackagePolicyValues,
+} from './typings';
 
 interface Props {
   policy: PackagePolicy;
@@ -23,13 +23,7 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
-  function handleChange({
-    newVars,
-    isValid,
-  }: {
-    newVars: Record<string, PackagePolicyConfigRecordEntry>;
-    isValid: boolean;
-  }) {
+  function handleChange(newVars: PackagePolicyValues, isValid: boolean) {
     onChange({
       isValid,
       updatedPolicy: {

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isEmpty } from 'lodash';
-import { PackagePolicyValues } from '..';
-import { Settings, Field } from './settings_form';
+import React from 'react';
+import { OnFormChangeFn, PackagePolicyValues } from '../typings';
+import { Field, Settings, SettingsForm } from './settings_form';
+import { handleFormChange } from './utils';
 
 const basicFields: Field[] = [
   {
@@ -125,7 +126,7 @@ const advancedFields: Field[] = [
   },
 ];
 
-export const apmSettings: Settings = {
+const apmSettings: Settings = {
   title: 'General',
   subtitle: 'Settings for the APM integration.',
   requiredErrorMessage: 'Required field',
@@ -140,8 +141,31 @@ export const apmSettings: Settings = {
 
 const apmFields = [...basicFields, ...advancedFields];
 
-export function validateAPMForm(values: PackagePolicyValues) {
+function validateAPMForm(values: PackagePolicyValues) {
   return apmFields
     .filter((field) => field.required)
     .every((field) => !isEmpty(values[field.key].value));
+}
+
+interface Props {
+  values: PackagePolicyValues;
+  onChange: OnFormChangeFn;
+}
+
+export function APMSettingsForm({ values, onChange }: Props) {
+  return (
+    <SettingsForm
+      settings={apmSettings}
+      values={values}
+      onChange={(key, value) => {
+        const { newValues, isValid } = handleFormChange({
+          values,
+          key,
+          value,
+          validateForm: validateAPMForm,
+        });
+        onChange(newValues, isValid);
+      }}
+    />
+  );
 }

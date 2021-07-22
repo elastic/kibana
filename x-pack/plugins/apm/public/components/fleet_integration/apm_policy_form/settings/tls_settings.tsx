@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { isEmpty } from 'lodash';
-import { PackagePolicyValues } from '..';
-import { Settings, Field } from './settings_form';
+import { OnFormChangeFn, PackagePolicyValues } from '../typings';
+import { Settings, Field, SettingsForm } from './settings_form';
+import { handleFormChange } from './utils';
 
 const basicFields: Field[] = [
   {
@@ -44,7 +46,7 @@ const basicFields: Field[] = [
 ];
 
 const TLS_ENABLED_KEY = 'tls_enabled';
-export const tlsSettings: Settings = {
+const tlsSettings: Settings = {
   title: 'TLS Settings',
   subtitle: 'Settings for TLS certification.',
   requiredErrorMessage: 'Required when TLS is enabled',
@@ -61,7 +63,7 @@ export const tlsSettings: Settings = {
 
 const tlsFields = basicFields;
 
-export function validateTLSForm(values: PackagePolicyValues) {
+function validateTLSForm(values: PackagePolicyValues) {
   // if TLS is disable it means that its form is valid
   if (!values[TLS_ENABLED_KEY].value) {
     return true;
@@ -69,4 +71,27 @@ export function validateTLSForm(values: PackagePolicyValues) {
   return tlsFields
     .filter((field) => field.required)
     .every((field) => !isEmpty(values[field.key].value));
+}
+
+interface Props {
+  values: PackagePolicyValues;
+  onChange: OnFormChangeFn;
+}
+
+export function TLSSettingsForm({ values, onChange }: Props) {
+  return (
+    <SettingsForm
+      settings={tlsSettings}
+      values={values}
+      onChange={(key, value) => {
+        const { newValues, isValid } = handleFormChange({
+          values,
+          key,
+          value,
+          validateForm: validateTLSForm,
+        });
+        onChange(newValues, isValid);
+      }}
+    />
+  );
 }

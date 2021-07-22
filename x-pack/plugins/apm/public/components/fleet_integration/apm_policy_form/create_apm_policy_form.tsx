@@ -6,11 +6,11 @@
  */
 import React from 'react';
 import { APMPolicyForm } from '.';
-import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
 import {
+  PackagePolicyValues,
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
-} from '../../../../../fleet/public';
+} from './typings';
 
 interface Props {
   newPolicy: NewPackagePolicy;
@@ -21,18 +21,12 @@ export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
-  function handleChange({
-    newVars,
-    isValid,
-  }: {
-    newVars: Record<string, PackagePolicyConfigRecordEntry>;
-    isValid: boolean;
-  }) {
+  function handleChange(newValues: PackagePolicyValues, isValid: boolean) {
     onChange({
       isValid,
       updatedPolicy: {
         ...newPolicy,
-        inputs: [{ ...firstInput, vars: newVars }, ...restInputs],
+        inputs: [{ ...firstInput, vars: newValues }, ...restInputs],
       },
     });
   }
