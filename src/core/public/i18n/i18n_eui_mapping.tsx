@@ -9,12 +9,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
   [key: string]: any;
 }
-
-type EuiTokensObject = Record<string, string | (values: EuiValues) => string>;
 
 export const getEuiContextMapping = (): EuiTokensObject => {
   return {
