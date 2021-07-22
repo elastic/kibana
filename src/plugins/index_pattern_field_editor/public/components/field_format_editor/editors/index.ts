@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { FieldFormatEditor, FieldFormatEditorFactory } from './types';
+export type { FieldFormatEditor, FieldFormatEditorFactory, FormatEditorProps } from './types';
 
 export { DefaultFormatEditor, defaultFormatEditorFactory } from './default';
 

@@ -22,7 +22,7 @@ import { IndexPatternFieldEditorPlugin } from './plugin';
 
 export { PluginStart as IndexPatternFieldEditorStart } from './types';
 export { DefaultFormatEditor } from './components';
-export { FieldFormatEditorFactory, FieldFormatEditor } from './components';
+export { FieldFormatEditorFactory, FieldFormatEditor, FormatEditorProps } from './components';
 
 export function plugin() {
   return new IndexPatternFieldEditorPlugin();
