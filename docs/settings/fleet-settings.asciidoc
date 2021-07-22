@@ -26,8 +26,6 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
   | Set to `true` (default) to enable {fleet}. 
 |===
 
-//QUESTION: These two settings have the same description. How are they different?
-
 [[fleet-data-visualizer-settings]]
 
 ==== {package-manager} settings
@@ -55,11 +53,10 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 |===
 
 
-==== Preconfiguration settings
+==== Preconfiguration settings (for advanced use cases)
 
-//QUESTION: We should add some details here to help users understand
-//when they might need to modify these settings? Are these customizations that
-//most users won't need to know about?
+Use these settings to pre-define integrations and agent policies that you
+want {fleet} to load up by default.
 
 [cols="2*<a"]
 |===
@@ -82,8 +79,9 @@ Required properties are:
 Optional properties are:
   
   `description`:: Text description of this policy.
-  `namespace`:: String identifying this policy's namespace (for advanced use cases).
-  `monitoring_enabled`:: A list of either or both the keywords `logs` or `metrics`.
+  `namespace`:: String identifying this policy's namespace.
+  `monitoring_enabled`:: List of keywords that specify the monitoring data to collect.
+  Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
   `is_managed`:: If `true`, this policy is editable by the user and can only
   be changed by updating the {kib} config.
   `is_default`:: If `true`, this policy is the default agent policy.
@@ -99,9 +97,6 @@ Optional properties are:
     exception that any object in `vars` can be passed `frozen: true` in order to
     prevent that specific `var` from being edited by the user.
 |===
-
-//QUESTION: I don't think the description of monitoring_enabled is complete.
-//Can you provide more info?
 
 Example configuration:
 
