@@ -34,6 +34,8 @@ export type FieldFormatEditor<FormatParams = {}> = ComponentType<
  * A factory for registering field format editor for a field format with `formatId`
  * @public
  */
-export type FieldFormatEditorFactory = (() => Promise<FieldFormatEditor>) & {
+export type FieldFormatEditorFactory<FormatParams = any> = (() => Promise<
+  FieldFormatEditor<FormatParams>
+>) & {
   formatId: string;
 };

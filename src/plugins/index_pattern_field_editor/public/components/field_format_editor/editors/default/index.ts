@@ -9,7 +9,8 @@
 import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
 
-export { defaultState, FormatEditorProps, FormatEditorState } from './default';
+export { defaultState, FormatEditorState } from './default';
+export type { FormatEditorProps } from '../types';
 export type { DefaultFormatEditor } from './default';
 
 export const defaultFormatEditorFactory: FieldFormatEditorFactory = () =>
