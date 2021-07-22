@@ -22,7 +22,7 @@ import { LegacyRequest } from '../../types';
 import { FilebeatResponse } from '../../../common/types/filebeat';
 
 interface Log {
-  timestamp?: string;
+  timestamp?: string | number;
   component?: string;
   node?: string;
   index?: string;
