@@ -12,7 +12,6 @@ import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
 import { repeatImage } from './repeat_image';
-import { shape } from './shape';
 import { table } from './table';
 import { text } from './text';
 
@@ -24,7 +23,6 @@ export const renderFunctions = [
   plot,
   progress,
   repeatImage,
-  shape,
   table,
   text,
 ];

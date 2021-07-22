@@ -96,6 +96,7 @@ describe.skip('FieldValueSuggestions', () => {
           selectedValue={[]}
           filters={[]}
           asCombobox={false}
+          allowExclusions={true}
         />
       </EuiThemeProvider>
     );
@@ -118,9 +119,12 @@ describe.skip('FieldValueSuggestions', () => {
           excludedValue={['Pak']}
           filters={[]}
           asCombobox={false}
+          allowExclusions={true}
         />
       </EuiThemeProvider>
     );
+
+    fireEvent.click(screen.getByText('Service name'));
 
     fireEvent.click(await screen.findByText('US'));
     fireEvent.click(await screen.findByText('Pak'));
