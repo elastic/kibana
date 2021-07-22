@@ -223,11 +223,7 @@ export function FieldSelect({
               <EuiFlexItem>
                 <TruncatedLabel
                   label={option.label}
-                  width={
-                    selectedField === ((option.value as unknown) as { field: string }).field
-                      ? labelWidth - 40 // extra padding for selected item
-                      : labelWidth
-                  }
+                  width={labelWidth}
                   search={searchValue}
                   font={font}
                 />

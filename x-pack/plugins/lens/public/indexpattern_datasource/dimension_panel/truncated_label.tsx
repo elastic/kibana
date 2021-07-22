@@ -76,7 +76,7 @@ export const TruncatedLabel = ({
 
   const outputLabel = truncateLabel(width, font, label, approximateLen, labelFn);
 
-  return search.length <= outputLabel.length - separatorsLength ? (
+  return search.length < outputLabel.length - separatorsLength ? (
     <EuiHighlight search={search}>{outputLabel}</EuiHighlight>
   ) : (
     <EuiMark>{outputLabel}</EuiMark>
