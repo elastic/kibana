@@ -7,7 +7,7 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import { resolve as resolveUrl } from 'url';
+import { join } from 'path';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
@@ -121,7 +121,7 @@ interface BatchQueueEntry {
   reject: (reason?: any) => void;
 }
 
-const join = (...uriComponents: Array<string | undefined>) =>
+const joinUriComponents = (...uriComponents: Array<string | undefined>) =>
   uriComponents
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
@@ -511,7 +511,7 @@ export class SavedObjectsClient {
   }
 
   private getPath(path: Array<string | undefined>): string {
-    return resolveUrl(API_BASE_URL, join(...path));
+    return join(API_BASE_URL, joinUriComponents(...path));
   }
 
   /**
