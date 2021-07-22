@@ -40,7 +40,7 @@ const basicFields: Field[] = [
 const advancedFields: Field[] = [
   {
     key: 'rum_event_rate_limit',
-    type: 'text',
+    type: 'integer',
     required: false,
     label: 'Rate limit events per IP',
     helpText: 'Maximum number of events allowed per IP per second.',
@@ -49,7 +49,7 @@ const advancedFields: Field[] = [
   },
   {
     key: 'rum_event_rate_lru_size',
-    type: 'text',
+    type: 'integer',
     required: false,
     label: 'Rate limit cache size',
     helpText: 'Number of unique IPs to be cached for the rate limiter.',

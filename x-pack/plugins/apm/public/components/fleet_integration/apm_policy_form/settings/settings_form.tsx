@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as t from 'io-ts';
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { PackagePolicyVars } from '../typings';
+import { FormRowField } from './form_row_field';
 
 interface AdvancedOptionsField {
   type: 'advanced_option';
@@ -35,15 +37,16 @@ export interface Settings {
 }
 
 export interface Field {
+  type: 'text' | 'bool' | 'select' | 'area' | 'integer';
   key: string;
   title?: string;
   description?: string;
   label?: string;
   helpText?: string;
-  type: 'text' | 'bool' | 'select' | 'area';
   required: boolean;
   fields?: SettingsField[];
   prependIcon?: string;
+  validation?: t.Type<any, string, unknown>;
 }
 
 type SettingsField = Field | AdvancedOptionsField;
@@ -81,81 +84,30 @@ function FormRow({
       </AdvancedOptions>
     );
   } else {
-    const fieldValue = vars?.[field.key]?.value;
-    const isInvalid = field.required && !fieldValue;
+    const value = vars?.[field.key]?.value;
+    const isInvalid = field.required && !value;
     return (
       <React.Fragment key={field.key}>
         <EuiDescribedFormGroup
           title={<h3>{field.title}</h3>}
           description={field.description}
         >
-          {field.type === 'bool' && (
-            <EuiFormRow
-              helpText={
-                <EuiText size="xs" color="subdued">
-                  {field.helpText}
-                </EuiText>
-              }
-            >
-              <EuiSwitch
-                label={field.label || (fieldValue ? 'Enabled' : 'Disabled')}
-                checked={fieldValue}
-                onChange={(e) => {
-                  onChange(field.key, e.target.checked);
-                }}
-              />
-            </EuiFormRow>
-          )}
-          {field.type === 'text' && (
-            <EuiFormRow
-              label={field.label}
-              labelAppend={
-                <EuiText size="xs" color="subdued">
-                  {field.required ? 'Required' : 'Optional'}
-                </EuiText>
-              }
-              helpText={
-                <EuiText size="xs" color={isInvalid ? 'danger' : 'subdued'}>
-                  {isInvalid ? requiredErrorMessage : field.helpText}
-                </EuiText>
-              }
-            >
-              <EuiFieldText
-                isInvalid={isInvalid}
-                value={fieldValue}
-                onChange={(e) => {
-                  onChange(field.key, e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          )}
-
-          {field.type === 'area' && (
-            <EuiFormRow
-              label={field.label}
-              labelAppend={
-                <EuiText size="xs" color="subdued">
-                  {field.required ? 'Required' : 'Optional'}
-                </EuiText>
-              }
-              helpText={
-                <EuiText size="xs" color={isInvalid ? 'danger' : 'subdued'}>
-                  {isInvalid ? requiredErrorMessage : field.helpText}
-                </EuiText>
-              }
-            >
-              <EuiTextArea
-                isInvalid={isInvalid}
-                value={fieldValue}
-                onChange={(e) => {
-                  onChange(field.key, e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          )}
+          <EuiFormRow
+            label={field.label}
+            isInvalid={isInvalid}
+            error={isInvalid ? requiredErrorMessage : undefined}
+            helpText={<EuiText size="xs">{field.helpText}</EuiText>}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {field.required ? 'Required' : 'Optional'}
+              </EuiText>
+            }
+          >
+            <FormRowField field={field} onChange={onChange} value={value} />
+          </EuiFormRow>
         </EuiDescribedFormGroup>
         {field.fields &&
-          fieldValue &&
+          value &&
           field.fields.map((childField) =>
             FormRow({
               field: childField,

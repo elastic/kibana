@@ -38,7 +38,7 @@ const basicFields: Field[] = [
 const advancedFields: Field[] = [
   {
     key: 'max_header_bytes',
-    type: 'text',
+    type: 'integer',
     required: false,
     label: "Maximum size of a request's header (bytes)",
     title: 'Limits',
@@ -71,13 +71,13 @@ const advancedFields: Field[] = [
   },
   {
     key: 'max_event_bytes',
-    type: 'text',
+    type: 'integer',
     required: false,
     label: 'Maximum size per event (bytes)',
   },
   {
     key: 'max_connections',
-    type: 'text',
+    type: 'integer',
     required: false,
     label: 'Simultaneously accepted connections',
   },
@@ -93,7 +93,7 @@ const advancedFields: Field[] = [
   },
   {
     key: 'api_key_limit',
-    type: 'text',
+    type: 'integer',
     required: false,
     label: 'Number of keys',
     helpText: 'Might be used for security policy compliance.',
