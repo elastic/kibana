@@ -147,7 +147,7 @@ export const MetricsAlertDropdown = () => {
             color="text"
             iconSide={'right'}
             iconType={'arrowDown'}
-            onClick={openPopover}
+            onClick={togglePopover}
             data-test-subj="infrastructure-alerts-and-rules"
           >
             <FormattedMessage
