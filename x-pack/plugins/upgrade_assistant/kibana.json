@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "upgrade_assistant"],
-  "requiredPlugins": ["management", "licensing", "features"],
+  "requiredPlugins": ["infra", "management", "licensing", "features", "data"],
   "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["esUiShared", "kibanaReact"]
 }

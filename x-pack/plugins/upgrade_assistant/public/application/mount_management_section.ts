@@ -18,6 +18,8 @@ export async function mountManagementSection(
   kibanaVersionInfo: KibanaVersionContext,
   readonly: boolean
 ) {
+  const [startServices, startPluginDeps] = await coreSetup.getStartServices();
+
   const [
     { i18n, docLinks, notifications, application, deprecations },
   ] = await coreSetup.getStartServices();
@@ -41,5 +43,7 @@ export async function mountManagementSection(
     breadcrumbs: breadcrumbService,
     getUrlForApp: application.getUrlForApp,
     deprecations,
+    startServices,
+    startPluginDeps,
   });
 }

@@ -13,3 +13,7 @@ export {
   UseRequestConfig,
   SectionLoading,
 } from '../../../../src/plugins/es_ui_shared/public/';
+
+export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+
+export { EuiThemeProvider } from '../../../../src/plugins/kibana_react/common';

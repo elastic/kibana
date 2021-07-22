@@ -8,6 +8,8 @@
 import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { I18nStart, ScopedHistory } from 'src/core/public';
+
+import { KibanaContextProvider, EuiThemeProvider } from '../shared_imports';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
 import { EsDeprecationsContent } from './components/es_deprecations';
@@ -45,12 +47,22 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
-export const RootComponent = ({ i18n, history, ...contextValue }: AppDependencies) => {
+export const RootComponent = ({
+  i18n,
+  history,
+  startServices,
+  startPluginDeps,
+  ...contextValue
+}: AppDependencies) => {
   return (
     <i18n.Context>
-      <AppContextProvider value={contextValue}>
-        <AppWithRouter history={history} />
-      </AppContextProvider>
+      <EuiThemeProvider>
+        <KibanaContextProvider services={{ ...startServices, ...startPluginDeps }}>
+          <AppContextProvider value={contextValue}>
+            <AppWithRouter history={history} />
+          </AppContextProvider>
+        </KibanaContextProvider>
+      </EuiThemeProvider>
     </i18n.Context>
   );
 };

@@ -31,15 +31,50 @@ import { LatestMinorBanner } from '../latest_minor_banner';
 import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
+import { LogStream } from '../../../../../infra/public';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
     defaultMessage: 'Upgrade Assistant',
   }),
-  pageDescription: i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-    defaultMessage:
-      'Get ready for the next version of Elastic Stack. Prepare to upgrade by identifying deprecated settings and features below. When you are ready, follow the upgrade guide to complete your version upgrade.',
-  }),
+  // TODO: probably should become its own component?
+  pageDescription: ({
+    version,
+    upgradeGuideLink,
+    whatsNewLink,
+  }: {
+    version: number;
+    upgradeGuideLink: string;
+    whatsNewLink: string;
+  }) => (
+    <>
+      <FormattedMessage
+        id="xpack.upgradeAssistant.overview.pageDescription"
+        defaultMessage="Get ready for the next version of Elastic Stack. Prepare to upgrade by identifying deprecated settings and features below. When you are ready, follow the {upgradeGuideLink} to complete your version upgrade."
+        values={{
+          upgradeGuideLink: (
+            <EuiLink href={upgradeGuideLink} target="_blank">
+              {i18n.translate('xpack.upgradeAssistant.overview.pageDescriptionLink', {
+                defaultMessage: 'upgrade guide',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+
+      <EuiSpacer size="m" />
+
+      <EuiText>
+        <EuiLink href={whatsNewLink} target="_blank">
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overview.pageDescriptionLink"
+            defaultMessage="Learn about what is new in version {version}.0"
+            values={{ version }}
+          />
+        </EuiLink>
+      </EuiText>
+    </>
+  ),
   docLink: i18n.translate('xpack.upgradeAssistant.overview.documentationLinkText', {
     defaultMessage: 'Documentation',
   }),
@@ -81,6 +116,9 @@ const i18nTexts = {
     defaultMessage:
       'After you have resolved your deprecations issues and are satisfied with the deprecation logs, it is time to upgrade. Follow the instructions in our documentation to complete your update.',
   }),
+  upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
+    defaultMessage: 'Follow the upgrade guide',
+  }),
 };
 
 interface Props {
@@ -114,6 +152,9 @@ const getResolveStep = ({ history }: Props): EuiStepProps => {
 };
 
 const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps => {
+  const endTimestamp = Date.now();
+  const startTimestamp = endTimestamp - 120 * 60 * 1000; // 2 hours
+
   return {
     title: i18nTexts.observeStepTitle,
     status: 'incomplete',
@@ -126,6 +167,16 @@ const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps
         <EuiSpacer size="m" />
 
         <DeprecationLoggingToggle />
+
+        <LogStream
+          sourceId="deprecation_logs"
+          startTimestamp={startTimestamp}
+          endTimestamp={endTimestamp}
+          columns={[
+            { type: 'timestamp', header: false },
+            { type: 'message', header: false },
+          ]}
+        />
       </>
     ),
   };
@@ -144,7 +195,7 @@ const getUpgradeStep = (): EuiStepProps => {
         <EuiSpacer size="m" />
 
         <EuiButton href="/#/navigation/button">
-          Follow the upgrade guide
+          {i18nTexts.upgradeStepLink}
           <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
         </EuiButton>
       </>
@@ -153,7 +204,8 @@ const getUpgradeStep = (): EuiStepProps => {
 };
 
 export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
-  const { breadcrumbs, docLinks, api } = useAppContext();
+  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
+  const { currentMajor } = kibanaVersionInfo;
 
   useEffect(() => {
     async function sendTelemetryData() {
@@ -174,7 +226,11 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
       <EuiPageHeader
         bottomBorder
         pageTitle={i18nTexts.pageTitle}
-        description={i18nTexts.pageDescription}
+        description={i18nTexts.pageDescription({
+          version: currentMajor,
+          upgradeGuideLink: '',
+          whatsNewLink: '',
+        })}
         rightSideItems={[
           <EuiButtonEmpty
             href={docLinks.links.upgradeAssistant}
