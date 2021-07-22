@@ -106,7 +106,7 @@ export const getCreateMigration = (
         }
 
         context.log.warn(
-          `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Encrypted attributes have been stripped from the original document and migration will be applied but this may cause decryption errors later on.`
+          `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Encrypted attributes have been stripped from the original document and migration will be applied but this may cause errors later on.`
         );
         return inputService.stripOrDecryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
           convertToMultiNamespaceType,

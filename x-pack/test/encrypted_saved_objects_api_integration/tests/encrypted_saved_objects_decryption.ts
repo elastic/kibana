@@ -17,8 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     // than what is used in the test. The SOs are from an older Kibana version to ensure that migrations will be applied,
 
     // When the test runs, you will see in the console logs both the decryption error and a warning that the migration will run anyway.
-    // The test asserts that the alert and action SOs have the new fields expected post-migration but retrieving them via
-    // getDecryptedAsInternalUser fails (as expected) because the decryption fails.
+    // The test asserts that the alert and action SOs have the new fields expected post-migration
 
     describe('migrations', () => {
       before(async () => {
@@ -40,9 +39,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .get(
-            `/api/saved_objects/get-decrypted-as-internal-user/alert/a0d18560-e985-11eb-b1e3-5b27f0de1e72`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/a0d18560-e985-11eb-b1e3-5b27f0de1e72`
           )
-          .expect(500);
+          .expect(200);
 
         expect(migratedRule.apiKey).to.be(undefined);
         expect(migratedRule.notify_when).to.eql('onActiveAlert');
@@ -54,9 +53,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .get(
-            `/api/saved_objects/get-decrypted-as-internal-user/action/b9127990-e985-11eb-b1e3-5b27f0de1e72`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/action/b9127990-e985-11eb-b1e3-5b27f0de1e72`
           )
-          .expect(500);
+          .expect(200);
 
         expect(migratedRule.secrets).to.be(undefined);
         expect(migratedConnector.is_missing_secrets).to.eql(false);
