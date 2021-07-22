@@ -10,7 +10,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import TimeseriesVisualization from './vis';
-import { getFieldFormats, setFieldFormats } from '../../../../services';
+import { setFieldFormats } from '../../../../services';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { UI_SETTINGS } from '../../../../../../data/public';
 import { getFieldFormatsRegistry } from '../../../../../../data/public/test_utils';
 
@@ -68,8 +69,7 @@ describe('TimeseriesVisualization', () => {
             },
           }}
           fieldFormatMap={fieldFormatMap}
-          createCustomFieldFormatter={(fieldName) => (value) =>
-            getFieldFormats().deserialize(fieldFormatMap[fieldName]).convert(value)}
+          createCustomFieldFormatter={createFieldFormatter}
         />
       );
 

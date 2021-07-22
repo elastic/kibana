@@ -53,17 +53,10 @@ export class MarkdownEditor extends Component {
     if (!visData) {
       return null;
     }
-    const dateFormat = getConfig('dateFormat');
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(
-      series,
-      model,
-      dateFormat,
-      getConfig,
-      this.fieldFormatMap
-    );
+    const variables = convertSeriesToVars(series, model, getConfig, this.fieldFormatMap);
     const rows = [];
-    const rawFormatter = createTickFormatter('0.[0000]', null, this.props.getConfig);
+    const rawFormatter = createTickFormatter('0.[0000]', null, getConfig);
 
     const createPrimitiveRow = (key) => {
       const snippet = `{{ ${key} }}`;

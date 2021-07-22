@@ -2234,9 +2234,9 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.14.0 tsvb - set ignore field formatting param to true for series by default', () => {
+  describe('7.15.0 tsvb - set ignore field formatting param to true for series by default', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.14.0'](
+      visualizationSavedObjectTypeMigrations['7.15.0'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );

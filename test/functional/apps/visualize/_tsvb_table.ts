@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const findService = getService('find');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
 
   describe('visual builder', function describeIndexTests() {
     before(async () => {
@@ -143,9 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await settings.clickKibanaIndexPatterns();
           await settings.clickIndexPatternLogstash();
           await settings.openControlsByName('machine.os.raw');
-          const formatRow = await testSubjects.find('formatRow');
-          const formatRowToggle = await formatRow.findByTestSubject('toggle');
-          await formatRowToggle.click();
+          await settings.toggleRow('formatRow');
         };
 
         before(async () => {

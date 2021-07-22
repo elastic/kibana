@@ -16,6 +16,7 @@ import {
   commonMigrateVislibPie,
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
+  commonAddTSVBIgnoreFilterFormatting,
 } from '../migrations/visualization_common_migrations';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableState) => {
@@ -29,6 +30,13 @@ const byValueHideTSVBLastValueIndicator = (state: SerializableState) => {
   return {
     ...state,
     savedVis: commonHideTSVBLastValueIndicator(state.savedVis),
+  };
+};
+
+const byValueAddTSVBIgnoreFilterFormatting = (state: SerializableState) => {
+  return {
+    ...state,
+    savedVis: commonAddTSVBIgnoreFilterFormatting(state.savedVis),
   };
 };
 
@@ -73,6 +81,7 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
         )(state),
       '7.14.0': (state) =>
         flow(byValueAddEmptyValueColorRule, byValueMigrateVislibPie, byValueMigrateTagcloud)(state),
+      '7.15.0': (state) => flow(byValueAddTSVBIgnoreFilterFormatting)(state),
     },
   };
 };

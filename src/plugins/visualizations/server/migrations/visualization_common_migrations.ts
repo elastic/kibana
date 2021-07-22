@@ -33,6 +33,14 @@ export const commonHideTSVBLastValueIndicator = (visState: any) => {
   return visState;
 };
 
+export const commonAddTSVBIgnoreFilterFormatting = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    const series: any[] = get(visState, 'params.series') || [];
+    series.forEach((item) => (item.ignore_field_formatting = true));
+  }
+  return visState;
+};
+
 export const commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel = (visState: any) => {
   if (visState && visState.type === 'metrics') {
     const { params } = visState;

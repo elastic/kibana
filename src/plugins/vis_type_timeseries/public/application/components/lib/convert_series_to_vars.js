@@ -15,14 +15,9 @@ import { createFieldFormatter } from './create_field_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
 
-export const convertSeriesToVars = (
-  series,
-  model,
-  dateFormat = 'lll',
-  getConfig = null,
-  fieldFormatMap
-) => {
+export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap) => {
   const variables = {};
+  const dateFormat = getConfig?.('dateFormat') ?? 'lll';
   model.series.forEach((seriesModel) => {
     series
       .filter((row) => startsWith(row.id, seriesModel.id))

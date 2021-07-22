@@ -15,6 +15,7 @@ import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
@@ -171,31 +172,6 @@ class TimeseriesVisualization extends Component {
     const yAxis = [];
     let mainDomainAdded = false;
 
-    const allSeriesHaveSameIgnoreFieldFormatting = seriesModel.every(
-      (seriesGroup) =>
-        seriesGroup.ignore_field_formatting === seriesModel[0].ignore_field_formatting
-    );
-
-    let allSeriesHaveSameFormatters;
-
-    if (allSeriesHaveSameIgnoreFieldFormatting) {
-      if (seriesModel[0].ignore_field_formatting) {
-        allSeriesHaveSameFormatters = seriesModel.every(
-          (seriesGroup) =>
-            seriesGroup.formatter === seriesModel[0].formatter &&
-            seriesGroup.value_template === seriesModel[0].value_template
-        );
-      } else {
-        const seriesUsedFieldFormats = seriesModel.map(
-          (seriesGroup) => fieldFormatMap[last(seriesGroup.metrics)?.field]
-        );
-        allSeriesHaveSameFormatters = seriesUsedFieldFormats.every(
-          (usedFieldFormat) =>
-            JSON.stringify(usedFieldFormat) === JSON.stringify(seriesUsedFieldFormats[0])
-        );
-      }
-    }
-
     this.showToastNotification = null;
 
     seriesModel.forEach((seriesGroup) => {
@@ -255,8 +231,12 @@ class TimeseriesVisualization extends Component {
               : seriesGroupTickFormatter,
         });
       } else if (!mainDomainAdded) {
+        const tickFormatter = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)
+          ? seriesGroupTickFormatter
+          : (val) => val;
+
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter: allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val,
+          tickFormatter,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,

@@ -18,6 +18,7 @@ import {
   commonMigrateVislibPie,
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
+  commonAddTSVBIgnoreFilterFormatting,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -951,19 +952,14 @@ const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
 const addTSVBIgnoreFilterFormatting: SavedObjectMigrationFn<any, any> = (doc) => {
   try {
     const visState = JSON.parse(doc.attributes.visState);
-    if (visState && visState.type === 'metrics') {
-      const series: any[] = get(visState, 'params.series') || [];
-
-      series.forEach((item) => (item.ignore_field_formatting = true));
-
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify(visState),
-        },
-      };
-    }
+    const newVisState = commonAddTSVBIgnoreFilterFormatting(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
   } catch (e) {
     // Let it go, the data is invalid and we'll leave it as is
   }
@@ -1125,7 +1121,7 @@ export const visualizationSavedObjectTypeMigrations = {
     addEmptyValueColorRule,
     migrateVislibPie,
     migrateTagCloud,
-    replaceIndexPatternReference,
-    addTSVBIgnoreFilterFormatting
+    replaceIndexPatternReference
   ),
+  '7.15.0': flow(addTSVBIgnoreFilterFormatting),
 };
