@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { EmptyState } from './empty_state';
+export { EmptyPrompts } from './empty_prompts';

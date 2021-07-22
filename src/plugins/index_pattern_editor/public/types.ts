@@ -141,7 +141,7 @@ export interface IndexPatternConfig {
   timestampField?: EuiComboBoxOptionOption<string>;
   allowHidden: boolean;
   id?: string;
-  type: string;
+  type: INDEX_PATTERN_TYPE;
 }
 
 export interface MatchedIndicesSet {

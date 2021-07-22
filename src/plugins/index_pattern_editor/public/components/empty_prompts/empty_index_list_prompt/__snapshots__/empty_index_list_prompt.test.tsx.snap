@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EmptyState should render normally 1`] = `
+exports[`EmptyIndexListPrompt should render normally 1`] = `
 <Fragment>
   <EuiPageContent
     className="inpEmptyState"

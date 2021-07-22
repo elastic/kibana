@@ -26,7 +26,7 @@ import { UseField } from '../../shared_imports';
 import { INDEX_PATTERN_TYPE, IndexPatternConfig } from '../../types';
 
 interface TypeFieldProps {
-  onChange: (type: string) => void;
+  onChange: (type: INDEX_PATTERN_TYPE) => void;
 }
 
 const standardSelectItem = (
@@ -69,7 +69,7 @@ const rollupSelectItem = (
 
 export const TypeField = ({ onChange }: TypeFieldProps) => {
   return (
-    <UseField<string, IndexPatternConfig> path="type">
+    <UseField<INDEX_PATTERN_TYPE, IndexPatternConfig> path="type">
       {({ label, value, setValue }) => {
         if (value === undefined) {
           return null;

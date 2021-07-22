@@ -24,7 +24,9 @@ import { schema } from '../form_schema';
 interface Props {
   options: TimestampOption[];
   isLoadingOptions: boolean;
-  helpText: string;
+  isExistingIndexPattern: boolean;
+  isLoadingMatchedIndices: boolean;
+  hasMatchedIndices: boolean;
 }
 
 const requireTimestampOptionValidator = (options: Props['options']): ValidationConfig => ({
@@ -60,16 +62,36 @@ const getTimestampConfig = (
   };
 };
 
+const noTimestampOptionText = i18n.translate('indexPatternEditor.editor.form.noTimeFieldsLabel', {
+  defaultMessage: "The matching data sources don't have time fields.",
+});
+
+const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
+  defaultMessage: 'Select a primary time field for use with the global time filter.',
+});
+
 export const TimestampField = ({
   options = [],
-  helpText = '',
   isLoadingOptions = false,
+  isExistingIndexPattern,
+  isLoadingMatchedIndices,
+  hasMatchedIndices,
 }: Props) => {
   const optionsAsComboBoxOptions = options.map(({ display, fieldName }) => ({
     label: display,
     value: fieldName,
   }));
   const timestampConfig = useMemo(() => getTimestampConfig(options), [options]);
+  const selectTimestampHelp = options.length ? timestampFieldHelp : '';
+
+  const timestampNoFieldsHelp =
+    options.length === 0 &&
+    !isExistingIndexPattern &&
+    !isLoadingMatchedIndices &&
+    !isLoadingOptions &&
+    hasMatchedIndices
+      ? noTimestampOptionText
+      : '';
 
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
@@ -122,7 +144,9 @@ export const TimestampField = ({
                   isLoading={isLoadingOptions}
                   fullWidth
                 />
-                <EuiFormHelpText>{helpText || <>&nbsp;</>}</EuiFormHelpText>
+                <EuiFormHelpText>
+                  {timestampNoFieldsHelp || selectTimestampHelp || <>&nbsp;</>}
+                </EuiFormHelpText>
               </>
             </EuiFormRow>
           </>

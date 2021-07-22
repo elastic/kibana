@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EmptyState } from '../empty_state';
+import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -19,10 +19,10 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-describe('EmptyState', () => {
+describe('EmptyIndexListPrompt', () => {
   it('should render normally', () => {
     const component = shallow(
-      <EmptyState
+      <EmptyIndexListPrompt
         onRefresh={() => {}}
         createAnyway={() => {}}
         closeFlyout={() => {}}
@@ -41,7 +41,7 @@ describe('EmptyState', () => {
         const onRefreshHandler = sinon.stub();
 
         const component = mountWithIntl(
-          <EmptyState
+          <EmptyIndexListPrompt
             onRefresh={onRefreshHandler}
             createAnyway={() => {}}
             closeFlyout={() => {}}

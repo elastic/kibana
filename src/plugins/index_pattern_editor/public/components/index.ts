@@ -20,10 +20,8 @@ export { IndexPatternEditor } from './index_pattern_editor';
 
 export { schema } from './form_schema';
 export { TimestampField, TypeField, TitleField } from './form_fields';
-export { EmptyState } from './empty_state';
-export { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
-export { IndicesList } from './indices_list';
-export { StatusMessage } from './status_message';
+export { EmptyPrompts } from './empty_prompts';
+export { PreviewPanel } from './preview_panel';
 export { LoadingIndices } from './loading_indices';
 export { geti18nTexts } from './i18n_texts';
 export { Footer } from './footer';

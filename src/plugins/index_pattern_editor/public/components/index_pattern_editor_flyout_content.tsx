@@ -23,7 +23,6 @@ import { FlyoutPanels } from './flyout_panels';
 
 import {
   MatchedItem,
-  ResolveIndexResponseItemAlias,
   IndexPatternEditorContext,
   RollupIndicesCapsResponse,
   INDEX_PATTERN_TYPE,
@@ -32,11 +31,6 @@ import {
 } from '../types';
 
 import {
-  LoadingIndices,
-  StatusMessage,
-  IndicesList,
-  EmptyIndexPatternPrompt,
-  EmptyState,
   TimestampField,
   TypeField,
   TitleField,
@@ -44,6 +38,8 @@ import {
   geti18nTexts,
   Footer,
   AdvancedParamsContent,
+  EmptyPrompts,
+  PreviewPanel,
 } from '.';
 
 export interface Props {
@@ -75,7 +71,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   requireTimestampField = false,
 }: Props) => {
   const {
-    services: { http, indexPatternService, uiSettings, docLinks, application },
+    services: { http, indexPatternService, uiSettings },
   } = useKibana<IndexPatternEditorContext>();
 
   const i18nTexts = geti18nTexts();
@@ -121,9 +117,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
   const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
   const [allSources, setAllSources] = useState<MatchedItem[]>([]);
-  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
-  const [goToForm, setGoToForm] = useState<boolean>(false);
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
   const [rollupIndex, setRollupIndex] = useState<string | undefined>();
   const [
@@ -137,9 +131,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     visibleIndices: [],
   });
 
-  const removeAliases = (item: MatchedItem) =>
-    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
-
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
     getIndices(http, () => [], '*', allowHidden).then((dataSources) => {
@@ -148,9 +139,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       setMatchedIndices(matchedSet);
       setIsLoadingSources(false);
     });
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
   }, [http, allowHidden]);
 
   // loading list of index patterns
@@ -270,9 +258,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
           indexRequests
         )) as MatchedItem[][];
 
-        // console.log('loadTimestampFieldOptions', query, exactMatched);
-        // await loadTimestampFieldOptions(query, exactMatched);
-
         const matchedIndicesResult = getMatchedIndices(
           allSources,
           partialMatched,
@@ -296,48 +281,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
       // setLastTitle(title2);
       return fetchIndices(title2);
     },
-    [
-      http,
-      allowHidden,
-      allSources,
-      type,
-      i18nTexts.rollupLabel,
-      rollupIndicesCapabilities,
-      // loadTimestampFieldOptions,
-      // form,
-    ]
+    [http, allowHidden, allSources, type, i18nTexts.rollupLabel, rollupIndicesCapabilities]
   );
 
-  // todo
+  // todo test
   if (isLoadingSources || isLoadingIndexPatterns) {
     return <EuiLoadingSpinner size="xl" />;
-  }
-
-  const hasDataIndices = allSources.some(({ name }: MatchedItem) => !name.startsWith('.'));
-
-  if (!existingIndexPatterns.length && !goToForm) {
-    if (!hasDataIndices && !remoteClustersExist) {
-      // load data
-      return (
-        <EmptyState
-          onRefresh={loadSources}
-          closeFlyout={onCancel}
-          createAnyway={() => setGoToForm(true)}
-          canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
-          navigateToApp={application.navigateToApp}
-          addDataUrl={docLinks.links.indexPatterns.introduction}
-        />
-      );
-    } else {
-      // first time
-      return (
-        <EmptyIndexPatternPrompt
-          goToCreate={() => setGoToForm(true)}
-          indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
-          canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
-        />
-      );
-    }
   }
 
   const showIndexPatternTypeSelect = () =>
@@ -363,71 +312,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
-  /*
-
-TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
-
-
-  */
-
-  const renderIndexList = () => {
-    if (isLoadingSources) {
-      return <></>;
-    }
-
-    const indicesToList = title?.length ? matchedIndices.visibleIndices : matchedIndices.allIndices;
-    return (
-      <IndicesList
-        data-test-subj="createIndexPatternStep1IndicesList"
-        query={title || ''}
-        indices={indicesToList}
-      />
-    );
-  };
-
-  const renderStatusMessage = (matched: {
-    allIndices: MatchedItem[];
-    exactMatchedIndices: MatchedItem[];
-    partialMatchedIndices: MatchedItem[];
-  }) => {
-    if (isLoadingSources) {
-      return null;
-    }
-
-    return (
-      <StatusMessage
-        matchedIndices={matched}
-        showSystemIndices={type === INDEX_PATTERN_TYPE.ROLLUP ? false : true}
-        isIncludingSystemIndices={allowHidden}
-        query={title || ''}
-      />
-    );
-  };
-
-  const previewPanelContent = isLoadingIndexPatterns ? (
-    <LoadingIndices />
-  ) : (
-    <>
-      {renderStatusMessage(matchedIndices)}
-      <EuiSpacer />
-      {renderIndexList()}
-    </>
-  );
-
-  // todo try to move within component
-  const selectTimestampHelp = timestampFieldOptions.length ? i18nTexts.timestampFieldHelp : '';
-
-  const timestampNoFieldsHelp =
-    timestampFieldOptions.length === 0 &&
-    !existingIndexPatterns.includes(title || '') &&
-    !isLoadingMatchedIndices &&
-    !isLoadingTimestampFields &&
-    matchedIndices.exactMatchedIndices.length
-      ? i18nTexts.noTimestampOptionText
-      : '';
-
   return (
-    <>
+    <EmptyPrompts
+      onCancel={onCancel}
+      allSources={allSources}
+      hasExistingIndexPatterns={!!existingIndexPatterns.length}
+    >
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           <EuiTitle data-test-subj="flyoutTitle">
@@ -453,7 +343,9 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
                 <TimestampField
                   options={timestampFieldOptions}
                   isLoadingOptions={isLoadingTimestampFields}
-                  helpText={timestampNoFieldsHelp || selectTimestampHelp}
+                  isExistingIndexPattern={existingIndexPatterns.includes(title)}
+                  isLoadingMatchedIndices={isLoadingMatchedIndices}
+                  hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -465,9 +357,20 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
             submitDisabled={form.isSubmitted && !form.isValid}
           />
         </FlyoutPanels.Item>
-        <FlyoutPanels.Item>{previewPanelContent}</FlyoutPanels.Item>
+        <FlyoutPanels.Item>
+          {isLoadingSources ? (
+            <></>
+          ) : (
+            <PreviewPanel
+              type={type as INDEX_PATTERN_TYPE}
+              allowHidden={allowHidden}
+              title={title}
+              matched={matchedIndices}
+            />
+          )}
+        </FlyoutPanels.Item>
       </FlyoutPanels.Group>
-    </>
+    </EmptyPrompts>
   );
 };
 

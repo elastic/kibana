@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import './empty_state.scss';
+import './empty_index_list_prompt.scss';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -28,7 +28,7 @@ import {
 
 import { ApplicationStart } from 'src/core/public';
 
-export const EmptyState = ({
+export const EmptyIndexListPrompt = ({
   onRefresh,
   closeFlyout,
   createAnyway,
