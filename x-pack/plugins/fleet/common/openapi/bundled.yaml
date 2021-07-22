@@ -811,10 +811,19 @@ paths:
     parameters: []
     post:
       summary: Package policy - Create
-      operationId: create-package-policies
+      operationId: create-package-policy
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/package_policy'
+                required:
+                  - item
       requestBody:
         content:
           application/json:
