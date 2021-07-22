@@ -37,8 +37,12 @@ export const MetricsAlertDropdown = () => {
   }, [setPopoverOpen]);
 
   const openPopover = useCallback(() => {
-    setPopoverOpen(true);
-  }, [setPopoverOpen]);
+    if (popoverOpen) {
+      setPopoverOpen(false);
+    } else {
+      setPopoverOpen(true);
+    }
+  }, [setPopoverOpen, popoverOpen]);
 
   const infrastructureAlertsPanel = useMemo(
     () => ({
@@ -160,7 +164,7 @@ export const MetricsAlertDropdown = () => {
         isOpen={popoverOpen}
         closePopover={closePopover}
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="metrics-alert-menu" />
       </EuiPopover>
       <AlertFlyout visibleFlyoutType={visibleFlyoutType} onClose={closeFlyout} />
     </>

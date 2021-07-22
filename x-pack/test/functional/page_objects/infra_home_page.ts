@@ -196,6 +196,18 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await thresholdInput.type([threshold]);
     },
 
+    async clickAlertsAndRules() {
+      await testSubjects.click('infrastructure-alerts-and-rules');
+    },
+
+    async ensurePopoverOpened() {
+      await testSubjects.existOrFail('metrics-alert-menu');
+    },
+
+    async ensurePopoverClosed() {
+      await testSubjects.missingOrFail('metrics-alert-menu');
+    },
+
     async openInventoryAlertFlyout() {
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('inventory-alerts-menu-option');
