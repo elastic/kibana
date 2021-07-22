@@ -21,6 +21,7 @@ filegroup(
       "//packages/kbn-docs-utils:build",
       "//packages/kbn-es:build",
       "//packages/kbn-es-archiver:build",
+      "//packages/kbn-es-query:build",
       "//packages/kbn-eslint-import-resolver-kibana:build",
       "//packages/kbn-eslint-plugin-eslint:build",
       "//packages/kbn-expect:build",
