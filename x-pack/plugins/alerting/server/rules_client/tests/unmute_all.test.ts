@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -27,7 +27,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -45,7 +45,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -53,7 +53,7 @@ setGlobalDate();
 
 describe('unmuteAll()', () => {
   test('unmutes an alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
+    const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -75,7 +75,7 @@ describe('unmuteAll()', () => {
       version: '123',
     });
 
-    await alertsClient.unmuteAll({ id: '1' });
+    await rulesClient.unmuteAll({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -123,8 +123,8 @@ describe('unmuteAll()', () => {
     });
 
     test('ensures user is authorised to unmuteAll this type of alert under the consumer', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      await alertsClient.unmuteAll({ id: '1' });
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.unmuteAll({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -136,12 +136,12 @@ describe('unmuteAll()', () => {
     });
 
     test('throws when user is not authorised to unmuteAll this type of alert', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
+      const rulesClient = new RulesClient(rulesClientParams);
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to unmuteAll a "myType" alert for "myApp"`)
       );
 
-      await expect(alertsClient.unmuteAll({ id: '1' })).rejects.toMatchInlineSnapshot(
+      await expect(rulesClient.unmuteAll({ id: '1' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to unmuteAll a "myType" alert for "myApp"]`
       );
 
@@ -156,7 +156,7 @@ describe('unmuteAll()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when unmuting a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
@@ -177,7 +177,7 @@ describe('unmuteAll()', () => {
         references: [],
         version: '123',
       });
-      await alertsClient.unmuteAll({ id: '1' });
+      await rulesClient.unmuteAll({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -190,7 +190,7 @@ describe('unmuteAll()', () => {
     });
 
     test('logs audit event when not authorised to unmute a rule', async () => {
-      const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
@@ -213,7 +213,7 @@ describe('unmuteAll()', () => {
       });
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(alertsClient.unmuteAll({ id: '1' })).rejects.toThrow();
+      await expect(rulesClient.unmuteAll({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
