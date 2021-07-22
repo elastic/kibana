@@ -132,8 +132,30 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
       },
     } as PieVisParams;
 
+    const getDimensionName = (columnId: number) => {
+      if (columnId === args.metric.accessor) {
+        return 'metric';
+      } else if (args.buckets?.find((bucket) => bucket.accessor === columnId)) {
+        return 'bucket';
+      } else if (args.splitColumn?.find((c) => c.accessor === columnId)) {
+        return 'split column';
+      } else if (args.splitRow?.find((c) => c.accessor === columnId)) {
+        return 'split row';
+      }
+    };
+
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable('default', context);
+      const logTable = {
+        columns: context.columns.map((column, index) => ({
+          ...column,
+          meta: {
+            ...column.meta,
+            dimensionName: column.meta.dimensionName || getDimensionName(index),
+          },
+        })),
+        rows: context.rows,
+      };
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     return {
