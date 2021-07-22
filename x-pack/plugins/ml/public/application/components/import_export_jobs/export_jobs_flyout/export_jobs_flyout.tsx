@@ -65,40 +65,43 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     [toasts]
   );
 
-  useEffect(() => {
-    setLoadingADJobs(true);
-    setLoadingDFAJobs(true);
-    setAdJobIds([]);
-    setSelectedJobIds([]);
-    setExporting(false);
-    setSelectedJobType(currentTab);
-    setSwitchTabConfirmVisible(false);
+  useEffect(
+    function onFlyoutChange() {
+      setLoadingADJobs(true);
+      setLoadingDFAJobs(true);
+      setAdJobIds([]);
+      setSelectedJobIds([]);
+      setExporting(false);
+      setSelectedJobType(currentTab);
+      setSwitchTabConfirmVisible(false);
 
-    if (showFlyout) {
-      getJobs()
-        .then(({ jobs }) => {
-          setLoadingADJobs(false);
-          setAdJobIds(jobs.map((j) => j.job_id));
-        })
-        .catch((error) => {
-          const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.adJobsError', {
-            defaultMessage: 'Could not load anomaly detection jobs',
+      if (showFlyout) {
+        getJobs()
+          .then(({ jobs }) => {
+            setLoadingADJobs(false);
+            setAdJobIds(jobs.map((j) => j.job_id));
+          })
+          .catch((error) => {
+            const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.adJobsError', {
+              defaultMessage: 'Could not load anomaly detection jobs',
+            });
+            displayErrorToast(error, errorTitle);
           });
-          displayErrorToast(error, errorTitle);
-        });
-      getDataFrameAnalytics()
-        .then(({ data_frame_analytics: dataFrameAnalytics }) => {
-          setLoadingDFAJobs(false);
-          setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
-        })
-        .catch((error) => {
-          const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.dfaJobsError', {
-            defaultMessage: 'Could not load data frame analytics jobs',
+        getDataFrameAnalytics()
+          .then(({ data_frame_analytics: dataFrameAnalytics }) => {
+            setLoadingDFAJobs(false);
+            setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
+          })
+          .catch((error) => {
+            const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.dfaJobsError', {
+              defaultMessage: 'Could not load data frame analytics jobs',
+            });
+            displayErrorToast(error, errorTitle);
           });
-          displayErrorToast(error, errorTitle);
-        });
-    }
-  }, [showFlyout]);
+      }
+    },
+    [showFlyout]
+  );
 
   function toggleFlyout() {
     setShowFlyout(!showFlyout);
@@ -137,7 +140,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     }
   }
 
-  const maybeSwitchTab = useCallback(() => {
+  const attemptTabSwitch = useCallback(() => {
     // if the user has already selected some jobs, open a confirm modal
     // rather than changing tabs
     if (selectedJobIds.length > 0) {
@@ -187,7 +190,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
               <EuiTabs size="s">
                 <EuiTab
                   isSelected={selectedJobType === 'anomaly-detector'}
-                  onClick={maybeSwitchTab}
+                  onClick={attemptTabSwitch}
                   disabled={exporting}
                 >
                   <FormattedMessage
@@ -197,7 +200,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                 </EuiTab>
                 <EuiTab
                   isSelected={selectedJobType === 'data-frame-analytics'}
-                  onClick={maybeSwitchTab}
+                  onClick={attemptTabSwitch}
                   disabled={exporting}
                 >
                   <FormattedMessage

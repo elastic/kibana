@@ -238,11 +238,6 @@ export function systemRoutes(
           acc[cur] = { exists: body.indices.includes(cur) };
           return acc;
         }, {} as Record<string, { exists: boolean }>);
-        // // const result = { exists: false };
-
-        // if (Array.isArray(body.indices) && body.indices.length !== 0) {
-        //   result.exists = true;
-        // }
 
         return response.ok({
           body: result,

@@ -98,9 +98,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     setShowFileReadError(showFileError);
   }, []);
 
-  useEffect(() => {
-    reset();
-  }, [showFlyout]);
+  useEffect(
+    function onFlyoutChange() {
+      reset();
+    },
+    [showFlyout]
+  );
 
   function toggleFlyout() {
     setShowFlyout(!showFlyout);
