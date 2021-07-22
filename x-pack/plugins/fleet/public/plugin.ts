@@ -28,7 +28,7 @@ import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
-import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -225,7 +225,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
             if (permissionsResponse?.success) {
               return core.http
-                .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
+                .post<PostFleetSetupResponse>(setupRouteService.getSetupPath())
                 .then(({ isInitialized }) =>
                   isInitialized
                     ? Promise.resolve(true)
