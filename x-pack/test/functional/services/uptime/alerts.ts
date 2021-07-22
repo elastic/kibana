@@ -14,20 +14,20 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
 
   return {
     async openFlyout(alertType: 'monitorStatus' | 'tls') {
-      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
-      await testSubjects.click('xpack.uptime.openAlertContextPanel', 5000);
+      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
+      await testSubjects.click('xpack.uptime.openAlertContextPanel');
       if (alertType === 'monitorStatus') {
-        await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
+        await testSubjects.click('xpack.uptime.toggleAlertFlyout');
       } else if (alertType === 'tls') {
         await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
       }
     },
     async openMonitorStatusAlertType(alertType: string) {
-      return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`, 5000);
+      return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`);
     },
     async setAlertTags(tags: string[]) {
       for (let i = 0; i < tags.length; i += 1) {
-        await testSubjects.click('comboBoxSearchInput', 5000);
+        await testSubjects.click('comboBoxSearchInput');
         await testSubjects.setValue('comboBoxInput', tags[i]);
         await browser.pressKeys(browser.keys.ENTER);
       }
@@ -71,15 +71,15 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       selectableAttribute: string,
       optionAttributes: string[]
     ) {
-      await testSubjects.click(expressionAttribute, 5000);
-      await testSubjects.click(selectableAttribute, 5000);
+      await testSubjects.click(expressionAttribute);
+      await testSubjects.click(selectableAttribute);
       for (let i = 0; i < optionAttributes.length; i += 1) {
-        await testSubjects.click(optionAttributes[i], 5000);
+        await testSubjects.click(optionAttributes[i]);
       }
-      return testSubjects.click(expressionAttribute, 5000);
+      await testSubjects.click(expressionAttribute);
     },
     async setMonitorStatusSelectableToHours() {
-      return this.setAlertExpressionSelectable(
+      await this.setAlertExpressionSelectable(
         'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression',
         'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable',
         ['xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption']
@@ -116,10 +116,10 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       return find.clickByCssSelector('body');
     },
     async clickSaveAlertButton() {
-      return testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveAlertButton');
     },
     async clickSaveAlertsConfirmButton() {
-      return testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
+      await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
     },
   };
 }

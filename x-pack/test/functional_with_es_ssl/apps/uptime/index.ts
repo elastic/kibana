@@ -13,10 +13,11 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Uptime app', function () {
+  /* eslint-disable ban/ban */
+  describe.only('Uptime app', function () {
     this.tags('ciGroup6');
 
-    describe('with real-world data', () => {
+    describe.only('with real-world data', () => {
       before(async () => {
         await esArchiver.load(ARCHIVE);
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
