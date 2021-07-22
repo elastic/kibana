@@ -167,6 +167,7 @@ describe('Previewing the metric threshold alert type', () => {
 const services: AlertServicesMock = alertsMock.createAlertServices();
 
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
+  const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
   const metric = params?.body.query.bool.filter[1]?.exists.field;
   if (params?.body.aggs.groupings) {
     if (params?.body.aggs.groupings.composite.after) {
@@ -175,21 +176,21 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
       );
     }
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.basicCompositePreviewResponse
+      mocks.basicCompositePreviewResponse(from)
     );
   }
   if (metric === 'test.metric.2') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricPreviewResponse
+      mocks.alternateMetricPreviewResponse(from)
     );
   }
   if (metric === 'test.metric.3') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.repeatingMetricPreviewResponse
+      mocks.repeatingMetricPreviewResponse(from)
     );
   }
   return elasticsearchClientMock.createSuccessTransportRequestPromise(
-    mocks.basicMetricPreviewResponse
+    mocks.basicMetricPreviewResponse(from)
   );
 });
 

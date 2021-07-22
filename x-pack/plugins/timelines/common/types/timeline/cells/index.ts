@@ -14,6 +14,7 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   data: TimelineNonEcsData[];
   eventId: string; // _id
   header: ColumnHeaderOptions;
+  isDraggable: boolean;
   linkValues: string[] | undefined;
   timelineId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
