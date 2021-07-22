@@ -29,7 +29,6 @@ export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './type
 export { SaveModalDashboardProps } from './components/types';
 export { projectIDs, ProjectID, Project } from '../common/labs';
 export * from '../common/lib';
-export * from '../common/types';
 
 export {
   LazyLabsBeakerButton,
