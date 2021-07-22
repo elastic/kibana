@@ -41,6 +41,7 @@ describe('trace', () => {
         },
       },
     });
+    await root.preboot();
   }, 30000);
 
   afterEach(async () => {
@@ -167,6 +168,7 @@ describe('trace', () => {
             },
           },
         });
+        await rootExecutionContextDisabled.preboot();
       }, 30000);
 
       afterEach(async () => {
@@ -435,7 +437,7 @@ describe('trace', () => {
         .expect(200);
 
       const header = response.body['x-opaque-id'];
-      expect(header).toContain('kibana:test-type:42');
+      expect(header).toContain('kibana:test-type:test-name:42');
     });
 
     it('propagates context to Elasticsearch unscoped client', async () => {
@@ -456,7 +458,7 @@ describe('trace', () => {
         .expect(200);
 
       const header = response.body['x-opaque-id'];
-      expect(header).toContain('kibana:test-type:42');
+      expect(header).toContain('kibana:test-type:test-name:42');
     });
 
     it('a repeat call overwrites the old context', async () => {
@@ -484,7 +486,7 @@ describe('trace', () => {
         .expect(200);
 
       const header = response.body['x-opaque-id'];
-      expect(header).toContain('kibana:new-type:41');
+      expect(header).toContain('kibana:new-type:new-name:41');
     });
 
     it('does not affect "x-opaque-id" set by user', async () => {
@@ -507,7 +509,7 @@ describe('trace', () => {
         .expect(200);
 
       const header = response.body['x-opaque-id'];
-      expect(header).toBe('my-opaque-id;kibana:test-type:42');
+      expect(header).toBe('my-opaque-id;kibana:test-type:test-name:42');
     });
 
     it('does not break on non-ASCII characters within execution context', async () => {
@@ -536,7 +538,7 @@ describe('trace', () => {
         .expect(200);
 
       const header = response.body['x-opaque-id'];
-      expect(header).toBe('my-opaque-id;kibana:test-type:42');
+      expect(header).toBe('my-opaque-id;kibana:test-type:test-name:42');
     });
   });
 });
