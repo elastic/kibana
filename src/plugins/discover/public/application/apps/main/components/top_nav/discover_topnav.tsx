@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DiscoverLayoutProps } from '../layout/types';
-import { getTopNavLinks } from './get_top_nav_links';
+import { getTopNavLinks, TopNavLink } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
@@ -37,11 +37,60 @@ export const DiscoverTopNav = ({
   services,
   columns,
 }: DiscoverTopNavProps) => {
+  const [registeredTopNavLinks, setRegisteredTopNavLinks] = useState<TopNavLink[]>([]);
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = services.navigation.ui;
+
+  useEffect(() => {
+    let unmounted = false;
+
+    const loadRegisteredTopNavLinks = async () => {
+      const callbacks = services.addDataService.getTopNavLinks();
+      const params = {
+        indexPattern,
+        onOpenInspector,
+        query,
+        savedQuery,
+        stateContainer,
+        updateQuery,
+        searchSource,
+        navigateTo,
+        savedSearch,
+        services,
+        columns,
+      };
+      const links = await Promise.all(
+        callbacks.map((cb) => {
+          return cb(params);
+        })
+      );
+      if (!unmounted) {
+        setRegisteredTopNavLinks(links);
+      }
+    };
+    loadRegisteredTopNavLinks();
+
+    return () => {
+      unmounted = true;
+    };
+  }, [
+    services?.addDataService,
+    indexPattern,
+    onOpenInspector,
+    query,
+    savedQuery,
+    stateContainer,
+    updateQuery,
+    searchSource,
+    navigateTo,
+    savedSearch,
+    services,
+    columns,
+  ]);
+
   const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
+    () => [
+      ...getTopNavLinks({
         indexPattern,
         navigateTo,
         savedSearch,
@@ -49,10 +98,10 @@ export const DiscoverTopNav = ({
         state: stateContainer,
         onOpenInspector,
         searchSource,
-        columns,
       }),
+      ...registeredTopNavLinks,
+    ],
     [
-      columns,
       indexPattern,
       navigateTo,
       onOpenInspector,
@@ -60,6 +109,7 @@ export const DiscoverTopNav = ({
       stateContainer,
       savedSearch,
       services,
+      registeredTopNavLinks,
     ]
   );
 

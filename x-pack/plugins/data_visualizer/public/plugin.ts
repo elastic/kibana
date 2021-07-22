@@ -26,10 +26,13 @@ import {
   IndexDataVisualizerLocatorDefinition,
 } from './application/index_data_visualizer/locator';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
+import { DiscoverSetup } from '../../../../src/plugins/discover/public';
+import { DiscoverNavLinkRegistrar } from './application/index_data_visualizer/services/discover_top_nav_link';
 
 export interface DataVisualizerSetupDependencies {
   share?: SharePluginSetup;
   home?: HomePublicPluginSetup;
+  discover?: DiscoverSetup;
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
@@ -63,6 +66,14 @@ export class DataVisualizerPlugin
 
     if (plugins.share) {
       this.locator = plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
+    }
+
+    if (plugins.discover?.addData && this.locator) {
+      const discoverNavLinkRegistrar = new DiscoverNavLinkRegistrar(this.locator);
+      plugins.discover.addData.registerTopNavLinks(
+        discoverNavLinkRegistrar.id,
+        discoverNavLinkRegistrar.registerDiscoverTopNavLink
+      );
     }
   }
 

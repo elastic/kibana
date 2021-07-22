@@ -64,6 +64,10 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
 import { SourceViewer } from './application/components/source_viewer/source_viewer';
+import {
+  AddDataService,
+  AddDataServiceSetup,
+} from './application/apps/main/services/add_top_nav_links';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -115,6 +119,8 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  // @todo: add documentation
+  addData: AddDataServiceSetup;
 }
 
 export interface DiscoverStart {
@@ -207,7 +213,7 @@ export class DiscoverPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
-
+  private readonly addDataService = new AddDataService();
   /**
    * @deprecated
    */
@@ -389,6 +395,7 @@ export class DiscoverPlugin
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
       locator: this.locator,
+      addData: { ...this.addDataService.setup() },
     };
   }
 
@@ -424,7 +431,8 @@ export class DiscoverPlugin
         core,
         plugins,
         this.initializerContext,
-        this.getEmbeddableInjector
+        this.getEmbeddableInjector,
+        this.addDataService
       );
       setServices(services);
       this.servicesInitialized = true;
