@@ -232,14 +232,16 @@ export const DocTable = ({
     >
       {rows.length !== 0 ? (
         <Fragment>
-          <SkipBottomButton onClick={onSkipBottomButtonClick} />
           {type === 'infinite' && (
-            <DocTableInfiniteMemoized
-              rows={rows}
-              renderHeader={renderHeader}
-              renderRows={renderRows}
-              minimumVisibleRows={minimumVisibleRows || 50}
-            />
+            <Fragment>
+              <SkipBottomButton onClick={onSkipBottomButtonClick} />
+              <DocTableInfiniteMemoized
+                rows={rows}
+                renderHeader={renderHeader}
+                renderRows={renderRows}
+                minimumVisibleRows={minimumVisibleRows || 50}
+              />
+            </Fragment>
           )}
           {type === 'embeddable' && (
             <DocTableEmbeddableMemoized
@@ -251,12 +253,15 @@ export const DocTable = ({
             />
           )}
           {type === 'context' && (
-            <table className="kbn-table table" data-test-subj="docTable">
-              <thead>{renderHeader()}</thead>
-              <tbody>{renderRows(rows)}</tbody>
-            </table>
+            <Fragment>
+              <SkipBottomButton onClick={onSkipBottomButtonClick} />
+              <table className="kbn-table table" data-test-subj="docTable">
+                <thead>{renderHeader()}</thead>
+                <tbody>{renderRows(rows)}</tbody>
+              </table>
+            </Fragment>
           )}
-          {rows.length === sampleSize ? (
+          {type === 'infinite' && rows.length === sampleSize ? (
             <div
               className="kbnDocTable__footer"
               data-test-subj="discoverDocTableFooter"
