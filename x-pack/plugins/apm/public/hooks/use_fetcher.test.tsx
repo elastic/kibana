@@ -6,22 +6,27 @@
  */
 
 import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
+import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { delay } from '../utils/testHelpers';
 import { FetcherResult, useFetcher } from './use_fetcher';
-import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
-import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 
-// Wrap the hook with a provider so it can useApmPluginContext
-const wrapper = MockApmPluginContextWrapper;
+// Wrap the hook with a provider so it can useKibana
+const wrapper = createKibanaReactContext({
+  notifications: { toasts: { add: () => {}, danger: () => {} } },
+}).Provider;
+
+type HookResult = RenderHookResult<
+  { children?: React.ReactNode },
+  FetcherResult<string> & {
+    refetch: () => void;
+  }
+>;
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {
-    let hook: RenderHookResult<
-      { children?: React.ReactNode; value?: ApmPluginContextValue },
-      FetcherResult<string> & {
-        refetch: () => void;
-      }
-    >;
+    let hook: HookResult;
+
     beforeEach(() => {
       jest.useFakeTimers();
       async function fn() {
@@ -65,12 +70,8 @@ describe('useFetcher', () => {
   });
 
   describe('when throwing after 500ms', () => {
-    let hook: RenderHookResult<
-      { children?: React.ReactNode; value?: ApmPluginContextValue },
-      FetcherResult<void> & {
-        refetch: () => void;
-      }
-    >;
+    let hook: HookResult;
+
     beforeEach(() => {
       jest.useFakeTimers();
       async function fn() {
