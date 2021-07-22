@@ -703,18 +703,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
-    [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
-      name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
-        defaultMessage: 'Use time range',
-        description: 'Restrict autocomplete results to the current time range',
-      }),
-      value: true,
-      description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
-        defaultMessage:
-          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. Only applies when `autocomplete:autocompleteValueSuggestionMethod` is `terms_agg`.',
-      }),
-      schema: schema.boolean(),
-    },
     [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
       name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
         defaultMessage: 'Autocomplete value suggestion method',
@@ -727,6 +715,18 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       options: ['terms_enum', 'terms_agg'],
       schema: schema.string(),
+    },
+    [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
+      name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
+        defaultMessage: 'Use time range',
+        description: 'Restrict autocomplete results to the current time range',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
+        defaultMessage:
+          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. When autocomplete:autocompleteValueSuggestionMethod is set to "terms_enum", values outside of the time range may still be suggested.',
+      }),
+      schema: schema.boolean(),
     },
     [UI_SETTINGS.SEARCH_TIMEOUT]: {
       name: i18n.translate('data.advancedSettings.searchTimeout', {
