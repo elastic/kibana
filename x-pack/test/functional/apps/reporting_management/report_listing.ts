@@ -76,6 +76,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('pagination-button-1'); // click page 2
       await testSubjects.find('checkboxSelectRow-kraz0qle154g0763b569zz83'); // wait for first row of page 2
 
+      await testSubjects.click('pagination-button-2'); // click page 3
+      await testSubjects.find('checkboxSelectRow-k9a9p1840gpe1457b1ghfxw5'); // wait for first row of page 3
+
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
     });
