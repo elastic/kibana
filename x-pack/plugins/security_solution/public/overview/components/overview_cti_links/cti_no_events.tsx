@@ -17,7 +17,7 @@ const warning = (
     color={'warning'}
     title={i18n.WARNING_TITLE}
     body={i18n.WARNING_BODY}
-    dataTestSubj="cti-inner-panel-warning"
+    data-test-subj="cti-inner-panel-warning"
   />
 );
 

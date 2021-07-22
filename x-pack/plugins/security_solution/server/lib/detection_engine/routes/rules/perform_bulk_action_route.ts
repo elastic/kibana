@@ -45,7 +45,7 @@ export const performBulkActionRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
@@ -56,12 +56,12 @@ export const performBulkActionRoute = (
           savedObjectsClient,
         });
 
-        if (!rulesClient) {
+        if (!alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         const rules = await findRules({
-          rulesClient,
+          alertsClient,
           perPage: BULK_ACTION_RULES_LIMIT,
           filter: body.query !== '' ? body.query : undefined,
           page: undefined,
@@ -83,7 +83,7 @@ export const performBulkActionRoute = (
               rules.data.map(async (rule) => {
                 if (!rule.enabled) {
                   throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await enableRule({ rule, rulesClient, savedObjectsClient });
+                  await enableRule({ rule, alertsClient, savedObjectsClient });
                 }
               })
             );
@@ -93,7 +93,7 @@ export const performBulkActionRoute = (
               rules.data.map(async (rule) => {
                 if (rule.enabled) {
                   throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.disable({ id: rule.id });
+                  await alertsClient.disable({ id: rule.id });
                 }
               })
             );
@@ -107,7 +107,7 @@ export const performBulkActionRoute = (
                   searchFields: ['alertId'],
                 });
                 await deleteRules({
-                  rulesClient,
+                  alertsClient,
                   savedObjectsClient,
                   ruleStatusClient,
                   ruleStatuses,
@@ -121,7 +121,7 @@ export const performBulkActionRoute = (
               rules.data.map(async (rule) => {
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-                const createdRule = await rulesClient.create({
+                const createdRule = await alertsClient.create({
                   data: duplicateRule(rule),
                 });
 
@@ -132,7 +132,7 @@ export const performBulkActionRoute = (
 
                 await updateRulesNotifications({
                   ruleAlertId: createdRule.id,
-                  rulesClient,
+                  alertsClient,
                   savedObjectsClient,
                   enabled: createdRule.enabled,
                   actions: ruleActions?.actions || [],
@@ -144,7 +144,7 @@ export const performBulkActionRoute = (
             break;
           case BulkAction.export:
             const exported = await getExportByObjectIds(
-              rulesClient,
+              alertsClient,
               rules.data.map(({ params }) => ({ rule_id: params.ruleId }))
             );
 

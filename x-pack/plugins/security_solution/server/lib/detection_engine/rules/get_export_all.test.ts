@@ -10,7 +10,7 @@ import {
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
@@ -18,7 +18,7 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 describe('getExportAll', () => {
   test('it exports everything from the alerts client', async () => {
-    const rulesClient = rulesClientMock.create();
+    const alertsClient = alertsClientMock.create();
     const result = getFindResultWithSingleHit();
     const alert = getAlertMock(getQueryRuleParams());
     alert.params = {
@@ -30,9 +30,9 @@ describe('getExportAll', () => {
       timelineTitle: 'some-timeline-title',
     };
     result.data = [alert];
-    rulesClient.find.mockResolvedValue(result);
+    alertsClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(rulesClient);
+    const exports = await getExportAll(alertsClient);
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -84,7 +84,7 @@ describe('getExportAll', () => {
   });
 
   test('it will export empty rules', async () => {
-    const rulesClient = rulesClientMock.create();
+    const alertsClient = alertsClientMock.create();
     const findResult: FindHit = {
       page: 1,
       perPage: 1,
@@ -92,9 +92,9 @@ describe('getExportAll', () => {
       data: [],
     };
 
-    rulesClient.find.mockResolvedValue(findResult);
+    alertsClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(rulesClient);
+    const exports = await getExportAll(alertsClient);
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',

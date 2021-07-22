@@ -669,10 +669,10 @@
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-server.AlertingApiRequestHandlerContext.getRulesClient",
+            "id": "def-server.AlertingApiRequestHandlerContext.getAlertsClient",
             "type": "Function",
             "tags": [],
-            "label": "getRulesClient",
+            "label": "getAlertsClient",
             "description": [],
             "signature": [
               "() => ",
@@ -680,8 +680,8 @@
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.RulesClient",
-                "text": "RulesClient"
+                "section": "def-server.AlertsClient",
+                "text": "AlertsClient"
               }
             ],
             "source": {
@@ -1170,7 +1170,7 @@
           "<Params>"
         ],
         "source": {
-          "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+          "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
           "lineNumber": 140
         },
         "deprecated": false,
@@ -1183,7 +1183,7 @@
             "label": "page",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 141
             },
             "deprecated": false
@@ -1196,7 +1196,7 @@
             "label": "perPage",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 142
             },
             "deprecated": false
@@ -1209,7 +1209,7 @@
             "label": "total",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 143
             },
             "deprecated": false
@@ -1233,7 +1233,7 @@
               "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
             ],
             "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 144
             },
             "deprecated": false
@@ -1343,10 +1343,10 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.PluginStartContract.getRulesClientWithRequest",
+            "id": "def-server.PluginStartContract.getAlertsClientWithRequest",
             "type": "Function",
             "tags": [],
-            "label": "getRulesClientWithRequest",
+            "label": "getAlertsClientWithRequest",
             "description": [],
             "signature": [
               "(request: ",
@@ -1362,8 +1362,8 @@
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.RulesClient",
-                "text": "RulesClient"
+                "section": "def-server.AlertsClient",
+                "text": "AlertsClient"
               },
               ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"muteAll\" | \"getAlertState\" | \"getAlertInstanceSummary\" | \"updateApiKey\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\">"
             ],
@@ -1375,7 +1375,7 @@
             "children": [
               {
                 "parentPluginId": "alerting",
-                "id": "def-server.PluginStartContract.getRulesClientWithRequest.$1",
+                "id": "def-server.PluginStartContract.getAlertsClientWithRequest.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -1571,10 +1571,10 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-server.RulesClient",
+        "id": "def-server.AlertsClient",
         "type": "Type",
         "tags": [],
-        "label": "RulesClient",
+        "label": "AlertsClient",
         "description": [],
         "signature": [
           "{ get: <Params extends Record<string, unknown> = never>({ id, }: { id: string; }) => Promise<Pick<",

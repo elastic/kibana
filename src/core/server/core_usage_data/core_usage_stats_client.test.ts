@@ -790,14 +790,8 @@ describe('CoreUsageStatsClient', () => {
         createNewCopies: true,
         overwrite: true,
       } as IncrementSavedObjectsImportOptions);
-      await usageStatsClient.incrementSavedObjectsImport({
-        request,
-        createNewCopies: false,
-        overwrite: true,
-      } as IncrementSavedObjectsImportOptions);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
-      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
-        1,
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
@@ -805,19 +799,6 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
-          // excludes 'overwriteEnabled.yes' and 'overwriteEnabled.no' when createNewCopies is true
-        ],
-        incrementOptions
-      );
-      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
-        2,
-        CORE_USAGE_STATS_TYPE,
-        CORE_USAGE_STATS_ID,
-        [
-          `${IMPORT_STATS_PREFIX}.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
-          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
         ],
         incrementOptions

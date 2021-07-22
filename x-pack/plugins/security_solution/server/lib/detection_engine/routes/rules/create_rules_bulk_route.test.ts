@@ -34,8 +34,8 @@ describe('create_rules_bulk', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
+    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
+    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
@@ -50,7 +50,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getReadBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -105,7 +105,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);
@@ -120,7 +120,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.rulesClient.create.mockImplementation(async () => {
+      clients.alertsClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getReadBulkRequest(), context);

@@ -10,11 +10,11 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 import { AlertNotifyWhenType } from '../../../common';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -57,10 +57,10 @@ describe('updateAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    alertsClient.update.mockResolvedValueOnce(mockedResponse);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -90,8 +90,8 @@ describe('updateAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: mockedResponse });
 
-    expect(rulesClient.update).toHaveBeenCalledTimes(1);
-    expect(rulesClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.update).toHaveBeenCalledTimes(1);
+    expect(alertsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {
@@ -133,10 +133,10 @@ describe('updateAlertRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    alertsClient.update.mockResolvedValueOnce(mockedResponse);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -180,10 +180,10 @@ describe('updateAlertRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockResolvedValueOnce(mockedResponse);
+    alertsClient.update.mockResolvedValueOnce(mockedResponse);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -223,9 +223,9 @@ describe('updateAlertRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    alertsClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);

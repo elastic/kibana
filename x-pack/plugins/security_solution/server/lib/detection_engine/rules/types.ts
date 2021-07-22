@@ -101,7 +101,7 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
-import { RulesClient, PartialAlert } from '../../../../../alerting/server';
+import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
@@ -186,7 +186,7 @@ export interface HapiReadableStream extends Readable {
 }
 
 export interface Clients {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
 }
 
 export const isAlertTypes = (
@@ -214,7 +214,7 @@ export const isRuleStatusFindType = (
 };
 
 export interface CreateRulesOptions {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: Author;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -267,14 +267,14 @@ export interface CreateRulesOptions {
 
 export interface UpdateRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   defaultOutputIndex: string;
   ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -324,13 +324,13 @@ export interface PatchRulesOptions {
 }
 
 export interface ReadRuleOptions {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
 }
 
 export interface DeleteRuleOptions {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   savedObjectsClient: SavedObjectsClientContract;
   ruleStatusClient: RuleStatusSavedObjectsClient;
   ruleStatuses: SavedObjectsFindResponse<IRuleStatusSOAttributes, unknown>;
@@ -338,7 +338,7 @@ export interface DeleteRuleOptions {
 }
 
 export interface FindRuleOptions {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;

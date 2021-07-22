@@ -28,9 +28,9 @@ export const deleteRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
-        await rulesClient.delete({ id });
+        await alertsClient.delete({ id });
         return res.noContent();
       })
     )

@@ -8,7 +8,7 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
-import { AggregateResult, AggregateOptions } from '../rules_client';
+import { AggregateResult, AggregateOptions } from '../alerts_client';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
@@ -64,12 +64,12 @@ export const aggregateRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const alertsClient = context.alerting.getAlertsClient();
         const options = rewriteQueryReq({
           ...req.query,
           has_reference: req.query.has_reference || undefined,
         });
-        const aggregateResult = await rulesClient.aggregate({ options });
+        const aggregateResult = await alertsClient.aggregate({ options });
         return res.ok({
           body: rewriteBodyRes(aggregateResult),
         });

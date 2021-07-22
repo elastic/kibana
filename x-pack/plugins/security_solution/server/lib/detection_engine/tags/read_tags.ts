@@ -7,7 +7,7 @@
 
 import { has } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
-import { RulesClient } from '../../../../../alerting/server';
+import { AlertsClient } from '../../../../../alerting/server';
 import { findRules } from '../rules/find_rules';
 
 export interface TagType {
@@ -40,23 +40,23 @@ export const convertTagsToSet = (tagObjects: object[]): Set<string> => {
 // then this should be replaced with a an aggregation call.
 // Ref: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
 export const readTags = async ({
-  rulesClient,
+  alertsClient,
 }: {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
 }): Promise<string[]> => {
-  const tags = await readRawTags({ rulesClient });
+  const tags = await readRawTags({ alertsClient });
   return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
 export const readRawTags = async ({
-  rulesClient,
+  alertsClient,
 }: {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   perPage?: number;
 }): Promise<string[]> => {
   // Get just one record so we can get the total count
   const firstTags = await findRules({
-    rulesClient,
+    alertsClient,
     fields: ['tags'],
     perPage: 1,
     page: 1,
@@ -66,7 +66,7 @@ export const readRawTags = async ({
   });
   // Get all the rules to aggregate over all the tags of the rules
   const rules = await findRules({
-    rulesClient,
+    alertsClient,
     fields: ['tags'],
     perPage: firstTags.total,
     sortField: 'createdAt',

@@ -11,12 +11,13 @@ import { EuiLink, EuiPanel } from '@elastic/eui';
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
-import { Shape } from '../../../../../../src/plugins/expression_shape/common';
 
 interface Props {
-  shapes: Shape[];
+  shapes: {
+    [key: string]: string;
+  };
   onChange?: (key: string) => void;
-  value?: Shape;
+  value?: string;
   ariaLabel?: string;
 }
 
@@ -24,7 +25,7 @@ export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLab
   const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>
-        <ShapePreview shape={value} />
+        <ShapePreview shape={value ? shapes[value] : undefined} />
       </EuiLink>
     </EuiPanel>
   );

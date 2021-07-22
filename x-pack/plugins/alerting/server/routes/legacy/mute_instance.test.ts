@@ -9,10 +9,10 @@ import { muteAlertInstanceRoute } from './mute_instance';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -34,10 +34,10 @@ describe('muteAlertInstanceRoute', () => {
       `"/api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute"`
     );
 
-    rulesClient.muteInstance.mockResolvedValueOnce();
+    alertsClient.muteInstance.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           alert_id: '1',
@@ -49,8 +49,8 @@ describe('muteAlertInstanceRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.muteInstance).toHaveBeenCalledTimes(1);
-    expect(rulesClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.muteInstance).toHaveBeenCalledTimes(1);
+    expect(alertsClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "alertId": "1",
@@ -70,11 +70,11 @@ describe('muteAlertInstanceRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.muteInstance.mockRejectedValue(
+    alertsClient.muteInstance.mockRejectedValue(
       new AlertTypeDisabledError('Fail', 'license_invalid')
     );
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);

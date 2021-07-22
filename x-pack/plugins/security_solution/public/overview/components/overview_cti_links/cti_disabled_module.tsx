@@ -25,16 +25,11 @@ export const CtiDisabledModuleComponent = () => {
         title={i18n.DANGER_TITLE}
         body={i18n.DANGER_BODY}
         button={
-          <EuiButton
-            href={threatIntelDocLink}
-            color={'warning'}
-            target="_blank"
-            data-test-subj="cti-enable-module-button"
-          >
+          <EuiButton href={threatIntelDocLink} color={'warning'} target="_blank">
             {i18n.DANGER_BUTTON}
           </EuiButton>
         }
-        dataTestSubj="cti-inner-panel-danger"
+        data-test-subj="cti-inner-panel-danger"
       />
     ),
     [threatIntelDocLink]

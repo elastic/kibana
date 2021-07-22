@@ -6,7 +6,7 @@
  */
 
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { RulesClient } from '../../../../alerting/server';
+import { AlertsClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import {
   CommonAlertStatus,
@@ -17,7 +17,7 @@ import { ALERTS } from '../../../common/constants';
 import { MonitoringLicenseService } from '../../types';
 
 export async function fetchStatus(
-  rulesClient: RulesClient,
+  alertsClient: AlertsClient,
   licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
   clusterUuids: string[],
@@ -27,7 +27,7 @@ export async function fetchStatus(
   const byType: { [type: string]: CommonAlertStatus } = {};
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
-      const alert = await AlertsFactory.getByType(type, rulesClient);
+      const alert = await AlertsFactory.getByType(type, alertsClient);
       if (!alert || !alert.rawAlert) {
         return;
       }
@@ -45,7 +45,7 @@ export async function fetchStatus(
       }
 
       // Now that we have the id, we can get the state
-      const states = await alert.getStates(rulesClient, id, filters);
+      const states = await alert.getStates(alertsClient, id, filters);
       if (!states) {
         return result;
       }

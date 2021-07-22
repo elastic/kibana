@@ -97,12 +97,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
 
   const button = useMemo(
     () => (
-      <EuiButton
-        href={buttonHref}
-        isDisabled={!buttonHref}
-        data-test-subj="cti-view-dashboard-button"
-        target="_blank"
-      >
+      <EuiButton href={buttonHref} isDisabled={!buttonHref} target="_blank">
         <FormattedMessage
           id="xpack.securitySolution.overview.ctiViewDasboard"
           defaultMessage="View dashboard"
@@ -119,7 +114,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () =>
       isDashboardPluginDisabled ? (
         <CtiInnerPanel
-          dataTestSubj="cti-inner-panel-info"
+          data-test-subj="cti-inner-panel-info"
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { updateNotifications } from './update_notifications';
 import { readNotifications } from './read_notifications';
 import { createNotifications } from './create_notifications';
@@ -16,17 +16,17 @@ jest.mock('./create_notifications');
 
 describe('updateNotifications', () => {
   const notification = getNotificationResult();
-  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
   beforeEach(() => {
-    rulesClient = rulesClientMock.create();
+    alertsClient = alertsClientMock.create();
   });
 
   it('should update the existing notification if interval provided', async () => {
     (readNotifications as jest.Mock).mockResolvedValue(notification);
 
     await updateNotifications({
-      rulesClient,
+      alertsClient,
       actions: [],
       ruleAlertId: 'new-rule-id',
       enabled: true,
@@ -34,7 +34,7 @@ describe('updateNotifications', () => {
       name: '',
     });
 
-    expect(rulesClient.update).toHaveBeenCalledWith(
+    expect(alertsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         id: notification.id,
         data: expect.objectContaining({
@@ -50,7 +50,7 @@ describe('updateNotifications', () => {
     (readNotifications as jest.Mock).mockResolvedValue(null);
 
     const params: UpdateNotificationParams = {
-      rulesClient,
+      alertsClient,
       actions: [],
       ruleAlertId: 'new-rule-id',
       enabled: true,
@@ -67,7 +67,7 @@ describe('updateNotifications', () => {
     (readNotifications as jest.Mock).mockResolvedValue(notification);
 
     await updateNotifications({
-      rulesClient,
+      alertsClient,
       actions: [],
       ruleAlertId: 'new-rule-id',
       enabled: true,
@@ -75,14 +75,14 @@ describe('updateNotifications', () => {
       name: '',
     });
 
-    expect(rulesClient.delete).toHaveBeenCalledWith(
+    expect(alertsClient.delete).toHaveBeenCalledWith(
       expect.objectContaining({
         id: notification.id,
       })
     );
   });
 
-  it('should call the rulesClient with transformed actions', async () => {
+  it('should call the alertsClient with transformed actions', async () => {
     (readNotifications as jest.Mock).mockResolvedValue(notification);
     const action = {
       group: 'default',
@@ -91,7 +91,7 @@ describe('updateNotifications', () => {
       action_type_id: '.slack',
     };
     await updateNotifications({
-      rulesClient,
+      alertsClient,
       actions: [action],
       ruleAlertId: 'new-rule-id',
       enabled: true,
@@ -99,7 +99,7 @@ describe('updateNotifications', () => {
       name: '',
     });
 
-    expect(rulesClient.update).toHaveBeenCalledWith(
+    expect(alertsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           actions: expect.arrayContaining([
@@ -120,7 +120,7 @@ describe('updateNotifications', () => {
     const ruleAlertId = 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 
     const result = await updateNotifications({
-      rulesClient,
+      alertsClient,
       actions: [],
       enabled: true,
       ruleAlertId,

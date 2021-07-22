@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { RulesClient } from '../../../../../alerting/server';
+import { AlertsClient } from '../../../../../alerting/server';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 
@@ -14,22 +14,22 @@ export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IM
 export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
 
 export const getNonPackagedRulesCount = async ({
-  rulesClient,
+  alertsClient,
 }: {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
 }): Promise<number> => {
-  return getRulesCount({ rulesClient, filter: FILTER_NON_PREPACKED_RULES });
+  return getRulesCount({ alertsClient, filter: FILTER_NON_PREPACKED_RULES });
 };
 
 export const getRulesCount = async ({
-  rulesClient,
+  alertsClient,
   filter,
 }: {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   filter: string;
 }): Promise<number> => {
   const firstRule = await findRules({
-    rulesClient,
+    alertsClient,
     filter,
     perPage: 1,
     page: 1,
@@ -41,15 +41,15 @@ export const getRulesCount = async ({
 };
 
 export const getRules = async ({
-  rulesClient,
+  alertsClient,
   filter,
 }: {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   filter: string;
 }): Promise<RuleAlertType[]> => {
-  const count = await getRulesCount({ rulesClient, filter });
+  const count = await getRulesCount({ alertsClient, filter });
   const rules = await findRules({
-    rulesClient,
+    alertsClient,
     filter,
     perPage: count,
     page: 1,
@@ -68,23 +68,23 @@ export const getRules = async ({
 };
 
 export const getNonPackagedRules = async ({
-  rulesClient,
+  alertsClient,
 }: {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
 }): Promise<RuleAlertType[]> => {
   return getRules({
-    rulesClient,
+    alertsClient,
     filter: FILTER_NON_PREPACKED_RULES,
   });
 };
 
 export const getExistingPrepackagedRules = async ({
-  rulesClient,
+  alertsClient,
 }: {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
 }): Promise<RuleAlertType[]> => {
   return getRules({
-    rulesClient,
+    alertsClient,
     filter: FILTER_PREPACKED_RULES,
   });
 };

@@ -26,13 +26,13 @@ import {
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
-import { RulesClient } from '../rules_client';
+import { AlertsClient } from '../alerts_client';
 import { NormalizedAlertType } from '../alert_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
   getServices: GetServicesFunction;
-  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
+  getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;

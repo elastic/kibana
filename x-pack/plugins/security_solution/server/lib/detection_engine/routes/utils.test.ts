@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
@@ -30,7 +30,7 @@ import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-let rulesClient: ReturnType<typeof rulesClientMock.create>;
+let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
 describe('utils', () => {
   describe('transformBulkError', () => {
@@ -386,11 +386,11 @@ describe('utils', () => {
 
   describe('getFailingRules', () => {
     beforeEach(() => {
-      rulesClient = rulesClientMock.create();
+      alertsClient = alertsClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-      const res = await getFailingRules(['my-fake-id'], rulesClient);
+      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      const res = await getFailingRules(['my-fake-id'], alertsClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
@@ -403,22 +403,22 @@ describe('utils', () => {
           message: 'oops',
         },
       };
-      rulesClient.get.mockResolvedValue(foundRule);
-      const res = await getFailingRules([foundRule.id], rulesClient);
+      alertsClient.get.mockResolvedValue(foundRule);
+      const res = await getFailingRules([foundRule.id], alertsClient);
       expect(res).toEqual({ [foundRule.id]: foundRule });
     });
     it('getFailingRules throws an error', async () => {
-      rulesClient.get.mockImplementation(() => {
+      alertsClient.get.mockImplementation(() => {
         throw new Error('my test error');
       });
       let error;
       try {
-        await getFailingRules(['my-fake-id'], rulesClient);
+        await getFailingRules(['my-fake-id'], alertsClient);
       } catch (exc) {
         error = exc;
       }
       expect(error.message).toEqual(
-        'Failed to get executionStatus with RulesClient: my test error'
+        'Failed to get executionStatus with AlertsClient: my test error'
       );
     });
   });

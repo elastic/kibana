@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
-import { FindOptions, FindResult } from '../rules_client';
+import { FindOptions, FindResult } from '../alerts_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import { AlertTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
@@ -118,7 +118,7 @@ export const findRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const alertsClient = context.alerting.getAlertsClient();
 
         const options = rewriteQueryReq({
           ...req.query,
@@ -126,7 +126,7 @@ export const findRulesRoute = (
           search_fields: searchFieldsAsArray(req.query.search_fields),
         });
 
-        const findResult = await rulesClient.find({ options });
+        const findResult = await alertsClient.find({ options });
         return res.ok({
           body: rewriteBodyRes(findResult),
         });

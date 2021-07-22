@@ -25,8 +25,8 @@ describe('find_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getFindBulkResultStatus());
 
     findRulesRoute(server.router);
@@ -39,14 +39,14 @@ describe('find_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getFindRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catches error if search throws error', async () => {
-      clients.rulesClient.find.mockImplementation(async () => {
+      clients.alertsClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getFindRequest(), context);

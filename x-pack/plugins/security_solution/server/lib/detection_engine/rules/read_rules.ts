@@ -14,19 +14,19 @@ import { isAlertType, ReadRuleOptions } from './types';
 /**
  * This reads the rules through a cascade try of what is fastest to what is slowest.
  * @param id - This is the fastest. This is the auto-generated id through the parameter id.
- * and the id will either be found through `rulesClient.get({ id })` or it will not
+ * and the id will either be found through `alertsClient.get({ id })` or it will not
  * be returned as a not-found or a thrown error that is not 404.
  * @param ruleId - This is a close second to being fast as long as it can find the rule_id from
  * a filter query against the tags using `alert.attributes.tags: "__internal:${ruleId}"]`
  */
 export const readRules = async ({
-  rulesClient,
+  alertsClient,
   id,
   ruleId,
 }: ReadRuleOptions): Promise<SanitizedAlert<RuleParams> | null> => {
   if (id != null) {
     try {
-      const rule = await rulesClient.get({ id });
+      const rule = await alertsClient.get({ id });
       if (isAlertType(rule)) {
         return rule;
       } else {
@@ -42,7 +42,7 @@ export const readRules = async ({
     }
   } else if (ruleId != null) {
     const ruleFromFind = await findRules({
-      rulesClient,
+      alertsClient,
       filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
       page: 1,
       fields: undefined,

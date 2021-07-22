@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { deleteNotifications } from './delete_notifications';
 import { readNotifications } from './read_notifications';
 jest.mock('./read_notifications');
 
 describe('deleteNotifications', () => {
-  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let alertsClient: ReturnType<typeof alertsClientMock.create>;
   const notificationId = 'notification-52128c15-0d1b-4716-a4c5-46997ac7f3bd';
   const ruleAlertId = 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 
   beforeEach(() => {
-    rulesClient = rulesClientMock.create();
+    alertsClient = alertsClientMock.create();
   });
 
   it('should return null if notification was not found', async () => {
     (readNotifications as jest.Mock).mockResolvedValue(null);
 
     const result = await deleteNotifications({
-      rulesClient,
+      alertsClient,
       id: notificationId,
       ruleAlertId,
     });
@@ -31,18 +31,18 @@ describe('deleteNotifications', () => {
     expect(result).toBe(null);
   });
 
-  it('should call rulesClient.delete if notification was found', async () => {
+  it('should call alertsClient.delete if notification was found', async () => {
     (readNotifications as jest.Mock).mockResolvedValue({
       id: notificationId,
     });
 
     const result = await deleteNotifications({
-      rulesClient,
+      alertsClient,
       id: notificationId,
       ruleAlertId,
     });
 
-    expect(rulesClient.delete).toHaveBeenCalledWith(
+    expect(alertsClient.delete).toHaveBeenCalledWith(
       expect.objectContaining({
         id: notificationId,
       })
@@ -50,18 +50,18 @@ describe('deleteNotifications', () => {
     expect(result).toEqual({ id: notificationId });
   });
 
-  it('should call rulesClient.delete if notification.id was null', async () => {
+  it('should call alertsClient.delete if notification.id was null', async () => {
     (readNotifications as jest.Mock).mockResolvedValue({
       id: null,
     });
 
     const result = await deleteNotifications({
-      rulesClient,
+      alertsClient,
       id: notificationId,
       ruleAlertId,
     });
 
-    expect(rulesClient.delete).toHaveBeenCalledWith(
+    expect(alertsClient.delete).toHaveBeenCalledWith(
       expect.objectContaining({
         id: notificationId,
       })
@@ -69,24 +69,24 @@ describe('deleteNotifications', () => {
     expect(result).toEqual({ id: null });
   });
 
-  it('should return null if rulesClient.delete rejects with 404 if notification.id was null', async () => {
+  it('should return null if alertsClient.delete rejects with 404 if notification.id was null', async () => {
     (readNotifications as jest.Mock).mockResolvedValue({
       id: null,
     });
 
-    rulesClient.delete.mockRejectedValue({
+    alertsClient.delete.mockRejectedValue({
       output: {
         statusCode: 404,
       },
     });
 
     const result = await deleteNotifications({
-      rulesClient,
+      alertsClient,
       id: notificationId,
       ruleAlertId,
     });
 
-    expect(rulesClient.delete).toHaveBeenCalledWith(
+    expect(alertsClient.delete).toHaveBeenCalledWith(
       expect.objectContaining({
         id: notificationId,
       })
@@ -94,7 +94,7 @@ describe('deleteNotifications', () => {
     expect(result).toEqual(null);
   });
 
-  it('should return error object if rulesClient.delete rejects with status different than 404 and if notification.id was null', async () => {
+  it('should return error object if alertsClient.delete rejects with status different than 404 and if notification.id was null', async () => {
     (readNotifications as jest.Mock).mockResolvedValue({
       id: null,
     });
@@ -105,12 +105,12 @@ describe('deleteNotifications', () => {
       },
     };
 
-    rulesClient.delete.mockRejectedValue(errorObject);
+    alertsClient.delete.mockRejectedValue(errorObject);
 
     let errorResult;
     try {
       await deleteNotifications({
-        rulesClient,
+        alertsClient,
         id: notificationId,
         ruleAlertId,
       });
@@ -118,7 +118,7 @@ describe('deleteNotifications', () => {
       errorResult = error;
     }
 
-    expect(rulesClient.delete).toHaveBeenCalledWith(
+    expect(alertsClient.delete).toHaveBeenCalledWith(
       expect.objectContaining({
         id: notificationId,
       })
@@ -132,7 +132,7 @@ describe('deleteNotifications', () => {
     });
 
     const result = await deleteNotifications({
-      rulesClient,
+      alertsClient,
       id: undefined,
       ruleAlertId,
     });

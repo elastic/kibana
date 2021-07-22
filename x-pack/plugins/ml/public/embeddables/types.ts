@@ -6,10 +6,14 @@
  */
 
 import type { CoreStart } from 'kibana/public';
-import type { Filter, Query } from '@kbn/es-query';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
-import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query/filters';
+import type {
+  Query,
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../src/plugins/data/common/query';
 import type {
   EmbeddableInput,
   EmbeddableOutput,

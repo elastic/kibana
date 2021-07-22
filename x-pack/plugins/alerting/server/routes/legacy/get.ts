@@ -28,10 +28,10 @@ export const getAlertRoute = (router: AlertingRouter, licenseState: ILicenseStat
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const rulesClient = context.alerting.getRulesClient();
+      const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
       return res.ok({
-        body: await rulesClient.get({ id }),
+        body: await alertsClient.get({ id }),
       });
     })
   );

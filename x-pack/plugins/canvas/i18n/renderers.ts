@@ -129,6 +129,16 @@ export const RendererStrings = {
         defaultMessage: 'Repeat an image a given number of times',
       }),
   },
+  shape: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.renderer.shape.displayName', {
+        defaultMessage: 'Shape',
+      }),
+    getHelpDescription: () =>
+      i18n.translate('xpack.canvas.renderer.shape.helpDescription', {
+        defaultMessage: 'Render a basic shape',
+      }),
+  },
   table: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.table.displayName', {

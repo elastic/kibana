@@ -19,7 +19,7 @@ export const getFilter = (filter: string | null | undefined) => {
 };
 
 export const findRules = ({
-  rulesClient,
+  alertsClient,
   perPage,
   page,
   fields,
@@ -27,7 +27,7 @@ export const findRules = ({
   sortField,
   sortOrder,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
-  return rulesClient.find({
+  return alertsClient.find({
     options: {
       fields,
       page,

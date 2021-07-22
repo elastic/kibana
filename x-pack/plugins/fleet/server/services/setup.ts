@@ -31,7 +31,7 @@ import { pkgToPkgKey } from './epm/registry';
 
 export interface SetupStatus {
   isInitialized: boolean;
-  nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
+  nonFatalErrors?: Array<PreconfigurationError | DefaultPackagesInstallationError>;
 }
 
 export async function setupIngestManager(

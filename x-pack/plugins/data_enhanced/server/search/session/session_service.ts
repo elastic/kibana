@@ -98,7 +98,6 @@ export class SearchSessionService
   constructor(
     private readonly logger: Logger,
     private readonly config: ConfigSchema,
-    private readonly version: string,
     private readonly security?: SecurityPluginSetup
   ) {
     this.sessionConfig = this.config.search.sessions;
@@ -331,7 +330,6 @@ export class SearchSessionService
         touched: new Date().toISOString(),
         idMapping: {},
         persisted: false,
-        version: this.version,
         realmType,
         realmName,
         username,

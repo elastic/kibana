@@ -8,16 +8,8 @@
 
 import { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { merge, Observable, pipe, EMPTY } from 'rxjs';
-import {
-  distinctUntilChanged,
-  catchError,
-  switchMap,
-  startWith,
-  filter,
-  mapTo,
-  map,
-} from 'rxjs/operators';
+import { merge, Observable, pipe } from 'rxjs';
+import { distinctUntilChanged, switchMap, startWith, filter, mapTo, map } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
 import { isErrorEmbeddable } from '../../services/embeddable';
@@ -81,16 +73,7 @@ export const syncDashboardIndexPatterns = ({
       map(() => dashboardContainer!.getChildIds()),
       distinctUntilChanged(deepEqual),
       switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            dashboardContainer!
-              .getChild(childId)
-              .getOutput$()
-              // Embeddables often throw errors into their output streams.
-              // This should not affect dashboard loading
-              .pipe(catchError(() => EMPTY))
-          )
-        )
+        merge(...newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$()))
       )
     )
   )

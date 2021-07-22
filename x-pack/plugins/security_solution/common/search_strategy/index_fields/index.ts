@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { IFieldSubType } from '@kbn/es-query';
-import type { IIndexPattern } from 'src/plugins/data/public';
-import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
+import { IIndexPattern } from 'src/plugins/data/public';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IFieldSubType,
+} from '../../../../../../src/plugins/data/common';
 import { DocValueFields, Maybe } from '../common';
 
 interface FieldInfo {

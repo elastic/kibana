@@ -33,7 +33,6 @@ const mockSavedObject: SearchSessionSavedObject = {
     expires: new Date().toISOString(),
     status: SearchSessionStatus.COMPLETE,
     persisted: true,
-    version: '8.0.0',
   },
   references: [],
 };

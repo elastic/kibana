@@ -274,6 +274,24 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.find('discoverDocTableFooter');
   }
 
+  public async clickDocSortDown() {
+    const isLegacyDefault = await this.useLegacyTable();
+    if (isLegacyDefault) {
+      await this.find.clickByCssSelector('.fa-sort-down');
+    } else {
+      await this.dataGrid.clickDocSortAsc();
+    }
+  }
+
+  public async clickDocSortUp() {
+    const isLegacyDefault = await this.useLegacyTable();
+    if (isLegacyDefault) {
+      await this.find.clickByCssSelector('.fa-sort-up');
+    } else {
+      await this.dataGrid.clickDocSortDesc();
+    }
+  }
+
   public async isShowingDocViewer() {
     return await this.testSubjects.exists('kbnDocViewer');
   }

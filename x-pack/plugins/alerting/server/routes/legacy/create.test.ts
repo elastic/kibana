@@ -10,11 +10,11 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 import { Alert } from '../../../common/alert';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -85,10 +85,10 @@ describe('createAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(createResult);
+    alertsClient.create.mockResolvedValueOnce(createResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         body: mockedAlert,
       },
@@ -97,8 +97,8 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
-    expect(rulesClient.create).toHaveBeenCalledTimes(1);
-    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.create).toHaveBeenCalledTimes(1);
+    expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {
@@ -152,10 +152,10 @@ describe('createAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(expectedResult);
+    alertsClient.create.mockResolvedValueOnce(expectedResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: { id: 'custom-id' },
         body: mockedAlert,
@@ -165,8 +165,8 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
-    expect(rulesClient.create).toHaveBeenCalledTimes(1);
-    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.create).toHaveBeenCalledTimes(1);
+    expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {
@@ -214,9 +214,9 @@ describe('createAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(createResult);
+    alertsClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {});
 
     await handler(context, req, res);
 
@@ -235,9 +235,9 @@ describe('createAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(createResult);
+    alertsClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {});
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
@@ -252,9 +252,9 @@ describe('createAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    alertsClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok', 'forbidden']);
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok', 'forbidden']);
 
     await handler(context, req, res);
 

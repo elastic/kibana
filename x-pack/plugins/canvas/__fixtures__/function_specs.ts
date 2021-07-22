@@ -8,9 +8,7 @@
 import { functions as browserFns } from '../canvas_plugin_src/functions/browser';
 import { ExpressionFunction } from '../../../../src/plugins/expressions';
 import { initFunctions } from '../public/functions';
-import { functionSpecs as shapeFunctionSpecs } from '../../../../src/plugins/expression_shape/__fixtures__';
 
 export const functionSpecs = browserFns
   .concat(...(initFunctions({} as any) as any))
-  .map((fn) => new ExpressionFunction(fn()))
-  .concat(...shapeFunctionSpecs);
+  .map((fn) => new ExpressionFunction(fn()));

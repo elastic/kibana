@@ -6,7 +6,7 @@
  */
 
 import { UpdateRulesOptions } from './types';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import {
   getUpdateRulesSchemaMock,
@@ -14,14 +14,14 @@ import {
 } from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 export const getUpdateRulesOptionsMock = (): UpdateRulesOptions => ({
-  rulesClient: rulesClientMock.create(),
+  alertsClient: alertsClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
   ruleUpdate: getUpdateRulesSchemaMock(),
 });
 
 export const getUpdateMlRulesOptionsMock = (): UpdateRulesOptions => ({
-  rulesClient: rulesClientMock.create(),
+  alertsClient: alertsClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
   ruleUpdate: getUpdateMachineLearningSchemaMock(),

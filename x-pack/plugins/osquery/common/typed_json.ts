@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DslQuery, Filter } from '@kbn/es-query';
+import { DslQuery, Filter } from 'src/plugins/data/common';
+
 import { JsonObject } from '@kbn/common-utils';
 
 export type ESQuery =

@@ -36,10 +36,10 @@ export const getAlertInstanceSummaryRoute = (
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const rulesClient = context.alerting.getRulesClient();
+      const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
       const { dateStart } = req.query;
-      const summary = await rulesClient.getAlertInstanceSummary({ id, dateStart });
+      const summary = await alertsClient.getAlertInstanceSummary({ id, dateStart });
       return res.ok({ body: summary });
     })
   );

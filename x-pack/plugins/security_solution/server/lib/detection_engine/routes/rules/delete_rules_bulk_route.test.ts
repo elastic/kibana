@@ -27,8 +27,8 @@ describe('delete_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.alertsClient.delete.mockResolvedValue({}); // successful deletion
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // rule status request
 
     deleteRulesBulkRoute(server.router);
@@ -62,13 +62,13 @@ describe('delete_rules', () => {
     });
 
     test('returns 200 because the error is in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(200);
@@ -83,7 +83,7 @@ describe('delete_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

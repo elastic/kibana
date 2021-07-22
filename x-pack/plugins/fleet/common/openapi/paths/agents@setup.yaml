@@ -7,7 +7,12 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/fleet_status_response.yaml
+            type: object
+            properties:
+              isInitialized:
+                type: boolean
+            required:
+              - isInitialized
   operationId: get-agents-setup
   security:
     - basicAuth: []
@@ -20,7 +25,12 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/fleet_setup_response.yaml
+            type: object
+            properties:
+              isInitialized:
+                type: boolean
+            required:
+              - isInitialized
   requestBody:
     content:
       application/json:

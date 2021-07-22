@@ -6,13 +6,13 @@
  */
 
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RulesClient, AlertServices } from '../../../../../alerting/server';
+import { AlertsClient, AlertServices } from '../../../../../alerting/server';
 import { updateOrCreateRuleActionsSavedObject } from '../rule_actions/update_or_create_rule_actions_saved_object';
 import { updateNotifications } from '../notifications/update_notifications';
 import { RuleActions } from '../rule_actions/types';
 
 interface UpdateRulesNotifications {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   ruleAlertId: string;
   actions: RuleAlertAction[] | undefined;
@@ -22,7 +22,7 @@ interface UpdateRulesNotifications {
 }
 
 export const updateRulesNotifications = async ({
-  rulesClient,
+  alertsClient,
   savedObjectsClient,
   ruleAlertId,
   actions,
@@ -38,7 +38,7 @@ export const updateRulesNotifications = async ({
   });
 
   await updateNotifications({
-    rulesClient,
+    alertsClient,
     ruleAlertId,
     enabled,
     name,

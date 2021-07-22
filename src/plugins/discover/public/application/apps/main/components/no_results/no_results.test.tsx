@@ -30,15 +30,13 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilters'>) {
-  const component = mountWithIntl(<DiscoverNoResults onDisableFilters={() => {}} {...props} />);
+function mountAndFindSubjects(props: DiscoverNoResultsProps) {
+  const component = mountWithIntl(<DiscoverNoResults {...props} />);
   return {
-    mainMsg: findTestSubject(component, 'discoverNoResults').exists(),
-    timeFieldMsg: findTestSubject(component, 'discoverNoResultsTimefilter').exists(),
-    errorMsg: findTestSubject(component, 'discoverNoResultsError').exists(),
-    adjustSearch: findTestSubject(component, 'discoverNoResultsAdjustSearch').exists(),
-    adjustFilters: findTestSubject(component, 'discoverNoResultsAdjustFilters').exists(),
-    disableFiltersButton: findTestSubject(component, 'discoverNoResultsDisableFilters').exists(),
+    mainMsg: findTestSubject(component, 'discoverNoResults').length > 0,
+    timeFieldMsg: findTestSubject(component, 'discoverNoResultsTimefilter').length > 0,
+    luceneMsg: findTestSubject(component, 'discoverNoResultsLucene').length > 0,
+    errorMsg: findTestSubject(component, 'discoverNoResultsError').length > 0,
   };
 }
 
@@ -49,10 +47,8 @@ describe('DiscoverNoResults', () => {
         const result = mountAndFindSubjects({});
         expect(result).toMatchInlineSnapshot(`
           Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "disableFiltersButton": false,
             "errorMsg": false,
+            "luceneMsg": false,
             "mainMsg": true,
             "timeFieldMsg": false,
           }
@@ -66,10 +62,8 @@ describe('DiscoverNoResults', () => {
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "disableFiltersButton": false,
             "errorMsg": false,
+            "luceneMsg": false,
             "mainMsg": true,
             "timeFieldMsg": true,
           }
@@ -77,16 +71,17 @@ describe('DiscoverNoResults', () => {
       });
     });
 
-    describe('filter/query', () => {
-      test('shows "adjust search" message when having query', () => {
-        const result = mountAndFindSubjects({ hasQuery: true });
-        expect(result).toHaveProperty('adjustSearch', true);
-      });
-
-      test('shows "adjust filters" message when having filters', () => {
-        const result = mountAndFindSubjects({ hasFilters: true });
-        expect(result).toHaveProperty('adjustFilters', true);
-        expect(result).toHaveProperty('disableFiltersButton', true);
+    describe('queryLanguage', () => {
+      test('supports lucene and renders doc link', () => {
+        const result = mountAndFindSubjects({ queryLanguage: 'lucene' });
+        expect(result).toMatchInlineSnapshot(`
+          Object {
+            "errorMsg": false,
+            "luceneMsg": true,
+            "mainMsg": true,
+            "timeFieldMsg": false,
+          }
+        `);
       });
     });
 
@@ -96,13 +91,12 @@ describe('DiscoverNoResults', () => {
         const result = mountAndFindSubjects({
           timeFieldName: 'awesome_time_field',
           error,
+          queryLanguage: 'lucene',
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "disableFiltersButton": false,
             "errorMsg": true,
+            "luceneMsg": false,
             "mainMsg": false,
             "timeFieldMsg": false,
           }

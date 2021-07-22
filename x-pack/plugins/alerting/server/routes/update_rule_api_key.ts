@@ -28,10 +28,10 @@ export const updateRuleApiKeyRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
         try {
-          await rulesClient.updateApiKey({ id });
+          await alertsClient.updateApiKey({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {

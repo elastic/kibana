@@ -8,7 +8,7 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, AlertTypeDisabledError } from '../lib';
-import { MuteOptions } from '../rules_client';
+import { MuteOptions } from '../alerts_client';
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
@@ -38,10 +38,10 @@ export const muteAlertRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const alertsClient = context.alerting.getAlertsClient();
         const params = rewriteParamsReq(req.params);
         try {
-          await rulesClient.muteInstance(params);
+          await alertsClient.muteInstance(params);
           return res.noContent();
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {

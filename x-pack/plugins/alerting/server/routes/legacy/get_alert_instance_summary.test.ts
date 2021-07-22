@@ -10,10 +10,10 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 import { AlertInstanceSummary } from '../../types';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -50,10 +50,10 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_instance_summary"`);
 
-    rulesClient.getAlertInstanceSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
+    alertsClient.getAlertInstanceSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -65,8 +65,8 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     await handler(context, req, res);
 
-    expect(rulesClient.getAlertInstanceSummary).toHaveBeenCalledTimes(1);
-    expect(rulesClient.getAlertInstanceSummary.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.getAlertInstanceSummary).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertInstanceSummary.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "dateStart": undefined,
@@ -86,12 +86,12 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.getAlertInstanceSummary = jest
+    alertsClient.getAlertInstanceSummary = jest
       .fn()
       .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',

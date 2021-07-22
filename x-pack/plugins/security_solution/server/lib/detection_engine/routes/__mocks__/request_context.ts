@@ -11,12 +11,12 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../../../src/core/server/mocks';
-import { rulesClientMock } from '../../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../../alerting/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
 
 const createMockClients = () => ({
-  rulesClient: rulesClientMock.create(),
+  alertsClient: alertsClientMock.create(),
   licensing: { license: licensingMock.createLicenseMock() },
   clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
@@ -47,7 +47,7 @@ const createRequestContextMock = (
 ): SecuritySolutionRequestHandlerContextMock => {
   const coreContext = coreMock.createRequestHandlerContext();
   return ({
-    alerting: { getRulesClient: jest.fn(() => clients.rulesClient) },
+    alerting: { getAlertsClient: jest.fn(() => clients.alertsClient) },
     core: {
       ...coreContext,
       elasticsearch: {

@@ -475,6 +475,7 @@ export class DiscoverPlugin
       }
       const { core, plugins } = await this.initializeServices();
       await getServices().kibanaLegacy.loadAngularBootstrap();
+      getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import(
         './application/angular/get_inner_angular'
       );

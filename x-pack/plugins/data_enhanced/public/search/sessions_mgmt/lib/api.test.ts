@@ -84,7 +84,6 @@ describe('Search Sessions Management API', () => {
             "restoreState": Object {},
             "restoreUrl": "hello-cool-undefined-url",
             "status": "complete",
-            "version": undefined,
           },
         ]
       `);

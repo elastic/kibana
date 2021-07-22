@@ -23,7 +23,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fleet_setup_response'
+                type: object
+                properties:
+                  isInitialized:
+                    type: boolean
         '500':
           description: Internal Server Error
           content:
@@ -186,7 +189,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fleet_status_response'
+                type: object
+                properties:
+                  isInitialized:
+                    type: boolean
+                required:
+                  - isInitialized
       operationId: get-agents-setup
       security:
         - basicAuth: []
@@ -199,7 +207,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fleet_setup_response'
+                type: object
+                properties:
+                  isInitialized:
+                    type: boolean
+                required:
+                  - isInitialized
       requestBody:
         content:
           application/json:
@@ -852,27 +865,6 @@ components:
       schema:
         type: string
   schemas:
-    fleet_setup_response:
-      title: Fleet Setup response
-      type: object
-      properties:
-        isInitialized:
-          type: boolean
-        nonFatalErrors:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-              message:
-                type: string
-            required:
-              - name
-              - message
-      required:
-        - isInitialized
-        - nonFatalErrors
     search_result:
       title: SearchResult
       type: object
@@ -1026,25 +1018,6 @@ components:
         - format_version
         - download
         - path
-    fleet_status_response:
-      title: Fleet status response
-      type: object
-      properties:
-        isReady:
-          type: boolean
-        missing_requirements:
-          type: array
-          items:
-            type: string
-            enum:
-              - tls_required
-              - api_keys
-              - fleet_admin_user
-              - fleet_server
-              - encrypted_saved_object_encryption_key_required
-      required:
-        - isReady
-        - missing_requirements
     agent_type:
       type: string
       title: AgentType

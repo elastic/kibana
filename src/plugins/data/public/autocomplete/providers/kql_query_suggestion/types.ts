@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { KueryNode } from '@kbn/es-query';
 import { CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
+  KueryNode,
   QuerySuggestionBasic,
   QuerySuggestionGetFnArgs,
 } from '../../../../../../../src/plugins/data/public';

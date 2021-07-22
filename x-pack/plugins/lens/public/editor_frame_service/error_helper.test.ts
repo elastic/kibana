@@ -141,17 +141,6 @@ const scriptedFieldError = {
   },
 };
 
-const networkError = {
-  stack: 'Error: Batch request failed with status 0',
-  message: '[lens_merge_tables] > [esaggs] > Batch request failed with status 0',
-  name: 'Error',
-  original: {
-    name: 'Error',
-    message: 'Batch request failed with status 0',
-    stack: 'Error: Batch request failed with status 0',
-  },
-};
-
 // EsAggs will report an internal error when user attempts to use a runtime field on an indexpattern he has no access to
 const indexpatternAccessError = {
   stack: "TypeError: Cannot read property 'values' of undefined\n",
@@ -184,12 +173,6 @@ describe('lens_error_helpers', () => {
     it('should report the original es aggs error for runtime fields for indexpattern not accessible', () => {
       expect(getOriginalRequestErrorMessages(indexpatternAccessError as Error)).toEqual([
         indexpatternAccessError.message,
-      ]);
-    });
-
-    it("should report a network custom message when there's a network/connection problem", () => {
-      expect(getOriginalRequestErrorMessages(networkError as Error)).toEqual([
-        'Network error, try again later or contact your administrator.',
       ]);
     });
   });

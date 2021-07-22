@@ -235,7 +235,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         const { jobsSummary } = jobServiceProvider(
           client,
           mlClient,
-          context.alerting?.getRulesClient()
+          context.alerting?.getAlertsClient()
         );
         const { jobIds } = request.body;
         const resp = await jobsSummary(jobIds);
@@ -340,7 +340,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         const { createFullJobsList } = jobServiceProvider(
           client,
           mlClient,
-          context.alerting?.getRulesClient()
+          context.alerting?.getAlertsClient()
         );
         const { jobIds } = request.body;
         const resp = await createFullJobsList(jobIds);

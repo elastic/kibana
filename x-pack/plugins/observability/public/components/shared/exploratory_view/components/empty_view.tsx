@@ -10,19 +10,19 @@ import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { LOADING_VIEW } from '../series_editor/series_editor';
-import { ReportViewType, SeriesUrl } from '../types';
+import { LOADING_VIEW } from '../series_builder/series_builder';
+import { SeriesUrl } from '../types';
 
 export function EmptyView({
   loading,
+  height,
   series,
-  reportType,
 }: {
   loading: boolean;
-  series?: SeriesUrl;
-  reportType: ReportViewType;
+  height: string;
+  series: SeriesUrl;
 }) {
-  const { dataType, reportDefinitions } = series ?? {};
+  const { dataType, reportType, reportDefinitions } = series ?? {};
 
   let emptyMessage = EMPTY_LABEL;
 
@@ -45,7 +45,7 @@ export function EmptyView({
   }
 
   return (
-    <Wrapper>
+    <Wrapper height={height}>
       {loading && (
         <EuiProgress
           size="xs"
@@ -66,8 +66,9 @@ export function EmptyView({
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ height: string }>`
   text-align: center;
+  height: ${(props) => props.height};
   position: relative;
 `;
 

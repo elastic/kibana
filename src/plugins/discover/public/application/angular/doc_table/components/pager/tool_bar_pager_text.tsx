@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import './tool_bar_pager_text.scss';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 interface Props {
@@ -19,7 +18,7 @@ interface Props {
 export function ToolBarPagerText({ startItem, endItem, totalItems }: Props) {
   return (
     <I18nProvider>
-      <div className="kbnDocTable__toolBarText" data-test-subj="toolBarPagerText">
+      <div className="kuiToolBarText" data-test-subj="toolBarPagerText">
         <FormattedMessage
           id="discover.docTable.pagerControl.pagesCountLabel"
           defaultMessage="{startItem}&ndash;{endItem} of {totalItems}"

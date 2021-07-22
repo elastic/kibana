@@ -31,10 +31,10 @@ export const updateApiKeyRoute = (router: AlertingRouter, licenseState: ILicense
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const rulesClient = context.alerting.getRulesClient();
+        const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
         try {
-          await rulesClient.updateApiKey({ id });
+          await alertsClient.updateApiKey({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {

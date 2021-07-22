@@ -76,12 +76,12 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const alertsClient = context.alerting?.getAlertsClient();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !rulesClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -200,10 +200,10 @@ export const importRulesRoute = (
 
                   throwHttpError(await mlAuthz.validateRuleType(type));
 
-                  const rule = await readRules({ rulesClient, ruleId, id: undefined });
+                  const rule = await readRules({ alertsClient, ruleId, id: undefined });
                   if (rule == null) {
                     await createRules({
-                      rulesClient,
+                      alertsClient,
                       anomalyThreshold,
                       author,
                       buildingBlockType,
@@ -256,7 +256,7 @@ export const importRulesRoute = (
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null && request.query.overwrite) {
                     await patchRules({
-                      rulesClient,
+                      alertsClient,
                       author,
                       buildingBlockType,
                       savedObjectsClient,

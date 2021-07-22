@@ -12,13 +12,12 @@ import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_m
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
 import {
-  ActionGroupIdsOf,
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { AlertInstance, AlertTypeState } from '../../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../../alerting/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -31,6 +30,7 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
+import { InventoryMetricThresholdAllowedActionGroups } from './register_inventory_metric_threshold_alert_type';
 
 interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
@@ -40,163 +40,145 @@ interface InventoryMetricThresholdParams {
   alertOnNoData?: boolean;
 }
 
-type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
->;
-
-export type InventoryMetricThresholdAlertTypeParams = Record<string, any>;
-export type InventoryMetricThresholdAlertTypeState = AlertTypeState; // no specific state used
-export type InventoryMetricThresholdAlertInstanceState = AlertInstanceState; // no specific state used
-export type InventoryMetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
-
-type InventoryMetricThresholdAlertInstance = AlertInstance<
-  InventoryMetricThresholdAlertInstanceState,
-  InventoryMetricThresholdAlertInstanceContext,
+export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) => async ({
+  services,
+  params,
+}: AlertExecutorOptions<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
   InventoryMetricThresholdAllowedActionGroups
->;
-type InventoryMetricThresholdAlertInstanceFactory = (
-  id: string,
-  threshold?: number | undefined,
-  value?: number | undefined
-) => InventoryMetricThresholdAlertInstance;
+>) => {
+  const {
+    criteria,
+    filterQuery,
+    sourceId,
+    nodeType,
+    alertOnNoData,
+  } = params as InventoryMetricThresholdParams;
 
-export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
-  libs.metricsRules.createLifecycleRuleExecutor<
-    InventoryMetricThresholdAlertTypeParams,
-    InventoryMetricThresholdAlertTypeState,
-    InventoryMetricThresholdAlertInstanceState,
-    InventoryMetricThresholdAlertInstanceContext,
-    InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params }) => {
-    const {
-      criteria,
-      filterQuery,
-      sourceId,
-      nodeType,
-      alertOnNoData,
-    } = params as InventoryMetricThresholdParams;
-    if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
-    const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (id) =>
-      alertWithLifecycle({
-        id,
-        fields: {},
-      });
+  if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
-    const source = await libs.sources.getSourceConfiguration(
-      savedObjectsClient,
-      sourceId || 'default'
+  const source = await libs.sources.getSourceConfiguration(
+    services.savedObjectsClient,
+    sourceId || 'default'
+  );
+
+  const logQueryFields = await libs
+    .getLogQueryFields(
+      sourceId || 'default',
+      services.savedObjectsClient,
+      services.scopedClusterClient.asCurrentUser
+    )
+    .catch(() => undefined);
+
+  const compositeSize = libs.configuration.inventory.compositeSize;
+
+  const results = await Promise.all(
+    criteria.map((condition) =>
+      evaluateCondition({
+        condition,
+        nodeType,
+        source,
+        logQueryFields,
+        esClient: services.scopedClusterClient.asCurrentUser,
+        compositeSize,
+        filterQuery,
+      })
+    )
+  );
+
+  const inventoryItems = Object.keys(first(results)!);
+  for (const item of inventoryItems) {
+    // AND logic; all criteria must be across the threshold
+    const shouldAlertFire = results.every((result) =>
+      // Grab the result of the most recent bucket
+      last(result[item].shouldFire)
     );
+    const shouldAlertWarn = results.every((result) => last(result[item].shouldWarn));
 
-    const logQueryFields = await libs
-      .getLogQueryFields(
-        sourceId || 'default',
-        services.savedObjectsClient,
-        services.scopedClusterClient.asCurrentUser
-      )
-      .catch(() => undefined);
+    // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
+    // whole alert is in a No Data/Error state
+    const isNoData = results.some((result) => last(result[item].isNoData));
+    const isError = results.some((result) => result[item].isError);
 
-    const compositeSize = libs.configuration.inventory.compositeSize;
-    const results = await Promise.all(
-      criteria.map((condition) =>
-        evaluateCondition({
-          condition,
-          nodeType,
-          source,
-          logQueryFields,
-          esClient: services.scopedClusterClient.asCurrentUser,
-          compositeSize,
-          filterQuery,
-        })
-      )
-    );
-    const inventoryItems = Object.keys(first(results)!);
-    for (const item of inventoryItems) {
-      // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) => {
-        // Grab the result of the most recent bucket
-        return last(result[item].shouldFire);
-      });
-      const shouldAlertWarn = results.every((result) => last(result[item].shouldWarn));
+    const nextState = isError
+      ? AlertStates.ERROR
+      : isNoData
+      ? AlertStates.NO_DATA
+      : shouldAlertFire
+      ? AlertStates.ALERT
+      : shouldAlertWarn
+      ? AlertStates.WARNING
+      : AlertStates.OK;
 
-      // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
-      // whole alert is in a No Data/Error state
-      const isNoData = results.some((result) => last(result[item].isNoData));
-      const isError = results.some((result) => result[item].isError);
-
-      const nextState = isError
-        ? AlertStates.ERROR
-        : isNoData
-        ? AlertStates.NO_DATA
-        : shouldAlertFire
-        ? AlertStates.ALERT
-        : shouldAlertWarn
-        ? AlertStates.WARNING
-        : AlertStates.OK;
-      let reason;
-      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
-        reason = results
-          .map((result) =>
-            buildReasonWithVerboseMetricName(
-              result[item],
-              buildFiredAlertReason,
-              nextState === AlertStates.WARNING
-            )
+    let reason;
+    if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
+      reason = results
+        .map((result) =>
+          buildReasonWithVerboseMetricName(
+            result[item],
+            buildFiredAlertReason,
+            nextState === AlertStates.WARNING
           )
+        )
+        .join('\n');
+      /*
+       * Custom recovery actions aren't yet available in the alerting framework
+       * Uncomment the code below once they've been implemented
+       * Reference: https://github.com/elastic/kibana/issues/87048
+       */
+      // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
+      // reason = results
+      //   .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
+      //   .join('\n');
+    }
+    if (alertOnNoData) {
+      if (nextState === AlertStates.NO_DATA) {
+        reason = results
+          .filter((result) => result[item].isNoData)
+          .map((result) => buildReasonWithVerboseMetricName(result[item], buildNoDataAlertReason))
           .join('\n');
-        /*
-         * Custom recovery actions aren't yet available in the alerting framework
-         * Uncomment the code below once they've been implemented
-         * Reference: https://github.com/elastic/kibana/issues/87048
-         */
-        // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
-        // reason = results
-        //   .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
-        //   .join('\n');
-      }
-      if (alertOnNoData) {
-        if (nextState === AlertStates.NO_DATA) {
-          reason = results
-            .filter((result) => result[item].isNoData)
-            .map((result) => buildReasonWithVerboseMetricName(result[item], buildNoDataAlertReason))
-            .join('\n');
-        } else if (nextState === AlertStates.ERROR) {
-          reason = results
-            .filter((result) => result[item].isError)
-            .map((result) => buildReasonWithVerboseMetricName(result[item], buildErrorAlertReason))
-            .join('\n');
-        }
-      }
-      if (reason) {
-        const actionGroupId =
-          nextState === AlertStates.OK
-            ? RecoveredActionGroup.id
-            : nextState === AlertStates.WARNING
-            ? WARNING_ACTIONS.id
-            : FIRED_ACTIONS.id;
-
-        const alertInstance = alertInstanceFactory(`${item}`);
-        alertInstance.scheduleActions(
-          /**
-           * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
-           * the RecoveredActionGroup isn't allowed
-           */
-          (actionGroupId as unknown) as InventoryMetricThresholdAllowedActionGroups,
-          {
-            group: item,
-            alertState: stateToAlertMessage[nextState],
-            reason,
-            timestamp: moment().toISOString(),
-            value: mapToConditionsLookup(results, (result) =>
-              formatMetric(result[item].metric, result[item].currentValue)
-            ),
-            threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-            metric: mapToConditionsLookup(criteria, (c) => c.metric),
-          }
-        );
+      } else if (nextState === AlertStates.ERROR) {
+        reason = results
+          .filter((result) => result[item].isError)
+          .map((result) => buildReasonWithVerboseMetricName(result[item], buildErrorAlertReason))
+          .join('\n');
       }
     }
-  });
+    if (reason) {
+      const actionGroupId =
+        nextState === AlertStates.OK
+          ? RecoveredActionGroup.id
+          : nextState === AlertStates.WARNING
+          ? WARNING_ACTIONS.id
+          : FIRED_ACTIONS.id;
+      const alertInstance = services.alertInstanceFactory(`${item}`);
+      alertInstance.scheduleActions(
+        /**
+         * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
+         * the RecoveredActionGroup isn't allowed
+         */
+        (actionGroupId as unknown) as InventoryMetricThresholdAllowedActionGroups,
+        {
+          group: item,
+          alertState: stateToAlertMessage[nextState],
+          reason,
+          timestamp: moment().toISOString(),
+          value: mapToConditionsLookup(results, (result) =>
+            formatMetric(result[item].metric, result[item].currentValue)
+          ),
+          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        }
+      );
+    }
+  }
+};
 
 const buildReasonWithVerboseMetricName = (
   resultItem: any,

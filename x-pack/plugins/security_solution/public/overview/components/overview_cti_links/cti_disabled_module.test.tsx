@@ -46,9 +46,9 @@ describe('CtiDisabledModule', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="cti-dashboard-links"] [data-test-subj="cti-inner-panel-danger"]')
-        .hostNodes().length
+      wrapper.find(
+        '[data-test-subj="cti-dashboard-links"] [data-test-subj="cti-inner-panel-danger"]'
+      ).length
     ).toEqual(1);
   });
 });

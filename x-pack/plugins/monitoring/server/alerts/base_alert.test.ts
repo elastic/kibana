@@ -19,7 +19,7 @@ describe('BaseAlert', () => {
   describe('create', () => {
     it('should create an alert if it does not exist', async () => {
       const alert = new BaseAlert();
-      const rulesClient = {
+      const alertsClient = {
         create: jest.fn(),
         find: jest.fn().mockImplementation(() => {
           return {
@@ -41,8 +41,8 @@ describe('BaseAlert', () => {
         },
       ];
 
-      await alert.createIfDoesNotExist(rulesClient as any, actionsClient as any, actions);
-      expect(rulesClient.create).toHaveBeenCalledWith({
+      await alert.createIfDoesNotExist(alertsClient as any, actionsClient as any, actions);
+      expect(alertsClient.create).toHaveBeenCalledWith({
         data: {
           actions: [
             {
@@ -73,7 +73,7 @@ describe('BaseAlert', () => {
 
     it('should not create an alert if it exists', async () => {
       const alert = new BaseAlert();
-      const rulesClient = {
+      const alertsClient = {
         create: jest.fn(),
         find: jest.fn().mockImplementation(() => {
           return {
@@ -96,14 +96,14 @@ describe('BaseAlert', () => {
         },
       ];
 
-      await alert.createIfDoesNotExist(rulesClient as any, actionsClient as any, actions);
-      expect(rulesClient.create).not.toHaveBeenCalled();
+      await alert.createIfDoesNotExist(alertsClient as any, actionsClient as any, actions);
+      expect(alertsClient.create).not.toHaveBeenCalled();
     });
   });
 
   describe('getStates', () => {
     it('should get alert states', async () => {
-      const rulesClient = {
+      const alertsClient = {
         getAlertState: jest.fn().mockImplementation(() => {
           return {
             alertInstances: {
@@ -117,7 +117,7 @@ describe('BaseAlert', () => {
       const id = '456def';
       const filters: any[] = [];
       const alert = new BaseAlert();
-      const states = await alert.getStates(rulesClient as any, id, filters);
+      const states = await alert.getStates(alertsClient as any, id, filters);
       expect(states).toStrictEqual({
         abc123: {
           id: 'foobar',
@@ -126,7 +126,7 @@ describe('BaseAlert', () => {
     });
 
     it('should return nothing if no states are available', async () => {
-      const rulesClient = {
+      const alertsClient = {
         getAlertState: jest.fn().mockImplementation(() => {
           return null;
         }),
@@ -134,7 +134,7 @@ describe('BaseAlert', () => {
       const id = '456def';
       const filters: any[] = [];
       const alert = new BaseAlert();
-      const states = await alert.getStates(rulesClient as any, id, filters);
+      const states = await alert.getStates(alertsClient as any, id, filters);
       expect(states).toStrictEqual({});
     });
   });

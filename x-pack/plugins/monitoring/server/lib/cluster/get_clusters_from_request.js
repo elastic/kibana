@@ -117,16 +117,16 @@ export async function getClustersFromRequest(
 
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-      const rulesClient = req.getRulesClient();
+      const alertsClient = req.getAlertsClient();
       const alertStatus = await fetchStatus(
-        rulesClient,
+        alertsClient,
         req.server.plugins.monitoring.info,
         undefined,
         clusters.map((cluster) => get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid))
       );
 
       for (const cluster of clusters) {
-        if (!rulesClient) {
+        if (!alertsClient) {
           cluster.alerts = {
             list: {},
             alertsMeta: {

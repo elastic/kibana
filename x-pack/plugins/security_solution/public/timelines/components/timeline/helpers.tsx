@@ -8,7 +8,6 @@
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
-import { EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   handleSkipFocus,
   elementOrChildrenHasFocus,
@@ -25,7 +24,12 @@ import {
   EXISTS_OPERATOR,
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  EsQueryConfig,
+  Filter,
+} from '../../../../../../../src/plugins/data/public';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 

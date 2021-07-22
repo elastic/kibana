@@ -10,7 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { RulesClient } from './rules_client';
+import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
   IScopedClusterClient,
@@ -44,7 +44,7 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
-  getRulesClient: () => RulesClient;
+  getAlertsClient: () => AlertsClient;
   listTypes: AlertTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;

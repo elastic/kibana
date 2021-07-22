@@ -15,9 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
@@ -100,18 +97,12 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     urlParams: { start, end, environment, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
-  const {
-    query: { rangeFrom, rangeTo, kuery },
-  } = useApmParams('/services/:serviceName/overview');
-
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
     comparisonEnabled,
     comparisonType,
   });
-
-  const apmRouter = useApmRouter();
 
   const columns: Array<EuiBasicTableColumn<ServiceDependencyPeriods>> = [
     {
@@ -147,14 +138,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                       {item.name}
                     </ServiceOverviewLink>
                   ) : (
-                    <EuiLink
-                      href={apmRouter.link('/backends/:backendName/overview', {
-                        path: { backendName: item.name },
-                        query: { rangeFrom, rangeTo, kuery, environment },
-                      })}
-                    >
-                      {item.name}
-                    </EuiLink>
+                    item.name
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>

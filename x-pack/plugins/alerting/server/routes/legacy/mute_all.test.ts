@@ -9,10 +9,10 @@ import { muteAllAlertRoute } from './mute_all';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -32,10 +32,10 @@ describe('muteAllAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_mute_all"`);
 
-    rulesClient.muteAll.mockResolvedValueOnce();
+    alertsClient.muteAll.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -46,8 +46,8 @@ describe('muteAllAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.muteAll).toHaveBeenCalledTimes(1);
-    expect(rulesClient.muteAll.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.muteAll).toHaveBeenCalledTimes(1);
+    expect(alertsClient.muteAll.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -66,9 +66,9 @@ describe('muteAllAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.muteAll.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    alertsClient.muteAll.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);

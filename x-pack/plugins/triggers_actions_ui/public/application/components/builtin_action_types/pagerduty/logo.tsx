@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { LogoProps } from '../types';
 
-const Logo = (props: LogoProps) => (
+const Logo = () => (
   <svg
     version="1.1"
     id="Layer_1"
@@ -21,7 +20,6 @@ const Logo = (props: LogoProps) => (
     xmlSpace="preserve"
     width="32"
     height="32"
-    {...props}
   >
     <g>
       <rect y="128.4" className="st0" width="25.7" height="46.6" style={{ fill: '#06AC38' }} />

@@ -117,11 +117,11 @@ export async function getTransactionBreakdown({
       aggs: {
         ...subAggs,
         by_date: {
-          date_histogram: getMetricsDateHistogramParams({
+          date_histogram: getMetricsDateHistogramParams(
             start,
             end,
-            metricsInterval: config['xpack.apm.metricsInterval'],
-          }),
+            config['xpack.apm.metricsInterval']
+          ),
           aggs: subAggs,
         },
       },

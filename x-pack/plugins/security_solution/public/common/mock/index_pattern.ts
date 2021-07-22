@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../../src/plugins/data/common';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export const mockIndexPattern: IIndexPattern = {
   fields: [

@@ -39,9 +39,9 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const alertsClient = context.alerting?.getAlertsClient();
 
-      if (!rulesClient) {
+      if (!alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -53,7 +53,7 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             body: `Can't export more than ${exportSizeLimit} rules`,
           });
         } else {
-          const nonPackagedRulesCount = await getNonPackagedRulesCount({ rulesClient });
+          const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
           if (nonPackagedRulesCount > exportSizeLimit) {
             return siemResponse.error({
               statusCode: 400,
@@ -64,8 +64,8 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
         const exported =
           request.body?.objects != null
-            ? await getExportByObjectIds(rulesClient, request.body.objects)
-            : await getExportAll(rulesClient);
+            ? await getExportByObjectIds(alertsClient, request.body.objects)
+            : await getExportAll(alertsClient);
 
         const responseBody = request.query.exclude_export_details
           ? exported.rulesNdjson

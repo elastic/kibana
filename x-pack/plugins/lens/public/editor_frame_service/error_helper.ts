@@ -28,10 +28,6 @@ interface EsAggError {
   stack: string;
 }
 
-const isNetworkError = (e: Error): boolean => {
-  return e.message === 'Batch request failed with status 0'; // Note: 0 here means Network error
-};
-
 const isRequestError = (e: Error | RequestError): e is RequestError => {
   if ('body' in e) {
     return e.body?.attributes?.error?.caused_by !== undefined;
@@ -105,15 +101,7 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
   const errorMessages = [];
   if (error && 'original' in error && error.original) {
     if (isEsAggError(error.original)) {
-      if (isNetworkError(error.original)) {
-        errorMessages.push(
-          i18n.translate('xpack.lens.editorFrame.networkErrorMessage', {
-            defaultMessage: 'Network error, try again later or contact your administrator.',
-          })
-        );
-      } else {
-        errorMessages.push(error.message);
-      }
+      errorMessages.push(error.message);
     } else {
       const rootErrors = uniqWith(getErrorSources(error.original), isEqual);
       for (const rootError of rootErrors) {

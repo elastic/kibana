@@ -6,12 +6,12 @@
  */
 
 import { CreateRulesOptions } from './types';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 
 export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
-  rulesClient: rulesClientMock.create(),
+  alertsClient: alertsClientMock.create(),
   anomalyThreshold: undefined,
   description: 'some description',
   enabled: true,
@@ -63,7 +63,7 @@ export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
 export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
-  rulesClient: rulesClientMock.create(),
+  alertsClient: alertsClientMock.create(),
   anomalyThreshold: 55,
   description: 'some description',
   enabled: true,

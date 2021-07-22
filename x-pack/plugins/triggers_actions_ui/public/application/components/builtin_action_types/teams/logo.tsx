@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { LogoProps } from '../types';
 
-const Logo = (props: LogoProps) => (
+const Logo = () => (
   <svg
     version="1.1"
     id="Layer_1"
@@ -21,7 +20,6 @@ const Logo = (props: LogoProps) => (
     viewBox="0 0 32 32"
     enableBackground="new 0 0 32 32"
     xmlSpace="preserve"
-    {...props}
   >
     <image
       width="32"

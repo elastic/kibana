@@ -14,16 +14,16 @@ export interface GetMonitorDetailsParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
-  rulesClient: any;
+  alertsClient: any;
 }
 
 const getMonitorAlerts = async ({
   uptimeEsClient,
-  rulesClient,
+  alertsClient,
   monitorId,
 }: {
   uptimeEsClient: UptimeESClient;
-  rulesClient: any;
+  alertsClient: any;
   monitorId: string;
 }) => {
   const options: any = {
@@ -34,7 +34,7 @@ const getMonitorAlerts = async ({
     sortField: 'name.keyword',
   };
 
-  const { data } = await rulesClient.find({ options });
+  const { data } = await alertsClient.find({ options });
   const monitorAlerts = [];
   for (let i = 0; i < data.length; i++) {
     const currAlert = data[i];
@@ -85,7 +85,7 @@ const getMonitorAlerts = async ({
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, rulesClient }) => {
+> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, alertsClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -133,7 +133,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   const errorTimestamp: string | undefined = data?.['@timestamp'];
   const monAlerts = await getMonitorAlerts({
     uptimeEsClient,
-    rulesClient,
+    alertsClient,
     monitorId,
   });
 

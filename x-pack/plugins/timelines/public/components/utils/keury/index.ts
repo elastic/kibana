@@ -7,9 +7,15 @@
 
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { JsonObject } from '@kbn/common-utils';
-import { EsQueryConfig, Filter, Query } from '@kbn/es-query';
 
-import { esQuery, esKuery, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import {
+  EsQueryConfig,
+  Query,
+  Filter,
+  esQuery,
+  esKuery,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,

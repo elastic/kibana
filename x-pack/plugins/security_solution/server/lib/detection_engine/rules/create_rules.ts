@@ -17,7 +17,7 @@ import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
 
 export const createRules = async ({
-  rulesClient,
+  alertsClient,
   anomalyThreshold,
   author,
   buildingBlockType,
@@ -67,7 +67,7 @@ export const createRules = async ({
   exceptionsList,
   actions,
 }: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
-  return rulesClient.create<RuleTypeParams>({
+  return alertsClient.create<RuleTypeParams>({
     data: {
       name,
       tags: addTags(tags, ruleId, immutable),

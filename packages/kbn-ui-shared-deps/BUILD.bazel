@@ -44,7 +44,9 @@ SRC_DEPS = [
   "@npm//abortcontroller-polyfill",
   "@npm//angular",
   "@npm//babel-loader",
+  "@npm//compression-webpack-plugin",
   "@npm//core-js",
+  "@npm//css-minimizer-webpack-plugin",
   "@npm//css-loader",
   "@npm//fflate",
   "@npm//jquery",
@@ -65,6 +67,7 @@ SRC_DEPS = [
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//symbol-observable",
+  "@npm//terser-webpack-plugin",
   "@npm//url-loader",
   "@npm//val-loader",
   "@npm//whatwg-fetch"

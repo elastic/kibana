@@ -32,8 +32,8 @@ describe('patch_rules_bulk', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // update succeeds
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // update succeeds
 
     patchRulesBulkRoute(server.router, ml);
   });
@@ -45,7 +45,7 @@ describe('patch_rules_bulk', () => {
     });
 
     test('returns an error in the response when updating a single rule that does not exist', async () => {
-      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getPatchBulkRequest(), context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -71,7 +71,7 @@ describe('patch_rules_bulk', () => {
       });
       await server.inject(request, context);
 
-      expect(clients.rulesClient.update).toHaveBeenCalledWith(
+      expect(clients.alertsClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             params: expect.objectContaining({
@@ -84,7 +84,7 @@ describe('patch_rules_bulk', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getPatchBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

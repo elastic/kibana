@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { ruleStatusSavedObjectsClientMock } from '../signals/__mocks__/rule_status_saved_objects_client.mock';
 import { deleteRules } from './delete_rules';
 import { deleteNotifications } from '../notifications/delete_notifications';
@@ -18,12 +18,12 @@ jest.mock('../notifications/delete_notifications');
 jest.mock('../rule_actions/delete_rule_actions_saved_object');
 
 describe('deleteRules', () => {
-  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let alertsClient: ReturnType<typeof alertsClientMock.create>;
   let ruleStatusClient: ReturnType<typeof ruleStatusSavedObjectsClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    rulesClient = rulesClientMock.create();
+    alertsClient = alertsClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
     ruleStatusClient = ruleStatusSavedObjectsClientMock.create();
   });
@@ -50,7 +50,7 @@ describe('deleteRules', () => {
     };
 
     const rule = {
-      rulesClient,
+      alertsClient,
       savedObjectsClient,
       ruleStatusClient,
       id: 'ruleId',
@@ -64,10 +64,10 @@ describe('deleteRules', () => {
 
     await deleteRules(rule);
 
-    expect(rulesClient.delete).toHaveBeenCalledWith({ id: rule.id });
+    expect(alertsClient.delete).toHaveBeenCalledWith({ id: rule.id });
     expect(deleteNotifications).toHaveBeenCalledWith({
       ruleAlertId: rule.id,
-      rulesClient: expect.any(Object),
+      alertsClient: expect.any(Object),
     });
     expect(deleteRuleActionsSavedObject).toHaveBeenCalledWith({
       ruleAlertId: rule.id,

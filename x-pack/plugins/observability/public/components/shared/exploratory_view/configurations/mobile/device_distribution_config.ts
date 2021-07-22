@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, ReportTypes, USE_BREAK_DOWN_COLUMN } from '../constants';
+import { FieldLabels, REPORT_METRIC_FIELD, USE_BREAK_DOWN_COLUMN } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
@@ -14,7 +14,7 @@ import { MobileFields } from './mobile_fields';
 
 export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: ReportTypes.DEVICE_DISTRIBUTION,
+    reportType: 'device-data-distribution',
     defaultSeriesType: 'bar',
     seriesTypes: ['bar', 'bar_horizontal'],
     xAxisColumn: {
@@ -38,13 +38,13 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
-    definitionFields: [SERVICE_NAME],
     metricOptions: [
       {
-        field: 'labels.device_id',
         id: 'labels.device_id',
+        field: 'labels.device_id',
         label: NUMBER_OF_DEVICES,
       },
     ],
+    definitionFields: [SERVICE_NAME],
   };
 }

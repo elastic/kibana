@@ -10,10 +10,10 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 import { Alert } from '../../../common';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -71,10 +71,10 @@ describe('getAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: { id: '1' },
       },
@@ -82,8 +82,8 @@ describe('getAlertRoute', () => {
     );
     await handler(context, req, res);
 
-    expect(rulesClient.get).toHaveBeenCalledTimes(1);
-    expect(rulesClient.get.mock.calls[0][0].id).toEqual('1');
+    expect(alertsClient.get).toHaveBeenCalledTimes(1);
+    expect(alertsClient.get.mock.calls[0][0].id).toEqual('1');
 
     expect(res.ok).toHaveBeenCalledWith({
       body: mockedAlert,
@@ -98,10 +98,10 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: { id: '1' },
       },
@@ -125,10 +125,10 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: { id: '1' },
       },

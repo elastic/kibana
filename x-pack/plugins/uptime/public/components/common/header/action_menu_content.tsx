@@ -10,15 +10,13 @@ import { EuiHeaderLinks, EuiToolTip, EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { createExploratoryViewUrl } from '../../../../../observability/public';
+import { createExploratoryViewUrl, SeriesUrl } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 import { SETTINGS_ROUTE } from '../../../../common/constants';
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
-import { monitorStatusSelector } from '../../../state/selectors';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -40,28 +38,13 @@ export function ActionMenuContent(): React.ReactElement {
   const { dateRangeStart, dateRangeEnd } = params;
   const history = useHistory();
 
-  const selectedMonitor = useSelector(monitorStatusSelector);
-
-  const monitorId = selectedMonitor?.monitor?.id;
-
   const syntheticExploratoryViewLink = createExploratoryViewUrl(
     {
-      reportType: 'kpi-over-time',
-      allSeries: [
-        {
-          dataType: 'synthetics',
-          seriesType: 'area_stacked',
-          selectedMetricField: 'monitor.duration.us',
-          time: { from: dateRangeStart, to: dateRangeEnd },
-          breakdown: monitorId ? 'observer.geo.name' : 'monitor.type',
-          reportDefinitions: {
-            'monitor.name': selectedMonitor?.monitor?.name
-              ? [selectedMonitor?.monitor?.name]
-              : ['ALL_VALUES'],
-          },
-          name: monitorId ? `${monitorId}-response-duration` : 'All monitors response duration',
-        },
-      ],
+      'synthetics-series': ({
+        dataType: 'synthetics',
+        isNew: true,
+        time: { from: dateRangeStart, to: dateRangeEnd },
+      } as unknown) as SeriesUrl,
     },
     basePath
   );

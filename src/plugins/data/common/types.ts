@@ -21,9 +21,3 @@ export * from './index_patterns/types';
  * not possible.
  */
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
-
-type FilterFormatterFunction = (value: any) => string;
-export interface FilterValueFormatter {
-  convert: FilterFormatterFunction;
-  getConverterFor: (type: string) => FilterFormatterFunction;
-}

@@ -19,7 +19,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
-import { InvalidateAPIKeyResult } from '../rules_client';
+import { InvalidateAPIKeyResult } from '../alerts_client';
 import { AlertsConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
 import { AlertingPluginsStart } from '../plugin';

@@ -11,10 +11,10 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { rulesClientMock } from '../rules_client.mock';
+import { alertsClientMock } from '../alerts_client.mock';
 import { HealthStatus } from '../types';
 import { alertsMock } from '../mocks';
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -62,7 +62,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok']);
 
     await handler(context, req, res);
 
@@ -78,7 +78,7 @@ describe('healthRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );
@@ -114,7 +114,7 @@ describe('healthRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );
@@ -150,7 +150,7 @@ describe('healthRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );
@@ -187,7 +187,7 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       {
-        rulesClient,
+        alertsClient,
         getFrameworkHealth: alerting.getFrameworkHealth,
         areApiKeysEnabled: () => Promise.resolve(false),
       },
@@ -227,7 +227,7 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       {
-        rulesClient,
+        alertsClient,
         getFrameworkHealth: alerting.getFrameworkHealth,
         areApiKeysEnabled: () => Promise.resolve(false),
       },
@@ -266,7 +266,7 @@ describe('healthRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      { alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );

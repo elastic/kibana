@@ -28,10 +28,10 @@ export const unmuteAllRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
         try {
-          await rulesClient.unmuteAll({ id });
+          await alertsClient.unmuteAll({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {

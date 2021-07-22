@@ -10,9 +10,9 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { rulesClientMock } from '../rules_client.mock';
+import { alertsClientMock } from '../alerts_client.mock';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -50,10 +50,10 @@ describe('getRuleStateRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/state"`);
 
-    rulesClient.getAlertState.mockResolvedValueOnce(mockedAlertState);
+    alertsClient.getAlertState.mockResolvedValueOnce(mockedAlertState);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -64,8 +64,8 @@ describe('getRuleStateRoute', () => {
 
     await handler(context, req, res);
 
-    expect(rulesClient.getAlertState).toHaveBeenCalledTimes(1);
-    expect(rulesClient.getAlertState.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.getAlertState).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertState.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -86,10 +86,10 @@ describe('getRuleStateRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/state"`);
 
-    rulesClient.getAlertState.mockResolvedValueOnce(undefined);
+    alertsClient.getAlertState.mockResolvedValueOnce(undefined);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -100,8 +100,8 @@ describe('getRuleStateRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.getAlertState).toHaveBeenCalledTimes(1);
-    expect(rulesClient.getAlertState.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.getAlertState).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertState.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -122,12 +122,12 @@ describe('getRuleStateRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/state"`);
 
-    rulesClient.getAlertState = jest
+    alertsClient.getAlertState = jest
       .fn()
       .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -138,8 +138,8 @@ describe('getRuleStateRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.getAlertState).toHaveBeenCalledTimes(1);
-    expect(rulesClient.getAlertState.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.getAlertState).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertState.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",

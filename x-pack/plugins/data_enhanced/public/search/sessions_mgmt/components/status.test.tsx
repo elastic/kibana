@@ -34,7 +34,6 @@ describe('Background Search Session management status labels', () => {
       expires: '2020-12-07T00:19:32Z',
       initialState: {},
       restoreState: {},
-      version: '8.0.0',
     };
   });
 

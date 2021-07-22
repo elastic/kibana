@@ -8,9 +8,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('ObservabilityApp', function () {
+  describe('Observability specs', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./exploratory_view'));
   });
 }

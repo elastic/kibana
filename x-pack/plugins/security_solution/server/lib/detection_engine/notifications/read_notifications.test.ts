@@ -6,7 +6,7 @@
  */
 
 import { readNotifications } from './read_notifications';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import {
   getNotificationResult,
   getFindNotificationsResultWithSingleHit,
@@ -23,18 +23,18 @@ class TestError extends Error {
 }
 
 describe('read_notifications', () => {
-  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
   beforeEach(() => {
-    rulesClient = rulesClientMock.create();
+    alertsClient = alertsClientMock.create();
   });
 
   describe('readNotifications', () => {
-    test('should return the output from rulesClient if id is set but ruleAlertId is undefined', async () => {
-      rulesClient.get.mockResolvedValue(getNotificationResult());
+    test('should return the output from alertsClient if id is set but ruleAlertId is undefined', async () => {
+      alertsClient.get.mockResolvedValue(getNotificationResult());
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: undefined,
       });
@@ -44,10 +44,10 @@ describe('read_notifications', () => {
       const result = getNotificationResult();
       // @ts-expect-error
       delete result.alertTypeId;
-      rulesClient.get.mockResolvedValue(result);
+      alertsClient.get.mockResolvedValue(result);
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: undefined,
       });
@@ -55,12 +55,12 @@ describe('read_notifications', () => {
     });
 
     test('should return error if alerts client throws 404 error on get', async () => {
-      rulesClient.get.mockImplementation(() => {
+      alertsClient.get.mockImplementation(() => {
         throw new TestError();
       });
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: undefined,
       });
@@ -68,12 +68,12 @@ describe('read_notifications', () => {
     });
 
     test('should return error if alerts client throws error on get', async () => {
-      rulesClient.get.mockImplementation(() => {
+      alertsClient.get.mockImplementation(() => {
         throw new Error('Test error');
       });
       try {
         await readNotifications({
-          rulesClient,
+          alertsClient,
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           ruleAlertId: undefined,
         });
@@ -82,47 +82,47 @@ describe('read_notifications', () => {
       }
     });
 
-    test('should return the output from rulesClient if id is set but ruleAlertId is null', async () => {
-      rulesClient.get.mockResolvedValue(getNotificationResult());
+    test('should return the output from alertsClient if id is set but ruleAlertId is null', async () => {
+      alertsClient.get.mockResolvedValue(getNotificationResult());
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: null,
       });
       expect(rule).toEqual(getNotificationResult());
     });
 
-    test('should return the output from rulesClient if id is undefined but ruleAlertId is set', async () => {
-      rulesClient.get.mockResolvedValue(getNotificationResult());
-      rulesClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
+    test('should return the output from alertsClient if id is undefined but ruleAlertId is set', async () => {
+      alertsClient.get.mockResolvedValue(getNotificationResult());
+      alertsClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: undefined,
         ruleAlertId: 'rule-1',
       });
       expect(rule).toEqual(getNotificationResult());
     });
 
-    test('should return null if the output from rulesClient with ruleAlertId set is empty', async () => {
-      rulesClient.get.mockResolvedValue(getNotificationResult());
-      rulesClient.find.mockResolvedValue({ data: [], page: 0, perPage: 1, total: 0 });
+    test('should return null if the output from alertsClient with ruleAlertId set is empty', async () => {
+      alertsClient.get.mockResolvedValue(getNotificationResult());
+      alertsClient.find.mockResolvedValue({ data: [], page: 0, perPage: 1, total: 0 });
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: undefined,
         ruleAlertId: 'rule-1',
       });
       expect(rule).toEqual(null);
     });
 
-    test('should return the output from rulesClient if id is null but ruleAlertId is set', async () => {
-      rulesClient.get.mockResolvedValue(getNotificationResult());
-      rulesClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
+    test('should return the output from alertsClient if id is null but ruleAlertId is set', async () => {
+      alertsClient.get.mockResolvedValue(getNotificationResult());
+      alertsClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: null,
         ruleAlertId: 'rule-1',
       });
@@ -130,11 +130,11 @@ describe('read_notifications', () => {
     });
 
     test('should return null if id and ruleAlertId are null', async () => {
-      rulesClient.get.mockResolvedValue(getNotificationResult());
-      rulesClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
+      alertsClient.get.mockResolvedValue(getNotificationResult());
+      alertsClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: null,
         ruleAlertId: null,
       });
@@ -142,11 +142,11 @@ describe('read_notifications', () => {
     });
 
     test('should return null if id and ruleAlertId are undefined', async () => {
-      rulesClient.get.mockResolvedValue(getNotificationResult());
-      rulesClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
+      alertsClient.get.mockResolvedValue(getNotificationResult());
+      alertsClient.find.mockResolvedValue(getFindNotificationsResultWithSingleHit());
 
       const rule = await readNotifications({
-        rulesClient,
+        alertsClient,
         id: undefined,
         ruleAlertId: undefined,
       });

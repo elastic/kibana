@@ -10,9 +10,9 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
+import { alertsClientMock } from '../alerts_client.mock';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -42,10 +42,10 @@ describe('aggregateRulesRoute', () => {
         unknown: 0,
       },
     };
-    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
+    alertsClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         query: {
           default_search_operator: 'AND',
@@ -68,8 +68,8 @@ describe('aggregateRulesRoute', () => {
       }
     `);
 
-    expect(rulesClient.aggregate).toHaveBeenCalledTimes(1);
-    expect(rulesClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.aggregate).toHaveBeenCalledTimes(1);
+    expect(alertsClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "options": Object {
@@ -100,7 +100,7 @@ describe('aggregateRulesRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.aggregate.mockResolvedValueOnce({
+    alertsClient.aggregate.mockResolvedValueOnce({
       alertExecutionStatus: {
         ok: 15,
         error: 2,
@@ -111,7 +111,7 @@ describe('aggregateRulesRoute', () => {
     });
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         query: {
           default_search_operator: 'OR',

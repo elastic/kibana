@@ -37,7 +37,6 @@ export interface AppDependencies {
   http: HttpStart;
   i18n: I18nStart;
   config: SessionsConfigSchema;
-  kibanaVersion: string;
 }
 
 export const APP = {
@@ -53,7 +52,6 @@ export type SessionsConfigSchema = ConfigSchema['search']['sessions'];
 export function registerSearchSessionsMgmt(
   coreSetup: CoreSetup<DataEnhancedStartDependencies>,
   config: SessionsConfigSchema,
-  kibanaVersion: string,
   services: IManagementSectionsPluginsSetup
 ) {
   services.management.sections.section.kibana.registerApp({
@@ -62,7 +60,7 @@ export function registerSearchSessionsMgmt(
     order: 1.75,
     mount: async (params) => {
       const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
-      const mgmtApp = new MgmtApp(coreSetup, config, kibanaVersion, params, services);
+      const mgmtApp = new MgmtApp(coreSetup, config, params, services);
       return mgmtApp.mountManagementSection();
     },
   });

@@ -6,7 +6,7 @@
  */
 import { JsonObject } from '@kbn/common-utils';
 
-import { DslQuery, Filter } from '@kbn/es-query';
+import { DslQuery, Filter } from 'src/plugins/data/common';
 
 export type ESQuery =
   | ESRangeQuery

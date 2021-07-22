@@ -4,13 +4,12 @@
 
 ## RangeFilterMeta type
 
-> Warning: This API is now obsolete.
-> 
-> Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
-> 
-
 <b>Signature:</b>
 
 ```typescript
-declare type RangeFilterMeta = oldRangeFilterMeta;
+export declare type RangeFilterMeta = FilterMeta & {
+    params: RangeFilterParams;
+    field?: any;
+    formattedValue?: string;
+};
 ```

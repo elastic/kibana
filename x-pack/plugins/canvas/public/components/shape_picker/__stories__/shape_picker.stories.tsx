@@ -9,8 +9,9 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ShapePicker } from '../shape_picker';
-import { getAvailableShapes } from '../../../../../../../src/plugins/expression_shape/common';
+
+import { shapes } from '../../../../canvas_plugin_src/renderers/shape/shapes';
 
 storiesOf('components/Shapes/ShapePicker', module).add('default', () => (
-  <ShapePicker shapes={getAvailableShapes()} onChange={action('onChange')} />
+  <ShapePicker shapes={shapes} onChange={action('onChange')} />
 ));

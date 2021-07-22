@@ -12,7 +12,6 @@ import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ApiResponse } from '@elastic/elasticsearch';
-import { TermsEnumResponse } from '@elastic/elasticsearch/api/types';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;
@@ -30,9 +29,7 @@ describe('_terms_enum suggestions', () => {
     const requestHandlerContext = coreMock.createRequestHandlerContext();
     savedObjectsClientMock = requestHandlerContext.savedObjects.client;
     esClientMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
-    esClientMock.termsEnum.mockResolvedValue(
-      (mockResponse as unknown) as ApiResponse<TermsEnumResponse>
-    );
+    esClientMock.transport.request.mockResolvedValue((mockResponse as unknown) as ApiResponse);
   });
 
   it('calls the _terms_enum API with the field, query, filters, and config tiers', async () => {
@@ -47,7 +44,7 @@ describe('_terms_enum suggestions', () => {
       { name: 'field_name', type: 'string' }
     );
 
-    const [[args]] = esClientMock.termsEnum.mock.calls;
+    const [[args]] = esClientMock.transport.request.mock.calls;
 
     expect(args).toMatchInlineSnapshot(`
       Object {
@@ -70,7 +67,8 @@ describe('_terms_enum suggestions', () => {
           },
           "string": "query",
         },
-        "index": "index",
+        "method": "POST",
+        "path": "/index/_terms_enum",
       }
     `);
     expect(result).toEqual(mockResponse.body.terms);
@@ -87,7 +85,7 @@ describe('_terms_enum suggestions', () => {
       []
     );
 
-    const [[args]] = esClientMock.termsEnum.mock.calls;
+    const [[args]] = esClientMock.transport.request.mock.calls;
 
     expect(args).toMatchInlineSnapshot(`
       Object {
@@ -110,7 +108,8 @@ describe('_terms_enum suggestions', () => {
           },
           "string": "query",
         },
-        "index": "index",
+        "method": "POST",
+        "path": "/index/_terms_enum",
       }
     `);
     expect(result).toEqual(mockResponse.body.terms);

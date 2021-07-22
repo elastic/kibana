@@ -13,17 +13,17 @@ import { createNotifications } from './create_notifications';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 export const updateNotifications = async ({
-  rulesClient,
+  alertsClient,
   actions,
   enabled,
   ruleAlertId,
   name,
   interval,
 }: UpdateNotificationParams): Promise<PartialAlert<RuleNotificationAlertTypeParams> | null> => {
-  const notification = await readNotifications({ rulesClient, id: undefined, ruleAlertId });
+  const notification = await readNotifications({ alertsClient, id: undefined, ruleAlertId });
 
   if (interval && notification) {
-    return rulesClient.update<RuleNotificationAlertTypeParams>({
+    return alertsClient.update<RuleNotificationAlertTypeParams>({
       id: notification.id,
       data: {
         tags: addTags([], ruleAlertId),
@@ -41,7 +41,7 @@ export const updateNotifications = async ({
     });
   } else if (interval && !notification) {
     return createNotifications({
-      rulesClient,
+      alertsClient,
       enabled,
       name,
       interval,
@@ -49,7 +49,7 @@ export const updateNotifications = async ({
       ruleAlertId,
     });
   } else if (!interval && notification) {
-    await rulesClient.delete({ id: notification.id });
+    await alertsClient.delete({ id: notification.id });
     return null;
   } else {
     return null;

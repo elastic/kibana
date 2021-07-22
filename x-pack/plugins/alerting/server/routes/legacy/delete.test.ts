@@ -10,9 +10,9 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -33,10 +33,10 @@ describe('deleteAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
-    rulesClient.delete.mockResolvedValueOnce({});
+    alertsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: {
           id: '1',
@@ -47,8 +47,8 @@ describe('deleteAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.delete).toHaveBeenCalledTimes(1);
-    expect(rulesClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.delete).toHaveBeenCalledTimes(1);
+    expect(alertsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -67,10 +67,10 @@ describe('deleteAlertRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    rulesClient.delete.mockResolvedValueOnce({});
+    alertsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: { id: '1' },
       }
@@ -93,10 +93,10 @@ describe('deleteAlertRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    rulesClient.delete.mockResolvedValueOnce({});
+    alertsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         id: '1',
       }

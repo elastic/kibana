@@ -9,12 +9,12 @@ import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import {
+  Query,
+  IIndexPattern,
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-  IndexPatternBase,
-  Query,
-} from '@kbn/es-query';
+} from '../../../../../../src/plugins/data/common';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
@@ -22,7 +22,7 @@ const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
-export const getEsFormattedQuery = (query: Query, indexPattern?: IndexPatternBase) => {
+export const getEsFormattedQuery = (query: Query, indexPattern?: IIndexPattern) => {
   let esFormattedQuery;
 
   const queryLanguage = query.language;

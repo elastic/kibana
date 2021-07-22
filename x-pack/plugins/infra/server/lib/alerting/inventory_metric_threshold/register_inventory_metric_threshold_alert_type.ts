@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import {
+  AlertType,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIdsOf,
+} from '../../../../../alerting/server';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -46,45 +51,56 @@ const condition = schema.object({
   ),
 });
 
-export async function registerMetricInventoryThresholdAlertType(
-  alertingPlugin: PluginSetupContract,
+export type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+>;
+
+export const registerMetricInventoryThresholdAlertType = (
   libs: InfraBackendLibs
-) {
-  alertingPlugin.registerType({
-    id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
-      defaultMessage: 'Inventory',
-    }),
-    validate: {
-      params: schema.object(
-        {
-          criteria: schema.arrayOf(condition),
-          nodeType: schema.string(),
-          filterQuery: schema.maybe(
-            schema.string({ validate: validateIsStringElasticsearchJSONFilter })
-          ),
-          sourceId: schema.string(),
-          alertOnNoData: schema.maybe(schema.boolean()),
-        },
-        { unknowns: 'allow' }
-      ),
-    },
-    defaultActionGroupId: FIRED_ACTIONS_ID,
-    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
-    producer: 'infrastructure',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    executor: createInventoryMetricThresholdExecutor(libs),
-    actionVariables: {
-      context: [
-        { name: 'group', description: groupActionVariableDescription },
-        { name: 'alertState', description: alertStateActionVariableDescription },
-        { name: 'reason', description: reasonActionVariableDescription },
-        { name: 'timestamp', description: timestampActionVariableDescription },
-        { name: 'value', description: valueActionVariableDescription },
-        { name: 'metric', description: metricActionVariableDescription },
-        { name: 'threshold', description: thresholdActionVariableDescription },
-      ],
-    },
-  });
-}
+): AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  never, // Only use if defining useSavedObjectReferences hook
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  InventoryMetricThresholdAllowedActionGroups
+> => ({
+  id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
+    defaultMessage: 'Inventory',
+  }),
+  validate: {
+    params: schema.object(
+      {
+        criteria: schema.arrayOf(condition),
+        nodeType: schema.string(),
+        filterQuery: schema.maybe(
+          schema.string({ validate: validateIsStringElasticsearchJSONFilter })
+        ),
+        sourceId: schema.string(),
+        alertOnNoData: schema.maybe(schema.boolean()),
+      },
+      { unknowns: 'allow' }
+    ),
+  },
+  defaultActionGroupId: FIRED_ACTIONS_ID,
+  actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
+  producer: 'infrastructure',
+  minimumLicenseRequired: 'basic',
+  isExportable: true,
+  executor: createInventoryMetricThresholdExecutor(libs),
+  actionVariables: {
+    context: [
+      { name: 'group', description: groupActionVariableDescription },
+      { name: 'alertState', description: alertStateActionVariableDescription },
+      { name: 'reason', description: reasonActionVariableDescription },
+      { name: 'timestamp', description: timestampActionVariableDescription },
+      { name: 'value', description: valueActionVariableDescription },
+      { name: 'metric', description: metricActionVariableDescription },
+      { name: 'threshold', description: thresholdActionVariableDescription },
+    ],
+  },
+});

@@ -350,9 +350,9 @@ export class MonitoringPlugin
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
             getActionTypeRegistry: () => context.actions?.listTypes(),
-            getRulesClient: () => {
+            getAlertsClient: () => {
               try {
-                return plugins.alerting.getRulesClientWithRequest(req);
+                return plugins.alerting.getAlertsClientWithRequest(req);
               } catch (err) {
                 // If security is disabled, this call will throw an error unless a certain config is set for dist builds
                 return null;

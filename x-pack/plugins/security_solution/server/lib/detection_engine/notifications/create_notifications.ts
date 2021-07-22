@@ -12,14 +12,14 @@ import { addTags } from './add_tags';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 export const createNotifications = async ({
-  rulesClient,
+  alertsClient,
   actions,
   enabled,
   ruleAlertId,
   interval,
   name,
 }: CreateNotificationParams): Promise<SanitizedAlert<RuleNotificationAlertTypeParams>> =>
-  rulesClient.create<RuleNotificationAlertTypeParams>({
+  alertsClient.create<RuleNotificationAlertTypeParams>({
     data: {
       name,
       tags: addTags([], ruleAlertId),

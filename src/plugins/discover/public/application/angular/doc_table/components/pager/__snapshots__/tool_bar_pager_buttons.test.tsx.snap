@@ -1,38 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders ToolBarPagerButtons 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="s"
-  responsive={false}
+<div
+  className="kuiButtonGroup"
 >
-  <EuiFlexItem
-    grow={false}
+  <button
+    aria-label="Previous page in table"
+    className="kuiButton kuiButton--basic kuiButton--icon"
+    data-test-subj="btnPrevPage"
+    disabled={false}
+    onClick={[Function]}
   >
-    <EuiButtonIcon
-      aria-label="Previous page in table"
-      data-test-subj="btnPrevPage"
-      display="base"
-      iconSize="m"
-      iconType="arrowLeft"
-      isDisabled={false}
-      onClick={[Function]}
-      size="xs"
+    <span
+      className="kuiButton__icon kuiIcon fa-chevron-left"
     />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+  </button>
+  <button
+    aria-label="Next page in table"
+    className="kuiButton kuiButton--basic kuiButton--icon"
+    data-test-subj="btnNextPage"
+    disabled={false}
+    onClick={[Function]}
   >
-    <EuiButtonIcon
-      aria-label="Next page in table"
-      data-test-subj="btnNextPage"
-      display="base"
-      iconSize="m"
-      iconType="arrowRight"
-      isDisabled={false}
-      onClick={[Function]}
-      size="xs"
+    <span
+      className="kuiButton__icon kuiIcon fa-chevron-right"
     />
-  </EuiFlexItem>
-</EuiFlexGroup>
+  </button>
+</div>
 `;

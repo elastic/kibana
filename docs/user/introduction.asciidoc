@@ -59,7 +59,7 @@ and everything you need to visualize and analyze your data.
 
 To access all of {kib} features, use the main menu.
 Open this menu by clicking the
-menu icon.
+menu icon. To keep the main menu visible at all times, click *Dock navigation*.
 For a quick reference of all {kib} features, refer to <<whats-the-right-app,What’s the right app for you?>>
 
 [role="screenshot"]
@@ -81,6 +81,10 @@ that it ran in, trace the transaction, and check the overall service availabilit
 * Designed for security analysts, {security-guide}/es-overview.html[*Elastic Security*] provides an overview of
 the events and alerts from your environment.  Elastic Security helps you defend
 your organization from threats before damage and loss occur.
++
+[role="screenshot"]
+image::siem/images/detections-ui.png[Detections view in Elastic Security]
+
 
 [float]
 [[visualize-and-analyze]]
@@ -161,7 +165,7 @@ guided processes for administering all things Elastic Stack,
 including data, indices, clusters, alerts, and security.
 
 [role="screenshot"]
-image::images/stack-management.png[Index Management view in Stack Management]
+image::images/intro-management.png[Index Management view in Stack Management]
 
 [float]
 ==== Manage your data, indices, and clusters
@@ -425,7 +429,7 @@ the <<get-started,{kib} Quick start>>.
 |<<xpack-graph, Graph>>
 
 |Share your data
-|<<dashboard, Dashboard>>, <<canvas, Canvas>>, <<discover,Discover>>
+|<<dashboard, Dashboard>>, <<canvas, Canvas>>
 
 2+|*Administer your Kibana instance*
 

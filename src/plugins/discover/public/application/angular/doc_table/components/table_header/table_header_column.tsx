@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { SortOrder } from './helpers';
 
 interface Props {
@@ -24,28 +24,11 @@ interface Props {
   sortOrder: SortOrder[];
 }
 
-interface IconProps {
-  iconType: string;
-  color: 'primary' | 'text';
-}
-
-interface IconButtonProps {
-  active: boolean;
-  ariaLabel: string;
-  className: string;
-  iconProps: IconProps;
-  onClick: () => void | undefined;
-  testSubject: string;
-  tooltip: string;
-}
-
-const sortDirectionToIcon: Record<string, IconProps> = {
-  desc: { iconType: 'sortDown', color: 'primary' },
-  asc: { iconType: 'sortUp', color: 'primary' },
-  '': { iconType: 'sortable', color: 'text' },
+const sortDirectionToIcon: Record<string, string> = {
+  desc: 'fa fa-sort-down',
+  asc: 'fa fa-sort-up',
+  '': 'fa fa-sort',
 };
-
-const ICON_BUTTON_STYLE = { width: 12, height: 12 };
 
 export function TableHeaderColumn({
   colLeftIdx,
@@ -60,24 +43,28 @@ export function TableHeaderColumn({
   sortOrder,
 }: Props) {
   const [, sortDirection = ''] = sortOrder.find((sortPair) => name === sortPair[0]) || [];
-  const curSortWithoutCol = sortOrder.filter((pair) => pair[0] !== name);
-  const curColSort = sortOrder.find((pair) => pair[0] === name);
-  const curColSortDir = (curColSort && curColSort[1]) || '';
+  const currentSortWithoutColumn = sortOrder.filter((pair) => pair[0] !== name);
+  const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
+  const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
+
+  const btnSortIcon = sortDirectionToIcon[sortDirection];
+  const btnSortClassName =
+    sortDirection !== '' ? btnSortIcon : `kbnDocTableHeader__sortChange ${btnSortIcon}`;
 
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
 
     // Cycle goes Unsorted -> Asc -> Desc -> Unsorted
-    if (curColSort === undefined) {
-      onChangeSortOrder([...curSortWithoutCol, [name, 'asc']]);
-    } else if (curColSortDir === 'asc') {
-      onChangeSortOrder([...curSortWithoutCol, [name, 'desc']]);
-    } else if (curColSortDir === 'desc' && curSortWithoutCol.length === 0) {
+    if (currentColumnSort === undefined) {
+      onChangeSortOrder([...currentSortWithoutColumn, [name, 'asc']]);
+    } else if (currentColumnSortDirection === 'asc') {
+      onChangeSortOrder([...currentSortWithoutColumn, [name, 'desc']]);
+    } else if (currentColumnSortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
       // If we're at the end of the cycle and this is the only existing sort, we switch
       // back to ascending sort instead of removing it.
       onChangeSortOrder([[name, 'asc']]);
     } else {
-      onChangeSortOrder(curSortWithoutCol);
+      onChangeSortOrder(currentSortWithoutColumn);
     }
   };
 
@@ -104,11 +91,11 @@ export function TableHeaderColumn({
       }
     );
 
-    if (curColSort === undefined) {
+    if (currentColumnSort === undefined) {
       return sortAscendingMessage;
     } else if (sortDirection === 'asc') {
       return sortDescendingMessage;
-    } else if (sortDirection === 'desc' && curSortWithoutCol.length === 0) {
+    } else if (sortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
       return sortAscendingMessage;
     } else {
       return stopSortingMessage;
@@ -116,13 +103,12 @@ export function TableHeaderColumn({
   };
 
   // action buttons displayed on the right side of the column name
-  const buttons: IconButtonProps[] = [
+  const buttons = [
     // Sort Button
     {
       active: isSortable && typeof onChangeSortOrder === 'function',
       ariaLabel: getSortButtonAriaLabel(),
-      className: !sortDirection ? 'kbnDocTableHeader__sortChange' : '',
-      iconProps: sortDirectionToIcon[sortDirection],
+      className: btnSortClassName,
       onClick: handleChangeSortOrder,
       testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: getSortButtonAriaLabel(),
@@ -134,8 +120,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Remove {columnName} column',
         values: { columnName: name },
       }),
-      className: 'kbnDocTableHeader__move',
-      iconProps: { iconType: 'cross', color: 'text' },
+      className: 'fa fa-remove kbnDocTableHeader__move',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.removeColumnButtonTooltip', {
@@ -149,8 +134,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
       }),
-      className: 'kbnDocTableHeader__move',
-      iconProps: { iconType: 'sortLeft', color: 'text' },
+      className: 'fa fa-angle-double-left kbnDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
@@ -164,8 +148,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },
       }),
-      className: 'kbnDocTableHeader__move',
-      iconProps: { iconType: 'sortRight', color: 'text' },
+      className: 'fa fa-angle-double-right kbnDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
@@ -176,7 +159,7 @@ export function TableHeaderColumn({
 
   return (
     <th data-test-subj="docTableHeaderField">
-      <span data-test-subj={`docTableHeader-${name}`} className="kbnDocTableHeader__actions">
+      <span data-test-subj={`docTableHeader-${name}`}>
         {displayName}
         {buttons
           .filter((button) => button.active)
@@ -186,14 +169,11 @@ export function TableHeaderColumn({
               content={button.tooltip}
               key={`button-${idx}`}
             >
-              <EuiButtonIcon
+              <button
                 aria-label={button.ariaLabel}
                 className={button.className}
                 data-test-subj={button.testSubject}
                 onClick={button.onClick}
-                iconSize="s"
-                style={ICON_BUTTON_STYLE}
-                {...button.iconProps}
               />
             </EuiToolTip>
           ))}

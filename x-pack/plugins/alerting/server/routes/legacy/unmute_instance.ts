@@ -30,10 +30,10 @@ export const unmuteAlertInstanceRoute = (router: AlertingRouter, licenseState: I
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const rulesClient = context.alerting.getRulesClient();
+      const alertsClient = context.alerting.getAlertsClient();
       const { alertId, alertInstanceId } = req.params;
       try {
-        await rulesClient.unmuteInstance({ alertId, alertInstanceId });
+        await alertsClient.unmuteInstance({ alertId, alertInstanceId });
         return res.noContent();
       } catch (e) {
         if (e instanceof AlertTypeDisabledError) {

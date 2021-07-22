@@ -8,7 +8,6 @@
 
 import { SavedObjectsType } from '../saved_objects';
 import { CORE_USAGE_STATS_TYPE } from './constants';
-import { migrateTo7141 } from './migrations';
 
 /** @internal */
 export const coreUsageStatsType: SavedObjectsType = {
@@ -18,8 +17,5 @@ export const coreUsageStatsType: SavedObjectsType = {
   mappings: {
     dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
     properties: {},
-  },
-  migrations: {
-    '7.14.1': migrateTo7141,
   },
 };

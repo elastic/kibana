@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { createNotifications } from './create_notifications';
 
 describe('createNotifications', () => {
-  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
   beforeEach(() => {
-    rulesClient = rulesClientMock.create();
+    alertsClient = alertsClientMock.create();
   });
 
-  it('calls the rulesClient with proper params', async () => {
+  it('calls the alertsClient with proper params', async () => {
     const ruleAlertId = 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 
     await createNotifications({
-      rulesClient,
+      alertsClient,
       actions: [],
       ruleAlertId,
       enabled: true,
@@ -27,7 +27,7 @@ describe('createNotifications', () => {
       name: '',
     });
 
-    expect(rulesClient.create).toHaveBeenCalledWith(
+    expect(alertsClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
@@ -38,7 +38,7 @@ describe('createNotifications', () => {
     );
   });
 
-  it('calls the rulesClient with transformed actions', async () => {
+  it('calls the alertsClient with transformed actions', async () => {
     const action = {
       group: 'default',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
@@ -46,7 +46,7 @@ describe('createNotifications', () => {
       action_type_id: '.slack',
     };
     await createNotifications({
-      rulesClient,
+      alertsClient,
       actions: [action],
       ruleAlertId: 'new-rule-id',
       enabled: true,
@@ -54,7 +54,7 @@ describe('createNotifications', () => {
       name: '',
     });
 
-    expect(rulesClient.create).toHaveBeenCalledWith(
+    expect(alertsClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           actions: expect.arrayContaining([

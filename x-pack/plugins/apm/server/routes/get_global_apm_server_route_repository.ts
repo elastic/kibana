@@ -11,7 +11,6 @@ import type {
 } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
 import { alertsChartPreviewRouteRepository } from './alerts/chart_preview';
-import { backendsRouteRepository } from './backends';
 import { correlationsRouteRepository } from './correlations';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentsRouteRepository } from './environments';
@@ -53,8 +52,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(apmIndicesRouteRepository)
     .merge(customLinkRouteRepository)
     .merge(sourceMapsRouteRepository)
-    .merge(apmFleetRouteRepository)
-    .merge(backendsRouteRepository);
+    .merge(apmFleetRouteRepository);
 
   return repository;
 };

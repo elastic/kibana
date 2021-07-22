@@ -7,15 +7,11 @@
 
 import { getBucketSize } from './get_bucket_size';
 
-export function getMetricsDateHistogramParams({
-  start,
-  end,
-  metricsInterval,
-}: {
-  start: number;
-  end: number;
-  metricsInterval: number;
-}) {
+export function getMetricsDateHistogramParams(
+  start: number,
+  end: number,
+  metricsInterval: number
+) {
   const { bucketSize } = getBucketSize({ start, end });
   return {
     field: '@timestamp',

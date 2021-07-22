@@ -6,7 +6,7 @@
  */
 
 import { PatchRulesOptions } from './types';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
@@ -14,7 +14,7 @@ import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.moc
 export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
-  rulesClient: rulesClientMock.create(),
+  alertsClient: alertsClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   anomalyThreshold: undefined,
   description: 'some description',
@@ -65,7 +65,7 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
 export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
-  rulesClient: rulesClientMock.create(),
+  alertsClient: alertsClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   anomalyThreshold: 55,
   description: 'some description',

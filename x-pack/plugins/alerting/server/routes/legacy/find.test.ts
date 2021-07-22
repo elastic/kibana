@@ -10,9 +10,9 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { alertsClientMock } from '../../alerts_client.mock';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -39,10 +39,10 @@ describe('findAlertRoute', () => {
       total: 0,
       data: [],
     };
-    rulesClient.find.mockResolvedValueOnce(findResult);
+    alertsClient.find.mockResolvedValueOnce(findResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         query: {
           per_page: 1,
@@ -64,8 +64,8 @@ describe('findAlertRoute', () => {
       }
     `);
 
-    expect(rulesClient.find).toHaveBeenCalledTimes(1);
-    expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.find).toHaveBeenCalledTimes(1);
+    expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "options": Object {
@@ -90,7 +90,7 @@ describe('findAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.find.mockResolvedValueOnce({
+    alertsClient.find.mockResolvedValueOnce({
       page: 1,
       perPage: 1,
       total: 0,
@@ -98,7 +98,7 @@ describe('findAlertRoute', () => {
     });
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         query: {
           per_page: 1,

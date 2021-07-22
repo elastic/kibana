@@ -38,7 +38,7 @@ import {
   ALERT_CCR_READ_EXCEPTIONS,
   ALERT_LARGE_SHARD_SIZE,
 } from '../../common/constants';
-import { RulesClient } from '../../../alerting/server';
+import { AlertsClient } from '../../../alerting/server';
 import { Alert } from '../../../alerting/common';
 
 const BY_TYPE = {
@@ -61,13 +61,13 @@ const BY_TYPE = {
 export class AlertsFactory {
   public static async getByType(
     type: string,
-    rulesClient: RulesClient | undefined
+    alertsClient: AlertsClient | undefined
   ): Promise<BaseAlert | undefined> {
     const alertCls = BY_TYPE[type];
-    if (!alertCls || !rulesClient) {
+    if (!alertCls || !alertsClient) {
       return;
     }
-    const alertClientAlerts = await rulesClient.find({
+    const alertClientAlerts = await alertsClient.find({
       options: {
         filter: `alert.attributes.alertTypeId:${type}`,
       },

@@ -11,7 +11,7 @@ import {
   AlertType,
   AlertExecutorOptions,
   AlertInstance,
-  RulesClient,
+  AlertsClient,
   AlertServices,
 } from '../../../alerting/server';
 import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
@@ -114,11 +114,11 @@ export class BaseAlert {
   }
 
   public async createIfDoesNotExist(
-    rulesClient: RulesClient,
+    alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
   ): Promise<SanitizedAlert<AlertTypeParams>> {
-    const existingAlertData = await rulesClient.find({
+    const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,
       },
@@ -152,7 +152,7 @@ export class BaseAlert {
       throttle = '1d',
       interval = '1m',
     } = this.alertOptions;
-    return await rulesClient.create<AlertTypeParams>({
+    return await alertsClient.create<AlertTypeParams>({
       data: {
         enabled: true,
         tags: [],
@@ -169,11 +169,11 @@ export class BaseAlert {
   }
 
   public async getStates(
-    rulesClient: RulesClient,
+    alertsClient: AlertsClient,
     id: string,
     filters: CommonAlertFilter[]
   ): Promise<{ [instanceId: string]: RawAlertInstance }> {
-    const states = await rulesClient.getAlertState({ id });
+    const states = await alertsClient.getAlertState({ id });
     if (!states || !states.alertInstances) {
       return {};
     }

@@ -56,10 +56,10 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
           }
         }
 
-        const rulesClient = context.alerting?.getRulesClient();
+        const alertsClient = context.alerting?.getAlertsClient();
         const actionsClient = context.actions?.getActionsClient();
         const types = context.actions?.listTypes();
-        if (!rulesClient || !actionsClient || !types) {
+        if (!alertsClient || !actionsClient || !types) {
           return response.ok({ body: undefined });
         }
 
@@ -99,7 +99,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
 
         if (disabledWatcherClusterAlerts) {
           createdAlerts = await Promise.all(
-            alerts.map((alert) => alert.createIfDoesNotExist(rulesClient, actionsClient, actions))
+            alerts.map((alert) => alert.createIfDoesNotExist(alertsClient, actionsClient, actions))
           );
         }
 

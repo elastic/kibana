@@ -49,8 +49,7 @@ export const getColumns = (
   api: SearchSessionsMgmtAPI,
   config: SessionsConfigSchema,
   timezone: string,
-  onActionComplete: OnActionComplete,
-  kibanaVersion: string
+  onActionComplete: OnActionComplete
 ): Array<EuiBasicTableColumn<UISession>> => {
   // Use a literal array of table column definitions to detail a UISession object
   return [
@@ -83,7 +82,7 @@ export const getColumns = (
       }),
       sortable: true,
       width: '20%',
-      render: (name: UISession['name'], { restoreUrl, reloadUrl, status, version }) => {
+      render: (name: UISession['name'], { restoreUrl, reloadUrl, status }) => {
         const isRestorable = isSessionRestorable(status);
         const href = isRestorable ? restoreUrl : reloadUrl;
         const trackAction = isRestorable
@@ -103,21 +102,6 @@ export const getColumns = (
             />
           </>
         );
-        const versionIncompatibleWarning =
-          isRestorable && version === kibanaVersion ? null : (
-            <>
-              {' '}
-              <EuiIconTip
-                type="alert"
-                content={
-                  <FormattedMessage
-                    id="xpack.data.mgmt.searchSessions.table.versionIncompatibleWarning"
-                    defaultMessage="This search session was created in a Kibana instance running a different version. It may not restore correctly."
-                  />
-                }
-              />
-            </>
-          );
         return (
           <RedirectAppLinks application={core.application}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
@@ -129,7 +113,6 @@ export const getColumns = (
               <TableText>
                 {name}
                 {notRestorableWarning}
-                {versionIncompatibleWarning}
               </TableText>
             </EuiLink>
           </RedirectAppLinks>

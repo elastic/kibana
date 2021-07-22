@@ -7,7 +7,7 @@
  */
 
 import { Moment } from 'moment';
-import { RangeFilterParams } from '@kbn/es-query';
+import { RangeFilterParams } from '../../../common';
 import { IAggConfig } from '../aggs';
 
 /** @internal **/

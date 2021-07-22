@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { LogoProps } from '../types';
 
-const Logo = (props: LogoProps) => {
+const Logo = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -17,7 +16,6 @@ const Logo = (props: LogoProps) => {
       fill="none"
       stroke="null"
       vectorEffect="non-scaling-stroke"
-      {...props}
     >
       <g fillRule="evenodd" stroke="null" clipRule="evenodd">
         <path

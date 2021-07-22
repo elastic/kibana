@@ -5,55 +5,45 @@
  * 2.0.
  */
 
-import React, { FC, RefCallback, useCallback, useState } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import {
-  LazyShapeDrawer,
-  Shape,
-  ShapeDrawerComponentProps,
-  getDefaultShapeData,
-  SvgConfig,
-  ShapeRef,
-  ViewBoxParams,
-} from '../../../../../../src/plugins/expression_shape/public';
-import { withSuspense } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
-  shape?: Shape;
-}
-
-const ShapeDrawer = withSuspense<ShapeDrawerComponentProps, ShapeRef>(LazyShapeDrawer);
-
-function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
-  const { minX, minY, width, height } = defaultViewBox;
-  return {
-    minX: minX - defaultWidth / 2,
-    minY: minY - defaultWidth / 2,
-    width: width + defaultWidth,
-    height: height + defaultWidth,
-  };
+  shape?: string;
 }
 
 export const ShapePreview: FC<Props> = ({ shape }) => {
-  const [shapeData, setShapeData] = useState<SvgConfig>(getDefaultShapeData());
+  if (!shape) {
+    return <div className="canvasShapePreview" />;
+  }
 
-  const shapeRef = useCallback<RefCallback<ShapeRef>>((node) => {
-    if (node !== null) setShapeData(node.getData());
-  }, []);
+  const weight = 5;
+  const parser = new DOMParser();
+  const shapeSvg = parser
+    .parseFromString(shape, 'image/svg+xml')
+    .getElementsByTagName('svg')
+    .item(0);
 
-  if (!shape) return <div className="canvasShapePreview" />;
+  if (!shapeSvg) {
+    throw new Error('An unexpected error occurred: the SVG was not parseable');
+  }
+
+  shapeSvg.setAttribute('fill', 'none');
+  shapeSvg.setAttribute('stroke', 'black');
+
+  const viewBox = shapeSvg.getAttribute('viewBox') || '0 0 0 0';
+  const initialViewBox = viewBox.split(' ').map((v: string) => parseInt(v, 10));
+
+  let [minX, minY, width, height] = initialViewBox;
+  minX -= weight / 2;
+  minY -= weight / 2;
+  width += weight;
+  height += weight;
+  shapeSvg.setAttribute('viewBox', [minX, minY, width, height].join(' '));
+
   return (
-    <div className="canvasShapePreview">
-      <ShapeDrawer
-        ref={shapeRef}
-        shapeType={shape}
-        shapeAttributes={{
-          fill: 'none',
-          stroke: 'black',
-          viewBox: getViewBox(5, shapeData.viewBox),
-        }}
-      />
-    </div>
+    // eslint-disable-next-line react/no-danger
+    <div className="canvasShapePreview" dangerouslySetInnerHTML={{ __html: shapeSvg.outerHTML }} />
   );
 };
 

@@ -11,7 +11,7 @@ import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from './../lib/rename_keys';
-import { FindOptions } from '../../rules_client';
+import { FindOptions } from '../../alerts_client';
 
 // config definition
 const querySchema = schema.object({
@@ -46,7 +46,7 @@ export const aggregateAlertRoute = (router: AlertingRouter, licenseState: ILicen
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const rulesClient = context.alerting.getRulesClient();
+      const alertsClient = context.alerting.getAlertsClient();
 
       const query = req.query;
       const renameMap = {
@@ -64,7 +64,7 @@ export const aggregateAlertRoute = (router: AlertingRouter, licenseState: ILicen
           : [query.search_fields];
       }
 
-      const aggregateResult = await rulesClient.aggregate({ options });
+      const aggregateResult = await alertsClient.aggregate({ options });
       return res.ok({
         body: aggregateResult,
       });

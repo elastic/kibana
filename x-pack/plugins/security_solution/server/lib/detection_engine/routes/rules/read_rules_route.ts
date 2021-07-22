@@ -47,17 +47,17 @@ export const readRulesRoute = (
 
       const { id, rule_id: ruleId } = request.query;
 
-      const rulesClient = context.alerting?.getRulesClient();
+      const alertsClient = context.alerting?.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
       try {
-        if (!rulesClient) {
+        if (!alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rule = await readRules({
-          rulesClient,
+          alertsClient,
           id,
           ruleId,
         });

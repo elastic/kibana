@@ -28,7 +28,7 @@ class PatchError extends Error {
 }
 
 export const patchRules = async ({
-  rulesClient,
+  alertsClient,
   author,
   buildingBlockType,
   savedObjectsClient,
@@ -192,15 +192,15 @@ export const patchRules = async ({
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
   }
 
-  const update = await rulesClient.update({
+  const update = await alertsClient.update({
     id: rule.id,
     data: validated,
   });
 
   if (rule.enabled && enabled === false) {
-    await rulesClient.disable({ id: rule.id });
+    await alertsClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
-    await enableRule({ rule, rulesClient, savedObjectsClient });
+    await enableRule({ rule, alertsClient, savedObjectsClient });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }

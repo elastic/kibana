@@ -12,18 +12,16 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server/lib/alerting/inventory_metric_threshold/types';
-
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { AlertTypeParams } from '../../../../alerting/common';
 import { validateMetricThreshold } from './components/validation';
-import { formatReason } from './rule_data_formatters';
 
 interface InventoryMetricAlertTypeParams extends AlertTypeParams {
   criteria: InventoryMetricConditions[];
 }
 
-export function createInventoryMetricAlertType(): ObservabilityRuleTypeModel<InventoryMetricAlertTypeParams> {
+export function createInventoryMetricAlertType(): AlertTypeModel<InventoryMetricAlertTypeParams> {
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
@@ -46,6 +44,5 @@ Reason:
       }
     ),
     requiresAppContext: false,
-    format: formatReason,
   };
 }

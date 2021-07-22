@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const find = getService('find');
-  const testSubjects = getService('testSubjects');
 
   describe('discover tab with new fields API', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -115,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('doc view should sort ascending', async function () {
           const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
-          await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+          await find.clickByCssSelector('.fa-sort-down');
 
           // we don't technically need this sleep here because the tryForTime will retry and the
           // results will match on the 2nd or 3rd attempt, but that debug output is huge in this

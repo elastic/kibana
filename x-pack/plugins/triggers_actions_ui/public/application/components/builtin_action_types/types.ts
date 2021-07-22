@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiIconProps } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
@@ -133,5 +132,3 @@ export interface TeamsSecrets {
 }
 
 export type TeamsActionConnector = UserConfiguredActionConnector<unknown, TeamsSecrets>;
-
-export type LogoProps = Omit<EuiIconProps, 'type'>;

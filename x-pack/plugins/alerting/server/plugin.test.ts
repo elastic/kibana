@@ -113,7 +113,7 @@ describe('Alerting Plugin', () => {
   });
 
   describe('start()', () => {
-    describe('getRulesClientWithRequest()', () => {
+    describe('getAlertsClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
@@ -148,7 +148,7 @@ describe('Alerting Plugin', () => {
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
         expect(() =>
-          startContract.getRulesClientWithRequest({} as KibanaRequest)
+          startContract.getAlertsClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
@@ -204,7 +204,7 @@ describe('Alerting Plugin', () => {
           },
           getSavedObjectsClient: jest.fn(),
         } as unknown) as KibanaRequest;
-        startContract.getRulesClientWithRequest(fakeRequest);
+        startContract.getAlertsClientWithRequest(fakeRequest);
       });
     });
 

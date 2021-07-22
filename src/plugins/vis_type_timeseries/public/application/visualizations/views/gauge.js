@@ -108,15 +108,10 @@ export class Gauge extends Component {
           ref={(el) => (this.inner = el)}
           style={styles.inner}
         >
-          <div className="tvbVisGauge__label" ref="title" data-test-subj="gaugeLabel">
+          <div className="tvbVisGauge__label" ref="title">
             {title}
           </div>
-          <div
-            className="tvbVisGauge__value"
-            style={styles.valueColor}
-            ref="label"
-            data-test-subj="gaugeValue"
-          >
+          <div className="tvbVisGauge__value" style={styles.valueColor} ref="label">
             {formatter(value)}
           </div>
           {additionalLabel}
@@ -129,15 +124,10 @@ export class Gauge extends Component {
           ref={(el) => (this.inner = el)}
           style={styles.inner}
         >
-          <div
-            className="tvbVisGauge__value"
-            style={styles.valueColor}
-            ref="label"
-            data-test-subj="gaugeValue"
-          >
+          <div className="tvbVisGauge__value" style={styles.valueColor} ref="label">
             {formatter(value)}
           </div>
-          <div className="tvbVisGauge__label" ref="title" data-test-subj="gaugeLabel">
+          <div className="tvbVisGauge__label" ref="title">
             {title}
           </div>
           {additionalLabel}

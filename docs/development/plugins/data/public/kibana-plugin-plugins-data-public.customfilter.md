@@ -4,13 +4,10 @@
 
 ## CustomFilter type
 
-> Warning: This API is now obsolete.
-> 
-> Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
-> 
-
 <b>Signature:</b>
 
 ```typescript
-declare type CustomFilter = oldCustomFilter;
+export declare type CustomFilter = Filter & {
+    query: any;
+};
 ```

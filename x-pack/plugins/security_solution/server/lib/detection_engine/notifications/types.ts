@@ -6,7 +6,7 @@
  */
 
 import {
-  RulesClient,
+  AlertsClient,
   PartialAlert,
   AlertType,
   AlertTypeParams,
@@ -25,7 +25,7 @@ export interface RuleNotificationAlertTypeParams extends AlertTypeParams {
 export type RuleNotificationAlertType = Alert<RuleNotificationAlertTypeParams>;
 
 export interface FindNotificationParams {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   perPage?: number;
   page?: number;
   sortField?: string;
@@ -45,7 +45,7 @@ export interface FindNotificationsRequestParams {
 }
 
 export interface Clients {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
 }
 
 export type UpdateNotificationParams = Omit<
@@ -73,7 +73,7 @@ export interface NotificationAlertParams {
 export type CreateNotificationParams = NotificationAlertParams & Clients;
 
 export interface ReadNotificationParams {
-  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
   id?: string | null;
   ruleAlertId?: string | null;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import rison, { RisonValue } from 'rison-node';
-import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
+import type { SeriesUrl, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { esFilters, ExistsFilter } from '../../../../../../../../src/plugins/data/public';
@@ -16,43 +16,40 @@ export function convertToShortUrl(series: SeriesUrl) {
   const {
     operationType,
     seriesType,
+    reportType,
     breakdown,
     filters,
     reportDefinitions,
     dataType,
     selectedMetricField,
-    hidden,
-    name,
-    color,
     ...restSeries
   } = series;
 
   return {
     [URL_KEYS.OPERATION_TYPE]: operationType,
+    [URL_KEYS.REPORT_TYPE]: reportType,
     [URL_KEYS.SERIES_TYPE]: seriesType,
     [URL_KEYS.BREAK_DOWN]: breakdown,
     [URL_KEYS.FILTERS]: filters,
     [URL_KEYS.REPORT_DEFINITIONS]: reportDefinitions,
     [URL_KEYS.DATA_TYPE]: dataType,
     [URL_KEYS.SELECTED_METRIC]: selectedMetricField,
-    [URL_KEYS.HIDDEN]: hidden,
-    [URL_KEYS.NAME]: name,
-    [URL_KEYS.COLOR]: color,
     ...restSeries,
   };
 }
 
-export function createExploratoryViewUrl(
-  { reportType, allSeries }: { reportType: ReportViewType; allSeries: AllSeries },
-  baseHref = ''
-) {
-  const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
+export function createExploratoryViewUrl(allSeries: AllSeries, baseHref = '') {
+  const allSeriesIds = Object.keys(allSeries);
+
+  const allShortSeries: AllShortSeries = {};
+
+  allSeriesIds.forEach((seriesKey) => {
+    allShortSeries[seriesKey] = convertToShortUrl(allSeries[seriesKey]);
+  });
 
   return (
     baseHref +
-    `/app/observability/exploratory-view/configure#?reportType=${reportType}&sr=${rison.encode(
-      (allShortSeries as unknown) as RisonValue
-    )}`
+    `/app/observability/exploratory-view#?sr=${rison.encode(allShortSeries as RisonValue)}`
   );
 }
 

@@ -10,21 +10,21 @@ import { getPatchRulesOptionsMock, getPatchMlRulesOptionsMock } from './patch_ru
 import { PatchRulesOptions } from './types';
 
 describe('patchRules', () => {
-  it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
+  it('should call alertsClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesOptionsMock = getPatchRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
       enabled: false,
     };
     await patchRules(ruleOptions);
-    expect(ruleOptions.rulesClient.disable).toHaveBeenCalledWith(
+    expect(ruleOptions.alertsClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: ruleOptions.rule?.id,
       })
     );
   });
 
-  it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
+  it('should call alertsClient.enable if the rule was disabled and enabled is true', async () => {
     const rulesOptionsMock = getPatchRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
@@ -34,14 +34,14 @@ describe('patchRules', () => {
       ruleOptions.rule.enabled = false;
     }
     await patchRules(ruleOptions);
-    expect(ruleOptions.rulesClient.enable).toHaveBeenCalledWith(
+    expect(ruleOptions.alertsClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: ruleOptions.rule?.id,
       })
     );
   });
 
-  it('calls the rulesClient with legacy ML params', async () => {
+  it('calls the alertsClient with legacy ML params', async () => {
     const rulesOptionsMock = getPatchMlRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
@@ -51,7 +51,7 @@ describe('patchRules', () => {
       ruleOptions.rule.enabled = false;
     }
     await patchRules(ruleOptions);
-    expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
+    expect(ruleOptions.alertsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
@@ -63,7 +63,7 @@ describe('patchRules', () => {
     );
   });
 
-  it('calls the rulesClient with new ML params', async () => {
+  it('calls the alertsClient with new ML params', async () => {
     const rulesOptionsMock = getPatchMlRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
@@ -74,7 +74,7 @@ describe('patchRules', () => {
       ruleOptions.rule.enabled = false;
     }
     await patchRules(ruleOptions);
-    expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
+    expect(ruleOptions.alertsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
@@ -103,7 +103,7 @@ describe('patchRules', () => {
         ],
       };
       await patchRules(ruleOptions);
-      expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
+      expect(ruleOptions.alertsClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             actions: [
@@ -138,7 +138,7 @@ describe('patchRules', () => {
       }
 
       await patchRules(ruleOptions);
-      expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
+      expect(ruleOptions.alertsClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             actions: [

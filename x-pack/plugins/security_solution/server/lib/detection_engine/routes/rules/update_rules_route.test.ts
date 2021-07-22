@@ -36,9 +36,9 @@ describe('update_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
+    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
 
     updateRulesRoute(server.router, ml);
@@ -57,7 +57,7 @@ describe('update_rules', () => {
     });
 
     test('returns 404 when updating a single rule that does not exist', async () => {
-      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
@@ -68,7 +68,7 @@ describe('update_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
@@ -84,7 +84,7 @@ describe('update_rules', () => {
     });
 
     test('returns error when updating non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
@@ -95,7 +95,7 @@ describe('update_rules', () => {
     });
 
     test('catches error if search throws error', async () => {
-      clients.rulesClient.find.mockImplementation(async () => {
+      clients.alertsClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getUpdateRequest(), context);

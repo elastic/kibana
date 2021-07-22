@@ -7,23 +7,20 @@
  */
 
 const Path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
+const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
+const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./src/index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-const WEBPACK_SRC = require.resolve('webpack');
 
 module.exports = {
-  node: {
-    child_process: 'empty',
-    fs: 'empty',
-  },
-  externals: {
-    module: 'module',
-  },
   mode: 'production',
   entry: {
     'kbn-ui-shared-deps': './src/entry.js',
@@ -33,7 +30,8 @@ module.exports = {
     'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
-  devtool: 'cheap-source-map',
+  // cheap-source-map should be used if needed
+  devtool: false,
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
@@ -41,11 +39,10 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
-    futureEmitAssets: true,
   },
 
   module: {
-    noParse: [MOMENT_SRC, WEBPACK_SRC],
+    noParse: [MOMENT_SRC],
     rules: [
       {
         include: [require.resolve('./src/entry.js')],
@@ -105,17 +102,35 @@ module.exports = {
   resolve: {
     alias: {
       moment: MOMENT_SRC,
-      // NOTE: Used to include react profiling on bundles
-      // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
-      'react-dom$': 'react-dom/profiling',
-      'scheduler/tracing': 'scheduler/tracing-profiling',
     },
     extensions: ['.js', '.ts'],
     symlinks: false,
   },
 
   optimization: {
-    minimize: false,
+    minimizer: [
+      new CssMinimizerPlugin({
+        parallel: false,
+        minimizerOptions: {
+          preset: [
+            'default',
+            {
+              discardComments: false,
+            },
+          ],
+        },
+      }),
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: false,
+        terserOptions: {
+          compress: true,
+          mangle: true,
+        },
+      }),
+    ],
     noEmitOnErrors: true,
     splitChunks: {
       cacheGroups: {
@@ -140,5 +155,44 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
+    new CompressionPlugin({
+      algorithm: 'brotliCompress',
+      filename: '[path].br',
+      test: /\.(js|css)$/,
+      cache: false,
+    }),
+    new CompressionPlugin({
+      algorithm: 'gzip',
+      filename: '[path].gz',
+      test: /\.(js|css)$/,
+      cache: false,
+    }),
+    new (class MetricsPlugin {
+      apply(compiler) {
+        compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
+          const metrics = [
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-js',
+              value: compilation.assets['kbn-ui-shared-deps.js'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-css',
+              value:
+                compilation.assets['kbn-ui-shared-deps.css'].size() +
+                compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-elastic',
+              value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
+            },
+          ];
+
+          compilation.emitAsset('metrics.json', new RawSource(JSON.stringify(metrics, null, 2)));
+        });
+      }
+    })(),
   ],
 };

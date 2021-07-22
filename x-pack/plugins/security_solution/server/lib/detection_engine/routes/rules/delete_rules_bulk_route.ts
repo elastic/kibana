@@ -50,10 +50,10 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
   const handler: Handler = async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
 
-    const rulesClient = context.alerting?.getRulesClient();
+    const alertsClient = context.alerting?.getAlertsClient();
     const savedObjectsClient = context.core.savedObjects.client;
 
-    if (!rulesClient) {
+    if (!alertsClient) {
       return siemResponse.error({ statusCode: 404 });
     }
 
@@ -73,7 +73,7 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         try {
-          const rule = await readRules({ rulesClient, id, ruleId });
+          const rule = await readRules({ alertsClient, id, ruleId });
           if (!rule) {
             return getIdBulkError({ id, ruleId });
           }
@@ -84,7 +84,7 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
             searchFields: ['alertId'],
           });
           await deleteRules({
-            rulesClient,
+            alertsClient,
             savedObjectsClient,
             ruleStatusClient,
             ruleStatuses,

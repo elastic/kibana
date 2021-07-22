@@ -150,7 +150,7 @@ export class CoreUsageStatsClient {
     const { createNewCopies, overwrite } = options;
     const counterFieldNames = [
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
-      ...(!createNewCopies ? [`overwriteEnabled.${overwrite ? 'yes' : 'no'}`] : []), // the overwrite option is ignored when createNewCopies is true
+      `overwriteEnabled.${overwrite ? 'yes' : 'no'}`,
     ];
     await this.updateUsageStats(counterFieldNames, IMPORT_STATS_PREFIX, options);
   }

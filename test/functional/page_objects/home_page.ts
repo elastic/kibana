@@ -74,7 +74,6 @@ export class HomePageObject extends FtrService {
 
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
-    await this.common.closeToastIfExists();
     await this.testSubjects.click(`launchSampleDataSet${id}`);
   }
 

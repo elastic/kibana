@@ -17,16 +17,16 @@ jest.mock('../static_globals', () => ({
 }));
 
 describe('AlertsFactory', () => {
-  const rulesClient = {
+  const alertsClient = {
     find: jest.fn(),
   };
 
   afterEach(() => {
-    rulesClient.find.mockReset();
+    alertsClient.find.mockReset();
   });
 
   it('should get by type', async () => {
-    rulesClient.find = jest.fn().mockImplementation(() => {
+    alertsClient.find = jest.fn().mockImplementation(() => {
       return {
         total: 1,
         data: [
@@ -36,20 +36,20 @@ describe('AlertsFactory', () => {
         ],
       };
     });
-    const alert = await AlertsFactory.getByType(ALERT_CPU_USAGE, rulesClient as any);
+    const alert = await AlertsFactory.getByType(ALERT_CPU_USAGE, alertsClient as any);
     expect(alert).not.toBeNull();
     expect(alert?.getId()).toBe(ALERT_CPU_USAGE);
   });
 
   it('should pass in the correct filters', async () => {
     let filter = null;
-    rulesClient.find = jest.fn().mockImplementation(({ options }) => {
+    alertsClient.find = jest.fn().mockImplementation(({ options }) => {
       filter = options.filter;
       return {
         total: 0,
       };
     });
-    await AlertsFactory.getByType(ALERT_CPU_USAGE, rulesClient as any);
+    await AlertsFactory.getByType(ALERT_CPU_USAGE, alertsClient as any);
     expect(filter).toBe(`alert.attributes.alertTypeId:${ALERT_CPU_USAGE}`);
   });
 });

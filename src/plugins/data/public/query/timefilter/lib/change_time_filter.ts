@@ -8,9 +8,8 @@
 
 import moment from 'moment';
 import { keys } from 'lodash';
-import { RangeFilter } from '@kbn/es-query';
 import { TimefilterContract } from '../../timefilter';
-import { TimeRange } from '../../../../common';
+import { RangeFilter, TimeRange } from '../../../../common';
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
   const key = keys(filter.range)[0];

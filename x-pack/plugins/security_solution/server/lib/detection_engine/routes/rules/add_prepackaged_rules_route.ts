@@ -34,7 +34,7 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
 
 import { buildSiemResponse } from '../utils';
-import { RulesClient } from '../../../../../../alerting/server';
+import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 
 import { ExceptionListClient } from '../../../../../../lists/server';
@@ -65,21 +65,19 @@ export const addPrepackedRulesRoute = (
       const frameworkRequest = await buildFrameworkRequest(context, security, _);
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const alertsClient = context.alerting?.getAlertsClient();
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !rulesClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         const validated = await createPrepackagedRules(
           context,
           siemClient,
-          rulesClient,
+          alertsClient,
           frameworkRequest,
-          config.maxTimelineImportExportSize,
-          config.prebuiltRulesFromFileSystem,
-          config.prebuiltRulesFromSavedObjects
+          config.maxTimelineImportExportSize
         );
         return response.ok({ body: validated ?? {} });
       } catch (err) {
@@ -104,11 +102,9 @@ class PrepackagedRulesError extends Error {
 export const createPrepackagedRules = async (
   context: SecuritySolutionRequestHandlerContext,
   siemClient: AppClient,
-  rulesClient: RulesClient,
+  alertsClient: AlertsClient,
   frameworkRequest: FrameworkRequest,
-  maxTimelineImportExportSize: ConfigType['maxTimelineImportExportSize'],
-  prebuiltRulesFromFileSystem: ConfigType['prebuiltRulesFromFileSystem'],
-  prebuiltRulesFromSavedObjects: ConfigType['prebuiltRulesFromSavedObjects'],
+  maxTimelineImportExportSize: number,
   exceptionsClient?: ExceptionListClient
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
   const esClient = context.core.elasticsearch.client;
@@ -116,7 +112,7 @@ export const createPrepackagedRules = async (
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
   const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-  if (!siemClient || !rulesClient) {
+  if (!siemClient || !alertsClient) {
     throw new PrepackagedRulesError('', 404);
   }
 
@@ -125,12 +121,8 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRules = await getLatestPrepackagedRules(
-    ruleAssetsClient,
-    prebuiltRulesFromFileSystem,
-    prebuiltRulesFromSavedObjects
-  );
-  const prepackagedRules = await getExistingPrepackagedRules({ rulesClient });
+  const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
+  const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
@@ -144,7 +136,7 @@ export const createPrepackagedRules = async (
     }
   }
 
-  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall, signalsIndex));
+  await Promise.all(installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex));
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -154,7 +146,7 @@ export const createPrepackagedRules = async (
     timeline,
     importTimelineResultSchema
   );
-  await updatePrepackagedRules(rulesClient, savedObjectsClient, rulesToUpdate, signalsIndex);
+  await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);
 
   const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {
     rules_installed: rulesToInstall.length,

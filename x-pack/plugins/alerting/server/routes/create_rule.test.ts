@@ -11,13 +11,13 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { CreateOptions } from '../rules_client';
-import { rulesClientMock } from '../rules_client.mock';
+import { CreateOptions } from '../alerts_client';
+import { alertsClientMock } from '../alerts_client.mock';
 import { AlertTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
 import { SanitizedAlert } from '../types';
 
-const rulesClient = rulesClientMock.create();
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -112,10 +112,10 @@ describe('createRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+    alertsClient.create.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         body: ruleToCreate,
       },
@@ -124,8 +124,8 @@ describe('createRuleRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
-    expect(rulesClient.create).toHaveBeenCalledTimes(1);
-    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.create).toHaveBeenCalledTimes(1);
+    expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {
@@ -180,13 +180,13 @@ describe('createRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce({
+    alertsClient.create.mockResolvedValueOnce({
       ...mockedAlert,
       id: 'custom-id',
     });
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { alertsClient },
       {
         params: { id: 'custom-id' },
         body: ruleToCreate,
@@ -196,8 +196,8 @@ describe('createRuleRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
-    expect(rulesClient.create).toHaveBeenCalledTimes(1);
-    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.create).toHaveBeenCalledTimes(1);
+    expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {
@@ -246,9 +246,9 @@ describe('createRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+    alertsClient.create.mockResolvedValueOnce(mockedAlert);
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: ruleToCreate });
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { body: ruleToCreate });
 
     await handler(context, req, res);
 
@@ -267,9 +267,9 @@ describe('createRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+    alertsClient.create.mockResolvedValueOnce(mockedAlert);
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {});
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
@@ -284,9 +284,9 @@ describe('createRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    alertsClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: ruleToCreate }, [
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { body: ruleToCreate }, [
       'ok',
       'forbidden',
     ]);

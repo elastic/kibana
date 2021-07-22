@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
-  const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
-  const filterBar = getService('filterBar');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   /**
    * Common test suite for testing exception scenarious within dashboard
@@ -25,19 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/dashboard/current/kibana'
       );
-      await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard_error_cases.json'
-      );
       await PageObjects.common.navigateToApp('dashboard');
-    });
-
-    it('correctly loads default index pattern on first load with an error embeddable', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard('Dashboard with Missing Lens Panel');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await filterBar.addFilter('bytes', 'is', '12345678');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await filterBar.getFilterCount()).to.be(1);
     });
 
     // wrapping into own describe to make sure new tab is cleaned up even if test failed

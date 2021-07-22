@@ -89,7 +89,7 @@ describe('add_prepackaged_rules_route', () => {
 
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -107,15 +107,15 @@ describe('add_prepackaged_rules_route', () => {
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating with a valid actionClient and rulesClient', async () => {
+    test('returns 200 when creating with a valid actionClient and alertClient', async () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 if rulesClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+    test('returns 404 if alertClient is not available on the route', async () => {
+      context.alerting!.getAlertsClient = jest.fn();
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -156,7 +156,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('responses', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
-      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -292,16 +292,13 @@ describe('add_prepackaged_rules_route', () => {
         getExceptionListClient: jest.fn(),
         getListClient: jest.fn(),
       };
-      const config = createMockConfig();
 
       await createPrepackagedRules(
         context,
         siemMockClient,
-        clients.rulesClient,
+        clients.alertsClient,
         {} as FrameworkRequest,
         1200,
-        config.prebuiltRulesFromFileSystem,
-        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 
@@ -311,16 +308,13 @@ describe('add_prepackaged_rules_route', () => {
 
     test('uses passed in exceptions list client when lists client not available in context', async () => {
       const { lists, ...myContext } = context;
-      const config = createMockConfig();
 
       await createPrepackagedRules(
         myContext,
         siemMockClient,
-        clients.rulesClient,
+        clients.alertsClient,
         {} as FrameworkRequest,
         1200,
-        config.prebuiltRulesFromFileSystem,
-        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 

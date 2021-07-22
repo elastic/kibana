@@ -115,7 +115,7 @@ export interface LegacyRequest {
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
-  getRulesClient: () => any;
+  getAlertsClient: () => any;
   getActionsClient: () => any;
   server: LegacyServer;
 }

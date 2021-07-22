@@ -39,11 +39,11 @@ export const updateRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting?.getRulesClient();
+      const alertsClient = context.alerting?.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
-      if (!siemClient || !rulesClient) {
+      if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -71,7 +71,7 @@ export const updateRulesBulkRoute = (
             throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const rule = await updateRules({
-              rulesClient,
+              alertsClient,
               savedObjectsClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               ruleUpdate: payloadRule,
@@ -79,7 +79,7 @@ export const updateRulesBulkRoute = (
             if (rule != null) {
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: rule.id,
-                rulesClient,
+                alertsClient,
                 savedObjectsClient,
                 enabled: payloadRule.enabled ?? true,
                 actions: payloadRule.actions,
