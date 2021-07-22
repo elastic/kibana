@@ -100,6 +100,7 @@ export function estimateCapacity(
       percentageOfExecutionsUsedByRecurringTasks + percentageOfExecutionsUsedByNonRecurringTasks
     )
   );
+
   /**
    * On average, how much of this kibana's capacity has been historically used to execute
    * non-recurring and ephemeral tasks
@@ -147,7 +148,7 @@ export function estimateCapacity(
    */
   const minRequiredKibanaInstances = Math.ceil(
     hasTooLittleCapacityToEstimateRequiredNonRecurringCapacity
-      ? /* 
+      ? /*
         if load is at 100% or there's no capacity for recurring tasks at the moment, then it's really difficult for us to assess how
         much capacity is needed for non-recurring tasks at normal times. This might be representative, but it might
         also be a spike and we have no way of knowing that. We'll recommend people scale up by 20% and go from there. */
@@ -182,7 +183,6 @@ export function estimateCapacity(
   const assumedRequiredThroughputPerMinutePerKibana =
     averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
-
   return {
     status:
       assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
