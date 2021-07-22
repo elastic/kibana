@@ -224,7 +224,7 @@ const jobStatusLabelsMap = new Map<JOB_STATUSES, string>([
   [
     COMPLETED,
     i18n.translate('xpack.reporting.jobStatuses.completedText', {
-      defaultMessage: 'Completed',
+      defaultMessage: 'Completed', // NOTE: a job is `completed` not `completed_with_warings` if it has reached max size or possibly contains csv characters
     }),
   ],
   [
