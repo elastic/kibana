@@ -63,19 +63,32 @@ export function asFiltersByRuleTypeAndConsumer(
     }, [])
   );
 
-  if (ruleTypes.size === 0 && opts.includeSpaceId && spaceId != null) {
-    return toElasticsearchQuery(
-      nodeBuilder.is(opts.fieldNames.spaceIds, spaceId),
-      undefined,
-      esQueryConfig
-    );
-  }
-
   if (opts.type === AlertingAuthorizationFilterType.ESDSL) {
     return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
   }
 
   return kueryNode;
+}
+
+// This is a specific use case currently for alerts as data
+// Space ids are stored in the alerts documents and even if security is disabled
+// still need to consider the users space privileges
+export function asFiltersBySpaceId(
+  opts: AlertingAuthorizationFilterOpts,
+  spaceId: string | undefined
+): KueryNode | JsonObject | undefined {
+  const filterBySpace = opts.includeSpaceId && opts.fieldNames.spaceIds != null && spaceId != null;
+  const kueryNode = nodeBuilder.is(opts.fieldNames.spaceIds, spaceId);
+
+  if (filterBySpace && opts.type === AlertingAuthorizationFilterType.ESDSL) {
+    return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
+  }
+
+  if (filterBySpace && opts.type === AlertingAuthorizationFilterType.KQL) {
+    return kueryNode;
+  }
+
+  return undefined;
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {

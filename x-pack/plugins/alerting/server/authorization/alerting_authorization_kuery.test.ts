@@ -10,6 +10,7 @@ import {
   AlertingAuthorizationFilterType,
   asFiltersByRuleTypeAndConsumer,
   ensureFieldIsSafeForQuery,
+  asFiltersBySpaceId,
 } from './alerting_authorization_kuery';
 import { esKuery } from '../../../../../src/plugins/data/server';
 
@@ -608,6 +609,91 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         minimum_should_match: 1,
       },
     });
+  });
+});
+
+describe('asFiltersBySpaceId', () => {
+  test('returns ES dsl filter of spaceId', () => {
+    expect(
+      asFiltersBySpaceId(
+        {
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+            spaceIds: 'path.to.space.id',
+          },
+          includeSpaceId: true,
+        },
+        'space1'
+      )
+    ).toEqual({
+      bool: { minimum_should_match: 1, should: [{ match: { 'path.to.space.id': 'space1' } }] },
+    });
+  });
+
+  test('returns KQL filter of spaceId', () => {
+    expect(
+      asFiltersBySpaceId(
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+            spaceIds: 'path.to.space.id',
+          },
+          includeSpaceId: true,
+        },
+        'space1'
+      )
+    ).toEqual(esKuery.fromKueryExpression('(path.to.space.id: space1)'));
+  });
+
+  test('returns undefined if no path to spaceIds is provided', () => {
+    expect(
+      asFiltersBySpaceId(
+        {
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          },
+          includeSpaceId: true,
+        },
+        'space1'
+      )
+    ).toBeUndefined();
+  });
+
+  test('returns undefined if "includeSpaceId" is false', () => {
+    expect(
+      asFiltersBySpaceId(
+        {
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+            spaceIds: 'path.to.space.id',
+          },
+          includeSpaceId: false,
+        },
+        'space1'
+      )
+    ).toBeUndefined();
+  });
+
+  test('returns undefined if no spaceId is provided', () => {
+    expect(
+      asFiltersBySpaceId({
+        type: AlertingAuthorizationFilterType.ESDSL,
+        fieldNames: {
+          ruleTypeId: 'path.to.rule.id',
+          consumer: 'consumer-field',
+          spaceIds: 'path.to.space.id',
+        },
+        includeSpaceId: true,
+      })
+    ).toBeUndefined();
   });
 });
 

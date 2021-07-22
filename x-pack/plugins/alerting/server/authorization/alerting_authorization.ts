@@ -17,6 +17,7 @@ import { AlertingAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
 import {
   asFiltersByRuleTypeAndConsumer,
+  asFiltersBySpaceId,
   AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
@@ -346,28 +347,13 @@ export class AlertingAuthorization {
           }
         },
       };
-    } else {
-      if (filterOpts.includeSpaceId) {
-        return {
-          filter: asFiltersByRuleTypeAndConsumer(new Set(), filterOpts, this.spaceId),
-          ensureRuleTypeIsAuthorized: (
-            ruleTypeId: string,
-            consumer: string,
-            authType: string
-          ) => {},
-          logSuccessfulAuthorization: () => {},
-        };
-      } else {
-        return {
-          ensureRuleTypeIsAuthorized: (
-            ruleTypeId: string,
-            consumer: string,
-            authType: string
-          ) => {},
-          logSuccessfulAuthorization: () => {},
-        };
-      }
     }
+
+    return {
+      filter: asFiltersBySpaceId(filterOpts, this.spaceId),
+      ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
+      logSuccessfulAuthorization: () => {},
+    };
   }
 
   public async filterByRuleTypeAuthorization(

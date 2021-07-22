@@ -35,7 +35,7 @@ const auditLogger = alertingAuthorizationAuditLoggerMock.create();
 const realAuditLogger = new AlertingAuthorizationAuditLogger();
 
 const getSpace = jest.fn();
-const getSpaceId = jest.fn();
+const getSpaceId = () => 'space1';
 
 const exemptConsumerIds: string[] = [];
 
@@ -1263,6 +1263,37 @@ describe('AlertingAuthorization', () => {
               "rule",
             ]
           `);
+    });
+
+    // This is a specific use case currently for alerts as data
+    // Space ids are stored in the alerts documents and even if security is disabled
+    // still need to consider the users space privileges
+    test('creates a spaceId only filter if security is disabled, but require space awareness', async () => {
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        alertTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        getSpaceId,
+        exemptConsumerIds,
+      });
+      const {
+        filter,
+        ensureRuleTypeIsAuthorized,
+      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alerts, {
+        type: AlertingAuthorizationFilterType.ESDSL,
+        fieldNames: {
+          ruleTypeId: 'ruleId',
+          consumer: 'consumer',
+          spaceIds: 'path.to.space.id',
+        },
+        includeSpaceId: true,
+      });
+
+      expect(filter).toEqual({
+        bool: { minimum_should_match: 1, should: [{ match: { 'path.to.space.id': 'space1' } }] },
+      });
     });
   });
 
