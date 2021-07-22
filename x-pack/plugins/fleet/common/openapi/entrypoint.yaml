@@ -54,6 +54,8 @@ paths:
     $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
   /package_policies:
     $ref: paths/package_policies.yaml
+  /package_policies/delete:
+    $ref: paths/package_policies@delete.yaml
   '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
 components:
