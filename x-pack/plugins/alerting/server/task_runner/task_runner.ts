@@ -70,6 +70,7 @@ interface AlertTaskInstance extends ConcreteTaskInstance {
 
 export class TaskRunner<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -81,6 +82,7 @@ export class TaskRunner<
   private taskInstance: AlertTaskInstance;
   private alertType: NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -92,6 +94,7 @@ export class TaskRunner<
   constructor(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -171,6 +174,7 @@ export class TaskRunner<
   ) {
     return createExecutionHandler<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -190,6 +194,8 @@ export class TaskRunner<
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
+      supportsEphemeralTasks: this.context.supportsEphemeralTasks,
+      maxEphemeralActionsPerAlert: this.context.maxEphemeralActionsPerAlert,
     });
   }
 
@@ -701,6 +707,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertLabel: string;
   namespace: string | undefined;
   ruleType: NormalizedAlertType<
+    AlertTypeParams,
     AlertTypeParams,
     AlertTypeState,
     {

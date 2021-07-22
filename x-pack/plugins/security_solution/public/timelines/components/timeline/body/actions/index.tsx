@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import styled from 'styled-components';
+
 import {
   eventHasNotes,
   getEventType,
@@ -27,6 +29,11 @@ import { AddToCaseAction } from '../../../../../cases/components/timeline_action
 import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
+
+const ActionsContainer = styled.div`
+  align-items: center;
+  display: flex;
+`;
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
@@ -93,7 +100,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   return (
-    <>
+    <ActionsContainer>
       {showCheckboxes && (
         <div key="select-event-container" data-test-subj="select-event-container">
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
@@ -179,7 +186,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           onRuleChange={onRuleChange}
         />
       </>
-    </>
+    </ActionsContainer>
   );
 };
 
