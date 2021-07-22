@@ -51,6 +51,24 @@ const SortingColumnsContainer = styled.div`
   }
 `;
 
+const FieldBrowserContainer = styled.div`
+  .euiToolTipAnchor {
+    .euiButtonContent {
+      padding: 0 4px;
+    }
+    button {
+      color: ${({ theme }) => theme.eui.euiColorPrimary};
+    }
+    .euiButtonContent__icon {
+      width: 16px;
+      height: 16px;
+    }
+    .euiButtonEmpty__text {
+      display: none;
+    }
+  }
+`;
+
 const ActionsContainer = styled.div`
   align-items: center;
   display: flex;
@@ -160,11 +178,13 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       )}
 
       <EventsTh role="button">
-        {timelinesUi.getFieldBrowser({
-          browserFields,
-          columnHeaders,
-          timelineId,
-        })}
+        <FieldBrowserContainer>
+          {timelinesUi.getFieldBrowser({
+            browserFields,
+            columnHeaders,
+            timelineId,
+          })}
+        </FieldBrowserContainer>
       </EventsTh>
 
       <EventsTh role="button">
