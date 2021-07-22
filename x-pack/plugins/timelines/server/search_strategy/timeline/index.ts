@@ -60,6 +60,13 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
 
       if (entityType != null && entityType === EntityType.ALERTS) {
         isUsingInternal = true;
+
+        const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
+
+        if (!allFeatureIdsValid) {
+          throw new Error('An invalid alerts consumer feature id was provided');
+        }
+
         return timelineAlertsSearchStrategy({
           es: esAsInternal,
           request,
@@ -125,19 +132,12 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory: TimelineFactory<T>;
   alertConsumers: ALERTS_CONSUMERS[];
 }) => {
-  const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
-
-  if (!allFeatureIdsValid) {
-    throw new Error('An invalid alerts consumer feature id was provided');
-  }
-
   const indices = alertConsumers.flatMap((consumer) => mapConsumerToIndexName[consumer]);
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
   // Note: Alerts RBAC are built off of the alerting's authorization class, which
   // is why we are pulling from alerting, not ther alertsClient here
   const alertingAuthorizationClient = alerting.getAlertingAuthorizationWithRequest(deps.request);
-
   const getAuthFilter = async () =>
     alertingAuthorizationClient.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alert, {
       type: AlertingAuthorizationFilterType.ESDSL,

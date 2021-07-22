@@ -346,11 +346,28 @@ export class AlertingAuthorization {
           }
         },
       };
+    } else {
+      if (filterOpts.includeSpaceId) {
+        return {
+          filter: asFiltersByRuleTypeAndConsumer(new Set(), filterOpts, this.spaceId),
+          ensureRuleTypeIsAuthorized: (
+            ruleTypeId: string,
+            consumer: string,
+            authType: string
+          ) => {},
+          logSuccessfulAuthorization: () => {},
+        };
+      } else {
+        return {
+          ensureRuleTypeIsAuthorized: (
+            ruleTypeId: string,
+            consumer: string,
+            authType: string
+          ) => {},
+          logSuccessfulAuthorization: () => {},
+        };
+      }
     }
-    return {
-      ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
-      logSuccessfulAuthorization: () => {},
-    };
   }
 
   public async filterByRuleTypeAuthorization(

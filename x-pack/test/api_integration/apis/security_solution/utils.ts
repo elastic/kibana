@@ -6,10 +6,6 @@
  */
 import { JsonObject, JsonArray } from '@kbn/common-utils';
 
-export const getSpaceUrlPrefix = (spaceId?: string) => {
-  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-};
-
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {
     filter: [
@@ -72,9 +68,6 @@ export const getFieldsToRequest = (): string[] => [
   'file.hash.sha256',
   'host.os.family',
   'event.code',
-  'kibana.rac.alert.owner',
-  'kibana.rac.alert.id',
-  'event.kind',
 ];
 
 /**
@@ -389,14 +382,5 @@ export const getDocValueFields = (): JsonArray => [
   },
   {
     field: 'dll.pe.original_file_name',
-  },
-  {
-    field: 'kibana.rac.alert.owner',
-  },
-  {
-    field: 'kibana.rac.alert.id',
-  },
-  {
-    field: 'event.kind',
   },
 ];

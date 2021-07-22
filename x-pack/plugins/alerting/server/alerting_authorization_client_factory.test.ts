@@ -74,6 +74,7 @@ test('creates an alerting authorization client with proper constructor arguments
     features: alertingAuthorizationClientFactoryParams.features,
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
+    getSpaceId: expect.any(Function),
     exemptConsumerIds: [],
   });
 
@@ -101,6 +102,7 @@ test('creates an alerting authorization client with proper constructor arguments
     features: alertingAuthorizationClientFactoryParams.features,
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
+    getSpaceId: expect.any(Function),
     exemptConsumerIds: ['exemptConsumerA', 'exemptConsumerB'],
   });
 
@@ -123,6 +125,7 @@ test('creates an alerting authorization client with proper constructor arguments
     features: alertingAuthorizationClientFactoryParams.features,
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
+    getSpaceId: expect.any(Function),
     exemptConsumerIds: [],
   });
 

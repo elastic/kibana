@@ -63,6 +63,14 @@ export function asFiltersByRuleTypeAndConsumer(
     }, [])
   );
 
+  if (ruleTypes.size === 0 && opts.includeSpaceId && spaceId != null) {
+    return toElasticsearchQuery(
+      nodeBuilder.is(opts.fieldNames.spaceIds, spaceId),
+      undefined,
+      esQueryConfig
+    );
+  }
+
   if (opts.type === AlertingAuthorizationFilterType.ESDSL) {
     return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
   }
