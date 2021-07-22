@@ -9,9 +9,9 @@
 import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
+import { FieldFormatsContentType } from 'src/plugins/data/public';
 import { Sample, SampleInput } from '../../types';
-import { FormatSelectEditorProps } from '../../field_format_editor';
+import { FormatEditorProps } from '../types';
 import { formatId } from './constants';
 
 export const convertSampleInput = (
@@ -43,14 +43,6 @@ export const convertSampleInput = (
 
 interface SampleInputs {
   [key: string]: Array<ReactText[] | ReactText>;
-}
-
-export interface FormatEditorProps<P> {
-  fieldType: string;
-  format: FieldFormat;
-  formatParams: { type?: string } & P;
-  onChange: (newParams: Record<string, any>) => void;
-  onError: FormatSelectEditorProps['onError'];
 }
 
 export interface FormatEditorState {
@@ -89,9 +81,10 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
   }
 
   onChange = (newParams = {}) => {
-    const { onChange, formatParams } = this.props;
+    const { onChange, formatParams, fieldType } = this.props;
 
     onChange({
+      fieldType,
       ...formatParams,
       ...newParams,
     });

@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType, LazyExoticComponent, PureComponent } from 'react';
-import memoize from 'lodash/memoize';
+import React, { LazyExoticComponent, PureComponent } from 'react';
+import { memoize } from 'lodash';
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import type {
-  DefaultFormatEditor,
   FieldFormatEditorFactory,
+  FieldFormatEditor as InnerFieldFormatEditor,
 } from 'src/plugins/index_pattern_field_editor/public';
+import type { FieldFormat } from 'src/plugins/data/public';
 
 export interface FieldFormatEditorProps {
   fieldType: string;
-  fieldFormat: DefaultFormatEditor;
+  fieldFormat: FieldFormat;
   fieldFormatId: string;
   fieldFormatParams: { [key: string]: unknown };
   fieldFormatEditors: any;
@@ -24,26 +25,14 @@ export interface FieldFormatEditorProps {
   onError: (error?: string) => void;
 }
 
-interface EditorComponentProps {
-  fieldType: FieldFormatEditorProps['fieldType'];
-  format: FieldFormatEditorProps['fieldFormat'];
-  formatParams: FieldFormatEditorProps['fieldFormatParams'];
-  onChange: FieldFormatEditorProps['onChange'];
-  onError: FieldFormatEditorProps['onError'];
-}
-
 interface FieldFormatEditorState {
-  EditorComponent: LazyExoticComponent<ComponentType<EditorComponentProps>> | null;
+  EditorComponent: LazyExoticComponent<InnerFieldFormatEditor> | null;
 }
 
 // use memoize to get stable reference
 const unwrapEditor = memoize(
   (editorFactory: FieldFormatEditorFactory | null): FieldFormatEditorState['EditorComponent'] => {
     if (!editorFactory) return null;
-
-    // @ts-ignore
-    // TODO: Type '(change: { [key: string]: any; fieldType: string; }) => void' is not assignable to type '(newParams: Record<string, any>) => void'.
-    // https://github.com/elastic/kibana/issues/104637
     return React.lazy(() => editorFactory().then((editor) => ({ default: editor })));
   }
 );
@@ -74,9 +63,13 @@ export class FieldFormatEditor extends PureComponent<
         {EditorComponent ? (
           <React.Suspense
             fallback={
-              <EuiDelayRender>
-                <EuiLoadingContent lines={4} style={{ marginTop: 8, display: 'block' }} />
-              </EuiDelayRender>
+              // We specify minHeight to avoid too mitigate layout shifts while loading an editor
+              // ~430 corresponds to "4 lines" of EuiLoadingContent
+              <div style={{ minHeight: 430, marginTop: 8 }}>
+                <EuiDelayRender>
+                  <EuiLoadingContent lines={4} />
+                </EuiDelayRender>
+              </div>
             }
           >
             <EditorComponent

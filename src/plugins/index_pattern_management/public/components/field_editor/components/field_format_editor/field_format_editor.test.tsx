@@ -43,7 +43,6 @@ describe('FieldFormatEditor', () => {
       />
     );
 
-    component.update();
     expect(component).toMatchSnapshot();
   });
 
