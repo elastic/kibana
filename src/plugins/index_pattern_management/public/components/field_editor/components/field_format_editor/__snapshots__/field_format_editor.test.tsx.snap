@@ -4,19 +4,22 @@ exports[`FieldFormatEditor should render normally 1`] = `
 <Fragment>
   <Suspense
     fallback={
-      <EuiDelayRender
-        delay={500}
-      >
-        <EuiLoadingContent
-          lines={4}
-          style={
-            Object {
-              "display": "block",
-              "marginTop": 8,
-            }
+      <div
+        style={
+          Object {
+            "marginTop": 8,
+            "minHeight": 430,
           }
-        />
-      </EuiDelayRender>
+        }
+      >
+        <EuiDelayRender
+          delay={500}
+        >
+          <EuiLoadingContent
+            lines={4}
+          />
+        </EuiDelayRender>
+      </div>
     }
   >
     <lazy
@@ -34,19 +37,22 @@ exports[`FieldFormatEditor should render nothing if there is no editor for the f
 <Fragment>
   <Suspense
     fallback={
-      <EuiDelayRender
-        delay={500}
-      >
-        <EuiLoadingContent
-          lines={4}
-          style={
-            Object {
-              "display": "block",
-              "marginTop": 8,
-            }
+      <div
+        style={
+          Object {
+            "marginTop": 8,
+            "minHeight": 430,
           }
-        />
-      </EuiDelayRender>
+        }
+      >
+        <EuiDelayRender
+          delay={500}
+        >
+          <EuiLoadingContent
+            lines={4}
+          />
+        </EuiDelayRender>
+      </div>
     }
   >
     <lazy

@@ -10,7 +10,7 @@ import React, { PureComponent } from 'react';
 import { shallow } from 'enzyme';
 
 import { FieldFormatEditor } from './field_format_editor';
-import type { DefaultFormatEditor } from 'src/plugins/index_pattern_field_editor/public';
+import type { FieldFormat } from '../../../../../../data/public';
 
 class TestEditor extends PureComponent {
   render() {
@@ -34,7 +34,7 @@ describe('FieldFormatEditor', () => {
     const component = shallow(
       <FieldFormatEditor
         fieldType="number"
-        fieldFormat={{} as DefaultFormatEditor}
+        fieldFormat={{} as FieldFormat}
         fieldFormatId="number"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}
@@ -50,7 +50,7 @@ describe('FieldFormatEditor', () => {
     const component = shallow(
       <FieldFormatEditor
         fieldType="number"
-        fieldFormat={{} as DefaultFormatEditor}
+        fieldFormat={{} as FieldFormat}
         fieldFormatId="ip"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}

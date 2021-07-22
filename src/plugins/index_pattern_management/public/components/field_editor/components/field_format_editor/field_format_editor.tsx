@@ -21,7 +21,7 @@ export interface FieldFormatEditorProps {
   fieldFormatId: string;
   fieldFormatParams: { [key: string]: unknown };
   fieldFormatEditors: any;
-  onChange: (change: { fieldType: string; [key: string]: any }) => void;
+  onChange: (change: { [key: string]: any }) => void;
   onError: (error?: string) => void;
 }
 
