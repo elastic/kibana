@@ -47,7 +47,7 @@ describe('fetchStatus', () => {
   };
   let alertStates: AlertState[] = [];
   const licenseService = null;
-  const alertsClient = {
+  const rulesClient = {
     find: jest.fn(() => ({
       total: 1,
       data: [
@@ -68,13 +68,13 @@ describe('fetchStatus', () => {
   };
 
   afterEach(() => {
-    (alertsClient.find as jest.Mock).mockClear();
-    (alertsClient.getAlertState as jest.Mock).mockClear();
+    (rulesClient.find as jest.Mock).mockClear();
+    (rulesClient.getAlertState as jest.Mock).mockClear();
     alertStates.length = 0;
   });
 
   it('should fetch from the alerts client', async () => {
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(status).toEqual({
@@ -96,7 +96,7 @@ describe('fetchStatus', () => {
       },
     ];
 
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(Object.values(status).length).toBe(1);
@@ -105,32 +105,32 @@ describe('fetchStatus', () => {
   });
 
   it('should pass in the right filter to the alerts client', async () => {
-    await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
+    await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
-    expect((alertsClient.find as jest.Mock).mock.calls[0][0].options.filter).toBe(
+    expect((rulesClient.find as jest.Mock).mock.calls[0][0].options.filter).toBe(
       `alert.attributes.alertTypeId:${alertType}`
     );
   });
 
   it('should return nothing if no alert state is found', async () => {
-    alertsClient.getAlertState = jest.fn(() => ({
+    rulesClient.getAlertState = jest.fn(() => ({
       alertTypeState: null,
     })) as any;
 
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(status[alertType].states.length).toEqual(0);
   });
 
   it('should return nothing if no alerts are found', async () => {
-    alertsClient.find = jest.fn(() => ({
+    rulesClient.find = jest.fn(() => ({
       total: 0,
       data: [],
     })) as any;
 
-    const status = await fetchStatus(alertsClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(status).toEqual({});
@@ -145,7 +145,7 @@ describe('fetchStatus', () => {
       })),
     };
     await fetchStatus(
-      alertsClient as any,
+      rulesClient as any,
       customLicenseService as any,
       [ALERT_CLUSTER_HEALTH],
       [defaultClusterState.clusterUuid]
@@ -154,7 +154,7 @@ describe('fetchStatus', () => {
   });
 
   it('should sort the alerts', async () => {
-    const customAlertsClient = {
+    const customRulesClient = {
       find: jest.fn(() => ({
         total: 1,
         data: [
@@ -182,7 +182,7 @@ describe('fetchStatus', () => {
       })),
     };
     const status = await fetchStatus(
-      customAlertsClient as any,
+      customRulesClient as any,
       licenseService as any,
       [ALERT_CPU_USAGE, ALERT_DISK_USAGE, ALERT_MISSING_MONITORING_DATA],
       [defaultClusterState.clusterUuid]
