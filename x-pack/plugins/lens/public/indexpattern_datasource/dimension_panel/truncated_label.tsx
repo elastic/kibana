@@ -9,13 +9,14 @@ import React from 'react';
 import { EuiMark } from '@elastic/eui';
 import { EuiHighlight } from '@elastic/eui';
 
+const createContext = () =>
+  document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
+
 // extracted from getTextWidth for performance
-const context = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
+const context = createContext();
 
 const getTextWidth = (text: string, font: string) => {
-  const ctx = context
-    ? context
-    : (document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D);
+  const ctx = context ?? createContext();
   ctx.font = font;
   const metrics = ctx.measureText(text);
   return metrics.width;

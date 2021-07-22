@@ -44,6 +44,10 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   markAllFieldsCompatible?: boolean;
 }
 
+const DEFAULT_COMBOBOX_WIDTH = 305;
+const COMBOBOX_PADDINGS = 90;
+const DEFAULT_FONT = '14px Inter';
+
 export function FieldSelect({
   currentIndexPattern,
   incompleteOperation,
@@ -168,10 +172,11 @@ export function FieldSelect({
     markAllFieldsCompatible,
   ]);
   const comboBoxRef = useRef<HTMLInputElement>(null);
-  const labelWidth = (comboBoxRef.current?.clientWidth || 305) - 90; // subtracting paddings
+  const labelWidth =
+    (comboBoxRef.current?.clientWidth || DEFAULT_COMBOBOX_WIDTH) - COMBOBOX_PADDINGS;
   const font = comboBoxRef.current
     ? window.getComputedStyle(comboBoxRef.current).font
-    : '14px Inter';
+    : DEFAULT_FONT;
 
   return (
     <div ref={comboBoxRef}>
