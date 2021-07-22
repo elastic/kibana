@@ -266,8 +266,8 @@ The 8.0.0-alpha1 release includes the following bug fix.
 Operations::
 * Moves systemd service to /usr/lib/systemd/system {kibana-pull}83571[#83571]
 
-[[release-notes-8.0.0]]
-== {kib} 8.0.0
+//[[release-notes-8.0.0]]
+//== {kib} 8.0.0
 
-coming::[8.0.0]
+//coming::[8.0.0]
 
