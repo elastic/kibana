@@ -99,9 +99,7 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     map((response) => {
       return {
         ...response,
-        ...{
-          rawResponse: shimHitsTotal(response.rawResponse, options),
-        },
+        rawResponse: shimHitsTotal(response.rawResponse, options),
       };
     }),
     mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
@@ -157,9 +155,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     map((response) => {
       return {
         ...response,
-        ...{
-          rawResponse: shimHitsTotal(response.rawResponse, options),
-        },
+        rawResponse: shimHitsTotal(response.rawResponse, options),
       };
     }),
     mergeMap((esSearchRes) => queryFactory.parse(requestWithAlertsIndices, esSearchRes)),

@@ -23,7 +23,7 @@ export const buildTimelineDetailsQuery = (
     authFilter != null
       ? {
           bool: {
-            filter: [{ ...basicFilter }, { ...authFilter }],
+            filter: [basicFilter, authFilter],
           },
         }
       : {

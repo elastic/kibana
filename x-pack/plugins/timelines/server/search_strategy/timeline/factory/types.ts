@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
 import {
   IEsSearchResponse,
   ISearchRequestParams,
@@ -20,7 +19,6 @@ export interface TimelineFactory<T extends TimelineFactoryQueryTypes> {
   buildDsl: (options: TimelineStrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: TimelineStrategyRequestType<T>,
-    response: IEsSearchResponse,
-    authFilter?: JsonObject | undefined
+    response: IEsSearchResponse
   ) => Promise<TimelineStrategyResponseType<T>>;
 }
