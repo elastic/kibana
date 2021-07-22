@@ -59,7 +59,7 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(options)
+        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options)
         : {
             ...(await getDefaultAsyncSubmitParams(
               uiSettingsClient,
