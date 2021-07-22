@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_ID } from '@kbn/rule-data-utils/target/technical_field_names';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
 export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({
@@ -28,7 +29,13 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
 
             if (ruleDataClient.isWriteEnabled() && numAlerts) {
               const response = await ruleDataClient.getWriter().bulk({
-                body: alerts.flatMap((event) => [{ index: {} }, event]),
+                body: alerts.flatMap((event) => [
+                  { index: {} },
+                  {
+                    ...event.fields,
+                    [ALERT_ID]: event.id,
+                  },
+                ]),
               });
               return {
                 instances: alerts.map((alert) => alertInstanceFactory(alert.id)),
