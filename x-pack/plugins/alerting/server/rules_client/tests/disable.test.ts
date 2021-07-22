@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -28,7 +28,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -47,14 +47,14 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('disable()', () => {
-  let alertsClient: AlertsClient;
+  let rulesClient: RulesClient;
   const existingAlert = {
     id: '1',
     type: 'alert',
@@ -90,14 +90,14 @@ describe('disable()', () => {
   };
 
   beforeEach(() => {
-    alertsClient = new AlertsClient(alertsClientParams);
+    rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
   });
 
   describe('authorization', () => {
     test('ensures user is authorised to disable this type of alert under the consumer', async () => {
-      await alertsClient.disable({ id: '1' });
+      await rulesClient.disable({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -112,7 +112,7 @@ describe('disable()', () => {
         new Error(`Unauthorized to disable a "myType" alert for "myApp"`)
       );
 
-      await expect(alertsClient.disable({ id: '1' })).rejects.toMatchInlineSnapshot(
+      await expect(rulesClient.disable({ id: '1' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to disable a "myType" alert for "myApp"]`
       );
 
@@ -127,7 +127,7 @@ describe('disable()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when disabling a rule', async () => {
-      await alertsClient.disable({ id: '1' });
+      await rulesClient.disable({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -142,7 +142,7 @@ describe('disable()', () => {
     test('logs audit event when not authorised to disable a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(alertsClient.disable({ id: '1' })).rejects.toThrow();
+      await expect(rulesClient.disable({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -174,7 +174,7 @@ describe('disable()', () => {
       },
       references: [],
     });
-    await alertsClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
@@ -229,7 +229,7 @@ describe('disable()', () => {
       references: [],
     });
 
-    await alertsClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
@@ -290,7 +290,7 @@ describe('disable()', () => {
       references: [],
     });
 
-    await alertsClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
@@ -308,7 +308,7 @@ describe('disable()', () => {
     });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(existingAlert);
 
-    await alertsClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -324,11 +324,11 @@ describe('disable()', () => {
     });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
-    await alertsClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(taskManager.removeIfExists).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key to invalidate on alert 1: Fail'
     );
   });
@@ -336,15 +336,15 @@ describe('disable()', () => {
   test('throws when unsecuredSavedObjectsClient update fails', async () => {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Failed to update'));
 
-    await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update"`
     );
   });
 
   test('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
-    await alertsClient.disable({ id: '1' });
-    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+    await rulesClient.disable({ id: '1' });
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
     );
   });
@@ -352,7 +352,7 @@ describe('disable()', () => {
   test('throws when failing to remove task from task manager', async () => {
     taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
 
-    await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to remove task"`
     );
   });

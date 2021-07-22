@@ -6,13 +6,13 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertsClient } from './alerts_client';
+import { RulesClient } from './rules_client';
 
-type Schema = PublicMethodsOf<AlertsClient>;
-export type AlertsClientMock = jest.Mocked<Schema>;
+type Schema = PublicMethodsOf<RulesClient>;
+export type RulesClientMock = jest.Mocked<Schema>;
 
-const createAlertsClientMock = () => {
-  const mocked: AlertsClientMock = {
+const createRulesClientMock = () => {
+  const mocked: RulesClientMock = {
     aggregate: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
@@ -33,8 +33,8 @@ const createAlertsClientMock = () => {
   return mocked;
 };
 
-export const alertsClientMock: {
-  create: () => AlertsClientMock;
+export const rulesClientMock: {
+  create: () => RulesClientMock;
 } = {
-  create: createAlertsClientMock,
+  create: createRulesClientMock,
 };

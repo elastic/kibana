@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -31,7 +31,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -49,7 +49,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry, eventLogClient);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry, eventLogClient);
 });
 
 setGlobalDate();
@@ -104,10 +104,10 @@ function getAlertInstanceSummarySavedObject(
 }
 
 describe('getAlertInstanceSummary()', () => {
-  let alertsClient: AlertsClient;
+  let rulesClient: RulesClient;
 
   beforeEach(() => {
-    alertsClient = new AlertsClient(alertsClientParams);
+    rulesClient = new RulesClient(rulesClientParams);
   });
 
   test('runs as expected with some event log data', async () => {
@@ -137,7 +137,7 @@ describe('getAlertInstanceSummary()', () => {
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
-    const result = await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    const result = await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "alertTypeId": "123",
@@ -194,7 +194,7 @@ describe('getAlertInstanceSummary()', () => {
       AlertInstanceSummaryFindEventsResult
     );
 
-    await alertsClient.getAlertInstanceSummary({ id: '1' });
+    await rulesClient.getAlertInstanceSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -233,7 +233,7 @@ describe('getAlertInstanceSummary()', () => {
     const dateStart = new Date(
       Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
     ).toISOString();
-    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -254,7 +254,7 @@ describe('getAlertInstanceSummary()', () => {
     );
 
     const dateStart = '2m';
-    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -276,7 +276,7 @@ describe('getAlertInstanceSummary()', () => {
 
     const dateStart = 'ain"t no way this will get parsed as a date';
     expect(
-      alertsClient.getAlertInstanceSummary({ id: '1', dateStart })
+      rulesClient.getAlertInstanceSummary({ id: '1', dateStart })
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
     );
@@ -288,7 +288,7 @@ describe('getAlertInstanceSummary()', () => {
       AlertInstanceSummaryFindEventsResult
     );
 
-    expect(alertsClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
+    expect(rulesClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
       `[Error: OMG!]`
     );
   });
@@ -298,6 +298,6 @@ describe('getAlertInstanceSummary()', () => {
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
     // error eaten but logged
-    await alertsClient.getAlertInstanceSummary({ id: '1' });
+    await rulesClient.getAlertInstanceSummary({ id: '1' });
   });
 });

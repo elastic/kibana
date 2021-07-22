@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -28,7 +28,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -47,14 +47,14 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('updateApiKey()', () => {
-  let alertsClient: AlertsClient;
+  let rulesClient: RulesClient;
   const existingAlert = {
     id: '1',
     type: 'alert',
@@ -87,7 +87,7 @@ describe('updateApiKey()', () => {
   };
 
   beforeEach(() => {
-    alertsClient = new AlertsClient(alertsClientParams);
+    rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -102,11 +102,11 @@ describe('updateApiKey()', () => {
   });
 
   test('updates the API key for the alert', async () => {
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
     });
-    await alertsClient.updateApiKey({ id: '1' });
+    await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
@@ -146,18 +146,18 @@ describe('updateApiKey()', () => {
   });
 
   test('throws an error if API key creation throws', async () => {
-    alertsClientParams.createAPIKey.mockImplementation(() => {
+    rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
     expect(
-      async () => await alertsClient.updateApiKey({ id: '1' })
+      async () => await rulesClient.updateApiKey({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error updating API key for rule: could not create API key - no"`
     );
   });
 
   test('falls back to SOC when getDecryptedAsInternalUser throws an error', async () => {
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
     });
@@ -172,7 +172,7 @@ describe('updateApiKey()', () => {
       references: [],
     });
 
-    await alertsClient.updateApiKey({ id: '1' });
+    await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
@@ -212,7 +212,7 @@ describe('updateApiKey()', () => {
   test('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
 
-    await alertsClient.updateApiKey({ id: '1' });
+    await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
       'api_key_pending_invalidation'
@@ -231,8 +231,8 @@ describe('updateApiKey()', () => {
       references: [],
     });
 
-    await alertsClient.updateApiKey({ id: '1' });
-    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+    await rulesClient.updateApiKey({ id: '1' });
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'updateApiKey(): Failed to load API key to invalidate on alert 1: Fail'
     );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
@@ -240,7 +240,7 @@ describe('updateApiKey()', () => {
   });
 
   test('throws when unsecuredSavedObjectsClient update fails and invalidates newly created API key', async () => {
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '234', api_key: 'abc' },
     });
@@ -255,7 +255,7 @@ describe('updateApiKey()', () => {
       references: [],
     });
 
-    await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail"`
     );
     expect(
@@ -265,7 +265,7 @@ describe('updateApiKey()', () => {
 
   describe('authorization', () => {
     test('ensures user is authorised to updateApiKey this type of alert under the consumer', async () => {
-      await alertsClient.updateApiKey({ id: '1' });
+      await rulesClient.updateApiKey({ id: '1' });
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -281,7 +281,7 @@ describe('updateApiKey()', () => {
         new Error(`Unauthorized to updateApiKey a "myType" alert for "myApp"`)
       );
 
-      await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toMatchInlineSnapshot(
+      await expect(rulesClient.updateApiKey({ id: '1' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to updateApiKey a "myType" alert for "myApp"]`
       );
 
@@ -296,7 +296,7 @@ describe('updateApiKey()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when updating the API key of a rule', async () => {
-      await alertsClient.updateApiKey({ id: '1' });
+      await rulesClient.updateApiKey({ id: '1' });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -312,7 +312,7 @@ describe('updateApiKey()', () => {
     test('logs audit event when not authorised to update the API key of a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrow();
+      await expect(rulesClient.updateApiKey({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
