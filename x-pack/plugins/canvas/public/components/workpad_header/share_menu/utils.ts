@@ -51,5 +51,7 @@ export function getPdfJobParams(
     objectType: 'canvas workpad',
     relativeUrls: workpadUrls,
     title,
+    // @ts-ignore kibana version is not available from any canvas service
+    version: undefined,
   };
 }
