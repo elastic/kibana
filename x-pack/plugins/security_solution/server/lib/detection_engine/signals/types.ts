@@ -300,6 +300,8 @@ export interface SearchAfterAndBulkCreateParams {
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  trackTotalHits?: boolean;
+  sortOrder?: estypes.SearchSortOrder;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

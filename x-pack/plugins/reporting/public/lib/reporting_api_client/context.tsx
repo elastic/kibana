@@ -9,6 +9,7 @@ import type { HttpSetup } from 'src/core/public';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext } from 'react';
 
+import { useKibana } from '../../shared_imports';
 import type { ReportingAPIClient } from './reporting_api_client';
 
 interface ContextValue {
@@ -19,9 +20,12 @@ interface ContextValue {
 const InternalApiClientContext = createContext<undefined | ContextValue>(undefined);
 
 export const InternalApiClientClientProvider: FunctionComponent<{
-  http: HttpSetup;
   apiClient: ReportingAPIClient;
-}> = ({ http, apiClient, children }) => {
+}> = ({ apiClient, children }) => {
+  const {
+    services: { http },
+  } = useKibana();
+
   return (
     <InternalApiClientContext.Provider value={{ http, apiClient }}>
       {children}
