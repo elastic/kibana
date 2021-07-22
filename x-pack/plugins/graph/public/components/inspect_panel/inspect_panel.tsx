@@ -16,14 +16,8 @@ import {
   KibanaContextProvider,
 } from '../../../../../../src/plugins/kibana_react/public';
 
-interface GraphWorkspace {
-  lastRequest?: string;
-  lastResponse?: string;
-}
-
 interface InspectPanelProps {
   showInspect?: boolean;
-  workspace: GraphWorkspace;
   indexPattern?: IndexPattern;
   uiSettings: IUiSettingsClient;
   lastRequest?: string;
