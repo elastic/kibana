@@ -23,7 +23,7 @@ interface State {
 }
 
 const DEFAULT_MAPPINGS = {
-  creation: {
+  created: {
     properties: {
       '@timestamp': {
         type: 'date',

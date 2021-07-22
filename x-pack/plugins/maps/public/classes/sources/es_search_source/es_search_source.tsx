@@ -448,7 +448,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const user = await getSecurityService()?.authc.getCurrentUser();
     const timestamp = new Date().toISOString();
     return {
-      creation: {
+      created: {
         ...(user ? { user: user.username } : {}),
         '@timestamp': timestamp,
       },
