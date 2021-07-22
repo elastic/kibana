@@ -29,7 +29,8 @@ jest.mock('../lib/log_health_metrics', () => ({
   logHealthMetrics: jest.fn(),
 }));
 
-describe('healthRoute', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/106388
+describe.skip('healthRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
