@@ -11,6 +11,7 @@ import {
   EuiSpacer,
   EuiLoadingContent,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -83,6 +84,11 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
+`;
+
+const StyledNotificationBadge = styled(EuiNotificationBadge)`
+  margin-top: -1px;
+  padding-top: 1px;
 `;
 
 const EventDetailsComponent: React.FC<Props> = ({
@@ -177,7 +183,11 @@ const EventDetailsComponent: React.FC<Props> = ({
             name: (
               <span>
                 {`${i18n.THREAT_INTEL} `}
-                {enrichmentsLoading ? <EuiLoadingSpinner /> : `(${enrichmentCount})`}
+                {enrichmentsLoading ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  <StyledNotificationBadge>{enrichmentCount}</StyledNotificationBadge>
+                )}
               </span>
             ),
             content: (
