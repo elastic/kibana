@@ -130,6 +130,7 @@ export const createPrepackagedRules = async (
     prebuiltRulesFromFileSystem,
     prebuiltRulesFromSavedObjects
   );
+  const prepackagedRules = await getExistingPrepackagedRules({ rulesClient });
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();

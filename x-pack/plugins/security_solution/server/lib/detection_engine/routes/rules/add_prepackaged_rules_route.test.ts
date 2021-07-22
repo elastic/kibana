@@ -107,14 +107,14 @@ describe('add_prepackaged_rules_route', () => {
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating with a valid actionClient and alertClient', async () => {
+    test('returns 200 when creating with a valid actionClient and rulesClient', async () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
+    test('returns 404 if rulesClient is not available on the route', async () => {
       context.alerting!.getRulesClient = jest.fn();
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);

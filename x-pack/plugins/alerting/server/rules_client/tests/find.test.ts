@@ -319,8 +319,8 @@ describe('find()', () => {
         },
       ],
     });
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.find({ options: {} });
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.find({ options: {} });
 
     expect(injectReferencesFn).toHaveBeenCalledTimes(1);
     expect(injectReferencesFn).toHaveBeenCalledWith(
@@ -514,8 +514,8 @@ describe('find()', () => {
         },
       ],
     });
-    const alertsClient = new AlertsClient(alertsClientParams);
-    await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
+    const rulesClient = new RulesClient(rulesClientParams);
+    await expect(rulesClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error injecting reference into rule params for rule id 2 - something went wrong!"`
     );
   });
