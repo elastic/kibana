@@ -82,5 +82,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
     });
+
+    it('Displays types of report jobs', async () => {
+      const allTitles = await testSubjects.findAll('reportingListItemObjectTitle');
+      expectSnapshot(await Promise.all(allTitles.map((titleEl) => titleEl.getVisibleText())))
+        .toMatchInline(`
+        Array [
+          "DEPRECATED_SEARCH_CSV
+        search",
+          "Discover search [2021-07-19T11:47:35.995-07:00]
+        search",
+          "Discover search [2021-07-19T11:46:00.132-07:00]
+        search",
+          "Discover search [2021-07-19T11:44:48.670-07:00]
+        search",
+          "[Flights] Global Flight Dashboard
+        dashboard",
+          "[Flights] Global Flight Dashboard
+        dashboard",
+          "[Flights] Global Flight Dashboard
+        dashboard",
+          "[Flights] Global Flight Dashboard
+        dashboard",
+          "[Flights] Global Flight Dashboard
+        dashboard",
+          "[Flights] Global Flight Dashboard
+        dashboard",
+        ]
+      `);
+    });
+
+    // TODO: need more data-test-subjs in the table
   });
 };
