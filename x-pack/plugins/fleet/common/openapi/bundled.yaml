@@ -1008,6 +1008,29 @@ paths:
                   - sucess
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /outputs:
+    get:
+      summary: Outputs
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/output'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+      operationId: get-outputs
   '/epm/packages/{pkgName}/stats':
     get:
       summary: Get stats for a package
@@ -1561,6 +1584,28 @@ components:
             version:
               type: string
         - $ref: '#/components/schemas/new_package_policy'
+    output:
+      title: Output
+      type: object
+      properties:
+        hosts:
+          type: array
+          items:
+            type: string
+        id:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+      required:
+        - hosts
+        - id
+        - is_default
+        - name
+        - type
     package_usage_stats:
       title: Package usage stats
       type: object

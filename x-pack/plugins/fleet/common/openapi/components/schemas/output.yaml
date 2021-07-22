@@ -1,0 +1,21 @@
+title: Output
+type: object
+properties:
+  hosts:
+    type: array
+    items:
+      type: string
+  id:
+    type: string
+  is_default:
+    type: boolean
+  name:
+    type: string
+  type:
+    type: string
+required:
+  - hosts
+  - id
+  - is_default
+  - name
+  - type
