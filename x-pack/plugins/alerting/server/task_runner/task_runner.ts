@@ -39,7 +39,7 @@ import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
-import { AlertsClient } from '../alerts_client';
+import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
   ActionGroup,
@@ -70,6 +70,7 @@ interface AlertTaskInstance extends ConcreteTaskInstance {
 
 export class TaskRunner<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -81,6 +82,7 @@ export class TaskRunner<
   private taskInstance: AlertTaskInstance;
   private alertType: NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -92,6 +94,7 @@ export class TaskRunner<
   constructor(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -154,9 +157,9 @@ export class TaskRunner<
   private getServicesWithSpaceLevelPermissions(
     spaceId: string,
     apiKey: RawAlert['apiKey']
-  ): [Services, PublicMethodsOf<AlertsClient>] {
+  ): [Services, PublicMethodsOf<RulesClient>] {
     const request = this.getFakeKibanaRequest(spaceId, apiKey);
-    return [this.context.getServices(request), this.context.getAlertsClientWithRequest(request)];
+    return [this.context.getServices(request), this.context.getRulesClientWithRequest(request)];
   }
 
   private getExecutionHandler(
@@ -171,6 +174,7 @@ export class TaskRunner<
   ) {
     return createExecutionHandler<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -458,13 +462,13 @@ export class TaskRunner<
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
-    const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
     let alert: SanitizedAlert<Params>;
 
     // Ensure API key is still valid and user has access
     try {
-      alert = await alertsClient.get({ id: alertId });
+      alert = await rulesClient.get({ id: alertId });
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
@@ -481,7 +485,7 @@ export class TaskRunner<
       schedule: asOk(
         // fetch the alert again to ensure we return the correct schedule as it may have
         // cahnged during the task execution
-        (await alertsClient.get({ id: alertId })).schedule
+        (await rulesClient.get({ id: alertId })).schedule
       ),
     };
   }
@@ -703,6 +707,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertLabel: string;
   namespace: string | undefined;
   ruleType: NormalizedAlertType<
+    AlertTypeParams,
     AlertTypeParams,
     AlertTypeState,
     {

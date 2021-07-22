@@ -38,14 +38,15 @@ import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
+import { LastUpdatedAt } from '../..';
+import { AlertCount, SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
 import * as i18n from './translations';
 import { InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
-const COMPACT_HEADER_HEIGHT = EVENTS_VIEWER_HEADER_HEIGHT - UTILITY_BAR_HEIGHT; // px
+const COMPACT_HEADER_HEIGHT = 36; // px
 const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
@@ -84,6 +85,7 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   overflow: hidden;
   margin: 0;
+  min-height: 490px;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
@@ -237,12 +239,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   );
 
   const subtitle = useMemo(
-    () =>
-      `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${
-        unit && unit(totalCountMinusDeleted)
-      }`,
+    () => `${totalCountMinusDeleted.toLocaleString()} ${unit && unit(totalCountMinusDeleted)}`,
     [totalCountMinusDeleted, unit]
   );
+
+  const additionalControls = useMemo(() => <AlertCount>{subtitle}</AlertCount>, [subtitle]);
 
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
@@ -303,10 +304,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               id={!resolverIsShowing(graphEventId) ? STANDALONE_ID : undefined}
               inspect={inspect}
               loading={loading}
-              height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
-              subtitle={utilityBar ? undefined : subtitle}
+              height={
+                headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
+              }
               title={justTitle}
-              // title={globalFullScreen ? titleWithExitFullScreen : justTitle}
             >
               {HeaderSectionContent}
             </HeaderSection>
@@ -317,10 +318,17 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+                <UpdatedFlexItem grow={false} show={!loading}>
+                  <LastUpdatedAt updatedAt={updatedAt} />
+                </UpdatedFlexItem>
+              </EuiFlexGroup>
+
+              <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     activePage={pageInfo.activePage}
+                    additionalControls={additionalControls}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
                     id={STANDALONE_ID}
@@ -340,7 +348,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                   <Footer
                     activePage={pageInfo.activePage}
                     data-test-subj="events-viewer-footer"
-                    updatedAt={updatedAt}
                     height={footerHeight}
                     id={STANDALONE_ID}
                     isLive={false}

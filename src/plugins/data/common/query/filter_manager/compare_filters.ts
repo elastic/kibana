@@ -7,7 +7,7 @@
  */
 
 import { defaults, isEqual, omit, map } from 'lodash';
-import { FilterMeta, Filter } from '../../es_query';
+import { FilterMeta, Filter } from '@kbn/es-query';
 
 export interface FilterCompareOptions {
   index?: boolean;

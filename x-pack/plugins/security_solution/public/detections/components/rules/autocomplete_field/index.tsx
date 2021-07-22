@@ -10,7 +10,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface AutocompleteFieldProps {
   dataTestSubj: string;
