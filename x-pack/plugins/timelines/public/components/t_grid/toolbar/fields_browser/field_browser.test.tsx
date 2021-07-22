@@ -25,52 +25,6 @@ jest.mock('react-redux', () => {
 describe('FieldsBrowser', () => {
   const timelineId = 'test';
 
-  // // `enzyme` doesn't mount the components into the global jsdom `document`
-  // // but that's where the click detector listener is, so for testing, we
-  // // pass the top-level mounted component's click event on to document
-  // const triggerDocumentMouseDown = () => {
-  //   const event = new Event('mousedown');
-  //   document.dispatchEvent(event);
-  // };
-
-  // const triggerDocumentMouseUp = () => {
-  //   const event = new Event('mouseup');
-  //   document.dispatchEvent(event);
-  // };
-
-  // test('it invokes onOutsideClick when onFieldSelected is undefined, and the user clicks outside the fields browser', () => {
-  //   const onOutsideClick = jest.fn();
-
-  //   const wrapper = mount(
-  //     <TestProviders>
-  //       <div
-  //         data-test-subj="outside"
-  //         onMouseDown={triggerDocumentMouseDown}
-  //         onMouseUp={triggerDocumentMouseUp}
-  //       >
-  //         <FieldsBrowser
-  //           columnHeaders={[]}
-  //           browserFields={mockBrowserFields}
-  //           filteredBrowserFields={mockBrowserFields}
-  //           searchInput={''}
-  //           isSearching={false}
-  //           onCategorySelected={jest.fn()}
-  //           onHide={jest.fn()}
-  //           onSearchInputChange={jest.fn()}
-  //           restoreFocusTo={React.createRef<HTMLButtonElement>()}
-  //           selectedCategoryId={''}
-  //           timelineId={timelineId}
-  //         />
-  //       </div>
-  //     </TestProviders>
-  //   );
-
-  //   wrapper.find('[data-test-subj="outside"]').simulate('mousedown');
-  //   wrapper.find('[data-test-subj="outside"]').simulate('mouseup');
-
-  //   expect(onOutsideClick).toHaveBeenCalled();
-  // });
-
   test('it renders the Close button', () => {
     const wrapper = mount(
       <TestProviders>
