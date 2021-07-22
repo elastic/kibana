@@ -18,7 +18,7 @@ import {
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { SpacesPluginStart } from '../../spaces/server';
 import { RulesClient } from './rules_client';
-import { AlertTypeRegistry } from './alert_type_registry';
+import { ruleTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
@@ -107,7 +107,7 @@ export interface PluginSetupContract {
 }
 
 export interface PluginStartContract {
-  listTypes: AlertTypeRegistry['list'];
+  listTypes: ruleTypeRegistry['list'];
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
@@ -139,7 +139,7 @@ export interface AlertingPluginsStart {
 export class AlertingPlugin {
   private readonly config: Promise<AlertsConfig>;
   private readonly logger: Logger;
-  private alertTypeRegistry?: AlertTypeRegistry;
+  private ruleTypeRegistry?: ruleTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
   private isESOCanEncrypt?: boolean;
@@ -197,13 +197,13 @@ export class AlertingPlugin {
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
-    const alertTypeRegistry = new AlertTypeRegistry({
+    const ruleTypeRegistry = new ruleTypeRegistry({
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
       licensing: plugins.licensing,
     });
-    this.alertTypeRegistry = alertTypeRegistry;
+    this.ruleTypeRegistry = ruleTypeRegistry;
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -224,7 +224,7 @@ export class AlertingPlugin {
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
-      this.alertTypeRegistry,
+      this.ruleTypeRegistry,
       this.logger
     );
 
@@ -299,7 +299,7 @@ export class AlertingPlugin {
         if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
         }
-        alertTypeRegistry.register(alertType);
+        ruleTypeRegistry.register(alertType);
       },
     };
   }
@@ -309,7 +309,7 @@ export class AlertingPlugin {
       isESOCanEncrypt,
       logger,
       taskRunnerFactory,
-      alertTypeRegistry,
+      ruleTypeRegistry,
       rulesClientFactory,
       alertingAuthorizationClientFactory,
       security,
@@ -329,7 +329,7 @@ export class AlertingPlugin {
     };
 
     alertingAuthorizationClientFactory.initialize({
-      alertTypeRegistry: alertTypeRegistry!,
+      ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
@@ -339,7 +339,7 @@ export class AlertingPlugin {
     });
 
     rulesClientFactory.initialize({
-      alertTypeRegistry: alertTypeRegistry!,
+      ruleTypeRegistry: ruleTypeRegistry!,
       logger,
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
@@ -378,7 +378,7 @@ export class AlertingPlugin {
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
-      alertTypeRegistry: this.alertTypeRegistry!,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerAlert: this.config.then((config) => config.maxEphemeralActionsPerAlert),
@@ -398,7 +398,7 @@ export class AlertingPlugin {
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
 
     return {
-      listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
+      listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
@@ -409,14 +409,14 @@ export class AlertingPlugin {
   private createRouteHandlerContext = (
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
-    const { alertTypeRegistry, rulesClientFactory } = this;
+    const { ruleTypeRegistry, rulesClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
-        listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
+        listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository(['alert'])),
         areApiKeysEnabled: async () => {

@@ -17,7 +17,7 @@ import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/se
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import {
   AlertTypeParams,
-  AlertTypeRegistry,
+  ruleTypeRegistry,
   GetServicesFunction,
   SpaceIdToNamespaceFunction,
   AlertTypeState,
@@ -39,7 +39,7 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
-  alertTypeRegistry: AlertTypeRegistry;
+  ruleTypeRegistry: ruleTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerAlert: Promise<number>;

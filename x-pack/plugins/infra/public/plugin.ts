@@ -34,11 +34,11 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
+    pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdAlertType()
     );
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
+    pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(createMetricThresholdAlertType());
 
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',

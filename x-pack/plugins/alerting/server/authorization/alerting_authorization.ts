@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { JsonObject } from '@kbn/common-utils';
-import { AlertTypeRegistry } from '../types';
+import { ruleTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
@@ -64,7 +64,7 @@ export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
 
 type IsAuthorizedAtProducerLevel = boolean;
 export interface ConstructorOptions {
-  alertTypeRegistry: AlertTypeRegistry;
+  ruleTypeRegistry: ruleTypeRegistry;
   request: KibanaRequest;
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
@@ -74,7 +74,7 @@ export interface ConstructorOptions {
 }
 
 export class AlertingAuthorization {
-  private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly ruleTypeRegistry: ruleTypeRegistry;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly auditLogger: AlertingAuthorizationAuditLogger;
@@ -84,7 +84,7 @@ export class AlertingAuthorization {
   private readonly spaceId: Promise<string | undefined>;
 
   constructor({
-    alertTypeRegistry,
+    ruleTypeRegistry,
     request,
     authorization,
     features,
@@ -94,7 +94,7 @@ export class AlertingAuthorization {
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
-    this.alertTypeRegistry = alertTypeRegistry;
+    this.ruleTypeRegistry = ruleTypeRegistry;
     this.auditLogger = auditLogger;
 
     // List of consumer ids that are exempt from privilege check. This should be used sparingly.
@@ -159,7 +159,7 @@ export class AlertingAuthorization {
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
     return this.augmentRuleTypesWithAuthorization(
-      this.alertTypeRegistry.list(),
+      this.ruleTypeRegistry.list(),
       operations,
       authorizationEntity,
       new Set(featureIds)
@@ -171,7 +171,7 @@ export class AlertingAuthorization {
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
-      const ruleType = this.alertTypeRegistry.get(ruleTypeId);
+      const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
       const requiredPrivilegesByScope = {
         consumer: authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
         producer: authorization.actions.alerting.get(
@@ -281,7 +281,7 @@ export class AlertingAuthorization {
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
-        this.alertTypeRegistry.list(),
+        this.ruleTypeRegistry.list(),
         [ReadOperations.Find],
         authorizationEntity
       );

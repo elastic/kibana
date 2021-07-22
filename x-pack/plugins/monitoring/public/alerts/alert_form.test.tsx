@@ -15,7 +15,7 @@ import { ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../../triggers_actions_ui/public/application/alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../../triggers_actions_ui/public/application/alert_type_registry.mock';
 import {
   ValidationResult,
   Alert,
@@ -47,7 +47,7 @@ jest.mock('../../../triggers_actions_ui/public/application/lib/alert_api', () =>
 const initLegacyShims = () => {
   const triggersActionsUi = {
     actionTypeRegistry: actionTypeRegistryMock.create(),
-    alertTypeRegistry: alertTypeRegistryMock.create(),
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
   };
   const data = { query: { timefilter: { timefilter: {} } } } as any;
   const ngInjector = {} as angular.auto.IInjectorService;
@@ -66,7 +66,7 @@ const initLegacyShims = () => {
 const ALERTS_FEATURE_ID = 'alerts';
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 describe('alert_form', () => {
   beforeEach(() => {
@@ -109,9 +109,9 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     beforeEach(async () => {
-      alertTypeRegistry.list.mockReturnValue([alertType]);
-      alertTypeRegistry.get.mockReturnValue(alertType);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.list.mockReturnValue([alertType]);
+      ruleTypeRegistry.get.mockReturnValue(alertType);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
@@ -142,7 +142,7 @@ describe('alert_form', () => {
               errors={{ name: [], interval: [] }}
               operation="create"
               actionTypeRegistry={actionTypeRegistry}
-              alertTypeRegistry={alertTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
             />
           </KibanaReactContext.Provider>
         </I18nProvider>

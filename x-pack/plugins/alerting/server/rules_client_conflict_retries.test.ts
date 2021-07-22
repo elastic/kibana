@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { RulesClient, ConstructorOptions } from './rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
-import { alertTypeRegistryMock } from './alert_type_registry.mock';
+import { ruleTypeRegistryMock } from './alert_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
@@ -28,7 +28,7 @@ const MockAlertId = 'alert-id';
 const ConflictAfterRetries = RetryForConflictsAttempts + 1;
 
 const taskManager = taskManagerMock.createStart();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
@@ -39,7 +39,7 @@ const kibanaVersion = 'v7.10.0';
 const logger = loggingSystemMock.create().get();
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   unsecuredSavedObjectsClient,
   authorization: (authorization as unknown) as AlertingAuthorization,
   actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
@@ -327,7 +327,7 @@ beforeEach(() => {
   actionsClient.getBulk.mockResolvedValue([]);
   rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
 
-  alertTypeRegistry.get.mockImplementation((id) => ({
+  ruleTypeRegistry.get.mockImplementation((id) => ({
     id: '123',
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -339,7 +339,7 @@ beforeEach(() => {
     producer: 'alerts',
   }));
 
-  alertTypeRegistry.get.mockReturnValue({
+  ruleTypeRegistry.get.mockReturnValue({
     id: 'myType',
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],

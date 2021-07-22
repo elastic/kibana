@@ -6,21 +6,21 @@
  */
 
 import { TaskRunnerFactory } from './task_runner';
-import { AlertTypeRegistry, ConstructorOptions } from './alert_type_registry';
+import { ruleTypeRegistry, ConstructorOptions } from './alert_type_registry';
 import { ActionGroup, AlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
 let mockedLicenseState: jest.Mocked<ILicenseState>;
-let alertTypeRegistryParams: ConstructorOptions;
+let ruleTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
 
 beforeEach(() => {
   jest.resetAllMocks();
   mockedLicenseState = licenseStateMock.create();
-  alertTypeRegistryParams = {
+  ruleTypeRegistryParams = {
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
@@ -30,12 +30,12 @@ beforeEach(() => {
 
 describe('has()', () => {
   test('returns false for unregistered alert types', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     expect(registry.has('foo')).toEqual(false);
   });
 
   test('returns true for registered alert types', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'foo',
       name: 'Foo',
@@ -72,7 +72,7 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
 
     const invalidCharacters = [' ', ':', '*', '*', '/'];
     for (const char of invalidCharacters) {
@@ -105,7 +105,7 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
 
     expect(() => registry.register(alertType)).toThrowError(
       new Error(`expected value of type [string] but got [number]`)
@@ -136,7 +136,7 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
 
     expect(() => registry.register(alertType)).toThrowError(
       new Error(
@@ -165,7 +165,7 @@ describe('register()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
     };
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertType);
     expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
       Array [
@@ -213,7 +213,7 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
 
     expect(() => registry.register(alertType)).toThrowError(
       new Error(
@@ -238,7 +238,7 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
@@ -269,14 +269,14 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertType);
     alertType.name = 'Changed';
     expect(registry.get('test').name).toEqual('Test');
   });
 
   test('should throw an error if type is already registered', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'test',
       name: 'Test',
@@ -314,7 +314,7 @@ describe('register()', () => {
 
 describe('get()', () => {
   test('should return registered type', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'test',
       name: 'Test',
@@ -364,7 +364,7 @@ describe('get()', () => {
   });
 
   test(`should throw an error if type isn't registered`, () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     expect(() => registry.get('test')).toThrowErrorMatchingInlineSnapshot(
       `"Alert type \\"test\\" is not registered."`
     );
@@ -373,13 +373,13 @@ describe('get()', () => {
 
 describe('list()', () => {
   test('should return empty when nothing is registered', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`Set {}`);
   });
 
   test('should return registered types', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'test',
       name: 'Test',
@@ -431,7 +431,7 @@ describe('list()', () => {
   });
 
   test('should return action variables state and empty context', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertTypeWithVariables('x', '', 's'));
     const alertType = registry.get('x');
     expect(alertType.actionVariables).toBeTruthy();
@@ -448,7 +448,7 @@ describe('list()', () => {
   });
 
   test('should return action variables context and empty state', () => {
-    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertTypeWithVariables('x', 'c', ''));
     const alertType = registry.get('x');
     expect(alertType.actionVariables).toBeTruthy();
@@ -466,11 +466,11 @@ describe('list()', () => {
 });
 
 describe('ensureAlertTypeEnabled', () => {
-  let alertTypeRegistry: AlertTypeRegistry;
+  let ruleTypeRegistry: ruleTypeRegistry;
 
   beforeEach(() => {
-    alertTypeRegistry = new AlertTypeRegistry(alertTypeRegistryParams);
-    alertTypeRegistry.register({
+    ruleTypeRegistry = new ruleTypeRegistry(ruleTypeRegistryParams);
+    ruleTypeRegistry.register({
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -489,7 +489,7 @@ describe('ensureAlertTypeEnabled', () => {
   });
 
   test('should call ensureLicenseForAlertType on the license state', async () => {
-    alertTypeRegistry.ensureAlertTypeEnabled('test');
+    ruleTypeRegistry.ensureAlertTypeEnabled('test');
     expect(mockedLicenseState.ensureLicenseForAlertType).toHaveBeenCalled();
   });
 
@@ -498,7 +498,7 @@ describe('ensureAlertTypeEnabled', () => {
       throw new Error('Fail');
     });
     expect(() =>
-      alertTypeRegistry.ensureAlertTypeEnabled('test')
+      ruleTypeRegistry.ensureAlertTypeEnabled('test')
     ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });

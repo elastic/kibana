@@ -19,7 +19,7 @@ export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
   alerting?: AlertingSetup
 ) {
-  triggersActionsUi.alertTypeRegistry.register({
+  triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
       defaultMessage: 'Alert when anomaly detection jobs results match the condition.',

@@ -10,7 +10,7 @@ import { IEventLogClient } from '../../../../event_log/server';
 import { actionsClientMock } from '../../../../actions/server/mocks';
 import { ConstructorOptions } from '../rules_client';
 import { eventLogClientMock } from '../../../../event_log/server/mocks';
-import { AlertTypeRegistry } from '../../alert_type_registry';
+import { ruleTypeRegistry } from '../../alert_type_registry';
 import { RecoveredActionGroup } from '../../../common';
 
 export const mockedDateString = '2019-02-12T21:01:22.479Z';
@@ -44,7 +44,7 @@ export function setGlobalDate() {
 export function getBeforeSetup(
   rulesClientParams: jest.Mocked<ConstructorOptions>,
   taskManager: ReturnType<typeof taskManagerMock.createStart>,
-  alertTypeRegistry: jest.Mocked<Pick<AlertTypeRegistry, 'get' | 'has' | 'register' | 'list'>>,
+  ruleTypeRegistry: jest.Mocked<Pick<ruleTypeRegistry, 'get' | 'has' | 'register' | 'list'>>,
   eventLogClient?: jest.Mocked<IEventLogClient>
 ) {
   jest.resetAllMocks();
@@ -81,7 +81,7 @@ export function getBeforeSetup(
   ]);
   rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
 
-  alertTypeRegistry.get.mockImplementation(() => ({
+  ruleTypeRegistry.get.mockImplementation(() => ({
     id: '123',
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],

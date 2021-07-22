@@ -119,7 +119,7 @@ export type UntypedNormalizedAlertType = NormalizedAlertType<
   string
 >;
 
-export class AlertTypeRegistry {
+export class ruleTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
   private readonly alertTypes: Map<string, UntypedNormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
@@ -162,7 +162,7 @@ export class AlertTypeRegistry {
   ) {
     if (this.has(alertType.id)) {
       throw new Error(
-        i18n.translate('xpack.alerting.alertTypeRegistry.register.duplicateAlertTypeError', {
+        i18n.translate('xpack.alerting.ruleTypeRegistry.register.duplicateAlertTypeError', {
           defaultMessage: 'Alert type "{id}" is already registered.',
           values: {
             id: alertType.id,
@@ -232,7 +232,7 @@ export class AlertTypeRegistry {
   > {
     if (!this.has(id)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.alertTypeRegistry.get.missingAlertTypeError', {
+        i18n.translate('xpack.alerting.ruleTypeRegistry.get.missingAlertTypeError', {
           defaultMessage: 'Alert type "{id}" is not registered.',
           values: {
             id,
@@ -338,7 +338,7 @@ function augmentActionGroupsWithReserved<
   if (recoveryActionGroup && activeActionGroups.has(recoveryActionGroup.id)) {
     throw new Error(
       i18n.translate(
-        'xpack.alerting.alertTypeRegistry.register.customRecoveryActionGroupUsageError',
+        'xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError',
         {
           defaultMessage:
             'Alert type [id="{id}"] cannot be registered. Action group [{actionGroup}] cannot be used as both a recovery and an active action group.',
@@ -351,7 +351,7 @@ function augmentActionGroupsWithReserved<
     );
   } else if (intersectingReservedActionGroups.length > 0) {
     throw new Error(
-      i18n.translate('xpack.alerting.alertTypeRegistry.register.reservedActionGroupUsageError', {
+      i18n.translate('xpack.alerting.ruleTypeRegistry.register.reservedActionGroupUsageError', {
         defaultMessage:
           'Alert type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {

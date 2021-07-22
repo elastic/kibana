@@ -6,11 +6,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertTypeRegistry } from './alert_type_registry';
+import { ruleTypeRegistry } from './alert_type_registry';
 
-type Schema = PublicMethodsOf<AlertTypeRegistry>;
+type Schema = PublicMethodsOf<ruleTypeRegistry>;
 
-const createAlertTypeRegistryMock = () => {
+const createruleTypeRegistryMock = () => {
   const mocked: jest.Mocked<Schema> = {
     has: jest.fn(),
     register: jest.fn(),
@@ -21,6 +21,6 @@ const createAlertTypeRegistryMock = () => {
   return mocked;
 };
 
-export const alertTypeRegistryMock = {
-  create: createAlertTypeRegistryMock,
+export const ruleTypeRegistryMock = {
+  create: createruleTypeRegistryMock,
 };

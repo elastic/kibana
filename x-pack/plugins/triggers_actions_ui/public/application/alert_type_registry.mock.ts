@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AlertTypeRegistryContract } from '../types';
+import { ruleTypeRegistryContract } from '../types';
 
-const createAlertTypeRegistryMock = () => {
-  const mocked: jest.Mocked<AlertTypeRegistryContract> = {
+const createruleTypeRegistryMock = () => {
+  const mocked: jest.Mocked<ruleTypeRegistryContract> = {
     has: jest.fn(),
     register: jest.fn(),
     get: jest.fn(),
@@ -17,6 +17,6 @@ const createAlertTypeRegistryMock = () => {
   return mocked;
 };
 
-export const alertTypeRegistryMock = {
-  create: createAlertTypeRegistryMock,
+export const ruleTypeRegistryMock = {
+  create: createruleTypeRegistryMock,
 };

@@ -32,7 +32,7 @@ import {
   SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
-  AlertTypeRegistry,
+  ruleTypeRegistry,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -89,7 +89,7 @@ export class TaskRunner<
     ActionGroupIds,
     RecoveryActionGroupId
   >;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly ruleTypeRegistry: ruleTypeRegistry;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -108,7 +108,7 @@ export class TaskRunner<
     this.logger = context.logger;
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
-    this.alertTypeRegistry = context.alertTypeRegistry;
+    this.ruleTypeRegistry = context.ruleTypeRegistry;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -245,7 +245,7 @@ export class TaskRunner<
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
-    const alertType = this.alertTypeRegistry.get(alertTypeId);
+    const alertType = this.ruleTypeRegistry.get(alertTypeId);
 
     const alertInstances = mapValues<
       Record<string, RawAlertInstance>,
@@ -474,7 +474,7 @@ export class TaskRunner<
     }
 
     try {
-      this.alertTypeRegistry.ensureAlertTypeEnabled(alert.alertTypeId);
+      this.ruleTypeRegistry.ensureAlertTypeEnabled(alert.alertTypeId);
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
     }

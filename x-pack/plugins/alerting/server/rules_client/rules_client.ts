@@ -24,7 +24,7 @@ import {
   Alert,
   PartialAlert,
   RawAlert,
-  AlertTypeRegistry,
+  ruleTypeRegistry,
   AlertAction,
   IntervalSchedule,
   SanitizedAlert,
@@ -86,7 +86,7 @@ export interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertingAuthorization;
   actionsAuthorization: ActionsAuthorization;
-  alertTypeRegistry: AlertTypeRegistry;
+  ruleTypeRegistry: ruleTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
@@ -199,7 +199,7 @@ export class RulesClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertingAuthorization;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly ruleTypeRegistry: ruleTypeRegistry;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
@@ -209,7 +209,7 @@ export class RulesClient {
   private readonly auditLogger?: AuditLogger;
 
   constructor({
-    alertTypeRegistry,
+    ruleTypeRegistry,
     unsecuredSavedObjectsClient,
     authorization,
     taskManager,
@@ -230,7 +230,7 @@ export class RulesClient {
     this.spaceId = spaceId;
     this.namespace = namespace;
     this.taskManager = taskManager;
-    this.alertTypeRegistry = alertTypeRegistry;
+    this.ruleTypeRegistry = ruleTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
@@ -266,10 +266,10 @@ export class RulesClient {
       throw error;
     }
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
 
     // Throws an error if alert type isn't registered
-    const alertType = this.alertTypeRegistry.get(data.alertTypeId);
+    const alertType = this.ruleTypeRegistry.get(data.alertTypeId);
 
     const validatedAlertTypeParams = validateAlertTypeParams(
       data.params,
@@ -731,7 +731,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
     const updateResult = await this.updateAlert<Params>({ id, data }, alertSavedObject);
 
@@ -771,7 +771,7 @@ export class RulesClient {
     { id, data }: UpdateOptions<Params>,
     { attributes, version }: SavedObject<RawAlert>
   ): Promise<PartialAlert<Params>> {
-    const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
+    const alertType = this.ruleTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(
@@ -938,7 +938,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
@@ -1024,7 +1024,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -1138,7 +1138,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
@@ -1215,7 +1215,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
       muteAll: true,
@@ -1277,7 +1277,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
       muteAll: false,
@@ -1339,7 +1339,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -1406,7 +1406,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
@@ -1425,7 +1425,7 @@ export class RulesClient {
 
   public async listAlertTypes() {
     return await this.authorization.filterByRuleTypeAuthorization(
-      this.alertTypeRegistry.list(),
+      this.ruleTypeRegistry.list(),
       [ReadOperations.Get, WriteOperations.Create],
       AlertingAuthorizationEntity.Rule
     );
@@ -1471,7 +1471,7 @@ export class RulesClient {
     rawAlert: RawAlert,
     references: SavedObjectReference[] | undefined
   ): Alert {
-    const ruleType = this.alertTypeRegistry.get(ruleTypeId);
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert

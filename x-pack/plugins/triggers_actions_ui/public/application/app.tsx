@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaFeature } from '../../../features/common';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
-import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
+import { ActionTypeRegistryContract, ruleTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
@@ -39,7 +39,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   storage?: Storage;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  alertTypeRegistry: AlertTypeRegistryContract;
+  ruleTypeRegistry: ruleTypeRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;

@@ -23,7 +23,7 @@ import {
   GenericValidationResult,
   ValidationResult,
 } from '../../../types';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -44,7 +44,7 @@ jest.mock('../../../common/lib/health_api', () => ({
 }));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const delay = (wait: number = 1000) =>
@@ -146,9 +146,9 @@ describe('alert_add', () => {
     });
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    alertTypeRegistry.list.mockReturnValue([alertType]);
-    alertTypeRegistry.get.mockReturnValue(alertType);
-    alertTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.list.mockReturnValue([alertType]);
+    ruleTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
 
@@ -161,7 +161,7 @@ describe('alert_add', () => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}
-        alertTypeRegistry={alertTypeRegistry}
+        ruleTypeRegistry={ruleTypeRegistry}
         metadata={{ test: 'some value', fields: ['test'] }}
       />
     );
