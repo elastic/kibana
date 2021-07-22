@@ -9,12 +9,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
   [key: string]: any;
 }
 
-export const getEuiContextMapping = () => {
+export const getEuiContextMapping = (): EuiTokensObject => {
   return {
     'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
       defaultMessage: 'Loading',
