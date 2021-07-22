@@ -85,34 +85,71 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Displays types of report jobs', async () => {
-      const allTitles = await testSubjects.findAll('reportingListItemObjectTitle');
-      expectSnapshot(await Promise.all(allTitles.map((titleEl) => titleEl.getVisibleText())))
-        .toMatchInline(`
+      const list = await pageObjects.reporting.getManagementList();
+      expectSnapshot(list).toMatchInline(`
         Array [
-          "DEPRECATED_SEARCH_CSV
-        search",
-          "Discover search [2021-07-19T11:47:35.995-07:00]
-        search",
-          "Discover search [2021-07-19T11:46:00.132-07:00]
-        search",
-          "Discover search [2021-07-19T11:44:48.670-07:00]
-        search",
-          "[Flights] Global Flight Dashboard
-        dashboard",
-          "[Flights] Global Flight Dashboard
-        dashboard",
-          "[Flights] Global Flight Dashboard
-        dashboard",
-          "[Flights] Global Flight Dashboard
-        dashboard",
-          "[Flights] Global Flight Dashboard
-        dashboard",
-          "[Flights] Global Flight Dashboard
-        dashboard",
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 10:29 PMtest_user",
+            "report": "DEPRECATED_SEARCH_CSVsearch",
+            "status": "Completed at 2021-07-19 @ 10:29 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:47 PMtest_user",
+            "report": "Discover search [2021-07-19T11:47:35.995-07:00]search",
+            "status": "Completed at 2021-07-19 @ 06:47 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:46 PMtest_user",
+            "report": "Discover search [2021-07-19T11:46:00.132-07:00]search",
+            "status": "Completed at 2021-07-19 @ 06:46 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:44 PMtest_user",
+            "report": "Discover search [2021-07-19T11:44:48.670-07:00]search",
+            "status": "Completed at 2021-07-19 @ 06:44 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Pending - waiting for job to be processed",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Failed at 2021-07-19 @ 06:43 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Failed at 2021-07-19 @ 10:15 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed with warnings at 2021-07-19 @ 06:41 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed with warnings at 2021-07-19 @ 06:39 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed at 2021-07-19 @ 06:39 PM",
+          },
         ]
       `);
     });
-
-    // TODO: need more data-test-subjs in the table
   });
 };
