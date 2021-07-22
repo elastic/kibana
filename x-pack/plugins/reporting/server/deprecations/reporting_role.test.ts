@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ReportingCore } from '.';
-import { registerDeprecations } from './deprecations';
-import { createMockConfigSchema, createMockReportingCore } from './test_helpers';
-import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { ReportingCore } from '..';
+import { getDeprecationsInfo } from './reporting_role';
+import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { GetDeprecationsContext, IScopedClusterClient } from 'kibana/server';
 
 let reportingCore: ReportingCore;
@@ -26,17 +26,22 @@ beforeEach(async () => {
 });
 
 test('logs no deprecations when setup has no issues', async () => {
-  const { getDeprecations } = await registerDeprecations(reportingCore, coreMock.createSetup());
-  expect(await getDeprecations(context)).toMatchInlineSnapshot(`Array []`);
+  expect(
+    await getDeprecationsInfo(context, {
+      reportingCore,
+    })
+  ).toMatchInlineSnapshot(`Array []`);
 });
 
 test('logs a plain message when only a reporting_user role issue is found', async () => {
   esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
     body: { reportron: { username: 'reportron', roles: ['kibana_admin', 'reporting_user'] } },
   });
-
-  const { getDeprecations } = await registerDeprecations(reportingCore, coreMock.createSetup());
-  expect(await getDeprecations(context)).toMatchInlineSnapshot(`
+  expect(
+    await getDeprecationsInfo(context, {
+      reportingCore,
+    })
+  ).toMatchInlineSnapshot(`
     Array [
       Object {
         "correctiveActions": Object {
@@ -61,8 +66,11 @@ test('logs multiple entries when multiple reporting_user role issues are found',
     },
   });
 
-  const { getDeprecations } = await registerDeprecations(reportingCore, coreMock.createSetup());
-  expect(await getDeprecations(context)).toMatchInlineSnapshot(`
+  expect(
+    await getDeprecationsInfo(context, {
+      reportingCore,
+    })
+  ).toMatchInlineSnapshot(`
     Array [
       Object {
         "correctiveActions": Object {
@@ -87,8 +95,11 @@ test('logs an expanded message when a config issue and a reporting_user role iss
   const mockReportingConfig = createMockConfigSchema({ roles: { enabled: true } });
   reportingCore = await createMockReportingCore(mockReportingConfig);
 
-  const { getDeprecations } = await registerDeprecations(reportingCore, coreMock.createSetup());
-  expect(await getDeprecations(context)).toMatchInlineSnapshot(`
+  expect(
+    await getDeprecationsInfo(context, {
+      reportingCore,
+    })
+  ).toMatchInlineSnapshot(`
     Array [
       Object {
         "correctiveActions": Object {
