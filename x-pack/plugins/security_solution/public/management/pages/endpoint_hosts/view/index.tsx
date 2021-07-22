@@ -380,6 +380,7 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Sensor',
         }),
+        truncateText: true,
       },
       {
         field: 'metadata.@timestamp',
