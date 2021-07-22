@@ -60,7 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
-      describe('Inverntory Test save functionality', () => {
+      describe('Inventory Test save functionality', () => {
         it('should have save and load controls', async () => {
           await pageObjects.common.navigateToApp('infraOps');
           await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
