@@ -91,8 +91,9 @@ value is `100MB`. The highest supported value for this setting is `1GB`.
 Set this property to `false` to prevent the filter editor and KQL autocomplete
 from suggesting values for fields.
 
-[[autocomplete-usetermsenum]]`autocomplete:useTermsEnum`::
-Use the Elasticsearch terms enum API for improved autocomplete suggestion performance. Results will not completely reflect the selected time range, and will not be sorted by popularity.
+[[autocomplete-usetermsenum]]`autocomplete:valueSuggestionMethod`::
+When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. Kibana returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range.
+When set to `terms_agg`, Kibana uses a terms aggregation for value suggestions, which is slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
 
 [[autocomplete-usetimerange]]`autocomplete:useTimeRange`::
 Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. Only applies when `autocomplete:useTermsEnum` is `false`.
