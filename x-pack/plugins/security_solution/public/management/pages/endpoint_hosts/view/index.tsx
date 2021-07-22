@@ -359,7 +359,7 @@ export const EndpointList = () => {
         field: 'metadata.host.ip',
         width: '12%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
-          defaultMessage: 'IP Address',
+          defaultMessage: 'IP address',
         }),
         // eslint-disable-next-line react/display-name
         render: (ip: string[]) => {
