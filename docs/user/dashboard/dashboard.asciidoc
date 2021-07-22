@@ -270,14 +270,14 @@ You can add additional interactions that allow you to open *Discover* from dashb
 Panel interaction:: Opens the data in *Discover* with the current dashboard filters, but does not take the filters
 saved with the panel.
 +
-To enable panel interactions, refere to  <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>.
+To enable panel interactions, refer to <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>.
++
+NOTE: In {kib} 7.13 and earlier, the panel interaction is enabled by default.
 
 Series interaction::
 Opens the series data in *Discover* from inside the panel.
 +
 To enable series interactions, refer to <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>>.
-
-NOTE: In {kib} 7.13 and earlier, the panel interaction was enabled by default.
 
 [float]
 [[download-csv]]
@@ -314,6 +314,26 @@ Download the data for non-*Lens* panels.
 +
 [role="screenshot"]
 image:images/Dashboard_inspect.png[Inspect in dashboard]
+
+[float]
+[[defer-loading-panels-below-the-fold]]
+== Improve dashboard loading time
+
+To improve the dashboard loading time, enable the *Defer loading panels below the fold* *Lab*, which loads the dashboard panels as they become visible on the dashboard.
+
+. In the toolbar, click *Labs*.
++
+To enable *Labs*, contact your administrator, or configure the <<Advanced Settings,advanced-options>>. 
+
+. To specify how you want to enable the lab, use the following actions:
+
+* *{kib}* &mdash; Enables the lab in {kib}.
+
+* *Browser* &mdash; Enables the lab for your browser, and persists after you close the browser.
+
+* *Session* &mdash; Enables the lab for this browser session, then resets after you close the browser.
+
+. Click *Close*.
 
 [float]
 [[share-the-dashboard]]
