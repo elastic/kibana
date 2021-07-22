@@ -106,7 +106,7 @@ export function jobsHealthServiceProvider(
           })
           .filter(
             (datafeedStat) =>
-              datafeedStat.state !== 'started' && datafeedStat.job_state !== 'opened'
+              datafeedStat.state !== 'started' || datafeedStat.job_state !== 'opened'
           );
       }
     },
