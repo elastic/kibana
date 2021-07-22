@@ -6,23 +6,25 @@
  */
 
 import React from 'react';
+import { fireEvent } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import * as fetcherHook from '../../../../../hooks/use_fetcher';
 import { SelectableUrlList } from './SelectableUrlList';
 import { render } from '../../utils/test_helper';
+import { I18LABELS } from '../../translations';
 
 describe('SelectableUrlList', () => {
+  jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    data: {},
+    status: fetcherHook.FETCH_STATUS.SUCCESS,
+    refetch: jest.fn(),
+  });
+
+  const customHistory = createMemoryHistory({
+    initialEntries: ['/?searchTerm=blog'],
+  });
+
   it('it uses search term value from url', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: {},
-      status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
-    });
-
-    const customHistory = createMemoryHistory({
-      initialEntries: ['/?searchTerm=blog'],
-    });
-
     const { getByDisplayValue } = render(
       <SelectableUrlList
         initialValue={'blog'}
@@ -39,5 +41,28 @@ describe('SelectableUrlList', () => {
       { customHistory }
     );
     expect(getByDisplayValue('blog')).toBeInTheDocument();
+  });
+
+  it('maintains focus on search input field', () => {
+    const { getByLabelText } = render(
+      <SelectableUrlList
+        initialValue={'blog'}
+        loading={false}
+        data={{ items: [], total: 0 }}
+        onChange={jest.fn()}
+        searchValue={'blog'}
+        onInputChange={jest.fn()}
+        onTermChange={jest.fn()}
+        popoverIsOpen={false}
+        setPopoverIsOpen={jest.fn()}
+        onApply={jest.fn()}
+      />,
+      { customHistory }
+    );
+
+    const input = getByLabelText(I18LABELS.filterByUrl);
+    fireEvent.click(input);
+
+    expect(document.activeElement).toBe(input);
   });
 });

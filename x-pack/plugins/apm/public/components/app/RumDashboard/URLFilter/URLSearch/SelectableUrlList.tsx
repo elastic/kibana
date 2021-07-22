@@ -109,6 +109,9 @@ export function SelectableUrlList({
 
   const onInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
     setPopoverIsOpen(true);
+    if (searchRef) {
+      searchRef.focus();
+    }
   };
 
   const onSearchInput = (e: React.FormEvent<HTMLInputElement>) => {
@@ -189,6 +192,7 @@ export function SelectableUrlList({
         onInput: onSearchInput,
         inputRef: setSearchRef,
         placeholder: I18LABELS.filterByUrl,
+        'aria-label': I18LABELS.filterByUrl,
       }}
       listProps={{
         rowHeight: 68,
@@ -210,6 +214,7 @@ export function SelectableUrlList({
             closePopover={closePopover}
             style={{ minWidth: 400 }}
             anchorPosition="downLeft"
+            ownFocus={false}
           >
             <div
               style={{
