@@ -9,7 +9,7 @@ import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import { PersistenceServices, RuleDataClient } from '../../../../../../rule_registry/server';
-import { CUSTOM_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { QUERY_ALERT_TYPE_ID } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../../target/types/server/plugin';
 import { ConfigType } from '../../../../config';
 
@@ -32,7 +32,7 @@ export const createQueryAlertType = (createOptions: {
     ruleDataClient,
   });
   return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
-    id: CUSTOM_ALERT_TYPE_ID,
+    id: QUERY_ALERT_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
       params: {

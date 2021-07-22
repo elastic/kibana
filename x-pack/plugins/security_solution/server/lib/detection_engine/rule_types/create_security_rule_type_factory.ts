@@ -67,6 +67,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       });
 
       const ruleSO = await savedObjectsClient.get('alert', alertId);
+
       const {
         actions,
         name,
@@ -208,6 +209,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
               wrapHits,
             },
           });
+
           // TODO: AlertTypeState?
           const createdSignals = result.createdSignals.concat(runResult.createdSignals);
           const warningMessages = result.warningMessages.concat(runResult.warningMessages);

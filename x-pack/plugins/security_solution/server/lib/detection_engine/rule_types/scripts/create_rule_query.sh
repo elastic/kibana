@@ -14,11 +14,30 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
      -d '
 {
   "params":{
-     "indexPatterns": ["*"],
-     "customQuery": "*:*"
+     "author": [],
+     "description": "Basic custom query rule",
+     "exceptionsList": [],
+     "falsePositives": [],
+     "from": "now-360s",
+     "query": "*:*",
+     "immutable": false,
+     "index": ["*"],
+     "language": "kuery",
+     "maxSignals": 100,
+     "outputIndex": ".siem-signals-madirey-05-03-2021",
+     "references": [],
+     "riskScore": 21,
+     "riskScoreMapping": [],
+     "ruleId": "siem.queryRule",
+     "severity": "low",
+     "severityMapping": [],
+     "threat": [],
+     "to": "now",
+     "type": "query",
+     "version": 1 
    },
    "consumer":"alerts",
-   "alertTypeId":"siem.customRule",
+   "alertTypeId":"siem.queryRule",
    "schedule":{
       "interval":"1m"
    },

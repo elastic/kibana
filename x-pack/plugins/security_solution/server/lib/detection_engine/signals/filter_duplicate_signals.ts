@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { SimpleHit, WrappedSignalHit } from './types';
+import { WrappedRACAlert } from '../rule_types/types';
+import { Ancestor, SimpleHit, WrappedSignalHit } from './types';
 
 const isWrappedSignalHit = (
   signals: SimpleHit[],
   isRuleRegistryEnabled: boolean
 ): signals is WrappedSignalHit[] => {
   return !isRuleRegistryEnabled;
+};
+
+const isWrappedRACAlert = (
+  signals: SimpleHit[],
+  isRuleRegistryEnabled: boolean
+): signals is WrappedRACAlert[] => {
+  return isRuleRegistryEnabled;
 };
 
 export const filterDuplicateSignals = (
@@ -23,8 +31,14 @@ export const filterDuplicateSignals = (
     return signals.filter(
       (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
     );
+  } else if (isWrappedRACAlert(signals, isRuleRegistryEnabled)) {
+    return signals.filter(
+      (doc) =>
+        !(doc._source.signal['kibana.alert.ancestors'] as Ancestor[]).some(
+          (ancestor) => ancestor.rule === ruleId
+        )
+    );
   } else {
-    // TODO: filter duplicate signals for RAC
-    return [];
+    return signals;
   }
 };
