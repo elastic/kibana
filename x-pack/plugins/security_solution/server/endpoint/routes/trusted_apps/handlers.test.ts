@@ -263,7 +263,9 @@ describe('handlers', () => {
       ]);
 
       expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({ body: error });
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: error.message, attributes: { type: error.type } },
+      });
     });
   });
 

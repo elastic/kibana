@@ -37,7 +37,7 @@ import {
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
 
-const getUnexistingPoliciesFromTrustedApp = async (
+const getNonExistingPoliciesFromTrustedApp = async (
   savedObjectClient: SavedObjectsClientContract,
   packagePolicyClient: PackagePolicyServiceInterface,
   trustedApp: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest
@@ -130,7 +130,7 @@ export const createTrustedApp = async (
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
-  const unexistingPolicies = await getUnexistingPoliciesFromTrustedApp(
+  const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
     savedObjectClient,
     packagePolicyClient,
     newTrustedApp
@@ -167,7 +167,7 @@ export const updateTrustedApp = async (
     throw new TrustedAppNotFoundError(id);
   }
 
-  const unexistingPolicies = await getUnexistingPoliciesFromTrustedApp(
+  const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
     savedObjectClient,
     packagePolicyClient,
     updatedTrustedApp

@@ -13,6 +13,8 @@ export class TrustedAppNotFoundError extends Error {
   }
 }
 export class TrustedAppPolicyNotExistsError extends Error {
+  public readonly type = 'TrustedApps/PolicyNotFound';
+
   constructor(name: string, policyIds: string[]) {
     super(
       `Trusted Application (${name}) is assigned with a policy that no longer exists: ${policyIds.join(

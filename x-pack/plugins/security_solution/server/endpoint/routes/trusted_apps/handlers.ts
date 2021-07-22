@@ -78,19 +78,6 @@ const packagePolicyClientFromEndpointContext = (
   return packagePolicy;
 };
 
-const savedObjectClientFromEndpointContext = (
-  endpointAppContext: EndpointAppContext,
-  req: KibanaRequest
-): SavedObjectsClientContract => {
-  const savedObjectClient = endpointAppContext.service.getScopedSavedObjectsClient(req);
-
-  if (!savedObjectClient) {
-    throw new Error('Saved Object client not found');
-  }
-
-  return savedObjectClient;
-};
-
 const errorHandler = <E extends Error>(
   logger: Logger,
   res: KibanaResponseFactory,
@@ -103,7 +90,7 @@ const errorHandler = <E extends Error>(
 
   if (error instanceof TrustedAppPolicyNotExistsError) {
     logger.error(error);
-    return res.badRequest({ body: error });
+    return res.badRequest({ body: { message: error.message, attributes: { type: error.type } } });
   }
 
   if (error instanceof TrustedAppVersionConflictError) {
@@ -194,7 +181,7 @@ export const getTrustedAppsCreateRouteHandler = (
       return res.ok({
         body: await createTrustedApp(
           exceptionListClientFromContext(context),
-          savedObjectClientFromEndpointContext(endpointAppContext, req),
+          context.core.savedObjects.client,
           packagePolicyClientFromEndpointContext(endpointAppContext),
           body
         ),
@@ -222,7 +209,7 @@ export const getTrustedAppsUpdateRouteHandler = (
       return res.ok({
         body: await updateTrustedApp(
           exceptionListClientFromContext(context),
-          savedObjectClientFromEndpointContext(endpointAppContext, req),
+          context.core.savedObjects.client,
           packagePolicyClientFromEndpointContext(endpointAppContext),
           req.params.id,
           body
