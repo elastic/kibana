@@ -19,4 +19,4 @@ export const PainlessLang: CompleteLangModuleType = {
   getSyntaxErrors,
 };
 
-export { PainlessContext, PainlessAutocompleteField } from './types';
+export type { PainlessContext, PainlessAutocompleteField } from './types';
