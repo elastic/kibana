@@ -44,7 +44,7 @@ describe('import_rules_route', () => {
     request = getImportRulesRequest(hapiStream);
     ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
+    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
@@ -72,7 +72,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting!.getRulesClient = jest.fn();
       const response = await server.inject(request, context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -166,7 +166,7 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -199,7 +199,7 @@ describe('import_rules_route', () => {
 
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
+        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const response = await server.inject(request, context);
 
         expect(response.status).toEqual(200);
@@ -219,7 +219,7 @@ describe('import_rules_route', () => {
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
+        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const overwriteRequest = getImportRulesRequestOverwriteTrue(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
@@ -339,7 +339,7 @@ describe('import_rules_route', () => {
 
     describe('rules with existing rule_id', () => {
       beforeEach(() => {
-        clients.alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit()); // extant rule
+        clients.rulesClient.find.mockResolvedValueOnce(getFindResultWithSingleHit()); // extant rule
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
