@@ -2315,7 +2315,7 @@ describe('Task Runner', () => {
     );
   });
 
-  test(`doesn't use API key when not provided`, async () => {
+  test(`doesn't use API key when API key is null`, async () => {
     const taskRunner = new TaskRunner(
       alertType,
       mockedTaskInstance,
@@ -2325,7 +2325,9 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
-      attributes: {},
+      attributes: {
+        apiKey: null,
+      },
       references: [],
     });
 
@@ -2343,6 +2345,105 @@ describe('Task Runner', () => {
       request,
       '/'
     );
+  });
+
+  test(`doesn't use API key when API key doesn't exist`, async () => {
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {},
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "error": Object {
+              "message": "Unable to decrypt attribute \\"apiKey\\" because \\"apiKey\\" is undefined.",
+            },
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "failure",
+              "reason": "decrypt",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "error",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
   });
 
   test('rescheduled the Alert if the schedule has update during a task run', async () => {
