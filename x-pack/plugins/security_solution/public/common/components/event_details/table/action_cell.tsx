@@ -65,6 +65,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     }, []);
 
     const draggableIds = actionCellConfig?.idList.map((id) => getDraggableId(id));
+    console.log(`${data.field}: ${draggableIds}`); // eslint-disable-line
     return (
       <HoverActions
         dataType={data.type}
