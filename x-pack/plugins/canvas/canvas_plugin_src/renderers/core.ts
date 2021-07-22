@@ -15,3 +15,5 @@ import { text } from './text';
 import { table } from './table';
 
 export const renderFunctions = [image, markdown, metric, pie, plot, progress, table, text];
+
+export const renderFunctionFactories = [];
