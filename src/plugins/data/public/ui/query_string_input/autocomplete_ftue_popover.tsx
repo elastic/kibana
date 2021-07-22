@@ -8,9 +8,11 @@
 
 import { ReactElement, useEffect, useState } from 'react';
 import React from 'react';
-import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana } from '../../../../kibana_react/public';
 
 const AUTOCOMPLETE_FTUE_POPOVER_STORAGE_KEY = 'data.autocompleteFtuePopover';
 
@@ -23,6 +25,9 @@ export function AutocompleteFtuePopover({
   storage: IStorageWrapper;
   children: ReactElement;
 }) {
+  const kibana = useKibana();
+  const autocompleteChangesLink = kibana.services.docLinks!.links.query.autocompleteChanges;
+
   const [autocompleteFtuePopoverDismissed, setAutocompleteFtuePopoverDismissed] = useState(() =>
     Boolean(storage.get(AUTOCOMPLETE_FTUE_POPOVER_STORAGE_KEY))
   );
@@ -42,13 +47,20 @@ export function AutocompleteFtuePopover({
         setAutocompleteFtuePopoverDismissed(true);
       }}
       content={
-        <EuiText size="s">
-          <p style={{ maxWidth: 300 }}>
-            {i18n.translate('data.autocompleteFtuePopover.content', {
-              defaultMessage:
-                'We changed how autocomplete works to improve performance. Learn more.',
-            })}
-          </p>
+        <EuiText size="s" style={{ maxWidth: '300px' }}>
+          <FormattedMessage
+            id="data.autocompleteFtuePopover.content"
+            defaultMessage="We changed how autocomplete works to improve performance. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink href={autocompleteChangesLink} target="_blank" external>
+                  {i18n.translate('data.autocompleteFtuePopover.learnMoreLink', {
+                    defaultMessage: 'Learn more.',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
         </EuiText>
       }
       minWidth={300}
