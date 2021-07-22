@@ -318,17 +318,25 @@ This content has moved. Refer to <<embedded-content-authentication>> and <<embed
 
 This content has moved. Refer to <<install-reporting-packages>>.
 
+[role="exclude",id="graph-getting-started"]
+== Create a graph
+
+This content has moved. Refer to <<xpack-graph>>.
+
+[role="exclude",id="graph-limitations"]
+== Graph limitations
+
+This content has moved. Refer to <<graph-troubleshooting>>.
+
 [role="exclude",id="profiler-getting-started"]
 == Getting start with Search Profiler
 
 This content has moved. Refer to <<xpack-profiler>>.
 
-
 [role="exclude",id="profiler-complicated"]
 == Profiling a more complicated querying
 
 This content has moved. Refer to <<xpack-profiler>>.
-
 
 [role="exclude",id="profiler-render"]
 == Rendering pre-captured profiler JSON
