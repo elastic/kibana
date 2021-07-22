@@ -18,7 +18,6 @@ import {
 
 import { Case, CaseStatuses, StatusAll } from '../../../../../../cases/common';
 import { Ecs } from '../../../../../common/ecs';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
 import { ActionIconItem } from '../../action_icon_item';
@@ -29,7 +28,11 @@ import * as i18n from './translations';
 export interface AddToCaseActionProps {
   ariaLabel?: string;
   ecsRowData: Ecs;
-  appId: string;
+  useInsertTimeline?: Function;
+  casePermissions: {
+    crud: boolean;
+    read: boolean;
+  } | null;
 }
 // FIXME: DEDUPE
 export const APP_ID = 'securitySolution';
@@ -98,7 +101,8 @@ interface PostCommentArg {
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   ecsRowData,
-  appId,
+  useInsertTimeline,
+  casePermissions,
 }) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
@@ -120,9 +124,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const userPermissions = useGetUserCasesPermissions(appId);
   const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
-  const userCanCrud = userPermissions?.crud ?? false;
+  const userCanCrud = casePermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
   const tooltipContext = userCanCrud
     ? isEventSupported
@@ -284,6 +287,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           afterCaseCreated={attachAlertToCase}
           onCloseFlyout={closeCaseFlyoutOpen}
           onSuccess={onCaseSuccess}
+          useInsertTimeline={useInsertTimeline}
         />
       )}
       {isAllCaseModalOpen &&
@@ -304,7 +308,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           hiddenStatuses: [CaseStatuses.closed, StatusAll],
           onRowClick: onCaseClicked,
           updateCase: onCaseSuccess,
-          userCanCrud: userPermissions?.crud ?? false,
+          userCanCrud: casePermissions?.crud ?? false,
           owner: [APP_ID],
         })}
     </>

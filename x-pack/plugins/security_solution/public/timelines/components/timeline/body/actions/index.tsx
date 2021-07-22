@@ -22,12 +22,12 @@ import { InvestigateInTimelineAction } from '../../../../../detections/component
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { EventsTdContent } from '../../styles';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-// import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
+import { useInsertTimeline } from '../../../../../cases/components/use_insert_timeline';
 import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
@@ -96,7 +96,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
   );
   const eventType = getEventType(ecsData);
-
+  const casePermissions = useGetUserCasesPermissions();
+  const insertTimelineHook = useInsertTimeline;
   const isEventContextMenuEnabledForEndpoint = useMemo(
     () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
     [ecsData.event?.kind, ecsData.agent?.type]
@@ -176,7 +177,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
           timelinesUi.getAddToCaseAction({
             ariaLabel: i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
             ecsRowData: ecsData,
-            appId: SERVER_APP_ID,
+            useInsertTimeline: insertTimelineHook,
+            casePermissions,
           })}
         {/* {[
           TimelineId.detectionsPage,

@@ -8,14 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { EuiGlobalToastList } from '@elastic/eui';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { TimelinesStartServices } from '../../../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TestProviders } from '../../../../mock';
 import { AddToCaseAction, APP_ID, SecurityPageName } from './add_to_case_action';
 import { basicCase } from '../../../../../../cases/public/containers/mock';
 import { Case, SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
-import { blah } from '../../../../../../../../src'
 
 jest.mock('../../../../../../../../src/plugins/kibana_react/public');
 
@@ -27,7 +25,10 @@ describe('AddToCaseAction', () => {
       _index: 'test-index',
       signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
     },
-    appId: APP_ID,
+    casePermissions: {
+      crud: true,
+      read: true,
+    }
   };
 
   const mockDispatchToaster = jest.fn();
@@ -46,10 +47,6 @@ describe('AddToCaseAction', () => {
       getCreateCase: mockCreateCase,
       getAllCasesSelectorModal: mockAllCasesModal.mockImplementation(() => <>{'test'}</>),
     };
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: true,
-      read: true,
-    });
   });
 
   it('it renders', () => {
@@ -186,14 +183,13 @@ describe('AddToCaseAction', () => {
   });
 
   it('hides the icon when user does not have crud permissions', () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+    const newProps = { ...props, casePermissions: {
       crud: false,
       read: true,
-    });
-
+    }}
     const wrapper = mount(
       <TestProviders>
-        <AddToCaseAction {...props} />
+        <AddToCaseAction {...newProps} />
       </TestProviders>
     );
 
