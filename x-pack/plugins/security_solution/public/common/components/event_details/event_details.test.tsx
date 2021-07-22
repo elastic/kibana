@@ -63,7 +63,7 @@ describe('EventDetails', () => {
   });
 
   describe('tabs', () => {
-    ['Table', 'JSON View'].forEach((tab) => {
+    ['Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         expect(
           wrapper
@@ -82,7 +82,7 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Overview', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
+    ['Overview', 'Threat Intel', 'Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(

@@ -22,11 +22,6 @@ interface UrlParam {
   username?: string;
 }
 
-interface App {
-  pathname?: string;
-  hash?: string;
-}
-
 /**
  * Converts a config and a pathname to a url
  * @param {object} config A url config
@@ -46,11 +41,11 @@ interface App {
  * @return {string}
  */
 
-function getUrl(config: UrlParam, app: App) {
+function getUrl(config: UrlParam, app: UrlParam) {
   return url.format(_.assign({}, config, app));
 }
 
-getUrl.noAuth = function getUrlNoAuth(config: UrlParam, app: App) {
+getUrl.noAuth = function getUrlNoAuth(config: UrlParam, app: UrlParam) {
   config = _.pickBy(config, function (val, param) {
     return param !== 'auth';
   });

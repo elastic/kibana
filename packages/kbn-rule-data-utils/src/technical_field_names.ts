@@ -31,6 +31,7 @@ const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
 const SPACE_IDS = 'kibana.space_ids' as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
+const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
 const fields = {
   TIMESTAMP,
@@ -53,6 +54,7 @@ const fields = {
   ALERT_STATUS,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
   SPACE_IDS,
 };
 
@@ -77,6 +79,7 @@ export {
   ALERT_STATUS,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
   SPACE_IDS,
 };
 
