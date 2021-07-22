@@ -41,7 +41,7 @@ import {
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { AlertsClient } from '../../../../alerting/server';
+import type { RulesClient } from '../../../../alerting/server';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
@@ -56,7 +56,7 @@ interface Results {
 export function jobsProvider(
   client: IScopedClusterClient,
   mlClient: MlClient,
-  alertsClient?: AlertsClient
+  rulesClient?: RulesClient
 ) {
   const { asInternalUser } = client;
 
@@ -423,8 +423,8 @@ export function jobsProvider(
         jobs.push(tempJob);
       });
 
-      if (alertsClient) {
-        const mlAlertingRules = await alertsClient.find<MlAnomalyDetectionAlertParams>({
+      if (rulesClient) {
+        const mlAlertingRules = await rulesClient.find<MlAnomalyDetectionAlertParams>({
           options: {
             filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}`,
             perPage: 1000,
