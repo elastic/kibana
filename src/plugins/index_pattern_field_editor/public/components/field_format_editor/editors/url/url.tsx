@@ -18,12 +18,13 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, FormatEditorProps } from '../default/default';
+import { DefaultFormatEditor } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
 
 import { context as contextType } from '../../../../../../kibana_react/public';
+import { FormatEditorProps } from '../types';
 
 interface OnChangeParam {
   type: string;

@@ -13,15 +13,11 @@ import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  DefaultFormatEditor,
-  defaultState,
-  FormatEditorProps,
-  FormatEditorState,
-} from '../default/default';
+import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
+import { FormatEditorProps } from '../types';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;
