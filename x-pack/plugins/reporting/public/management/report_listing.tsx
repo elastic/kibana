@@ -111,7 +111,7 @@ class ReportListingUi extends Component<Props, State> {
         <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
 
         <EuiSpacer size={'l'} />
-        {this.renderTable()}
+        <div>{this.renderTable()}</div>
 
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="flexEnd">
@@ -357,6 +357,14 @@ class ReportListingUi extends Component<Props, State> {
 
     return (
       <Fragment>
+        {this.state.selectedJobs.length > 0 && (
+          <Fragment>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
+              <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
             defaultMessage: 'Reports generated in Kibana applications',
@@ -383,7 +391,6 @@ class ReportListingUi extends Component<Props, State> {
           data-test-subj={REPORT_TABLE_ID}
           rowProps={() => ({ 'data-test-subj': REPORT_TABLE_ROW_ID })}
         />
-        {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>
     );
   }
