@@ -89,10 +89,10 @@ export interface PluginsServiceDiscoverDeps {
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
-  private readonly prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+  private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
   private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
-  private readonly standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+  private readonly standardPluginsSystem: PluginsSystem<PluginType.standard>;
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
@@ -100,6 +100,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
 
   constructor(private readonly coreContext: CoreContext) {
+    this.prebootPluginsSystem = new PluginsSystem(coreContext, PluginType.preboot);
+    this.standardPluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
     this.log = coreContext.logger.get('plugins-service');
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
