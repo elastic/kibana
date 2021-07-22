@@ -249,10 +249,16 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-              <EmptyPlaceholder
-                icon={[Function]}
-              />
-          `);
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
+      `);
     });
 
     test('it renders an EmptyPlaceholder when null value is passed as data', () => {
@@ -269,9 +275,15 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-        <EmptyPlaceholder
-          icon={[Function]}
-        />
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
       `);
     });
 
