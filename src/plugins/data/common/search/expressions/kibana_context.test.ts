@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore, Filter } from '@kbn/es-query';
+import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ExecutionContext } from 'src/plugins/expressions/common';
 import { KibanaContext } from './kibana_context_type';
@@ -204,59 +204,43 @@ describe('kibanaContextFn', () => {
 
   it('deduplicates duplicated filters and keeps the first enabled filter', async () => {
     const { fn } = kibanaContextFn;
-    const query = {
-      match_phrase: {
-        Carrier: 'JetBeats',
+    const filter1 = buildFilter(
+      { fields: [] },
+      { name: 'test', type: 'test' },
+      FILTERS.PHRASE,
+      false,
+      true,
+      {
+        query: 'JetBeats',
       },
-    };
-    const $state = {
-      store: FilterStateStore.APP_STATE,
-    };
-    const filter1: Filter = {
-      meta: {
-        index: 'test',
-        alias: null,
-        negate: false,
-        disabled: true,
-        type: 'phrase',
-        key: 'Carrier',
-        params: {
-          query: 'JetBeats',
-        },
+      null,
+      FilterStateStore.APP_STATE
+    );
+    const filter2 = buildFilter(
+      { fields: [] },
+      { name: 'test', type: 'test' },
+      FILTERS.PHRASE,
+      false,
+      false,
+      {
+        query: 'JetBeats',
       },
-      query,
-      $state,
-    };
-    const filter2: Filter = {
-      meta: {
-        index: 'test',
-        alias: null,
-        negate: false,
-        disabled: false,
-        type: 'phrase',
-        key: 'Carrier',
-        params: {
-          query: 'JetBeats',
-        },
+      null,
+      FilterStateStore.APP_STATE
+    );
+
+    const filter3 = buildFilter(
+      { fields: [] },
+      { name: 'test', type: 'test' },
+      FILTERS.PHRASE,
+      false,
+      false,
+      {
+        query: 'JetBeats',
       },
-      query,
-      $state,
-    };
-    const filter3: Filter = {
-      meta: {
-        index: 'test',
-        alias: null,
-        negate: false,
-        disabled: false,
-        type: 'phrase',
-        key: 'Carrier',
-        params: {
-          query: 'JetBeats',
-        },
-      },
-      query,
-      $state,
-    };
+      null,
+      FilterStateStore.APP_STATE
+    );
 
     const input: KibanaContext = {
       type: 'kibana_context',
