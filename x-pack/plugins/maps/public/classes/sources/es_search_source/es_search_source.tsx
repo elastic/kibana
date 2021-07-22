@@ -441,15 +441,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return matchingIndexes.length === 1;
   }
 
-  async getDefaultFields(): Promise<Record<string, string>> {
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
     if (!(await this._isDrawingIndex())) {
       return {};
     }
     const user = await getSecurityService()?.authc.getCurrentUser();
     const timestamp = new Date().toISOString();
     return {
-      ...(user ? { user: user.username } : {}),
-      '@timestamp': timestamp,
+      creation: {
+        ...(user ? { user: user.username } : {}),
+        '@timestamp': timestamp,
+      },
     };
   }
 

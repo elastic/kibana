@@ -240,7 +240,7 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  async getDefaultFields(): Promise<Record<string, string>> {
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
     return {};
   }
 }

@@ -23,11 +23,15 @@ interface State {
 }
 
 const DEFAULT_MAPPINGS = {
-  '@timestamp': {
-    type: 'date',
-  },
-  user: {
-    type: 'keyword',
+  creation: {
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+      user: {
+        type: 'keyword',
+      },
+    },
   },
 };
 
