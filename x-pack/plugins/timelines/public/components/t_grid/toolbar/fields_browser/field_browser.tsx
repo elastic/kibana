@@ -6,16 +6,17 @@
  */
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
-  EuiFocusTrap,
   EuiFlexItem,
-  EuiOutsideClickDetector,
-  EuiScreenReaderOnly,
-  EuiToolTip,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalFooter,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { useEffect, useCallback, useRef } from 'react';
-import { noop } from 'lodash/fp';
+import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -24,46 +25,30 @@ import type { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
 import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
-import { Header } from './header';
+import { Search } from './search';
 import {
   CATEGORY_PANE_WIDTH,
   CLOSE_BUTTON_CLASS_NAME,
   FIELDS_PANE_WIDTH,
+  FIELD_BROWSER_WIDTH,
   focusSearchInput,
   onFieldsBrowserTabPressed,
   PANES_FLEX_GROUP_WIDTH,
+  RESET_FIELDS_CLASS_NAME,
   scrollCategoriesPane,
 } from './helpers';
-import type { FieldBrowserProps, OnHideFieldBrowser } from './types';
-import { tGridActions } from '../../../../store/t_grid';
+import type { FieldBrowserProps } from './types';
+import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 
 import * as i18n from './translations';
-
-const FieldsBrowserContainer = styled.div<{ width: number }>`
-  background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
-  border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
-    ${({ theme }) => theme.eui.euiColorMediumShade};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  left: 12px;
-  padding: ${({ theme }) => theme.eui.paddingSizes.s} ${({ theme }) => theme.eui.paddingSizes.s}
-    ${({ theme }) => theme.eui.paddingSizes.s};
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  width: ${({ width }) => width}px;
-  z-index: 9990;
-`;
-FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
+import { useDeepEqualSelector } from '../../../../hooks/use_selector';
 
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
 `;
 PanesFlexGroup.displayName = 'PanesFlexGroup';
 
-type Props = Pick<
-  FieldBrowserProps,
-  'browserFields' | 'height' | 'onFieldSelected' | 'timelineId' | 'width'
-> & {
+type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> & {
   /**
    * The current timeline column headers
    */
@@ -93,11 +78,7 @@ type Props = Pick<
   /**
    * Hides the field browser when invoked
    */
-  onHideFieldBrowser: OnHideFieldBrowser;
-  /**
-   * Invoked when the user clicks outside of the field browser
-   */
-  onOutsideClick: () => void;
+  onHide: () => void;
   /**
    * Invoked when the user types in the search input
    */
@@ -120,15 +101,13 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   filteredBrowserFields,
   isSearching,
   onCategorySelected,
-  onFieldSelected,
-  onHideFieldBrowser,
   onSearchInputChange,
-  onOutsideClick,
+  onHide,
   restoreFocusTo,
   searchInput,
   selectedCategoryId,
   timelineId,
-  width,
+  width = FIELD_BROWSER_WIDTH,
 }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -138,23 +117,28 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
+  const closeAndRestoreFocus = useCallback(() => {
+    onHide();
+    setTimeout(() => {
+      // restore focus on the next tick after we have escaped the EuiFocusTrap
+      restoreFocusTo.current?.focus();
+    }, 0);
+  }, [onHide, restoreFocusTo]);
+
+  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+
+  const onResetColumns = useCallback(() => {
+    onUpdateColumns(defaultColumns);
+    closeAndRestoreFocus();
+  }, [onUpdateColumns, closeAndRestoreFocus, defaultColumns]);
+
   /** Invoked when the user types in the input to filter the field browser */
   const onInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onSearchInputChange(event.target.value);
     },
     [onSearchInputChange]
-  );
-
-  const selectFieldAndHide = useCallback(
-    (fieldId: string) => {
-      if (onFieldSelected != null) {
-        onFieldSelected(fieldId);
-      }
-
-      onHideFieldBrowser();
-    },
-    [onFieldSelected, onHideFieldBrowser]
   );
 
   const scrollViewsAndFocusInput = useCallback(() => {
@@ -176,14 +160,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategoryId, timelineId]);
 
-  const closeAndRestoreFocus = useCallback(() => {
-    onOutsideClick();
-    setTimeout(() => {
-      // restore focus on the next tick after we have escaped the EuiFocusTrap
-      restoreFocusTo.current?.focus();
-    }, 0);
-  }, [onOutsideClick, restoreFocusTo]);
-
   const onKeyDown = useCallback(
     (keyboardEvent: React.KeyboardEvent) => {
       if (isEscape(keyboardEvent)) {
@@ -202,43 +178,20 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiOutsideClickDetector
-      data-test-subj="outside-click-detector"
-      onOutsideClick={onFieldSelected != null ? noop : onOutsideClick}
-      isDisabled={false}
-    >
-      <FieldsBrowserContainer
-        data-test-subj="fields-browser-container"
-        onKeyDown={onKeyDown}
-        ref={containerElement}
-        width={width}
-      >
-        <EuiFocusTrap>
-          <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
-            <p>{i18n.YOU_ARE_IN_A_POPOVER}</p>
-          </EuiScreenReaderOnly>
+    <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
+      <div data-test-subj="fields-browser-container" onKeyDown={onKeyDown} ref={containerElement}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <h1>{i18n.FIELDS_BROWSER}</h1>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={i18n.CLOSE} data-test-subj="closeToolTip">
-                <EuiButtonIcon
-                  aria-label={i18n.CLOSE}
-                  className={CLOSE_BUTTON_CLASS_NAME}
-                  data-test-subj="close"
-                  iconType="cross"
-                  onClick={closeAndRestoreFocus}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <Header
+        <EuiModalBody>
+          <Search
             data-test-subj="header"
             filteredBrowserFields={filteredBrowserFields}
             isSearching={isSearching}
-            onOutsideClick={closeAndRestoreFocus}
             onSearchInputChange={onInputChange}
-            onUpdateColumns={onUpdateColumns}
             searchInput={searchInput}
             timelineId={timelineId}
           />
@@ -261,7 +214,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
                 data-test-subj="fields-pane"
                 filteredBrowserFields={filteredBrowserFields}
                 onCategorySelected={onCategorySelected}
-                onFieldSelected={selectFieldAndHide}
                 onUpdateColumns={onUpdateColumns}
                 searchInput={searchInput}
                 selectedCategoryId={selectedCategoryId}
@@ -270,9 +222,32 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
           </PanesFlexGroup>
-        </EuiFocusTrap>
-      </FieldsBrowserContainer>
-    </EuiOutsideClickDetector>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              className={RESET_FIELDS_CLASS_NAME}
+              data-test-subj="reset-fields"
+              onClick={onResetColumns}
+            >
+              {i18n.RESET_FIELDS}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={closeAndRestoreFocus}
+              aria-label={i18n.CLOSE}
+              className={CLOSE_BUTTON_CLASS_NAME}
+              data-test-subj="close"
+            >
+              {i18n.CLOSE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiModalFooter>
+      </div>
+    </EuiModal>
   );
 };
 

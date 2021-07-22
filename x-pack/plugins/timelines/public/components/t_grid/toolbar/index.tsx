@@ -13,7 +13,6 @@ import type { ColumnHeaderOptions } from '../../../../common';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
 import { StatefulFieldsBrowser } from './fields_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './fields_browser/helpers';
 
 interface Props {
   browserFields: BrowserFields;
@@ -57,8 +56,6 @@ export const TimelineToolbarComponent = ({ browserFields, columnHeaders, timelin
         additionalControls: (
           <StatefulFieldsBrowser
             data-test-subj="field-browser"
-            height={FIELD_BROWSER_HEIGHT}
-            width={FIELD_BROWSER_WIDTH}
             browserFields={browserFields}
             timelineId={timelineId}
             columnHeaders={columnHeaders}

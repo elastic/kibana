@@ -30,8 +30,7 @@ LoadingSpinner.displayName = 'LoadingSpinner';
 export const CATEGORY_PANE_WIDTH = 200;
 export const DESCRIPTION_COLUMN_WIDTH = 300;
 export const FIELD_COLUMN_WIDTH = 200;
-export const FIELD_BROWSER_WIDTH = 900;
-export const FIELD_BROWSER_HEIGHT = 300;
+export const FIELD_BROWSER_WIDTH = 925;
 export const FIELDS_PANE_WIDTH = 670;
 export const HEADER_HEIGHT = 40;
 export const PANES_FLEX_GROUP_WIDTH = CATEGORY_PANE_WIDTH + FIELDS_PANE_WIDTH + 10;
@@ -199,6 +198,11 @@ export const viewAllHasFocus = (containerElement: HTMLElement | null): boolean =
     containerElement?.querySelector<HTMLDivElement>(`.${VIEW_ALL_BUTTON_CLASS_NAME}`)
   );
 
+export const resetButtonHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${RESET_FIELDS_CLASS_NAME}`)
+  );
+
 export const scrollCategoriesPane = ({
   containerElement,
   selectedCategoryId,
@@ -308,15 +312,20 @@ export const onCategoryTableFocusChanging = ({
 }: {
   containerElement: HTMLElement | null;
   shiftKey: boolean;
-}) => (shiftKey ? focusViewAllButton(containerElement) : focusCloseButton(containerElement));
+}) => (shiftKey ? focusViewAllButton(containerElement) : focusResetFieldsButton(containerElement));
 
 export const onCloseButtonFocusChanging = ({
   containerElement,
   shiftKey,
+  timelineId,
 }: {
   containerElement: HTMLElement | null;
   shiftKey: boolean;
-}) => (shiftKey ? focusCategoryTable(containerElement) : focusResetFieldsButton(containerElement));
+  timelineId: string;
+}) =>
+  shiftKey
+    ? focusResetFieldsButton(containerElement)
+    : focusSearchInput({ containerElement, timelineId });
 
 export const onSearchInputFocusChanging = ({
   containerElement,
@@ -330,7 +339,7 @@ export const onSearchInputFocusChanging = ({
   timelineId: string;
 }) =>
   shiftKey
-    ? focusResetFieldsButton(containerElement)
+    ? focusCloseButton(containerElement)
     : focusCategoriesPane({ containerElement, selectedCategoryId, timelineId });
 
 export const onViewAllFocusChanging = ({
@@ -347,6 +356,14 @@ export const onViewAllFocusChanging = ({
   shiftKey
     ? focusCategoriesPane({ containerElement, selectedCategoryId, timelineId })
     : focusCategoryTable(containerElement);
+
+export const onResetButtonFocusChanging = ({
+  containerElement,
+  shiftKey,
+}: {
+  containerElement: HTMLElement | null;
+  shiftKey: boolean;
+}) => (shiftKey ? focusCategoryTable(containerElement) : focusCloseButton(containerElement));
 
 export const onFieldsBrowserTabPressed = ({
   containerElement,
@@ -390,11 +407,18 @@ export const onFieldsBrowserTabPressed = ({
       containerElement,
       shiftKey,
     });
+  } else if (resetButtonHasFocus(containerElement)) {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    onResetButtonFocusChanging({
+      containerElement,
+      shiftKey,
+    });
   } else if (closeButtonHasFocus(containerElement)) {
     stopPropagationAndPreventDefault(keyboardEvent);
     onCloseButtonFocusChanging({
       containerElement,
       shiftKey,
+      timelineId,
     });
   }
 };

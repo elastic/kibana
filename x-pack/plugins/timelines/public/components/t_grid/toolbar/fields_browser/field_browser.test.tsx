@@ -8,101 +8,70 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TestProviders, mockBrowserFields } from '../../../../mock';
+import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mock';
+import { tGridActions } from '../../../../store/t_grid';
 
 import { FieldsBrowser } from './field_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('FieldsBrowser', () => {
   const timelineId = 'test';
 
-  // `enzyme` doesn't mount the components into the global jsdom `document`
-  // but that's where the click detector listener is, so for testing, we
-  // pass the top-level mounted component's click event on to document
-  const triggerDocumentMouseDown = () => {
-    const event = new Event('mousedown');
-    document.dispatchEvent(event);
-  };
+  // // `enzyme` doesn't mount the components into the global jsdom `document`
+  // // but that's where the click detector listener is, so for testing, we
+  // // pass the top-level mounted component's click event on to document
+  // const triggerDocumentMouseDown = () => {
+  //   const event = new Event('mousedown');
+  //   document.dispatchEvent(event);
+  // };
 
-  const triggerDocumentMouseUp = () => {
-    const event = new Event('mouseup');
-    document.dispatchEvent(event);
-  };
+  // const triggerDocumentMouseUp = () => {
+  //   const event = new Event('mouseup');
+  //   document.dispatchEvent(event);
+  // };
 
-  test('it invokes onOutsideClick when onFieldSelected is undefined, and the user clicks outside the fields browser', () => {
-    const onOutsideClick = jest.fn();
+  // test('it invokes onOutsideClick when onFieldSelected is undefined, and the user clicks outside the fields browser', () => {
+  //   const onOutsideClick = jest.fn();
 
-    const wrapper = mount(
-      <TestProviders>
-        <div
-          data-test-subj="outside"
-          onMouseDown={triggerDocumentMouseDown}
-          onMouseUp={triggerDocumentMouseUp}
-        >
-          <FieldsBrowser
-            columnHeaders={[]}
-            browserFields={mockBrowserFields}
-            filteredBrowserFields={mockBrowserFields}
-            searchInput={''}
-            height={FIELD_BROWSER_HEIGHT}
-            isSearching={false}
-            onCategorySelected={jest.fn()}
-            onHideFieldBrowser={jest.fn()}
-            onOutsideClick={onOutsideClick}
-            onSearchInputChange={jest.fn()}
-            restoreFocusTo={React.createRef<HTMLButtonElement>()}
-            selectedCategoryId={''}
-            timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
-          />
-        </div>
-      </TestProviders>
-    );
+  //   const wrapper = mount(
+  //     <TestProviders>
+  //       <div
+  //         data-test-subj="outside"
+  //         onMouseDown={triggerDocumentMouseDown}
+  //         onMouseUp={triggerDocumentMouseUp}
+  //       >
+  //         <FieldsBrowser
+  //           columnHeaders={[]}
+  //           browserFields={mockBrowserFields}
+  //           filteredBrowserFields={mockBrowserFields}
+  //           searchInput={''}
+  //           isSearching={false}
+  //           onCategorySelected={jest.fn()}
+  //           onHide={jest.fn()}
+  //           onSearchInputChange={jest.fn()}
+  //           restoreFocusTo={React.createRef<HTMLButtonElement>()}
+  //           selectedCategoryId={''}
+  //           timelineId={timelineId}
+  //         />
+  //       </div>
+  //     </TestProviders>
+  //   );
 
-    wrapper.find('[data-test-subj="outside"]').simulate('mousedown');
-    wrapper.find('[data-test-subj="outside"]').simulate('mouseup');
+  //   wrapper.find('[data-test-subj="outside"]').simulate('mousedown');
+  //   wrapper.find('[data-test-subj="outside"]').simulate('mouseup');
 
-    expect(onOutsideClick).toHaveBeenCalled();
-  });
+  //   expect(onOutsideClick).toHaveBeenCalled();
+  // });
 
-  test('it does NOT invoke onOutsideClick when onFieldSelected is defined, and the user clicks outside the fields browser', () => {
-    const onOutsideClick = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <div
-          data-test-subj="outside"
-          onMouseDown={triggerDocumentMouseDown}
-          onMouseUp={triggerDocumentMouseUp}
-        >
-          <FieldsBrowser
-            columnHeaders={[]}
-            browserFields={mockBrowserFields}
-            filteredBrowserFields={mockBrowserFields}
-            searchInput={''}
-            height={FIELD_BROWSER_HEIGHT}
-            isSearching={false}
-            onCategorySelected={jest.fn()}
-            onFieldSelected={jest.fn()}
-            onHideFieldBrowser={jest.fn()}
-            onOutsideClick={onOutsideClick}
-            onSearchInputChange={jest.fn()}
-            restoreFocusTo={React.createRef<HTMLButtonElement>()}
-            selectedCategoryId={''}
-            timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
-          />
-        </div>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="outside"]').simulate('mousedown');
-    wrapper.find('[data-test-subj="outside"]').simulate('mouseup');
-
-    expect(onOutsideClick).not.toHaveBeenCalled();
-  });
-
-  test('it renders the header', () => {
+  test('it renders the Close button', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser
@@ -110,21 +79,141 @@ describe('FieldsBrowser', () => {
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           searchInput={''}
-          height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
           onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
+          onHide={jest.fn()}
           onSearchInputChange={jest.fn()}
           restoreFocusTo={React.createRef<HTMLButtonElement>()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="close"]').first().text()).toEqual('Close');
+  });
+
+  test('it invokes the Close button', () => {
+    const onHide = jest.fn();
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          columnHeaders={[]}
+          browserFields={mockBrowserFields}
+          filteredBrowserFields={mockBrowserFields}
+          searchInput={''}
+          isSearching={false}
+          onCategorySelected={jest.fn()}
+          onHide={onHide}
+          onSearchInputChange={jest.fn()}
+          restoreFocusTo={React.createRef<HTMLButtonElement>()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="close"]').first().simulate('click');
+    expect(onHide).toBeCalled();
+  });
+
+  test('it renders the Reset Fields button', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          columnHeaders={[]}
+          browserFields={mockBrowserFields}
+          filteredBrowserFields={mockBrowserFields}
+          searchInput={''}
+          isSearching={false}
+          onCategorySelected={jest.fn()}
+          onHide={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          restoreFocusTo={React.createRef<HTMLButtonElement>()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="reset-fields"]').first().text()).toEqual('Reset Fields');
+  });
+
+  test('it invokes updateColumns action when the user clicks the Reset Fields button', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          columnHeaders={defaultHeaders}
+          browserFields={mockBrowserFields}
+          filteredBrowserFields={mockBrowserFields}
+          searchInput={''}
+          isSearching={false}
+          onCategorySelected={jest.fn()}
+          onHide={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          restoreFocusTo={React.createRef<HTMLButtonElement>()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
+
+    expect(mockDispatch).toBeCalledWith(
+      tGridActions.updateColumns({
+        id: timelineId,
+        columns: defaultHeaders,
+      })
+    );
+  });
+
+  test('it invokes onHide when the user clicks the Reset Fields button', () => {
+    const onHide = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          columnHeaders={[]}
+          browserFields={mockBrowserFields}
+          filteredBrowserFields={mockBrowserFields}
+          searchInput={''}
+          isSearching={false}
+          onCategorySelected={jest.fn()}
+          onHide={onHide}
+          onSearchInputChange={jest.fn()}
+          restoreFocusTo={React.createRef<HTMLButtonElement>()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
+
+    expect(onHide).toBeCalled();
+  });
+
+  test('it renders the search', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          columnHeaders={[]}
+          browserFields={mockBrowserFields}
+          filteredBrowserFields={mockBrowserFields}
+          searchInput={''}
+          isSearching={false}
+          onCategorySelected={jest.fn()}
+          onHide={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          restoreFocusTo={React.createRef<HTMLButtonElement>()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="field-search"]').exists()).toBe(true);
   });
 
   test('it renders the categories pane', () => {
@@ -135,16 +224,13 @@ describe('FieldsBrowser', () => {
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           searchInput={''}
-          height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
           onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
+          onHide={jest.fn()}
           onSearchInputChange={jest.fn()}
           restoreFocusTo={React.createRef<HTMLButtonElement>()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
     );
@@ -160,16 +246,13 @@ describe('FieldsBrowser', () => {
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           searchInput={''}
-          height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
           onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
+          onHide={jest.fn()}
           onSearchInputChange={jest.fn()}
           restoreFocusTo={React.createRef<HTMLButtonElement>()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
     );
@@ -185,16 +268,13 @@ describe('FieldsBrowser', () => {
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           searchInput={''}
-          height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
           onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
+          onHide={jest.fn()}
           onSearchInputChange={jest.fn()}
           restoreFocusTo={React.createRef<HTMLButtonElement>()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
     );
@@ -216,16 +296,13 @@ describe('FieldsBrowser', () => {
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           searchInput={''}
-          height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
           onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
+          onHide={jest.fn()}
           onSearchInputChange={onSearchInputChange}
           restoreFocusTo={React.createRef<HTMLButtonElement>()}
           selectedCategoryId={''}
           timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
     );

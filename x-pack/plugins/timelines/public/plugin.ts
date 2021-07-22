@@ -16,7 +16,7 @@ import type {
   CoreStart,
 } from '../../../../src/core/public';
 import type { TimelinesUIStart, TGridProps } from './types';
-import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserWrappedProps } from './components';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
   getLastUpdatedLazy,
   getLoadingPanelLazy,
@@ -60,7 +60,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getLastUpdated: (props: LastUpdatedAtProps) => {
         return getLastUpdatedLazy(props);
       },
-      getFieldBrowser: (props: FieldBrowserWrappedProps) => {
+      getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldsBrowserLazy(props, {
           store: this._store!,
         });

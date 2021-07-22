@@ -38,7 +38,6 @@ import { StatefulFieldsBrowser, tGridActions } from '../../../';
 import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../toolbar/fields_browser/helpers';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -222,8 +221,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             {
               <StatefulFieldsBrowser
                 data-test-subj="field-browser"
-                height={FIELD_BROWSER_HEIGHT}
-                width={FIELD_BROWSER_WIDTH}
                 browserFields={browserFields}
                 timelineId={id}
                 columnHeaders={columnHeaders}
