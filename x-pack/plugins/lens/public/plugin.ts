@@ -177,6 +177,7 @@ export class LensPlugin {
         attributeService: await this.attributeService!(),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
+        executionContext: coreStart.executionContext,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
