@@ -97,28 +97,20 @@ export const getCreateMigration = (
     // if we are continuing the migration, strip encrypted attributes from the document using stripOrDecryptAttributesSync
     const documentToMigrate = mapAttributes(encryptedDoc, (inputAttributes) => {
       try {
-        const decryptedAttributes = inputService.decryptAttributesSync<any>(
-          decryptDescriptor,
-          inputAttributes,
-          { convertToMultiNamespaceType }
-        );
-        return decryptedAttributes;
+        return inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
+          convertToMultiNamespaceType,
+        });
       } catch (err) {
         if (!shouldMigrateIfDecryptionFails || !(err instanceof EncryptionError)) {
           throw err;
         }
 
         context.log.warn(
-          `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Migration will be applied to the original encrypted document but this may cause decryption errors later on.`
+          `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Encrypted attributes have been stripped from the original document and migration will be applied but this may cause decryption errors later on.`
         );
-        const { attributes: strippedAttributes } = inputService.stripOrDecryptAttributesSync<any>(
-          decryptDescriptor,
-          inputAttributes,
-          {
-            convertToMultiNamespaceType,
-          }
-        );
-        return strippedAttributes;
+        return inputService.stripOrDecryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
+          convertToMultiNamespaceType,
+        }).attributes;
       }
     });
 

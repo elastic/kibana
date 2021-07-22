@@ -2353,7 +2353,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',

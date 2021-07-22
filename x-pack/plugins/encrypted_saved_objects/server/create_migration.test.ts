@@ -291,7 +291,7 @@ describe('createMigration()', () => {
       const instantiateServiceWithLegacyType = jest.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn((doc) => {
+      const migrationFunc = jest.fn(() => {
         throw new Error('migration failed!');
       });
 
@@ -342,7 +342,7 @@ describe('createMigration()', () => {
       const instantiateServiceWithLegacyType = jest.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
-      const migrationFunc = jest.fn((doc) => {
+      const migrationFunc = jest.fn(() => {
         throw new Error('migration failed!');
       });
 
