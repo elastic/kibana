@@ -10,10 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
-import {
-  flashAPIErrors,
-  getErrorsFromHttpResponse,
-} from '../../../../../shared/flash_messages/handle_api_errors';
+import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -24,7 +21,7 @@ import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
 import { CrawlerDataFromServer, CrawlerDomain } from '../../types';
 import { crawlerDataServerToClient } from '../../utils';
 
-import { extractDomainAndEntryPointFromUrl, getDomainWithProtocol } from './utils';
+import { extractDomainAndEntryPointFromUrl } from './utils';
 
 export interface AddDomainLogicValues {
   addDomainFormInputValue: string;

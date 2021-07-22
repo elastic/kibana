@@ -23,7 +23,6 @@ jest.mock('../../crawler_overview_logic', () => ({
 
 import { nextTick } from '@kbn/test/jest';
 
-import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
 import { CrawlerDomain } from '../../types';
 
