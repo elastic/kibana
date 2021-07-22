@@ -5,59 +5,109 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, act, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
-import { PoliciesSelector } from '.';
+import { PoliciesSelector, PoliciesSelectorProps } from '.';
 
-let onSearchMock: jest.Mock;
+let onChangeSelectionMock: jest.Mock;
 
-interface EuiFieldSearchPropsFake {
-  onSearch(value: string): void;
-}
-
-describe('Search bar', () => {
+describe('Policies selector', () => {
   beforeEach(() => {
-    onSearchMock = jest.fn();
+    onChangeSelectionMock = jest.fn();
+  });
+  const generator = new EndpointDocGenerator('policy-list');
+  const policy = generator.generatePolicyPackagePolicy();
+  policy.name = 'test policy A';
+  policy.id = 'abc123';
+  const getElement = (params: Partial<PoliciesSelectorProps>) => {
+    return render(
+      <PoliciesSelector policies={[policy]} onChangeSelection={onChangeSelectionMock} {...params} />
+    );
+  };
+
+  describe('When click on policy', () => {
+    it('should have a default value', () => {
+      const defaultIncludedPolicies = 'abc123';
+      const defaultExcludedPolicies = 'global';
+      const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
+      act(() => {
+        fireEvent.click(element.getByTestId('policiesSelectorButton'));
+      });
+      expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
+      act(() => {
+        fireEvent.click(element.getByText('Unassigned entries'));
+      });
+      expect(onChangeSelectionMock).toHaveBeenCalledWith([
+        { checked: 'on', id: 'abc123', name: 'test policy A' },
+        { checked: 'off', id: 'global', name: 'Global entries' },
+        { checked: 'on', id: 'unassigned', name: 'Unassigned entries' },
+      ]);
+    });
+
+    it('should disable enabled default value', () => {
+      const defaultIncludedPolicies = 'abc123';
+      const defaultExcludedPolicies = 'global';
+      const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
+      act(() => {
+        fireEvent.click(element.getByTestId('policiesSelectorButton'));
+      });
+      act(() => {
+        fireEvent.click(element.getByText(policy.name));
+      });
+      expect(onChangeSelectionMock).toHaveBeenCalledWith([
+        { checked: 'off', id: 'abc123', name: 'test policy A' },
+        { checked: 'off', id: 'global', name: 'Global entries' },
+        { checked: undefined, id: 'unassigned', name: 'Unassigned entries' },
+      ]);
+    });
+
+    it('should remove disabled default value', () => {
+      const defaultIncludedPolicies = 'abc123';
+      const defaultExcludedPolicies = 'global';
+      const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
+      act(() => {
+        fireEvent.click(element.getByTestId('policiesSelectorButton'));
+      });
+      act(() => {
+        fireEvent.click(element.getByText('Global entries'));
+      });
+      expect(onChangeSelectionMock).toHaveBeenCalledWith([
+        { checked: 'on', id: 'abc123', name: 'test policy A' },
+        { checked: undefined, id: 'global', name: 'Global entries' },
+        { checked: undefined, id: 'unassigned', name: 'Unassigned entries' },
+      ]);
+    });
   });
 
-  const getElement = (defaultValue: string = '') => (
-    // <PoliciesSelector
-
-    // />
-    <></>
-  );
-
-  it('should have a default value', () => {
-    const expectedDefaultValue = 'this is a default value';
-    const element = mount(getElement(expectedDefaultValue));
-    const defaultValue = element.find('[data-test-subj="searchField"]').first().props()
-      .defaultValue;
-    expect(defaultValue).toBe(expectedDefaultValue);
-  });
-
-  it('should dispatch search action when submit search field', () => {
-    const expectedDefaultValue = 'this is a default value';
-    const element = mount(getElement());
-    expect(onSearchMock).toHaveBeenCalledTimes(0);
-    const searchFieldProps = element
-      .find('[data-test-subj="searchField"]')
-      .first()
-      .props() as EuiFieldSearchPropsFake;
-
-    searchFieldProps.onSearch(expectedDefaultValue);
-
-    expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
-  });
-
-  it('should dispatch search action when click on button', () => {
-    const expectedDefaultValue = 'this is a default value';
-    const element = mount(getElement(expectedDefaultValue));
-    expect(onSearchMock).toHaveBeenCalledTimes(0);
-
-    element.find('[data-test-subj="searchButton"]').first().simulate('click');
-    expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
+  describe('When filter policy', () => {
+    it('should filter policy by name', () => {
+      const element = getElement({});
+      act(() => {
+        fireEvent.click(element.getByTestId('policiesSelectorButton'));
+      });
+      act(() => {
+        fireEvent.change(element.getByTestId('policiesSelectorSearch'), {
+          target: { value: policy.name },
+        });
+      });
+      expect(element.queryAllByText('Global entries')).toStrictEqual([]);
+      expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
+    });
+    it('should filter with no results', () => {
+      const element = getElement({});
+      act(() => {
+        fireEvent.click(element.getByTestId('policiesSelectorButton'));
+      });
+      act(() => {
+        fireEvent.change(element.getByTestId('policiesSelectorSearch'), {
+          target: { value: 'no results' },
+        });
+      });
+      expect(element.queryAllByText('Global entries')).toStrictEqual([]);
+      expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
+      expect(element.queryAllByText(policy.name)).toStrictEqual([]);
+    });
   });
 });

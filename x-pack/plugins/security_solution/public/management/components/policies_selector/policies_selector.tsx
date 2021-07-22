@@ -131,6 +131,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
       () => (
         <EuiFilterButton
           iconType="arrowDown"
+          data-test-subj="policiesSelectorButton"
           onClick={onButtonClick}
           isSelected={isPopoverOpen}
           numFilters={itemsList.length}
@@ -159,7 +160,12 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
               panelPaddingSize="none"
             >
               <EuiPopoverTitle paddingSize="s">
-                <EuiFieldSearch compressed onChange={onChange} value={query} />
+                <EuiFieldSearch
+                  data-test-subj="policiesSelectorSearch"
+                  compressed
+                  onChange={onChange}
+                  value={query}
+                />
               </EuiPopoverTitle>
               <div className="euiFilterSelect__items">{dropdownItems}</div>
             </EuiPopover>

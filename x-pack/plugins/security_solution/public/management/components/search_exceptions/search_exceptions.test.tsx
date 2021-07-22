@@ -16,7 +16,7 @@ interface EuiFieldSearchPropsFake {
   onSearch(value: string): void;
 }
 
-describe('Search bar', () => {
+describe('Search exceptions', () => {
   beforeEach(() => {
     onSearchMock = jest.fn();
   });

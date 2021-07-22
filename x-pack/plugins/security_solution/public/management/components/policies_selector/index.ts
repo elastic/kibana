@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PoliciesSelector, Item } from './policies_selector';
+export { PoliciesSelector, Item, PoliciesSelectorProps } from './policies_selector';
