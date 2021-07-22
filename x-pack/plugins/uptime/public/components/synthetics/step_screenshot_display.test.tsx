@@ -30,7 +30,7 @@ describe('StepScreenshotDisplayProps', () => {
     const { getByAltText } = render(
       <StepScreenshotDisplay
         checkGroup="check_group"
-        isScreenshotBlob={true}
+        isFullScreenshot={true}
         isScreenshotRef={false}
         stepIndex={1}
         stepName="STEP_NAME"
@@ -44,7 +44,7 @@ describe('StepScreenshotDisplayProps', () => {
     const { getByAltText } = render(
       <StepScreenshotDisplay
         checkGroup="check_group"
-        isScreenshotBlob={true}
+        isFullScreenshot={true}
         isScreenshotRef={false}
         stepIndex={1}
       />
@@ -57,7 +57,7 @@ describe('StepScreenshotDisplayProps', () => {
     const { getByTestId } = render(
       <StepScreenshotDisplay
         checkGroup="check_group"
-        isScreenshotBlob={false}
+        isFullScreenshot={false}
         isScreenshotRef={false}
         stepIndex={1}
         stepName="STEP_NAME"
@@ -76,7 +76,7 @@ describe('StepScreenshotDisplayProps', () => {
     const { getByAltText } = render(
       <StepScreenshotDisplay
         checkGroup="check_group"
-        isScreenshotBlob={false}
+        isFullScreenshot={false}
         isScreenshotRef={true}
         stepIndex={1}
         stepName="STEP_NAME"
