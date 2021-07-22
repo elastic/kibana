@@ -42,6 +42,8 @@ describe('ingest_integration tests ', () => {
   let ctx: SecuritySolutionRequestHandlerContext;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
+  const prebuiltRulesFromFileSystem = createMockConfig().prebuiltRulesFromFileSystem;
+  const prebuiltRulesFromSavedObjects = createMockConfig().prebuiltRulesFromSavedObjects;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -80,6 +82,8 @@ describe('ingest_integration tests ', () => {
         manifestManager,
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
+        prebuiltRulesFromFileSystem,
+        prebuiltRulesFromSavedObjects,
         endpointAppContextMock.security,
         endpointAppContextMock.alerting,
         licenseService,
