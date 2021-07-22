@@ -191,6 +191,13 @@ export default ({ getService }: FtrProviderContext) => {
           },
           original_time: '2020-11-16T22:58:08.000Z',
         },
+        all_field_values: [
+          'store',
+          'linux_anomalous_network_activity_ecs',
+          'root',
+          'store',
+          'mothra',
+        ],
       });
     });
 

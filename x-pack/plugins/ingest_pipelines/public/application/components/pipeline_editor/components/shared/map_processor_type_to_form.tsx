@@ -14,6 +14,7 @@ import {
   Append,
   Bytes,
   Circle,
+  CommunityId,
   Convert,
   CSV,
   DateProcessor,
@@ -34,6 +35,7 @@ import {
   Json,
   Kv,
   Lowercase,
+  NetworkDirection,
   Pipeline,
   RegisteredDomain,
   Remove,
@@ -123,6 +125,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  community_id: {
+    FieldsComponent: CommunityId,
+    docLinkPath: '/community-id-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.communityId', {
+      defaultMessage: 'Community ID',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.communityId', {
+      defaultMessage: 'Computes the Community ID for network flow data.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.communityId', {
+        defaultMessage: 'Computes the Community ID for network flow data.',
       }),
   },
   convert: {
@@ -515,6 +531,23 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  network_direction: {
+    FieldsComponent: NetworkDirection,
+    docLinkPath: '/network-direction-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.networkDirection', {
+      defaultMessage: 'Network Direction',
+    }),
+    typeDescription: i18n.translate(
+      'xpack.ingestPipelines.processors.description.networkDirection',
+      {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
+      }
+    ),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.networkDirection', {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
       }),
   },
   pipeline: {

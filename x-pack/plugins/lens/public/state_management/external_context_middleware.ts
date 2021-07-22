@@ -27,7 +27,7 @@ export const externalContextMiddleware = (data: DataPublicPluginStart) => (
     store.dispatch
   );
   return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (action.type === 'app/navigateAway') {
+    if (action.type === 'lens/navigateAway') {
       unsubscribeFromExternalContext();
     }
     next(action);
@@ -44,7 +44,7 @@ function subscribeToExternalContext(
 
   const dispatchFromExternal = (searchSessionId = search.session.start()) => {
     const globalFilters = filterManager.getFilters();
-    const filters = isEqual(getState().app.filters, globalFilters)
+    const filters = isEqual(getState().lens.filters, globalFilters)
       ? null
       : { filters: globalFilters };
     dispatch(
@@ -64,7 +64,7 @@ function subscribeToExternalContext(
     .pipe(delay(0))
     // then update if it didn't get updated yet
     .subscribe((newSessionId?: string) => {
-      if (newSessionId && getState().app.searchSessionId !== newSessionId) {
+      if (newSessionId && getState().lens.searchSessionId !== newSessionId) {
         debounceDispatchFromExternal(newSessionId);
       }
     });

@@ -625,6 +625,15 @@ export const getValidDateFromDoc = ({
     const tempMoment = moment(lastTimestamp);
     if (tempMoment.isValid()) {
       return tempMoment.toDate();
+    } else if (typeof timestampValue === 'string') {
+      // worse case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
+      // so we try one last time to parse this best we can by converting from string to a number
+      const maybeDate = moment(+lastTimestamp);
+      if (maybeDate.isValid()) {
+        return maybeDate.toDate();
+      } else {
+        return undefined;
+      }
     } else {
       return undefined;
     }
@@ -788,9 +797,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
       },
       aggregations: newAggregations,
       hits: {
-        total:
-          createTotalHitsFromSearchResult({ searchResult: prev }) +
-          createTotalHitsFromSearchResult({ searchResult: next }),
+        total: calculateTotal(prev.hits.total, next.hits.total),
         max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },
@@ -798,16 +805,23 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
   });
 };
 
-export const createTotalHitsFromSearchResult = ({
-  searchResult,
-}: {
-  searchResult: { hits: { total: number | { value: number } } };
-}): number => {
-  const totalHits =
-    typeof searchResult.hits.total === 'number'
-      ? searchResult.hits.total
-      : searchResult.hits.total.value;
-  return totalHits;
+export const getTotalHitsValue = (totalHits: number | { value: number } | undefined): number =>
+  typeof totalHits === 'undefined'
+    ? -1
+    : typeof totalHits === 'number'
+    ? totalHits
+    : totalHits.value;
+
+export const calculateTotal = (
+  prevTotal: number | { value: number } | undefined,
+  nextTotal: number | { value: number } | undefined
+): number => {
+  const prevTotalHits = getTotalHitsValue(prevTotal);
+  const nextTotalHits = getTotalHitsValue(nextTotal);
+  if (prevTotalHits === -1 || nextTotalHits === -1) {
+    return -1;
+  }
+  return prevTotalHits + nextTotalHits;
 };
 
 export const calculateThresholdSignalUuid = (

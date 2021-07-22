@@ -12,12 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import {
-  getHttp,
-  getMapAppConfig,
-  getSearchService,
-  getTimeFilter,
-} from '../../../kibana_services';
+import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -66,7 +61,7 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import { addFeatureToIndex, getMatchingIndexes } from './util/feature_edit';
+import { addFeatureToIndex, deleteFeatureFromIndex, getMatchingIndexes } from './util/feature_edit';
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -424,9 +419,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   async supportsFeatureEditing(): Promise<boolean> {
-    if (!getMapAppConfig().enableDrawingFeature) {
-      return false;
-    }
     await this.getIndexPattern();
     if (!(this.indexPattern && this.indexPattern.title)) {
       return false;
@@ -628,17 +620,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
             defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
             values: {
-              entityCount: meta.entityCount,
-              totalEntities: meta.totalEntities,
+              entityCount: meta.entityCount?.toLocaleString(),
+              totalEntities: meta.totalEntities?.toLocaleString(),
             },
           })
         : i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
             defaultMessage: `Found {entityCount} entities.`,
-            values: { entityCount: meta.entityCount },
+            values: { entityCount: meta.entityCount?.toLocaleString() },
           });
       const docsPerEntityMsg = i18n.translate('xpack.maps.esSearch.topHitsSizeMsg', {
         defaultMessage: `Showing top {topHitsSize} documents per entity.`,
-        values: { topHitsSize: this._descriptor.topHitsSize },
+        values: { topHitsSize: this._descriptor.topHitsSize?.toLocaleString() },
       });
 
       return {
@@ -653,7 +645,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: meta.resultsCount },
+          values: { count: meta.resultsCount?.toLocaleString() },
         }),
         areResultsTrimmed: true,
       };
@@ -662,7 +654,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
         defaultMessage: `Found {count} documents.`,
-        values: { count: meta.resultsCount },
+        values: { count: meta.resultsCount?.toLocaleString() },
       }),
       areResultsTrimmed: false,
     };
@@ -714,6 +706,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async addFeature(geometry: Geometry | Position[]) {
     const indexPattern = await this.getIndexPattern();
     await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
+  }
+
+  async deleteFeature(featureId: string) {
+    const indexPattern = await this.getIndexPattern();
+    await deleteFeatureFromIndex(indexPattern.title, featureId);
   }
 
   async getUrlTemplateWithMeta(

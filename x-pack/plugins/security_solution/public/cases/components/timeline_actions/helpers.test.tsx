@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import { mount } from 'enzyme';
+import 'jest-styled-components';
 import { createUpdateSuccessToaster } from './helpers';
 import { Case } from '../../../../../cases/common';
 
@@ -23,12 +26,30 @@ describe('helpers', () => {
     it('creates the correct toast when the sync alerts is on', () => {
       // We remove the id as is randomly generated and the text as it is a React component
       // which is being test on toaster_content.test.tsx
-      const { id, text, ...toast } = createUpdateSuccessToaster(theCase, onViewCaseClick);
+      const { id, text, title, ...toast } = createUpdateSuccessToaster(theCase, onViewCaseClick);
+      const mountedTitle = mount(<>{title}</>);
+
       expect(toast).toEqual({
         color: 'success',
         iconType: 'check',
-        title: 'An alert has been added to "My case"',
       });
+      expect(mountedTitle).toMatchInlineSnapshot(`
+        .c0 {
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        <styled.span>
+          <span
+            className="c0"
+          >
+            An alert has been added to "My case"
+          </span>
+        </styled.span>
+      `);
     });
   });
 });

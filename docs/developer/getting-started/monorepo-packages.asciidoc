@@ -77,6 +77,7 @@ yarn kbn watch-bazel
 - @kbn/dev-utils
 - @kbn/docs-utils
 - @kbn/es
+- @kbn/es-archiver
 - @kbn/eslint-import-resolver-kibana
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
@@ -90,6 +91,7 @@ yarn kbn watch-bazel
 - @kbn/optimizer
 - @kbn/plugin-helpers
 - @kbn/rule-data-utils
+- @kbn/securitysolution-autocomplete
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
 - @kbn/securitysolution-io-ts-alerting-types
@@ -103,9 +105,12 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository
+- @kbn/spec-to-console
 - @kbn/std
 - @kbn/storybook
 - @kbn/telemetry-utils
+- @kbn/test
+- @kbn/test-subj-selector
 - @kbn/tinymath
 - @kbn/ui-framework
 - @kbn/ui-shared-deps

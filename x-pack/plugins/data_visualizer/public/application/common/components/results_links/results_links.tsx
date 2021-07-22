@@ -18,6 +18,19 @@ import { FindFileStructureResponse } from '../../../../../../file_upload/common'
 import type { FileUploadPluginStart } from '../../../../../../file_upload/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
+type LinkType = 'file' | 'index';
+
+export interface ResultLink {
+  id: string;
+  type: LinkType;
+  title: string;
+  icon: string;
+  description: string;
+  getUrl(params?: any): Promise<string>;
+  canDisplay(params?: any): Promise<boolean>;
+  dataTestSubj?: string;
+}
+
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
   index: string;
@@ -25,6 +38,7 @@ interface Props {
   timeFieldName?: string;
   createIndexPattern: boolean;
   showFilebeatFlyout(): void;
+  additionalLinks: ResultLink[];
 }
 
 interface GlobalState {
@@ -41,6 +55,7 @@ export const ResultsLinks: FC<Props> = ({
   timeFieldName,
   createIndexPattern,
   showFilebeatFlyout,
+  additionalLinks,
 }) => {
   const {
     services: { fileUpload },
@@ -55,6 +70,7 @@ export const ResultsLinks: FC<Props> = ({
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [indexPatternManagementLink, setIndexPatternManagementLink] = useState('');
+  const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
 
   const {
     services: {
@@ -99,6 +115,23 @@ export const ResultsLinks: FC<Props> = ({
     };
 
     getDiscoverUrl();
+
+    Promise.all(
+      additionalLinks.map(async ({ canDisplay, getUrl }) => {
+        if ((await canDisplay({ indexPatternId })) === false) {
+          return null;
+        }
+        return getUrl({ globalState, indexPatternId });
+      })
+    ).then((urls) => {
+      const linksById = urls.reduce((acc, url, i) => {
+        if (url !== null) {
+          acc[additionalLinks[i].id] = url;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      setGeneratedLinks(linksById);
+    });
 
     if (!unmounted) {
       setIndexManagementLink(
@@ -231,6 +264,19 @@ export const ResultsLinks: FC<Props> = ({
           onClick={showFilebeatFlyout}
         />
       </EuiFlexItem>
+      {additionalLinks
+        .filter(({ id }) => generatedLinks[id] !== undefined)
+        .map((link) => (
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={link.icon} />}
+              data-test-subj="fileDataVisLink"
+              title={link.title}
+              description={link.description}
+              href={generatedLinks[link.id]}
+            />
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
   );
 };

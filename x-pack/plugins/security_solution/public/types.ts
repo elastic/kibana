@@ -30,12 +30,15 @@ import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 import { Detections } from './detections';
 import { Cases } from './cases';
+import { Exceptions } from './exceptions';
 import { Hosts } from './hosts';
 import { Network } from './network';
 import { Overview } from './overview';
+import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -50,6 +53,7 @@ export interface SetupPlugins {
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
+  dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
@@ -81,11 +85,26 @@ export interface AppObservableLibs {
 export type InspectResponse = Inspect & { response: string[] };
 
 export interface SubPlugins {
-  detections: Detections;
+  alerts: Detections;
+  rules: Rules;
+  exceptions: Exceptions;
   cases: Cases;
   hosts: Hosts;
   network: Network;
   overview: Overview;
   timelines: Timelines;
   management: Management;
+}
+
+// TODO: find a better way to defined these types
+export interface StartedSubPlugins {
+  alerts: ReturnType<Detections['start']>;
+  rules: ReturnType<Rules['start']>;
+  exceptions: ReturnType<Exceptions['start']>;
+  cases: ReturnType<Cases['start']>;
+  hosts: ReturnType<Hosts['start']>;
+  network: ReturnType<Network['start']>;
+  overview: ReturnType<Overview['start']>;
+  timelines: ReturnType<Timelines['start']>;
+  management: ReturnType<Management['start']>;
 }

@@ -31,6 +31,17 @@ kibana_vars=(
     csp.rules
     csp.strict
     csp.warnLegacyBrowsers
+    csp.script_src
+    csp.worker_src
+    csp.style_src
+    csp.connect_src
+    csp.default_src
+    csp.font_src
+    csp.frame_src
+    csp.img_src
+    csp.frame_ancestors
+    csp.report_uri
+    csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     elasticsearch.customHeaders
@@ -40,6 +51,7 @@ kibana_vars=(
     elasticsearch.pingTimeout
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
+    elasticsearch.serviceAccountToken
     elasticsearch.shardTimeout
     elasticsearch.sniffInterval
     elasticsearch.sniffOnConnectionFault
@@ -369,6 +381,16 @@ kibana_vars=(
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
+    xpack.securitySolution.alertMergeStrategy
+    xpack.securitySolution.endpointResultListDefaultFirstPageIndex
+    xpack.securitySolution.endpointResultListDefaultPageSize
+    xpack.securitySolution.maxRuleImportExportSize
+    xpack.securitySolution.maxRuleImportPayloadBytes
+    xpack.securitySolution.maxTimelineImportExportSize
+    xpack.securitySolution.maxTimelineImportPayloadBytes
+    xpack.securitySolution.packagerTaskInterval
+    xpack.securitySolution.prebuiltRulesFromFileSystem
+    xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
     xpack.task_manager.enabled

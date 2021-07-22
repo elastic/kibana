@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { groupBy, omit } from 'lodash';
+import { groupBy, omit, pick, isEqual } from 'lodash';
 
 import type {
   NewPackagePolicy,
@@ -36,7 +36,7 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
-  nonFatalErrors?: PreconfigurationError[];
+  nonFatalErrors: PreconfigurationError[];
 }
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
@@ -140,7 +140,23 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
       );
 
-      if (!created) return { created, policy };
+      if (!created) {
+        if (!policy?.is_managed) return { created, policy };
+        const { hasChanged, fields } = comparePreconfiguredPolicyToCurrent(
+          preconfiguredAgentPolicy,
+          policy
+        );
+        if (hasChanged) {
+          const updatedPolicy = await agentPolicyService.update(
+            soClient,
+            esClient,
+            String(preconfiguredAgentPolicy.id),
+            fields
+          );
+          return { created, policy: updatedPolicy };
+        }
+        return { created, policy };
+      }
       const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
 
       const installedPackagePolicies = await Promise.all(
@@ -226,6 +242,19 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
+  };
+}
+
+export function comparePreconfiguredPolicyToCurrent(
+  policyFromConfig: PreconfiguredAgentPolicy,
+  currentPolicy: AgentPolicy
+) {
+  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id');
+  const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
+
+  return {
+    hasChanged: !isEqual(configTopLevelFields, currentTopLevelFields),
+    fields: configTopLevelFields,
   };
 }
 
@@ -373,6 +402,11 @@ function deepMergeVars(
       throw new Error(name);
     }
     const originalVar = original.vars[name];
-    Reflect.set(original.vars, name, { ...originalVar, ...val });
+    const newVar =
+      // If a single value was passed in to a multi field, ensure it gets converted to a multi
+      Array.isArray(originalVar.value) && !Array.isArray(val.value)
+        ? { ...val, value: [val.value] }
+        : val;
+    Reflect.set(original.vars, name, { ...originalVar, ...newVar });
   }
 }

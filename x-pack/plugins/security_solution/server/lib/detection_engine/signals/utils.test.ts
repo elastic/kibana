@@ -36,11 +36,12 @@ import {
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
-  createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
   buildChunkedOrFilter,
   getValidDateFromDoc,
+  calculateTotal,
+  getTotalHitsValue,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -53,7 +54,6 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
-  repeatedSearchResultsWithSortId,
   sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
 } from './__mocks__/es_results';
@@ -1368,6 +1368,45 @@ describe('utils', () => {
       const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      if (doc.fields != null) {
+        doc.fields['@timestamp'] = [testDate];
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields is nonexistent', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      doc.fields = undefined;
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch in an override field', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      const testDate = `${new Date(override).valueOf()}`;
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          different_timestamp: [testDate],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
   });
 
   describe('createSearchAfterReturnType', () => {
@@ -1530,22 +1569,6 @@ describe('utils', () => {
     });
   });
 
-  describe('createTotalHitsFromSearchResult', () => {
-    test('it should return 0 for empty results', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: sampleEmptyDocSearchResults(),
-      });
-      expect(result).toEqual(0);
-    });
-
-    test('it should return 4 for 4 result sets', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
-      });
-      expect(result).toEqual(4);
-    });
-  });
-
   describe('calculateThresholdSignalUuid', () => {
     it('should generate a uuid without key', () => {
       const startedAt = new Date('2020-12-17T16:27:00Z');
@@ -1579,6 +1602,30 @@ describe('utils', () => {
     test('should return a filter with a multiple values chunked', () => {
       const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
       expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
+    });
+  });
+
+  describe('getTotalHitsValue', () => {
+    test('returns value if present as number', () => {
+      expect(getTotalHitsValue(sampleDocSearchResultsWithSortId().hits.total)).toBe(1);
+    });
+
+    test('returns value if present as value object', () => {
+      expect(getTotalHitsValue({ value: 1 })).toBe(1);
+    });
+
+    test('returns -1 if not present', () => {
+      expect(getTotalHitsValue(undefined)).toBe(-1);
+    });
+  });
+
+  describe('calculateTotal', () => {
+    test('should add totalHits if both totalHits values are numbers', () => {
+      expect(calculateTotal(1, 2)).toBe(3);
+    });
+
+    test('should return -1 if totalHits is undefined', () => {
+      expect(calculateTotal(undefined, 2)).toBe(-1);
     });
   });
 });

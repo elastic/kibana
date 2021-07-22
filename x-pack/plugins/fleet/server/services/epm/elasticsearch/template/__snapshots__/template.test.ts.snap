@@ -86,6 +86,10 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
         },
         "validarray": {
           "type": "integer"
+        },
+        "cycle_type": {
+          "type": "constant_keyword",
+          "value": "bicycle"
         }
       },
       "_meta": {

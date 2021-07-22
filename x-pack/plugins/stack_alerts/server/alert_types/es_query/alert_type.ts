@@ -27,7 +27,14 @@ export const ConditionMetAlertInstanceId = 'query matched';
 
 export function getAlertType(
   logger: Logger
-): AlertType<EsQueryAlertParams, EsQueryAlertState, {}, ActionContext, typeof ActionGroupId> {
+): AlertType<
+  EsQueryAlertParams,
+  never, // Only use if defining useSavedObjectReferences hook
+  EsQueryAlertState,
+  {},
+  ActionContext,
+  typeof ActionGroupId
+> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
   });
@@ -140,6 +147,7 @@ export function getAlertType(
       ],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
   };
@@ -186,7 +194,10 @@ export function getAlertType(
                         filter: [
                           {
                             range: {
-                              [params.timeField]: { lte: timestamp },
+                              [params.timeField]: {
+                                lte: timestamp,
+                                format: 'strict_date_optional_time',
+                              },
                             },
                           },
                         ],

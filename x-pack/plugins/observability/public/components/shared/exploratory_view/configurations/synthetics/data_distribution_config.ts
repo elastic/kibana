@@ -5,28 +5,51 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, RECORDS_FIELD } from '../constants';
-import { buildExistsFilter } from '../utils';
-import { MONITORS_DURATION_LABEL, PINGS_LABEL } from '../constants/labels';
+import { ConfigProps, SeriesConfig } from '../../types';
+import {
+  FieldLabels,
+  REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
+} from '../constants';
+import {
+  CLS_LABEL,
+  DCL_LABEL,
+  DOCUMENT_ONLOAD_LABEL,
+  FCP_LABEL,
+  LCP_LABEL,
+  MONITORS_DURATION_LABEL,
+  PINGS_LABEL,
+} from '../constants/labels';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+} from '../constants/field_names/synthetics';
 
-export function getSyntheticsDistributionConfig({ series, indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsDistributionConfig({
+  series,
+  indexPattern,
+}: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: series?.seriesType || 'line',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: 'performance.metric',
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
-        sourceField: RECORDS_FIELD,
+        sourceField: RECORDS_PERCENTAGE_FIELD,
         label: PINGS_LABEL,
       },
     ],
     hasOperationType: false,
-    defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
-    breakdowns: [
+    filterFields: ['monitor.type', 'observer.geo.name', 'tags'],
+    breakdownFields: [
       'observer.geo.name',
       'monitor.name',
       'monitor.id',
@@ -34,20 +57,38 @@ export function getSyntheticsDistributionConfig({ series, indexPattern }: Config
       'tags',
       'url.port',
     ],
-    filters: [...buildExistsFilter('summary.up', indexPattern)],
-    reportDefinitions: [
+    baseFilters: [],
+    definitionFields: ['monitor.name', 'url.full'],
+    metricOptions: [
       {
-        field: 'monitor.name',
+        label: MONITORS_DURATION_LABEL,
+        id: MONITOR_DURATION_US,
+        field: MONITOR_DURATION_US,
       },
       {
-        field: 'url.full',
+        label: LCP_LABEL,
+        field: SYNTHETICS_LCP,
+        id: SYNTHETICS_LCP,
       },
       {
-        field: 'performance.metric',
-        custom: true,
-        options: [
-          { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },
-        ],
+        label: FCP_LABEL,
+        field: SYNTHETICS_FCP,
+        id: SYNTHETICS_FCP,
+      },
+      {
+        label: DCL_LABEL,
+        field: SYNTHETICS_DCL,
+        id: SYNTHETICS_DCL,
+      },
+      {
+        label: DOCUMENT_ONLOAD_LABEL,
+        field: SYNTHETICS_DOCUMENT_ONLOAD,
+        id: SYNTHETICS_DOCUMENT_ONLOAD,
+      },
+      {
+        label: CLS_LABEL,
+        field: SYNTHETICS_CLS,
+        id: SYNTHETICS_CLS,
       },
     ],
     labels: { ...FieldLabels, 'monitor.duration.us': MONITORS_DURATION_LABEL },

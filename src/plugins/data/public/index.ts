@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/*
+ * esQuery and esKuery:
+ */
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
@@ -14,15 +18,6 @@ import { ConfigSchema } from '../config';
  */
 
 import {
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-  disableFilter,
-  FILTERS,
-  FilterStateStore,
   getPhraseFilterField,
   getPhraseFilterValue,
   isExistsFilter,
@@ -34,6 +29,22 @@ import {
   isQueryStringFilter,
   isRangeFilter,
   toggleFilterNegated,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+  disableFilter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  buildEsQuery,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+  FILTERS,
+  FilterStateStore,
   compareFilters,
   COMPARE_ALL_OPTIONS,
 } from '../common';
@@ -94,7 +105,8 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export type {
+export {
+  KueryNode,
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -103,29 +115,26 @@ export type {
   PhraseFilter,
   CustomFilter,
   MatchAllFilter,
+  IFieldSubType,
+  EsQueryConfig,
+  isFilter,
+  isFilters,
 } from '../common';
 
-/*
- * esQuery and esKuery:
+import { getEsQueryConfig } from '../common';
+
+/**
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
  */
-
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-} from '../common';
-
 export const esKuery = {
   nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };
 
+/**
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
 export const esQuery = {
   buildEsQuery,
   getEsQueryConfig,
@@ -133,8 +142,6 @@ export const esQuery = {
   luceneStringToDsl,
   decorateQuery,
 };
-
-export { EsQueryConfig, KueryNode } from '../common';
 
 /*
  * Field Formatters:
@@ -209,10 +216,12 @@ export {
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
+  cellHasFormulas,
+  tableHasFormulas,
 };
 
 /*
@@ -258,7 +267,6 @@ export {
 export {
   IIndexPattern,
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
@@ -268,6 +276,8 @@ export {
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  IndexPatternType,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
@@ -485,7 +495,7 @@ export {
   getKbnTypeNames,
 } from '../common';
 
-export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+export { isTimeRange, isQuery } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';

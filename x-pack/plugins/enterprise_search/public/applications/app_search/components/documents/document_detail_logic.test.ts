@@ -23,7 +23,7 @@ describe('DocumentDetailLogic', () => {
   const { mount } = new LogicMounter(DocumentDetailLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -101,9 +101,7 @@ describe('DocumentDetailLogic', () => {
 
         expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
         await nextTick();
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
-          'Successfully marked document for deletion. It will be deleted momentarily.'
-        );
+        expect(flashSuccessToast).toHaveBeenCalledWith('Your document was deleted');
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
       });
 

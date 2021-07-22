@@ -19,7 +19,7 @@ interface CaseState {
 }
 
 type Action =
-  | { type: 'FETCH_INIT' }
+  | { type: 'FETCH_INIT'; payload: { silent: boolean } }
   | { type: 'FETCH_SUCCESS'; payload: Case }
   | { type: 'FETCH_FAILURE' }
   | { type: 'UPDATE_CASE'; payload: Case };
@@ -29,7 +29,10 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
     case 'FETCH_INIT':
       return {
         ...state,
-        isLoading: true,
+        // If doing a silent fetch, then don't set `isLoading`. This helps
+        // with preventing screen flashing when wanting to refresh the actions
+        // and comments
+        isLoading: !action.payload?.silent,
         isError: false,
       };
     case 'FETCH_SUCCESS':
@@ -56,7 +59,11 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
 };
 
 export interface UseGetCase extends CaseState {
-  fetchCase: () => void;
+  /**
+   * @param [silent] When set to `true`, the `isLoading` property will not be set to `true`
+   * while doing the API call
+   */
+  fetchCase: (silent?: boolean) => Promise<void>;
   updateCase: (newCase: Case) => void;
 }
 
@@ -74,33 +81,35 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
     dispatch({ type: 'UPDATE_CASE', payload: newCase });
   }, []);
 
-  const callFetch = useCallback(async () => {
-    try {
-      isCancelledRef.current = false;
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-      dispatch({ type: 'FETCH_INIT' });
+  const callFetch = useCallback(
+    async (silent: boolean = false) => {
+      try {
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
+        dispatch({ type: 'FETCH_INIT', payload: { silent } });
 
-      const response = await (subCaseId
-        ? getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal)
-        : getCase(caseId, true, abortCtrlRef.current.signal));
+        const response = await (subCaseId
+          ? getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal)
+          : getCase(caseId, true, abortCtrlRef.current.signal));
 
-      if (!isCancelledRef.current) {
-        dispatch({ type: 'FETCH_SUCCESS', payload: response });
-      }
-    } catch (error) {
-      if (!isCancelledRef.current) {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
+        if (!isCancelledRef.current) {
+          dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
-        dispatch({ type: 'FETCH_FAILURE' });
+      } catch (error) {
+        if (!isCancelledRef.current) {
+          if (error.name !== 'AbortError') {
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              { title: i18n.ERROR_TITLE }
+            );
+          }
+          dispatch({ type: 'FETCH_FAILURE' });
+        }
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, subCaseId]);
+    },
+    [caseId, subCaseId, toasts]
+  );
 
   useEffect(() => {
     callFetch();

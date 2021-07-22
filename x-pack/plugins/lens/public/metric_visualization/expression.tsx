@@ -113,29 +113,32 @@ export function MetricChart({
 }: MetricChartProps & { formatFactory: FormatFactory }) {
   const { metricTitle, title, description, accessor, mode } = args;
   const firstTable = Object.values(data.tables)[0];
-  if (!accessor) {
-    return (
-      <VisualizationContainer
-        reportTitle={title}
-        reportDescription={description}
-        className="lnsMetricExpression__container"
-      />
-    );
+
+  const getEmptyState = () => (
+    <VisualizationContainer
+      reportTitle={title}
+      reportDescription={description}
+      className="lnsMetricExpression__container"
+    >
+      <EmptyPlaceholder icon={LensIconChartMetric} />
+    </VisualizationContainer>
+  );
+
+  if (!accessor || !firstTable) {
+    return getEmptyState();
   }
 
-  if (!firstTable) {
-    return <EmptyPlaceholder icon={LensIconChartMetric} />;
-  }
-
-  const column = firstTable.columns.find(({ id }) => id === accessor)!;
+  const column = firstTable.columns.find(({ id }) => id === accessor);
   const row = firstTable.rows[0];
+  if (!column || !row) {
+    return getEmptyState();
+  }
 
   // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
   // Mind falsy values here as 0!
   const shouldShowResults = row[accessor] != null;
-
   if (!shouldShowResults) {
-    return <EmptyPlaceholder icon={LensIconChartMetric} />;
+    return getEmptyState();
   }
 
   const value =

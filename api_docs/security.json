@@ -705,7 +705,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 167
+        "lineNumber": 170
       },
       "deprecated": false,
       "children": [
@@ -729,7 +729,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 171
+            "lineNumber": 174
           },
           "deprecated": false
         },
@@ -753,7 +753,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 175
+            "lineNumber": 178
           },
           "deprecated": false
         }
@@ -770,7 +770,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 178
+        "lineNumber": 181
       },
       "deprecated": false,
       "children": [
@@ -794,7 +794,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 182
+            "lineNumber": 185
           },
           "deprecated": false
         },
@@ -818,7 +818,25 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 186
+            "lineNumber": 189
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginStart.uiApi",
+          "type": "Object",
+          "tags": [],
+          "label": "uiApi",
+          "description": [
+            "\nExposes UI components that will be loaded asynchronously."
+          ],
+          "signature": [
+            "UiApi"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 193
           },
           "deprecated": false
         }
@@ -1721,14 +1739,14 @@
           {
             "plugin": "alerting",
             "link": {
-              "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
               "lineNumber": 23
             }
           },
           {
             "plugin": "alerting",
             "link": {
-              "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
               "lineNumber": 98
             }
           }
@@ -1847,7 +1865,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/server/plugin.ts",
-        "lineNumber": 72
+        "lineNumber": 71
       },
       "deprecated": false,
       "children": [
@@ -1881,7 +1899,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 76
+            "lineNumber": 75
           },
           "deprecated": true,
           "references": [
@@ -1931,7 +1949,7 @@
               "plugin": "dataEnhanced",
               "link": {
                 "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts",
-                "lineNumber": 448
+                "lineNumber": 514
               }
             },
             {
@@ -1991,7 +2009,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 80
+            "lineNumber": 79
           },
           "deprecated": true,
           "references": [
@@ -2073,7 +2091,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 84
+            "lineNumber": 83
           },
           "deprecated": false
         },
@@ -2097,7 +2115,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 88
+            "lineNumber": 87
           },
           "deprecated": false
         }
@@ -2116,7 +2134,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/server/plugin.ts",
-        "lineNumber": 94
+        "lineNumber": 93
       },
       "deprecated": false,
       "children": [
@@ -2140,7 +2158,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 98
+            "lineNumber": 97
           },
           "deprecated": false
         },
@@ -2164,7 +2182,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 102
+            "lineNumber": 101
           },
           "deprecated": false
         }

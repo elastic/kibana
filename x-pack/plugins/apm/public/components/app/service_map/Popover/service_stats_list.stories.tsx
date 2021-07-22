@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
 import { ServiceStatsList } from './ServiceStatsList';
 
 export default {
-  title: 'app/service_map/Popover/ServiceStatsList',
+  title: 'app/ServiceMap/Popover/ServiceStatsList',
   component: ServiceStatsList,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
 };
 
 export function Example() {
