@@ -5,54 +5,80 @@
  * 2.0.
  */
 
-import './field_select.scss';
 import React from 'react';
 import { EuiMark } from '@elastic/eui';
 import { EuiHighlight } from '@elastic/eui';
 
+// extracted from getTextWidth for performance
+const context = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
+
+const getTextWidth = (text: string, font: string) => {
+  const ctx = context
+    ? context
+    : (document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D);
+  ctx.font = font;
+  const metrics = ctx.measureText(text);
+  return metrics.width;
+};
+
+const truncateLabel = (
+  width: number,
+  font: string,
+  label: string,
+  approximateLength: number,
+  labelFn: (label: string, length: number) => string
+) => {
+  let output = labelFn(label, approximateLength);
+  while (getTextWidth(output, font) > width) {
+    approximateLength = approximateLength - 1;
+    output = labelFn(label, approximateLength);
+  }
+  return output;
+};
+
 export const TruncatedLabel = ({
   label,
-  length,
+  width,
   search,
+  font,
 }: {
   label: string;
-  length: number;
   search: string;
+  width: number;
+  font: string;
 }) => {
-  if (label.length <= length) return <EuiHighlight search={search}>{label}</EuiHighlight>;
+  const textWidth = getTextWidth(label, font);
+  if (textWidth < width) {
+    return <EuiHighlight search={search}>{label}</EuiHighlight>;
+  }
 
-  const separator = '...';
-  let truncLen = length - separator.length;
   const searchPosition = label.indexOf(search);
+  const approximateLen = Math.round((width * label.length) / textWidth);
+  const separator = '...';
+  let separatorsLength = separator.length;
+  let labelFn;
 
   if (!search || searchPosition === -1) {
-    const frontChars = Math.ceil(truncLen / 2);
-    const backChars = Math.floor(truncLen / 2);
-    return (
-      <span>
-        {label.substr(0, frontChars) + separator + label.substr(label.length - backChars)}
-      </span>
-    );
-  }
-
-  let constructedLabel;
-
-  if (searchPosition === 0) {
+    labelFn = (text: string, length: number) =>
+      `${text.substr(0, 8)}${separator}${text.substr(text.length - (length - 8))}`;
+  } else if (searchPosition === 0) {
     // search phrase at the beginning
-    constructedLabel = `${label.substr(0, truncLen)}${separator}`;
+    labelFn = (text: string, length: number) => `${text.substr(0, length)}${separator}`;
+  } else if (approximateLen > label.length - searchPosition) {
+    // search phrase close to the end or at the end
+    labelFn = (text: string, length: number) => `${separator}${text.substr(text.length - length)}`;
   } else {
-    if (truncLen > label.length - searchPosition) {
-      // search phrase close to the end or at the end
-      constructedLabel = `${separator}${label.substr(label.length - truncLen)}`;
-    } else {
-      truncLen = truncLen - separator.length;
-      constructedLabel = `${separator}${label.substr(searchPosition, truncLen)}${separator}`;
-    }
+    // search phrase is in the middle
+    labelFn = (text: string, length: number) =>
+      `${separator}${text.substr(searchPosition, length)}${separator}`;
+    separatorsLength = 2 * separator.length;
   }
 
-  return search.length <= truncLen ? (
-    <EuiHighlight search={search}>{constructedLabel}</EuiHighlight>
+  const outputLabel = truncateLabel(width, font, label, approximateLen, labelFn);
+
+  return search.length <= outputLabel.length - separatorsLength ? (
+    <EuiHighlight search={search}>{outputLabel}</EuiHighlight>
   ) : (
-    <EuiMark>{constructedLabel}</EuiMark>
+    <EuiMark>{outputLabel}</EuiMark>
   );
 };

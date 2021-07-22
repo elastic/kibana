@@ -168,8 +168,10 @@ export function FieldSelect({
     markAllFieldsCompatible,
   ]);
   const comboBoxRef = useRef<HTMLInputElement>(null);
-  const labelWidth = (comboBoxRef.current?.clientWidth || 305) - 70; // subtracting paddings
-  const labelLength = Math.round(labelWidth / 8.3); // dividing the width by the approximate space of a single letter, depends on the font size and spacing
+  const labelWidth = (comboBoxRef.current?.clientWidth || 305) - 90; // subtracting paddings
+  const font = comboBoxRef.current
+    ? window.getComputedStyle(comboBoxRef.current).font
+    : '14px Inter';
 
   return (
     <div ref={comboBoxRef}>
@@ -209,19 +211,30 @@ export function FieldSelect({
             onChoose(choice);
           }
         }}
-        renderOption={(option, searchValue) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={null}>
-              <LensFieldIcon
-                type={((option.value as unknown) as { dataType: DataType }).dataType}
-                fill="none"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <TruncatedLabel label={option.label} length={labelLength} search={searchValue} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        renderOption={(option, searchValue) => {
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={null}>
+                <LensFieldIcon
+                  type={((option.value as unknown) as { dataType: DataType }).dataType}
+                  fill="none"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <TruncatedLabel
+                  label={option.label}
+                  width={
+                    selectedField === ((option.value as unknown) as { field: string }).field
+                      ? labelWidth - 40 // extra padding for selected item
+                      : labelWidth
+                  }
+                  search={searchValue}
+                  font={font}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }}
         {...rest}
       />
     </div>
