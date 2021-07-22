@@ -460,13 +460,12 @@ export class TaskRunner<
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
-    let apiKey: string | null | undefined;
+    let apiKey: string | null;
     try {
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
-
     const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
     let alert: SanitizedAlert<Params>;
