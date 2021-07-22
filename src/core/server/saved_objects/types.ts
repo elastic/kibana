@@ -29,6 +29,7 @@ export type {
 } from './import/types';
 
 import { SavedObject } from '../../types';
+import { ElasticsearchClient } from '../elasticsearch';
 
 type KueryNode = any;
 
@@ -248,6 +249,10 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  */
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
+export type SavedObjectTypeExcludeFromUpgradeFilterHook = (
+  esClient: Pick<ElasticsearchClient, 'search'>
+) => Promise<estypes.QueryDslQueryContainer>; // TODO: this should only support KQL filters with field re-writing rather than arbitrary query clauses that could affect any type
+
 /**
  * @remarks This is only internal for now, and will only be public when we expose the registerType API
  *
@@ -277,6 +282,12 @@ export interface SavedObjectsType<Attributes = any> {
    * If defined, will be used to convert the type to an alias.
    */
   convertToAliasScript?: string;
+  /**
+   * If defined, allows a type to run a search query and return a query filter that may match any documents which may
+   * be excluded from the next migration upgrade process. Useful for cleaning up old documents which are no longer
+   * needed.
+   */
+  deleteOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
   /**
    * The {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type.
    */

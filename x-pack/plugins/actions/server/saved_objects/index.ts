@@ -22,11 +22,13 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import { getOldestIdleActionTask } from '../../../task_manager/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  actionTypeRegistry: ActionTypeRegistry
+  actionTypeRegistry: ActionTypeRegistry,
+  taskManagerIndex: string
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
@@ -69,6 +71,17 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
+    deleteOnUpgrade: async (client) => {
+      const oldestIdleActionTask = await getOldestIdleActionTask(client, taskManagerIndex);
+      return {
+        bool: {
+          must: [
+            { term: { type: 'action_task_params' } },
+            { range: { updated_at: { lt: oldestIdleActionTask } } },
+          ],
+        },
+      };
+    },
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

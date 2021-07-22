@@ -58,6 +58,13 @@ export const createInitialState = ({
   };
 
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
+  const excludeFilterHooks = typeRegistry
+    .getAllTypes()
+    .filter(
+      (type) =>
+        /** TODO: calculate this correctly for .kibana types type.indexPattern === indexPrefix && */ !!type.deleteOnUpgrade
+    )
+    .map((type) => type.deleteOnUpgrade!);
 
   return {
     controlState: 'INIT',
@@ -79,5 +86,6 @@ export const createInitialState = ({
     logs: [],
     unusedTypesQuery: excludeUnusedTypesQuery,
     knownTypes,
+    excludeFromUpgradeFilterHooks: excludeFilterHooks,
   };
 };

@@ -18,6 +18,7 @@ import {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,
 } from '../migrations/core/migrate_raw_docs';
+import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
 
 export type MigrationLogLevel = 'error' | 'info' | 'warning';
 
@@ -118,6 +119,10 @@ export interface BaseState extends ControlState {
    * The list of known SO types that are registered.
    */
   readonly knownTypes: string[];
+  /**
+   * All exclude filter hooks registered for types on this index
+   */
+  readonly excludeFromUpgradeFilterHooks: SavedObjectTypeExcludeFromUpgradeFilterHook[];
 }
 
 export interface InitState extends BaseState {
@@ -169,6 +174,11 @@ export interface CheckUnknownDocumentsState extends BaseState {
 export interface SetSourceWriteBlockState extends PostInitState {
   /** Set a write block on the source index to prevent any further writes */
   readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
+  readonly sourceIndex: Option.Some<string>;
+}
+
+export interface CalculateExcludeFiltersState extends PostInitState {
+  readonly controlState: 'CALCULATE_EXCLUDE_FILTERS';
   readonly sourceIndex: Option.Some<string>;
 }
 
@@ -401,6 +411,7 @@ export type State = Readonly<
   | WaitForYellowSourceState
   | CheckUnknownDocumentsState
   | SetSourceWriteBlockState
+  | CalculateExcludeFiltersState
   | CreateNewTargetState
   | CreateReindexTempState
   | ReindexSourceToTempOpenPit
