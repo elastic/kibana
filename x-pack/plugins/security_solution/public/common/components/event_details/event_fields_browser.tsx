@@ -131,10 +131,6 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     color: ${({ theme }) => theme.eui.euiColorFullShade};
     vertical-align: top;
   }
-
-  .kbnDocViewer__warning {
-    margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  }
 `;
 
 /**
