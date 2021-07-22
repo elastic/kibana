@@ -8,6 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
+import { repeatImageFunction } from '../common/expression_functions';
 import { repeatImageRenderer } from './expression_renderers';
 
 interface SetupDeps {
@@ -18,17 +19,23 @@ interface StartDeps {
   expression: ExpressionsStart;
 }
 
-export type ExpressionMetricPluginSetup = void;
-export type ExpressionMetricPluginStart = void;
+export type ExpressionRepeatImagePluginSetup = void;
+export type ExpressionRepeatImagePluginStart = void;
 
-export class ExpressionMetricPlugin
+export class ExpressionRepeatImagePlugin
   implements
-    Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
+    Plugin<
+      ExpressionRepeatImagePluginSetup,
+      ExpressionRepeatImagePluginStart,
+      SetupDeps,
+      StartDeps
+    > {
+  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRepeatImagePluginSetup {
+    expressions.registerFunction(repeatImageFunction);
     expressions.registerRenderer(repeatImageRenderer);
   }
 
-  public start(core: CoreStart): ExpressionMetricPluginStart {}
+  public start(core: CoreStart): ExpressionRepeatImagePluginStart {}
 
   public stop() {}
 }

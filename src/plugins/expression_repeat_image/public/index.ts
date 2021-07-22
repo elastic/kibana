@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionMetricPlugin } from './plugin';
+import { ExpressionRepeatImagePlugin } from './plugin';
 
-export type { ExpressionMetricPluginSetup, ExpressionMetricPluginStart } from './plugin';
+export type { ExpressionRepeatImagePluginSetup, ExpressionRepeatImagePluginStart } from './plugin';
 
 export function plugin() {
-  return new ExpressionMetricPlugin();
+  return new ExpressionRepeatImagePlugin();
 }
 
 export * from './expression_renderers';
