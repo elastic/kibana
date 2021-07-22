@@ -7,10 +7,7 @@ post:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              isInitialized:
-                type: boolean
+            $ref: ../components/schemas/fleet_setup_response.yaml
     '500':
       description: Internal Server Error
       content:
