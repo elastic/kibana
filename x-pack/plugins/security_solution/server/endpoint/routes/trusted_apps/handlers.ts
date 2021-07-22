@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KibanaResponseFactory,
-  RequestHandler,
-  IKibanaResponse,
-  Logger,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import type { KibanaResponseFactory, RequestHandler, IKibanaResponse, Logger } from 'kibana/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { ExceptionListClient } from '../../../../../lists/server';
