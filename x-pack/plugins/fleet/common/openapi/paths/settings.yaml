@@ -1,0 +1,11 @@
+get:
+  summary: Settings
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/fleet_settings_response.yaml
+  operationId: get-settings

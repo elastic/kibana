@@ -16,6 +16,8 @@ paths:
   # plugin-wide endpoint(s)
   /setup:
     $ref: paths/setup.yaml
+  /settings:
+    $ref: paths/settings.yaml
   # EPM / integrations endpoints
   /epm/categories:
     $ref: paths/epm@categories.yaml

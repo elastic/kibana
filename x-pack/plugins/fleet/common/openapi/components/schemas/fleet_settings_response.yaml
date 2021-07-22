@@ -1,0 +1,21 @@
+title: Fleet Setup response
+type: object
+properties:
+  response:
+    type: object
+    properties:
+      id:
+        type: string
+      has_seen_add_data_notice:
+        type: boolean
+      has_seen_fleet_migration_notice:
+        type: boolean
+      fleet_server_hosts:
+        type: array
+        items:
+          type: string
+    required:
+      - fleet_server_hosts
+      - id
+required:
+  - response

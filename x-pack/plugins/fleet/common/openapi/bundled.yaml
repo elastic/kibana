@@ -36,6 +36,18 @@ paths:
       operationId: setup
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /settings:
+    get:
+      summary: Settings
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fleet_settings_response'
+      operationId: get-settings
   /epm/categories:
     get:
       summary: Package categories
@@ -1086,6 +1098,28 @@ components:
       required:
         - isInitialized
         - nonFatalErrors
+    fleet_settings_response:
+      title: Fleet Setup response
+      type: object
+      properties:
+        response:
+          type: object
+          properties:
+            id:
+              type: string
+            has_seen_add_data_notice:
+              type: boolean
+            has_seen_fleet_migration_notice:
+              type: boolean
+            fleet_server_hosts:
+              type: array
+              items:
+                type: string
+          required:
+            - fleet_server_hosts
+            - id
+      required:
+        - response
     search_result:
       title: Search result
       type: object
