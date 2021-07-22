@@ -7,10 +7,11 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { DiscoverLayoutProps } from '../layout/types';
-import { getTopNavLinks, TopNavLink } from './get_top_nav_links';
+import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
+import { TopNavMenuData } from '../../../../../../../navigation/public';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -37,7 +38,7 @@ export const DiscoverTopNav = ({
   services,
   columns,
 }: DiscoverTopNavProps) => {
-  const [registeredTopNavLinks, setRegisteredTopNavLinks] = useState<TopNavLink[]>([]);
+  const [registeredTopNavLinks, setRegisteredTopNavLinks] = useState<TopNavMenuData[]>([]);
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = services.navigation.ui;
 
@@ -45,7 +46,7 @@ export const DiscoverTopNav = ({
     let unmounted = false;
 
     const loadRegisteredTopNavLinks = async () => {
-      const callbacks = services.addDataService.getTopNavLinks();
+      const callbacks = services.addDataService.getTopNavLinkGetters();
       const params = {
         indexPattern,
         onOpenInspector,

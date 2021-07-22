@@ -18,7 +18,8 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import { IndexDataVisualizerLocator } from '../locator';
 import { isPopulatedObject } from '../../../../common/utils/object_utils';
-import { DiscoverSetup } from '../../../../../../../src/plugins/discover/public';
+import type { DiscoverSetup } from '../../../../../../../src/plugins/discover/public';
+import { SEARCH_QUERY_LANGUAGE } from '../types/combined_query';
 
 export const DISCOVER_DV_TOP_NAV_LINK_ID = 'indexDataVisualizer';
 
@@ -31,7 +32,7 @@ export class DiscoverNavLinkRegistrar {
   }
 
   registerDiscoverTopNavLink: Parameters<
-    DiscoverSetup['addData']['registerTopNavLinks']
+    DiscoverSetup['addData']['registerTopNavLinkGetter']
   >[1] = async (args) => {
     if (!this.locator) {
       throw Error('IndexDataVisualizerLocator not available');
@@ -69,7 +70,7 @@ export class DiscoverNavLinkRegistrar {
           const queryLanguage = extractedQuery.language;
           const qryString = extractedQuery.query;
           let qry;
-          if (queryLanguage === 'kuery') {
+          if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
             const ast = fromKueryExpression(qryString);
             qry = toElasticsearchQuery(ast, indexPattern);
           } else {

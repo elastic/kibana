@@ -65,9 +65,9 @@ import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
 import { SourceViewer } from './application/components/source_viewer/source_viewer';
 import {
-  AddDataService,
-  AddDataServiceSetup,
-} from './application/apps/main/services/add_top_nav_links';
+  AddTopNavDataService,
+  AddTopNavDataServiceSetup,
+} from './application/apps/main/services/add_top_nav_data';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -120,7 +120,7 @@ export interface DiscoverSetup {
    */
   readonly locator: undefined | DiscoverAppLocator;
   // @todo: add documentation
-  addData: AddDataServiceSetup;
+  addData: AddTopNavDataServiceSetup;
 }
 
 export interface DiscoverStart {
@@ -213,7 +213,7 @@ export class DiscoverPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
-  private readonly addDataService = new AddDataService();
+  private readonly addDataService = new AddTopNavDataService();
   /**
    * @deprecated
    */

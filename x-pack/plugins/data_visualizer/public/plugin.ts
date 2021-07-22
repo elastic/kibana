@@ -70,7 +70,7 @@ export class DataVisualizerPlugin
 
     if (plugins.discover?.addData && this.locator) {
       const discoverNavLinkRegistrar = new DiscoverNavLinkRegistrar(this.locator);
-      plugins.discover.addData.registerTopNavLinks(
+      plugins.discover.addData.registerTopNavLinkGetter(
         discoverNavLinkRegistrar.id,
         discoverNavLinkRegistrar.registerDiscoverTopNavLink
       );

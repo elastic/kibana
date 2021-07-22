@@ -19,7 +19,7 @@ export type AddNavLinkCallback = (params: DiscoverTopNavProps) => Promise<TopNav
  * Service for other plugins to register additional links or actions
  * within Discover (e.g. top navigation bar)
  */
-export class AddDataService {
+export class AddTopNavDataService {
   private TopNavMenuDatas: Record<string, AddNavLinkCallback> = {};
 
   public setup() {
@@ -27,7 +27,7 @@ export class AddDataService {
       /**
        * Registers an async callback function that will return a valid top nav link action
        */
-      registerTopNavLinks: (id: string, callbackFn: AddNavLinkCallback) => {
+      registerTopNavLinkGetter: (id: string, callbackFn: AddNavLinkCallback) => {
         if (this.TopNavMenuDatas[id]) {
           throw new Error(`link ${id} already exists`);
         }
@@ -36,9 +36,9 @@ export class AddDataService {
     };
   }
 
-  public getTopNavMenuDatas() {
+  public getTopNavLinkGetters() {
     return Object.values(this.TopNavMenuDatas);
   }
 }
 
-export type AddDataServiceSetup = ReturnType<AddDataService['setup']>;
+export type AddTopNavDataServiceSetup = ReturnType<AddTopNavDataService['setup']>;
