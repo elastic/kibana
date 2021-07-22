@@ -18,7 +18,7 @@ interface Props {
 
 export function ToolBarPagerText({ startItem, endItem, totalItems }: Props) {
   return (
-    <div className="kuiToolBarText" data-test-subj="toolBarPagerText">
+    <div className="kbnDocTable__toolBarText" data-test-subj="toolBarPagerText">
       <FormattedMessage
         id="discover.docTable.pagerControl.pagesCountLabel"
         defaultMessage="{startItem}&ndash;{endItem} of {totalItems} documents"
