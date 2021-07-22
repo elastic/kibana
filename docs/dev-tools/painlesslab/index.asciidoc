@@ -7,7 +7,7 @@ beta::[]
 The *Painless Lab* is an interactive code editor that lets you test and
 debug {ref}/modules-scripting-painless.html[Painless scripts] in real-time.
 You can use the Painless scripting
-language to create <<scripted-fields, {kib} scripted fields>>,
+language to create <<runtime-fields, {kib} runtime fields>>,
 process {ref}/docs-reindex.html[reindexed data], define complex
 <<watcher-create-advanced-watch, Watcher conditions>>,
 and work with data in other contexts.
