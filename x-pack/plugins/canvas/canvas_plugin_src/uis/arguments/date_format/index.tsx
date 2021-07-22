@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { compose, withProps } from 'recompose';
+import React, { FC } from 'react';
 import moment from 'moment';
-import { DateFormatArgInput as Component, Props as ComponentProps } from './date_format';
+import { DateFormatArgInput, Props as ComponentProps } from './date_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
@@ -15,6 +15,10 @@ import { ArgumentStrings } from '../../../../i18n';
 import { SetupInitializer } from '../../../plugin';
 
 const { DateFormat: strings } = ArgumentStrings;
+
+const getDateFormatArgInput = (defaultDateFormats: ComponentProps['dateFormats']) => (
+  props: ComponentProps
+) => <DateFormatArgInput {...props} dateFormats={defaultDateFormats} />;
 
 export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,
@@ -35,12 +39,10 @@ export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentPr
     text: moment.utc(moment()).format(format),
   }));
 
-  const DateFormatArgInput = compose<ComponentProps, null>(withProps({ dateFormats }))(Component);
-
   return () => ({
     name: 'dateFormat',
     displayName: strings.getDisplayName(),
     help: strings.getHelp(),
-    simpleTemplate: templateFromReactComponent(DateFormatArgInput),
+    simpleTemplate: templateFromReactComponent(getDateFormatArgInput(dateFormats)),
   });
 };
