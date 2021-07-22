@@ -167,7 +167,7 @@ export class ReportingPageObject extends FtrService {
       allRows.map(async (row) => {
         const $ = await row.parseDomContent();
         return {
-          report: $.findTestSubject('reportJobTitle').text().trim(),
+          report: $.findTestSubject('reportingListItemObjectTitle').text().trim(),
           createdAt: $.findTestSubject('reportJobCreatedAt').text().trim(),
           status: $.findTestSubject('reportJobStatus').text().trim(),
           actions: $.findTestSubject('reportJobActions').text().trim(),

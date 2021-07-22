@@ -292,7 +292,7 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (objectTitle: string, job: Job) => {
           return (
-            <div data-test-subj="reportJobTitle">
+            <div data-test-subj="reportingListItemObjectTitle">
               <div>{objectTitle}</div>
               <EuiText size="s">
                 <EuiTextColor color="subdued">{job.objectType}</EuiTextColor>

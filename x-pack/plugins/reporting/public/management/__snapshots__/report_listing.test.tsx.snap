@@ -426,7 +426,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -1808,7 +1808,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -1923,7 +1923,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Processing (attempt 1 of 1) at 
+                          Processing (attempt 1 of 1) at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -3204,7 +3204,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -3319,7 +3319,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -4647,7 +4647,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -4762,7 +4762,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed with warnings at 
+                          Completed with warnings at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -6186,7 +6186,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -6301,7 +6301,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -7629,7 +7629,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -7744,7 +7744,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -9072,7 +9072,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -9187,7 +9187,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -10515,7 +10515,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -10630,7 +10630,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -11958,7 +11958,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportJobTitle"
+                        data-test-subj="reportingListItemObjectTitle"
                         key=".0"
                       >
                         <div>
@@ -12073,7 +12073,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
