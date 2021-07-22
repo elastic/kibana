@@ -19,20 +19,6 @@ Other versions: {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.
 // tag::notable-highlights[]
 
 [float]
-[[enterprise-search-7-14]]
-=== Enterprise Search now in {kib}
-
-beta[] You can now manage your Enterprise Search deployments without leaving {kib}!
-7.14 introduces *App Search* and *Workplace Search* management dashboards for
-{kib}, so you can experience the full power of Elastic from a single interface.
-Get started by selecting Enterprise Search from the main menu or {kib} home page.
-Learn more in
-https://www.elastic.co/guide/en/enterprise-search/7.14/user-interfaces.html#user-interfaces-management-kibana[Setting up Enterprise Search in {kib}].
-
-[role="screenshot"]
-image::user/images/new-enterprise-search.png[Enterprise Search home page, where you can open App Search and Workplace Search]
-
-[float]
 [[alerting-7-14]]
 === Alerting&mdash;import and export rules & connectors
 
@@ -190,24 +176,6 @@ enhanced *Lens* integration, and source views in the document viewer.
 accessibility, and usability.  For more information on the most-used app in {kib}, refer to {kibana-ref}/discover.html[Discover].
 
 [float]
-[[labs-7-14]]
-=== Labs&mdash;preview experimental features
-
-With *Labs*, you can now try out and provide feedback on the
-*Canvas* and *Dashboard* features that are in progress or experimental.
-To enable *Labs*, go to {kibana-ref}/advanced-options.html[Advanced Settings].
-Once enabled, you’ll see *Labs* in the toolbar.
-
-[role="screenshot"]
-image::user/images/new-labs.png[Dashboard app showing how to access Labs from the toolbar]
-
-The first *Labs* project is *Defer loading panels below the fold*. To improve dashboard loading time,
-the dashboard panels that users must scroll to see aren't loaded until they
-become visible on the dashboard.
-Give *Defer loading* a try,
-and let us know what you think.
-
-[float]
 [[canvas-7-14]]
 === Canvas&mdash;improves SQL expression function
 
@@ -268,5 +236,38 @@ summarizes what the job will do and which fields it will operate on.
 
 [role="screenshot"]
 image::user/images/new-ml-rare-job.jpg[Rare job wizard for anomaly detection]
+
+[float]
+[[enterprise-search-7-14]]
+=== Enterprise Search now in {kib}
+
+beta[] You can now manage your Enterprise Search deployments without leaving {kib}!
+7.14 introduces *App Search* and *Workplace Search* management dashboards for
+{kib}, so you can experience the full power of Elastic from a single interface.
+Get started by selecting Enterprise Search from the main menu or {kib} home page.
+Learn more in
+https://www.elastic.co/guide/en/enterprise-search/7.14/user-interfaces.html#user-interfaces-management-kibana[Setting up Enterprise Search in {kib}].
+
+[role="screenshot"]
+image::user/images/new-enterprise-search.png[Enterprise Search home page, where you can open App Search and Workplace Search]
+
+[float]
+[[labs-7-14]]
+=== Labs&mdash;preview experimental features
+
+With *Labs*, you can now try out and provide feedback on the
+*Canvas* and *Dashboard* features that are in progress or experimental.
+To enable *Labs*, go to {kibana-ref}/advanced-options.html[Advanced Settings].
+Once enabled, you’ll see *Labs* in the toolbar.
+
+[role="screenshot"]
+image::user/images/new-labs.png[Dashboard app showing how to access Labs from the toolbar]
+
+The first *Labs* project is *Defer loading panels below the fold*. To improve dashboard loading time,
+the dashboard panels that users must scroll to see aren't loaded until they
+become visible on the dashboard.
+Give *Defer loading* a try,
+and let us know what you think.
+
 
 // end::notable-highlights[]
