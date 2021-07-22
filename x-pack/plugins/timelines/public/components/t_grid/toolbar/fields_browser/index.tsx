@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPortal, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPortal, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -25,7 +25,6 @@ export const INPUT_TIMEOUT = 250;
 const FieldsBrowserButtonContainer = styled.div`
   display: inline-block;
   position: relative;
-  width: 24px;
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
@@ -127,16 +126,18 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
       <EuiToolTip content={i18n.FIELDS_BROWSER}>
-        <EuiButtonIcon
+        <EuiButtonEmpty
           aria-label={i18n.FIELDS_BROWSER}
           buttonRef={customizeColumnsButtonRef}
           className={fieldsButtonClassName}
+          color="text"
           data-test-subj="show-field-browser"
           iconType="listAdd"
           onClick={toggleShow}
+          size="xs"
         >
           {i18n.FIELDS}
-        </EuiButtonIcon>
+        </EuiButtonEmpty>
       </EuiToolTip>
 
       {show && (
