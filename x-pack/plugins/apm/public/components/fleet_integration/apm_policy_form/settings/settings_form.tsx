@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { PackagePolicyValues } from '../typings';
+import { PackagePolicyVars } from '../typings';
 
 interface AdvancedOptionsField {
   type: 'advanced_option';
@@ -52,18 +52,18 @@ export type FormRowOnChange = (key: string, value: any) => void;
 
 interface Props {
   settings: Settings;
-  values?: PackagePolicyValues;
+  vars?: PackagePolicyVars;
   onChange: FormRowOnChange;
 }
 
 function FormRow({
   field,
-  values,
+  vars,
   onChange,
   requiredErrorMessage,
 }: {
   field: SettingsField;
-  values?: PackagePolicyValues;
+  vars?: PackagePolicyVars;
   onChange: FormRowOnChange;
   requiredErrorMessage?: string;
 }) {
@@ -73,7 +73,7 @@ function FormRow({
         {field.fields.map((advancedField) =>
           FormRow({
             field: advancedField,
-            values,
+            vars,
             onChange,
             requiredErrorMessage,
           })
@@ -81,7 +81,7 @@ function FormRow({
       </AdvancedOptions>
     );
   } else {
-    const fieldValue = values?.[field.key]?.value;
+    const fieldValue = vars?.[field.key]?.value;
     const isInvalid = field.required && !fieldValue;
     return (
       <React.Fragment key={field.key}>
@@ -159,7 +159,7 @@ function FormRow({
           field.fields.map((childField) =>
             FormRow({
               field: childField,
-              values,
+              vars,
               onChange,
               requiredErrorMessage,
             })
@@ -169,7 +169,7 @@ function FormRow({
   }
 }
 
-export function SettingsForm({ settings, values, onChange }: Props) {
+export function SettingsForm({ settings, vars, onChange }: Props) {
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -189,7 +189,7 @@ export function SettingsForm({ settings, values, onChange }: Props) {
       {settings.fields.map((field) => {
         return FormRow({
           field,
-          values,
+          vars,
           onChange,
           requiredErrorMessage: settings.requiredErrorMessage,
         });

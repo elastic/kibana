@@ -6,7 +6,7 @@
  */
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { OnFormChangeFn, PackagePolicyValues } from '../typings';
+import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { Field, Settings, SettingsForm } from './settings_form';
 import { handleFormChange } from './utils';
 
@@ -141,30 +141,30 @@ const apmSettings: Settings = {
 
 const apmFields = [...basicFields, ...advancedFields];
 
-function validateAPMForm(values: PackagePolicyValues) {
+function validateAPMForm(vars: PackagePolicyVars) {
   return apmFields
     .filter((field) => field.required)
-    .every((field) => !isEmpty(values[field.key].value));
+    .every((field) => !isEmpty(vars[field.key].value));
 }
 
 interface Props {
-  values: PackagePolicyValues;
+  vars: PackagePolicyVars;
   onChange: OnFormChangeFn;
 }
 
-export function APMSettingsForm({ values, onChange }: Props) {
+export function APMSettingsForm({ vars, onChange }: Props) {
   return (
     <SettingsForm
       settings={apmSettings}
-      values={values}
+      vars={vars}
       onChange={(key, value) => {
-        const { newValues, isValid } = handleFormChange({
-          values,
+        const { newVars, isValid } = handleFormChange({
+          vars,
           key,
           value,
           validateForm: validateAPMForm,
         });
-        onChange(newValues, isValid);
+        onChange(newVars, isValid);
       }}
     />
   );

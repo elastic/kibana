@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { isEmpty } from 'lodash';
-import { OnFormChangeFn, PackagePolicyValues } from '../typings';
+import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { Settings, Field, SettingsForm } from './settings_form';
 import { handleFormChange } from './utils';
 
@@ -95,34 +95,34 @@ const rumSettings: Settings = {
 
 const rumFields = [...basicFields, ...advancedFields];
 
-function validateRUMForm(values: PackagePolicyValues) {
+function validateRUMForm(vars: PackagePolicyVars) {
   // if RUM is disable it means that its form is valid
-  if (!values[ENABLE_RUM_KEY].value) {
+  if (!vars[ENABLE_RUM_KEY].value) {
     return true;
   }
   return rumFields
     .filter((field) => field.required)
-    .every((field) => !isEmpty(values[field.key].value));
+    .every((field) => !isEmpty(vars[field.key].value));
 }
 
 interface Props {
-  values: PackagePolicyValues;
+  vars: PackagePolicyVars;
   onChange: OnFormChangeFn;
 }
 
-export function RUMSettingsForm({ values, onChange }: Props) {
+export function RUMSettingsForm({ vars, onChange }: Props) {
   return (
     <SettingsForm
       settings={rumSettings}
-      values={values}
+      vars={vars}
       onChange={(key, value) => {
-        const { newValues, isValid } = handleFormChange({
-          values,
+        const { newVars, isValid } = handleFormChange({
+          vars,
           key,
           value,
           validateForm: validateRUMForm,
         });
-        onChange(newValues, isValid);
+        onChange(newVars, isValid);
       }}
     />
   );

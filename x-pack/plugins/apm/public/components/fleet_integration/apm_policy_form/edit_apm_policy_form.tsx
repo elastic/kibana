@@ -10,7 +10,7 @@ import {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
-  PackagePolicyValues,
+  PackagePolicyVars,
 } from './typings';
 
 interface Props {
@@ -23,7 +23,7 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
-  function handleChange(newVars: PackagePolicyValues, isValid: boolean) {
+  function handleChange(newVars: PackagePolicyVars, isValid: boolean) {
     onChange({
       isValid,
       updatedPolicy: {
@@ -31,5 +31,5 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
       },
     });
   }
-  return <APMPolicyForm values={vars} onChange={handleChange} />;
+  return <APMPolicyForm vars={vars} onChange={handleChange} />;
 }

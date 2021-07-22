@@ -7,7 +7,7 @@
 import React from 'react';
 import { APMPolicyForm } from '.';
 import {
-  PackagePolicyValues,
+  PackagePolicyVars,
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from './typings';
@@ -21,14 +21,14 @@ export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
-  function handleChange(newValues: PackagePolicyValues, isValid: boolean) {
+  function handleChange(newVars: PackagePolicyVars, isValid: boolean) {
     onChange({
       isValid,
       updatedPolicy: {
         ...newPolicy,
-        inputs: [{ ...firstInput, vars: newValues }, ...restInputs],
+        inputs: [{ ...firstInput, vars: newVars }, ...restInputs],
       },
     });
   }
-  return <APMPolicyForm values={vars} onChange={handleChange} />;
+  return <APMPolicyForm vars={vars} onChange={handleChange} />;
 }

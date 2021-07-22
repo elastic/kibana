@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { PackagePolicyValues } from '../typings';
+import { PackagePolicyVars } from '../typings';
 
-function mergeNewValue(
-  oldValues: PackagePolicyValues,
+function mergeNewVars(
+  oldVars: PackagePolicyVars,
   key: string,
   value?: any
-): PackagePolicyValues {
-  return { ...oldValues, [key]: { ...oldValues[key], value } };
+): PackagePolicyVars {
+  return { ...oldVars, [key]: { ...oldVars[key], value } };
 }
 
 export function handleFormChange({
-  values,
+  vars,
   key,
   value,
   validateForm,
 }: {
-  values: PackagePolicyValues;
+  vars: PackagePolicyVars;
   key: string;
   value?: any;
-  validateForm: (values: PackagePolicyValues) => boolean;
+  validateForm: (vars: PackagePolicyVars) => boolean;
 }) {
-  const newValues = mergeNewValue(values, key, value);
-  const isValid = validateForm(newValues);
-  return { newValues, isValid };
+  const newVars = mergeNewVars(vars, key, value);
+  const isValid = validateForm(newVars);
+  return { newVars, isValid };
 }

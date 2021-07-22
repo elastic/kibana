@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { isEmpty } from 'lodash';
-import { OnFormChangeFn, PackagePolicyValues } from '../typings';
+import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { Settings, Field, SettingsForm } from './settings_form';
 import { handleFormChange } from './utils';
 
@@ -63,34 +63,34 @@ const tlsSettings: Settings = {
 
 const tlsFields = basicFields;
 
-function validateTLSForm(values: PackagePolicyValues) {
+function validateTLSForm(vars: PackagePolicyVars) {
   // if TLS is disable it means that its form is valid
-  if (!values[TLS_ENABLED_KEY].value) {
+  if (!vars[TLS_ENABLED_KEY].value) {
     return true;
   }
   return tlsFields
     .filter((field) => field.required)
-    .every((field) => !isEmpty(values[field.key].value));
+    .every((field) => !isEmpty(vars[field.key].value));
 }
 
 interface Props {
-  values: PackagePolicyValues;
+  vars: PackagePolicyVars;
   onChange: OnFormChangeFn;
 }
 
-export function TLSSettingsForm({ values, onChange }: Props) {
+export function TLSSettingsForm({ vars, onChange }: Props) {
   return (
     <SettingsForm
       settings={tlsSettings}
-      values={values}
+      vars={vars}
       onChange={(key, value) => {
-        const { newValues, isValid } = handleFormChange({
-          values,
+        const { newVars, isValid } = handleFormChange({
+          vars,
           key,
           value,
           validateForm: validateTLSForm,
         });
-        onChange(newValues, isValid);
+        onChange(newVars, isValid);
       }}
     />
   );

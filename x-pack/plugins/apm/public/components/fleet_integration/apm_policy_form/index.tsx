@@ -6,24 +6,24 @@
  */
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { OnFormChangeFn, PackagePolicyValues } from './typings';
+import { OnFormChangeFn, PackagePolicyVars } from './typings';
 import { APMSettingsForm } from './settings/apm_settings';
 import { RUMSettingsForm } from './settings/rum_settings';
 import { TLSSettingsForm } from './settings/tls_settings';
 
 interface Props {
   onChange: OnFormChangeFn;
-  values?: PackagePolicyValues;
+  vars?: PackagePolicyVars;
 }
 
-export function APMPolicyForm({ values = {}, onChange }: Props) {
+export function APMPolicyForm({ vars = {}, onChange }: Props) {
   return (
     <>
-      <APMSettingsForm values={values} onChange={onChange} />
+      <APMSettingsForm vars={vars} onChange={onChange} />
       <EuiSpacer />
-      <RUMSettingsForm values={values} onChange={onChange} />
+      <RUMSettingsForm vars={vars} onChange={onChange} />
       <EuiSpacer />
-      <TLSSettingsForm values={values} onChange={onChange} />
+      <TLSSettingsForm vars={vars} onChange={onChange} />
     </>
   );
 }
