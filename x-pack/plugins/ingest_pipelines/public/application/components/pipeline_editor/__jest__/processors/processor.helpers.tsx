@@ -180,4 +180,13 @@ type TestSubject =
   | 'fieldsValueField.input'
   | 'saltValueField.input'
   | 'methodsValueField'
+  | 'sourceIpField.input'
+  | 'sourcePortField.input'
+  | 'destinationIpField.input'
+  | 'destinationPortField.input'
+  | 'icmpTypeField.input'
+  | 'icmpCodeField.input'
+  | 'ianaField.input'
+  | 'transportField.input'
+  | 'seedField.input'
   | 'trimSwitch.input';

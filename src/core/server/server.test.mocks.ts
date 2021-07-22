@@ -95,3 +95,9 @@ export const mockI18nService = i18nServiceMock.create();
 jest.doMock('./i18n/i18n_service', () => ({
   I18nService: jest.fn(() => mockI18nService),
 }));
+
+import { prebootServiceMock } from './preboot/preboot_service.mock';
+export const mockPrebootService = prebootServiceMock.create();
+jest.doMock('./preboot/preboot_service', () => ({
+  PrebootService: jest.fn(() => mockPrebootService),
+}));
