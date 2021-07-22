@@ -57,9 +57,6 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 |===
 
 
-//QUESTION: Is the xpack.fleet.agents.fleet_server.hosts setting supported? It
-//wasn't listed in https://github.com/elastic/observability-docs/issues/758.
-
 ==== Preconfiguration settings
 
 //QUESTION: We should add some details here to help users understand
@@ -70,19 +67,19 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 |===
 
 | `xpack.fleet.packages`
-  | List of integration packages that are installed when the {fleet} app starts
+  | List of integrations that are installed when the {fleet} app starts
   up for the first time. Required properties are:
   
-  `name`:: Package name.
+  `name`:: Name of the integration from the package registry.
   `version`:: Either an exact semantic version, or the keyword `latest` to fetch
-  the latest package version.
+  the latest integration version.
 
 | `xpack.fleet.agentPolicies`
   | List of agent policies that are configured when the {fleet} app starts.
 Required properties are:
 
-  `name`:: Policy name.
   `id`:: Unique ID for this policy. The ID may be a number or string.
+  `name`:: Policy name.
 
 Optional properties are:
   
@@ -93,14 +90,14 @@ Optional properties are:
   be changed by updating the {kib} config.
   `is_default`:: If `true`, this policy is the default agent policy.
   `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.
-  `package_policies`:: List of policy integrations to add to this policy.
+  `package_policies`:: List of integration policies to add to this policy.
     `name`::: (required) Name of the integration policy.
-    `package`::: (required) Object containing
-      `name`:::: Name of the integration package associated with this policy.
+    `package`::: (required) Integration that this policy configures
+      `name`:::: Name of the integration associated with this policy.
     `description`::: Text string describing this integration policy.
     `namespace`::: String identifying this policy's namespace.
     `inputs`::: Array that overrides any default input settings for this
-    policy's package. Follows the same schema as integration inputs, with the
+    integration. Follows the same schema as integration inputs, with the
     exception that any object in `vars` can be passed `frozen: true` in order to
     prevent that specific `var` from being edited by the user.
 |===
@@ -108,15 +105,7 @@ Optional properties are:
 //QUESTION: I don't think the description of monitoring_enabled is complete.
 //Can you provide more info?
 
-//QUESTION: The description of package under package_policies is incomplete
-//in https://github.com/elastic/observability-docs/issues/758. Can 
-//you please fill in the details.
-
 Example configuration:
-
-//QUESTION: Can someone in dev please confirm/test this config example. It's taken
-//from https://github.com/elastic/kibana/pull/96588, and I don't know if it's
-//still valid.
 
 [source,yaml]
 ----
