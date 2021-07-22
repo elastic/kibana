@@ -199,15 +199,5 @@ describe('Executor', () => {
         expect(extractFn).toBeCalledTimes(5);
       });
     });
-
-    describe('.migrate', () => {
-      test('calls migrate function for every expression function in expression', () => {
-        executor.migrate(
-          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
-          '7.10.0'
-        );
-        expect(migrateFn).toBeCalledTimes(5);
-      });
-    });
   });
 });
