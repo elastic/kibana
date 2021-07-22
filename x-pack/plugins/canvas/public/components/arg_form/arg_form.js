@@ -19,9 +19,7 @@ const isPending = (argTypeInstance, resolvedArgValue) => {
   const { argType } = argTypeInstance;
 
   // arg does not need to be resolved, no need to branch
-  if (!argType.resolveArgValue) {
-    return false;
-  }
+  if (!argType.resolveArgValue) return false;
 
   // arg needs to be resolved, render pending if the value is not defined
   return typeof resolvedArgValue === 'undefined';
