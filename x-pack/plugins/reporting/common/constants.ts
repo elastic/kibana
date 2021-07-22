@@ -113,4 +113,7 @@ export enum JOB_STATUSES {
   WARNINGS = 'completed_with_warnings',
 }
 
+// Job params require a `version` field as of 7.15.0. For older jobs set with
+// automation that have no version value in the job params, we assume the
+// intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
