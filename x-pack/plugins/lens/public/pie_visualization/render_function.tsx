@@ -234,7 +234,15 @@ export function PieComponent(
     isMetricEmpty;
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon={LensIconChartDonut} />;
+    return (
+      <VisualizationContainer
+        reportTitle={props.args.title}
+        reportDescription={props.args.description}
+        className="lnsPieExpression__container"
+      >
+        <EmptyPlaceholder icon={LensIconChartDonut} />;
+      </VisualizationContainer>
+    );
   }
 
   if (hasNegative) {

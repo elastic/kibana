@@ -314,8 +314,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     return <EmptyPlaceholder icon={LensIconChartHeatmap} />;
   }
 
-  // const colorPalette = euiPaletteForTemperature(5);
-
   return (
     <Chart>
       <Settings
@@ -351,7 +349,7 @@ export function HeatmapChartReportable(props: HeatmapRenderProps) {
     isReady: false,
   });
 
-  // It takes a cycle for the XY chart to render. This prevents
+  // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });
