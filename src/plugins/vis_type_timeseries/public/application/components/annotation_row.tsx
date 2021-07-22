@@ -73,16 +73,23 @@ export const AnnotationRow = ({
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
       const { indexPatterns } = getDataStart();
+      let fetchedIndexPattern: IndexPatternSelectProps['fetchedIndex'] = {
+        indexPattern: undefined,
+        indexPatternString: undefined,
+      };
 
-      setFetchedIndex(
-        index
+      try {
+        fetchedIndexPattern = index
           ? await fetchIndexPattern(index, indexPatterns)
           : {
-              indexPattern: undefined,
-              indexPatternString: undefined,
+              ...fetchedIndexPattern,
               defaultIndex: await indexPatterns.getDefault(),
-            }
-      );
+            };
+      } catch {
+        // nothing to be here
+      }
+
+      setFetchedIndex(fetchedIndexPattern);
     };
 
     updateFetchedIndex(model.index_pattern);

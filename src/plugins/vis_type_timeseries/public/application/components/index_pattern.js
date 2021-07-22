@@ -139,18 +139,25 @@ export const IndexPattern = ({
   useEffect(() => {
     async function fetchIndex() {
       const { indexPatterns } = getDataStart();
+      let fetchedIndexPattern = {
+        indexPattern: undefined,
+        indexPatternString: undefined,
+      };
 
-      setFetchedIndex(
-        index
+      try {
+        fetchedIndexPattern = index
           ? await fetchIndexPattern(index, indexPatterns, {
               fetchKibanaIndexForStringIndexes: true,
             })
           : {
-              indexPattern: undefined,
-              indexPatternString: undefined,
+              ...fetchedIndexPattern,
               defaultIndex: await indexPatterns.getDefault(),
-            }
-      );
+            };
+      } catch {
+        // nothing to be here
+      }
+
+      setFetchedIndex(fetchedIndexPattern);
     }
 
     fetchIndex();
