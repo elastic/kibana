@@ -23,6 +23,7 @@ import {
   TIMESTAMP,
 } from '../../../detections/components/alerts_table/translations';
 import {
+  AGENT_STATUS_FIELD_NAME,
   IP_FIELD_TYPE,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -44,6 +45,10 @@ export const Indent = styled.div`
   word-break: break-word;
 `;
 
+const StyledEmptyComponent = styled.div`
+  padding: ${(props) => `${props.theme.eui.paddingSizes.xs} 0`};
+`;
+
 const fields = [
   { id: 'signal.status', label: SIGNAL_STATUS },
   { id: '@timestamp', label: TIMESTAMP },
@@ -55,7 +60,7 @@ const fields = [
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
   { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
-  { id: 'agent.status' },
+  { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
@@ -87,7 +92,7 @@ const getDescription = ({
   values,
 }: AlertSummaryRow['description']) => {
   if (isEmpty(values)) {
-    return <>{getEmptyValue()}</>;
+    return <StyledEmptyComponent>{getEmptyValue()}</StyledEmptyComponent>;
   }
 
   const eventFieldsData = {
@@ -162,18 +167,26 @@ const getSummaryRows = ({
             },
           ];
         }
+
         const linkValueField =
           item.linkField != null && data.find((d) => d.field === item.linkField);
         const linkValue = getOr(null, 'originalValue.0', linkValueField);
         const value = getOr(null, 'originalValue.0', field);
-        const category = field.category;
+        const category = field.category ?? '';
+        const fieldName = field.field ?? '';
+
+        const browserField = get([category, 'fields', fieldName], browserFields);
         const description = {
           ...initialDescription,
-          data: field,
+          data: { ...field, ...(item.overrideField ? { field: item.overrideField } : {}) },
           values: field.values,
           linkValue: linkValue ?? undefined,
-          fieldFromBrowserField: get(`${category}.fields.${field.field}`, browserFields),
+          fieldFromBrowserField: browserField,
         };
+
+        if (item.id === 'agent.id' && !endpointAlertCheck({ data })) {
+          return acc;
+        }
 
         if (item.id === 'signal.threshold_result.terms') {
           try {
@@ -192,7 +205,7 @@ const getSummaryRows = ({
             );
             return [...acc, ...thresholdTerms];
           } catch (err) {
-            return acc;
+            return [...acc];
           }
         }
 
@@ -241,25 +254,6 @@ const AlertSummaryViewComponent: React.FC<{
     timelineId,
   ]);
 
-  const isEndpointAlert = useMemo(() => {
-    return endpointAlertCheck({ data });
-  }, [data]);
-
-  const endpointId = useMemo(() => find({ category: 'agent', field: 'agent.id' }, data), [data]);
-
-  const agentStatusRow = {
-    title: i18n.AGENT_STATUS,
-    description: {
-      data: endpointId ?? ({} as TimelineEventsDetailsItem),
-      eventId,
-      timelineId,
-      values: endpointId?.values,
-      linkValue: undefined,
-    },
-  } as AlertSummaryRow;
-
-  const summaryRowsWithAgentStatus = [...summaryRows, agentStatusRow];
-
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id');
     return Array.isArray(item?.originalValue)
@@ -271,11 +265,7 @@ const AlertSummaryViewComponent: React.FC<{
   return (
     <>
       <EuiSpacer size="l" />
-      <SummaryView
-        summaryColumns={summaryColumns}
-        summaryRows={isEndpointAlert ? summaryRowsWithAgentStatus : summaryRows}
-        title={title}
-      />
+      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
       {maybeRule?.note && (
         <>
           <EuiHorizontalRule />
