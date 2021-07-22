@@ -13,10 +13,18 @@ import {
   EuiCodeBlock,
   EuiButtonIcon,
   EuiToolTip,
+  EuiLoadingSpinner,
+  EuiIcon,
+  EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useQuery } from 'react-query';
 
+import moment from 'moment';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -26,6 +34,8 @@ import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { PlatformIcons } from './queries/platforms';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
+import { ResultsTable } from '../results/results_table';
+import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 
 export enum ViewResultsActionButtonType {
   icon = 'icon',
@@ -303,6 +313,161 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
 export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActionComponent);
 
+const ScheduledQueryExpandedContent = ({ queryId }) => {
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <ScheduledQueryErrorsTable actionId={queryId} />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <ResultsTable actionId={queryId} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const ScheduledQueryLastRun = ({ queryId }) => {
+  const data = useKibana().services.data;
+
+  const { data: lastResultsData, isFetched } = useQuery(
+    ['scheduledQueryLastResults', { queryId }],
+    async () => {
+      const indexPattern = await data.indexPatterns.find('logs-*');
+      const searchSource = await data.search.searchSource.create({
+        index: indexPattern[0],
+        aggs: {
+          runs: {
+            terms: {
+              field: 'response_id',
+              order: { first_event_ingested_time: 'desc' },
+              size: 1,
+            },
+            aggs: {
+              first_event_ingested_time: { min: { field: 'event.ingested' } },
+              unique_agents: { cardinality: { field: 'agent.id' } },
+            },
+          },
+        },
+        filter: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+              key: 'action_id',
+              value: queryId,
+            },
+            query: {
+              match_phrase: {
+                action_id: queryId,
+              },
+            },
+          },
+        ],
+      });
+
+      const responseData = await searchSource.fetch$().toPromise();
+
+      // console.error('responseData', responseData);
+
+      return responseData.rawResponse.aggregations?.runs?.buckets[0];
+    }
+  );
+
+  // console.error('data', data, queryId, lastResultsData);
+
+  if (!isFetched) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (!lastResultsData) {
+    return <>{'-'}</>;
+  }
+
+  return (
+    <>
+      {moment(lastResultsData.first_event_ingested_time.value).fromNow()}
+      {` / ${lastResultsData.doc_count} `}
+      <EuiIcon type="document" />
+      {` / ${lastResultsData.unique_agents.value} `}
+      <EuiIcon type="user" />
+    </>
+  );
+};
+
+const ScheduledQueryErrors = ({ queryId, interval }) => {
+  console.error('qqq', queryId, interval);
+
+  const data = useKibana().services.data;
+
+  const { data: lastResultsData, isFetched } = useQuery(
+    ['scheduledQueryErrors', { queryId, interval }],
+    async () => {
+      const indexPattern = await data.indexPatterns.find('logs-*');
+      const searchSource = await data.search.searchSource.create({
+        index: indexPattern[0],
+        query: {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        message: queryId,
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        message: 'Error',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 2,
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: `now-${interval * 20000}s`,
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        },
+        size: 0,
+      });
+
+      const responseData = await searchSource.fetch$().toPromise();
+
+      console.error('responseData', responseData);
+
+      return responseData;
+    }
+  );
+
+  if (!isFetched) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (!lastResultsData?.rawResponse.hits.total) {
+    return <>{'-'}</>;
+  }
+
+  return (
+    <EuiTextColor color="danger">
+      <EuiIcon type="alert" />
+      {` ${lastResultsData.rawResponse.hits.total}`}
+    </EuiTextColor>
+  );
+};
+
 interface ScheduledQueryGroupQueriesTableProps {
   data: OsqueryManagerPackagePolicyInputStream[];
   editMode?: boolean;
@@ -320,6 +485,7 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   selectedItems,
   setSelectedItems,
 }) => {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
   const renderDeleteAction = useCallback(
     (item: OsqueryManagerPackagePolicyInputStream) => (
       <EuiButtonIcon
@@ -388,6 +554,11 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
     []
   );
 
+  const renderLastResultsColumn = useCallback(
+    (item) => <ScheduledQueryLastRun queryId={item.vars.id.value} />,
+    []
+  );
+
   const renderDiscoverResultsAction = useCallback(
     (item) => (
       <ViewResultsInDiscoverAction
@@ -407,6 +578,42 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
     ),
     []
   );
+
+  const getItemId = useCallback(
+    (item: OsqueryManagerPackagePolicyInputStream) => get('vars.id.value', item),
+    []
+  );
+
+  const toggleDetails = useCallback(
+    (item) => {
+      const itemId = getItemId(item);
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+      if (itemIdToExpandedRowMapValues[itemId]) {
+        delete itemIdToExpandedRowMapValues[itemId];
+      } else {
+        itemIdToExpandedRowMapValues[itemId] = <ScheduledQueryExpandedContent queryId={itemId} />;
+      }
+      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [getItemId, itemIdToExpandedRowMap]
+  );
+
+  const renderToggleRowButton = useCallback(
+    (item) => (
+      <EuiButtonIcon
+        onClick={() => toggleDetails(item)}
+        aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+      />
+    ),
+    [itemIdToExpandedRowMap, toggleDetails]
+  );
+
+  const renderErrorsColumn = useCallback((item) => {
+    return (
+      <ScheduledQueryErrors queryId={item.vars?.id.value} interval={item.vars?.interval.value} />
+    );
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -431,20 +638,35 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
         }),
         render: renderQueryColumn,
       },
+      // {
+      //   field: 'vars.platform.value',
+      //   name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.platformColumnTitle', {
+      //     defaultMessage: 'Platform',
+      //   }),
+      //   render: renderPlatformColumn,
+      // },
       {
-        field: 'vars.platform.value',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.platformColumnTitle', {
-          defaultMessage: 'Platform',
-        }),
-        render: renderPlatformColumn,
+        name: i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queriesTable.lastResultsColumnTitle',
+          {
+            defaultMessage: 'Last results',
+          }
+        ),
+        render: renderLastResultsColumn,
       },
       {
-        field: 'vars.version.value',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.versionColumnTitle', {
-          defaultMessage: 'Min Osquery version',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.errorsColumnTitle', {
+          defaultMessage: 'Errors',
         }),
-        render: renderVersionColumn,
+        render: renderErrorsColumn,
       },
+      // {
+      //   field: 'vars.version.value',
+      //   name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.versionColumnTitle', {
+      //     defaultMessage: 'Min Osquery version',
+      //   }),
+      //   render: renderVersionColumn,
+      // },
       {
         name: editMode
           ? i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.actionsColumnTitle', {
@@ -475,16 +697,23 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
               },
             ],
       },
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '40px',
+        isExpander: true,
+        render: renderToggleRowButton,
+      },
     ],
     [
+      renderQueryColumn,
+      renderLastResultsColumn,
+      renderErrorsColumn,
       editMode,
+      renderEditAction,
       renderDeleteAction,
       renderDiscoverResultsAction,
-      renderEditAction,
       renderLensResultsAction,
-      renderPlatformColumn,
-      renderQueryColumn,
-      renderVersionColumn,
+      renderToggleRowButton,
     ]
   );
 
@@ -495,11 +724,6 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
         direction: 'asc' as const,
       },
     }),
-    []
-  );
-
-  const itemId = useCallback(
-    (item: OsqueryManagerPackagePolicyInputStream) => get('vars.id.value', item),
     []
   );
 
@@ -514,11 +738,13 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   return (
     <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
       items={data}
-      itemId={itemId}
+      itemId={getItemId}
       columns={columns}
       sorting={sorting}
       selection={editMode ? selection : undefined}
       isSelectable={editMode}
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      isExpandable
     />
   );
 };
