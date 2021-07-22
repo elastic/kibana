@@ -287,7 +287,7 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (objectTitle: string, job: Job) => {
           return (
-            <div data-test-subj="reportingListItemObjectTitle">
+            <div data-test-subj="reportJobTitle">
               <div>{objectTitle}</div>
               <EuiText size="s">
                 <EuiTextColor color="subdued">{job.objectType}</EuiTextColor>
@@ -302,7 +302,9 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.createdAtTitle',
           defaultMessage: 'Created at',
         }),
-        render: (_createdAt: string, job: Job) => job.getCreatedAtLabel(),
+        render: (_createdAt: string, job: Job) => (
+          <div data-test-subj="reportJobCreatedAt">{job.getCreatedAtLabel()}</div>
+        ),
       },
       {
         field: 'status',
@@ -310,7 +312,9 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.statusTitle',
           defaultMessage: 'Status',
         }),
-        render: (_status: string, job: Job) => job.getStatusLabel(),
+        render: (_status: string, job: Job) => (
+          <div data-test-subj="reportJobStatus">{job.getStatusLabel()}</div>
+        ),
       },
       {
         name: intl.formatMessage({
@@ -321,7 +325,7 @@ class ReportListingUi extends Component<Props, State> {
           {
             render: (job: Job) => {
               return (
-                <div>
+                <div data-test-subj="reportJobActions">
                   <ReportInfoButton {...this.props} job={job} />
                   <ReportWarningsButton {...this.props} job={job} />
                   <ReportErrorButton {...this.props} job={job} />
@@ -372,6 +376,7 @@ class ReportListingUi extends Component<Props, State> {
           isSelectable={true}
           onChange={this.onTableChange}
           data-test-subj="reportJobListing"
+          rowProps={() => ({ 'data-test-subj': 'reportListingRow' })}
         />
         {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>

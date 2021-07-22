@@ -86,12 +86,10 @@ export class Job {
 
     if (status === PENDING) {
       return (
-        <div>
-          <FormattedMessage
-            id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
-            defaultMessage="Pending - waiting for job to be processed"
-          />
-        </div>
+        <FormattedMessage
+          id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
+          defaultMessage="Pending - waiting for job to be processed"
+        />
       );
     }
 
@@ -103,18 +101,16 @@ export class Job {
 
     if (statusTimestamp) {
       return (
-        <div>
-          <FormattedMessage
-            id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
-            defaultMessage="{statusLabel} at {statusTimestamp}"
-            values={{
-              statusLabel,
-              statusTimestamp: (
-                <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
-              ),
-            }}
-          />
-        </div>
+        <FormattedMessage
+          id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
+          defaultMessage="{statusLabel} at {statusTimestamp}"
+          values={{
+            statusLabel,
+            statusTimestamp: (
+              <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
+            ),
+          }}
+        />
       );
     }
 
@@ -125,10 +121,10 @@ export class Job {
   getCreatedAtLabel() {
     if (this.created_by) {
       return (
-        <div>
+        <>
           <div>{this.formatDate(this.created_at)}</div>
           <span>{this.created_by}</span>
-        </div>
+        </>
       );
     }
     return this.formatDate(this.created_at);

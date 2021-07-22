@@ -79,9 +79,6 @@ class ReportInfoButtonUi extends Component<Props, State> {
       return null;
     }
 
-    const jobType = info.jobtype || NA;
-    const attempts = info.attempts ? info.attempts.toString() : NA;
-    const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
 
     const jobInfo = [
@@ -101,9 +98,23 @@ class ReportInfoButtonUi extends Component<Props, State> {
       },
       { title: 'Content Type', description: info.content_type || NA },
       { title: 'Size in Bytes', description: info.size?.toString() || NA },
-      { title: 'Attempts', description: attempts },
-      { title: 'Max Attempts', description: maxAttempts },
+      { title: 'Attempts', description: info.attempts.toString() },
+      { title: 'Max Attempts', description: info.max_attempts?.toString() || NA },
       { title: 'Timeout', description: timeout },
+      {
+        title: 'Export Type',
+        description: info.isDeprecated
+          ? this.props.intl.formatMessage(
+              {
+                id: 'xpack.reporting.listing.table.reportCalloutExportTypeDeprecated',
+                defaultMessage: '{jobtype} (DEPRECATED)',
+              },
+              { jobtype: info.jobtype }
+            )
+          : info.jobtype,
+      },
+
+      // TODO when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
     ];
 
     const jobScreenshot = [
@@ -123,7 +134,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
         <EuiDescriptionList listItems={jobInfo} type="column" align="center" compressed />
         <EuiSpacer size="s" />
         <EuiDescriptionList listItems={processingInfo} type="column" align="center" compressed />
-        {USES_HEADLESS_JOB_TYPES.includes(jobType) ? (
+        {USES_HEADLESS_JOB_TYPES.includes(info.jobtype) ? (
           <>
             <EuiSpacer size="s" />
             <EuiDescriptionList listItems={jobScreenshot} type="column" align="center" compressed />

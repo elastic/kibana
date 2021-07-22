@@ -157,4 +157,21 @@ export class ReportingPageObject extends FtrService {
     const toTime = 'Sep 23, 1999 @ 18:31:44.000';
     await this.timePicker.setAbsoluteRange(fromTime, toTime);
   }
+
+  async getManagementList() {
+    const table = await this.testSubjects.find('reportJobListing');
+    const allRows = await table.findAllByTestSubject('reportJobRow');
+
+    return Promise.all(
+      allRows.map(async (row) => {
+        const $ = await row.parseDomContent();
+        return {
+          report: $.findTestSubject('reportJobTitle').text().trim(),
+          createdAt: $.findTestSubject('reportJobCreatedAt').text().trim(),
+          status: $.findTestSubject('reportJobStatus').text().trim(),
+          actions: $.findTestSubject('reportJobActions').text().trim(),
+        };
+      })
+    );
+  }
 }
