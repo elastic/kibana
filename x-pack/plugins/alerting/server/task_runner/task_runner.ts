@@ -116,14 +116,18 @@ export class TaskRunner<
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes: { apiKey },
+      attributes,
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
       alertId,
       { namespace }
     );
 
-    return apiKey;
+    if (!attributes.hasOwnProperty('apiKey')) {
+      throw new Error('apiKey does not exist');
+    }
+
+    return attributes.apiKey;
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
@@ -461,13 +465,6 @@ export class TaskRunner<
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
-    }
-
-    if (apiKey === undefined) {
-      throw new ErrorWithReason(
-        AlertExecutionStatusErrorReasons.Decrypt,
-        new Error('Unable to decrypt attribute "apiKey" because "apiKey" is undefined.')
-      );
     }
 
     const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
