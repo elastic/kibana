@@ -177,7 +177,9 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
-export interface LocatorParams<P extends SerializableState = SerializableState> {
+export interface LocatorParams<
+  P extends SerializableState = SerializableState & { forceNow?: string }
+> {
   id: string;
   version: string;
   params: P;

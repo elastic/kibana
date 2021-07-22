@@ -124,7 +124,7 @@ export const ReportingExampleApp = ({
       },
       locatorParams: {
         id: REPORTING_EXAMPLE_LOCATOR_ID,
-        version: '1',
+        version: '0.5.0',
         params: { myTestState: {} },
       },
       objectType: 'develeloperExample',
