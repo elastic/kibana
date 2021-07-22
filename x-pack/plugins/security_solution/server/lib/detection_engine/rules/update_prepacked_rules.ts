@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { chunk } from 'lodash/fp';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
+import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';
@@ -43,34 +43,34 @@ export const UPDATE_CHUNK_SIZE = 50;
  * Updates the prepackaged rules given a set of rules and output index.
  * This implements a chunked approach to not saturate network connections and
  * avoid being a "noisy neighbor".
- * @param alertsClient Alerting client
+ * @param rulesClient Alerting client
  * @param savedObjectsClient Saved object client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  */
 export const updatePrepackagedRules = async (
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
 ): Promise<void> => {
   const ruleChunks = chunk(UPDATE_CHUNK_SIZE, rules);
   for (const ruleChunk of ruleChunks) {
-    const rulePromises = createPromises(alertsClient, savedObjectsClient, ruleChunk, outputIndex);
+    const rulePromises = createPromises(rulesClient, savedObjectsClient, ruleChunk, outputIndex);
     await Promise.all(rulePromises);
   }
 };
 
 /**
  * Creates promises of the rules and returns them.
- * @param alertsClient Alerting client
+ * @param rulesClient Alerting client
  * @param savedObjectsClient Saved object client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  * @returns Promise of what was updated.
  */
 export const createPromises = (
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
@@ -122,7 +122,7 @@ export const createPromises = (
       exceptions_list: exceptionsList,
     } = rule;
 
-    const existingRule = await readRules({ alertsClient, ruleId, id: undefined });
+    const existingRule = await readRules({ rulesClient, ruleId, id: undefined });
 
     // TODO: Fix these either with an is conversion or by better typing them within io-ts
     const filters: PartialFilter[] | undefined = filtersObject as PartialFilter[];
@@ -130,7 +130,7 @@ export const createPromises = (
     // Note: we do not pass down enabled as we do not want to suddenly disable
     // or enable rules on the user when they were not expecting it if a rule updates
     return patchRules({
-      alertsClient,
+      rulesClient,
       author,
       buildingBlockType,
       description,
