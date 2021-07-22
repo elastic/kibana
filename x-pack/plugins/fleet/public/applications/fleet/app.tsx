@@ -30,7 +30,6 @@ import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
 import {
   ConfigContext,
   FleetStatusProvider,
-  IntraAppStateProvider,
   KibanaVersionContext,
   sendGetPermissionsCheck,
   sendSetup,
@@ -228,13 +227,11 @@ export const FleetAppContext: React.FC<{
                   <EuiThemeProvider darkMode={isDarkMode}>
                     <UIExtensionsContext.Provider value={extensions}>
                       <FleetStatusProvider>
-                        <IntraAppStateProvider kibanaScopedHistory={history}>
-                          <Router history={history}>
-                            <PackageInstallProvider notifications={startServices.notifications}>
-                              {children}
-                            </PackageInstallProvider>
-                          </Router>
-                        </IntraAppStateProvider>
+                        <Router history={history}>
+                          <PackageInstallProvider notifications={startServices.notifications}>
+                            {children}
+                          </PackageInstallProvider>
+                        </Router>
                       </FleetStatusProvider>
                     </UIExtensionsContext.Provider>
                   </EuiThemeProvider>
@@ -326,7 +323,7 @@ export const AppRoutes = memo(
               if (!shouldRedirectHash) {
                 return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
               }
-              const pathname = location.hash.replace(/^#\/fleet/, '');
+              const pathname = location.hash.replace(/^#(\/fleet)?/, '');
 
               return (
                 <Redirect

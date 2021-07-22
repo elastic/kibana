@@ -165,6 +165,9 @@ export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
         href,
         onClick: href
           ? (ev: React.MouseEvent) => {
+              if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
+                return;
+              }
               ev.preventDefault();
               application.navigateToUrl(href);
             }

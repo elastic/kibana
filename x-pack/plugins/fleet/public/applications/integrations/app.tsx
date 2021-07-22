@@ -41,7 +41,7 @@ import type { UIExtensionsStorage } from './types';
 import { EPMApp } from './sections/epm';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { PackageInstallProvider } from './hooks';
-import { useBreadcrumbs, IntraAppStateProvider, UIExtensionsContext } from './hooks';
+import { useBreadcrumbs, UIExtensionsContext } from './hooks';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
@@ -201,15 +201,13 @@ export const IntegrationsAppContext: React.FC<{
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <UIExtensionsContext.Provider value={extensions}>
                     <FleetStatusProvider>
-                      <IntraAppStateProvider kibanaScopedHistory={history}>
-                        <Router history={history}>
-                          <AgentPolicyContextProvider>
-                            <PackageInstallProvider notifications={startServices.notifications}>
-                              {children}
-                            </PackageInstallProvider>
-                          </AgentPolicyContextProvider>
-                        </Router>
-                      </IntraAppStateProvider>
+                      <Router history={history}>
+                        <AgentPolicyContextProvider>
+                          <PackageInstallProvider notifications={startServices.notifications}>
+                            {children}
+                          </PackageInstallProvider>
+                        </AgentPolicyContextProvider>
+                      </Router>
                     </FleetStatusProvider>
                   </UIExtensionsContext.Provider>
                 </EuiThemeProvider>
