@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import moment from 'moment';
 import { DateFormatArgInput, Props as ComponentProps } from './date_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
@@ -17,12 +17,12 @@ import { SetupInitializer } from '../../../plugin';
 const { DateFormat: strings } = ArgumentStrings;
 
 const getDateFormatArgInput = (defaultDateFormats: ComponentProps['dateFormats']) => (
-  props: ComponentProps
-) => <DateFormatArgInput {...props} dateFormats={defaultDateFormats} />;
+  props: Omit<ComponentProps, 'dateFormats'> & Partial<Pick<ComponentProps, 'dateFormats'>>
+) => <DateFormatArgInput dateFormats={defaultDateFormats} {...props} />;
 
 export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,
-  plugins
+  _
 ) => {
   const formatMap = {
     DEFAULT: core.uiSettings.get('dateFormat'),
