@@ -68,10 +68,6 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     start: metadata?.start,
     end: metadata?.end,
   });
-  // If we only get one value for the list of environments, it's going to be "All"
-  // and we don't want to show it.
-  const environments =
-    environmentOptions.length === 1 ? [] : environmentOptions;
 
   const fields = [
     <ServiceField value={params.serviceName} />,
@@ -82,7 +78,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environments}
+      options={environmentOptions}
       onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
     <PopoverExpression

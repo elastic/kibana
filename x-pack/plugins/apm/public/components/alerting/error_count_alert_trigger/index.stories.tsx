@@ -15,7 +15,7 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 export default {
-  title: 'app/ErrorCountAlertTrigger',
+  title: 'alerting/ErrorCountAlertTrigger',
   component: ErrorCountAlertTrigger,
   decorators: [
     (Story: React.ComponentClass) => (

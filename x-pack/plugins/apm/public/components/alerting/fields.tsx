@@ -40,7 +40,8 @@ export function EnvironmentField({
     defaultMessage: 'Environment',
   });
 
-  if (options.length === 0) {
+  // "1" means "All" is the only option and we should not show a select.
+  if (options.length === 1) {
     return <EuiExpression description={title} value={currentValue} />;
   }
 

@@ -99,11 +99,6 @@ export function TransactionDurationAlertTrigger(props: Props) {
     end: metadata?.end,
   });
 
-  // If we only get one value for the list of environments, it's going to be "All"
-  // and we don't want to show it.
-  const environments =
-    environmentOptions.length === 1 ? [] : environmentOptions;
-
   const { data } = useFetcher(
     (callApmApi) => {
       if (params.windowSize && params.windowUnit) {
@@ -161,7 +156,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environments}
+      options={environmentOptions}
       onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
     <PopoverExpression
