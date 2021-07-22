@@ -101,7 +101,15 @@ describe('getSummaryStatus', () => {
           summary: '[s2]: Lorem ipsum',
           detail: 'See the status page for more information',
           meta: {
-            affectedServices: ['s2'],
+            affectedServices: {
+              s2: {
+                level: ServiceStatusLevels.unavailable,
+                summary: 'Lorem ipsum',
+                meta: {
+                  custom: { data: 'here' },
+                },
+              },
+            },
           },
         });
       });
@@ -128,7 +136,17 @@ describe('getSummaryStatus', () => {
           detail: 'Vivamus pulvinar sem ac luctus ultrices.',
           documentationUrl: 'http://helpmenow.com/problem1',
           meta: {
-            affectedServices: ['s2'],
+            affectedServices: {
+              s2: {
+                level: ServiceStatusLevels.unavailable,
+                summary: 'Lorem ipsum',
+                detail: 'Vivamus pulvinar sem ac luctus ultrices.',
+                documentationUrl: 'http://helpmenow.com/problem1',
+                meta: {
+                  custom: { data: 'here' },
+                },
+              },
+            },
           },
         });
       });
@@ -165,7 +183,26 @@ describe('getSummaryStatus', () => {
           summary: '[2] services are unavailable',
           detail: 'See the status page for more information',
           meta: {
-            affectedServices: ['s2', 's3'],
+            affectedServices: {
+              s2: {
+                level: ServiceStatusLevels.unavailable,
+                summary: 'Lorem ipsum',
+                detail: 'Vivamus pulvinar sem ac luctus ultrices.',
+                documentationUrl: 'http://helpmenow.com/problem1',
+                meta: {
+                  custom: { data: 'here' },
+                },
+              },
+              s3: {
+                level: ServiceStatusLevels.unavailable,
+                summary: 'Proin mattis',
+                detail: 'Nunc quis nulla at mi lobortis pretium.',
+                documentationUrl: 'http://helpmenow.com/problem2',
+                meta: {
+                  other: { data: 'over there' },
+                },
+              },
+            },
           },
         });
       });

@@ -6,7 +6,8 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IFieldSubType } from '../../../../../../../src/plugins/data/public';
 import { TimelineNonEcsData } from '../../../search_strategy/timeline';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';

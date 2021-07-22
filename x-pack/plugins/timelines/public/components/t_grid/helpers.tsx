@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import {
@@ -15,7 +14,12 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '../../../common';
-import type { IIndexPattern } from '../../../../../../src/plugins/data/public';
+import type {
+  EsQueryConfig,
+  Filter,
+  IIndexPattern,
+  Query,
+} from '../../../../../../src/plugins/data/public';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 // eslint-disable-next-line no-duplicate-imports

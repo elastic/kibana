@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { Position } from '@elastic/charts';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
 
@@ -48,6 +49,26 @@ describe('Legend Settings', () => {
     const component = shallow(<LegendSettingsPopover {...props} />);
     component.find('[data-test-subj="lens-legend-display-btn"]').simulate('change');
     expect(props.onDisplayChange).toHaveBeenCalled();
+  });
+
+  it('should have default the Position to right when no position is given', () => {
+    const component = shallow(<LegendSettingsPopover {...props} />);
+    expect(
+      component.find('[data-test-subj="lens-legend-position-btn"]').prop('idSelected')
+    ).toEqual(Position.Right);
+  });
+
+  it('should have called the onPositionChange function on ButtonGroup change', () => {
+    const component = shallow(<LegendSettingsPopover {...props} />);
+    component.find('[data-test-subj="lens-legend-position-btn"]').simulate('change');
+    expect(props.onPositionChange).toHaveBeenCalled();
+  });
+
+  it('should disable the position button group on hide mode', () => {
+    const component = shallow(<LegendSettingsPopover {...props} mode="hide" />);
+    expect(
+      component.find('[data-test-subj="lens-legend-position-btn"]').prop('isDisabled')
+    ).toEqual(true);
   });
 
   it('should enable the Nested Legend Switch when renderNestedLegendSwitch prop is true', () => {

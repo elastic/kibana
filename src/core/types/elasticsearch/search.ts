@@ -39,8 +39,8 @@ type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>
   ? ValuesType<T>
-  : T extends Array<infer U>
-  ? ValueTypeOfField<U>
+  : T extends string[] | number[]
+  ? ValueTypeOfField<ValuesType<T>>
   : T extends { field: estypes.Field }
   ? T['field']
   : T extends string | number

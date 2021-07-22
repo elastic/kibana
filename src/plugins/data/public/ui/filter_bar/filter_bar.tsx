@@ -8,16 +8,6 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import {
-  buildEmptyFilter,
-  Filter,
-  enableFilter,
-  disableFilter,
-  pinFilter,
-  toggleFilterDisabled,
-  toggleFilterNegated,
-  unpinFilter,
-} from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { useState, useRef } from 'react';
 
@@ -27,8 +17,17 @@ import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern } from '../..';
-
-import { UI_SETTINGS } from '../../../common';
+import {
+  buildEmptyFilter,
+  Filter,
+  enableFilter,
+  disableFilter,
+  pinFilter,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  unpinFilter,
+  UI_SETTINGS,
+} from '../../../common';
 
 interface Props {
   filters: Filter[];

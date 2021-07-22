@@ -2,15 +2,17 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md)
 
-## KueryNode type
-
-> Warning: This API is now obsolete.
-> 
-> Please import from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
-> 
+## KueryNode interface
 
 <b>Signature:</b>
 
 ```typescript
-declare type KueryNode = oldKueryNode;
+export interface KueryNode 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [type](./kibana-plugin-plugins-data-public.kuerynode.type.md) | <code>keyof NodeTypes</code> |  |
+

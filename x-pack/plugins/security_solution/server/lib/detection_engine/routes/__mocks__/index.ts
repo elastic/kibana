@@ -26,8 +26,6 @@ export const createMockConfig = (): ConfigType => ({
   endpointResultListDefaultPageSize: 10,
   packagerTaskInterval: '60s',
   alertMergeStrategy: 'missingFields',
-  prebuiltRulesFromFileSystem: true,
-  prebuiltRulesFromSavedObjects: false,
 });
 
 export const mockGetCurrentUser = {

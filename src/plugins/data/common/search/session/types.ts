@@ -71,10 +71,6 @@ export interface SearchSessionSavedObjectAttributes {
   realmType?: string;
   realmName?: string;
   username?: string;
-  /**
-   * Version information to display warnings when trying to restore a session from a different version
-   */
-  version: string;
 }
 
 export interface SearchSessionRequestInfo {

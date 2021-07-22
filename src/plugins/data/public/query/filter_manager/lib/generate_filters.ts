@@ -8,6 +8,8 @@
 
 import _ from 'lodash';
 import {
+  IFieldType,
+  IIndexPattern,
   Filter,
   isExistsFilter,
   isPhraseFilter,
@@ -17,9 +19,7 @@ import {
   buildFilter,
   FilterStateStore,
   FILTERS,
-} from '@kbn/es-query';
-
-import { IFieldType, IIndexPattern } from '../../../../common';
+} from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(

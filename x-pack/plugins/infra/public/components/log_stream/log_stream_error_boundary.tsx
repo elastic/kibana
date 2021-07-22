@@ -8,7 +8,7 @@
 import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { KQLSyntaxError } from '@kbn/es-query';
+import { KQLSyntaxError } from '../../../../../../src/plugins/data/common';
 import { RenderErrorFunc, ResettableErrorBoundary } from '../resettable_error_boundary';
 
 export const LogStreamErrorBoundary: React.FC<{ resetOnChange: any }> = ({

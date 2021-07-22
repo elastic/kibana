@@ -239,7 +239,7 @@ export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }:
 
   const footer = () => {
     return (
-      <EuiPopoverFooter paddingSize="s">
+      <EuiPopoverFooter>
         <EuiSwitch
           label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
             defaultMessage: 'Hide missing fields',
@@ -297,7 +297,7 @@ export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }:
             }}
             button={buttonContent}
           >
-            <EuiPopoverTitle paddingSize="s">
+            <EuiPopoverTitle>
               {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
                 defaultMessage: 'Filter by type',
               })}

@@ -66,9 +66,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
       username: {
         type: 'keyword',
       },
-      version: {
-        type: 'keyword',
-      },
     },
   },
   migrations: searchSessionSavedObjectMigrations,

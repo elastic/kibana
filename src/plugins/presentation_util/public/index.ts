@@ -38,8 +38,6 @@ export {
   withSuspense,
 } from './components';
 
-export * from './components/types';
-
 export {
   AddFromLibraryButton,
   PrimaryActionButton,

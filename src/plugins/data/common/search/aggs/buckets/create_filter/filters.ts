@@ -7,8 +7,8 @@
  */
 
 import { get } from 'lodash';
-import { buildQueryFilter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import { buildQueryFilter } from '../../../../../common';
 
 export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {
   // have the aggConfig write agg dsl params

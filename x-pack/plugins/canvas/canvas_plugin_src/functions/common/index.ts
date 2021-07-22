@@ -44,6 +44,7 @@ import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
 import { repeatImage } from './repeat_image';
 import { seriesStyle } from './seriesStyle';
+import { shape } from './shape';
 import { sort } from './sort';
 import { staticColumn } from './staticColumn';
 import { string } from './string';
@@ -95,6 +96,7 @@ export const functions = [
   rounddate,
   rowCount,
   seriesStyle,
+  shape,
   sort,
   staticColumn,
   string,

@@ -40,5 +40,4 @@ export interface UISession {
   restoreUrl: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
-  version: string;
 }

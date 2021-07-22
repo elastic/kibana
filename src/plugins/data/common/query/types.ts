@@ -8,4 +8,8 @@
 
 export * from './timefilter/types';
 
-export { Query } from '@kbn/es-query';
+// eslint-disable-next-line
+export type Query = {
+  query: string | { [key: string]: any };
+  language: string;
+};

@@ -19,7 +19,7 @@ toJSON(): {
         searchable: boolean;
         aggregatable: boolean;
         readFromDocValues: boolean;
-        subType: import("@kbn/es-query").IFieldSubType | undefined;
+        subType: import("../..").IFieldSubType | undefined;
         customLabel: string | undefined;
     };
 ```
@@ -37,7 +37,7 @@ toJSON(): {
         searchable: boolean;
         aggregatable: boolean;
         readFromDocValues: boolean;
-        subType: import("@kbn/es-query").IFieldSubType | undefined;
+        subType: import("../..").IFieldSubType | undefined;
         customLabel: string | undefined;
     }`
 

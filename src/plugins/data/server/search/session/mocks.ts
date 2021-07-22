@@ -27,8 +27,7 @@ export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
     getConfig: jest.fn(
       () =>
         (({
-          defaultExpiration: moment.duration('1', 'w'),
-          enabled: true,
+          defaultExpiration: moment.duration('1', 'm'),
         } as unknown) as SearchSessionsConfigSchema)
     ),
   };

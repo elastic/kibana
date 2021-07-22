@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { buildPhrasesFilter, buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import {
+  buildPhrasesFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  Filter,
+} from '../../../../../common';
 
 export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
   const field = aggConfig.params.field;

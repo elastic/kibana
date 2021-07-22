@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FILTERS, Filter, isQueryStringFilter } from '@kbn/es-query';
+import { FILTERS, Filter, isQueryStringFilter } from '../../../../../common';
 
 export const mapQueryString = (filter: Filter) => {
   if (isQueryStringFilter(filter)) {

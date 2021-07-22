@@ -91,7 +91,7 @@ describe('SearchSessionService', () => {
         warn: jest.fn(),
         error: jest.fn(),
       };
-      service = new SearchSessionService(mockLogger, config, '8.0.0');
+      service = new SearchSessionService(mockLogger, config);
       const coreStart = coreMock.createStart();
       mockTaskManager = taskManagerMock.createStart();
       await flushPromises();
@@ -171,7 +171,7 @@ describe('SearchSessionService', () => {
         warn: jest.fn(),
         error: jest.fn(),
       };
-      service = new SearchSessionService(mockLogger, config, '8.0.0');
+      service = new SearchSessionService(mockLogger, config);
       const coreStart = coreMock.createStart();
       mockTaskManager = taskManagerMock.createStart();
       await flushPromises();

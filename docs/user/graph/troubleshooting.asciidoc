@@ -1,8 +1,8 @@
 [role="xpack"]
 [[graph-troubleshooting]]
-== Graph troubleshooting and limitations
+== Graph troubleshooting
 ++++
-<titleabbrev>Troubleshooting and limitations</titleabbrev>
+<titleabbrev>Troubleshoot</titleabbrev>
 ++++
 
 [discrete]
@@ -22,7 +22,7 @@ but they can miss details from individual documents. If you need to perform a
 detailed forensic analysis, you can adjust the following settings to ensure a
 graph exploration produces all of the relevant data:
 
-* Increase the `sample_size` to a larger number of documents to analyze more
+* Increase the `sample_size` to a larger number of documents to analyse more
 data on each shard.
 * Set the `use_significance` setting to `false` to retrieve terms regardless
 of any statistical correlation with the sample.
@@ -53,28 +53,7 @@ large documents with your seed and guiding queries.
 so even increasing the frequency threshold by one can massively reduce the
 number of candidate terms whose background frequencies are checked.
 
-Keep in mind that all of these options reduce the scope of information analyzed
+Keep in mind that all of these options reduce the scope of information analysed
 and can increase the potential to miss what could be interesting details. However,
 the information that's lost tends to be associated with lower-quality documents
 with lower-frequency terms, which can be an acceptable trade-off.
-
-[discrete]
-=== Limited support for multiple indices
-The graph API can explore multiple indices, types, or aliases in a
-single API request, but the assumption is that each "hop" it performs
-is querying the same set of indices. Currently, it is not possible to
-take a term found in a field from one index and use that value to explore
-connections in _a different field_ held in another type or index.
-
-A good example of where this might be useful is if an IP address is
-found in the `remote_host` field of an index called "weblogs20160101",
-you might want to follow that up by looking for the same address in
-the `ip_address` field of an index called "knownthreats".
-
-Supporting this behavior would require extra mappings to indicate that
-the weblogs' `remote_host` field contained values that had currency and
-meaning in the `ip_address` field of the threats index.
-
-Since we do not currently support this translation, you would have to
-perform multiple calls to take the values from the weblogs index
-response and build them into a separate request to the threats index.

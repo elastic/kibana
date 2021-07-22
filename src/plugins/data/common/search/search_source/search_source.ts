@@ -72,7 +72,6 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
-import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -94,6 +93,8 @@ import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
   getEsQueryConfig,
+  buildEsQuery,
+  Filter,
   UI_SETTINGS,
   isErrorResponse,
   isPartialResponse,

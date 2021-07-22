@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
 import { CidrMask } from '../lib/cidr_mask';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { IpRangeKey } from '../lib/ip_range';
+import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
 
 export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey) => {
   let range: RangeFilterParams;

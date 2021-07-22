@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, isMissingFilter, FILTERS } from '@kbn/es-query';
+import { Filter, isMissingFilter, FILTERS } from '../../../../../common';
 
 export const mapMissing = (filter: Filter) => {
   if (isMissingFilter(filter)) {

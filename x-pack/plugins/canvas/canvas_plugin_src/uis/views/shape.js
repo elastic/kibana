@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAvailableShapes } from '../../../../../../src/plugins/expression_shape/common';
+import { shapes } from '../../renderers/shape/shapes';
 import { ViewStrings } from '../../../i18n';
 
 const { Shape: strings } = ViewStrings;
@@ -21,7 +21,7 @@ export const shape = () => ({
       displayName: strings.getShapeDisplayName(),
       argType: 'shape',
       options: {
-        shapes: getAvailableShapes(),
+        shapes,
       },
     },
     {

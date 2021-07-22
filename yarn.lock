@@ -2783,10 +2783,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-query@link:bazel-bin/packages/kbn-es-query":
-  version "0.0.0"
-  uid ""
-
 "@kbn/es@link:bazel-bin/packages/kbn-es":
   version "0.0.0"
   uid ""
@@ -21534,10 +21530,10 @@ pdfmake@^0.1.65:
     pdfkit "^0.11.0"
     svg-to-pdfkit "^0.1.8"
 
-peggy@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/peggy/-/peggy-1.2.0.tgz#657ba45900cbef1dc9f52356704bdbb193c2021c"
-  integrity sha512-PQ+NKpAobImfMprYQtc4Egmyi29bidRGEX0kKjCU5uuW09s0Cthwqhfy7mLkwcB4VcgacE5L/ZjruD/kOPCUUw==
+peggy@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/peggy/-/peggy-1.0.0.tgz#df6c7816c9df0ef35e071aaf96836cb866fe7eb4"
+  integrity sha512-lH12sxAXj4Aug+vH6IGoByIQOREIlhH+x4Uzb9kce6DD8wcGeidkC0JYEOwHormKrLt5BFLTbR4PuD/tiMOirQ==
 
 pegjs@0.10.0:
   version "0.10.0"

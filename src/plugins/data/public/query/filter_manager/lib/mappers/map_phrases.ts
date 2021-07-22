@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, isPhrasesFilter } from '@kbn/es-query';
-
-import { FilterValueFormatter } from '../../../../../common';
+import { Filter, FilterValueFormatter, isPhrasesFilter } from '../../../../../common';
 
 const getFormattedValueFn = (params: any) => {
   return (formatter?: FilterValueFormatter) => {

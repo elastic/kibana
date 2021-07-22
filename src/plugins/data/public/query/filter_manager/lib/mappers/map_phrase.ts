@@ -9,15 +9,14 @@
 import { get } from 'lodash';
 import {
   PhraseFilter,
+  FilterValueFormatter,
   getPhraseFilterValue,
   getPhraseFilterField,
   FILTERS,
   isScriptedPhraseFilter,
   Filter,
   isPhraseFilter,
-} from '@kbn/es-query';
-
-import { FilterValueFormatter } from '../../../../../common';
+} from '../../../../../common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['script', 'script', 'params', 'value']);

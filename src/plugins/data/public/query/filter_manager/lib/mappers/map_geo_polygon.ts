@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { GeoPolygonFilter, FILTERS, Filter, isGeoPolygonFilter } from '@kbn/es-query';
-
-import { FilterValueFormatter } from '../../../../../common';
+import {
+  FilterValueFormatter,
+  GeoPolygonFilter,
+  FILTERS,
+  Filter,
+  isGeoPolygonFilter,
+} from '../../../../../common';
 
 const POINTS_SEPARATOR = ', ';
 

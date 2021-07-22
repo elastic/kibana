@@ -29,7 +29,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery } from 'src/plugins/data/common';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
