@@ -11,11 +11,12 @@ allOf:
           - inactive
       packagePolicies:
         oneOf:
-          - items:
+          - type: array
+            items:
               type: string
-          - items:
+          - type: array
+            items:
               $ref: ./package_policy.yaml
-        type: array
       updated_on:
         type: string
         format: date-time
