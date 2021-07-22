@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
@@ -20,6 +21,12 @@ const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
 /** wait this many ms after the user completes typing before applying the filter input */
 export const INPUT_TIMEOUT = 250;
 
+const FieldsBrowserButtonContainer = styled.div`
+  display: inline-block;
+  position: relative;
+`;
+
+FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
 /**
  * Manages the state of the field browser
  */
@@ -112,7 +119,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   }, [show, browserFields]);
 
   return (
-    <div data-test-subj="fields-browser-button-container">
+    <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
       <EuiToolTip content={i18n.FIELDS_BROWSER}>
         <EuiButtonEmpty
           aria-label={i18n.FIELDS_BROWSER}
@@ -146,7 +153,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           width={width}
         />
       )}
-    </div>
+    </FieldsBrowserButtonContainer>
   );
 };
 
