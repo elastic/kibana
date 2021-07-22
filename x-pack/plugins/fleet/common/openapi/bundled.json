@@ -702,6 +702,129 @@
         }
       }
     },
+    "/agents/{agentId}/upgrade": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent - Upgrade",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/upgrade_agent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/upgrade_agent"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "upgrade-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/upgrade_agent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/bulk_reassign": {
+      "post": {
+        "summary": "Agents - Bulk reassign",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean"
+                      },
+                      "error": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-reassign-agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "policy_id": {
+                    "type": "string"
+                  },
+                  "agents": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "policy_id",
+                  "agents"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/agents/{agentId}/unenroll": {
       "parameters": [
         {
@@ -842,60 +965,6 @@
                 "required": [
                   "agents"
                 ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/agents/{agentId}/upgrade": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "agentId",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "post": {
-        "summary": "Agent - Upgrade",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/upgrade_agent"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "BAD REQUEST",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/upgrade_agent"
-                }
-              }
-            }
-          }
-        },
-        "operationId": "upgrade-agent",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/upgrade_agent"
               }
             }
           }
