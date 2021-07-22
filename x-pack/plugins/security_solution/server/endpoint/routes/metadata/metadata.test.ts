@@ -384,9 +384,6 @@ describe('test endpoint route', () => {
         mockAgentService.getAgent = jest
           .fn()
           .mockRejectedValue(new AgentNotFoundError('not found'));
-        //   .mockImplementation(() => {
-        //   SavedObjectsErrorHelpers.createGenericNotFoundError();
-        // });
 
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
