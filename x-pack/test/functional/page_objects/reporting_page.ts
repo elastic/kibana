@@ -10,6 +10,7 @@ import { format as formatUrl } from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
 import { FtrService } from '../ftr_provider_context';
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../../plugins/reporting/common/constants';
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
@@ -159,10 +160,10 @@ export class ReportingPageObject extends FtrService {
   }
 
   async getManagementList() {
-    const table = await this.testSubjects.find('reportJobListing');
-    const allRows = await table.findAllByTestSubject('reportJobRow');
+    const table = await this.testSubjects.find(REPORT_TABLE_ID);
+    const allRows = await table.findAllByTestSubject(REPORT_TABLE_ROW_ID);
 
-    return Promise.all(
+    return await Promise.all(
       allRows.map(async (row) => {
         const $ = await row.parseDomContent();
         return {

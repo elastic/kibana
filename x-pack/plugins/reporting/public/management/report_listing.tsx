@@ -21,6 +21,7 @@ import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
@@ -375,8 +376,8 @@ class ReportListingUi extends Component<Props, State> {
           selection={selection}
           isSelectable={true}
           onChange={this.onTableChange}
-          data-test-subj="reportJobListing"
-          rowProps={() => ({ 'data-test-subj': 'reportListingRow' })}
+          data-test-subj={REPORT_TABLE_ID}
+          rowProps={() => ({ 'data-test-subj': REPORT_TABLE_ROW_ID })}
         />
         {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>

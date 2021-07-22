@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { REPORT_TABLE_ID } from '../../../../plugins/reporting/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -37,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // to reset the data after deletion testing
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
       await pageObjects.common.navigateToApp('reporting');
-      await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
+      await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 200000 });
     });
 
     after(async () => {
