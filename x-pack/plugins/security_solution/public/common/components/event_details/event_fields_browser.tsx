@@ -9,6 +9,7 @@ import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { rgba } from 'polished';
 import styled from 'styled-components';
 import {
   arrayIndexToAriaIndex,
@@ -37,10 +38,38 @@ interface Props {
   timelineTabType: TimelineTabs | 'flyout';
 }
 
+const TableWrapper = styled.div`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    > .euiFlexGroup:first-of-type {
+      flex: 0;
+    }
+  }
+`;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   flex: 1;
   overflow: auto;
+  &::-webkit-scrollbar {
+    height: ${({ theme }) => theme.eui.euiScrollBar};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
+  }
+  &::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
+    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+  }
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 
   .eventFieldsTable__fieldIcon {
     padding-top: ${({ theme }) => parseFloat(theme.eui.euiSizeXS) * 1.5}px;
@@ -248,7 +277,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     }, [focusSearchInput]);
 
     return (
-      <div onKeyDown={onKeyDown} ref={containerElement}>
+      <TableWrapper onKeyDown={onKeyDown} ref={containerElement}>
         <StyledEuiInMemoryTable
           className={EVENT_FIELDS_TABLE_CLASS_NAME}
           items={items}
@@ -258,7 +287,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           search={search}
           sorting={false}
         />
-      </div>
+      </TableWrapper>
     );
   }
 );
