@@ -7,17 +7,15 @@ post:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                success:
-                  type: boolean
-              required:
-                - id
-                - success
+            type: object
+            properties:
+              id:
+                type: string
+              success:
+                type: boolean
+            required:
+              - id
+              - success
   requestBody:
     content:
       application/json:
