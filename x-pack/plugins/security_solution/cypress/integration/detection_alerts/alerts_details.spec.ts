@@ -61,8 +61,8 @@ describe('Alert details with unmapped fields', () => {
     cy.get(TABLE_ROWS)
       .eq(expectedUnmmappedField.row)
       .within(() => {
-        cy.get(CELL_TEXT).eq(0).should('have.text', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).eq(1).should('have.text', expectedUnmmappedField.text);
+        cy.get(CELL_TEXT).eq(2).should('have.text', expectedUnmmappedField.field);
+        cy.get(CELL_TEXT).eq(4).should('have.text', expectedUnmmappedField.text);
       });
   });
 });

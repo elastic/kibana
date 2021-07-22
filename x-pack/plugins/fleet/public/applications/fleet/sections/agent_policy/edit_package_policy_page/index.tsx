@@ -31,6 +31,7 @@ import {
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
+import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
@@ -492,6 +493,6 @@ const IntegrationsBreadcrumb = memo<{
   policyName: string;
   pkgkey: string;
 }>(({ pkgTitle, policyName, pkgkey }) => {
-  useBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
   return null;
 });
