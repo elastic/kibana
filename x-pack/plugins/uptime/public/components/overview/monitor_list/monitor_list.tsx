@@ -53,7 +53,7 @@ export const MonitorListComponent: ({
   pageSize,
   setPageSize,
 }: Props) => any = ({ filters, monitorList: { list, error, loading }, pageSize, setPageSize }) => {
-  const [drawerIds, updateDrawerIds] = useState<string[]>([]);
+  const [expandedDrawerIds, updateExpandedDrawerIds] = useState<string[]>([]);
   const { width } = useWindowSize();
   const [hideExtraColumns, setHideExtraColumns] = useState(false);
 
@@ -71,15 +71,15 @@ export const MonitorListComponent: ({
   const prevPagePagination = list.prevPagePagination ?? '';
 
   const toggleDrawer = (id: string) => {
-    if (drawerIds.includes(id)) {
-      updateDrawerIds(drawerIds.filter((p) => p !== id));
+    if (expandedDrawerIds.includes(id)) {
+      updateExpandedDrawerIds(expandedDrawerIds.filter((p) => p !== id));
     } else {
-      updateDrawerIds([...drawerIds, id]);
+      updateExpandedDrawerIds([...expandedDrawerIds, id]);
     }
   };
 
   const getExpandedRowMap = () => {
-    return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
+    return expandedDrawerIds.reduce((map: ExpandedRowMap, id: string) => {
       return {
         ...map,
         [id]: (
@@ -191,7 +191,7 @@ export const MonitorListComponent: ({
                 <EuiButtonIcon
                   aria-label={labels.getExpandDrawerLabel(id)}
                   data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
-                  iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
+                  iconType={expandedDrawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
                   onClick={() => toggleDrawer(id)}
                 />
               );
