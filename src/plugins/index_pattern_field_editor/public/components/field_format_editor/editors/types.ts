@@ -18,7 +18,7 @@ export interface FormatEditorProps<P> {
   fieldType: string;
   format: FieldFormat;
   formatParams: { type?: string } & P;
-  onChange: (newParams: { fieldType: string; [key: string]: any }) => void;
+  onChange: (newParams: { [key: string]: any }) => void;
   onError: FormatSelectEditorProps['onError'];
 }
 

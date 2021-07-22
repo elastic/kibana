@@ -81,10 +81,9 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
   }
 
   onChange = (newParams = {}) => {
-    const { onChange, formatParams, fieldType } = this.props;
+    const { onChange, formatParams } = this.props;
 
     onChange({
-      fieldType,
       ...formatParams,
       ...newParams,
     });
