@@ -120,12 +120,6 @@ export type JobStatus =
   | 'processing' // Report job has been claimed and is executing
   | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
-// payload for retrieving the error message of a failed job
-export interface JobContent {
-  content: TaskRunResult['content'];
-  content_type: false;
-}
-
 /*
  * Info API response: to avoid unnecessary large payloads on a network, the
  * report query results do not include `payload.headers` or `output.content`,
