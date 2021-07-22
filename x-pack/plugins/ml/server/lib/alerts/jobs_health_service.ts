@@ -75,7 +75,7 @@ export function jobsHealthServiceProvider(
 
   return {
     /**
-     * Gets not started datafeeds and not opened jobs for provided jobs selection.
+     * Gets not started datafeeds for opened jobs.
      * @param jobIds
      */
     async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse | void> {
@@ -104,10 +104,10 @@ export function jobsHealthServiceProvider(
               job_state: jobState,
             };
           })
-          .filter(
-            (datafeedStat) =>
-              datafeedStat.state !== 'started' || datafeedStat.job_state !== 'opened'
-          );
+          .filter((datafeedStat) => {
+            // Find opened jobs with not started datafeeds
+            return datafeedStat.job_state === 'opened' && datafeedStat.state !== 'started';
+          });
       }
     },
     /**
