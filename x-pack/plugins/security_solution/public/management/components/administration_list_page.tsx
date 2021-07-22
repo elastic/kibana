@@ -6,20 +6,12 @@
  */
 
 import React, { FC, memo } from 'react';
-import { EuiPanel, CommonProps } from '@elastic/eui';
-import styled from 'styled-components';
+import { CommonProps } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { BETA_BADGE_LABEL } from '../common/translations';
-
-/** Ensure that all flyouts z-index in Administation area show the flyout header */
-const EuiPanelStyled = styled(EuiPanel)`
-  .euiFlyout {
-    z-index: ${({ theme }) => theme.eui.euiZNavigation + 1};
-  }
-`;
 
 interface AdministrationListPageProps {
   beta: boolean;
