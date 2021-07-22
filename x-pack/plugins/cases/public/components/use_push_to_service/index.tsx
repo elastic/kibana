@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
@@ -77,7 +77,9 @@ export const usePushToService = ({
       return errors;
     }
 
-    if (actionLicense != null && !actionLicense.enabledInLicense) {
+    const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
+
+    if (hasLicenseError) {
       errors = [...errors, getLicenseError()];
     }
 
@@ -99,7 +101,7 @@ export const usePushToService = ({
           description: i18n.CONFIGURE_CONNECTOR,
         },
       ];
-    } else if (!isValidConnector && !loadingLicense) {
+    } else if (!isValidConnector && !loadingLicense && !hasLicenseError) {
       errors = [
         ...errors,
         {
@@ -107,14 +109,22 @@ export const usePushToService = ({
           title: '',
           description: (
             <FormattedMessage
-              defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
-              id="xpack.cases.caseView.pushToServiceDisableByInvalidConnector"
+              defaultMessage="The connector used to send updates to external service has been deleted or you do not have the {appropriateLicense} to use it. To update cases in external systems, select a different connector or create a new one."
+              id="xpack.cases.configureCases.warningMessage"
+              values={{
+                appropriateLicense: (
+                  <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                    {i18n.LINK_APPROPRIATE_LICENSE}
+                  </EuiLink>
+                ),
+              }}
             />
           ),
           errorType: 'danger',
         },
       ];
     }
+
     if (caseStatus === CaseStatuses.closed) {
       errors = [
         ...errors,
