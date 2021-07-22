@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { once } from 'lodash';
+
 import { appContextService, licenseService } from '../../';
 
 // from https://github.com/elastic/package-registry#docker (maybe from OpenAPI one day)
@@ -35,9 +37,11 @@ export const getRegistryUrl = (): string => {
   const isEnterprise = licenseService.isEnterprise();
 
   if (customUrl && isEnterprise) {
-    appContextService
-      .getLogger()
-      .info('Custom registry url is an experimental feature and is unsupported.');
+    once(() => {
+      appContextService
+        .getLogger()
+        .info('Custom registry url is an experimental feature and is unsupported.');
+    });
     return customUrl;
   }
 
