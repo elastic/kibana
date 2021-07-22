@@ -11,7 +11,7 @@ import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from './../lib/rename_keys';
-import { MuteOptions } from '../../alerts_client';
+import { MuteOptions } from '../../rules_client';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
@@ -32,7 +32,7 @@ export const muteAlertInstanceRoute = (router: AlertingRouter, licenseState: ILi
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const alertsClient = context.alerting.getAlertsClient();
+      const rulesClient = context.alerting.getRulesClient();
 
       const renameMap = {
         alert_id: 'alertId',
@@ -41,7 +41,7 @@ export const muteAlertInstanceRoute = (router: AlertingRouter, licenseState: ILi
 
       const renamedQuery = renameKeys<MuteOptions, Record<string, unknown>>(renameMap, req.params);
       try {
-        await alertsClient.muteInstance(renamedQuery);
+        await rulesClient.muteInstance(renamedQuery);
         return res.noContent();
       } catch (e) {
         if (e instanceof AlertTypeDisabledError) {
