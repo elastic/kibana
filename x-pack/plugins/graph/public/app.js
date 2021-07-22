@@ -37,6 +37,7 @@ import {
   getSavedWorkspace,
   deleteSavedWorkspace,
 } from './helpers/saved_workspace_utils';
+import { ControlPanel } from './components/control_panel';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -106,6 +107,28 @@ export function initGraphApp(angularModule, deps) {
 
   app.directive('graphVisualization', function (reactDirective) {
     return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
+  });
+
+  app.directive('controlPanel', function (reactDirective) {
+    return reactDirective(
+      ControlPanel,
+      [
+        ['workspace', { watchDepth: 'reference' }],
+        ['liveResponseFields', { watchDepth: 'reference' }],
+        ['setDetail', { watchDepth: 'reference' }],
+        ['isSelectedSelected', { watchDepth: 'reference' }],
+        ['isColorDark', { watchDepth: 'reference' }],
+        ['urlTemplates', { watchDepth: 'reference' }],
+        ['openUrlTemplate', { watchDepth: 'reference' }],
+        ['detail', { watchDepth: 'reference' }],
+        ['colors', { watchDepth: 'reference' }],
+        ['performMerge', { watchDepth: 'reference' }],
+        ['selectSelected', { watchDepth: 'reference' }],
+      ],
+      {
+        restrict: 'E',
+      }
+    );
   });
 
   app.config(function ($routeProvider) {

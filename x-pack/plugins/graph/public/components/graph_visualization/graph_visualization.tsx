@@ -21,7 +21,6 @@ import { makeNodeId } from '../../services/persistence';
 export interface GroupAwareWorkspaceNode extends WorkspaceNode {
   kx: number;
   ky: number;
-  numChildren: number;
 }
 
 export interface GroupAwareWorkspaceEdge extends WorkspaceEdge {

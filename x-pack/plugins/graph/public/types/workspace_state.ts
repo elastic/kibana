@@ -6,6 +6,8 @@
  */
 
 import { JsonObject } from '@kbn/common-utils';
+import d3 from 'd3';
+import { TargetOptions } from '../components/control_panel';
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
 
@@ -22,6 +24,7 @@ export interface WorkspaceNode {
   parent: WorkspaceNode | null;
   color: string;
   isSelected?: boolean;
+  numChildren: number;
 }
 
 export interface WorkspaceEdge {
@@ -63,8 +66,25 @@ export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
+  selectedNodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
   blocklistedNodes: WorkspaceNode[];
+  undoLog: string;
+  redoLog: string;
+  force: ReturnType<typeof d3.layout.force>;
+
+  undo: () => void;
+  redo: () => void;
+  expandSelecteds: (targetOptions: TargetOptions) => {};
+  deleteSelection: () => void;
+  blocklistSelection: () => void;
+  selectAll: () => void;
+  selectNone: () => void;
+  selectInvert: () => void;
+  selectNeighbours: () => void;
+  deselectNode: (node: WorkspaceNode) => void;
+  colorSelected: (color: string) => void;
+  groupSelections: (node: WorkspaceNode | undefined) => void;
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];
