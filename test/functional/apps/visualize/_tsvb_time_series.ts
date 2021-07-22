@@ -205,7 +205,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.selectAggType('Average');
           await visualBuilder.setFieldForAggregation('bytes');
 
-          const chartData = await visualBuilder.getChartDatumArray();
+          const chartData = await visualBuilder.getAreaChartData();
           expect(chartData).to.eql(expectedChartData);
         });
 
@@ -220,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.selectAggType('Percentile');
           await visualBuilder.setFieldForAggregation('Memory');
 
-          const chartData = await visualBuilder.getChartDatumArray();
+          const chartData = await visualBuilder.getAreaChartData();
           expect(chartData).to.eql(expectedChartData);
         });
 
@@ -247,21 +247,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.setFieldForAggregation('bytes');
           await visualBuilder.setMetricsGroupByTerms('type');
 
-          const areasCount = await visualBuilder.getChartItemsCount();
-          const firstAreaChartData = await visualBuilder.getChartDatumArray();
-          const firstAreaLegendName = await visualBuilder.getLegendName();
-          const firstAreaColor = await visualBuilder.getChartItemColor();
-          const secondAreaChartData = await visualBuilder.getChartDatumArray(1);
-          const secondAreaLegendName = await visualBuilder.getLegendName(1);
-          const secondAreaColor = await visualBuilder.getChartItemColor(1);
+          const chartDebugData = await visualBuilder.getChartDebugState();
+          const legendNames = await visualBuilder.getLegendNames(chartDebugData);
+          const areaColors = await visualBuilder.getAreaChartColors(chartDebugData);
+          const firstAreaChartData = await visualBuilder.getAreaChartData(chartDebugData);
+          const secondAreaChartData = await visualBuilder.getAreaChartData(chartDebugData, 1);
 
-          expect(areasCount).to.be(2);
+          expect(chartDebugData?.areas?.length).to.be(2);
+          expect(legendNames).to.eql(['apache', 'nginx']);
+          expect(areaColors).to.eql(['#54b399', '#6092c0']);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
-          expect(firstAreaLegendName).to.be('apache');
-          expect(firstAreaColor).to.be('#54b399');
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
-          expect(secondAreaLegendName).to.be('nginx');
-          expect(secondAreaColor).to.be('#6092c0');
         });
 
         it('should display correct chart data, label names and area colors for min aggregation when split by filters', async () => {
@@ -289,37 +285,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.setColorPickerValue('#00BCA3', 1);
           await visualBuilder.setColorPickerValue('#72CFC2', 2);
 
-          const areasCount = await visualBuilder.getChartItemsCount();
-          const firstAreaChartData = await visualBuilder.getChartDatumArray();
-          const firstAreaLegendName = await visualBuilder.getLegendName();
-          const firstAreaColor = await visualBuilder.getChartItemColor();
-          const secondAreaChartData = await visualBuilder.getChartDatumArray(1);
-          const secondAreaLegendName = await visualBuilder.getLegendName(1);
-          const secondAreaColor = await visualBuilder.getChartItemColor(1);
+          const chartDebugData = await visualBuilder.getChartDebugState();
+          const legendNames = await visualBuilder.getLegendNames(chartDebugData);
+          const areaColors = await visualBuilder.getAreaChartColors(chartDebugData);
+          const firstAreaChartData = await visualBuilder.getAreaChartData(chartDebugData);
+          const secondAreaChartData = await visualBuilder.getAreaChartData(chartDebugData, 1);
 
-          expect(areasCount).to.be(2);
+          expect(chartDebugData?.areas?.length).to.be(2);
+          expect(legendNames).to.eql(['bytes > 5000', 'second']);
+          expect(areaColors).to.eql(['rgba(0,188,163,1)', 'rgba(114,207,194,1)']);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
-          expect(firstAreaLegendName).to.be('bytes > 5000');
-          expect(firstAreaColor).to.be('rgba(0,188,163,1)');
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
-          expect(secondAreaLegendName).to.be('second');
-          expect(secondAreaColor).to.be('rgba(114,207,194,1)');
         });
 
         it('should display cloned series and then change its chart type to bar', async () => {
-          let areasCount = await visualBuilder.getChartItemsCount();
-          expect(areasCount).to.be(1);
+          let chartDebugData = await visualBuilder.getChartDebugState();
+          expect(chartDebugData?.areas?.length).to.be(1);
 
           await visualBuilder.cloneSeries();
-          areasCount = await visualBuilder.getChartItemsCount();
-          expect(areasCount).to.be(2);
+          chartDebugData = await visualBuilder.getChartDebugState();
+          expect(chartDebugData?.areas?.length).to.be(2);
 
           await visualBuilder.clickSeriesOption();
           await visualBuilder.setChartType('Bar');
-          const barsCount = await visualBuilder.getChartItemsCount('bars');
-          areasCount = await visualBuilder.getChartItemsCount();
-          expect(barsCount).to.be(1);
-          expect(areasCount).to.be(1);
+
+          chartDebugData = await visualBuilder.getChartDebugState();
+          expect(chartDebugData?.bars?.length).to.be(1);
+          expect(chartDebugData?.areas?.length).to.be(1);
         });
 
         it('should display correct chart data for overridden index pattern', async () => {
@@ -338,7 +330,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.setIndexPatternValue('long-window-logstash-*');
           await visualBuilder.setIntervalValue('12h');
 
-          const chartData = await visualBuilder.getChartDatumArray();
+          const chartData = await visualBuilder.getAreaChartData();
           expect(chartData).to.eql(expectedChartData);
         });
 
@@ -350,8 +342,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.clickPanelOptions('timeSeries');
           await visualBuilder.setIntervalValue('2d');
 
-          const title = await visualBuilder.getXAxisTitle();
-          const chartData = await visualBuilder.getChartDatumArray();
+          const chartDebugData = await visualBuilder.getChartDebugState();
+          const title = await visualBuilder.getXAxisTitle(chartDebugData);
+          const chartData = await visualBuilder.getAreaChartData(chartDebugData);
 
           expect(title).to.be('per 2 days');
           expect(chartData).to.eql(expectedChartData);
@@ -371,7 +364,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setSeriesFilter('machine.os.raw : "win 7" and bytes > 10000');
 
-            const chartData = await visualBuilder.getChartDatumArray();
+            const chartData = await visualBuilder.getAreaChartData();
             expect(chartData).to.eql(expectedChartData);
           });
 
@@ -388,7 +381,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setPanelFilter('machine.os.raw: "ios"');
 
-            const chartData = await visualBuilder.getChartDatumArray();
+            const chartData = await visualBuilder.getAreaChartData();
             expect(chartData).to.eql(expectedChartData);
           });
         });

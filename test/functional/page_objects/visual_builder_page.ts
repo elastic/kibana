@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DebugState } from '@elastic/charts';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -829,29 +830,26 @@ export class VisualBuilderPageObject extends FtrService {
     await this.elasticChart.setNewChartUiDebugFlag(enabled);
   }
 
-  public async getXAxisTitle() {
-    const [xAxis] = (await this.elasticChart.getChartDebugData())?.axes?.x ?? [];
-    return xAxis.title;
+  public async getChartDebugState(chartData?: DebugState) {
+    return chartData ?? (await this.elasticChart.getChartDebugData())!;
   }
 
-  public async getLegendName(nth: number = 0) {
-    const legendItems = (await this.elasticChart.getChartDebugData())?.legend?.items ?? [];
-    return legendItems[nth]?.name;
+  public async getXAxisTitle(chartData?: DebugState, nth: number = 0) {
+    const debugState = await this.getChartDebugState(chartData);
+    return debugState?.axes?.x[nth]?.title;
   }
 
-  public async getChartItemColor(nth: number = 0, itemType: 'areas' | 'bars' | 'lines' = 'areas') {
-    const chartItems = (await this.elasticChart.getChartDebugData())?.[itemType] ?? [];
-    return chartItems[nth]?.color;
+  public async getLegendNames(chartData?: DebugState) {
+    const legendItems = (await this.getChartDebugState(chartData))?.legend?.items ?? [];
+    return legendItems.map(({ name }) => name);
+  }
+  public async getAreaChartColors(chartData?: DebugState) {
+    const areas = (await this.getChartDebugState(chartData))?.areas ?? [];
+    return areas.map(({ color }) => color);
   }
 
-  public async getChartItemsCount(itemType: 'areas' | 'bars' | 'lines' = 'areas') {
-    const chartItems = (await this.elasticChart.getChartDebugData())?.[itemType] ?? [];
-    return chartItems.length;
-  }
-
-  public async getChartDatumArray(nth: number = 0) {
-    const areas = (await this.elasticChart.getChartDebugData())?.areas ?? [];
-    const points = areas[nth]?.lines.y1.points;
-    return points.map(({ x, y }) => [x, y]);
+  public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
+    const areas = (await this.getChartDebugState(chartData))?.areas ?? [];
+    return areas[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
   }
 }
