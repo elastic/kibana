@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StatefulTopN } from '../../top_n';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -44,17 +44,28 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererScope(activeScope);
-
-    return showTopN ? (
-      <StatefulTopN
-        browserFields={browserFields}
-        field={field}
-        indexPattern={indexPattern}
-        onFilterAdded={onFilterAdded}
-        timelineId={timelineId ?? undefined}
-        toggleTopN={onClick}
-        value={value}
+    const button = (
+      <EuiButtonIcon
+        aria-label={SHOW_TOP(field)}
+        className="securitySolution__hoverActionButton"
+        data-test-subj="show-top-field"
+        iconSize="s"
+        iconType="visBarVertical"
+        onClick={onClick}
       />
+    );
+    return showTopN ? (
+      <EuiPopover button={button} isOpen={showTopN} closePopover={onClick}>
+        <StatefulTopN
+          browserFields={browserFields}
+          field={field}
+          indexPattern={indexPattern}
+          onFilterAdded={onFilterAdded}
+          timelineId={timelineId ?? undefined}
+          toggleTopN={onClick}
+          value={value}
+        />
+      </EuiPopover>
     ) : (
       <EuiToolTip
         content={

@@ -24,12 +24,18 @@ export const filterOutValueFn = ({
   filterManager,
   onFilterAdded,
 }: FilterValueFnArgs) => {
-  const filter =
-    value?.length === 0 ? createFilter(field, null, false) : createFilter(field, value, true);
+  const makeFilter = (currentVal: string | null | undefined) =>
+    currentVal?.length === 0
+      ? createFilter(field, null, false)
+      : createFilter(field, currentVal, true);
+  const filters = Array.isArray(value)
+    ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
+    : makeFilter(value);
+
   const activeFilterManager = filterManager;
 
   if (activeFilterManager != null) {
-    activeFilterManager.addFilters(filter);
+    activeFilterManager.addFilters(filters);
     if (onFilterAdded != null) {
       onFilterAdded();
     }
