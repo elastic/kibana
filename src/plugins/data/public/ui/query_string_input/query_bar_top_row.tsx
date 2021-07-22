@@ -173,7 +173,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
     return (
       <EuiFlexItem>
-        <AutocompleteFtuePopover storage={storage}>
+        <AutocompleteFtuePopover storage={storage} isVisible={isQueryInputFocused}>
           <QueryStringInput
             disableAutoFocus={props.disableAutoFocus}
             indexPatterns={props.indexPatterns!}

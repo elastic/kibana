@@ -15,9 +15,11 @@ import { i18n } from '@kbn/i18n';
 const AUTOCOMPLETE_FTUE_POPOVER_STORAGE_KEY = 'data.autocompleteFtuePopover';
 
 export function AutocompleteFtuePopover({
+  isVisible,
   storage,
   children,
 }: {
+  isVisible?: boolean;
   storage: IStorageWrapper;
   children: ReactElement;
 }) {
@@ -27,36 +29,38 @@ export function AutocompleteFtuePopover({
   const [autocompleteFtuePopoverVisible, setAutocompleteFtuePopoverVisible] = useState(false);
 
   useEffect(() => {
-    if (!autocompleteFtuePopoverDismissed) {
+    if (!autocompleteFtuePopoverDismissed && isVisible) {
       setAutocompleteFtuePopoverVisible(true);
     }
-  }, [autocompleteFtuePopoverDismissed]);
+  }, [autocompleteFtuePopoverDismissed, isVisible]);
 
   return (
     <EuiTourStep
       onFinish={() => {}}
       closePopover={() => {
         setAutocompleteFtuePopoverVisible(false);
+        setAutocompleteFtuePopoverDismissed(true);
       }}
       content={
         <EuiText size="s">
           <p style={{ maxWidth: 300 }}>
             {i18n.translate('data.autocompleteFtuePopover.content', {
               defaultMessage:
-                'The way we query for value suggestions in autocomplete has changed. We now use the terms enum API in Elasticsearch for improved  performance, though results will not always completely reflect the selected time range, and will not be sorted by popularity. To revert to the old behavior of using a terms aggregation, go to Advanced Settings and set autocomplete:valueSuggestionMethod to "terms_agg".',
+                'We changed how autocomplete works to improve performance. Learn more.',
             })}
           </p>
         </EuiText>
       }
       minWidth={300}
       anchorPosition="downCenter"
+      zIndex={4002}
       anchorClassName="eui-displayBlock"
       step={1}
       stepsTotal={1}
       isStepOpen={autocompleteFtuePopoverVisible}
-      subtitle={i18n.translate('data.autocompleteFtuePopover.subtitle', { defaultMessage: 'Tip' })}
+      subtitle={''}
       title={i18n.translate('data.autocompleteFtuePopover.title', {
-        defaultMessage: 'Autocomplete changes',
+        defaultMessage: 'Autocomplete is now faster!',
       })}
       footerAction={
         <EuiButtonEmpty

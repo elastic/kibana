@@ -33,7 +33,9 @@ describe('AutocompleteFtuePopover', () => {
   it('should render popover if local storage flag is not set', () => {
     const child = <span />;
     const instance = mount(
-      <AutocompleteFtuePopover storage={createMockStorage()}>{child}</AutocompleteFtuePopover>
+      <AutocompleteFtuePopover storage={createMockStorage()} isVisible={true}>
+        {child}
+      </AutocompleteFtuePopover>
     );
     expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(true);
   });
