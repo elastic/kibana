@@ -200,6 +200,17 @@ export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boole
   }
 );
 
+export const prevEntriesExist: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(entriesExistState, (doEntriesExists) => {
+  return (
+    isLoadingResourceState(doEntriesExists) &&
+    doEntriesExists.previousState &&
+    // @ts-ignore Data exists in prevState
+    doEntriesExists.previousState.data
+  );
+});
+
 export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
   state
 ) => state.active;

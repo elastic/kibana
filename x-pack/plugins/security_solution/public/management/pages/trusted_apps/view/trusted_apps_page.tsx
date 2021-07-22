@@ -27,6 +27,7 @@ import {
   getCurrentLocation,
   getListTotalItemsCount,
   listOfPolicies,
+  prevEntriesExist,
 } from '../store/selectors';
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -42,8 +43,12 @@ import { EmptyState } from './components/empty_state';
 import { SearchBar } from '../../../components/search_bar';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const TrustedAppsPage = memo(() => {
+  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+    'trustedAppsByPolicyEnabled'
+  );
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
@@ -51,6 +56,7 @@ export const TrustedAppsPage = memo(() => {
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const policyList = useTrustedAppsSelector(listOfPolicies);
   const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
+  const didEntriesExist = useTrustedAppsSelector(prevEntriesExist) === true;
   const navigationCallbackQuery = useTrustedAppsNavigateCallback(
     (query: string, includedPolicies?: string, excludedPolicies?: string) => ({
       filter: query,
@@ -70,6 +76,7 @@ export const TrustedAppsPage = memo(() => {
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
     view_type: viewType,
   }));
+
   const handleOnSearch = useCallback(
     (query: string, includedPolicies?: string, excludedPolicies?: string) => {
       dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
@@ -114,13 +121,13 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      {doEntriesExist ? (
+      {doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist) ? (
         <>
           <SearchBar
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
-            hasPolicyFilter
+            hasPolicyFilter={isTrustedAppsByPolicyEnabled}
             policyList={policyList}
             defaultExcludedPolicies={location.excludedPolicies}
             defaultIncludedPolicies={location.includedPolicies}
@@ -170,7 +177,7 @@ export const TrustedAppsPage = memo(() => {
     >
       <TrustedAppsNotifications />
 
-      {isCheckingIfEntriesExists ? (
+      {isCheckingIfEntriesExists && !didEntriesExist ? (
         <EuiEmptyPrompt
           data-test-subj="trustedAppsListLoader"
           body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />}

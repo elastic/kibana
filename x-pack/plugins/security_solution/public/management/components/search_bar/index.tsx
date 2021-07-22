@@ -36,18 +36,19 @@ export const SearchBar = memo<SearchBarProps>(
     const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
 
     const onChangeSelection = (items: Item[]) => {
-      setIncludedPolicies(
-        items
-          .filter((item) => item.checked === 'on')
-          .map((item) => item.id)
-          .join(',')
-      );
-      setExcludedPolicies(
-        items
-          .filter((item) => item.checked === 'off')
-          .map((item) => item.id)
-          .join(',')
-      );
+      const includePoliciesNew = items
+        .filter((item) => item.checked === 'on')
+        .map((item) => item.id)
+        .join(',');
+      const excludePoliciesNew = items
+        .filter((item) => item.checked === 'off')
+        .map((item) => item.id)
+        .join(',');
+
+      setIncludedPolicies(includePoliciesNew);
+      setExcludedPolicies(excludePoliciesNew);
+
+      onSearch(query, includePoliciesNew, excludePoliciesNew);
     };
 
     const handleOnChangeSearchField = useCallback(

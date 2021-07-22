@@ -774,6 +774,20 @@ describe('When on the Trusted Apps Page', () => {
             return releaseListResponse();
           }
         }
+
+        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+          const policy = generator.generatePolicyPackagePolicy();
+          policy.name = 'test policy A';
+          policy.id = 'abc123';
+
+          const response: GetPackagePoliciesResponse = {
+            items: [policy],
+            page: 1,
+            perPage: 1000,
+            total: 1,
+          };
+          return response;
+        }
         if (priorMockImplementation) {
           return priorMockImplementation(path);
         }
@@ -921,6 +935,27 @@ describe('When on the Trusted Apps Page', () => {
           backButtonLabel: 'back to fleet',
           backButtonUrl: '/fleet',
         });
+      });
+
+      const priorMockImplementation = coreStart.http.get.getMockImplementation();
+      // @ts-ignore
+      coreStart.http.get.mockImplementation((path, options) => {
+        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+          const policy = generator.generatePolicyPackagePolicy();
+          policy.name = 'test policy A';
+          policy.id = 'abc123';
+
+          const response: GetPackagePoliciesResponse = {
+            items: [policy],
+            page: 1,
+            perPage: 1000,
+            total: 1,
+          };
+          return response;
+        }
+        if (priorMockImplementation) {
+          return priorMockImplementation(path);
+        }
       });
     });
 
