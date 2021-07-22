@@ -340,12 +340,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
         >
           <tbody>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k90e51pk1ieucbae0c3t8wo2"
@@ -424,7 +426,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -480,6 +482,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -521,6 +524,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -648,6 +652,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -657,6 +662,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -847,6 +863,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -1090,6 +1117,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -1280,6 +1318,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -1468,6 +1517,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -1662,12 +1722,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k90e51pk1ieucbae0c3t8wo1"
@@ -1746,7 +1808,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -1802,6 +1864,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -1843,6 +1906,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -1984,6 +2048,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -1993,6 +2058,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -2183,6 +2259,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -2426,6 +2513,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -2616,6 +2714,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -2804,6 +2913,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -2998,12 +3118,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k90cmthd1gv8cbae0c2le8bo"
@@ -3082,7 +3204,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -3138,6 +3260,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -3179,6 +3302,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -3320,6 +3444,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -3329,6 +3454,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -3519,6 +3655,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -3762,6 +3909,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -3952,6 +4110,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -4140,6 +4309,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -4381,12 +4561,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k906958e1d4wcbae0c9hip1a"
@@ -4465,7 +4647,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -4521,6 +4703,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -4562,6 +4745,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -4707,6 +4891,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -4716,6 +4901,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -4908,6 +5104,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -5151,6 +5358,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -5427,6 +5645,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -5617,6 +5846,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -5860,12 +6100,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k9067y2a1d4wcbae0cad38n0"
@@ -5944,7 +6186,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -6000,6 +6242,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -6041,6 +6284,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -6182,6 +6426,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -6191,6 +6436,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -6381,6 +6637,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -6624,6 +6891,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -6814,6 +7092,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -7002,6 +7291,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -7243,12 +7543,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k9067s1m1d4wcbae0cdnvcms"
@@ -7327,7 +7629,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -7383,6 +7685,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -7424,6 +7727,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -7565,6 +7869,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -7574,6 +7879,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -7764,6 +8080,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -8007,6 +8334,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -8197,6 +8535,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -8385,6 +8734,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -8626,12 +8986,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k9065q3s1d4wcbae0c00fxlh"
@@ -8710,7 +9072,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -8766,6 +9128,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -8807,6 +9170,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -8948,6 +9312,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -8957,6 +9322,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -9147,6 +9523,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -9390,6 +9777,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -9580,6 +9978,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -9768,6 +10177,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -10009,12 +10429,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k905zdw11d34cbae0c3y6tzh"
@@ -10093,7 +10515,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -10149,6 +10571,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -10190,6 +10613,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -10331,6 +10755,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -10340,6 +10765,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -10530,6 +10966,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -10773,6 +11220,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -10963,6 +11421,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -11151,6 +11620,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -11392,12 +11872,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
               </tr>
             </EuiTableRow>
             <EuiTableRow
+              data-test-subj="reportJobRow"
               hasActions={true}
               isSelectable={true}
               isSelected={false}
             >
               <tr
                 className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                data-test-subj="reportJobRow"
               >
                 <EuiTableRowCellCheckbox
                   key="_selection_column_k8t4ylcb07mi9d006214ifyg"
@@ -11476,7 +11958,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
-                        data-test-subj="reportingListItemObjectTitle"
+                        data-test-subj="reportJobTitle"
                         key=".0"
                       >
                         <div>
@@ -11532,6 +12014,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobCreatedAt"
                         key=".0"
                       >
                         <div>
@@ -11573,6 +12056,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       className="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <div
+                        data-test-subj="reportJobStatus"
                         key=".0"
                       >
                         <FormattedMessage
@@ -11714,6 +12198,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiTableCellContent__hoverItem"
                           >
                             <div
+                              data-test-subj="reportJobActions"
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
@@ -11723,6 +12208,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
@@ -11913,6 +12409,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "list": [Function],
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
+                                    }
+                                  }
+                                  capabilities={
+                                    Object {
+                                      "catalogue": Object {},
+                                      "management": Object {
+                                        "data": Object {
+                                          "index_lifecycle_management": true,
+                                        },
+                                      },
+                                      "navLinks": Object {},
                                     }
                                   }
                                   ilmPolicyContextValue={
@@ -12156,6 +12663,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -12346,6 +12864,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "total": [Function],
                                   }
                                 }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
+                                  }
+                                }
                                 ilmPolicyContextValue={
                                   Object {
                                     "isLoading": false,
@@ -12534,6 +13063,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "list": [Function],
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
+                                  }
+                                }
+                                capabilities={
+                                  Object {
+                                    "catalogue": Object {},
+                                    "management": Object {
+                                      "data": Object {
+                                        "index_lifecycle_management": true,
+                                      },
+                                    },
+                                    "navLinks": Object {},
                                   }
                                 }
                                 ilmPolicyContextValue={
