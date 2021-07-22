@@ -702,6 +702,81 @@
         }
       }
     },
+    "/agents/{agentId}/unenroll": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent - Unenroll",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "unenroll-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revoke": {
+                    "type": "boolean"
+                  },
+                  "force": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/agents/{agentId}/upgrade": {
       "parameters": [
         {
@@ -819,81 +894,6 @@
                   "policy_id",
                   "agents"
                 ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/agents/{agentId}/unenroll": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "agentId",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "post": {
-        "summary": "Agent - Unenroll",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "BAD REQUEST",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "number",
-                      "enum": [
-                        400
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "operationId": "unenroll-agent",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "revoke": {
-                    "type": "boolean"
-                  },
-                  "force": {
-                    "type": "boolean"
-                  }
-                }
               }
             }
           }

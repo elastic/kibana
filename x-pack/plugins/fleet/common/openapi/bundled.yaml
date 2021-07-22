@@ -428,6 +428,51 @@ paths:
                   type: string
               required:
                 - policy_id
+  '/agents/{agentId}/unenroll':
+    parameters:
+      - schema:
+          type: string
+        name: agentId
+        in: path
+        required: true
+    post:
+      summary: Agent - Unenroll
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                    enum:
+                      - 400
+      operationId: unenroll-agent
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revoke:
+                  type: boolean
+                force:
+                  type: boolean
   '/agents/{agentId}/upgrade':
     parameters:
       - schema:
@@ -500,51 +545,6 @@ paths:
               required:
                 - policy_id
                 - agents
-  '/agents/{agentId}/unenroll':
-    parameters:
-      - schema:
-          type: string
-        name: agentId
-        in: path
-        required: true
-    post:
-      summary: Agent - Unenroll
-      tags: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-        '400':
-          description: BAD REQUEST
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                    enum:
-                      - 400
-      operationId: unenroll-agent
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                revoke:
-                  type: boolean
-                force:
-                  type: boolean
   /agents/bulk_unenroll:
     post:
       summary: Agents - Bulk unenroll
@@ -736,17 +736,15 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    success:
-                      type: boolean
-                  required:
-                    - id
-                    - success
+                type: object
+                properties:
+                  id:
+                    type: string
+                  success:
+                    type: boolean
+                required:
+                  - id
+                  - success
       requestBody:
         content:
           application/json:
