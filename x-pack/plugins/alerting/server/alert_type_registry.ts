@@ -119,9 +119,9 @@ export type UntypedNormalizedAlertType = NormalizedAlertType<
   string
 >;
 
-export class ruleTypeRegistry {
+export class RuleTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
-  private readonly alertTypes: Map<string, UntypedNormalizedAlertType> = new Map();
+  private readonly ruleTypes: Map<string, UntypedNormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
   private readonly licensing: LicensingPluginSetup;
@@ -163,7 +163,7 @@ export class ruleTypeRegistry {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerting.ruleTypeRegistry.register.duplicateAlertTypeError', {
-          defaultMessage: 'Alert type "{id}" is already registered.',
+          defaultMessage: 'Rule type "{id}" is already registered.',
           values: {
             id: alertType.id,
           },
@@ -233,7 +233,7 @@ export class ruleTypeRegistry {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerting.ruleTypeRegistry.get.missingAlertTypeError', {
-          defaultMessage: 'Alert type "{id}" is not registered.',
+          defaultMessage: 'Rule type "{id}" is not registered.',
           values: {
             id,
           },
@@ -341,7 +341,7 @@ function augmentActionGroupsWithReserved<
         'xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError',
         {
           defaultMessage:
-            'Alert type [id="{id}"] cannot be registered. Action group [{actionGroup}] cannot be used as both a recovery and an active action group.',
+            'Rule type [id="{id}"] cannot be registered. Action group [{actionGroup}] cannot be used as both a recovery and an active action group.',
           values: {
             actionGroup: recoveryActionGroup.id,
             id,
@@ -353,7 +353,7 @@ function augmentActionGroupsWithReserved<
     throw new Error(
       i18n.translate('xpack.alerting.ruleTypeRegistry.register.reservedActionGroupUsageError', {
         defaultMessage:
-          'Alert type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
+          'Rule type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {
           actionGroups: intersectingReservedActionGroups.join(', '),
           id,

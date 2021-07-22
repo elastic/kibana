@@ -269,7 +269,7 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
 
     // Throws an error if alert type isn't registered
-    const alertType = this.ruleTypeRegistry.get(data.alertTypeId);
+    const ruleType = this.ruleTypeRegistry.get(data.alertTypeId);
 
     const validatedAlertTypeParams = validateAlertTypeParams(
       data.params,
@@ -771,7 +771,7 @@ export class RulesClient {
     { id, data }: UpdateOptions<Params>,
     { attributes, version }: SavedObject<RawAlert>
   ): Promise<PartialAlert<Params>> {
-    const alertType = this.ruleTypeRegistry.get(attributes.alertTypeId);
+    const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(
