@@ -194,10 +194,15 @@ class ReportInfoButtonUi extends Component<Props, State> {
       id: 'xpack.reporting.listing.table.reportInfoButtonTooltip',
       defaultMessage: 'See report info',
     });
-    if (this.props.job.getWarnings()) {
+    if (this.props.job.getError()) {
+      message = this.props.intl.formatMessage({
+        id: 'xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip',
+        defaultMessage: 'See report info and error message',
+      });
+    } else if (this.props.job.getWarnings()) {
       message = this.props.intl.formatMessage({
         id: 'xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip',
-        defaultMessage: 'See job info and warnings',
+        defaultMessage: 'See report info and warnings',
       });
     }
 

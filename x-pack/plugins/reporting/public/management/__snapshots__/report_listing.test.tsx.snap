@@ -5302,7 +5302,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See job info and warnings"
+                                    content="See report info and warnings"
                                     delay="regular"
                                     position="top"
                                   >

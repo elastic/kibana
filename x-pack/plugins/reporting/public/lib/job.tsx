@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -35,7 +36,7 @@ export class Job {
   public created_at: ReportSource['created_at'];
   public started_at: ReportSource['started_at'];
   public completed_at: ReportSource['completed_at'];
-  public status: ReportSource['status'];
+  public status: JOB_STATUSES; // FIXME: can not use ReportSource['status'] due to type mismatch
   public attempts: ReportSource['attempts'];
   public max_attempts: ReportSource['max_attempts'];
 
@@ -62,7 +63,7 @@ export class Job {
     this.created_at = report.created_at;
     this.started_at = report.started_at;
     this.completed_at = report.completed_at;
-    this.status = report.status;
+    this.status = report.status as JOB_STATUSES;
     this.attempts = report.attempts;
     this.max_attempts = report.max_attempts;
 
@@ -80,42 +81,60 @@ export class Job {
     this.warnings = report.output?.warnings;
   }
 
-  getStatusLabel() {
-    const status = this.status;
-    let statusLabel = jobStatusLabelsMap.get(status as JOB_STATUSES); // FIXME: conflicting type definitions for job status (string vs. enum) in the code
+  getStatusMessage() {
+    let smallMessage;
+    if (status === PROCESSING) {
+      smallMessage = i18n.translate('xpack.reporting.listing.tableValue.statusDetail.attemptXofY', {
+        defaultMessage: 'Attempt {attempts} of {max_attempts}',
+        values: { attempts: this.attempts, max_attempts: this.max_attempts },
+      });
+    }
+    if (this.getError()) {
+      smallMessage = i18n.translate('xpack.reporting.listing.tableValue.statusDetail.errorText', {
+        defaultMessage: 'See report info for error details.',
+      });
+    }
+    if (this.getWarnings()) {
+      smallMessage = i18n.translate('xpack.reporting.listing.tableValue.statusDetail.errorText', {
+        defaultMessage: 'See report info for warnings.',
+      });
+    }
 
-    if (status === PENDING) {
+    if (smallMessage) {
       return (
-        <FormattedMessage
-          id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
-          defaultMessage="Pending - waiting for job to be processed"
-        />
+        <EuiText size="s">
+          <EuiTextColor color="subdued"> {smallMessage} </EuiTextColor>
+        </EuiText>
       );
     }
 
-    if (status === PROCESSING) {
-      statusLabel = statusLabel + ` (attempt ${this.attempts} of ${this.max_attempts})`;
-    }
+    return null;
+  }
 
+  getStatusLabel() {
+    const statusLabel = jobStatusLabelsMap.get(this.status);
     const statusTimestamp = this.getStatusTimestamp();
 
     if (statusTimestamp) {
       return (
-        <FormattedMessage
-          id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
-          defaultMessage="{statusLabel} at {statusTimestamp}"
-          values={{
-            statusLabel,
-            statusTimestamp: (
-              <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
-            ),
-          }}
-        />
+        <>
+          <FormattedMessage
+            id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
+            defaultMessage="{statusLabel} at {statusTimestamp}"
+            values={{
+              statusLabel,
+              statusTimestamp: (
+                <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
+              ),
+            }}
+          />
+          {this.getStatusMessage()}
+        </>
       );
     }
 
     // unknown status
-    return <div>{statusLabel}</div>;
+    return statusLabel as string;
   }
 
   getCreatedAtLabel() {
@@ -230,7 +249,7 @@ const jobStatusLabelsMap = new Map<JOB_STATUSES, string>([
   [
     WARNINGS,
     i18n.translate('xpack.reporting.jobStatuses.warningText', {
-      defaultMessage: 'Completed with warnings',
+      defaultMessage: 'Completed',
     }),
   ],
   [

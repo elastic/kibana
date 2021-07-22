@@ -38,7 +38,6 @@ import { ReportDiagnostic } from './report_diagnostic';
 import { ReportDownloadButton } from './report_download_button';
 import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
-import { ReportWarningsButton } from './report_warnings_button';
 
 export interface Props {
   intl: InjectedIntl;
@@ -332,7 +331,6 @@ class ReportListingUi extends Component<Props, State> {
               return (
                 <div data-test-subj="reportJobActions">
                   <ReportInfoButton {...this.props} job={job} />
-                  <ReportWarningsButton {...this.props} job={job} />
                   <ReportErrorButton {...this.props} job={job} />
                   <ReportDownloadButton {...this.props} job={job} />
                 </div>
