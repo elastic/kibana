@@ -6,14 +6,18 @@
  */
 
 import { getHttp } from '../../../kibana_services';
-import { CreateDocSourceResp, INDEX_SOURCE_API_PATH } from '../../../../common';
+import {
+  CreateDocSourceResp,
+  INDEX_SOURCE_API_PATH,
+  IndexSourceMappings,
+} from '../../../../common';
 
 export const createNewIndexAndPattern = async ({
   indexName,
   defaultMappings = {},
 }: {
   indexName: string;
-  defaultMappings: Record<string, Record<string, string>>;
+  defaultMappings: IndexSourceMappings | {};
 }) => {
   return await getHttp().fetch<CreateDocSourceResp>({
     path: `/${INDEX_SOURCE_API_PATH}`,

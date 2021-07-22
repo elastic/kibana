@@ -90,7 +90,7 @@ export interface IVectorLayer extends ILayer {
   canShowTooltip(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
-  addFeature(geometry: Geometry | Position[], addDefaultFields: boolean): Promise<void>;
+  addFeature(geometry: Geometry | Position[]): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
 }
 

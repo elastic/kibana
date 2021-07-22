@@ -736,7 +736,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
-  async addFeature(geometry: Geometry | Position[], defaultFields: Record<string, string>) {
+  async addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ) {
     const indexPattern = await this.getIndexPattern();
     await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName(), defaultFields);
   }
