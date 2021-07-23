@@ -1011,17 +1011,25 @@ export class SavedObjectsRepository {
     }
 
     const namespace = normalizeNamespace(options.namespace);
-
-    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
+    const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
       },
       { ignore: [404] }
     );
-
     const indexNotFound = statusCode === 404;
-
+    const esHeaderFound =
+      headers && headers['x-elastic-product']
+        ? headers['x-elastic-product'] === 'Elasticsearch'
+        : false;
+    // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
+    if (!isFoundGetResponse(body) && !esHeaderFound) {
+      const responseError = SavedObjectsErrorHelpers.decorateEsUnavailableError(
+        new Error('x-elastic-product not present or not recognized')
+      );
+      throw SavedObjectsErrorHelpers.isEsUnavailableError(responseError);
+    }
     if (
       !isFoundGetResponse(body) ||
       indexNotFound ||
