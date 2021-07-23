@@ -24,12 +24,17 @@ import {
   MatchedIndicesSet,
 } from '../../types';
 
+interface RefreshMatchedIndicesResult {
+  matchedIndicesResult: MatchedIndicesSet;
+  newRollupIndexName?: string;
+}
+
 interface TitleFieldProps {
   existingIndexPatterns: string[];
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
+  refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -66,7 +71,7 @@ const createTitlesNoDupesValidator = (
 
 interface MatchesValidatorArgs {
   rollupIndicesCapabilities: Record<string, { error: string }>;
-  refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
+  refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
   isRollup: boolean;
 }
 
@@ -76,10 +81,10 @@ const matchesValidator = ({
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value }) => {
-    const results = await refreshMatchedIndices(value);
+    const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(value);
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
-    if (results.exactMatchedIndices.length === 0) {
+    if (matchedIndicesResult.exactMatchedIndices.length === 0) {
       return mustMatchError;
     }
 
@@ -87,7 +92,7 @@ const matchesValidator = ({
       return;
     }
 
-    const rollupIndexMatches = results.exactMatchedIndices.filter((matchedIndex) =>
+    const rollupIndexMatches = matchedIndicesResult.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
     );
 
@@ -97,7 +102,7 @@ const matchesValidator = ({
       return rollupIndexPatternTooManyMatchesError;
     }
 
-    const error = rollupIndicesCapabilities[value].error;
+    const error = newRollupIndexName && rollupIndicesCapabilities[newRollupIndexName].error;
 
     if (error) {
       return {
@@ -117,7 +122,7 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
+  refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
 }
 
 const getTitleConfig = ({

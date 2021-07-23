@@ -225,6 +225,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       // todo move to utility lib
       const isRollupIndex = (indexName: string) =>
         getRollupIndices(rollupIndicesCapabilities).includes(indexName);
+      let newRollupIndexName: string | undefined;
 
       // move inside getIndices
       const getIndexTags = (indexName: string) =>
@@ -267,7 +268,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
         if (type === INDEX_PATTERN_TYPE.ROLLUP) {
           const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
-          setRollupIndex(rollupIndices.length === 1 ? rollupIndices[0].name : undefined);
+          newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
+          setRollupIndex(newRollupIndexName);
         } else {
           setRollupIndex(undefined);
         }
@@ -275,7 +277,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         setMatchedIndices(matchedIndicesResult);
         setIsLoadingMatchedIndices(false);
 
-        return matchedIndicesResult;
+        return { matchedIndicesResult, newRollupIndexName };
       };
 
       // setLastTitle(title2);
