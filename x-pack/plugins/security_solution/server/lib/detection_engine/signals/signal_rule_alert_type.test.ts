@@ -33,6 +33,7 @@ import { queryExecutor } from './executors/query';
 import { mlExecutor } from './executors/ml';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -188,6 +189,7 @@ describe('signal_rule_alert_type', () => {
     payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
     alert = signalRulesAlertType({
+      experimentalFeatures: allowedExperimentalValues,
       logger,
       eventsTelemetry: undefined,
       version,

@@ -34,11 +34,13 @@ import {
   SimpleHit,
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const eqlExecutor = async ({
   rule,
   tuple,
   exceptionItems,
+  experimentalFeatures,
   services,
   version,
   logger,
@@ -50,6 +52,7 @@ export const eqlExecutor = async ({
   rule: SavedObject<AlertAttributes<EqlRuleParams>>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
+  experimentalFeatures: ExperimentalFeatures;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
@@ -85,7 +88,12 @@ export const eqlExecutor = async ({
       throw err;
     }
   }
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
   const request = buildEqlSearchRequest(
     ruleParams.query,
     inputIndex,

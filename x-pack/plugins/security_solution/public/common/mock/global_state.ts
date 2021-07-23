@@ -13,6 +13,9 @@ import {
   NetworkTopTablesFields,
   NetworkTlsFields,
   NetworkUsersFields,
+  RiskScoreFields,
+  HostRulesFields,
+  HostTacticsFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -25,12 +28,14 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
+import { uebaModel } from '../../ueba/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 export const mockGlobalState: State = {
   app: {
@@ -39,12 +44,7 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
-    enableExperimental: {
-      trustedAppsByPolicyEnabled: false,
-      metricsEntitiesEnabled: false,
-      ruleRegistryEnabled: false,
-      tGridEnabled: false,
-    },
+    enableExperimental: allowedExperimentalValues,
   },
   hosts: {
     page: {
@@ -160,6 +160,36 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
           sort: { direction: Direction.desc },
+        },
+      },
+    },
+  },
+  ueba: {
+    page: {
+      queries: {
+        [uebaModel.UebaTableType.riskScore]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+        },
+      },
+    },
+    details: {
+      queries: {
+        [uebaModel.UebaTableType.hostRules]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
+        },
+        [uebaModel.UebaTableType.hostTactics]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostTacticsFields.riskScore, direction: Direction.desc },
+        },
+        [uebaModel.UebaTableType.userRules]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
         },
       },
     },
