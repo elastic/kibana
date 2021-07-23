@@ -86,7 +86,11 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { APP_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
+import {
+  APP_ID,
+  DEFAULT_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
+} from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -227,6 +231,9 @@ const RuleDetailsPageComponent = () => {
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
+  // TODO: Steph/ueba remove when past experimental
+  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
+
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const {
@@ -348,7 +355,14 @@ const RuleDetailsPageComponent = () => {
     ),
     [ruleDetailTab, setRuleDetailTab]
   );
-
+  const ruleIndices = useMemo(
+    () =>
+      rule?.index ??
+      (uebaEnabled
+        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
+        : DEFAULT_INDEX_PATTERN),
+    [rule?.index, uebaEnabled]
+  );
   const handleRefresh = useCallback(() => {
     if (fetchRuleStatus != null && ruleId != null) {
       fetchRuleStatus(ruleId);
@@ -732,7 +746,7 @@ const RuleDetailsPageComponent = () => {
               <ExceptionsViewer
                 ruleId={ruleId ?? ''}
                 ruleName={rule?.name ?? ''}
-                ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
+                ruleIndices={ruleIndices}
                 availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
                 exceptionListsMeta={exceptionLists.lists}

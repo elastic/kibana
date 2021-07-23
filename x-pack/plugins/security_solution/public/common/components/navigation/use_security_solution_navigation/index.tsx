@@ -13,6 +13,8 @@ import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { GenericNavRecord } from '../types';
 
 /**
  * @description - This hook provides the structure necessary by the KibanaPageTemplate for rendering the primary security_solution side navigation.
@@ -29,6 +31,12 @@ export const useSecuritySolutionNavigation = () => {
 
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
+  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
+  let enabledNavTabs: GenericNavRecord = (navTabs as unknown) as GenericNavRecord;
+  if (!uebaEnabled) {
+    const { ueba, ...rest } = enabledNavTabs;
+    enabledNavTabs = rest;
+  }
   useEffect(() => {
     if (pathName || pageName) {
       setBreadcrumbs(
@@ -36,7 +44,7 @@ export const useSecuritySolutionNavigation = () => {
           detailName,
           filters: urlState.filters,
           flowTarget,
-          navTabs,
+          navTabs: enabledNavTabs,
           pageName,
           pathName,
           query: urlState.query,
@@ -65,12 +73,13 @@ export const useSecuritySolutionNavigation = () => {
     tabName,
     getUrlForApp,
     navigateToUrl,
+    enabledNavTabs,
   ]);
 
   return usePrimaryNavigation({
     query: urlState.query,
     filters: urlState.filters,
-    navTabs,
+    navTabs: enabledNavTabs,
     pageName,
     sourcerer: urlState.sourcerer,
     savedQuery: urlState.savedQuery,
