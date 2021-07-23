@@ -9,6 +9,7 @@ import './field_select.scss';
 import { partition } from 'lodash';
 import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -172,11 +173,33 @@ export function FieldSelect({
     markAllFieldsCompatible,
   ]);
   const comboBoxRef = useRef<HTMLInputElement>(null);
-  const labelWidth =
-    (comboBoxRef.current?.clientWidth || DEFAULT_COMBOBOX_WIDTH) - COMBOBOX_PADDINGS;
-  const font = comboBoxRef.current
-    ? window.getComputedStyle(comboBoxRef.current).font
-    : DEFAULT_FONT;
+  const [labelProps, setLabelProps] = React.useState<{
+    width: number;
+    font: string;
+  }>({
+    width: DEFAULT_COMBOBOX_WIDTH - COMBOBOX_PADDINGS,
+    font: DEFAULT_FONT,
+  });
+
+  const computeStyles = (_e: UIEvent | undefined, shouldRecomputeAll = false) => {
+    if (comboBoxRef.current) {
+      const current = {
+        ...labelProps,
+        width: comboBoxRef.current?.clientWidth - COMBOBOX_PADDINGS,
+      };
+      if (shouldRecomputeAll) {
+        current.font = window.getComputedStyle(comboBoxRef.current).font;
+      }
+      setLabelProps(current);
+    }
+  };
+
+  useEffectOnce(() => {
+    if (comboBoxRef.current) {
+      computeStyles(undefined, true);
+    }
+    window.addEventListener('resize', computeStyles);
+  });
 
   return (
     <div ref={comboBoxRef}>
@@ -226,12 +249,7 @@ export function FieldSelect({
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <TruncatedLabel
-                  label={option.label}
-                  width={labelWidth}
-                  search={searchValue}
-                  font={font}
-                />
+                <TruncatedLabel {...labelProps} label={option.label} search={searchValue} />
               </EuiFlexItem>
             </EuiFlexGroup>
           );

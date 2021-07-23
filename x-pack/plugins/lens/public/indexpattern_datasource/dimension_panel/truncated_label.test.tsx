@@ -26,7 +26,7 @@ describe('truncated_label', () => {
     const wrapper = mount(
       <TruncatedLabel {...defaultProps} label="example_space.example_field.subcategory.subfield" />
     );
-    expect(wrapper.text()).toEqual('example_...ubcategory.subfield');
+    expect(wrapper.text()).toEqual('example_….subcategory.subfield');
   });
   describe('with search value passed', () => {
     it('constructs truncated label when searching for the string of index = 0', () => {
@@ -37,7 +37,7 @@ describe('truncated_label', () => {
           label="example_space.example_field.subcategory.subfield"
         />
       );
-      expect(wrapper.text()).toEqual('example_space.example_field...');
+      expect(wrapper.text()).toEqual('example_space.example_field.s…');
       expect(wrapper.find('mark').text()).toEqual('example_space');
     });
     it('constructs truncated label when searching for the string in the middle', () => {
@@ -48,7 +48,7 @@ describe('truncated_label', () => {
           label="example_space.example_field.subcategory.subfield"
         />
       );
-      expect(wrapper.text()).toEqual('...ample_field.subcategory....');
+      expect(wrapper.text()).toEqual('…ample_field.subcategory.subf…');
       expect(wrapper.find('mark').text()).toEqual('ample_field');
     });
     it('constructs truncated label when searching for the string at the end of the label', () => {
@@ -59,7 +59,7 @@ describe('truncated_label', () => {
           label="example_space.example_field.subcategory.subfield"
         />
       );
-      expect(wrapper.text()).toEqual('..._field.subcategory.subfield');
+      expect(wrapper.text()).toEqual('…le_field.subcategory.subfield');
       expect(wrapper.find('mark').text()).toEqual('subf');
     });
 
@@ -71,8 +71,8 @@ describe('truncated_label', () => {
           label="example_space.example_field.subcategory.subfield"
         />
       );
-      expect(wrapper.text()).toEqual('...ample_space.example_fiel...');
-      expect(wrapper.find('mark').text()).toEqual('...ample_space.example_fiel...');
+      expect(wrapper.text()).toEqual('…ample_space.example_field.su…');
+      expect(wrapper.find('mark').text()).toEqual('…ample_space.example_field.su…');
     });
   });
 });

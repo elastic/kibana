@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiMark } from '@elastic/eui';
 import { EuiHighlight } from '@elastic/eui';
 
@@ -37,7 +37,7 @@ const truncateLabel = (
   return output;
 };
 
-export const TruncatedLabel = ({
+export const TruncatedLabel = React.memo(function TruncatedLabel({
   label,
   width,
   search,
@@ -47,15 +47,16 @@ export const TruncatedLabel = ({
   search: string;
   width: number;
   font: string;
-}) => {
-  const textWidth = getTextWidth(label, font);
+}) {
+  const textWidth = useMemo(() => getTextWidth(label, font), [label, font]);
+
   if (textWidth < width) {
     return <EuiHighlight search={search}>{label}</EuiHighlight>;
   }
 
   const searchPosition = label.indexOf(search);
   const approximateLen = Math.round((width * label.length) / textWidth);
-  const separator = '...';
+  const separator = `…`;
   let separatorsLength = separator.length;
   let labelFn;
 
@@ -82,4 +83,4 @@ export const TruncatedLabel = ({
   ) : (
     <EuiMark>{outputLabel}</EuiMark>
   );
-};
+});
