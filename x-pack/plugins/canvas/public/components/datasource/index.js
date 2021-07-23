@@ -15,6 +15,17 @@ import { getSelectedElement, getSelectedPage } from '../../state/selectors/workp
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
+const DatasourceComponent = compose(
+  withState('stateArgs', 'updateArgs', ({ args }) => args),
+  withState('selecting', 'setSelecting', false),
+  withState('previewing', 'setPreviewing', false),
+  withState('isInvalid', 'setInvalid', false),
+  withState('stateDatasource', 'selectDatasource', ({ datasource }) => datasource),
+  withHandlers({
+    resetArgs: ({ updateArgs, args }) => () => updateArgs(args),
+  })
+)(Component);
+
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
   pageId: getSelectedPage(state),
@@ -82,17 +93,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const Datasource = compose(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withState('stateArgs', 'updateArgs', ({ args }) => args),
-  withState('selecting', 'setSelecting', false),
-  withState('previewing', 'setPreviewing', false),
-  withState('isInvalid', 'setInvalid', false),
-  withState('stateDatasource', 'selectDatasource', ({ datasource }) => datasource),
-  withHandlers({
-    resetArgs: ({ updateArgs, args }) => () => updateArgs(args),
-  })
-)(Component);
+export const Datasource = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(DatasourceComponent);
 
 Datasource.propTypes = {
   done: PropTypes.func,
