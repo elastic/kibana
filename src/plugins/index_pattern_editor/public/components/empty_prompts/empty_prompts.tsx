@@ -24,6 +24,7 @@ interface Props {
   onCancel: () => void;
   allSources: MatchedItem[];
   hasExistingIndexPatterns: boolean;
+  loadSources: () => void;
 }
 
 export const EmptyPrompts: FC<Props> = ({
@@ -31,6 +32,7 @@ export const EmptyPrompts: FC<Props> = ({
   allSources,
   onCancel,
   children,
+  loadSources,
 }) => {
   const {
     services: { docLinks, application, http },
@@ -41,7 +43,7 @@ export const EmptyPrompts: FC<Props> = ({
 
   const hasDataIndices = allSources.some(({ name }: MatchedItem) => !name.startsWith('.'));
 
-  const loadSources = useCallback(() => {
+  useCallback(() => {
     if (!hasDataIndices)
       getIndices(http, () => [], '*:*', false).then((dataSources) =>
         setRemoteClustersExist(!!dataSources.filter(removeAliases).length)

@@ -319,6 +319,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       onCancel={onCancel}
       allSources={allSources}
       hasExistingIndexPatterns={!!existingIndexPatterns.length}
+      loadSources={loadSources}
     >
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
