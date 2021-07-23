@@ -12,23 +12,6 @@ import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
 
 class ArgTemplateFormComponent extends React.Component {
-  static propTypes = {
-    template: PropTypes.func,
-    argumentProps: PropTypes.shape({
-      valueMissing: PropTypes.bool,
-      label: PropTypes.string,
-      setLabel: PropTypes.func.isRequired,
-      expand: PropTypes.bool,
-      setExpand: PropTypes.func,
-      onValueRemove: PropTypes.func,
-      resetErrorState: PropTypes.func.isRequired,
-      renderError: PropTypes.func.isRequired,
-    }),
-    handlers: PropTypes.object.isRequired,
-    error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
-    errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
-  };
-
   UNSAFE_componentWillUpdate(prevProps) {
     //see if error state changed
     if (this.props.error !== prevProps.error) {
@@ -81,6 +64,23 @@ class ArgTemplateFormComponent extends React.Component {
     );
   }
 }
+
+ArgTemplateFormComponent.propTypes = {
+  template: PropTypes.func,
+  argumentProps: PropTypes.shape({
+    valueMissing: PropTypes.bool,
+    label: PropTypes.string,
+    setLabel: PropTypes.func.isRequired,
+    expand: PropTypes.bool,
+    setExpand: PropTypes.func,
+    onValueRemove: PropTypes.func,
+    resetErrorState: PropTypes.func.isRequired,
+    renderError: PropTypes.func.isRequired,
+  }),
+  handlers: PropTypes.object.isRequired,
+  error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
+  errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
+};
 
 export const ArgTemplateForm = compose(
   withPropsOnChange(
