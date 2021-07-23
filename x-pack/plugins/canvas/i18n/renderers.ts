@@ -119,16 +119,6 @@ export const RendererStrings = {
         defaultMessage: 'Render a progress indicator that reveals a percentage of an element',
       }),
   },
-  repeatImage: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.repeatImage.displayName', {
-        defaultMessage: 'Image repeat',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.repeatImage.helpDescription', {
-        defaultMessage: 'Repeat an image a given number of times',
-      }),
-  },
   table: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.table.displayName', {
