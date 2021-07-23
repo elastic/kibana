@@ -106,7 +106,11 @@ const SavedObjectsTablePage = ({
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;
-          return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
+          return inAppUrl
+            ? !inAppUrl.uiCapabilitiesPath
+              ? true
+              : Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath))
+            : false;
         }}
       />
     </ContextWrapper>
