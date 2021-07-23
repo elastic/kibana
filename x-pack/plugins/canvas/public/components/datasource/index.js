@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
 import { PropTypes } from 'prop-types';
 import { connect } from 'react-redux';
-import { withState, withHandlers, compose } from 'recompose';
 import { get } from 'lodash';
 import { datasourceRegistry } from '../../expression_types';
 import { getServerFunctions } from '../../state/selectors/app';
@@ -15,16 +15,35 @@ import { getSelectedElement, getSelectedPage } from '../../state/selectors/workp
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
-const DatasourceComponent = compose(
-  withState('stateArgs', 'updateArgs', ({ args }) => args),
-  withState('selecting', 'setSelecting', false),
-  withState('previewing', 'setPreviewing', false),
-  withState('isInvalid', 'setInvalid', false),
-  withState('stateDatasource', 'selectDatasource', ({ datasource }) => datasource),
-  withHandlers({
-    resetArgs: ({ updateArgs, args }) => () => updateArgs(args),
-  })
-)(Component);
+const DatasourceComponent = (props) => {
+  const { args, datasource } = props;
+  const [stateArgs, updateArgs] = useState(args);
+  const [selecting, setSelecting] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [isInvalid, setInvalid] = useState(false);
+  const [stateDatasource, selectDatasource] = useState(datasource);
+
+  const resetArgs = useCallback(() => {
+    updateArgs(args);
+  }, [updateArgs, args]);
+
+  return (
+    <Component
+      {...props}
+      stateArgs={stateArgs}
+      updateArgs={updateArgs}
+      selecting={selecting}
+      setSelecting={setSelecting}
+      previewing={previewing}
+      setPreviewing={setPreviewing}
+      isInvalid={isInvalid}
+      setInvalid={setInvalid}
+      stateDatasource={stateDatasource}
+      selectDatasource={selectDatasource}
+      resetArgs={resetArgs}
+    />
+  );
+};
 
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
