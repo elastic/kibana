@@ -22,6 +22,14 @@ export const url: SavedObjectsType = {
   },
   mappings: {
     properties: {
+      slug: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
       accessCount: {
         type: 'long',
       },
