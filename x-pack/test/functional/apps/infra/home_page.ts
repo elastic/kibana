@@ -56,37 +56,64 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('alerts flyouts', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+      });
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
+
+      it('should open and close inventory alert flyout', async () => {
+        await pageObjects.infraHome.openInventoryAlertFlyout();
+        await pageObjects.infraHome.closeAlertFlyout();
+      });
+
+      it('should open and close inventory alert flyout', async () => {
+        await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
+        await pageObjects.infraHome.closeAlertFlyout();
+      });
+
+      it('should open and close alerts popover using button', async () => {
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverOpened();
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverClosed();
+      });
+    });
+
     describe('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      it('should have save and load controls', async () => {
+        await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraSavedViews.getSavedViewsButton();
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+      });
 
-      describe('Inventory Test save functionality', () => {
-        it('should have save and load controls', async () => {
-          await pageObjects.common.navigateToApp('infraOps');
-          await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await pageObjects.infraSavedViews.getSavedViewsButton();
-          await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
-        });
+      it('should open popover', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        await pageObjects.infraSavedViews.closeSavedViewsPopover();
+      });
 
-        it('should open popover', async () => {
-          await pageObjects.infraSavedViews.clickSavedViewsButton();
-          await pageObjects.infraSavedViews.closeSavedViewsPopover();
-        });
+      it('should create new saved view and load it', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        await pageObjects.infraSavedViews.clickSaveNewViewButton();
+        await pageObjects.infraSavedViews.getCreateSavedViewModal();
+        await pageObjects.infraSavedViews.createNewSavedView('view1');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
+      });
 
-        it('should create new saved view and load it', async () => {
-          await pageObjects.infraSavedViews.clickSavedViewsButton();
-          await pageObjects.infraSavedViews.clickSaveNewViewButton();
-          await pageObjects.infraSavedViews.getCreateSavedViewModal();
-          await pageObjects.infraSavedViews.createNewSavedView('view1');
-          await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
-        });
-
-        it('should new views should be listed in the load views list', async () => {
-          await pageObjects.infraSavedViews.clickSavedViewsButton();
-          await pageObjects.infraSavedViews.clickLoadViewButton();
-          await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
-          await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
-        });
+      it('should new views should be listed in the load views list', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        await pageObjects.infraSavedViews.clickLoadViewButton();
+        await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
+        await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
       });
     });
   });
