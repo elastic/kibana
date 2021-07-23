@@ -541,7 +541,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Pending at 
+                          Pending at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -1535,7 +1535,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Processing at 
+                          Processing at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -2529,7 +2529,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -3570,7 +3570,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -3924,7 +3924,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 }
                               >
                                 <EuiToolTip
-                                  content="Download report with warnings."
+                                  content="Download report with warnings"
                                   delay="regular"
                                   position="top"
                                 >
@@ -4638,7 +4638,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -5679,7 +5679,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -6720,7 +6720,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -7761,7 +7761,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >
@@ -8802,7 +8802,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at 
+                          Completed at
                           <span
                             className="eui-textNoWrap"
                           >

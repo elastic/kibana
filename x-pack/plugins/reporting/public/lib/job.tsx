@@ -82,10 +82,11 @@ export class Job {
   }
 
   getStatusMessage() {
+    const status = this.status;
     let smallMessage;
     if (status === PENDING) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.pendingStatusReachedText', {
-        defaultMessage: 'waiting for job to be processed',
+        defaultMessage: 'Waiting for job to be processed',
       });
     }
     if (status === PROCESSING) {
@@ -96,12 +97,12 @@ export class Job {
     }
     if (this.getWarnings()) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.errorText', {
-        defaultMessage: 'See report info for warnings.',
+        defaultMessage: 'See report info for warnings',
       });
     }
     if (this.getError()) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.errorText', {
-        defaultMessage: 'See report info for error details.',
+        defaultMessage: 'See report info for error details',
       });
     }
 

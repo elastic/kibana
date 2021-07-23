@@ -43,7 +43,7 @@ export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => 
         position="top"
         content={intl.formatMessage({
           id: 'xpack.reporting.listing.table.downloadReportWithWarnings',
-          defaultMessage: 'Download report with warnings.',
+          defaultMessage: 'Download report with warnings',
         })}
       >
         {button}
