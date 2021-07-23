@@ -2,6 +2,22 @@
 
 .lnsFieldItem {
   width: 100%;
+
+  &.kbnFieldButton {
+    &:focus-within,
+    &-isActive {
+      @include removeEuiFocusRing;
+    }
+  }
+
+  .kbnFieldButton__button:focus {
+    @include passDownFocusRing('.kbnFieldButton__name > span');
+
+    .kbnFieldButton__name > span {
+      text-decoration: underline;
+    }
+  }
+
   .lnsFieldItem__infoIcon {
     visibility: hidden;
     opacity: 0;
@@ -14,42 +30,6 @@
       visibility: visible;
       opacity: 1;
       transition: opacity $euiAnimSpeedFast ease-in-out 1s;
-    }
-  }
-}
-
-.lnsFieldItem.kbnFieldButton {
-  &:focus-within,
-  &-isActive {
-    @include removeEuiFocusRing;
-  }
-}
-
-.lnsFieldItem .kbnFieldButton__button {
-  &:focus {
-    @include removeEuiFocusRing;
-  }
-
-  &:focus .kbnFieldButton__name > span {
-    @include euiFocusBackground;
-    text-decoration: underline;
-
-    @include kbnThemeStyle('v7') {
-      @include euiFocusRing;
-    }
-
-    @include kbnThemeStyle('v8') {
-      outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
-    }
-  }
-
-  @include kbnThemeStyle('v8') {
-    &:focus:focus-visible .kbnFieldButton__name > span {
-      outline-style: auto; // Chrome
-    }
-
-    &:focus:not(:focus-visible) .kbnFieldButton__name > span {
-      outline: none;
     }
   }
 }

@@ -134,29 +134,7 @@
   width: 100%;
 
   &:focus {
-    @include removeEuiFocusRing;
+    @include passDownFocusRing('.lnsLayerPanel__triggerTextLabel');
     background-color: transparent;
-  }
-
-  &:focus .lnsLayerPanel__triggerTextLabel {
-    @include euiFocusBackground;
-
-    @include kbnThemeStyle('v7') {
-      @include euiFocusRing;
-    }
-
-    @include kbnThemeStyle('v8') {
-      outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
-    }
-  }
-
-  @include kbnThemeStyle('v8') {
-    &:focus:focus-visible .lnsLayerPanel__triggerTextLabel {
-      outline-style: auto; // Chrome
-    }
-
-    &:focus:not(:focus-visible) .lnsLayerPanel__triggerTextLabel {
-      outline: none;
-    }
   }
 }
