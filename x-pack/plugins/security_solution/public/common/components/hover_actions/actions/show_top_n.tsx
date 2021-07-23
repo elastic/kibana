@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StatefulTopN } from '../../top_n';
@@ -44,15 +44,18 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererScope(activeScope);
-    const button = (
-      <EuiButtonIcon
-        aria-label={SHOW_TOP(field)}
-        className="securitySolution__hoverActionButton"
-        data-test-subj="show-top-field"
-        iconSize="s"
-        iconType="visBarVertical"
-        onClick={onClick}
-      />
+    const button = useMemo(
+      () => (
+        <EuiButtonIcon
+          aria-label={SHOW_TOP(field)}
+          className="securitySolution__hoverActionButton"
+          data-test-subj="show-top-field"
+          iconSize="s"
+          iconType="visBarVertical"
+          onClick={onClick}
+        />
+      ),
+      [field, onClick]
     );
     return showTopN ? (
       <EuiPopover button={button} isOpen={showTopN} closePopover={onClick}>
@@ -80,14 +83,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           />
         }
       >
-        <EuiButtonIcon
-          aria-label={SHOW_TOP(field)}
-          className="securitySolution__hoverActionButton"
-          data-test-subj="show-top-field"
-          iconSize="s"
-          iconType="visBarVertical"
-          onClick={onClick}
-        />
+        {button}
       </EuiToolTip>
     );
   }

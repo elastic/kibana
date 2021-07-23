@@ -140,6 +140,7 @@
     "@kbn/mapbox-gl": "link:bazel-bin/packages/kbn-mapbox-gl",
     "@kbn/monaco": "link:bazel-bin/packages/kbn-monaco",
     "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
+    "@kbn/securitysolution-autocomplete": "link:bazel-bin/packages/kbn-securitysolution-autocomplete",
     "@kbn/securitysolution-es-utils": "link:bazel-bin/packages/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-hook-utils": "link:bazel-bin/packages/kbn-securitysolution-hook-utils",
     "@kbn/securitysolution-io-ts-alerting-types": "link:bazel-bin/packages/kbn-securitysolution-io-ts-alerting-types",
