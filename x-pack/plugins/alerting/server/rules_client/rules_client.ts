@@ -17,6 +17,7 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
+  SavedObjectsResolveResponse,
 } from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
@@ -379,7 +380,10 @@ export class RulesClient {
   }: {
     id: string;
   }): Promise<SanitizedAlert<Params>> {
-    const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+    const {
+      saved_object: result,
+      ...resolveResponse
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.alertTypeId,
@@ -407,7 +411,8 @@ export class RulesClient {
       result.id,
       result.attributes.alertTypeId,
       result.attributes,
-      result.references
+      result.references,
+      resolveResponse
     );
   }
 
@@ -617,6 +622,7 @@ export class RulesClient {
         id,
         { namespace: this.namespace }
       );
+      // TODO: How to handle `resolveResponse` here?
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
       attributes = decryptedAlert.attributes;
@@ -626,7 +632,11 @@ export class RulesClient {
         `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the scheduledTaskId using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const { saved_object: alert } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>(
+        'alert',
+        id
+      );
+      // TODO: How to handle `resolveResponse` here?
       taskIdToRemove = alert.attributes.scheduledTaskId;
       attributes = alert.attributes;
     }
@@ -696,13 +706,18 @@ export class RulesClient {
         id,
         { namespace: this.namespace }
       );
+      // TODO: How to handle `resolveResponse` here?
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
         `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the object using SOC
-      alertSavedObject = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const {
+        saved_object: savedObject,
+      } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+      // TODO: How to handle `resolveResponse` here?
+      alertSavedObject = savedObject;
     }
 
     try {
@@ -884,7 +899,11 @@ export class RulesClient {
         `updateApiKey(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the attributes and version using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const { saved_object: alert } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>(
+        'alert',
+        id
+      );
+      // TODO: How to handle `resolveResponse` here?
       attributes = alert.attributes;
       version = alert.version;
     }
@@ -989,9 +1008,13 @@ export class RulesClient {
         `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the attributes and version using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const { saved_object: alert } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>(
+        'alert',
+        id
+      );
       attributes = alert.attributes;
       version = alert.version;
+      // TODO: How to handle `resolveResponse` here
     }
 
     try {
@@ -1098,6 +1121,7 @@ export class RulesClient {
         id,
         { namespace: this.namespace }
       );
+      // TODO: How to handle `resolveResponse` here?
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -1107,7 +1131,11 @@ export class RulesClient {
         `disable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the attributes and version using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const { saved_object: alert } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>(
+        'alert',
+        id
+      );
+      // TODO: How to handle `resolveResponse` here?
       attributes = alert.attributes;
       version = alert.version;
     }
@@ -1180,10 +1208,10 @@ export class RulesClient {
   }
 
   private async muteAllWithOCC({ id }: { id: string }) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawAlert>(
-      'alert',
-      id
-    );
+    const {
+      saved_object: { attributes, version },
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+    // TODO: How to handle `resolveResponse` here?
 
     try {
       await this.authorization.ensureAuthorized({
@@ -1242,10 +1270,10 @@ export class RulesClient {
   }
 
   private async unmuteAllWithOCC({ id }: { id: string }) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawAlert>(
-      'alert',
-      id
-    );
+    const {
+      saved_object: { attributes, version },
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+    // TODO: How to handle `resolveResponse` here
 
     try {
       await this.authorization.ensureAuthorized({
@@ -1304,10 +1332,10 @@ export class RulesClient {
   }
 
   private async muteInstanceWithOCC({ alertId, alertInstanceId }: MuteOptions) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
-      'alert',
-      alertId
-    );
+    const {
+      saved_object: { attributes, version },
+    } = await this.unsecuredSavedObjectsClient.resolve<Alert>('alert', alertId);
+    // TODO: How to handle `resolveResponse` here?
 
     try {
       await this.authorization.ensureAuthorized({
@@ -1372,10 +1400,11 @@ export class RulesClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
-      'alert',
-      alertId
-    );
+    const {
+      saved_object: { attributes, version },
+    } = await this.unsecuredSavedObjectsClient.resolve<Alert>('alert', alertId);
+
+    // TODO: How to handle `resolveResponse` here
 
     try {
       await this.authorization.ensureAuthorized({
@@ -1469,13 +1498,22 @@ export class RulesClient {
     id: string,
     ruleTypeId: string,
     rawAlert: RawAlert,
-    references: SavedObjectReference[] | undefined
-  ): Alert {
+    references: SavedObjectReference[] | undefined,
+    resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>
+  ): Alert & { resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'> } {
     const ruleType = this.alertTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references) as Alert;
+    return this.getPartialAlertFromRaw<Params>(
+      id,
+      ruleType,
+      rawAlert,
+      references,
+      resolveResponse
+    ) as Alert & {
+      resolveResponse: Omit<SavedObjectsResolveResponse, 'saved_object'>;
+    };
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
@@ -1490,8 +1528,11 @@ export class RulesClient {
       params,
       ...rawAlert
     }: Partial<RawAlert>,
-    references: SavedObjectReference[] | undefined
-  ): PartialAlert<Params> {
+    references: SavedObjectReference[] | undefined,
+    resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>
+  ): PartialAlert<Params> & {
+    resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>;
+  } {
     // Not the prettiest code here, but if we want to use most of the
     // alert fields from the rawAlert using `...rawAlert` kind of access, we
     // need to specifically delete the executionStatus as it's a different type
@@ -1506,6 +1547,7 @@ export class RulesClient {
     return {
       id,
       notifyWhen,
+      resolveResponse,
       ...rawAlertWithoutExecutionStatus,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change

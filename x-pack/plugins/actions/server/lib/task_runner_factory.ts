@@ -87,11 +87,14 @@ export class TaskRunnerFactory {
         const {
           attributes: { actionId, params, apiKey, relatedSavedObjects },
           references,
+          /* resolveResponse, */
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
           spaceIdToNamespace
         );
+
+        // TODO: How to handle `resolveResponse` here?
 
         const requestHeaders: Record<string, string> = {};
         if (apiKey) {

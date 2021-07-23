@@ -115,13 +115,19 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
+
+    // TODO: Change when https://github.com/elastic/kibana/issues/106567 is resolved
+
     const {
       attributes: { apiKey },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
       alertId,
-      { namespace }
+      {
+        namespace,
+      }
     );
+    // TODO: How to handle `resolveResponse` here?
 
     return apiKey;
   }
@@ -456,6 +462,7 @@ export class TaskRunner<
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
+    // TODO: Change when https://github.com/elastic/kibana/issues/106567 is resolved
     let apiKey: string | null;
     try {
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
@@ -478,6 +485,7 @@ export class TaskRunner<
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
     }
+
     return {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert, event)

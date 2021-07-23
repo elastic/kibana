@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { Logger, SavedObject, SavedObjectReference } from 'kibana/server';
+import {
+  Logger,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsResolveResponse,
+} from 'kibana/server';
 
 import { KueryNode } from '../../../../../../src/plugins/data/common';
 import {
@@ -93,13 +98,24 @@ export class AttachmentService {
   public async get({
     unsecuredSavedObjectsClient,
     attachmentId,
-  }: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
+  }: GetAttachmentArgs): Promise<
+    SavedObject<AttachmentAttributes> & {
+      resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>;
+    }
+  > {
     try {
       this.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      return await unsecuredSavedObjectsClient.get<AttachmentAttributes>(
+      const {
+        saved_object: savedObject,
+        ...resolveResponse
+      } = await unsecuredSavedObjectsClient.resolve<AttachmentAttributes>(
         CASE_COMMENT_SAVED_OBJECT,
         attachmentId
       );
+      return {
+        ...savedObject,
+        resolveResponse,
+      };
     } catch (error) {
       this.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;

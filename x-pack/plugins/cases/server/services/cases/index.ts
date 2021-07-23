@@ -14,6 +14,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsBulkResponse,
   SavedObjectsFindResult,
+  SavedObjectsResolveResponse,
 } from 'kibana/server';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -713,10 +714,21 @@ export class CasesService {
   public async getCase({
     unsecuredSavedObjectsClient,
     id: caseId,
-  }: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>> {
+  }: GetCaseArgs): Promise<
+    SavedObject<ESCaseAttributes> & {
+      resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>;
+    }
+  > {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
-      return await unsecuredSavedObjectsClient.get<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
+      const {
+        saved_object: savedObject,
+        ...resolveResponse
+      } = await unsecuredSavedObjectsClient.resolve<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
+      return {
+        ...savedObject,
+        resolveResponse,
+      };
     } catch (error) {
       this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;
@@ -725,10 +737,21 @@ export class CasesService {
   public async getSubCase({
     unsecuredSavedObjectsClient,
     id,
-  }: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
+  }: GetCaseArgs): Promise<
+    SavedObject<SubCaseAttributes> & {
+      resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>;
+    }
+  > {
     try {
       this.log.debug(`Attempting to GET sub case ${id}`);
-      return await unsecuredSavedObjectsClient.get<SubCaseAttributes>(SUB_CASE_SAVED_OBJECT, id);
+      const {
+        saved_object: savedObject,
+        ...resolveResponse
+      } = await unsecuredSavedObjectsClient.resolve<SubCaseAttributes>(SUB_CASE_SAVED_OBJECT, id);
+      return {
+        ...savedObject,
+        resolveResponse,
+      };
     } catch (error) {
       this.log.error(`Error on GET sub case ${id}: ${error}`);
       throw error;

@@ -47,7 +47,7 @@ export class CaseConfigureService {
   public async get({ unsecuredSavedObjectsClient, configurationId }: GetCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to GET case configuration ${configurationId}`);
-      return await unsecuredSavedObjectsClient.get<ESCasesConfigureAttributes>(
+      return await unsecuredSavedObjectsClient.resolve<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         configurationId
       );

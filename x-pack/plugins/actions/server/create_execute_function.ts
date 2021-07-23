@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../src/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsResolveResponse,
+} from '../../../../src/core/server';
 import { RunNowResult, TaskManagerStartContract } from '../../task_manager/server';
 import {
   RawAction,
@@ -53,8 +56,10 @@ export function createExecutionEnqueuerFunction({
       );
     }
 
-    const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
+    const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
+
+    // TODO: How to handle `resolveResponse` here
 
     const { actionTypeId } = action;
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
@@ -93,7 +98,7 @@ export function createEphemeralExecutionEnqueuerFunction({
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, apiKey }: ExecuteOptions
   ): Promise<RunNowResult> {
-    const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
+    const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
 
     const { actionTypeId } = action;
@@ -148,12 +153,21 @@ async function getAction(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string
-): Promise<PreConfiguredAction | RawAction> {
+): Promise<{
+  action: PreConfiguredAction | RawAction;
+  resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>;
+}> {
   const pcAction = preconfiguredActions.find((action) => action.id === actionId);
   if (pcAction) {
-    return pcAction;
+    return { action: pcAction };
   }
 
-  const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return attributes;
+  const {
+    saved_object: { attributes },
+    ...resolveResponse
+  } = await unsecuredSavedObjectsClient.resolve<RawAction>('action', actionId);
+  return {
+    action: attributes,
+    resolveResponse,
+  };
 }

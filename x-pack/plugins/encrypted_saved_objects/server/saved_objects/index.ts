@@ -11,6 +11,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsBaseOptions,
+  SavedObjectsResolveResponse,
   SavedObjectsServiceSetup,
   StartServicesAccessor,
 } from 'src/core/server';
@@ -42,7 +43,9 @@ export interface EncryptedSavedObjectsClient {
     type: string,
     id: string,
     options?: SavedObjectsBaseOptions
-  ) => Promise<SavedObject<T>>;
+  ) => Promise<
+    SavedObject<T> & { resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'> }
+  >;
 }
 
 export function setupSavedObjects({
@@ -81,11 +84,19 @@ export function setupSavedObjects({
         type: string,
         id: string,
         options?: SavedObjectsBaseOptions
-      ): Promise<SavedObject<T>> => {
+      ): Promise<
+        SavedObject<T> & { resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'> }
+      > => {
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
-        const savedObject = await internalRepository.get(type, id, options);
+        const { saved_object: savedObject, ...resolveResponse } = await internalRepository.resolve(
+          type,
+          id,
+          options
+        );
+
         return {
           ...savedObject,
+          resolveResponse,
           attributes: (await service.decryptAttributes(
             {
               type,

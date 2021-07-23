@@ -31,7 +31,9 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'single',
+    // namespaceType: 'single',
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
     management: {
@@ -67,7 +69,9 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'single',
+    // namespaceType: 'single',
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
   });
   encryptedSavedObjects.registerType({

@@ -17,6 +17,7 @@ import {
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
+  SavedObjectsResolveResponse,
 } from '../../../../src/core/server';
 import { AuditLogger } from '../../security/server';
 import { ActionType } from '../common';
@@ -209,10 +210,10 @@ export class ActionsClient {
       throw error;
     }
     const {
-      attributes,
-      references,
-      version,
-    } = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+      saved_object: { attributes, references, version },
+      /* resolvedResponse */
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAction>('action', id);
+    // TODO: How to handle `resolveResponse` here
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -263,7 +264,13 @@ export class ActionsClient {
   /**
    * Get an action
    */
-  public async get({ id }: { id: string }): Promise<ActionResult> {
+  public async get({
+    id,
+  }: {
+    id: string;
+  }): Promise<
+    ActionResult & { resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'> }
+  > {
     try {
       await this.authorization.ensureAuthorized('get');
     } catch (error) {
@@ -296,7 +303,12 @@ export class ActionsClient {
       };
     }
 
-    const result = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const {
+      saved_object: result,
+      ...resolveResponse
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAction>('action', id);
+
+    // TODO: How to handle `resolveResponse` here
 
     this.auditLogger?.log(
       connectorAuditEvent({
@@ -312,6 +324,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      resolveResponse,
     };
   }
 
@@ -331,12 +344,24 @@ export class ActionsClient {
       throw error;
     }
 
-    const savedObjectsActions = (
+    const discoveredSavedObjects = (
       await this.unsecuredSavedObjectsClient.find<RawAction>({
         perPage: MAX_ACTIONS_RETURNED,
         type: 'action',
       })
-    ).saved_objects.map(actionFromSavedObject);
+    ).saved_objects;
+    const savedObjectsActions = (
+      await Promise.all(
+        discoveredSavedObjects.map(({ id }) =>
+          this.unsecuredSavedObjectsClient.resolve<RawAction>('action', id)
+        )
+      )
+    ).map(({ saved_object: action, ...resolveResponse }) => {
+      return {
+        ...actionFromSavedObject(action),
+        resolveResponse,
+      };
+    });
 
     savedObjectsActions.forEach(({ id }) =>
       this.auditLogger?.log(

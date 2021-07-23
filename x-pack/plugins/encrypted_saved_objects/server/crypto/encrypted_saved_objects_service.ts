@@ -498,7 +498,6 @@ export class EncryptedSavedObjectsService {
           `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
         );
         this.options.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
-
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
           attributeName,

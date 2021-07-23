@@ -20,15 +20,16 @@ export async function getAuthorizationModeBySource(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   executionSource?: ActionExecutionSource<unknown>
 ): Promise<AuthorizationMode> {
+  // TODO: How to handle `resolveResponse` here
   return isSavedObjectExecutionSource(executionSource) &&
     executionSource?.source?.type === ALERT_SAVED_OBJECT_TYPE &&
     (
-      await unsecuredSavedObjectsClient.get<{
+      await unsecuredSavedObjectsClient.resolve<{
         meta?: {
           versionApiKeyLastmodified?: string;
         };
       }>(ALERT_SAVED_OBJECT_TYPE, executionSource.source.id)
-    ).attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION
+    ).saved_object.attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION
     ? AuthorizationMode.Legacy
     : AuthorizationMode.RBAC;
 }

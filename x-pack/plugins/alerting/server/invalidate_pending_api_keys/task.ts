@@ -201,6 +201,7 @@ async function invalidateApiKeys(
         'api_key_pending_invalidation',
         apiKeyObj.id
       );
+      // TODO: How to handle `resolveResponse` here?
       return decryptedApiKey.attributes.apiKeyId;
     })
   );
