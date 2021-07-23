@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DraggableId } from 'react-beautiful-dnd';
+
+import { stopPropagationAndPreventDefault } from '../../../../common';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
@@ -25,7 +27,7 @@ export interface UseGetHandleStartDragToTimelineArgs {
   draggableId: DraggableId | undefined;
 }
 
-export const useGetHandleStartDragToTimeline = ({
+const useGetHandleStartDragToTimeline = ({
   field,
   draggableId,
 }: UseGetHandleStartDragToTimelineArgs): (() => void) => {
@@ -41,8 +43,38 @@ export const useGetHandleStartDragToTimeline = ({
   return handleStartDragToTimeline;
 };
 
-export const AddToTimelineButton: React.FC<HoverActionComponentProps> = React.memo(
-  ({ field, onClick, ownFocus, showTooltip = false, value }) => {
+export interface AddToTimelineButtonProps extends HoverActionComponentProps {
+  draggableIds?: DraggableId[];
+}
+
+const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
+  ({
+    defaultFocusedButtonRef,
+    draggableIds,
+    field,
+    keyboardEvent,
+    ownFocus,
+    showTooltip = false,
+    value,
+  }) => {
+    const handleStartDragToTimeline = (() => {
+      const handleStartDragToTimelineFns = draggableIds?.map((draggableId) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        return useGetHandleStartDragToTimeline({ draggableId, field });
+      });
+      return () => handleStartDragToTimelineFns?.forEach((dragFn) => dragFn());
+    })();
+
+    useEffect(() => {
+      if (!ownFocus) {
+        return;
+      }
+      if (keyboardEvent?.key === ADD_TO_TIMELINE_KEYBOARD_SHORTCUT) {
+        stopPropagationAndPreventDefault(keyboardEvent);
+        handleStartDragToTimeline();
+      }
+    }, [handleStartDragToTimeline, keyboardEvent, ownFocus]);
+
     return showTooltip ? (
       <EuiToolTip
         content={
@@ -59,24 +91,29 @@ export const AddToTimelineButton: React.FC<HoverActionComponentProps> = React.me
       >
         <EuiButtonIcon
           aria-label={ADD_TO_TIMELINE}
+          buttonRef={defaultFocusedButtonRef}
           className="timelines__hoverActionButton"
           data-test-subj="add-to-timeline"
           iconSize="s"
           iconType="timeline"
-          onClick={onClick}
+          onClick={handleStartDragToTimeline}
         />
       </EuiToolTip>
     ) : (
       <EuiButtonIcon
         aria-label={ADD_TO_TIMELINE}
+        buttonRef={defaultFocusedButtonRef}
         className="timelines__hoverActionButton"
         data-test-subj="add-to-timeline"
         iconSize="s"
         iconType="timeline"
-        onClick={onClick}
+        onClick={handleStartDragToTimeline}
       />
     );
   }
 );
 
 AddToTimelineButton.displayName = 'AddToTimelineButton';
+
+// eslint-disable-next-line import/no-default-export
+export { AddToTimelineButton as default };

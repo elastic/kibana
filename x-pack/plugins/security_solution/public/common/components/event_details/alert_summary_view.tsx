@@ -88,6 +88,7 @@ const getDescription = ({
     eventId={eventId}
     fieldName={fieldName}
     fieldType={fieldType}
+    isDraggable={false}
     value={value}
     linkValue={linkValue}
   />

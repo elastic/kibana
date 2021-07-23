@@ -53,6 +53,7 @@ export const FieldValueCell = React.memo(
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
+                    isDraggable={false}
                     isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={getLinkValue(data.field)}

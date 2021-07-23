@@ -6,13 +6,13 @@
  */
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { getAllFieldsByName } from '../../containers/source';
-import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../lib/clipboard/clipboard';
+
 import { useKibana } from '../../lib/kibana';
+import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from './utils';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, TimelineId } from '../../../../common/types/timeline';
@@ -117,29 +117,13 @@ export const HoverActions: React.FC<Props> = React.memo(
     const { timelines } = kibana.services;
     // Common actions used by the alert table and alert flyout
     const {
-      addToTimeline: {
-        AddToTimelineButton,
-        keyboardShortcut: addToTimelineKeyboardShortcut,
-        useGetHandleStartDragToTimeline,
-      },
-      columnToggle: {
-        ColumnToggleButton,
-        columnToggleFn,
-        keyboardShortcut: columnToggleKeyboardShortcut,
-      },
-      copy: { CopyButton, keyboardShortcut: copyKeyboardShortcut },
-      filterForValue: {
-        FilterForValueButton,
-        filterForValueFn,
-        keyboardShortcut: filterForValueKeyboardShortcut,
-      },
-      filterOutValue: {
-        FilterOutValueButton,
-        filterOutValueFn,
-        keyboardShortcut: filterOutValueKeyboardShortcut,
-      },
+      getAddToTimelineButton,
+      getColumnToggleButton,
+      getCopyButton,
+      getFilterForValueButton,
+      getFilterOutValueButton,
     } = timelines.getHoverActions();
-
+    const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
     const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
       kibana.services.data.query.filterManager,
     ]);
@@ -169,30 +153,8 @@ export const HoverActions: React.FC<Props> = React.memo(
         : SourcererScopeName.default;
     const { browserFields } = useSourcererScope(activeScope);
 
-    const handleStartDragToTimeline = (() => {
-      const handleStartDragToTimelineFns = draggableIds?.map((draggableId) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        return useGetHandleStartDragToTimeline({ draggableId, field });
-      });
-      return () => handleStartDragToTimelineFns?.forEach((dragFn) => dragFn());
-    })();
-
-    const handleFilterForValue = useCallback(() => {
-      filterForValueFn({ field, value: values, filterManager, onFilterAdded });
-    }, [filterForValueFn, field, values, filterManager, onFilterAdded]);
-
-    const handleFilterOutValue = useCallback(() => {
-      filterOutValueFn({ field, value: values, filterManager, onFilterAdded });
-    }, [filterOutValueFn, field, values, filterManager, onFilterAdded]);
-
-    const handleToggleColumn = useCallback(
-      () => (toggleColumn ? columnToggleFn({ toggleColumn, field }) : null),
-      [columnToggleFn, field, toggleColumn]
-    );
-
     const isInit = useRef(true);
     const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
-    const panelRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
       if (isInit.current && goGetTimelineId != null && timelineId == null) {
@@ -215,31 +177,6 @@ export const HoverActions: React.FC<Props> = React.memo(
           return;
         }
         switch (keyboardEvent.key) {
-          case addToTimelineKeyboardShortcut:
-            stopPropagationAndPreventDefault(keyboardEvent);
-            handleStartDragToTimeline();
-            break;
-          case columnToggleKeyboardShortcut:
-            stopPropagationAndPreventDefault(keyboardEvent);
-            handleToggleColumn();
-            break;
-          case copyKeyboardShortcut:
-            stopPropagationAndPreventDefault(keyboardEvent);
-            const copyToClipboardButton = panelRef.current?.querySelector<HTMLButtonElement>(
-              `.${COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}`
-            );
-            if (copyToClipboardButton != null) {
-              copyToClipboardButton.click();
-            }
-            break;
-          case filterForValueKeyboardShortcut:
-            stopPropagationAndPreventDefault(keyboardEvent);
-            handleFilterForValue();
-            break;
-          case filterOutValueKeyboardShortcut:
-            stopPropagationAndPreventDefault(keyboardEvent);
-            handleFilterOutValue();
-            break;
           case SHOW_TOP_N_KEYBOARD_SHORTCUT:
             stopPropagationAndPreventDefault(keyboardEvent);
             toggleTopN();
@@ -250,34 +187,23 @@ export const HoverActions: React.FC<Props> = React.memo(
             stopPropagationAndPreventDefault(keyboardEvent);
             break;
           default:
+            setStKeyboardEvent(keyboardEvent);
             break;
         }
       },
-      [
-        addToTimelineKeyboardShortcut,
-        columnToggleKeyboardShortcut,
-        copyKeyboardShortcut,
-        filterForValueKeyboardShortcut,
-        filterOutValueKeyboardShortcut,
-        handleFilterForValue,
-        handleFilterOutValue,
-        handleStartDragToTimeline,
-        handleToggleColumn,
-        ownFocus,
-        toggleTopN,
-      ]
+      [ownFocus, toggleTopN]
     );
 
     const showFilters = !showTopN && values != null;
 
     return (
-      <StyledHoverActionsContainer onKeyDown={onKeyDown} ref={panelRef} $showTopN={showTopN}>
-        <EuiFocusTrap
-          disabled={isFocusTrapDisabled({
-            ownFocus,
-            showTopN,
-          })}
-        >
+      <EuiFocusTrap
+        disabled={isFocusTrapDisabled({
+          ownFocus,
+          showTopN,
+        })}
+      >
+        <StyledHoverActionsContainer onKeyDown={onKeyDown} $showTopN={showTopN}>
           <EuiScreenReaderOnly>
             <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(field)}</p>
           </EuiScreenReaderOnly>
@@ -286,46 +212,56 @@ export const HoverActions: React.FC<Props> = React.memo(
 
           {showFilters && (
             <>
-              <FilterForValueButton
-                data-test-subj="hover-actions-filter-for"
-                defaultFocusedButtonRef={defaultFocusedButtonRef}
-                field={field}
-                onClick={handleFilterForValue}
-                ownFocus={ownFocus}
-                showTooltip
-                value={values}
-              />
-              <FilterOutValueButton
-                data-test-subj="hover-actions-filter-out"
-                field={field}
-                onClick={handleFilterOutValue}
-                ownFocus={ownFocus}
-                showTooltip
-                value={values}
-              />
+              <div data-test-subj="hover-actions-filter-for">
+                {getFilterForValueButton({
+                  defaultFocusedButtonRef,
+                  field,
+                  filterManager,
+                  keyboardEvent: stKeyboardEvent,
+                  onFilterAdded,
+                  ownFocus,
+                  showTooltip: true,
+                  value: values,
+                })}
+              </div>
+              <div data-test-subj="hover-actions-filter-out">
+                {getFilterOutValueButton({
+                  field,
+                  filterManager,
+                  keyboardEvent: stKeyboardEvent,
+                  onFilterAdded,
+                  ownFocus,
+                  showTooltip: true,
+                  value: values,
+                })}
+              </div>
             </>
           )}
           {toggleColumn && (
-            <ColumnToggleButton
-              data-test-subj="hover-actions-toggle-column"
-              field={field}
-              isDisabled={isObjectArray && dataType !== 'geo_point'}
-              isObjectArray={isObjectArray}
-              onClick={handleToggleColumn}
-              ownFocus={ownFocus}
-              value={values}
-            />
+            <div data-test-subj="hover-actions-toggle-column">
+              {getColumnToggleButton({
+                field,
+                isDisabled: isObjectArray && dataType !== 'geo_point',
+                isObjectArray,
+                keyboardEvent: stKeyboardEvent,
+                ownFocus,
+                showTooltip: true,
+                toggleColumn,
+                value: values,
+              })}
+            </div>
           )}
 
           {showFilters && draggableIds != null && (
-            <AddToTimelineButton
-              data-test-subj="hover-actions-add-timeline"
-              field={field}
-              onClick={handleStartDragToTimeline}
-              ownFocus={ownFocus}
-              showTooltip
-              value={values}
-            />
+            <div data-test-subj="hover-actions-add-timeline">
+              {getAddToTimelineButton({
+                field,
+                keyboardEvent: stKeyboardEvent,
+                ownFocus,
+                showTooltip: true,
+                value: values,
+              })}
+            </div>
           )}
           {allowTopN({
             browserField: getAllFieldsByName(browserFields)[field],
@@ -343,17 +279,19 @@ export const HoverActions: React.FC<Props> = React.memo(
             />
           )}
           {!showTopN && (
-            <CopyButton
-              data-test-subj="hover-actions-copy-button"
-              field={field}
-              isHoverAction
-              ownFocus={ownFocus}
-              showTooltip
-              value={values}
-            />
+            <div data-test-subj="hover-actions-copy-button">
+              {getCopyButton({
+                field,
+                isHoverAction: true,
+                keyboardEvent: stKeyboardEvent,
+                ownFocus,
+                showTooltip: true,
+                value: values,
+              })}
+            </div>
           )}
-        </EuiFocusTrap>
-      </StyledHoverActionsContainer>
+        </StyledHoverActionsContainer>
+      </EuiFocusTrap>
     );
   }
 );
