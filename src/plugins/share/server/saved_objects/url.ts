@@ -41,7 +41,7 @@ export const url: SavedObjectsType = {
       },
       // Legacy field - contains already pre-formatted final URL.
       // This is here to support old saved objects that have this field.
-      // TODO: Remove this field and execute a migration to the new format.
+      // @todo Remove in 8.0.0
       url: {
         type: 'text',
         fields: {
