@@ -7,7 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { pure, compose, branch, renderComponent } from 'recompose';
 import Style from 'style-it';
 import { getType } from '@kbn/interpreter/common';
 import { Loading } from '../loading';
@@ -16,39 +15,32 @@ import { ElementShareContainer } from '../element_share_container';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 
-/*
-  Branches
-  Short circut rendering of the element if the element isn't ready or isn't valid.
-*/
-const branches = [
-  // no renderable or renderable config value, render loading
-  branch(
-    ({ renderable, state }) => {
-      return !state || !renderable;
-    },
-    renderComponent(({ backgroundColor }) => <Loading backgroundColor={backgroundColor} />)
-  ),
+// const isLoading = (renderable, state) => !state || !renderable;
+const isLoading = (renderable, state) => !state || !renderable;
+
+const isNotValidForRendering = (renderable, renderFunction) =>
+  renderable && getType(renderable) !== 'render' && !renderFunction;
+
+const isNotValidExpression = (renderable, renderFunction, state) =>
+  state === 'error' || // The renderable has an error
+  getType(renderable) !== 'render' || // The renderable isn't, well, renderable
+  !renderFunction; // We can't find an element in the registry for this
+
+export const ElementContent = (props) => {
+  const { renderable, renderFunction, width, height, handlers, backgroundColor, state } = props;
+  const { onComplete } = handlers;
+
+  if (isLoading(renderable, state)) return <Loading backgroundColor={backgroundColor} />;
 
   // renderable is available, but no matching element is found, render invalid
-  branch(({ renderable, renderFunction }) => {
-    return renderable && getType(renderable) !== 'render' && !renderFunction;
-  }, renderComponent(InvalidElementType)),
+  if (isNotValidForRendering(renderable, renderFunction)) {
+    return <InvalidElementType {...props} renderableType={renderable?.as} />;
+  }
 
   // error state, render invalid expression notice
-  branch(({ renderable, renderFunction, state }) => {
-    return (
-      state === 'error' || // The renderable has an error
-      getType(renderable) !== 'render' || // The renderable isn't, well, renderable
-      !renderFunction // We can't find an element in the registry for this
-    );
-  }, renderComponent(InvalidExpression)),
-];
-
-export const ElementContent = compose(
-  pure,
-  ...branches
-)(({ renderable, renderFunction, width, height, handlers }) => {
-  const { onComplete } = handlers;
+  if (isNotValidExpression(renderable, renderFunction, state)) {
+    return <InvalidExpression {...props} />;
+  }
 
   return Style.it(
     renderable.css,
@@ -76,7 +68,7 @@ export const ElementContent = compose(
       </ElementShareContainer>
     </div>
   );
-});
+};
 
 ElementContent.propTypes = {
   renderable: PropTypes.shape({
