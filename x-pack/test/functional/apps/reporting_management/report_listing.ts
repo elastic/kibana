@@ -92,7 +92,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "actions": "",
             "createdAt": "2021-07-19 @ 10:29 PMtest_user",
             "report": "Automated reportsearch",
-            "status": "Completed at 2021-07-19 @ 10:29 PMDeprecated export type: see report warnings.",
+            "status": "Completed at 2021-07-19 @ 10:29 PMSee report warnings.",
           },
           Object {
             "actions": "",

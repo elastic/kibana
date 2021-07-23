@@ -93,10 +93,6 @@ export class Job {
         defaultMessage: 'Attempt {attempts} of {max_attempts}.',
         values: { attempts: this.attempts, max_attempts: this.max_attempts },
       });
-    } else if (this.isDeprecated) {
-      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.deprecatedText', {
-        defaultMessage: 'Deprecated export type: see report warnings.',
-      });
     } else if (this.getWarnings()) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.warningsText', {
         defaultMessage: 'See report info for warnings.',
