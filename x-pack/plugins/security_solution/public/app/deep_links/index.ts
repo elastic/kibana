@@ -346,10 +346,11 @@ export function getDeepLinks(
   return topDeepLinks
     .filter(
       (deepLink) =>
-        (deepLink.id !== SecurityPageName.case && deepLink.id !== SecurityPageName.ueba) ||
-        (deepLink.id === SecurityPageName.case &&
-          (capabilities == null || capabilities.siem.read_cases === true)) ||
-        (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled)
+        deepLink.id !== SecurityPageName.case || // Is not cases
+        deepLink.id !== SecurityPageName.ueba || // Is not ueba
+        (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) || // Is ueba and the flag is on.
+        capabilities == null || // Security is disabled
+        (deepLink.id === SecurityPageName.case && capabilities.siem.read_cases === true) // Is cases and the user has at least read access to cases
     )
     .map((deepLink) => {
       const deepLinkId = deepLink.id as SecurityDeepLinkName;

@@ -74,13 +74,14 @@ import {
 import {
   HostRulesRequestOptions,
   HostRulesStrategyResponse,
+  HostTacticsRequestOptions,
+  HostTacticsStrategyResponse,
   RiskScoreRequestOptions,
   RiskScoreStrategyResponse,
   UebaQueries,
   UserRulesRequestOptions,
   UserRulesStrategyResponse,
 } from './ueba';
-import { HostTacticsRequestOptions, HostTacticsStrategyResponse } from './ueba/host_tactics';
 
 export * from './hosts';
 export * from './matrix_histogram';

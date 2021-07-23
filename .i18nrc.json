@@ -1,5 +1,6 @@
 {
   "paths": {
+    "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "console": "src/plugins/console",
     "core": "src/core",
     "discover": "src/plugins/discover",
@@ -29,6 +30,7 @@
     "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "maps_legacy": "src/plugins/maps_legacy",
     "monaco": "packages/kbn-monaco/src",
+    "esQuery": "packages/kbn-es-query/src",
     "presentationUtil": "src/plugins/presentation_util",
     "indexPatternFieldEditor": "src/plugins/index_pattern_field_editor",
     "indexPatternManagement": "src/plugins/index_pattern_management",
