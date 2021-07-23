@@ -42,29 +42,29 @@ type InlineEditableTableLogicType<Item extends ItemWithAnID> = MakeLogicType<
   InlineEditableTableActions<Item>
 >;
 
-// TODO: Figure out how to replace `ItemWithAnID` with a Typescript generic like `T`
-// This may be an issue with kea's underlying typescript support
-export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWithAnID>>({
-  path: (key: string) => ['enterprise_search', 'app_search', 'inline_editable_table_logic', key],
-  key: (props) => props.instanceId,
-  actions: () => ({
-    deleteItem: (item) => ({ item }),
-    doneEditing: true,
-    editNewItem: true,
-    editExistingItem: (item) => item,
-    reorderItems: (items, oldItems) => ({ items, oldItems }),
-    saveExistingItem: true,
-    saveNewItem: true,
-    setEditingItemValue: (newValue) => newValue,
-    setFormErrors: (formErrors) => formErrors,
-  }),
-  reducers: ({ props: { columns, itemId } }) => ({
-    isEditing: [false],
-    editingItemId: [null],
-    // TODO, empty item value default
-    editingItemValue: [null], // TODO I changed this to null because empty objects don't have an id
-    formErrors: [{}],
-    isEditingUnsavedItem: [false],
-    doesEditingItemValueContainEmptyProperty: [false],
-  }),
-});
+export const getInlineEditableTableLogic = <T extends ItemWithAnID>() => {
+  return kea<InlineEditableTableLogicType<T>>({
+    path: (key: string) => ['enterprise_search', 'app_search', 'inline_editable_table_logic', key],
+    key: (props) => props.instanceId,
+    actions: () => ({
+      deleteItem: (item) => ({ item }),
+      doneEditing: true,
+      editNewItem: true,
+      editExistingItem: (item) => item,
+      reorderItems: (items, oldItems) => ({ items, oldItems }),
+      saveExistingItem: true,
+      saveNewItem: true,
+      setEditingItemValue: (newValue) => newValue,
+      setFormErrors: (formErrors) => formErrors,
+    }),
+    reducers: ({ props: { columns, itemId } }) => ({
+      isEditing: [false],
+      editingItemId: [null],
+      // TODO, empty item value default
+      editingItemValue: [null], // TODO I changed this to null because empty objects don't have an id
+      formErrors: [{}],
+      isEditingUnsavedItem: [false],
+      doesEditingItemValueContainEmptyProperty: [false],
+    }),
+  });
+};

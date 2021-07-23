@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { ReorderableTable } from '../reorderable_table';
 
 import { EMPTY_ITEM } from './constants';
-import { InlineEditableTableLogic } from './inline_editable_table_logic';
+import { getInlineEditableTableLogic } from './inline_editable_table_logic';
 import { ItemWithAnID } from './types';
 
 import './inline_editable_tables.scss';
@@ -44,7 +44,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>({
   uneditableItems,
   ...rest
 }: InlineEditableTableProps<Item>) => {
-  const inlineEditableTableLogic = InlineEditableTableLogic({ instanceId });
+  const inlineEditableTableLogic = getInlineEditableTableLogic<ItemWithAnID>()({ instanceId });
   const { editingItemId, isEditing, isEditingUnsavedItem } = useValues(inlineEditableTableLogic);
   const { editNewItem, reorderItems } = useActions(inlineEditableTableLogic);
 

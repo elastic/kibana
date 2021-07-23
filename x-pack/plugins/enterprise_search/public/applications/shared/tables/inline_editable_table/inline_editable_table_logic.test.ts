@@ -13,10 +13,14 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { InlineEditableTableLogic } from './inline_editable_table_logic';
+import { getInlineEditableTableLogic } from './inline_editable_table_logic';
+
+interface Foo {
+  id: number;
+}
 
 describe('InlineEditableTableLogic', () => {
-  const { mount } = new LogicMounter(InlineEditableTableLogic);
+  const { mount } = new LogicMounter(getInlineEditableTableLogic<Foo>());
 
   const DEFAULT_VALUES = {
     doesEditingItemValueContainEmptyProperty: false,

@@ -16,9 +16,9 @@ import { ReorderableTable } from '../reorderable_table';
 import { InlineEditableTable } from './inline_editable_table';
 
 jest.mock('./inline_editable_table_logic', () => ({
-  InlineEditableTableLogic: jest.fn(),
+  getInlineEditableTableLogic: jest.fn().mockReturnValue(jest.fn()),
 }));
-import { InlineEditableTableLogic } from './inline_editable_table_logic';
+import { getInlineEditableTableLogic } from './inline_editable_table_logic';
 
 const items = [{ id: 1 }, { id: 2 }];
 const requiredParams = {
@@ -70,7 +70,7 @@ describe('InlineEditableTable', () => {
 
   it('uses the instanceId prop to key the included logic', () => {
     shallow(<InlineEditableTable {...requiredParams} instanceId="MyInstance" />);
-    expect(InlineEditableTableLogic).toHaveBeenCalledWith({ instanceId: 'MyInstance' });
+    expect(getInlineEditableTableLogic()).toHaveBeenCalledWith({ instanceId: 'MyInstance' });
   });
 
   it('will use the value of addButtonText as custom text on the New Row button', () => {
