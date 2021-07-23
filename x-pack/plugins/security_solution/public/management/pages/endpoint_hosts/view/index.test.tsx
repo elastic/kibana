@@ -1258,7 +1258,7 @@ describe('when on the endpoint list page', () => {
     it('navigates to the Ingest Agent Details page with policy reassign', async () => {
       const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
       expect(agentPolicyReassignLink.getAttribute('href')).toEqual(
-        `/app/fleet/agents/${agentId}/details?openReassignFlyout=true`
+        `/app/fleet/agents/${agentId}?openReassignFlyout=true`
       );
     });
   });
