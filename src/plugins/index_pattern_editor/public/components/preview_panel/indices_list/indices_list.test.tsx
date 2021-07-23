@@ -9,7 +9,7 @@
 import React from 'react';
 import { IndicesList } from '../indices_list';
 import { shallow } from 'enzyme';
-import { MatchedItem } from '../../types';
+import { MatchedItem } from '../../../types';
 
 const indices = ([
   { name: 'kibana', tags: [] },

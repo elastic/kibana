@@ -9,7 +9,7 @@
 import React from 'react';
 import { StatusMessage } from '../status_message';
 import { shallow } from 'enzyme';
-import { MatchedItem } from '../../types';
+import { MatchedItem } from '../../../types';
 
 const tagsPartial = {
   tags: [],

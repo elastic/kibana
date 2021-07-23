@@ -12,7 +12,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MatchedItem } from '../../types';
+import { MatchedItem } from '../../../types';
 
 interface StatusMessageProps {
   matchedIndices: {
