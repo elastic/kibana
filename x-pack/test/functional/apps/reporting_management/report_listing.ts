@@ -122,12 +122,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:41 PMtest_user",
             "report": "[Flights] Global Flight Dashboarddashboard",
-            "status": "Failed at 2021-07-19 @ 10:15 PMSee report info for error details.",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
-            "report": "[Flights] Global Flight Dashboarddashboard",
             "status": "Failed at 2021-07-19 @ 06:43 PMSee report info for error details.",
           },
           Object {
@@ -147,6 +141,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "createdAt": "2021-07-19 @ 06:38 PMtest_user",
             "report": "[Flights] Global Flight Dashboarddashboard",
             "status": "Completed at 2021-07-19 @ 06:39 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed at 2021-07-19 @ 06:38 PM",
           },
         ]
       `);
