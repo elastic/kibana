@@ -248,12 +248,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.setMetricsGroupByTerms('type');
 
           const chartDebugData = await visualBuilder.getChartDebugState();
+          const areasCount = (await visualBuilder.getChartItems(chartDebugData))?.length;
           const legendNames = await visualBuilder.getLegendNames(chartDebugData);
           const areaColors = await visualBuilder.getAreaChartColors(chartDebugData);
           const firstAreaChartData = await visualBuilder.getAreaChartData(chartDebugData);
           const secondAreaChartData = await visualBuilder.getAreaChartData(chartDebugData, 1);
 
-          expect(chartDebugData?.areas?.length).to.be(2);
+          expect(areasCount).to.be(2);
           expect(legendNames).to.eql(['apache', 'nginx']);
           expect(areaColors).to.eql(['#54b399', '#6092c0']);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
@@ -286,12 +287,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.setColorPickerValue('#72CFC2', 2);
 
           const chartDebugData = await visualBuilder.getChartDebugState();
+          const areasCount = (await visualBuilder.getChartItems(chartDebugData))?.length;
           const legendNames = await visualBuilder.getLegendNames(chartDebugData);
           const areaColors = await visualBuilder.getAreaChartColors(chartDebugData);
           const firstAreaChartData = await visualBuilder.getAreaChartData(chartDebugData);
           const secondAreaChartData = await visualBuilder.getAreaChartData(chartDebugData, 1);
 
-          expect(chartDebugData?.areas?.length).to.be(2);
+          expect(areasCount).to.be(2);
           expect(legendNames).to.eql(['bytes > 5000', 'second']);
           expect(areaColors).to.eql(['rgba(0,188,163,1)', 'rgba(114,207,194,1)']);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
@@ -299,19 +301,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should display cloned series and then change its chart type to bar', async () => {
-          let chartDebugData = await visualBuilder.getChartDebugState();
-          expect(chartDebugData?.areas?.length).to.be(1);
+          let areasCount = (await visualBuilder.getChartItems())?.length;
+          expect(areasCount).to.be(1);
 
           await visualBuilder.cloneSeries();
-          chartDebugData = await visualBuilder.getChartDebugState();
-          expect(chartDebugData?.areas?.length).to.be(2);
+          areasCount = (await visualBuilder.getChartItems())?.length;
+          expect(areasCount).to.be(2);
 
           await visualBuilder.clickSeriesOption();
           await visualBuilder.setChartType('Bar');
 
-          chartDebugData = await visualBuilder.getChartDebugState();
-          expect(chartDebugData?.bars?.length).to.be(1);
-          expect(chartDebugData?.areas?.length).to.be(1);
+          const chartDebugData = await visualBuilder.getChartDebugState();
+          areasCount = (await visualBuilder.getChartItems(chartDebugData))?.length;
+          const barsCount = (await visualBuilder.getChartItems(chartDebugData))?.length;
+          expect(areasCount).to.be(1);
+          expect(barsCount).to.be(1);
         });
 
         it('should display correct chart data for overridden index pattern', async () => {
