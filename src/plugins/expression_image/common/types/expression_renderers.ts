@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+import { ImageMode } from './expression_functions';
 
-export * from './labs';
-export * from './types';
+export type OriginString = 'bottom' | 'left' | 'top' | 'right';
+
+export interface ImageRendererConfig {
+  dataurl: string | null;
+  mode: ImageMode | null;
+}
+
+export interface NodeDimensions {
+  width: number;
+  height: number;
+}

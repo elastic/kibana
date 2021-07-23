@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
-
-export * from './labs';
-export * from './types';
+// eslint-disable-next-line import/no-commonjs
+module.exports = require('@kbn/storybook').defaultConfig;

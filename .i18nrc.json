@@ -18,6 +18,7 @@
     "devTools": "src/plugins/dev_tools",
     "expressions": "src/plugins/expressions",
     "expressionError": "src/plugins/expression_error",
+    "expressionImage": "src/plugins/expression_image",
     "expressionRepeatImage": "src/plugins/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressionShape": "src/plugins/expression_shape",

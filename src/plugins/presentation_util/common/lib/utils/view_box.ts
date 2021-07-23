@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+import { ViewBoxParams } from '../../types';
 
-export * from './labs';
-export * from './types';
+export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
+  if (!viewBox) return;
+  return `${viewBox?.minX} ${viewBox?.minY} ${viewBox?.width} ${viewBox?.height}`;
+}
