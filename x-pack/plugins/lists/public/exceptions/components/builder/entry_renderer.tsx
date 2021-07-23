@@ -27,16 +27,18 @@ import {
   getFilteredIndexPatterns,
   getOperatorOptions,
 } from '@kbn/securitysolution-list-utils';
+import {
+  AutocompleteFieldExistsComponent,
+  AutocompleteFieldListsComponent,
+  AutocompleteFieldMatchAnyComponent,
+  AutocompleteFieldMatchComponent,
+  FieldComponent,
+  OperatorComponent,
+} from '@kbn/securitysolution-autocomplete';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { HttpStart } from '../../../../../../../src/core/public';
-import { FieldComponent } from '../autocomplete/field';
-import { OperatorComponent } from '../autocomplete/operator';
-import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_exists';
-import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
-import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
-import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';

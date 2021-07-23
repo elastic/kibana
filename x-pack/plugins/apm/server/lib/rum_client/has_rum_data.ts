@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   SERVICE_NAME,
@@ -20,7 +21,10 @@ export async function hasRumData({
   setup: Setup & Partial<SetupTimeRange>;
 }) {
   try {
-    const { start, end } = setup;
+    const {
+      start = moment().subtract(24, 'h').valueOf(),
+      end = moment().valueOf(),
+    } = setup;
 
     const params = {
       apm: {
