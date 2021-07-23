@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsServerStart, ExpressionsServerSetup } from '../../expressions/server';
-import { imageFunction } from '../common';
+import { imageFunction } from '../common/expression_functions';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;

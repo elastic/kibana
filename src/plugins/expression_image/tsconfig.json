@@ -12,6 +12,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "__fixtures__/**/*",
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
