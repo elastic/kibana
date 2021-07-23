@@ -361,7 +361,11 @@ export const Library: React.FC = () => {
           </EuiTitle>
           <EuiSpacer />
 
-          <InlineEditableTable />
+          <InlineEditableTable
+            items={[{ id: 1 }, { id: 2 }]}
+            instanceId="MyInstance"
+            title="Some Title"
+          />
           <EuiSpacer />
 
           <EuiSpacer />
