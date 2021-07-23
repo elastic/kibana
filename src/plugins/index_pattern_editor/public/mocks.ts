@@ -8,9 +8,7 @@
 
 import { IndexPatternEditorPlugin } from './plugin';
 
-export type Start = jest.Mocked<
-  Omit<ReturnType<IndexPatternEditorPlugin['start']>, 'DeleteRuntimeFieldProvider'>
->;
+export type Start = jest.Mocked<ReturnType<IndexPatternEditorPlugin['start']>>;
 
 export type Setup = jest.Mocked<ReturnType<IndexPatternEditorPlugin['setup']>>;
 

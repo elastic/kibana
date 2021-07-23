@@ -7,7 +7,6 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import '../test_utils/setup_environment';
 import { registerTestBed, TestBed, noop, getCommonActions } from '../test_utils';
 import { IndexPatternEditorFlyoutContent, Props } from './index_pattern_editor_flyout_content';
 
