@@ -1,3 +1,5 @@
+@import '../../../mixins';
+
 .lnsLayerPanel {
   margin-bottom: $euiSizeS;
 
@@ -132,19 +134,8 @@
   width: 100%;
 
   &:focus {
+    @include removeEuiFocusRing;
     background-color: transparent;
-
-    @include kbnThemeStyle('v7') {
-      animation: none !important; // sass-lint:disable-line no-important
-    }
-
-    @include kbnThemeStyle('v8') {
-      outline: none;
-
-      &:focus-visible {
-        outline-style: none;
-      }
-    }
   }
 
   &:focus .lnsLayerPanel__triggerTextLabel {
