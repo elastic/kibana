@@ -76,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
-      await testSubjects.click('addSampleData');
       await testSubjects.click('sampleDataSetCardlogs');
       await a11y.testAppSnapshot();
     });
