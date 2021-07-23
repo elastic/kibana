@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -144,6 +145,12 @@ export const PageRouter: FC = () => {
   } = useKibana<ClientPluginsStart>();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
+  const StyledPageTemplateComponent = styled(PageTemplateComponent)`
+    .euiPageHeaderContent > .euiFlexGroup {
+      flex-wrap: wrap;
+    }
+  `;
+
   return (
     <Switch>
       {Routes.map(
@@ -153,9 +160,9 @@ export const PageRouter: FC = () => {
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               {pageHeader ? (
-                <PageTemplateComponent pageHeader={pageHeader}>
+                <StyledPageTemplateComponent pageHeader={pageHeader}>
                   <RouteComponent />
-                </PageTemplateComponent>
+                </StyledPageTemplateComponent>
               ) : (
                 <RouteComponent />
               )}
