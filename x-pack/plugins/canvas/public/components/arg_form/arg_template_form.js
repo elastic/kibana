@@ -5,67 +5,54 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { compose, withPropsOnChange, withProps } from 'recompose';
+import usePrevious from 'react-use/lib/usePrevious';
 import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
 
-class ArgTemplateFormComponent extends React.Component {
-  UNSAFE_componentWillUpdate(prevProps) {
-    //see if error state changed
-    if (this.props.error !== prevProps.error) {
-      this.props.handlers.destroy();
-    }
-  }
-  componentDidUpdate() {
-    if (this.props.error) {
-      return this._renderErrorTemplate();
-    }
-    this._renderTemplate(this._domNode);
-  }
+const mergeWithFormHandlers = (handlers) => Object.assign(new ExpressionFormHandlers(), handlers);
 
-  componentWillUnmount() {
-    this.props.handlers.destroy();
-  }
+export const ArgTemplateForm = ({ template, argumentProps, handlers, error, errorTemplate }) => {
+  const [updatedHandlers, setHandlers] = useState(mergeWithFormHandlers(handlers));
+  const previousError = usePrevious(error);
+  const domNodeRef = useRef();
+  const renderTemplate = useCallback(
+    (domNode) => template && template(domNode, argumentProps, updatedHandlers),
+    [template, argumentProps, updatedHandlers]
+  );
 
-  _domNode = null;
+  const renderErrorTemplate = useCallback(() => React.createElement(errorTemplate, argumentProps), [
+    errorTemplate,
+    argumentProps,
+  ]);
 
-  _renderTemplate = (domNode) => {
-    const { template, argumentProps, handlers } = this.props;
-    if (template) {
-      return template(domNode, argumentProps, handlers);
-    }
-  };
+  useEffect(() => {
+    setHandlers(mergeWithFormHandlers(handlers));
+  }, [handlers]);
 
-  _renderErrorTemplate = () => {
-    const { errorTemplate, argumentProps } = this.props;
-    return React.createElement(errorTemplate, argumentProps);
-  };
+  useEffect(() => {
+    if (previousError !== error) updatedHandlers.destroy();
+  }, [previousError, error, updatedHandlers]);
 
-  render() {
-    const { template, error } = this.props;
+  useEffect(() => {
+    if (!error) renderTemplate(domNodeRef.current);
+  }, [error, renderTemplate, domNodeRef]);
 
-    if (error) {
-      return this._renderErrorTemplate();
-    }
+  if (error) return renderErrorTemplate();
+  if (!template) return null;
 
-    if (!template) {
-      return null;
-    }
+  return (
+    <RenderToDom
+      render={(domNode) => {
+        domNodeRef.current = domNode;
+        renderTemplate(domNode);
+      }}
+    />
+  );
+};
 
-    return (
-      <RenderToDom
-        render={(domNode) => {
-          this._domNode = domNode;
-          this._renderTemplate(domNode);
-        }}
-      />
-    );
-  }
-}
-
-ArgTemplateFormComponent.propTypes = {
+ArgTemplateForm.propTypes = {
   template: PropTypes.func,
   argumentProps: PropTypes.shape({
     valueMissing: PropTypes.bool,
@@ -81,15 +68,3 @@ ArgTemplateFormComponent.propTypes = {
   error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
 };
-
-export const ArgTemplateForm = compose(
-  withPropsOnChange(
-    () => false,
-    () => ({
-      expressionFormHandlers: new ExpressionFormHandlers(),
-    })
-  ),
-  withProps(({ handlers, expressionFormHandlers }) => ({
-    handlers: Object.assign(expressionFormHandlers, handlers),
-  }))
-)(ArgTemplateFormComponent);
