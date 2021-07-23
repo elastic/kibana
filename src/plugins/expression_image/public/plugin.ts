@@ -9,6 +9,7 @@
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
 import { imageRenderer } from './expression_renderers';
+import { imageFunction } from '../common/expression_functions';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -24,6 +25,7 @@ export type ExpressionImagePluginStart = void;
 export class ExpressionImagePlugin
   implements Plugin<ExpressionImagePluginSetup, ExpressionImagePluginStart, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionImagePluginSetup {
+    expressions.registerFunction(imageFunction);
     expressions.registerRenderer(imageRenderer);
   }
 
