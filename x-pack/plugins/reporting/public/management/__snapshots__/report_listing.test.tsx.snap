@@ -541,13 +541,30 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Pending at
+                          Pending at 
                           <span
                             className="eui-textNoWrap"
                           >
                             2020-04-14 @ 05:01 PM
                           </span>
                         </FormattedMessage>
+                        <EuiText
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                            >
+                              <span
+                                className="euiTextColor euiTextColor--subdued"
+                              >
+                                Waiting for job to be processed.
+                              </span>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
                       </div>
                     </div>
                   </td>
@@ -1535,13 +1552,30 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Processing at
+                          Processing at 
                           <span
                             className="eui-textNoWrap"
                           >
                             2020-04-14 @ 05:01 PM
                           </span>
                         </FormattedMessage>
+                        <EuiText
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                            >
+                              <span
+                                className="euiTextColor euiTextColor--subdued"
+                              >
+                                Attempt 1 of 1.
+                              </span>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
                       </div>
                     </div>
                   </td>
@@ -2529,7 +2563,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at
+                          Completed at 
                           <span
                             className="eui-textNoWrap"
                           >
@@ -3570,7 +3604,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at
+                          Completed at 
                           <span
                             className="eui-textNoWrap"
                           >
@@ -4638,7 +4672,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at
+                          Completed at 
                           <span
                             className="eui-textNoWrap"
                           >
@@ -5679,7 +5713,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at
+                          Completed at 
                           <span
                             className="eui-textNoWrap"
                           >
@@ -6720,7 +6754,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at
+                          Completed at 
                           <span
                             className="eui-textNoWrap"
                           >
@@ -7761,7 +7795,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at
+                          Completed at 
                           <span
                             className="eui-textNoWrap"
                           >
@@ -8802,7 +8836,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             }
                           }
                         >
-                          Completed at
+                          Completed at 
                           <span
                             className="eui-textNoWrap"
                           >

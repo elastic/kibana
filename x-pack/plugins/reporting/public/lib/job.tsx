@@ -86,23 +86,24 @@ export class Job {
     let smallMessage;
     if (status === PENDING) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.pendingStatusReachedText', {
-        defaultMessage: 'Waiting for job to be processed',
+        defaultMessage: 'Waiting for job to be processed.',
       });
-    }
-    if (status === PROCESSING) {
+    } else if (status === PROCESSING) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.attemptXofY', {
-        defaultMessage: 'Attempt {attempts} of {max_attempts}',
+        defaultMessage: 'Attempt {attempts} of {max_attempts}.',
         values: { attempts: this.attempts, max_attempts: this.max_attempts },
       });
-    }
-    if (this.getWarnings()) {
-      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.errorText', {
-        defaultMessage: 'See report info for warnings',
+    } else if (this.isDeprecated) {
+      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.deprecatedText', {
+        defaultMessage: 'Deprecated export type: see report warnings.',
       });
-    }
-    if (this.getError()) {
+    } else if (this.getWarnings()) {
+      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.warningsText', {
+        defaultMessage: 'See report info for warnings.',
+      });
+    } else if (this.getError()) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.errorText', {
-        defaultMessage: 'See report info for error details',
+        defaultMessage: 'See report info for error details.',
       });
     }
 
