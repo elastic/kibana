@@ -141,6 +141,7 @@
   &:focus-within {
     @include euiFocusRing;
     pointer-events: none;
+    z-index: $lnsZLevel2;
   }
 }
 

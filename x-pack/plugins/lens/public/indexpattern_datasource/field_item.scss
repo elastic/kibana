@@ -16,6 +16,23 @@
   }
 }
 
+.lnsFieldItem.kbnFieldButton {
+  &:focus-within,
+  &-isActive {
+    @include kbnThemeStyle('v7') {
+      animation: none !important; // sass-lint:disable-line no-important
+    }
+
+    @include kbnThemeStyle('v8') {
+      outline: none;
+
+      &:focus-visible {
+        outline-style: none;
+      }
+    }
+  }
+}
+
 .lnsFieldItem .kbnFieldButton__button {
   &:focus {
     @include kbnThemeStyle('v7') {
