@@ -19,6 +19,7 @@ import {
   entriesMatch,
   entriesMatchAny,
   entriesNested,
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { hasLargeValueList } from '../has_large_value_list';
@@ -69,26 +70,87 @@ export const chunkExceptions = (
   return chunk(chunkSize, exceptions);
 };
 
-export const buildExceptionItemFilter = (
-  exceptionItem: ExceptionItemSansLargeValueLists
-): BooleanFilter | NestedFilter => {
-  const { entries } = exceptionItem;
+/**
+ * Transforms the os_type into a regular filter as if the user had created it
+ * from the fields for the next state of transforms which will create the elastic filters
+ * from it.
+ *
+ * Note: We use two types of fields, the "host.os.type" and "host.os.name.caseless"
+ * The endpoint/endgame agent has been using "host.os.name.caseless" as the same value as the ECS
+ * value of "host.os.type" where the auditbeat, winlogbeat, etc... (other agents) are all using
+ * "host.os.type". In order to be compatible with both, I create an "OR" between these two data types
+ * where if either has a match then we will exclude it as part of the match. This should also be
+ * forwards compatible for endpoints/endgame agents when/if they upgrade to using "host.os.type"
+ * rather than using "host.os.name.caseless" values.
+ *
+ * Also we create another "OR" from the osType names so that if there are multiples such as ['windows', 'linux']
+ * this will exclude anything with either 'windows' or with 'linux'
+ * @param osTypes The os_type array from the REST interface that is an array such as ['windows', 'linux']
+ * @param entries The entries to join the OR's with before the elastic filter change out
+ */
+export const transformOsType = (
+  osTypes: OsTypeArray,
+  entries: NonListEntry[]
+): NonListEntry[][] => {
+  const hostTypeTransformed = osTypes.map<NonListEntry[]>((osType) => {
+    return [
+      { field: 'host.os.type', operator: 'included', type: 'match', value: osType },
+      ...entries,
+    ];
+  });
+  const caseLessTransformed = osTypes.map<NonListEntry[]>((osType) => {
+    return [
+      { field: 'host.os.name.caseless', operator: 'included', type: 'match', value: osType },
+      ...entries,
+    ];
+  });
+  return [...hostTypeTransformed, ...caseLessTransformed];
+};
 
-  if (entries.length === 1) {
-    return createInnerAndClauses(entries[0]);
-  } else {
+/**
+ * This builds an exception item filter with the os type
+ * @param osTypes The os_type array from the REST interface that is an array such as ['windows', 'linux']
+ * @param entries The entries to join the OR's with before the elastic filter change out
+ */
+export const buildExceptionItemFilterWithOsType = (
+  osTypes: OsTypeArray,
+  entries: NonListEntry[]
+): BooleanFilter[] => {
+  const entriesWithOsTypes = transformOsType(osTypes, entries);
+  return entriesWithOsTypes.map((entryWithOsType) => {
     return {
       bool: {
-        filter: entries.map((entry) => createInnerAndClauses(entry)),
+        filter: entryWithOsType.map((entry) => createInnerAndClauses(entry)),
       },
     };
+  });
+};
+
+export const buildExceptionItemFilter = (
+  exceptionItem: ExceptionItemSansLargeValueLists
+): Array<BooleanFilter | NestedFilter> => {
+  const { entries, os_types: osTypes } = exceptionItem;
+  if (osTypes != null && osTypes.length > 0) {
+    return buildExceptionItemFilterWithOsType(osTypes, entries);
+  } else {
+    if (entries.length === 1) {
+      return [createInnerAndClauses(entries[0])];
+    } else {
+      return [
+        {
+          bool: {
+            filter: entries.map((entry) => createInnerAndClauses(entry)),
+          },
+        },
+      ];
+    }
   }
 };
 
 export const createOrClauses = (
   exceptionItems: ExceptionItemSansLargeValueLists[]
 ): Array<BooleanFilter | NestedFilter> => {
-  return exceptionItems.map((exceptionItem) => buildExceptionItemFilter(exceptionItem));
+  return exceptionItems.flatMap((exceptionItem) => buildExceptionItemFilter(exceptionItem));
 };
 
 export const buildExceptionFilter = ({

@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment from 'moment';
+import { DslQuery, Filter } from '@kbn/es-query';
+import moment, { Moment } from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
@@ -300,6 +300,8 @@ export interface SearchAfterAndBulkCreateParams {
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  trackTotalHits?: boolean;
+  sortOrder?: estypes.SearchSortOrder;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

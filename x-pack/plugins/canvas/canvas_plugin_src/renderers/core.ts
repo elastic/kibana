@@ -11,20 +11,9 @@ import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
-import { repeatImage } from './repeat_image';
-import { table } from './table';
 import { text } from './text';
+import { table } from './table';
 
-export const renderFunctions = [
-  image,
-  markdown,
-  metric,
-  pie,
-  plot,
-  progress,
-  repeatImage,
-  table,
-  text,
-];
+export const renderFunctions = [image, markdown, metric, pie, plot, progress, table, text];
 
 export const renderFunctionFactories = [];
