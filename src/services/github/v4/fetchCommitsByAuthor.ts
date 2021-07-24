@@ -140,9 +140,8 @@ export async function fetchCommitsByAuthor(
       sha,
     });
 
-    const existingTargetPullRequests = getExistingTargetPullRequests(
-      pullRequestNode
-    );
+    const existingTargetPullRequests =
+      getExistingTargetPullRequests(pullRequestNode);
 
     const targetBranchesFromLabels = getTargetBranchesFromLabels({
       sourceBranch: pullRequestNode.baseRefName,

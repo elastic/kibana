@@ -82,8 +82,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           title: '[6.x] myCommitMessage (#1000) | myOtherCommitMessage (#2000)',
           head: 'sqren:backport/6.x/pr-1000_pr-2000',
           base: '6.x',
-          body:
-            'Backports the following commits to 6.x:\n - myCommitMessage (#1000)\n - myOtherCommitMessage (#2000)\n\nmyPrSuffix',
+          body: 'Backports the following commits to 6.x:\n - myCommitMessage (#1000)\n - myOtherCommitMessage (#2000)\n\nmyPrSuffix',
         })
         .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
 
@@ -152,8 +151,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           title: '[6.x] myCommitMessage (mySha)',
           head: 'sqren:backport/6.x/commit-mySha',
           base: '6.x',
-          body:
-            'Backports the following commits to 6.x:\n - myCommitMessage (mySha)',
+          body: 'Backports the following commits to 6.x:\n - myCommitMessage (mySha)',
         })
         .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
 

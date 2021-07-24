@@ -125,8 +125,7 @@ describe('runWithOptions', () => {
     expect(createPullRequestCalls).toEqual([
       {
         base: '6.x',
-        body:
-          'Backports the following commits to 6.x:\n - Add 👻 (2e63475c)\n\nmyPrDescription',
+        body: 'Backports the following commits to 6.x:\n - Add 👻 (2e63475c)\n\nmyPrDescription',
         head: 'sqren:backport/6.x/commit-2e63475c',
         title: 'myPrTitle 6.x Add 👻 (2e63475c)',
       },

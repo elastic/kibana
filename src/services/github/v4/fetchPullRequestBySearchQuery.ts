@@ -79,9 +79,8 @@ export async function fetchPullRequestBySearchQuery(
       pullNumber,
     });
 
-    const existingTargetPullRequests = getExistingTargetPullRequests(
-      pullRequestNode
-    );
+    const existingTargetPullRequests =
+      getExistingTargetPullRequests(pullRequestNode);
 
     const targetBranchesFromLabels = getTargetBranchesFromLabels({
       sourceBranch: pullRequestNode.baseRefName,

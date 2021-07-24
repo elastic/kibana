@@ -119,8 +119,7 @@ describe('integration', () => {
           title: '[6.0] Add witch (#85) | Add 👻 (2e63475c)',
           head: 'sqren:backport/6.0/pr-85_commit-2e63475c',
           base: '6.0',
-          body:
-            'Backports the following commits to 6.0:\n - Add witch (#85)\n - Add 👻 (2e63475c)',
+          body: 'Backports the following commits to 6.0:\n - Add witch (#85)\n - Add 👻 (2e63475c)',
         },
       ]);
     });

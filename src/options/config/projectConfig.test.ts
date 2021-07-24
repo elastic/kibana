@@ -40,7 +40,7 @@ describe('getProjectConfig', () => {
 
   describe('when projectConfig is missing', () => {
     it('should return empty config', async () => {
-      ((findUp as any) as jest.SpyInstance).mockReturnValueOnce(undefined);
+      (findUp as any as jest.SpyInstance).mockReturnValueOnce(undefined);
       const projectConfig = await getProjectConfig();
       expect(projectConfig).toEqual(undefined);
     });

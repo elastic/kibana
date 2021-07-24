@@ -591,9 +591,7 @@ describe('addRemote', () => {
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
     await addRemote(options, 'elastic');
 
-    return expect(
-      spy
-    ).toHaveBeenCalledWith(
+    return expect(spy).toHaveBeenCalledWith(
       'git remote add elastic https://x-access-token:myAccessToken@github.com/elastic/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
     );
@@ -605,9 +603,7 @@ describe('addRemote', () => {
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
     await addRemote(options, 'sqren');
 
-    return expect(
-      spy
-    ).toHaveBeenCalledWith(
+    return expect(spy).toHaveBeenCalledWith(
       'git remote add sqren https://x-access-token:myAccessToken@github.com/sqren/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
     );
@@ -622,9 +618,7 @@ describe('addRemote', () => {
       'sqren'
     );
 
-    return expect(
-      spy
-    ).toHaveBeenCalledWith(
+    return expect(spy).toHaveBeenCalledWith(
       'git remote add sqren https://x-access-token:myAccessToken@github.my-company.com/sqren/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
     );

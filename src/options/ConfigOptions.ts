@@ -1,10 +1,10 @@
 import { Logger } from '../services/logger';
 
-export interface BranchChoice {
+export interface TargetBranchChoice {
   name: string;
   checked?: boolean;
 }
-export type BranchChoiceRaw = string | BranchChoice;
+export type TargetBranchChoiceOrString = string | TargetBranchChoice;
 
 type AutoFixConflictsHandler = ({
   files,
@@ -49,7 +49,7 @@ export type ConfigOptions = Partial<{
   sha: string;
   sourceBranch: string;
   sourcePRLabels: string[];
-  targetBranchChoices: BranchChoiceRaw[];
+  targetBranchChoices: TargetBranchChoiceOrString[];
   targetBranches: string[];
   targetPRLabels: string[];
   upstream: string;
@@ -57,7 +57,7 @@ export type ConfigOptions = Partial<{
   verbose: boolean;
 
   // deprecated: renamed to `targetBranchChoices`
-  branches: BranchChoiceRaw[];
+  branches: TargetBranchChoiceOrString[];
 
   // deprecated: renamed to `targetPRLabels`
   labels: string[];

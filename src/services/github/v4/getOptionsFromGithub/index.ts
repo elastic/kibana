@@ -119,15 +119,12 @@ async function getRemoteConfigFile(
     return;
   }
 
-  const [
-    isLocalConfigModified,
-    isLocalConfigUntracked,
-    localCommitDate,
-  ] = await Promise.all([
-    isLocalConfigFileModified(),
-    isLocalConfigFileUntracked(),
-    getLocalConfigFileCommitDate(),
-  ]);
+  const [isLocalConfigModified, isLocalConfigUntracked, localCommitDate] =
+    await Promise.all([
+      isLocalConfigFileModified(),
+      isLocalConfigFileUntracked(),
+      getLocalConfigFileCommitDate(),
+    ]);
 
   if (isLocalConfigUntracked) {
     logger.info('Skipping remote config: local config is new');

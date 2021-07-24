@@ -5,7 +5,7 @@ import inquirer, {
   ConfirmQuestion,
 } from 'inquirer';
 import isEmpty from 'lodash.isempty';
-import { BranchChoice } from '../options/ConfigOptions';
+import { TargetBranchChoice } from '../options/ConfigOptions';
 import { Commit } from '../types/Commit';
 import { getShortSha } from './github/commitFormatters';
 
@@ -62,7 +62,7 @@ export async function promptForTargetBranches({
   targetBranchChoices,
   isMultipleChoice,
 }: {
-  targetBranchChoices: BranchChoice[];
+  targetBranchChoices: TargetBranchChoice[];
   isMultipleChoice: boolean;
 }): Promise<string[]> {
   const res = await prompt<string | string[]>({

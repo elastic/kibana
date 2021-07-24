@@ -1,4 +1,4 @@
-import { BranchChoice } from '../options/ConfigOptions';
+import { TargetBranchChoice } from '../options/ConfigOptions';
 import { ValidConfigOptions } from '../options/options';
 import * as prompts from '../services/prompts';
 import { Commit } from '../types/Commit';
@@ -17,9 +17,9 @@ describe('getTargetBranches', () => {
   });
 
   describe('when `targetBranchesFromLabels=["7.x"]`', () => {
-    let targetBranchChoices: BranchChoice[];
+    let targetBranchChoices: TargetBranchChoice[];
     beforeEach(async () => {
-      const options = ({
+      const options = {
         targetBranches: [],
         multipleBranches: true,
         targetBranchChoices: [
@@ -28,10 +28,10 @@ describe('getTargetBranches', () => {
           { name: '7.7' },
           { name: '7.6' },
           { name: '7.5' },
-        ] as BranchChoice[],
+        ] as TargetBranchChoice[],
         branchLabelMapping: {},
         sourceBranch: 'master',
-      } as unknown) as ValidConfigOptions;
+      } as unknown as ValidConfigOptions;
 
       const commits = [
         {
@@ -73,9 +73,9 @@ describe('getTargetBranches', () => {
   });
 
   describe('when `targetBranchesFromLabels=["8.0.0"]`', () => {
-    let targetBranchChoices: BranchChoice[];
+    let targetBranchChoices: TargetBranchChoice[];
     beforeEach(async () => {
-      const options = ({
+      const options = {
         targetBranches: [],
         multipleBranches: true,
         targetBranchChoices: [
@@ -83,9 +83,9 @@ describe('getTargetBranches', () => {
           { name: '7.7' },
           { name: '7.6' },
           { name: '7.5' },
-        ] as BranchChoice[],
+        ] as TargetBranchChoice[],
         sourceBranch: 'master',
-      } as unknown) as ValidConfigOptions;
+      } as unknown as ValidConfigOptions;
 
       const commits = [
         {
@@ -117,11 +117,11 @@ describe('getTargetBranches', () => {
     let branches: ReturnType<typeof getTargetBranches>;
 
     beforeEach(async () => {
-      const options = ({
+      const options = {
         targetBranches: [],
         targetBranchChoices: [{ name: 'branchA' }, { name: 'branchB' }],
         multipleBranches: false,
-      } as unknown) as ValidConfigOptions;
+      } as unknown as ValidConfigOptions;
 
       const commits: Commit[] = [
         {
@@ -155,11 +155,11 @@ describe('getTargetBranches', () => {
 
     beforeEach(() => {
       branches = getTargetBranches(
-        ({
+        {
           targetBranches: ['branchA', 'branchB'],
           targetBranchChoices: [],
           multipleBranches: false,
-        } as unknown) as ValidConfigOptions,
+        } as unknown as ValidConfigOptions,
         []
       );
     });
@@ -175,7 +175,7 @@ describe('getTargetBranches', () => {
 });
 
 describe('getTargetBranchChoices', () => {
-  const options = ({
+  const options = {
     ci: false,
     targetBranchChoices: [
       { name: 'master', checked: true },
@@ -184,7 +184,7 @@ describe('getTargetBranchChoices', () => {
       { name: '7.7', checked: false },
     ],
     branchLabelMapping: {},
-  } as unknown) as ValidConfigOptions;
+  } as unknown as ValidConfigOptions;
 
   const sourceBranch = 'master';
 

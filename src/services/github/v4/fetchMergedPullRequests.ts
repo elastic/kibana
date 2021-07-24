@@ -73,9 +73,8 @@ export async function fetchMergedPullRequests(
       const pullRequestNode =
         commitEdge.node.associatedPullRequests.edges[0].node;
 
-      const existingTargetPullRequests = getExistingTargetPullRequests(
-        pullRequestNode
-      );
+      const existingTargetPullRequests =
+        getExistingTargetPullRequests(pullRequestNode);
 
       const expectedTargetBranches = getTargetBranchesFromLabels({
         sourceBranch: pullRequestNode.baseRefName,

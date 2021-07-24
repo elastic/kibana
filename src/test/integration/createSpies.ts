@@ -25,8 +25,8 @@ export function createSpies({ commitCount }: { commitCount: number }) {
   // mock inquirer.prompt
   mockInquirerPrompts(commitCount);
 
-  const getGithubConfigOptionsCalls = mockGqlRequest<GithubConfigOptionsResponse>(
-    {
+  const getGithubConfigOptionsCalls =
+    mockGqlRequest<GithubConfigOptionsResponse>({
       name: 'GithubConfigOptions',
       statusCode: 200,
       body: {
@@ -42,8 +42,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
           },
         },
       },
-    }
-  );
+    });
 
   const authorIdCalls = mockGqlRequest<AuthorIdResponse>({
     name: 'AuthorId',

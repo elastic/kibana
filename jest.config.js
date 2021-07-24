@@ -3,6 +3,7 @@ module.exports = {
   setupFiles: ['./src/test/setupFiles/automatic-mocks.ts'],
   preset: 'ts-jest',
   testRegex: 'src/.*test.ts$',
+  testEnvironment: 'node',
 
   // exclude private tests that requires credentials and can therefore not run on CI for external contributors
   modulePathIgnorePatterns: ['.*.private.test.ts$'],

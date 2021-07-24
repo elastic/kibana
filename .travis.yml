@@ -1,16 +1,10 @@
 os:
   - linux
   - osx
-addons:
-  apt:
-    sources:
-      - ppa:git-core/ppa
-    packages:
-      - git
 language: node_js
 node_js:
-  - '10'
   - '12'
+  - '14'
 cache: yarn
 before_script:
   - yarn
@@ -19,8 +13,8 @@ before_script:
 script:
   - yarn tsc
   - yarn eslint './**/*.{ts,js}'
-  - 'if [ -n "$accessToken" ]; then yarn jest --config ./jest.config.all.js --coverage; fi'
-  - 'if [ -z "$accessToken" ]; then yarn jest --config ./jest.config.js; fi'
+  - 'if [ -n "$accessToken" ]; then echo "Running public and private tests" && yarn jest --config ./jest.config.all.js --coverage; fi'
+  - 'if [ -z "$accessToken" ]; then echo "Running only public tests (excluding private ones) " && yarn jest --config ./jest.config.js; fi'
 after_success:
   - npm install -g coveralls
   - cat coverage/lcov.info | coveralls

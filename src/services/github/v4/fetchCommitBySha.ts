@@ -92,9 +92,8 @@ export async function fetchCommitBySha(
     text: `${chalk.bold('Select commit')} ${chalk.cyan(formattedMessage)}`,
   });
 
-  const existingTargetPullRequests = getExistingTargetPullRequests(
-    pullRequestNode
-  );
+  const existingTargetPullRequests =
+    getExistingTargetPullRequests(pullRequestNode);
 
   const targetBranchesFromLabels = pullRequestNode
     ? getTargetBranchesFromLabels({

@@ -17,13 +17,8 @@ import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 export async function fetchCommitByPullNumber(
   options: ValidConfigOptions & { pullNumber: number }
 ): Promise<Commit> {
-  const {
-    accessToken,
-    githubApiBaseUrlV4,
-    pullNumber,
-    repoName,
-    repoOwner,
-  } = options;
+  const { accessToken, githubApiBaseUrlV4, pullNumber, repoName, repoOwner } =
+    options;
   const query = /* GraphQL */ `
     query CommitByPullNumber(
       $repoOwner: String!
@@ -85,9 +80,8 @@ export async function fetchCommitByPullNumber(
     )}`,
   });
 
-  const existingTargetPullRequests = getExistingTargetPullRequests(
-    pullRequestNode
-  );
+  const existingTargetPullRequests =
+    getExistingTargetPullRequests(pullRequestNode);
 
   const targetBranchesFromLabels = getTargetBranchesFromLabels({
     sourceBranch: pullRequestNode.baseRefName,

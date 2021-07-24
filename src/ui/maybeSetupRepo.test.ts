@@ -6,7 +6,7 @@ import { maybeSetupRepo } from './maybeSetupRepo';
 describe('maybeSetupRepo', () => {
   it('should delete repo if an error occurs', async () => {
     expect.assertions(2);
-    ((makeDir as any) as jest.Mock).mockImplementationOnce(() => {
+    (makeDir as any as jest.Mock).mockImplementationOnce(() => {
       throw new Error('makeDir failed');
     });
 
