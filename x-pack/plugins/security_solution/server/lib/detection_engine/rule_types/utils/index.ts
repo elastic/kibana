@@ -11,13 +11,15 @@ import { SecurityAlertTypeReturnValue } from '../types';
 export const createResultObject = <TState extends AlertTypeState>(state: TState) => {
   const result: SecurityAlertTypeReturnValue<TState> = {
     bulkCreateTimes: [],
+    createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
     lastLookbackDate: undefined,
     searchAfterTimes: [],
     state,
-    success: false,
-    warnings: [],
+    success: true,
+    warning: false,
+    warningMessages: [],
   };
   return result;
 };

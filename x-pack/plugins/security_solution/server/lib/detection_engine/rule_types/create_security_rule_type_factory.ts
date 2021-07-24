@@ -211,8 +211,8 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           });
 
           // TODO: AlertTypeState?
-          const createdSignals = result.createdSignals.concat(runResult.createdSignals);
-          const warningMessages = result.warningMessages.concat(runResult.warningMessages);
+          const createdSignals = runResult.createdSignals.concat(runResult.createdSignals);
+          const warningMessages = runResult.warningMessages.concat(runResult.warningMessages);
           result = {
             bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
             createdSignals,

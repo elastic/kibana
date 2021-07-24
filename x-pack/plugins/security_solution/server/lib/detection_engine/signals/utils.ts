@@ -748,7 +748,7 @@ export const mergeReturns = (
 
     return {
       success: existingSuccess && newSuccess,
-      warning: existingWarning && newWarning,
+      warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
