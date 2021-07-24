@@ -247,6 +247,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // Register rule types via rule-registry
       this.setupPlugins.alerting.registerType(
         createQueryAlertType({
+          experimentalFeatures,
           lists: plugins.lists,
           logger: this.logger,
           mergeStrategy: this.config.alertMergeStrategy,

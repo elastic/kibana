@@ -10,8 +10,8 @@ import { v4 } from 'uuid';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
-
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 
@@ -19,6 +19,7 @@ describe('Custom query alerts', () => {
   it('does not send an alert when no events found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const queryAlertType = createQueryAlertType({
+      experimentalFeatures: allowedExperimentalValues,
       lists: '',
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
@@ -61,6 +62,7 @@ describe('Custom query alerts', () => {
   it('sends a properly formatted alert when events are found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const queryAlertType = createQueryAlertType({
+      experimentalFeatures: allowedExperimentalValues,
       lists: '',
       logger: dependencies.logger,
       mergeStrategy: 'allFields',

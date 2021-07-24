@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ECS_VERSION } from '../../../../event_log/generated/schemas';
 import { pickWithPatterns } from '../../../common/pick_with_patterns';
 import * as Fields from '../../../common/technical_rule_data_field_names';
 import { ecsFieldMap } from './ecs_field_map';
@@ -44,7 +43,7 @@ export const technicalRuleFieldMap = {
     array: false,
     required: true,
   },
-  [ECS_VERSION]: {
+  [Fields.ECS_VERSION]: {
     type: 'keyword',
     array: false,
     required: true,

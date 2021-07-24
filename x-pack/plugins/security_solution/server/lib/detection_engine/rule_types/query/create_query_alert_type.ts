@@ -10,6 +10,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import { PersistenceServices, RuleDataClient } from '../../../../../../rule_registry/server';
 import { QUERY_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { SetupPlugins } from '../../../../../target/types/server/plugin';
 import { ConfigType } from '../../../../config';
 
@@ -19,12 +20,13 @@ import { queryExecutor } from '../../signals/executors/query';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
 
 export const createQueryAlertType = (createOptions: {
+  experimentalFeatures: ExperimentalFeatures;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
 }) => {
-  const { lists, logger, mergeStrategy, ruleDataClient } = createOptions;
+  const { experimentalFeatures, lists, logger, mergeStrategy, ruleDataClient } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
@@ -82,6 +84,7 @@ export const createQueryAlertType = (createOptions: {
         buildRuleMessage,
         bulkCreate,
         exceptionItems,
+        experimentalFeatures,
         eventsTelemetry: undefined,
         listClient,
         logger,

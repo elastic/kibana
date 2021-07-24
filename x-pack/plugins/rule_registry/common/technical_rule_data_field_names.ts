@@ -8,6 +8,8 @@
 export * from '@kbn/rule-data-utils/target/technical_field_names';
 
 // TODO: move the below to technical_field_names package
+const ECS_VERSION = 'ecs.version' as const;
+
 const KIBANA_NAMESPACE = 'kibana';
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
@@ -88,4 +90,5 @@ export {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_RISK_SCORE,
+  ECS_VERSION,
 };

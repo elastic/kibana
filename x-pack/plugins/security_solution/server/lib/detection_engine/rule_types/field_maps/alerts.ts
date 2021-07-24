@@ -89,7 +89,7 @@ export const alertsFieldMap: FieldMap = {
     required: true,
   },
   'kibana.alert.threat.tactic': {
-    type: 'keyword',
+    type: 'object',
     array: false,
     required: true,
   },
