@@ -38,7 +38,8 @@ export const DurationEventStartEnd = React.memo<{
   eventId: string;
   eventEnd?: string[] | null;
   eventStart?: string[] | null;
-}>(({ contextId, eventDuration, eventId, eventEnd, eventStart }) => (
+  isDraggable?: boolean;
+}>(({ contextId, eventDuration, eventId, eventEnd, eventStart, isDraggable }) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="duration-and-start-group"
@@ -53,7 +54,7 @@ export const DurationEventStartEnd = React.memo<{
               data-test-subj="event-duration"
               field={EVENT_DURATION_FIELD_NAME}
               id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_DURATION_FIELD_NAME}-${duration}`}
-              isDraggable={false}
+              isDraggable={isDraggable}
               // @ts-expect-error
               name={name}
               tooltipContent={null}
@@ -77,7 +78,7 @@ export const DurationEventStartEnd = React.memo<{
               data-test-subj="event-start"
               field={EVENT_START_FIELD_NAME}
               id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_START_FIELD_NAME}-${start}`}
-              isDraggable={false}
+              isDraggable={isDraggable}
               tooltipContent={null}
               value={start}
             >
@@ -96,7 +97,7 @@ export const DurationEventStartEnd = React.memo<{
               data-test-subj="event-end"
               field={EVENT_END_FIELD_NAME}
               id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_END_FIELD_NAME}-${end}`}
-              isDraggable={false}
+              isDraggable={isDraggable}
               tooltipContent={null}
               value={end}
             >

@@ -132,7 +132,7 @@ const NonDecoratedIpComponent: React.FC<{
   return (
     <DraggableWrapper
       dataProvider={dataProviderProp}
-      isDraggable={false}
+      isDraggable={isDraggable}
       key={key}
       render={render}
       truncate={truncate}
@@ -238,7 +238,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   return (
     <DraggableWrapper
       dataProvider={dataProviderProp}
-      isDraggable={false}
+      isDraggable={isDraggable}
       key={key}
       render={render}
       truncate={truncate}

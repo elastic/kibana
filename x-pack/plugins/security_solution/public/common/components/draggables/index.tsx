@@ -168,6 +168,7 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
  * @param iconType -the (optional) type of icon e.g. `snowflake` to display on the badge
+ * @param isDraggable
  * @param name - defaulting to `field`, this optional human readable name is used by the `DataProvider` that represents the data
  * @param color - defaults to `hollow`, optionally overwrite the color of the badge icon
  * @param children - defaults to displaying `value`, this allows an arbitrary visualization to be displayed in lieu of the default behavior
@@ -181,6 +182,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   field,
   value,
   iconType,
+  isDraggable,
   name,
   color = 'hollow',
   children,
@@ -190,6 +192,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   value != null ? (
     <DefaultDraggable
       id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
+      isDraggable={isDraggable}
       field={field}
       name={name}
       value={value}
