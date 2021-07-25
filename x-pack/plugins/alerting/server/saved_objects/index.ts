@@ -19,7 +19,7 @@ import { transformRulesForExport } from './transform_rule_for_export';
 import { RawAlert } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
-import { ruleTypeRegistry } from '../alert_type_registry';
+import { RuleTypeRegistry } from '../rule_type_registry';
 
 export { partiallyUpdateAlert } from './partially_update_alert';
 
@@ -47,7 +47,7 @@ export type AlertAttributesExcludedFromAADType =
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  ruleTypeRegistry: ruleTypeRegistry,
+  ruleTypeRegistry: RuleTypeRegistry,
   logger: Logger
 ) {
   savedObjects.registerType({

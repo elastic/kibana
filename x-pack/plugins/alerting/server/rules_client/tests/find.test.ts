@@ -8,7 +8,7 @@
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { ruleTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { nodeTypes } from '@kbn/es-query';
 import { esKuery } from '../../../../../../src/plugins/data/server';
@@ -20,7 +20,7 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { RegistryAlertType } from '../../alert_type_registry';
+import { RegistryRuleType } from '../../rule_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -60,7 +60,7 @@ jest.mock('../lib/map_sort_field', () => ({
 }));
 
 describe('find()', () => {
-  const listedTypes = new Set<RegistryAlertType>([
+  const listedTypes = new Set<RegistryRuleType>([
     {
       actionGroups: [],
       recoveryActionGroup: RecoveredActionGroup,

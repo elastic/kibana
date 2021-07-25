@@ -17,8 +17,8 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { UntypedNormalizedAlertType } from '../alert_type_registry';
-import { ruleTypeRegistryMock } from '../alert_type_registry.mock';
+import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
 const alertType: UntypedNormalizedAlertType = {
   id: 'test',

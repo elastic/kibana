@@ -6,7 +6,7 @@
  */
 
 import { Request } from '@hapi/hapi';
-import { ruleTypeRegistryMock } from './alert_type_registry.mock';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { KibanaRequest } from '../../../../src/core/server';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { securityMock } from '../../security/server/mocks';

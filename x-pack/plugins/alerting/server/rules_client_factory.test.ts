@@ -7,7 +7,7 @@
 
 import { Request } from '@hapi/hapi';
 import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
-import { ruleTypeRegistryMock } from './alert_type_registry.mock';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { KibanaRequest } from '../../../../src/core/server';
 import {

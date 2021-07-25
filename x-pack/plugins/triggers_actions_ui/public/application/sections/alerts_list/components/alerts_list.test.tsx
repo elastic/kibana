@@ -11,7 +11,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ruleTypeRegistryMock } from '../../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
 import {

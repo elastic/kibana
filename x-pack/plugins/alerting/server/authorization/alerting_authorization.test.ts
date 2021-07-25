@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { ruleTypeRegistryMock } from '../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
 import {
   PluginStartContract as FeaturesStartContract,
@@ -23,7 +23,7 @@ import { alertingAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertingAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
-import { RegistryAlertType } from '../alert_type_registry';
+import { RegistryRuleType } from '../rule_type_registry';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 
@@ -888,7 +888,7 @@ describe('AlertingAuthorization', () => {
   });
 
   describe('getFindAuthorizationFilter', () => {
-    const myOtherAppAlertType: RegistryAlertType = {
+    const myOtherAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -900,7 +900,7 @@ describe('AlertingAuthorization', () => {
       producer: 'alerts',
       enabledInLicense: true,
     };
-    const myAppAlertType: RegistryAlertType = {
+    const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -912,7 +912,7 @@ describe('AlertingAuthorization', () => {
       producer: 'myApp',
       enabledInLicense: true,
     };
-    const mySecondAppAlertType: RegistryAlertType = {
+    const mySecondAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -1241,7 +1241,7 @@ describe('AlertingAuthorization', () => {
   });
 
   describe('filterByRuleTypeAuthorization', () => {
-    const myOtherAppAlertType: RegistryAlertType = {
+    const myOtherAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -1253,7 +1253,7 @@ describe('AlertingAuthorization', () => {
       producer: 'myOtherApp',
       enabledInLicense: true,
     };
-    const myAppAlertType: RegistryAlertType = {
+    const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -1946,7 +1946,7 @@ describe('AlertingAuthorization', () => {
   });
 
   describe('getAugmentedRuleTypesWithAuthorization', () => {
-    const myOtherAppAlertType: RegistryAlertType = {
+    const myOtherAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -1958,7 +1958,7 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
       isExportable: true,
     };
-    const myAppAlertType: RegistryAlertType = {
+    const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -1970,7 +1970,7 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
       isExportable: true,
     };
-    const mySecondAppAlertType: RegistryAlertType = {
+    const mySecondAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',

@@ -36,8 +36,8 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
-import { UntypedNormalizedAlertType } from '../alert_type_registry';
-import { ruleTypeRegistryMock } from '../alert_type_registry.mock';
+import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
 
 const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
@@ -2617,7 +2617,7 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
-    ruleTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+    ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
       throw new Error('OMG');
     });
 

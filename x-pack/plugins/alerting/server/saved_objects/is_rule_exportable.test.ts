@@ -7,7 +7,7 @@
 
 import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
 import { TaskRunnerFactory } from '../task_runner';
-import { ruleTypeRegistry, ConstructorOptions } from '../alert_type_registry';
+import { RuleTypeRegistry, ConstructorOptions } from '../rule_type_registry';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { ILicenseState } from '../lib/license_state';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -33,7 +33,7 @@ beforeEach(() => {
 
 describe('isRuleExportable', () => {
   it('should return true if rule type isExportable is true', () => {
-    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'foo',
       name: 'Foo',
@@ -89,7 +89,7 @@ describe('isRuleExportable', () => {
   });
 
   it('should return false and log warning if rule type isExportable is false', () => {
-    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'foo',
       name: 'Foo',
@@ -148,7 +148,7 @@ describe('isRuleExportable', () => {
   });
 
   it('should return false and log warning if rule type is not registered', () => {
-    const registry = new ruleTypeRegistry(ruleTypeRegistryParams);
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'foo',
       name: 'Foo',

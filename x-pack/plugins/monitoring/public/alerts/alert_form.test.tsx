@@ -15,7 +15,7 @@ import { ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { ruleTypeRegistryMock } from '../../../triggers_actions_ui/public/application/alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../../triggers_actions_ui/public/application/rule_type_registry.mock';
 import {
   ValidationResult,
   Alert,

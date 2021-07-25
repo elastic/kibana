@@ -16,7 +16,7 @@ import {
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
-import { ruleTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
 import { useKibana } from '../../../common/lib/kibana';

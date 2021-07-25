@@ -9,9 +9,9 @@ import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { JsonObject } from '@kbn/common-utils';
-import { ruleTypeRegistry } from '../types';
+import { RuleTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
-import { RegistryAlertType } from '../alert_type_registry';
+import { RegistryRuleType } from '../rule_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertingAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
@@ -58,13 +58,13 @@ interface HasPrivileges {
   all: boolean;
 }
 type AuthorizedConsumers = Record<string, HasPrivileges>;
-export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
+export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
 }
 
 type IsAuthorizedAtProducerLevel = boolean;
 export interface ConstructorOptions {
-  ruleTypeRegistry: ruleTypeRegistry;
+  ruleTypeRegistry: RuleTypeRegistry;
   request: KibanaRequest;
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
@@ -74,7 +74,7 @@ export interface ConstructorOptions {
 }
 
 export class AlertingAuthorization {
-  private readonly ruleTypeRegistry: ruleTypeRegistry;
+  private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly auditLogger: AlertingAuthorizationAuditLogger;
@@ -352,7 +352,7 @@ export class AlertingAuthorization {
   }
 
   public async filterByRuleTypeAuthorization(
-    ruleTypes: Set<RegistryAlertType>,
+    ruleTypes: Set<RegistryRuleType>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity
   ): Promise<Set<RegistryAlertTypeWithAuth>> {
@@ -365,7 +365,7 @@ export class AlertingAuthorization {
   }
 
   private async augmentRuleTypesWithAuthorization(
-    ruleTypes: Set<RegistryAlertType>,
+    ruleTypes: Set<RegistryRuleType>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity,
     featuresIds?: Set<string>
@@ -457,7 +457,7 @@ export class AlertingAuthorization {
   }
 
   private augmentWithAuthorizedConsumers(
-    ruleTypes: Set<RegistryAlertType>,
+    ruleTypes: Set<RegistryRuleType>,
     authorizedConsumers: AuthorizedConsumers
   ): Set<RegistryAlertTypeWithAuth> {
     return new Set(

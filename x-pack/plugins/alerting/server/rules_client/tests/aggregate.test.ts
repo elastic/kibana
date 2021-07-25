@@ -8,7 +8,7 @@
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { ruleTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
@@ -17,7 +17,7 @@ import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { AlertExecutionStatusValues } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
-import { RegistryAlertType } from '../../alert_type_registry';
+import { RegistryRuleType } from '../../rule_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -52,7 +52,7 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('aggregate()', () => {
-  const listedTypes = new Set<RegistryAlertType>([
+  const listedTypes = new Set<RegistryRuleType>([
     {
       actionGroups: [],
       actionVariables: undefined,

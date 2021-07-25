@@ -18,7 +18,7 @@ import {
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { SpacesPluginStart } from '../../spaces/server';
 import { RulesClient } from './rules_client';
-import { ruleTypeRegistry } from './alert_type_registry';
+import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
@@ -107,7 +107,7 @@ export interface PluginSetupContract {
 }
 
 export interface PluginStartContract {
-  listTypes: ruleTypeRegistry['list'];
+  listTypes: RuleTypeRegistry['list'];
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
@@ -139,7 +139,7 @@ export interface AlertingPluginsStart {
 export class AlertingPlugin {
   private readonly config: Promise<AlertsConfig>;
   private readonly logger: Logger;
-  private ruleTypeRegistry?: ruleTypeRegistry;
+  private ruleTypeRegistry?: RuleTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
   private isESOCanEncrypt?: boolean;
@@ -197,7 +197,7 @@ export class AlertingPlugin {
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
-    const ruleTypeRegistry = new ruleTypeRegistry({
+    const ruleTypeRegistry = new RuleTypeRegistry({
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,

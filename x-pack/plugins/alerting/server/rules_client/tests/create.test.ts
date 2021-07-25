@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { ruleTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
@@ -2032,7 +2032,7 @@ describe('create()', () => {
 
   test('throws error when ensureActionTypeEnabled throws', async () => {
     const data = getMockData();
-    ruleTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+    ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);

@@ -36,7 +36,7 @@ export interface ConstructorOptions {
   licensing: LicensingPluginSetup;
 }
 
-export interface RegistryAlertType
+export interface RegistryRuleType
   extends Pick<
     UntypedNormalizedAlertType,
     | 'name'
@@ -137,7 +137,7 @@ export class RuleTypeRegistry {
     return this.alertTypes.has(id);
   }
 
-  public ensureAlertTypeEnabled(id: string) {
+  public ensureRuleTypeEnabled(id: string) {
     this.licenseState.ensureLicenseForAlertType(this.get(id));
   }
 
@@ -256,7 +256,7 @@ export class RuleTypeRegistry {
     >;
   }
 
-  public list(): Set<RegistryAlertType> {
+  public list(): Set<RegistryRuleType> {
     return new Set(
       Array.from(this.alertTypes).map(
         ([
