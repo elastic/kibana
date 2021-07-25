@@ -155,6 +155,7 @@ export const searchAfterAndBulkCreate = async ({
           success: bulkSuccess,
           errors: bulkErrors,
         } = await bulkCreate(wrappedDocs);
+
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnType({

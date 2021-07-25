@@ -41,6 +41,9 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 instances: alerts.map((alert) => alertInstanceFactory(alert.id)),
                 response,
               };
+            } else {
+              console.log('write not enabled');
+              logger.debug('Writing is disabled.');
             }
           },
         },

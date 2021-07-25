@@ -60,11 +60,11 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
   );
   const createdItems = wrappedDocs
     .map((doc, index) => ({
-      _id: response.body.items[index].create?._id ?? '',
-      _index: response.body.items[index].create?._index ?? '',
+      _id: response.body.items[index].index?._id ?? '',
+      _index: response.body.items[index].index?._index ?? '',
       ...doc._source,
     }))
-    .filter((_, index) => get(response.body.items[index], 'create.status') === 201);
+    .filter((_, index) => response.body.items[index].index?.status === 201);
   const createdItemsCount = createdItems.length;
   const duplicateSignalsCount = countBy(response.body.items, 'create.status')['409'];
   const errorCountByMessage = errorAggregator(response.body, [409]);
