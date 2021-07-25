@@ -171,13 +171,15 @@ function runBackportAsync(
     ...options,
   ]);
 
-  return new Promise<string>((resolve, reject) => {
+  const p = new Promise<string>((resolve, reject) => {
     let data = '';
 
     // fail if expectations hasn't been found within 4s
+    const TIMEOUT_IN_SECONDS = 4;
     const timeout = setTimeout(() => {
-      reject(`Expectation "${waitForString}" not found in: ${data.toString()}`);
-    }, 4000);
+      reject(`Expectation '${waitForString}' not found within ${TIMEOUT_IN_SECONDS} seconds in:
+      '${data.toString()}'`);
+    }, TIMEOUT_IN_SECONDS * 1000);
 
     proc.stdout.on('data', (dataChunk) => {
       data += dataChunk;
@@ -186,9 +188,15 @@ function runBackportAsync(
       if (!waitForString || output.includes(waitForString)) {
         clearTimeout(timeout);
         // remove ansi codes and whitespace
-        resolve(stripAnsi(output).replace(/\s+$/gm, ''));
-        proc.kill();
+        const strippedOutput = stripAnsi(output).replace(/\s+$/gm, '');
+
+        resolve(strippedOutput);
       }
     });
+  });
+
+  // kill child process
+  return p.finally(() => {
+    proc.kill();
   });
 }
