@@ -64,7 +64,6 @@ export const createQueryAlertType = (createOptions: {
     isExportable: false,
     producer: 'security-solution',
     async executor(execOptions) {
-      // let result = createResultObject<QueryAlertState>({});
       const {
         runOpts: {
           buildRuleMessage,

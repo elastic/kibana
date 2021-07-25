@@ -6,7 +6,7 @@
  */
 
 import { performance } from 'perf_hooks';
-import { countBy, isEmpty, get } from 'lodash';
+import { countBy, isEmpty } from 'lodash';
 
 import { Logger } from 'kibana/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
@@ -50,6 +50,7 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
   );
 
   const end = performance.now();
+
   logger.debug(
     buildRuleMessage(
       `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
@@ -58,6 +59,7 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
   logger.debug(
     buildRuleMessage(`took property says bulk took: ${response.body.took} milliseconds`)
   );
+
   const createdItems = wrappedDocs
     .map((doc, index) => ({
       _id: response.body.items[index].index?._id ?? '',
@@ -66,19 +68,23 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
     }))
     .filter((_, index) => response.body.items[index].index?.status === 201);
   const createdItemsCount = createdItems.length;
+
   const duplicateSignalsCount = countBy(response.body.items, 'create.status')['409'];
   const errorCountByMessage = errorAggregator(response.body, [409]);
 
   logger.debug(buildRuleMessage(`bulk created ${createdItemsCount} signals`));
+
   if (duplicateSignalsCount > 0) {
     logger.debug(buildRuleMessage(`ignored ${duplicateSignalsCount} duplicate signals`));
   }
+
   if (!isEmpty(errorCountByMessage)) {
     logger.error(
       buildRuleMessage(
         `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
       )
     );
+
     return {
       errors: Object.keys(errorCountByMessage),
       success: false,

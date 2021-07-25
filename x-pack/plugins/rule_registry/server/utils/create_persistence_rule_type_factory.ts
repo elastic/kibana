@@ -42,7 +42,6 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 response,
               };
             } else {
-              console.log('write not enabled');
               logger.debug('Writing is disabled.');
             }
           },
