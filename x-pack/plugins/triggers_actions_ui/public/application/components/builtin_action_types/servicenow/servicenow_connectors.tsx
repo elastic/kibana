@@ -213,6 +213,19 @@ const ServiceNowConnectorFields: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <FormattedMessage
+        defaultMessage="To use the connector you had to {install} the Elastic App from the ServiceNow Store."
+        id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
+        values={{
+          install: (
+            <EuiLink href="https://store.servicenow.com/" target="_blank">
+              {i18n.INSTALL}
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer size="m" />
       {isLegacy && <DeprecatedCallout />}
       {applicationRequired && <ApplicationRequiredCallout />}
     </>

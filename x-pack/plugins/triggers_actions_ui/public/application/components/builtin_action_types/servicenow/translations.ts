@@ -203,3 +203,10 @@ export const APP_INFO_API_ERROR = i18n.translate(
     defaultMessage: 'Unreachable Elastic Application in ServiceNow instance.',
   }
 );
+
+export const INSTALL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.install',
+  {
+    defaultMessage: 'install',
+  }
+);
