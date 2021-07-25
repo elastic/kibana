@@ -43,6 +43,62 @@ describe('crawler routes', () => {
     });
   });
 
+  describe('POST /api/app_search/engines/{name}/crawler/domains', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/engines/{name}/crawler/domains',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/domains',
+      });
+    });
+
+    it('validates correctly with params and body', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { name: 'https://elastic.co/guide', entry_points: [{ value: '/guide' }] },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('accepts a query param', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { name: 'https://elastic.co/guide', entry_points: [{ value: '/guide' }] },
+        query: { respond_with: 'crawler_details' },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without a name param', () => {
+      const request = {
+        params: {},
+        body: { name: 'https://elastic.co/guide', entry_points: [{ value: '/guide' }] },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without a body', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
   describe('DELETE /api/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
