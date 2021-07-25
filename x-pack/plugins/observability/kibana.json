@@ -8,6 +8,7 @@
   ],
   "optionalPlugins": [
     "home",
+    "discover",
     "lens",
     "licensing",
     "usageCollection"
