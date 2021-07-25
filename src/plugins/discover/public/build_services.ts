@@ -40,7 +40,7 @@ import type { AddTopNavDataService } from './application/apps/main/services/add_
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
-  addTopNavDataService: AddTopNavDataService;
+  addTopNavData: AddTopNavDataService;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -71,7 +71,7 @@ export async function buildServices(
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
   getEmbeddableInjector: () => Promise<auto.IInjectorService>,
-  addTopNavDataService: AddTopNavDataService
+  addTopNavData: AddTopNavDataService
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
@@ -81,8 +81,8 @@ export async function buildServices(
   const { usageCollection } = plugins;
 
   return {
-    addTopNavDataService,
     addBasePath: core.http.basePath.prepend,
+    addTopNavData,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,

@@ -46,8 +46,8 @@ export const DiscoverTopNav = ({
     let unmounted = false;
 
     const loadRegisteredTopNavLinks = async () => {
-      if (services?.addTopNavDataService) {
-        const callbacks = services.addTopNavDataService.getTopNavLinkGetters();
+      if (services?.addTopNavData) {
+        const callbacks = services.addTopNavData.getTopNavLinkGetters();
         const params = {
           indexPattern,
           onOpenInspector,
@@ -77,7 +77,7 @@ export const DiscoverTopNav = ({
       unmounted = true;
     };
   }, [
-    services?.addTopNavDataService,
+    services?.addTopNavData,
     indexPattern,
     onOpenInspector,
     query,

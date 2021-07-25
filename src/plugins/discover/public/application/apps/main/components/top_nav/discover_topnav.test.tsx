@@ -16,6 +16,7 @@ import { ISearchSource, Query } from '../../../../../../../data/common';
 import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
+import { act } from 'react-dom/test-utils';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -38,25 +39,21 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 }
 
 describe('Discover topnav component', () => {
-  test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
-    const props = getProps(true);
-    const component = shallowWithIntl(<DiscoverTopNav {...props} />);
-    const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual([
-      'options',
-      'new',
-      'save',
-      'open',
-      'share',
-      'inspect',
-      'dataVisualizer',
-    ]);
+  test('generated config of TopNavMenu config is correct when discover save permissions are assigned', async () => {
+    await act(async () => {
+      const props = getProps(true);
+      const component = shallowWithIntl(<DiscoverTopNav {...props} />);
+      const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
+      expect(topMenuConfig).toEqual(['options', 'new', 'save', 'open', 'share', 'inspect']);
+    });
   });
 
-  test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
-    const props = getProps(false);
-    const component = shallowWithIntl(<DiscoverTopNav {...props} />);
-    const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect', 'dataVisualizer']);
+  test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', async () => {
+    await act(async () => {
+      const props = getProps(false);
+      const component = shallowWithIntl(<DiscoverTopNav {...props} />);
+      const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
+      expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect']);
+    });
   });
 });

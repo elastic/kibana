@@ -80,13 +80,6 @@ test('getTopNavLinks result', () => {
         "run": [Function],
         "testId": "openInspectorButton",
       },
-      Object {
-        "description": "Open in Data visualizer",
-        "id": "dataVisualizer",
-        "label": "Data visualizer",
-        "run": [Function],
-        "testId": "dataVisualizerTopNavButton",
-      },
     ]
   `);
 });
