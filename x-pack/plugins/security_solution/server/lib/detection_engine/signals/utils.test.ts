@@ -36,11 +36,12 @@ import {
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
-  createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
   buildChunkedOrFilter,
   getValidDateFromDoc,
+  calculateTotal,
+  getTotalHitsValue,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -53,7 +54,6 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
-  repeatedSearchResultsWithSortId,
   sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
 } from './__mocks__/es_results';
@@ -1569,22 +1569,6 @@ describe('utils', () => {
     });
   });
 
-  describe('createTotalHitsFromSearchResult', () => {
-    test('it should return 0 for empty results', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: sampleEmptyDocSearchResults(),
-      });
-      expect(result).toEqual(0);
-    });
-
-    test('it should return 4 for 4 result sets', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
-      });
-      expect(result).toEqual(4);
-    });
-  });
-
   describe('calculateThresholdSignalUuid', () => {
     it('should generate a uuid without key', () => {
       const startedAt = new Date('2020-12-17T16:27:00Z');
@@ -1618,6 +1602,30 @@ describe('utils', () => {
     test('should return a filter with a multiple values chunked', () => {
       const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
       expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
+    });
+  });
+
+  describe('getTotalHitsValue', () => {
+    test('returns value if present as number', () => {
+      expect(getTotalHitsValue(sampleDocSearchResultsWithSortId().hits.total)).toBe(1);
+    });
+
+    test('returns value if present as value object', () => {
+      expect(getTotalHitsValue({ value: 1 })).toBe(1);
+    });
+
+    test('returns -1 if not present', () => {
+      expect(getTotalHitsValue(undefined)).toBe(-1);
+    });
+  });
+
+  describe('calculateTotal', () => {
+    test('should add totalHits if both totalHits values are numbers', () => {
+      expect(calculateTotal(1, 2)).toBe(3);
+    });
+
+    test('should return -1 if totalHits is undefined', () => {
+      expect(calculateTotal(undefined, 2)).toBe(-1);
     });
   });
 });

@@ -16,6 +16,8 @@ paths:
   # plugin-wide endpoint(s)
   /setup:
     $ref: paths/setup.yaml
+  /settings:
+    $ref: paths/settings.yaml
   # EPM / integrations endpoints
   /epm/categories:
     $ref: paths/epm@categories.yaml
@@ -62,6 +64,12 @@ paths:
     $ref: paths/package_policies@delete.yaml
   '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
+  /outputs:
+    $ref: paths/outputs.yaml
+  /outputs/{outputId}:
+    $ref: paths/outputs@{output_id}.yaml
+  '/epm/packages/{pkgName}/stats':
+    $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
 components:
   securitySchemes:
     basicAuth:
