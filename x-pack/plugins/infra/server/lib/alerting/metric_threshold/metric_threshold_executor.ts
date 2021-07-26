@@ -8,6 +8,7 @@
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
   ActionGroupIdsOf,
   RecoveredActionGroup,
@@ -44,6 +45,7 @@ type MetricThresholdAlertInstance = AlertInstance<
 
 type MetricThresholdAlertInstanceFactory = (
   id: string,
+  reason: string,
   threshold?: number | undefined,
   value?: number | undefined
 ) => MetricThresholdAlertInstance;
@@ -60,10 +62,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertInstanceFactory: MetricThresholdAlertInstanceFactory = (id) =>
+    const alertInstanceFactory: MetricThresholdAlertInstanceFactory = (id, reason) =>
       alertWithLifecycle({
         id,
-        fields: {},
+        fields: {
+          [ALERT_REASON]: reason,
+        },
       });
 
     const { sourceId, alertOnNoData } = params as {
@@ -147,7 +151,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alertInstance = alertInstanceFactory(`${group}`);
+        const alertInstance = alertInstanceFactory(`${group}`, reason);
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],

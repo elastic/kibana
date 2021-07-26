@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
-export const formatReason: ObservabilityRuleTypeFormatter = () => {
-  const reason = i18n.translate('xpack.infra.metrics.alerting.threshold.alertReasonDescription', {
-    defaultMessage: 'Metric threshold', // TEMP reason message, will be deleted once we index the reason field
-  });
-  const link = '';
-
+export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
+  const reason = fields[ALERT_REASON] ?? '';
+  const link = '/app/metrics/explorer';
   return {
     reason,
     link,
