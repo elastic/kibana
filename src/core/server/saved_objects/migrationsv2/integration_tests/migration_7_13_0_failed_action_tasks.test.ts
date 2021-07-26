@@ -34,8 +34,7 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
       settings: {
         es: {
           license: 'basic',
-          // TODO: use archive from 7.13 so this can be backported to 7.14 branch
-          dataArchive: Path.join(__dirname, 'archives', '7.14_1.5k_failed_action_tasks.zip'),
+          dataArchive: Path.join(__dirname, 'archives', '7.13_1.5k_failed_action_tasks.zip'),
         },
       },
     }));
@@ -86,8 +85,8 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
 
     // Verify counts in current index before migration starts
     expect(await getCounts()).toEqual({
-      actionTaskParamsCount: 1532,
-      tasksCount: 1546,
+      actionTaskParamsCount: 2010,
+      tasksCount: 2020,
     });
 
     root = createRoot();
@@ -96,16 +95,15 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
     await root.start();
 
     // Bulk of tasks should have been filtered out of current index
-    // Q: is this going to be flaky if TM starts manipulating docs before the counts are taken?
-    expect(await getCounts()).toEqual({
-      actionTaskParamsCount: 397,
-      tasksCount: 478,
-    });
+    const { actionTaskParamsCount, tasksCount } = await getCounts();
+    // Use toBeLessThan to avoid flakiness in the case that TM starts manipulating docs before the counts are taken
+    expect(actionTaskParamsCount).toBeLessThan(1000);
+    expect(tasksCount).toBeLessThan(1000);
 
     // Verify that docs were not deleted from old index
-    expect(await getCounts('.kibana_7.14.0_001', '.kibana_task_manager_7.14.0_001')).toEqual({
-      actionTaskParamsCount: 1532,
-      tasksCount: 1546,
+    expect(await getCounts('.kibana_7.13.5_001', '.kibana_task_manager_7.13.5_001')).toEqual({
+      actionTaskParamsCount: 2010,
+      tasksCount: 2020,
     });
   });
 });
