@@ -43,14 +43,14 @@ export class IndexPatternDatasource {
         renameColumns,
         formatColumn,
         counterRate,
-        getTimeScaleFunction,
+        timeScale,
         getSuffixFormatter,
       } = await import('../async_services');
       return core
         .getStartServices()
         .then(([coreStart, { data, indexPatternFieldEditor, uiActions }]) => {
           data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
-          expressions.registerFunction(getTimeScaleFunction(data));
+          expressions.registerFunction(timeScale);
           expressions.registerFunction(counterRate);
           expressions.registerFunction(renameColumns);
           expressions.registerFunction(formatColumn);

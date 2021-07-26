@@ -22,8 +22,9 @@ import {
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
-import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+
+type OriginalColumn = { id: string } & IndexPatternColumn;
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,

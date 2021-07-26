@@ -16,11 +16,10 @@ import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-  SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import { DateRange } from '../common';
-import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -36,8 +35,6 @@ import type {
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
-
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface PublicAPIProps<T> {
   state: T;
@@ -385,15 +382,6 @@ export interface OperationMetadata {
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
-}
-
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
 }
 
 export interface VisualizationConfigProps<T = unknown> {
