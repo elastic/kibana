@@ -5,18 +5,25 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import { Duplex } from 'stream';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ReportDocument } from '../../common/types';
 
+type Callback = (error?: Error) => void;
 type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
 export interface ContentStreamDocument {
   id: string;
   index: string;
+  if_primary_term?: number;
+  if_seq_no?: number;
 }
 
-export class ContentStream extends Readable {
+export class ContentStream extends Duplex {
+  private buffer = '';
+  private primaryTerm?: number;
+  private seqNo?: number;
+
   constructor(private client: ElasticsearchClient, private document: ContentStreamDocument) {
     super();
   }
@@ -52,6 +59,32 @@ export class ContentStream extends Readable {
     }
   }
 
+  _write(chunk: Buffer | string, _encoding: string, callback: Callback) {
+    this.buffer += typeof chunk === 'string' ? chunk : chunk.toString();
+    callback();
+  }
+
+  async _final(callback: Callback) {
+    try {
+      const { body } = await this.client.update<ReportDocument>({
+        ...this.document,
+        body: {
+          doc: {
+            output: {
+              content: this.buffer,
+            },
+          },
+        },
+      });
+
+      ({ _primary_term: this.primaryTerm, _seq_no: this.seqNo } = body);
+      this.buffer = '';
+      callback();
+    } catch (error) {
+      callback(error);
+    }
+  }
+
   async toString(): Promise<string> {
     let result = '';
 
@@ -60,5 +93,13 @@ export class ContentStream extends Readable {
     }
 
     return result;
+  }
+
+  getSeqNo(): number | undefined {
+    return this.seqNo;
+  }
+
+  getPrimaryTerm(): number | undefined {
+    return this.primaryTerm;
   }
 }

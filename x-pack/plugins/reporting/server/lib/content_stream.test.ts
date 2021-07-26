@@ -74,4 +74,51 @@ describe('ContentStream', () => {
       await expect(stream.toString()).resolves.toBe('');
     });
   });
+
+  describe('write', () => {
+    it('should not send a request until stream is closed', () => {
+      stream.write('something');
+
+      expect(client.update).not.toHaveBeenCalled();
+    });
+
+    it('should send the contents when stream ends', async () => {
+      stream.write('123');
+      stream.write('456');
+      stream.end();
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.update).toHaveBeenCalledTimes(1);
+
+      const [[request]] = client.update.mock.calls;
+
+      expect(request).toHaveProperty('id', 'something');
+      expect(request).toHaveProperty('index', 'somewhere');
+      expect(request).toHaveProperty('body.doc.output.content', '123456');
+    });
+
+    it('should emit an error event', async () => {
+      client.update.mockRejectedValueOnce('some error');
+
+      stream.end('data');
+      const error = await new Promise((resolve) => stream.once('error', resolve));
+
+      expect(error).toBe('some error');
+    });
+
+    it('should update _seq_no and _primary_term from the response', async () => {
+      client.update.mockResolvedValueOnce({
+        body: {
+          _primary_term: 1,
+          _seq_no: 10,
+        },
+      } as any);
+
+      stream.end('something');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(stream.getPrimaryTerm()).toBe(1);
+      expect(stream.getSeqNo()).toBe(10);
+    });
+  });
 });
