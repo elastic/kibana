@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+import { ViewBoxParams } from '../../types';
+
+export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
+  if (!viewBox) return;
+  return `${viewBox?.minX} ${viewBox?.minY} ${viewBox?.width} ${viewBox?.height}`;
+}

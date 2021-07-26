@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+export interface ViewBoxParams {
+  minX: number;
+  minY: number;
+  width: number;
+  height: number;
+}
