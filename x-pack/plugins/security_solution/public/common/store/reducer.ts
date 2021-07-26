@@ -14,6 +14,7 @@ import { sourcererReducer, sourcererModel } from './sourcerer';
 
 import { HostsPluginReducer } from '../../hosts/store';
 import { NetworkPluginReducer } from '../../network/store';
+import { UebaPluginReducer } from '../../ueba/store';
 import { TimelinePluginReducer } from '../../timelines/store/timeline';
 
 import { SecuritySubPlugins } from '../../app/types';
@@ -24,6 +25,7 @@ import { KibanaIndexPattern, KibanaIndexPatterns } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
+  UebaPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer &
   ManagementPluginReducer;

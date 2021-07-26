@@ -31,16 +31,10 @@ import { ExceptionBuilder } from '../../../../../../shared_imports';
 
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
-import {
-  FORM_DESCRIPTION,
-  NAME_LABEL,
-  NAME_ERROR,
-  NAME_PLACEHOLDER,
-  OS_LABEL,
-  RULE_NAME,
-} from './translations';
+import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
+import { ABOUT_EVENT_FILTERS } from '../../translations';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -205,8 +199,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     return !isIndexPatternLoading && exception ? (
       <EuiForm component="div">
-        <EuiText size="s">{FORM_DESCRIPTION}</EuiText>
-        <EuiSpacer size="m" />
+        {!exception || !exception.item_id ? (
+          <EuiText color="subdued" size="xs">
+            {ABOUT_EVENT_FILTERS}
+            <EuiSpacer size="m" />
+          </EuiText>
+        ) : null}
         {nameInputMemo}
         <EuiSpacer size="m" />
         {allowSelectOs ? (
