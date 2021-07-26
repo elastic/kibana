@@ -215,7 +215,7 @@ export function systemRoutes(
     {
       path: '/api/ml/index_exists',
       validate: {
-        body: schema.object({ index: schema.string() }),
+        body: schema.object({ indices: schema.arrayOf(schema.string()) }),
       },
       options: {
         tags: ['access:ml:canAccessML'],
@@ -223,21 +223,21 @@ export function systemRoutes(
     },
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { index } = request.body;
+        const { indices } = request.body;
 
         const options = {
-          index: [index],
+          index: indices,
           fields: ['*'],
           ignore_unavailable: true,
           allow_no_indices: true,
         };
 
         const { body } = await client.asCurrentUser.fieldCaps(options);
-        const result = { exists: false };
 
-        if (Array.isArray(body.indices) && body.indices.length !== 0) {
-          result.exists = true;
-        }
+        const result = indices.reduce((acc, cur) => {
+          acc[cur] = { exists: body.indices.includes(cur) };
+          return acc;
+        }, {} as Record<string, { exists: boolean }>);
 
         return response.ok({
           body: result,

@@ -349,13 +349,19 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getGaugeLabel() {
-    const gaugeLabel = await this.find.byCssSelector('.tvbVisGauge__label');
+    const gaugeLabel = await this.testSubjects.find('gaugeLabel');
     return await gaugeLabel.getVisibleText();
   }
 
   public async getGaugeCount() {
-    const gaugeCount = await this.find.byCssSelector('.tvbVisGauge__value');
+    const gaugeCount = await this.testSubjects.find('gaugeValue');
     return await gaugeCount.getVisibleText();
+  }
+
+  public async getGaugeColor(isInner = false): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${isInner ? 'Inner' : ''}`);
+    return await gaugeColoredCircle.getAttribute('stroke');
   }
 
   public async clickTopN() {
@@ -370,6 +376,12 @@ export class VisualBuilderPageObject extends FtrService {
   public async getTopNCount() {
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
+  }
+
+  public async getTopNBarStyle(nth: number = 0): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const topNBars = await this.testSubjects.findAll('topNInnerBar');
+    return await topNBars[nth].getAttribute('style');
   }
 
   public async clickTable() {
@@ -565,8 +577,8 @@ export class VisualBuilderPageObject extends FtrService {
     return (await label.findAllByTestSubject('comboBoxInput'))[1];
   }
 
-  public async clickColorPicker(): Promise<void> {
-    const picker = await this.find.byCssSelector('.tvbColorPicker button');
+  public async clickColorPicker(nth: number = 0): Promise<void> {
+    const picker = (await this.find.allByCssSelector('.tvbColorPicker button'))[nth];
     await picker.clickMouseButton();
   }
 
@@ -584,10 +596,10 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
-    const picker = await this.find.allByCssSelector('.tvbColorPicker button');
-    await picker[nth].clickMouseButton();
+    await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
     await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.clickColorPicker(nth);
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
@@ -615,7 +627,13 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async getMetricValueStyle(): Promise<string> {
     await this.visChart.waitForVisualizationRenderingStabilized();
-    const metricValue = await this.find.byCssSelector('[data-test-subj="tsvbMetricValue"]');
+    const metricValue = await this.testSubjects.find('tsvbMetricValue');
+    return await metricValue.getAttribute('style');
+  }
+
+  public async getGaugeValueStyle(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const metricValue = await this.testSubjects.find('gaugeValue');
     return await metricValue.getAttribute('style');
   }
 
