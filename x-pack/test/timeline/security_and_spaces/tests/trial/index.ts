@@ -11,7 +11,7 @@ import {
   createUsersAndRoles,
   deleteSpaces,
   deleteUsersAndRoles,
-} from '../../../common/lib/authentication';
+} from '../../../../rule_registry/common/lib/authentication';
 
 import {
   observabilityMinReadAlertsRead,
@@ -22,7 +22,7 @@ import {
   observabilityMinReadAlertsAllSpacesAll,
   observabilityMinimalAll,
   observabilityMinimalAllSpacesAll,
-} from '../../../common/lib/authentication/roles';
+} from '../../../../rule_registry/common/lib/authentication/roles';
 import {
   obsMinReadAlertsRead,
   obsMinReadAlertsReadSpacesAll,
@@ -33,7 +33,7 @@ import {
   obsMinReadAlertsAllSpacesAll,
   obsMinAll,
   obsMinAllSpacesAll,
-} from '../../../common/lib/authentication/users';
+} from '../../../../rule_registry/common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
@@ -98,6 +98,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     });
 
     // Trial
-    loadTestFile(require.resolve('./trial'));
+    loadTestFile(require.resolve('./events'));
   });
 };

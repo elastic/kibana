@@ -33,10 +33,6 @@ import {
   noKibanaPrivileges,
 } from '../../../../rule_registry/common/lib/authentication/users';
 import {
-  createSpacesAndUsers,
-  deleteSpacesAndUsers,
-} from '../../../../rule_registry/common/lib/authentication/';
-import {
   Direction,
   TimelineEventsQueries,
 } from '../../../../../plugins/security_solution/common/search_strategy';
@@ -68,7 +64,6 @@ const SPACE_2 = 'space2';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const getPostBody = (): JsonObject => ({
     defaultIndex: ['.alerts-*'],
