@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const DRAGGABLE_UX_STYLE = {
+import { DraggableUXStyles } from './types';
+
+export const DRAGGABLE_UX_STYLE: DraggableUXStyles = {
   flexBasis: '16px',
   flexGrow: 0,
   alignItems: 'center',

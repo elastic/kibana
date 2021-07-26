@@ -9,13 +9,9 @@ import React from 'react';
 
 import { EuiFlexItem } from '@elastic/eui';
 
-import { Column } from './types';
+import { DraggableUXStyles } from './types';
 
-export interface CellProps<Item> {
-  alignItems?: Column<Item>['alignItems'];
-  flexBasis?: Column<Item>['flexBasis'];
-  flexGrow?: Column<Item>['flexGrow'];
-}
+type CellProps<Item> = DraggableUXStyles;
 
 export const Cell = <Item extends object>({
   children,
