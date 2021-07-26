@@ -136,6 +136,9 @@ export class VisualizeEmbeddable
     this.deps = deps;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
+    this.searchSessionId = this.input.searchSessionId;
+    this.query = this.input.query;
+
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
@@ -149,7 +152,7 @@ export class VisualizeEmbeddable
     }
 
     this.subscriptions.push(
-      this.getUpdated$().subscribe((value) => {
+      this.getInput$().subscribe(() => {
         const isDirty = this.handleChanges();
 
         if (isDirty && this.handler) {
