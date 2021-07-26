@@ -42,4 +42,4 @@ export {
 export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 export { SavedVisState, VisParams } from '../common';
-export { ExpressionValueVisDimension } from './expression_functions/vis_dimension';
+export { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
