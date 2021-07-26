@@ -21,6 +21,7 @@ import {
   entriesNested,
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { Filter } from '@kbn/es-query';
 
 import { hasLargeValueList } from '../has_large_value_list';
 
@@ -145,9 +146,6 @@ export const createOrClauses = (
   return exceptionItems.flatMap((exceptionItem) => buildExceptionItemFilter(exceptionItem));
 };
 
-// NOTE: This function used to have a return type of "Filter" from: "../../../../../src/plugins/data/common" and if that Filter
-// becomes a package friendly import, use it again. Otherwise we choose to not type the return of this function to at least give us
-// some typing information.
 export const buildExceptionFilter = ({
   lists,
   excludeExceptions,
@@ -156,14 +154,14 @@ export const buildExceptionFilter = ({
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   excludeExceptions: boolean;
   chunkSize: number;
-}) => {
+}): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
   const exceptionsWithoutLargeValueLists = lists.filter(
     (item): item is ExceptionItemSansLargeValueLists => !hasLargeValueList(item.entries)
   );
 
-  const exceptionFilter = {
+  const exceptionFilter: Filter = {
     meta: {
       alias: null,
       disabled: false,
@@ -171,7 +169,7 @@ export const buildExceptionFilter = ({
     },
     query: {
       bool: {
-        should: undefined as {} | undefined, // NOTE: Loose type until we move back to a more proper "Filter" type again
+        should: undefined,
       },
     },
   };
