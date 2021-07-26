@@ -106,6 +106,12 @@ export default async function ({ readConfigFile }) {
       observabilityCases: {
         pathname: '/app/observability/cases',
       },
+      fleet: {
+        pathname: '/app/fleet',
+      },
+      integrations: {
+        pathname: '/app/integrations',
+      },
     },
     junit: {
       reportName: 'Chrome UI Functional Tests',

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { Direction } from '@elastic/eui';
 import { IUiSettingsClient } from 'kibana/public';
 import { CustomPaletteState, PaletteRegistry } from 'src/plugins/charts/public';
 import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
-import type { FormatFactory, ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
-import type { DatatableProps } from '../expression';
+import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
 import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION, LENS_TOGGLE_ACTION } from './constants';
-
-export type LensGridDirection = 'none' | Direction;
+import type { FormatFactory } from '../../../common';
+import type { DatatableProps, LensGridDirection } from '../../../common/expressions';
 
 export interface LensSortActionData {
   columnId: string | undefined;
@@ -48,12 +46,6 @@ export type DatatableRenderProps = DatatableProps & {
    */
   rowHasRowClickTriggerActions?: boolean[];
 };
-
-export interface DatatableRender {
-  type: 'render';
-  as: 'lens_datatable_renderer';
-  value: DatatableProps;
-}
 
 export interface DataContextType {
   table?: Datatable;
