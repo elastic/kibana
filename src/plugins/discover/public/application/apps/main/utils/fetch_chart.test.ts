@@ -9,7 +9,7 @@ import { FetchStatus } from '../../../types';
 import { BehaviorSubject, of, throwError as throwErrorRx } from 'rxjs';
 import { RequestAdapter } from '../../../../../../inspector';
 import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
-import { fetchChart } from './fetch_chart';
+import { fetchChart, updateSearchSource } from './fetch_chart';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../../__mocks__/services';
@@ -135,5 +135,40 @@ describe('test fetchCharts', () => {
         done();
       },
     });
+  });
+
+  test('updateSearchSource helper function', () => {
+    const chartAggConfigs = updateSearchSource(
+      savedSearchMockWithTimeField.searchSource,
+      'auto',
+      discoverServiceMock.data
+    );
+    expect(chartAggConfigs.aggs).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "enabled": true,
+          "id": "1",
+          "params": Object {},
+          "schema": "metric",
+          "type": "count",
+        },
+        Object {
+          "enabled": true,
+          "id": "2",
+          "params": Object {
+            "drop_partials": false,
+            "extended_bounds": Object {},
+            "field": "timestamp",
+            "interval": "auto",
+            "min_doc_count": 1,
+            "scaleMetricValues": false,
+            "useNormalizedEsInterval": true,
+            "used_interval": "0ms",
+          },
+          "schema": "segment",
+          "type": "date_histogram",
+        },
+      ]
+    `);
   });
 });
