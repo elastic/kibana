@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Story } from '@storybook/react';
 import { cloneDeep, merge } from 'lodash';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
@@ -14,19 +15,20 @@ import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
 export default {
-  title: 'app/TransactionDurationAlertTrigger',
+  title: 'alerting/TransactionDurationAlertTrigger',
   component: TransactionDurationAlertTrigger,
   decorators: [
-    (Story: ComponentType) => {
+    (StoryComponent: ComponentType) => {
       const contextMock = (merge(cloneDeep(mockApmPluginContextValue), {
         core: {
           http: {
             get: (endpoint: string) => {
               if (endpoint === '/api/apm/environments') {
-                return Promise.resolve(['production']);
+                return Promise.resolve({ environments: ['production'] });
               } else {
                 return Promise.resolve({
                   transactionTypes: ['request'],
@@ -39,11 +41,13 @@ export default {
 
       return (
         <div style={{ width: 400 }}>
-          <MemoryRouter initialEntries={['/transactions/test-service-name']}>
-            <Route path="/transactions/:serviceName">
+          <MemoryRouter initialEntries={['/services/test-service-name']}>
+            <Route path="/services/:serviceName">
               <MockApmPluginContextWrapper value={contextMock}>
                 <MockUrlParamsContextProvider>
-                  <Story />
+                  <ApmServiceContextProvider>
+                    <StoryComponent />
+                  </ApmServiceContextProvider>
                 </MockUrlParamsContextProvider>
               </MockApmPluginContextWrapper>
             </Route>
@@ -54,7 +58,7 @@ export default {
   ],
 };
 
-export function Example() {
+export const Example: Story = () => {
   const params = {
     threshold: 1500,
     aggregationType: 'avg' as const,
@@ -67,4 +71,4 @@ export function Example() {
       setAlertProperty={() => undefined}
     />
   );
-}
+};

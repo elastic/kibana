@@ -40,7 +40,7 @@ export function UptimeSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
   const history = useHistory();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
@@ -58,7 +58,7 @@ export function UptimeSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.synthetics?.hasData) {
+  if (!hasDataMap.synthetics?.hasData) {
     return null;
   }
 

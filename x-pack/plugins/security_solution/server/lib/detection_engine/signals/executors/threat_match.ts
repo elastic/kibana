@@ -20,10 +20,11 @@ import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
 import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const threatMatchExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
   services,
@@ -31,12 +32,13 @@ export const threatMatchExecutor = async ({
   searchAfterSize,
   logger,
   eventsTelemetry,
+  experimentalFeatures,
   buildRuleMessage,
   bulkCreate,
   wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -44,14 +46,20 @@ export const threatMatchExecutor = async ({
   searchAfterSize: number;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
   return createThreatSignals({
-    tuples,
+    tuple,
     threatMapping: ruleParams.threatMapping,
     query: ruleParams.query,
     inputIndex,

@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiText, EuiBadge, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSideNavItemType, EuiText, EuiBadge, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SideNavLink, SideNavItem } from '../../../shared/layout';
+import { generateNavLink } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
 import {
   ENGINE_PATH,
@@ -41,13 +42,12 @@ import { SCHEMA_TITLE } from '../schema';
 import { SEARCH_UI_TITLE } from '../search_ui';
 import { SYNONYMS_TITLE } from '../synonyms';
 
-import { EngineDetails } from './types';
-
 import { EngineLogic, generateEnginePath } from './';
 
 import './engine_nav.scss';
 
-export const EngineNav: React.FC = () => {
+export const useEngineNav = () => {
+  const isEngineRoute = !!useRouteMatch(ENGINE_PATH);
   const {
     myRole: {
       canViewEngineAnalytics,
@@ -63,7 +63,6 @@ export const EngineNav: React.FC = () => {
       canViewEngineApiLogs,
     },
   } = useValues(AppLogic);
-
   const {
     engineName,
     dataLoading,
@@ -75,15 +74,16 @@ export const EngineNav: React.FC = () => {
     engine,
   } = useValues(EngineLogic);
 
-  if (dataLoading) return null;
-  if (!engineName) return null;
+  if (!isEngineRoute) return undefined;
+  if (dataLoading) return undefined;
+  if (!engineName) return undefined;
 
-  const { invalidBoosts, unsearchedUnconfirmedFields } = engine as Required<EngineDetails>;
-
-  return (
-    <>
-      <SideNavItem className="appSearchNavEngineLabel" data-test-subj="EngineLabel">
-        <EuiText color="subdued" size="s">
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'engineName',
+      name: engineName,
+      renderItem: () => (
+        <EuiText color="subdued" size="s" className="appSearchNavEngineLabel">
           <div className="eui-textTruncate">{engineName.toUpperCase()}</div>
           {isSampleEngine && (
             <EuiBadge>
@@ -100,164 +100,198 @@ export const EngineNav: React.FC = () => {
             </EuiBadge>
           )}
         </EuiText>
-      </SideNavItem>
-      <SideNavLink to={generateEnginePath(ENGINE_PATH)} data-test-subj="EngineOverviewLink">
-        {OVERVIEW_TITLE}
-      </SideNavLink>
-      {canViewEngineAnalytics && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_ANALYTICS_PATH)}
-          shouldShowActiveForSubroutes
-          data-test-subj="EngineAnalyticsLink"
-        >
-          {ANALYTICS_TITLE}
-        </SideNavLink>
-      )}
-      {canViewEngineDocuments && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_DOCUMENTS_PATH)}
-          shouldShowActiveForSubroutes
-          data-test-subj="EngineDocumentsLink"
-        >
-          {DOCUMENTS_TITLE}
-        </SideNavLink>
-      )}
-      {canViewEngineSchema && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_SCHEMA_PATH)}
-          shouldShowActiveForSubroutes
-          data-test-subj="EngineSchemaLink"
-        >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
-            <EuiFlexItem>{SCHEMA_TITLE}</EuiFlexItem>
-            <EuiFlexItem className="appSearchNavIcons">
-              {hasSchemaErrors && (
-                <EuiIcon
-                  type="alert"
-                  color="danger"
-                  title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
-                    defaultMessage: 'Schema change errors',
-                  })}
-                  data-test-subj="EngineNavSchemaErrors"
-                />
+      ),
+      'data-test-subj': 'EngineLabel',
+    },
+    {
+      id: 'overview',
+      name: OVERVIEW_TITLE,
+      ...generateNavLink({ to: generateEnginePath(ENGINE_PATH) }),
+      'data-test-subj': 'EngineOverviewLink',
+    },
+  ];
+
+  if (canViewEngineAnalytics) {
+    navItems.push({
+      id: 'analytics',
+      name: ANALYTICS_TITLE,
+      ...generateNavLink({
+        to: generateEnginePath(ENGINE_ANALYTICS_PATH),
+        shouldShowActiveForSubroutes: true,
+      }),
+      'data-test-subj': 'EngineAnalyticsLink',
+    });
+  }
+
+  if (canViewEngineDocuments) {
+    navItems.push({
+      id: 'documents',
+      name: DOCUMENTS_TITLE,
+      ...generateNavLink({
+        to: generateEnginePath(ENGINE_DOCUMENTS_PATH),
+        shouldShowActiveForSubroutes: true,
+      }),
+      'data-test-subj': 'EngineDocumentsLink',
+    });
+  }
+
+  if (canViewEngineSchema) {
+    navItems.push({
+      id: 'schema',
+      name: SCHEMA_TITLE,
+      ...generateNavLink({
+        to: generateEnginePath(ENGINE_SCHEMA_PATH),
+        shouldShowActiveForSubroutes: true,
+      }),
+      'data-test-subj': 'EngineSchemaLink',
+      icon: (
+        <>
+          {hasSchemaErrors && (
+            <EuiIcon
+              type="alert"
+              color="danger"
+              className="appSearchNavIcon"
+              title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
+                defaultMessage: 'Schema change errors',
+              })}
+              data-test-subj="EngineNavSchemaErrors"
+            />
+          )}
+          {hasUnconfirmedSchemaFields && (
+            <EuiIcon
+              type="iInCircle"
+              color="primary"
+              className="appSearchNavIcon"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFields',
+                { defaultMessage: 'New unconfirmed fields' }
               )}
-              {hasUnconfirmedSchemaFields && (
-                <EuiIcon
-                  type="iInCircle"
-                  color="primary"
-                  title={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFields',
-                    { defaultMessage: 'New unconfirmed fields' }
-                  )}
-                  data-test-subj="EngineNavSchemaUnconfirmedFields"
-                />
+              data-test-subj="EngineNavSchemaUnconfirmedFields"
+            />
+          )}
+          {hasSchemaConflicts && (
+            <EuiIcon
+              type="alert"
+              color="warning"
+              className="appSearchNavIcon"
+              title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.conflicts', {
+                defaultMessage: 'Schema conflicts',
+              })}
+              data-test-subj="EngineNavSchemaConflicts"
+            />
+          )}
+        </>
+      ),
+    });
+  }
+
+  if (canViewEngineCrawler && !isMetaEngine) {
+    navItems.push({
+      id: 'crawler',
+      name: CRAWLER_TITLE,
+      ...generateNavLink({
+        to: generateEnginePath(ENGINE_CRAWLER_PATH),
+        shouldShowActiveForSubroutes: true,
+      }),
+      'data-test-subj': 'EngineCrawlerLink',
+    });
+  }
+
+  if (canViewMetaEngineSourceEngines && isMetaEngine) {
+    navItems.push({
+      id: 'sourceEngines',
+      name: ENGINES_TITLE,
+      ...generateNavLink({ to: generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH) }),
+      'data-test-subj': 'MetaEngineEnginesLink',
+    });
+  }
+
+  if (canManageEngineRelevanceTuning) {
+    const { invalidBoosts, unsearchedUnconfirmedFields } = engine;
+
+    navItems.push({
+      id: 'relevanceTuning',
+      name: RELEVANCE_TUNING_TITLE,
+      ...generateNavLink({ to: generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH) }),
+      'data-test-subj': 'EngineRelevanceTuningLink',
+      icon: (
+        <>
+          {invalidBoosts && (
+            <EuiIcon
+              type="alert"
+              color="warning"
+              className="appSearchNavIcon"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoosts',
+                { defaultMessage: 'Invalid boosts' }
               )}
-              {hasSchemaConflicts && (
-                <EuiIcon
-                  type="alert"
-                  color="warning"
-                  title={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.engine.schema.conflicts',
-                    { defaultMessage: 'Schema conflicts' }
-                  )}
-                  data-test-subj="EngineNavSchemaConflicts"
-                />
+              data-test-subj="EngineNavRelevanceTuningInvalidBoosts"
+            />
+          )}
+          {unsearchedUnconfirmedFields && (
+            <EuiIcon
+              type="alert"
+              color="warning"
+              className="appSearchNavIcon"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.unsearchedFields',
+                { defaultMessage: 'Unsearched fields' }
               )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </SideNavLink>
-      )}
-      {canViewEngineCrawler && !isMetaEngine && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_CRAWLER_PATH)}
-          data-test-subj="EngineCrawlerLink"
-        >
-          {CRAWLER_TITLE}
-        </SideNavLink>
-      )}
-      {canViewMetaEngineSourceEngines && isMetaEngine && (
-        <SideNavLink
-          to={generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH)}
-          data-test-subj="MetaEngineEnginesLink"
-        >
-          {ENGINES_TITLE}
-        </SideNavLink>
-      )}
-      {canManageEngineRelevanceTuning && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH)}
-          data-test-subj="EngineRelevanceTuningLink"
-        >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
-            <EuiFlexItem>{RELEVANCE_TUNING_TITLE}</EuiFlexItem>
-            <EuiFlexItem className="appSearchNavIcons">
-              {invalidBoosts && (
-                <EuiIcon
-                  type="alert"
-                  color="warning"
-                  title={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoosts',
-                    { defaultMessage: 'Invalid boosts' }
-                  )}
-                  data-test-subj="EngineNavRelevanceTuningInvalidBoosts"
-                />
-              )}
-              {unsearchedUnconfirmedFields && (
-                <EuiIcon
-                  type="alert"
-                  color="warning"
-                  title={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.unsearchedFields',
-                    { defaultMessage: 'Unsearched fields' }
-                  )}
-                  data-test-subj="EngineNavRelevanceTuningUnsearchedFields"
-                />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </SideNavLink>
-      )}
-      {canManageEngineSynonyms && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_SYNONYMS_PATH)}
-          data-test-subj="EngineSynonymsLink"
-        >
-          {SYNONYMS_TITLE}
-        </SideNavLink>
-      )}
-      {canManageEngineCurations && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_CURATIONS_PATH)}
-          shouldShowActiveForSubroutes
-          data-test-subj="EngineCurationsLink"
-        >
-          {CURATIONS_TITLE}
-        </SideNavLink>
-      )}
-      {canManageEngineResultSettings && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_RESULT_SETTINGS_PATH)}
-          data-test-subj="EngineResultSettingsLink"
-        >
-          {RESULT_SETTINGS_TITLE}
-        </SideNavLink>
-      )}
-      {canManageEngineSearchUi && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_SEARCH_UI_PATH)}
-          data-test-subj="EngineSearchUILink"
-        >
-          {SEARCH_UI_TITLE}
-        </SideNavLink>
-      )}
-      {canViewEngineApiLogs && (
-        <SideNavLink
-          to={generateEnginePath(ENGINE_API_LOGS_PATH)}
-          data-test-subj="EngineAPILogsLink"
-        >
-          {API_LOGS_TITLE}
-        </SideNavLink>
-      )}
-    </>
-  );
+              data-test-subj="EngineNavRelevanceTuningUnsearchedFields"
+            />
+          )}
+        </>
+      ),
+    });
+  }
+
+  if (canManageEngineSynonyms) {
+    navItems.push({
+      id: 'synonyms',
+      name: SYNONYMS_TITLE,
+      ...generateNavLink({ to: generateEnginePath(ENGINE_SYNONYMS_PATH) }),
+      'data-test-subj': 'EngineSynonymsLink',
+    });
+  }
+
+  if (canManageEngineCurations) {
+    navItems.push({
+      id: 'curations',
+      name: CURATIONS_TITLE,
+      ...generateNavLink({
+        to: generateEnginePath(ENGINE_CURATIONS_PATH),
+        shouldShowActiveForSubroutes: true,
+      }),
+      'data-test-subj': 'EngineCurationsLink',
+    });
+  }
+
+  if (canManageEngineResultSettings) {
+    navItems.push({
+      id: 'resultSettings',
+      name: RESULT_SETTINGS_TITLE,
+      ...generateNavLink({ to: generateEnginePath(ENGINE_RESULT_SETTINGS_PATH) }),
+      'data-test-subj': 'EngineResultSettingsLink',
+    });
+  }
+
+  if (canManageEngineSearchUi) {
+    navItems.push({
+      id: 'searchUI',
+      name: SEARCH_UI_TITLE,
+      ...generateNavLink({ to: generateEnginePath(ENGINE_SEARCH_UI_PATH) }),
+      'data-test-subj': 'EngineSearchUILink',
+    });
+  }
+
+  if (canViewEngineApiLogs) {
+    navItems.push({
+      id: 'apiLogs',
+      name: API_LOGS_TITLE,
+      ...generateNavLink({ to: generateEnginePath(ENGINE_API_LOGS_PATH) }),
+      'data-test-subj': 'EngineAPILogsLink',
+    });
+  }
+
+  return navItems;
 };

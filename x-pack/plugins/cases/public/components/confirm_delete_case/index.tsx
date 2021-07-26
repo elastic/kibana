@@ -10,9 +10,9 @@ import { EuiConfirmModal } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface ConfirmDeleteCaseModalProps {
-  caseTitle?: string;
+  caseTitle: string;
   isModalVisible: boolean;
-  isPlural: boolean;
+  caseQuantity?: number;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -20,7 +20,7 @@ interface ConfirmDeleteCaseModalProps {
 const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
   caseTitle,
   isModalVisible,
-  isPlural,
+  caseQuantity = 1,
   onCancel,
   onConfirm,
 }) => {
@@ -31,20 +31,14 @@ const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
     <EuiConfirmModal
       buttonColor="danger"
       cancelButtonText={i18n.CANCEL}
-      confirmButtonText={isPlural ? i18n.DELETE_CASES : i18n.DELETE_CASE}
+      confirmButtonText={i18n.DELETE_CASE(caseQuantity)}
       data-test-subj="confirm-delete-case-modal"
       defaultFocusedButton="confirm"
       onCancel={onCancel}
       onConfirm={onConfirm}
-      title={
-        isPlural
-          ? i18n.DELETE_SELECTED_CASES
-          : caseTitle == null
-          ? i18n.DELETE_THIS_CASE
-          : i18n.DELETE_TITLE(caseTitle)
-      }
+      title={i18n.DELETE_SELECTED_CASES(caseQuantity, caseTitle)}
     >
-      {isPlural ? i18n.CONFIRM_QUESTION_PLURAL : i18n.CONFIRM_QUESTION}
+      {i18n.CONFIRM_QUESTION(caseQuantity)}
     </EuiConfirmModal>
   );
 };

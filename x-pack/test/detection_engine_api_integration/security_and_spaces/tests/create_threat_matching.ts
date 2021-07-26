@@ -28,6 +28,7 @@ import {
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/cti/constants';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -152,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
         const fullSource = signalsOpen.hits.hits.find(
-          (signal) => signal._source.signal.parents[0].id === 'UBXOBmkBR346wHgnLP8T'
+          (signal) => signal._source.signal.parents[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
         const fullSignal = fullSource!._source; // If this doesn't exist the test is going to fail anyway so using a bang operator here to get rid of ts error
         expect(fullSignal).eql({
@@ -163,6 +164,29 @@ export default ({ getService }: FtrProviderContext) => {
             id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
             type: 'auditbeat',
             version: '8.0.0',
+          },
+          auditd: {
+            data: {
+              hostname: '46.101.47.213',
+              op: 'PAM:bad_ident',
+              terminal: 'ssh',
+            },
+            message_type: 'user_err',
+            result: 'fail',
+            sequence: 2267,
+            session: 'unset',
+            summary: {
+              actor: {
+                primary: 'unset',
+                secondary: 'root',
+              },
+              how: '/usr/sbin/sshd',
+              object: {
+                primary: 'ssh',
+                secondary: '46.101.47.213',
+                type: 'user-session',
+              },
+            },
           },
           cloud: {
             instance: {
@@ -175,11 +199,10 @@ export default ({ getService }: FtrProviderContext) => {
             version: '1.0.0-beta2',
           },
           event: {
-            action: 'boot',
-            dataset: 'login',
+            action: 'error',
+            category: 'user-login',
+            module: 'auditd',
             kind: 'signal',
-            module: 'system',
-            origin: '/var/log/wtmp',
           },
           host: {
             architecture: 'x86_64',
@@ -196,9 +219,25 @@ export default ({ getService }: FtrProviderContext) => {
               version: '18.04.2 LTS (Bionic Beaver)',
             },
           },
-          message: 'System boot',
+          network: {
+            direction: 'incoming',
+          },
+          process: {
+            executable: '/usr/sbin/sshd',
+            pid: 32739,
+          },
           service: {
-            type: 'system',
+            type: 'auditd',
+          },
+          source: {
+            ip: '46.101.47.213',
+          },
+          user: {
+            audit: {
+              id: 'unset',
+            },
+            id: '0',
+            name: 'root',
           },
           signal: {
             _meta: {
@@ -206,33 +245,31 @@ export default ({ getService }: FtrProviderContext) => {
             },
             ancestors: [
               {
-                depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                id: '7yJ-B2kBR346wHgnhlMn',
                 type: 'event',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                depth: 0,
               },
             ],
             depth: 1,
             original_event: {
-              action: 'boot',
-              dataset: 'login',
-              kind: 'event',
-              module: 'system',
-              origin: '/var/log/wtmp',
+              action: 'error',
+              category: 'user-login',
+              module: 'auditd',
             },
             original_time: fullSignal.signal.original_time,
             parent: {
-              depth: 0,
-              id: 'UBXOBmkBR346wHgnLP8T',
-              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              id: '7yJ-B2kBR346wHgnhlMn',
               type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
             },
             parents: [
               {
-                depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                id: '7yJ-B2kBR346wHgnhlMn',
                 type: 'event',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                depth: 0,
               },
             ],
             rule: fullSignal.signal.rule,
@@ -425,7 +462,7 @@ export default ({ getService }: FtrProviderContext) => {
                     id: '978783',
                     index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
-                    type: 'url',
+                    type: ENRICHMENT_TYPES.IndicatorMatchRule,
                   },
                   provider: 'geenensp',
                   type: 'url',
@@ -457,7 +494,7 @@ export default ({ getService }: FtrProviderContext) => {
                     id: '978783',
                     index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
-                    type: 'url',
+                    type: ENRICHMENT_TYPES.IndicatorMatchRule,
                   },
                   provider: 'geenensp',
                   type: 'url',
@@ -519,7 +556,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -544,7 +581,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978787',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               provider: 'other_provider',
               type: 'ip',
@@ -619,7 +656,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -649,7 +686,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.port',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -674,7 +711,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978787',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               provider: 'other_provider',
               type: 'ip',
@@ -754,38 +791,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978783',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'destination.ip',
-                type: 'url',
-              },
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
-              },
-              event: {
-                category: 'threat',
-                created: '2021-01-26T11:09:05.529Z',
-                dataset: 'threatintel.abuseurl',
-                ingested: '2021-01-26T11:09:06.595350Z',
-                kind: 'enrichment',
-                module: 'threatintel',
-                reference: 'https://urlhaus.abuse.ch/url/978783/',
-                type: 'indicator',
-              },
-            },
-          ]);
-
-          assertContains(threats[1].indicator, [
-            {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              matched: {
-                atomic: '159.89.119.67',
-                id: '978783',
-                index: 'filebeat-8.0.0-2021.01.26-000001',
-                field: 'destination.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               provider: 'geenensp',
               type: 'url',
@@ -813,7 +819,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.ip',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -838,7 +844,7 @@ export default ({ getService }: FtrProviderContext) => {
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
                 field: 'source.port',
-                type: 'url',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
               port: 57324,
               provider: 'geenensp',
@@ -851,6 +857,37 @@ export default ({ getService }: FtrProviderContext) => {
                 kind: 'enrichment',
                 module: 'threatintel',
                 reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+          ]);
+
+          assertContains(threats[1].indicator, [
+            {
+              description: "domain should match the auditbeat hosts' data's source.ip",
+              domain: '159.89.119.67',
+              first_seen: '2021-01-26T11:09:04.000Z',
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
+              provider: 'geenensp',
+              type: 'url',
+              url: {
+                full: 'http://159.89.119.67:59600/bin.sh',
+                scheme: 'http',
+              },
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.595350Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978783/',
                 type: 'indicator',
               },
             },

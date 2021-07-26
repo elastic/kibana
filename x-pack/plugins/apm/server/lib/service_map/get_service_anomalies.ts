@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
@@ -18,7 +18,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';

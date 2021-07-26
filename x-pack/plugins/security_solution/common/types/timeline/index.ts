@@ -23,6 +23,13 @@ import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
 
+export * from './actions';
+export * from './cells';
+export * from './columns';
+export * from './data_provider';
+export * from './rows';
+export * from './store';
+
 /*
  *  ColumnHeader Types
  */
@@ -301,6 +308,7 @@ export enum TimelineId {
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
+  uebaPageExternalAlerts = 'ueba-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
@@ -313,6 +321,7 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.uebaPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
 ]);
@@ -490,6 +499,11 @@ export type TimelineExpandedDetailType =
 
 export type TimelineExpandedDetail = {
   [tab in TimelineTabs]?: TimelineExpandedDetailType;
+};
+
+export type ToggleDetailPanel = TimelineExpandedDetailType & {
+  tabType?: TimelineTabs;
+  timelineId: string;
 };
 
 export const pageInfoTimeline = runtimeTypes.type({

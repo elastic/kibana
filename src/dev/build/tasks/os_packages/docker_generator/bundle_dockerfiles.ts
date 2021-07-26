@@ -42,7 +42,7 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
     await copyAll(resolve(scope.dockerBuildDir), resolve(dockerFilesBuildDir), {
       select: ['LICENSE'],
     });
-    const templates = ['hardening_manifest.yml', 'README.md'];
+    const templates = ['hardening_manifest.yaml', 'README.md'];
     for (const template of templates) {
       const file = readFileSync(resolve(__dirname, 'templates/ironbank', template));
       const output = Mustache.render(file.toString(), scope);

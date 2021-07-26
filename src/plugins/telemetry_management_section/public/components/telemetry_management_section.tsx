@@ -7,16 +7,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import {
-  EuiCallOut,
-  EuiPanel,
-  EuiForm,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -116,46 +107,46 @@ export class TelemetryManagementSection extends Component<Props, State> {
             <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
           </TrackApplicationView>
         )}
-        <EuiPanel paddingSize="l">
+        <EuiSplitPanel.Outer hasBorder>
           <EuiForm>
-            <EuiText>
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={false}>
-                  <h2>
-                    <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
-                  </h2>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiText>
+            <EuiSplitPanel.Inner color="subdued">
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
+                </h2>
+              </EuiTitle>
+            </EuiSplitPanel.Inner>
 
-            {this.maybeGetAppliesSettingMessage()}
-            <EuiSpacer size="s" />
-            <LazyField
-              setting={{
-                type: 'boolean',
-                name: 'telemetry:enabled',
-                displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
-                  defaultMessage: 'Provide usage statistics',
-                }),
-                value: enabled,
-                description: this.renderDescription(),
-                defVal: true,
-                ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
-                  defaultMessage: 'Provide usage statistics',
-                }),
-                requiresPageReload: false,
-                category: [],
-                isOverridden: false,
-                isCustom: true,
-              }}
-              loading={processing}
-              dockLinks={this.props.docLinks}
-              toasts={this.props.toasts}
-              handleChange={this.toggleOptIn}
-              enableSaving={this.props.enableSaving}
-            />
+            <EuiSplitPanel.Inner>
+              {this.maybeGetAppliesSettingMessage()}
+              <EuiSpacer size="s" />
+              <LazyField
+                setting={{
+                  type: 'boolean',
+                  name: 'telemetry:enabled',
+                  displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
+                    defaultMessage: 'Provide usage statistics',
+                  }),
+                  value: enabled,
+                  description: this.renderDescription(),
+                  defVal: true,
+                  ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
+                    defaultMessage: 'Provide usage statistics',
+                  }),
+                  requiresPageReload: false,
+                  category: [],
+                  isOverridden: false,
+                  isCustom: true,
+                }}
+                loading={processing}
+                dockLinks={this.props.docLinks}
+                toasts={this.props.toasts}
+                handleChange={this.toggleOptIn}
+                enableSaving={this.props.enableSaving}
+              />
+            </EuiSplitPanel.Inner>
           </EuiForm>
-        </EuiPanel>
+        </EuiSplitPanel.Outer>
       </Fragment>
     );
   }

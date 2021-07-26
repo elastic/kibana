@@ -17,10 +17,10 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { SpacesPluginStart } from '../../spaces/server';
-import { AlertsClient } from './alerts_client';
+import { RulesClient } from './rules_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
-import { AlertsClientFactory } from './alerts_client_factory';
+import { RulesClientFactory } from './rules_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import {
   KibanaRequest,
@@ -74,6 +74,7 @@ import { AlertingAuthorization } from './authorization';
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
+  executeStart: 'execute-start',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
@@ -86,6 +87,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 export interface PluginSetupContract {
   registerType<
     Params extends AlertTypeParams = AlertTypeParams,
+    ExtractedParams extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
@@ -94,6 +96,7 @@ export interface PluginSetupContract {
   >(
     alertType: AlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -105,7 +108,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
-  getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
   ): PublicMethodsOf<AlertingAuthorization>;
@@ -141,7 +144,7 @@ export class AlertingPlugin {
   private licenseState: ILicenseState | null = null;
   private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
-  private readonly alertsClientFactory: AlertsClientFactory;
+  private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -152,9 +155,9 @@ export class AlertingPlugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
-    this.alertsClientFactory = new AlertsClientFactory();
+    this.rulesClientFactory = new RulesClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
@@ -191,8 +194,6 @@ export class AlertingPlugin {
       event: { provider: EVENT_LOG_PROVIDER },
     });
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.config);
-
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
@@ -219,6 +220,13 @@ export class AlertingPlugin {
         );
       });
     }
+
+    setupSavedObjects(
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
+      this.alertTypeRegistry,
+      this.logger
+    );
 
     initializeApiKeyInvalidator(
       this.logger,
@@ -271,6 +279,7 @@ export class AlertingPlugin {
     return {
       registerType<
         Params extends AlertTypeParams = AlertTypeParams,
+        ExtractedParams extends AlertTypeParams = AlertTypeParams,
         State extends AlertTypeState = AlertTypeState,
         InstanceState extends AlertInstanceState = AlertInstanceState,
         InstanceContext extends AlertInstanceContext = AlertInstanceContext,
@@ -279,6 +288,7 @@ export class AlertingPlugin {
       >(
         alertType: AlertType<
           Params,
+          ExtractedParams,
           State,
           InstanceState,
           InstanceContext,
@@ -300,7 +310,7 @@ export class AlertingPlugin {
       logger,
       taskRunnerFactory,
       alertTypeRegistry,
-      alertsClientFactory,
+      rulesClientFactory,
       alertingAuthorizationClientFactory,
       security,
       licenseState,
@@ -328,7 +338,7 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
-    alertsClientFactory.initialize({
+    rulesClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
       logger,
       taskManager: plugins.taskManager,
@@ -345,13 +355,13 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
     });
 
-    const getAlertsClientWithRequest = (request: KibanaRequest) => {
+    const getRulesClientWithRequest = (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      return alertsClientFactory!.create(request, core.savedObjects);
+      return rulesClientFactory!.create(request, core.savedObjects);
     };
 
     const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
@@ -361,7 +371,7 @@ export class AlertingPlugin {
     taskRunnerFactory.initialize({
       logger,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
-      getAlertsClientWithRequest,
+      getRulesClientWithRequest,
       spaceIdToNamespace,
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsClient,
@@ -370,10 +380,12 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       alertTypeRegistry: this.alertTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
+      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+      maxEphemeralActionsPerAlert: this.config.then((config) => config.maxEphemeralActionsPerAlert),
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
-      const client = getAlertsClientWithRequest(request);
+      const client = getRulesClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
           ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
@@ -388,7 +400,7 @@ export class AlertingPlugin {
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertingAuthorizationWithRequest,
-      getAlertsClientWithRequest,
+      getRulesClientWithRequest,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository(['alert'])),
     };
@@ -397,12 +409,12 @@ export class AlertingPlugin {
   private createRouteHandlerContext = (
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
-    const { alertTypeRegistry, alertsClientFactory } = this;
+    const { alertTypeRegistry, rulesClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
-        getAlertsClient: () => {
-          return alertsClientFactory!.create(request, savedObjects);
+        getRulesClient: () => {
+          return rulesClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
         getFrameworkHealth: async () =>

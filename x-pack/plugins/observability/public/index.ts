@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
+import { lazy } from 'react';
 import {
   Plugin,
   ObservabilityPublicPluginsStart,
@@ -54,6 +55,7 @@ export {
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
+export const LazyAlertsFlyout = lazy(() => import('./pages/alerts/alerts_flyout'));
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 
 export * from './typings';
@@ -63,7 +65,13 @@ export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+export { ALL_VALUES_SELECTED } from './components/shared/field_value_suggestions/field_value_combobox';
+export { FilterValueLabel } from './components/shared/filter_value_label/filter_value_label';
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
-export type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+export type {
+  ObservabilityRuleTypeFormatter,
+  ObservabilityRuleTypeModel,
+  ObservabilityRuleTypeRegistry,
+} from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';

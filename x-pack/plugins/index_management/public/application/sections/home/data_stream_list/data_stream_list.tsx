@@ -16,18 +16,22 @@ import {
   EuiText,
   EuiIconTip,
   EuiSpacer,
+  EuiPageContent,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import {
+  PageLoading,
+  PageError,
+  Error,
   reactRouterNavigate,
   extractQueryParams,
   attemptToURIDecode,
+  APP_WRAPPER_CLASS,
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
@@ -166,16 +170,16 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.loadingDataStreamsDescription"
           defaultMessage="Loading data streams…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.loadingDataStreamsErrorMessage"
@@ -252,10 +256,10 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         data-test-subj="emptyPrompt"
       />
     );
-  } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
-    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams, decodedDataStreamName));
+  } else {
+    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
-      <>
+      <EuiPageContent hasShadow={false} paddingSize="none" data-test-subj="dataStreamList">
         {renderHeader()}
         <EuiSpacer size="l" />
 
@@ -270,12 +274,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
-      </>
+      </EuiPageContent>
     );
   }
 
   return (
-    <div data-test-subj="dataStreamList">
+    <div className={APP_WRAPPER_CLASS}>
       {content}
 
       {/*

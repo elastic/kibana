@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/*
+ * esQuery and esKuery:
+ */
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
@@ -14,16 +18,6 @@ import { ConfigSchema } from '../config';
  */
 
 import {
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-  disableFilter,
-  FILTERS,
-  FilterStateStore,
-  getDisplayValueFromFilter,
   getPhraseFilterField,
   getPhraseFilterValue,
   isExistsFilter,
@@ -35,6 +29,22 @@ import {
   isQueryStringFilter,
   isRangeFilter,
   toggleFilterNegated,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+  disableFilter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  buildEsQuery,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+  FILTERS,
+  FilterStateStore,
   compareFilters,
   COMPARE_ALL_OPTIONS,
 } from '../common';
@@ -43,6 +53,7 @@ import { FilterLabel } from './ui';
 import { FilterItem } from './ui/filter_bar';
 
 import {
+  getDisplayValueFromFilter,
   generateFilters,
   onlyDisabledFiltersChanged,
   changeTimeFilter,
@@ -94,7 +105,8 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export type {
+export {
+  KueryNode,
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -103,29 +115,26 @@ export type {
   PhraseFilter,
   CustomFilter,
   MatchAllFilter,
+  IFieldSubType,
+  EsQueryConfig,
+  isFilter,
+  isFilters,
 } from '../common';
 
-/*
- * esQuery and esKuery:
+import { getEsQueryConfig } from '../common';
+
+/**
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
  */
-
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-} from '../common';
-
 export const esKuery = {
   nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };
 
+/**
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ */
 export const esQuery = {
   buildEsQuery,
   getEsQueryConfig,
@@ -133,8 +142,6 @@ export const esQuery = {
   luceneStringToDsl,
   decorateQuery,
 };
-
-export { EsQueryConfig, KueryNode } from '../common';
 
 /*
  * Field Formatters:
@@ -209,10 +216,12 @@ export {
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
+  cellHasFormulas,
+  tableHasFormulas,
 };
 
 /*
@@ -258,7 +267,6 @@ export {
 export {
   IIndexPattern,
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
@@ -268,6 +276,8 @@ export {
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  IndexPatternType,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
@@ -276,9 +286,8 @@ export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
  * Autocomplete query suggestions:
  */
 
-export {
+export type {
   QuerySuggestion,
-  QuerySuggestionTypes,
   QuerySuggestionGetFn,
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
@@ -286,6 +295,7 @@ export {
   AutocompleteStart,
 } from './autocomplete';
 
+export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -320,25 +330,23 @@ import {
   tabifyGetColumns,
 } from '../common';
 
-export {
+export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
+
+export type {
   // aggs
   AggConfigSerialized,
-  AggGroupLabels,
   AggGroupName,
-  AggGroupNames,
   AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
   AggConfigOptions,
-  BUCKET_TYPES,
   EsaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  METRIC_TYPES,
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
@@ -352,30 +360,23 @@ export {
 
 export type { AggConfigs, AggConfig } from '../common';
 
-export {
+export type {
   // search
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
-  extractSearchSourceReferences,
-  getEsPreference,
-  getSearchParamsFromRequest,
   IEsSearchRequest,
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  injectSearchSourceReferences,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
-  parseSearchSourceJSON,
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
   SearchSourceFields,
-  SortDirection,
-  SearchSessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
@@ -386,11 +387,21 @@ export {
   TimeoutErrorMode,
   PainlessError,
   Reason,
+  WaitUntilNextSessionCompletesOptions,
+} from './search';
+
+export {
+  parseSearchSourceJSON,
+  injectSearchSourceReferences,
+  extractSearchSourceReferences,
+  getEsPreference,
+  getSearchParamsFromRequest,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
-  WaitUntilNextSessionCompletesOptions,
   isEsError,
+  SearchSessionState,
+  SortDirection,
 } from './search';
 
 export type {
@@ -438,33 +449,36 @@ export const search = {
  * UI components
  */
 
-export {
-  SearchBar,
+export type {
   SearchBarProps,
   StatefulSearchBarProps,
   IndexPatternSelectProps,
-  QueryStringInput,
   QueryStringInputProps,
 } from './ui';
+
+export { QueryStringInput, SearchBar } from './ui';
 
 /**
  * Types to be shared externally
  * @public
  */
-export { Filter, Query, RefreshInterval, TimeRange } from '../common';
+export type { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
-  QueryState,
   getDefaultQuery,
   FilterManager,
+  TimeHistory,
+} from './query';
+
+export type {
+  QueryState,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
   InputTimeRange,
-  TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
   QueryStateChange,
@@ -472,7 +486,7 @@ export {
   AutoRefreshDoneFn,
 } from './query';
 
-export { AggsStart } from './search/aggs';
+export type { AggsStart } from './search/aggs';
 
 export {
   getTime,
@@ -481,7 +495,7 @@ export {
   getKbnTypeNames,
 } from '../common';
 
-export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+export { isTimeRange, isQuery } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
@@ -496,7 +510,7 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new DataPublicPlugin(initializerContext);
 }
 
-export {
+export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
@@ -505,4 +519,4 @@ export {
 } from './types';
 
 // Export plugin after all other imports
-export { DataPublicPlugin as Plugin };
+export type { DataPublicPlugin as DataPlugin };

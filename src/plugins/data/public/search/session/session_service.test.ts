@@ -33,6 +33,7 @@ const mockSavedObject: SearchSessionSavedObject = {
     expires: new Date().toISOString(),
     status: SearchSessionStatus.COMPLETE,
     persisted: true,
+    version: '8.0.0',
   },
   references: [],
 };
@@ -98,6 +99,14 @@ describe('Session service', () => {
       expect(nowProvider.reset).toHaveBeenCalled();
     });
 
+    it("Can't clear other apps' session", async () => {
+      sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      currentAppId$.next('change');
+      sessionService.clear();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+    });
+
     it("Can start a new session in case there is other apps' stale session", async () => {
       const s1 = sessionService.start();
       expect(sessionService.getSessionId()).not.toBeUndefined();
@@ -151,6 +160,72 @@ describe('Session service', () => {
 
       expect(abort).toBeCalledTimes(3);
     });
+  });
+
+  it('Can continue previous session from another app', async () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+
+    sessionService.clear();
+    currentAppId$.next('change');
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.getSessionId()).toBe(sessionId);
+  });
+
+  it('Calling clear() more than once still allows previous session from another app to continue', async () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+
+    sessionService.clear();
+    sessionService.clear();
+
+    currentAppId$.next('change');
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.getSessionId()).toBe(sessionId);
+  });
+
+  it('Continue drops storage configuration', () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    expect(sessionService.isSessionStorageReady()).toBe(true);
+
+    sessionService.clear();
+
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+  });
+
+  // it might be that search requests finish after the session is cleared and before it was continued,
+  // to avoid "infinite loading" state after we continue the session we have to drop pending searches
+  it('Continue drops client side loading state', async () => {
+    const sessionId = sessionService.start();
+
+    sessionService.trackSearch({ abort: () => {} });
+    expect(state$.getValue()).toBe(SearchSessionState.Loading);
+
+    sessionService.clear(); // even allow to call clear multiple times
+
+    expect(state$.getValue()).toBe(SearchSessionState.None);
+
+    sessionService.continue(sessionId!);
+    expect(sessionService.getSessionId()).toBe(sessionId);
+
+    // the original search was never `untracked`,
+    // but we still consider this a completed session until new search fire
+    expect(state$.getValue()).toBe(SearchSessionState.Completed);
   });
 
   test('getSearchOptions infers isRestore & isStored from state', async () => {

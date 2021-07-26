@@ -6,13 +6,17 @@
  */
 
 import { connect } from 'react-redux';
-import { MapStoreState } from '../../reducers/store';
-import { getGeoFieldNames } from '../../selectors/map_selectors';
 import { ToolbarOverlay } from './toolbar_overlay';
+import { MapStoreState } from '../../reducers/store';
+import { getDrawMode } from '../../selectors/ui_selectors';
+import { getGeoFieldNames } from '../../selectors/map_selectors';
+import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     showToolsControl: getGeoFieldNames(state).length !== 0,
+    shapeDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_SHAPES,
+    pointDrawModeActive: getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
   };
 }
 

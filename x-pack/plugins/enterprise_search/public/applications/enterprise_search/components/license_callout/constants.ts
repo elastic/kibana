@@ -11,10 +11,3 @@ export const LICENSE_CALLOUT_BODY = i18n.translate('xpack.enterpriseSearch.licen
   defaultMessage:
     'Enterprise authentication via SAML, document-level permission and authorization support, custom search experiences and more are available with a valid Platinum license.',
 });
-
-export const LICENSE_CALLOUT_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.licenseCalloutButton',
-  {
-    defaultMessage: 'Manage your license',
-  }
-);

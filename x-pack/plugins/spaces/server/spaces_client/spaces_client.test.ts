@@ -341,4 +341,25 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
   });
+
+  describe('#disableLegacyUrlAliases', () => {
+    test(`updates legacy URL aliases using callWithRequestRepository`, async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+
+      const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+      const aliases = [
+        { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
+        { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },
+      ];
+      await client.disableLegacyUrlAliases(aliases);
+
+      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledWith([
+        { type: 'legacy-url-alias', id: 'space1:foo:123', attributes: { disabled: true } },
+        { type: 'legacy-url-alias', id: 'space2:bar:456', attributes: { disabled: true } },
+      ]);
+    });
+  });
 });

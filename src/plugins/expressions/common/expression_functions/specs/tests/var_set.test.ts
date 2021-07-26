@@ -24,6 +24,7 @@ describe('expression_functions', () => {
       context = {
         getSearchContext: () => input,
         getSearchSessionId: () => undefined,
+        getExecutionContext: () => undefined,
         types: {},
         variables: { test: 1 },
         abortSignal: {} as any,
@@ -65,7 +66,7 @@ describe('expression_functions', () => {
 
       it('sets the variables', async () => {
         const vars = {};
-        const result = await executor
+        const { result } = await executor
           .run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
           .pipe(first())
           .toPromise();

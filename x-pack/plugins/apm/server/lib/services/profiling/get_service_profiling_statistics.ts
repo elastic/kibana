@@ -15,17 +15,14 @@ import {
   getValueTypeConfig,
 } from '../../../../common/profiling';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   PROFILE_STACK,
   PROFILE_TOP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import {
-  rangeQuery,
-  environmentQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';

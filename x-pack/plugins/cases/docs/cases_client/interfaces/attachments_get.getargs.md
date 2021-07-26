@@ -19,7 +19,7 @@
 
 The ID of the attachment to retrieve
 
-Defined in: [attachments/get.ts:81](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/get.ts#L81)
+Defined in: [attachments/get.ts:80](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L80)
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 The ID of the case to retrieve an attachment from
 
-Defined in: [attachments/get.ts:77](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/get.ts#L77)
+Defined in: [attachments/get.ts:76](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L76)

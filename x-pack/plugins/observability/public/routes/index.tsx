@@ -5,29 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
 import * as t from 'io-ts';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { Redirect } from 'react-router-dom';
+import { alertStatusRt } from '../../common/typings';
+import { ExploratoryViewPage } from '../components/shared/exploratory_view';
+import { AlertsPage } from '../pages/alerts';
+import { AllCasesPage } from '../pages/cases/all_cases';
+import { CaseDetailsPage } from '../pages/cases/case_details';
+import { ConfigureCasesPage } from '../pages/cases/configure_cases';
+import { CreateCasePage } from '../pages/cases/create_case';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
-import { AlertsPage } from '../pages/alerts';
-import { CreateCasePage } from '../pages/cases/create_case';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
-import { CaseDetailsPage } from '../pages/cases/case_details';
-import { ConfigureCasesPage } from '../pages/cases/configure_cases';
-import { AllCasesPage } from '../pages/cases/all_cases';
-import { casesBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { alertStatusRt } from '../../common/typings';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
 type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
 };
-
-export type Breadcrumbs = Array<{ text: string }>;
 
 export interface Params {
   query?: t.HasProps;
@@ -40,26 +37,12 @@ export const routes = {
       return <HomePage />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
   },
   '/landing': {
     handler: () => {
       return <LandingPage />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.landing.breadcrumb', {
-          defaultMessage: 'Getting started',
-        }),
-      },
-    ],
   },
   '/overview': {
     handler: ({ query }: any) => {
@@ -73,34 +56,24 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
   },
   '/cases': {
     handler: () => {
       return <AllCasesPage />;
     },
     params: {},
-    breadcrumb: [casesBreadcrumbs.cases],
   },
   '/cases/create': {
     handler: () => {
       return <CreateCasePage />;
     },
     params: {},
-    breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.create],
   },
   '/cases/configure': {
     handler: () => {
       return <ConfigureCasesPage />;
     },
     params: {},
-    breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.configure],
   },
   '/cases/:detailName': {
     handler: () => {
@@ -111,7 +84,6 @@ export const routes = {
         detailName: t.string,
       }),
     },
-    breadcrumb: [casesBreadcrumbs.cases],
   },
   '/alerts': {
     handler: (routeParams: any) => {
@@ -127,15 +99,21 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.alerts.breadcrumb', {
-          defaultMessage: 'Alerts',
-        }),
-      },
-    ],
   },
-  '/exploratory-view': {
+  '/exploratory-view/': {
+    handler: () => {
+      return <Redirect to="//exploratory-view/configure" />;
+    },
+    params: {
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+        refreshPaused: jsonRt.pipe(t.boolean),
+        refreshInterval: jsonRt.pipe(t.number),
+      }),
+    },
+  },
+  '/exploratory-view/:mode': {
     handler: () => {
       return <ExploratoryViewPage />;
     },
@@ -147,12 +125,5 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.exploratoryView', {
-          defaultMessage: 'Analyze data',
-        }),
-      },
-    ],
   },
 };

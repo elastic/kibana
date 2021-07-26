@@ -5,52 +5,63 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { createHashHistory } from 'history';
-import { Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { TopNavMenuData } from 'src/plugins/navigation/public';
+
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
-import { PackageInstallProvider } from '../integrations/hooks';
+import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
 
 import {
   ConfigContext,
   FleetStatusProvider,
-  IntraAppStateProvider,
   KibanaVersionContext,
   sendGetPermissionsCheck,
   sendSetup,
   useBreadcrumbs,
-  useConfig,
   useStartServices,
   UIExtensionsContext,
 } from './hooks';
-import { Error, Loading } from './components';
+import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
-import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout } from './layouts';
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
-import { FleetApp } from './sections/agents';
-import { IngestManagerOverview } from './sections/overview';
-import { ProtectedRoute } from './index';
+import { AgentsApp } from './sections/agents';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
+import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 
-const ErrorLayout = ({ children }: { children: JSX.Element }) => (
+const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
+
+const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
+  isAddIntegrationsPath,
+  children,
+}) => (
   <EuiErrorBoundary>
-    <DefaultLayout showSettings={false}>
-      <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-    </DefaultLayout>
+    {isAddIntegrationsPath ? (
+      <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>
+    ) : (
+      <DefaultLayout>
+        <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
+      </DefaultLayout>
+    )}
   </EuiErrorBoundary>
 );
 
@@ -68,6 +79,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [permissionsError, setPermissionsError] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
+
+  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
 
   useEffect(() => {
     (async () => {
@@ -107,7 +120,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
 
   if (isPermissionsLoading || permissionsError) {
     return (
-      <ErrorLayout>
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
         {isPermissionsLoading ? (
           <Loading />
         ) : permissionsError === 'REQUEST_ERROR' ? (
@@ -166,7 +179,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
 
   if (!isInitialized || initializationError) {
     return (
-      <ErrorLayout>
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
         {initializationError ? (
           <Error
             title={
@@ -178,7 +191,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             error={initializationError}
           />
         ) : (
-          <Loading />
+          <FleetSetupLoading />
         )}
       </ErrorLayout>
     );
@@ -203,67 +216,128 @@ export const FleetAppContext: React.FC<{
 }> = memo(
   ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-    const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
 
     return (
-      <startServices.i18n.Context>
-        <KibanaContextProvider services={{ ...startServices }}>
-          <EuiErrorBoundary>
-            <ConfigContext.Provider value={config}>
-              <KibanaVersionContext.Provider value={kibanaVersion}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <UIExtensionsContext.Provider value={extensions}>
-                    <FleetStatusProvider>
-                      <IntraAppStateProvider kibanaScopedHistory={history}>
-                        <Router history={routerHistoryInstance}>
+      <RedirectAppLinks application={startServices.application}>
+        <startServices.i18n.Context>
+          <KibanaContextProvider services={{ ...startServices }}>
+            <EuiErrorBoundary>
+              <ConfigContext.Provider value={config}>
+                <KibanaVersionContext.Provider value={kibanaVersion}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider>
+                        <Router history={history}>
                           <PackageInstallProvider notifications={startServices.notifications}>
                             {children}
                           </PackageInstallProvider>
                         </Router>
-                      </IntraAppStateProvider>
-                    </FleetStatusProvider>
-                  </UIExtensionsContext.Provider>
-                </EuiThemeProvider>
-              </KibanaVersionContext.Provider>
-            </ConfigContext.Provider>
-          </EuiErrorBoundary>
-        </KibanaContextProvider>
-      </startServices.i18n.Context>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </EuiThemeProvider>
+                </KibanaVersionContext.Provider>
+              </ConfigContext.Provider>
+            </EuiErrorBoundary>
+          </KibanaContextProvider>
+        </startServices.i18n.Context>
+      </RedirectAppLinks>
     );
   }
 );
 
-export const AppRoutes = memo(() => {
-  const { agents } = useConfig();
+const FleetTopNav = memo(
+  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const { getModalHref } = useUrlModal();
+    const services = useStartServices();
 
-  return (
-    <Switch>
-      <Route path={FLEET_ROUTING_PATHS.policies}>
-        <DefaultLayout section="agent_policy">
-          <AgentPolicyApp />
-        </DefaultLayout>
-      </Route>
-      <Route path={FLEET_ROUTING_PATHS.data_streams}>
-        <DefaultLayout section="data_stream">
-          <DataStreamApp />
-        </DefaultLayout>
-      </Route>
-      <ProtectedRoute path={FLEET_ROUTING_PATHS.fleet} isAllowed={agents.enabled}>
-        <DefaultLayout section="fleet">
-          <FleetApp />
-        </DefaultLayout>
-      </ProtectedRoute>
-      <Route exact path={FLEET_ROUTING_PATHS.overview}>
-        <DefaultLayout section="overview">
-          <IngestManagerOverview />
-        </DefaultLayout>
-      </Route>
-      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <DefaultLayout showNav={false}>
-          <CreatePackagePolicyPage />
-        </DefaultLayout>
-      </Route>
-      <Redirect to="/" />
-    </Switch>
-  );
-});
+    const { TopNavMenu } = services.navigation.ui;
+
+    const topNavConfig: TopNavMenuData[] = [
+      {
+        label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
+          defaultMessage: 'Send Feedback',
+        }),
+        iconType: 'popout',
+        run: () => window.open(FEEDBACK_URL),
+      },
+
+      {
+        label: i18n.translate('xpack.fleet.appNavigation.settingsButton', {
+          defaultMessage: 'Fleet settings',
+        }),
+        iconType: 'gear',
+        run: () => services.application.navigateToUrl(getModalHref('settings')),
+      },
+    ];
+    return (
+      <TopNavMenu
+        appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
+        config={topNavConfig}
+        setMenuMountPoint={setHeaderActionMenu}
+      />
+    );
+  }
+);
+
+export const AppRoutes = memo(
+  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const { modal, setModal } = useUrlModal();
+
+    return (
+      <>
+        <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
+
+        {modal === 'settings' && (
+          <EuiPortal>
+            <SettingFlyout
+              onClose={() => {
+                setModal(null);
+              }}
+            />
+          </EuiPortal>
+        )}
+
+        <Switch>
+          <Route path={FLEET_ROUTING_PATHS.agents}>
+            <AgentsApp />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.policies}>
+            <AgentPolicyApp />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
+            <EnrollmentTokenListPage />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.data_streams}>
+            <DataStreamApp />
+          </Route>
+
+          {/* TODO: Move this route to the Integrations app */}
+          <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+            <CreatePackagePolicyPage />
+          </Route>
+
+          <Route
+            render={({ location }) => {
+              // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+              const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+              if (!shouldRedirectHash) {
+                return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
+              }
+              const pathname = location.hash.replace(/^#(\/fleet)?/, '');
+
+              return (
+                <Redirect
+                  to={{
+                    ...location,
+                    pathname,
+                    hash: undefined,
+                  }}
+                />
+              );
+            }}
+          />
+        </Switch>
+      </>
+    );
+  }
+);

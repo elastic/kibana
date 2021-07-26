@@ -5,29 +5,10 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common/api';
-import { AlertInfo } from '../../common';
-import { CasesClientGetAlertsResponse } from './types';
+import { AlertGet, AlertUpdateStatus, CasesClientGetAlertsResponse } from './types';
 import { get } from './get';
 import { updateStatus } from './update_status';
 import { CasesClientArgs } from '../types';
-
-/**
- * Defines the fields necessary to update an alert's status.
- */
-export interface UpdateAlertRequest {
-  id: string;
-  index: string;
-  status: CaseStatuses;
-}
-
-export interface AlertUpdateStatus {
-  alerts: UpdateAlertRequest[];
-}
-
-export interface AlertGet {
-  alertsInfo: AlertInfo[];
-}
 
 export interface AlertSubClient {
   get(args: AlertGet): Promise<CasesClientGetAlertsResponse>;

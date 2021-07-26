@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { eqlExecutor } from './eql';
@@ -15,6 +16,7 @@ import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 jest.mock('../../routes/index/get_index_version');
 
@@ -23,6 +25,7 @@ describe('eql_executor', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
+  const params = getEqlRuleParams();
   const eqlSO = {
     id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     type: 'alert',
@@ -40,9 +43,14 @@ describe('eql_executor', () => {
         interval: '5m',
       },
       throttle: 'no_actions',
-      params: getEqlRuleParams(),
+      params,
     },
     references: [],
+  };
+  const tuple = {
+    from: dateMath.parse(params.from)!,
+    to: dateMath.parse(params.to)!,
+    maxSignals: params.maxSignals,
   };
   const searchAfterSize = 7;
 
@@ -64,12 +72,16 @@ describe('eql_executor', () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await eqlExecutor({
         rule: eqlSO,
+        tuple,
         exceptionItems,
+        experimentalFeatures: allowedExperimentalValues,
         services: alertServices,
         version,
         logger,
         searchAfterSize,
         bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+        wrapSequences: jest.fn(),
       });
       expect(response.warningMessages.length).toEqual(1);
     });

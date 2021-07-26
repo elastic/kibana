@@ -50,11 +50,11 @@ export const NodeEventsInCategory = memo(function ({
   return (
     <>
       {isLoading ? (
-        <StyledPanel>
+        <StyledPanel hasBorder>
           <PanelLoading />
         </StyledPanel>
       ) : (
-        <StyledPanel data-test-subj="resolver:panel:events-in-category">
+        <StyledPanel hasBorder data-test-subj="resolver:panel:events-in-category">
           {hasError || !node ? (
             <EuiCallOut
               title={i18n.translate(

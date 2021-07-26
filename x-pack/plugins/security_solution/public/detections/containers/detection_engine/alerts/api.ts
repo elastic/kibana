@@ -7,7 +7,7 @@
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
-import { HostIsolationResponse, HostMetadataInfo } from '../../../../../common/endpoint/types';
+import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -118,16 +118,16 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  * @throws An error if response is not OK
  */
 export const createHostIsolation = async ({
-  agentId,
+  endpointId,
   comment = '',
   caseIds,
 }: {
-  agentId: string;
+  endpointId: string;
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   isolateHost({
-    agent_ids: [agentId],
+    endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
   });
@@ -142,16 +142,16 @@ export const createHostIsolation = async ({
  * @throws An error if response is not OK
  */
 export const createHostUnIsolation = async ({
-  agentId,
+  endpointId,
   comment = '',
   caseIds,
 }: {
-  agentId: string;
+  endpointId: string;
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   unIsolateHost({
-    agent_ids: [agentId],
+    endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
   });
@@ -180,10 +180,12 @@ export const getCaseIdsFromAlertId = async ({
  */
 export const getHostMetadata = async ({
   agentId,
+  signal,
 }: {
   agentId: string;
-}): Promise<HostMetadataInfo> =>
-  KibanaServices.get().http.fetch<HostMetadataInfo>(
+  signal?: AbortSignal;
+}): Promise<HostInfo> =>
+  KibanaServices.get().http.fetch<HostInfo>(
     resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-    { method: 'get' }
+    { method: 'GET', signal }
   );

@@ -10,9 +10,8 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { DatatableColumn } from 'src/plugins/expressions/public';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import {
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
@@ -21,32 +20,9 @@ import {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
-import { CustomPaletteParams } from '../shared_components/coloring/types';
 import { getStopsForFixedMode } from '../shared_components';
-import { getDefaultSummaryLabel } from './summary';
-
-export interface ColumnState {
-  columnId: string;
-  width?: number;
-  hidden?: boolean;
-  isTransposed?: boolean;
-  // These flags are necessary to transpose columns and map them back later
-  // They are set automatically and are not user-editable
-  transposable?: boolean;
-  originalColumnId?: string;
-  originalName?: string;
-  bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
-  alignment?: 'left' | 'right' | 'center';
-  palette?: PaletteOutput<CustomPaletteParams>;
-  colorMode?: 'none' | 'cell' | 'text';
-  summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
-  summaryLabel?: string;
-}
-
-export interface SortingState {
-  columnId: string | undefined;
-  direction: 'asc' | 'desc' | 'none';
-}
+import { getDefaultSummaryLabel } from '../../common/expressions';
+import type { ColumnState, SortingState } from '../../common/expressions';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -101,11 +77,11 @@ export const getDatatableVisualization = ({
 
   switchVisualizationType: (_, state) => state,
 
-  initialize(frame, state) {
+  initialize(addNewLayer, state) {
     return (
       state || {
         columns: [],
-        layerId: frame.addNewLayer(),
+        layerId: addNewLayer(),
       }
     );
   },

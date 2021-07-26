@@ -14,10 +14,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'reporting']);
   const log = getService('log');
   const supertest = getService('supertestWithoutAuth');
-
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const reportingApi = getService('reportingAPI');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const postJobJSON = async (
     apiPath: string,
@@ -31,12 +32,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Polling for jobs', () => {
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.load(ecommerceSOPath);
     });
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
       await reportingApi.deleteAllReports();
     });
 

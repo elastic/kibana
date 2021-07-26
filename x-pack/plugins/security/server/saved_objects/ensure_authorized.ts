@@ -135,6 +135,29 @@ export function getEnsureAuthorizedActionResult<T extends string>(
   return record[action] ?? { authorizedSpaces: [] };
 }
 
+/**
+ * Helper function that, given an `EnsureAuthorizedResult`, ensures that the user is authorized to perform a given action for the given
+ * object type in the given spaces.
+ *
+ * @param {string} objectType the object type to check.
+ * @param {T} action the action to check.
+ * @param {EnsureAuthorizedResult<T>['typeActionMap']} typeActionMap the typeActionMap from an EnsureAuthorizedResult.
+ * @param {string[]} spacesToAuthorizeFor the spaces to check.
+ */
+export function isAuthorizedForObjectInAllSpaces<T extends string>(
+  objectType: string,
+  action: T,
+  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
+  spacesToAuthorizeFor: string[]
+) {
+  const actionResult = getEnsureAuthorizedActionResult(objectType, action, typeActionMap);
+  const { authorizedSpaces, isGloballyAuthorized } = actionResult;
+  const authorizedSpacesSet = new Set(authorizedSpaces);
+  return (
+    isGloballyAuthorized || spacesToAuthorizeFor.every((space) => authorizedSpacesSet.has(space))
+  );
+}
+
 async function checkPrivileges(
   deps: EnsureAuthorizedDependencies,
   actions: string | string[],

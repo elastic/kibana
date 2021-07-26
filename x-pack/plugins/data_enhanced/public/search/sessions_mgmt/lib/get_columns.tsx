@@ -16,10 +16,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
@@ -49,7 +49,8 @@ export const getColumns = (
   api: SearchSessionsMgmtAPI,
   config: SessionsConfigSchema,
   timezone: string,
-  onActionComplete: OnActionComplete
+  onActionComplete: OnActionComplete,
+  kibanaVersion: string
 ): Array<EuiBasicTableColumn<UISession>> => {
   // Use a literal array of table column definitions to detail a UISession object
   return [
@@ -82,7 +83,7 @@ export const getColumns = (
       }),
       sortable: true,
       width: '20%',
-      render: (name: UISession['name'], { restoreUrl, reloadUrl, status }) => {
+      render: (name: UISession['name'], { restoreUrl, reloadUrl, status, version }) => {
         const isRestorable = isSessionRestorable(status);
         const href = isRestorable ? restoreUrl : reloadUrl;
         const trackAction = isRestorable
@@ -102,6 +103,21 @@ export const getColumns = (
             />
           </>
         );
+        const versionIncompatibleWarning =
+          isRestorable && version === kibanaVersion ? null : (
+            <>
+              {' '}
+              <EuiIconTip
+                type="alert"
+                content={
+                  <FormattedMessage
+                    id="xpack.data.mgmt.searchSessions.table.versionIncompatibleWarning"
+                    defaultMessage="This search session was created in a Kibana instance running a different version. It may not restore correctly."
+                  />
+                }
+              />
+            </>
+          );
         return (
           <RedirectAppLinks application={core.application}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
@@ -113,11 +129,26 @@ export const getColumns = (
               <TableText>
                 {name}
                 {notRestorableWarning}
+                {versionIncompatibleWarning}
               </TableText>
             </EuiLink>
           </RedirectAppLinks>
         );
       },
+    },
+
+    // # Searches
+    {
+      field: 'numSearches',
+      name: i18n.translate('xpack.data.mgmt.searchSessions.table.numSearches', {
+        defaultMessage: '# Searches',
+      }),
+      sortable: true,
+      render: (numSearches: UISession['numSearches'], session) => (
+        <TableText color="subdued" data-test-subj="sessionManagementNumSearchesCol">
+          {numSearches}
+        </TableText>
+      ),
     },
 
     // Session status
@@ -229,6 +260,7 @@ export const getColumns = (
                   api={api}
                   key={`popkey-${session.id}`}
                   session={session}
+                  core={core}
                   onActionComplete={onActionComplete}
                 />
               </EuiFlexItem>

@@ -33,6 +33,8 @@ const mockDeps = {
       trustedAppsByPolicyEnabled: false,
       metricsEntitiesEnabled: false,
       ruleRegistryEnabled: false,
+      tGridEnabled: false,
+      uebaEnabled: false,
     },
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,

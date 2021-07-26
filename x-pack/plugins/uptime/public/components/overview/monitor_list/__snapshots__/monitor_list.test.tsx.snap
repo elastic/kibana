@@ -845,7 +845,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
 }
 
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder"
 >
   <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive c0"
@@ -1052,7 +1052,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
             >
               <span
-                class="euiTableCellContent euiTableCellContent--alignCenter"
+                class="euiTableCellContent"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1263,7 +1263,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               class="euiTableRowCell euiTableRowCell--hideForMobile"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
                   class="euiToolTipAnchor"
@@ -1299,28 +1299,37 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     class="euiPopover__anchor"
                   >
                     <div
-                      class="euiSwitch euiSwitch--compressed"
+                      class="euiFormRow"
+                      id="generated-id-row"
                     >
-                      <button
-                        aria-checked="false"
-                        aria-label="Enable status alert"
-                        class="euiSwitch__button"
-                        data-test-subj="uptimeDisplayDefineConnector"
-                        id="defineAlertSettingsSwitch"
-                        role="switch"
-                        type="button"
+                      <div
+                        class="euiFormRow__fieldWrapper"
                       >
-                        <span
-                          class="euiSwitch__body"
+                        <div
+                          class="euiSwitch euiSwitch--compressed"
                         >
-                          <span
-                            class="euiSwitch__thumb"
-                          />
-                          <span
-                            class="euiSwitch__track"
-                          />
-                        </span>
-                      </button>
+                          <button
+                            aria-checked="false"
+                            aria-label="Enable status alerts"
+                            class="euiSwitch__button"
+                            data-test-subj="uptimeDisplayDefineConnector"
+                            id="generated-id"
+                            role="switch"
+                            type="button"
+                          >
+                            <span
+                              class="euiSwitch__body"
+                            >
+                              <span
+                                class="euiSwitch__thumb"
+                              />
+                              <span
+                                class="euiSwitch__track"
+                              />
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1516,7 +1525,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               class="euiTableRowCell euiTableRowCell--hideForMobile"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
                   class="euiToolTipAnchor"
@@ -1552,28 +1561,37 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     class="euiPopover__anchor"
                   >
                     <div
-                      class="euiSwitch euiSwitch--compressed"
+                      class="euiFormRow"
+                      id="generated-id-row"
                     >
-                      <button
-                        aria-checked="false"
-                        aria-label="Enable status alert"
-                        class="euiSwitch__button"
-                        data-test-subj="uptimeDisplayDefineConnector"
-                        id="defineAlertSettingsSwitch"
-                        role="switch"
-                        type="button"
+                      <div
+                        class="euiFormRow__fieldWrapper"
                       >
-                        <span
-                          class="euiSwitch__body"
+                        <div
+                          class="euiSwitch euiSwitch--compressed"
                         >
-                          <span
-                            class="euiSwitch__thumb"
-                          />
-                          <span
-                            class="euiSwitch__track"
-                          />
-                        </span>
-                      </button>
+                          <button
+                            aria-checked="false"
+                            aria-label="Enable status alerts"
+                            class="euiSwitch__button"
+                            data-test-subj="uptimeDisplayDefineConnector"
+                            id="generated-id"
+                            role="switch"
+                            type="button"
+                          >
+                            <span
+                              class="euiSwitch__body"
+                            >
+                              <span
+                                class="euiSwitch__thumb"
+                              />
+                              <span
+                                class="euiSwitch__track"
+                              />
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

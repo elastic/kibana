@@ -16,6 +16,8 @@ import type {
 import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { GroupedNodes } from './types';
 
+export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;
+
 export function groupArgsByType(args: TinymathAST[]) {
   const { namedArgument, variable, function: functions } = groupBy<TinymathAST>(
     args,
@@ -62,6 +64,9 @@ export function getOperationParams(
     if (operation.filterable && (name === 'kql' || name === 'lucene')) {
       args[name] = value;
     }
+    if (operation.shiftable && name === 'shift') {
+      args[name] = value;
+    }
     return args;
   }, {});
 }
@@ -101,18 +106,20 @@ export const tinymathFunctions: Record<
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
+      defaultMessage: `
 Adds up two numbers.
 Also works with + symbol
 
 Example: Calculate the sum of two fields
 
-${'`sum(price) + sum(tax)`'}
+\`sum(price) + sum(tax)\`
 
 Example: Offset count by a static value
 
-${'`add(count(), 5)`'}
+\`add(count(), 5)\`
     `,
+    }),
   },
   subtract: {
     positionalArguments: [
@@ -125,13 +132,15 @@ ${'`add(count(), 5)`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.subtractFunction.markdown', {
+      defaultMessage: `
 Subtracts the first number from the second number.
-Also works with ${'`-`'} symbol
+Also works with \`-\` symbol
 
 Example: Calculate the range of a field
-${'`subtract(max(bytes), min(bytes))`'}
+\`subtract(max(bytes), min(bytes))\`
     `,
+    }),
   },
   multiply: {
     positionalArguments: [
@@ -144,16 +153,18 @@ ${'`subtract(max(bytes), min(bytes))`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.multiplyFunction.markdown', {
+      defaultMessage: `
 Multiplies two numbers.
-Also works with ${'`*`'} symbol.
+Also works with \`*\` symbol.
 
 Example: Calculate price after current tax rate
-${'`sum(bytes) * last_value(tax_rate)`'}
+\`sum(bytes) * last_value(tax_rate)\`
 
 Example: Calculate price after constant tax rate
-${'`multiply(sum(price), 1.2)`'}
+\`multiply(sum(price), 1.2)\`
     `,
+    }),
   },
   divide: {
     positionalArguments: [
@@ -166,15 +177,17 @@ ${'`multiply(sum(price), 1.2)`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.divideFunction.markdown', {
+      defaultMessage: `
 Divides the first number by the second number.
-Also works with ${'`/`'} symbol
+Also works with \`/\` symbol
 
-Example: Calculate profit margin 
-${'`sum(profit) / sum(revenue)`'}
+Example: Calculate profit margin
+\`sum(profit) / sum(revenue)\`
 
-Example: ${'`divide(sum(bytes), 2)`'}
+Example: \`divide(sum(bytes), 2)\`
     `,
+    }),
   },
   abs: {
     positionalArguments: [
@@ -183,11 +196,13 @@ Example: ${'`divide(sum(bytes), 2)`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.absFunction.markdown', {
+      defaultMessage: `
 Calculates absolute value. A negative value is multiplied by -1, a positive value stays the same.
 
-Example: Calculate average distance to sea level ${'`abs(average(altitude))`'}
+Example: Calculate average distance to sea level \`abs(average(altitude))\`
     `,
+    }),
   },
   cbrt: {
     positionalArguments: [
@@ -196,12 +211,14 @@ Example: Calculate average distance to sea level ${'`abs(average(altitude))`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.cbrtFunction.markdown', {
+      defaultMessage: `
 Cube root of value.
 
 Example: Calculate side length from volume
-${'`cbrt(last_value(volume))`'}
+\`cbrt(last_value(volume))\`
     `,
+    }),
   },
   ceil: {
     positionalArguments: [
@@ -210,13 +227,14 @@ ${'`cbrt(last_value(volume))`'}
         type: getTypeI18n('number'),
       },
     ],
-    // signature: 'ceil(value: number)',
-    help: `
+    help: i18n.translate('xpack.lens.formula.ceilFunction.markdown', {
+      defaultMessage: `
 Ceiling of value, rounds up.
 
-Example: Round up price to the next dollar 
-${'`ceil(sum(price))`'}
+Example: Round up price to the next dollar
+\`ceil(sum(price))\`
     `,
+    }),
   },
   clamp: {
     positionalArguments: [
@@ -233,8 +251,8 @@ ${'`ceil(sum(price))`'}
         type: getTypeI18n('number'),
       },
     ],
-    // signature: 'clamp(value: number, minimum: number, maximum: number)',
-    help: `
+    help: i18n.translate('xpack.lens.formula.clampFunction.markdown', {
+      defaultMessage: `
 Limits the value from a minimum to maximum.
 
 Example: Make sure to catch outliers
@@ -246,6 +264,7 @@ clamp(
 )
 \`\`\`
 `,
+    }),
   },
   cube: {
     positionalArguments: [
@@ -254,12 +273,14 @@ clamp(
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.cubeFunction.markdown', {
+      defaultMessage: `
 Calculates the cube of a number.
 
 Example: Calculate volume from side length
-${'`cube(last_value(length))`'}
+\`cube(last_value(length))\`
     `,
+    }),
   },
   exp: {
     positionalArguments: [
@@ -268,13 +289,15 @@ ${'`cube(last_value(length))`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.expFunction.markdown', {
+      defaultMessage: `
 Raises *e* to the nth power.
 
 Example: Calculate the natural exponential function
 
-${'`exp(last_value(duration))`'}
+\`exp(last_value(duration))\`
     `,
+    }),
   },
   fix: {
     positionalArguments: [
@@ -283,12 +306,14 @@ ${'`exp(last_value(duration))`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.fixFunction.markdown', {
+      defaultMessage: `
 For positive values, takes the floor. For negative values, takes the ceiling.
 
 Example: Rounding towards zero
-${'`fix(sum(profit))`'}
+\`fix(sum(profit))\`
     `,
+    }),
   },
   floor: {
     positionalArguments: [
@@ -297,12 +322,14 @@ ${'`fix(sum(profit))`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.floorFunction.markdown', {
+      defaultMessage: `
 Round down to nearest integer value
 
 Example: Round down a price
-${'`floor(sum(price))`'}
+\`floor(sum(price))\`
     `,
+    }),
   },
   log: {
     positionalArguments: [
@@ -317,7 +344,8 @@ ${'`floor(sum(price))`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.logFunction.markdown', {
+      defaultMessage: `
 Logarithm with optional base. The natural base *e* is used as default.
 
 Example: Calculate number of bits required to store values
@@ -326,17 +354,8 @@ log(sum(bytes))
 log(sum(bytes), 2)
 \`\`\`
     `,
+    }),
   },
-  // TODO: check if this is valid for Tinymath
-  //   log10: {
-  //     positionalArguments: [
-  //       { name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }), type: getTypeI18n('number') },
-  //     ],
-  //     help: `
-  // Base 10 logarithm.
-  // Example: ${'`log10(sum(bytes))`'}
-  //     `,
-  //   },
   mod: {
     positionalArguments: [
       {
@@ -348,12 +367,14 @@ log(sum(bytes), 2)
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.modFunction.markdown', {
+      defaultMessage: `
 Remainder after dividing the function by a number
 
 Example: Calculate last three digits of a value
-${'`mod(sum(price), 1000)`'}
+\`mod(sum(price), 1000)\`
     `,
+    }),
   },
   pow: {
     positionalArguments: [
@@ -366,12 +387,14 @@ ${'`mod(sum(price), 1000)`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.powFunction.markdown', {
+      defaultMessage: `
 Raises the value to a certain power. The second argument is required
 
 Example: Calculate volume based on side length
-${'`pow(last_value(length), 3)`'}
+\`pow(last_value(length), 3)\`
     `,
+    }),
   },
   round: {
     positionalArguments: [
@@ -386,7 +409,8 @@ ${'`pow(last_value(length), 3)`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.roundFunction.markdown', {
+      defaultMessage: `
 Rounds to a specific number of decimal places, default of 0
 
 Examples: Round to the cent
@@ -395,6 +419,7 @@ round(sum(bytes))
 round(sum(bytes), 2)
 \`\`\`
     `,
+    }),
   },
   sqrt: {
     positionalArguments: [
@@ -403,12 +428,14 @@ round(sum(bytes), 2)
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.sqrtFunction.markdown', {
+      defaultMessage: `
 Square root of a positive value only
 
 Example: Calculate side length based on area
-${'`sqrt(last_value(area))`'}
+\`sqrt(last_value(area))\`
     `,
+    }),
   },
   square: {
     positionalArguments: [
@@ -417,16 +444,18 @@ ${'`sqrt(last_value(area))`'}
         type: getTypeI18n('number'),
       },
     ],
-    help: `
+    help: i18n.translate('xpack.lens.formula.squareFunction.markdown', {
+      defaultMessage: `
 Raise the value to the 2nd power
 
 Example: Calculate area based on side length
-${'`square(last_value(length))`'}
+\`square(last_value(length))\`
     `,
+    }),
   },
 };
 
-export function isMathNode(node: TinymathAST) {
+export function isMathNode(node: TinymathAST | string) {
   return isObject(node) && node.type === 'function' && tinymathFunctions[node.name];
 }
 
@@ -437,6 +466,7 @@ export function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
     }
     return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
   }
+
   return flattenMathNodes(root);
 }
 

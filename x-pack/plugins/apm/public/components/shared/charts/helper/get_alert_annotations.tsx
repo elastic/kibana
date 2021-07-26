@@ -10,7 +10,7 @@ import {
   Position,
   RectAnnotation,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_DURATION,
@@ -20,7 +20,7 @@ import {
   RULE_ID,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
 import type { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
@@ -68,15 +68,30 @@ function getAlertHeader({
   }
 }
 
+/**
+ * Get the components needed to render alert annotations.
+ *
+ * You might be thinking, "Hey, this is a function that returns DOM.
+ * This should not be a function but a component."
+ *
+ * You would be correct, except for https://github.com/elastic/elastic-charts/issues/914,
+ * which makes it so if you construct a chart with its elements broken into
+ * different components it makes the whole chart disappear, which is not what
+ * we want.
+ */
 export function getAlertAnnotations({
   alerts,
   chartStartTime,
   getFormatter,
+  selectedAlertId,
+  setSelectedAlertId,
   theme,
 }: {
   alerts?: Alert[];
   chartStartTime: number;
   getFormatter: ObservabilityRuleTypeRegistry['getFormatter'];
+  selectedAlertId?: string;
+  setSelectedAlertId: Dispatch<SetStateAction<string | undefined>>;
   theme: EuiTheme;
 }) {
   return alerts?.flatMap((alert) => {
@@ -100,6 +115,7 @@ export function getAlertAnnotations({
         formatters: { asDuration, asPercent },
       }) ?? {}),
     };
+    const isSelected = uuid === selectedAlertId;
 
     return [
       <LineAnnotation
@@ -113,9 +129,29 @@ export function getAlertAnnotations({
         domainType={AnnotationDomainType.XDomain}
         id={`alert_${uuid}_line`}
         key={`alert_${uuid}_line`}
-        marker={<EuiIcon type="alert" />}
+        marker={
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.apm.alertAnnotationButtonAriaLabel',
+              { defaultMessage: 'View alert details' }
+            )}
+            color={severityLevel === 'warning' ? 'warning' : 'danger'}
+            onClick={() => {
+              if (selectedAlertId === uuid) {
+                setSelectedAlertId(undefined);
+              } else {
+                setSelectedAlertId(uuid);
+              }
+            }}
+            iconSize={isSelected ? 'l' : 'm'}
+            iconType="alert"
+            size="xs"
+          />
+        }
         markerPosition={Position.Top}
-        style={{ line: { opacity: 1, strokeWidth: 2, stroke: color } }}
+        style={{
+          line: { opacity: 1, strokeWidth: isSelected ? 6 : 2, stroke: color },
+        }}
       />,
       <RectAnnotation
         key={`alert_${uuid}_area`}
@@ -128,7 +164,7 @@ export function getAlertAnnotations({
             },
           },
         ]}
-        style={{ fill: color }}
+        style={{ fill: color, opacity: isSelected ? 0.6 : 0.25 }}
       />,
     ];
   });

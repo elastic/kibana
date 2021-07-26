@@ -204,15 +204,21 @@ export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }:
     return [
       {
         id: `${id}-any`,
-        label: 'any',
+        label: i18n.translate('discover.fieldChooser.filter.toggleButton.any', {
+          defaultMessage: 'any',
+        }),
       },
       {
         id: `${id}-true`,
-        label: 'yes',
+        label: i18n.translate('discover.fieldChooser.filter.toggleButton.yes', {
+          defaultMessage: 'yes',
+        }),
       },
       {
         id: `${id}-false`,
-        label: 'no',
+        label: i18n.translate('discover.fieldChooser.filter.toggleButton.no', {
+          defaultMessage: 'no',
+        }),
       },
     ];
   };

@@ -20,7 +20,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
@@ -120,18 +119,6 @@ export const DatavisualizerSelector: FC = () => {
                     id="xpack.ml.datavisualizer.selector.importDataDescription"
                     defaultMessage="Import data from a log file. You can upload files up to {maxFileSize}."
                     values={{ maxFileSize }}
-                  />
-                }
-                betaBadgeLabel={i18n.translate(
-                  'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
-                  {
-                    defaultMessage: 'Experimental',
-                  }
-                )}
-                betaBadgeTooltipContent={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.experimentalBadgeTooltipLabel"
-                    defaultMessage="Experimental feature. We'd love to hear your feedback."
                   />
                 }
                 footer={

@@ -9,7 +9,6 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 
@@ -22,13 +21,14 @@ export function dateHistogram(
   esQueryConfig,
   seriesIndex,
   capabilities,
-  uiSettings
+  uiSettings,
+  buildSeriesMetaParams
 ) {
   return (next) => async (doc) => {
     const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { timeField, interval, maxBars } = getIntervalAndTimefield(panel, series, seriesIndex);
+    const { timeField, interval, maxBars } = await buildSeriesMetaParams();
     const { from, to } = offsetTime(req, series.offset_time);
 
     let bucketInterval;

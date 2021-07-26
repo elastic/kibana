@@ -22,6 +22,7 @@ export const Template: FunctionComponent<Props> = ({
     uiPublicUrl,
     locale,
     darkMode,
+    themeVersion,
     stylesheetPaths,
     injectedMetadata,
     i18n,
@@ -36,7 +37,7 @@ export const Template: FunctionComponent<Props> = ({
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
         <title>Elastic</title>
-        <Fonts url={uiPublicUrl} />
+        <Fonts themeVersion={themeVersion} url={uiPublicUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
         <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />

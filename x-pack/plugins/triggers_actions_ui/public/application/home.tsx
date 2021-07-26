@@ -8,18 +8,7 @@
 import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  EuiText,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
 import { Section, routeToConnectors, routeToRules } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
@@ -89,78 +78,66 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }, [section, chrome, setBreadcrumbs]);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent color="transparent">
-        <EuiTitle size="m">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <h1 data-test-subj="appTitle">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Rules and Connectors"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={docLinks.links.alerting.guide}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.home.docsLinkText"
-                  defaultMessage="Documentation"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
+    <>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <span data-test-subj="appTitle">
             <FormattedMessage
-              id="xpack.triggersActionsUI.home.sectionDescription"
-              defaultMessage="Detect conditions using rules, and take actions using connectors."
+              id="xpack.triggersActionsUI.home.appTitle"
+              defaultMessage="Rules and Connectors"
             />
-          </p>
-        </EuiText>
+          </span>
+        }
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={docLinks.links.alerting.guide}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.home.docsLinkText"
+              defaultMessage="Documentation"
+            />
+          </EuiButtonEmpty>,
+        ]}
+        description={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.home.sectionDescription"
+            defaultMessage="Detect conditions using rules, and take actions using connectors."
+          />
+        }
+        tabs={tabs.map((tab) => ({
+          label: tab.name,
+          onClick: () => onSectionChange(tab.id),
+          isSelected: tab.id === section,
+          key: tab.id,
+          'data-test-subj': `${tab.id}Tab`,
+        }))}
+      />
 
-        <EuiTabs>
-          {tabs.map((tab) => (
-            <EuiTab
-              onClick={() => onSectionChange(tab.id)}
-              isSelected={tab.id === section}
-              key={tab.id}
-              data-test-subj={`${tab.id}Tab`}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
+      <EuiSpacer size="l" />
 
-        <EuiSpacer size="s" />
-
-        <HealthContextProvider>
-          <HealthCheck waitForCheck={true}>
-            <Switch>
-              {canShowActions && (
-                <Route
-                  exact
-                  path={routeToConnectors}
-                  component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
-                />
-              )}
+      <HealthContextProvider>
+        <HealthCheck waitForCheck={true}>
+          <Switch>
+            {canShowActions && (
               <Route
                 exact
-                path={routeToRules}
-                component={suspendedComponentWithProps(AlertsList, 'xl')}
+                path={routeToConnectors}
+                component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
               />
-            </Switch>
-          </HealthCheck>
-        </HealthContextProvider>
-      </EuiPageContent>
-    </EuiPageBody>
+            )}
+            <Route
+              exact
+              path={routeToRules}
+              component={suspendedComponentWithProps(AlertsList, 'xl')}
+            />
+          </Switch>
+        </HealthCheck>
+      </HealthContextProvider>
+    </>
   );
 };
 

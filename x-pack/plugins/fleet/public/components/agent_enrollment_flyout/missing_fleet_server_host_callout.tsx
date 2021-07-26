@@ -10,10 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { useUrlModal } from '../../hooks';
+import { useUrlModal, useStartServices } from '../../hooks';
 
 export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
   const { setModal } = useUrlModal();
+  const { docLinks } = useStartServices();
+
   return (
     <EuiCallOut
       title={i18n.translate('xpack.fleet.agentEnrollment.missingFleetHostCalloutTitle', {
@@ -25,11 +27,7 @@ export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
         defaultMessage="A URL for your Fleet Server host is required to enroll agents with Fleet. You can add this information in Fleet Settings. For more information, see the {link}."
         values={{
           link: (
-            <EuiLink
-              href="https://www.elastic.co/guide/en/fleet/current/index.html"
-              target="_blank"
-              external
-            >
+            <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.missingFleetHostGuideLink"
                 defaultMessage="Fleet User Guide"

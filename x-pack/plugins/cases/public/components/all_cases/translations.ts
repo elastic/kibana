@@ -12,10 +12,18 @@ export * from '../../common/translations';
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
   defaultMessage: 'No Cases',
 });
+
 export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.body', {
   defaultMessage:
     'There are no cases to display. Please create a new case or change your filter settings above.',
 });
+
+export const NO_CASES_BODY_READ_ONLY = i18n.translate(
+  'xpack.cases.caseTable.noCases.readonly.body',
+  {
+    defaultMessage: 'There are no cases to display. Please change your filter settings above.',
+  }
+);
 
 export const ADD_NEW_CASE = i18n.translate('xpack.cases.caseTable.addNewCase', {
   defaultMessage: 'Add New Case',
@@ -82,10 +90,15 @@ export const REFRESH = i18n.translate('xpack.cases.caseTable.refreshTitle', {
   defaultMessage: 'Refresh',
 });
 
-export const SERVICENOW_LINK_ARIA = i18n.translate('xpack.cases.caseTable.serviceNowLinkAria', {
-  defaultMessage: 'click to view the incident on servicenow',
-});
-
+export const PUSH_LINK_ARIA = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.caseTable.pushLinkAria', {
+    values: { thirdPartyName },
+    defaultMessage: 'click to view the incident on { thirdPartyName }.',
+  });
 export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
   defaultMessage: 'Status',
+});
+
+export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
+  defaultMessage: 'Change status',
 });

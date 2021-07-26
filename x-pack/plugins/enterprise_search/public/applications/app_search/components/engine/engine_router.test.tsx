@@ -19,7 +19,6 @@ import { Switch, Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../shared/loading';
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
 import { CrawlerRouter } from '../crawler';
@@ -40,9 +39,16 @@ describe('EngineRouter', () => {
     ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
+    isMetaEngine: false,
     myRole: {},
   };
-  const actions = { setEngineName: jest.fn(), initializeEngine: jest.fn(), clearEngine: jest.fn() };
+  const actions = {
+    setEngineName: jest.fn(),
+    initializeEngine: jest.fn(),
+    pollEmptyEngine: jest.fn(),
+    stopPolling: jest.fn(),
+    clearEngine: jest.fn(),
+  };
 
   beforeEach(() => {
     setMockValues(values);
@@ -59,12 +65,14 @@ describe('EngineRouter', () => {
       expect(actions.setEngineName).toHaveBeenCalledWith('some-engine');
     });
 
-    it('initializes/fetches engine API data', () => {
+    it('initializes/fetches engine API data and starts a poll for empty engines', () => {
       expect(actions.initializeEngine).toHaveBeenCalled();
+      expect(actions.pollEmptyEngine).toHaveBeenCalled();
     });
 
-    it('clears engine on unmount and on update', () => {
+    it('clears engine and stops polling on unmount / on engine change', () => {
       unmountHandler();
+      expect(actions.stopPolling).toHaveBeenCalled();
       expect(actions.clearEngine).toHaveBeenCalled();
     });
   });
@@ -80,20 +88,20 @@ describe('EngineRouter', () => {
     );
   });
 
-  it('renders a loading component if async data is still loading', () => {
+  it('renders a loading page template if async data is still loading', () => {
     setMockValues({ ...values, dataLoading: true });
     const wrapper = shallow(<EngineRouter />);
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('isLoading')).toEqual(true);
   });
 
   // This would happen if a user jumps around from one engine route to another. If the engine name
   // on the path has changed, but we still have an engine stored in state, we do not want to load
   // any route views as they would be rendering with the wrong data.
-  it('renders a loading component if the engine stored in state is stale', () => {
+  it('renders a loading page template if the engine stored in state is stale', () => {
     setMockValues({ ...values, engineName: 'some-engine' });
     mockUseParams.mockReturnValue({ engineName: 'some-new-engine' });
     const wrapper = shallow(<EngineRouter />);
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('isLoading')).toEqual(true);
   });
 
   it('renders a default engine overview', () => {
@@ -168,14 +176,18 @@ describe('EngineRouter', () => {
   });
 
   it('renders a source engines view', () => {
-    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
+    setMockValues({
+      ...values,
+      myRole: { canViewMetaEngineSourceEngines: true },
+      isMetaEngine: true,
+    });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(SourceEngines)).toHaveLength(1);
   });
 
   it('renders a crawler view', () => {
-    setMockValues({ ...values, myRole: { canViewEngineCrawler: true } });
+    setMockValues({ ...values, myRole: { canViewEngineCrawler: true }, isMetaEngine: false });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(CrawlerRouter)).toHaveLength(1);

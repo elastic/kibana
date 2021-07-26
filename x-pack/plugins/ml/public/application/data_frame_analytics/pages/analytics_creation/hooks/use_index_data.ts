@@ -255,6 +255,7 @@ export const useIndexData = (
 
   return {
     ...dataGrid,
+    indexPatternFields,
     renderCellValue,
   };
 };

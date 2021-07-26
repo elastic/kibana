@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-list-hooks';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { getUserPrivilege } from '../../containers/detection_engine/alerts/api';
 import * as i18n from './translations';

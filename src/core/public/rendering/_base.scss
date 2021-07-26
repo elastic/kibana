@@ -38,6 +38,7 @@
 @mixin kbnAffordForHeader($headerHeight) {
   @include euiHeaderAffordForFixed($headerHeight);
 
+  #securitySolutionStickyKQL,
   #app-fixed-viewport {
     top: $headerHeight;
   }

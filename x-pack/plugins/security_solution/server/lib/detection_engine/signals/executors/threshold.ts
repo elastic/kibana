@@ -36,11 +36,13 @@ import {
   mergeReturns,
 } from '../utils';
 import { BuildRuleMessage } from '../rule_messages';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const thresholdExecutor = async ({
   rule,
-  tuples,
+  tuple,
   exceptionItems,
+  experimentalFeatures,
   services,
   version,
   logger,
@@ -50,8 +52,9 @@ export const thresholdExecutor = async ({
   wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
+  experimentalFeatures: ExperimentalFeatures;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
@@ -68,92 +71,95 @@ export const thresholdExecutor = async ({
     );
     result.warning = true;
   }
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
 
-  for (const tuple of tuples) {
-    const {
-      thresholdSignalHistory,
-      searchErrors: previousSearchErrors,
-    } = await getThresholdSignalHistory({
-      indexPattern: [ruleParams.outputIndex],
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      services,
-      logger,
-      ruleId: ruleParams.ruleId,
-      bucketByFields: ruleParams.threshold.field,
-      timestampOverride: ruleParams.timestampOverride,
-      buildRuleMessage,
-    });
+  const {
+    thresholdSignalHistory,
+    searchErrors: previousSearchErrors,
+  } = await getThresholdSignalHistory({
+    indexPattern: [ruleParams.outputIndex],
+    from: tuple.from.toISOString(),
+    to: tuple.to.toISOString(),
+    services,
+    logger,
+    ruleId: ruleParams.ruleId,
+    bucketByFields: ruleParams.threshold.field,
+    timestampOverride: ruleParams.timestampOverride,
+    buildRuleMessage,
+  });
 
-    const bucketFilters = await getThresholdBucketFilters({
-      thresholdSignalHistory,
-      timestampOverride: ruleParams.timestampOverride,
-    });
+  const bucketFilters = await getThresholdBucketFilters({
+    thresholdSignalHistory,
+    timestampOverride: ruleParams.timestampOverride,
+  });
 
-    const esFilter = await getFilter({
-      type: ruleParams.type,
-      filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
-      language: ruleParams.language,
-      query: ruleParams.query,
-      savedId: ruleParams.savedId,
-      services,
-      index: inputIndex,
-      lists: exceptionItems,
-    });
+  const esFilter = await getFilter({
+    type: ruleParams.type,
+    filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
+    language: ruleParams.language,
+    query: ruleParams.query,
+    savedId: ruleParams.savedId,
+    services,
+    index: inputIndex,
+    lists: exceptionItems,
+  });
 
-    const {
+  const {
+    searchResult: thresholdResults,
+    searchErrors,
+    searchDuration: thresholdSearchDuration,
+  } = await findThresholdSignals({
+    inputIndexPattern: inputIndex,
+    from: tuple.from.toISOString(),
+    to: tuple.to.toISOString(),
+    services,
+    logger,
+    filter: esFilter,
+    threshold: ruleParams.threshold,
+    timestampOverride: ruleParams.timestampOverride,
+    buildRuleMessage,
+  });
+
+  const {
+    success,
+    bulkCreateDuration,
+    createdItemsCount,
+    createdItems,
+    errors,
+  } = await bulkCreateThresholdSignals({
+    someResult: thresholdResults,
+    ruleSO: rule,
+    filter: esFilter,
+    services,
+    logger,
+    inputIndexPattern: inputIndex,
+    signalsIndex: ruleParams.outputIndex,
+    startedAt,
+    from: tuple.from.toDate(),
+    thresholdSignalHistory,
+    bulkCreate,
+    wrapHits,
+  });
+
+  result = mergeReturns([
+    result,
+    createSearchAfterReturnTypeFromResponse({
       searchResult: thresholdResults,
-      searchErrors,
-      searchDuration: thresholdSearchDuration,
-    } = await findThresholdSignals({
-      inputIndexPattern: inputIndex,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      services,
-      logger,
-      filter: esFilter,
-      threshold: ruleParams.threshold,
       timestampOverride: ruleParams.timestampOverride,
-      buildRuleMessage,
-    });
-
-    const {
+    }),
+    createSearchAfterReturnType({
       success,
-      bulkCreateDuration,
-      createdItemsCount,
-      createdItems,
-      errors,
-    } = await bulkCreateThresholdSignals({
-      someResult: thresholdResults,
-      ruleSO: rule,
-      filter: esFilter,
-      services,
-      logger,
-      inputIndexPattern: inputIndex,
-      signalsIndex: ruleParams.outputIndex,
-      startedAt,
-      from: tuple.from.toDate(),
-      thresholdSignalHistory,
-      bulkCreate,
-      wrapHits,
-    });
-
-    result = mergeReturns([
-      result,
-      createSearchAfterReturnTypeFromResponse({
-        searchResult: thresholdResults,
-        timestampOverride: ruleParams.timestampOverride,
-      }),
-      createSearchAfterReturnType({
-        success,
-        errors: [...errors, ...previousSearchErrors, ...searchErrors],
-        createdSignalsCount: createdItemsCount,
-        createdSignals: createdItems,
-        bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-        searchAfterTimes: [thresholdSearchDuration],
-      }),
-    ]);
-  }
+      errors: [...errors, ...previousSearchErrors, ...searchErrors],
+      createdSignalsCount: createdItemsCount,
+      createdSignals: createdItems,
+      bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+      searchAfterTimes: [thresholdSearchDuration],
+    }),
+  ]);
   return result;
 };

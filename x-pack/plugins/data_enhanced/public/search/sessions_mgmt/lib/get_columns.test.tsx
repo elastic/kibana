@@ -70,16 +70,26 @@ describe('Search Sessions Management table column factory', () => {
       reloadUrl: '/app/great-app-url',
       restoreUrl: '/app/great-app-url/#42',
       appId: 'discovery',
+      numSearches: 3,
       status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
       initialState: {},
       restoreState: {},
+      version: '7.14.0',
     };
   });
 
   test('returns columns', () => {
-    const columns = getColumns(mockCoreStart, mockPluginsSetup, api, mockConfig, tz, handleAction);
+    const columns = getColumns(
+      mockCoreStart,
+      mockPluginsSetup,
+      api,
+      mockConfig,
+      tz,
+      handleAction,
+      '7.14.0'
+    );
     expect(columns).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -94,6 +104,12 @@ describe('Search Sessions Management table column factory', () => {
           "render": [Function],
           "sortable": true,
           "width": "20%",
+        },
+        Object {
+          "field": "numSearches",
+          "name": "# Searches",
+          "render": [Function],
+          "sortable": true,
         },
         Object {
           "field": "status",
@@ -137,7 +153,8 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const name = mount(nameColumn.render!(mockSession.name, mockSession) as ReactElement);
@@ -146,16 +163,37 @@ describe('Search Sessions Management table column factory', () => {
     });
   });
 
-  // Status column
-  describe('status', () => {
-    test('render in_progress', () => {
-      const [, , status] = getColumns(
+  // Num of searches column
+  describe('num of searches', () => {
+    test('renders', () => {
+      const [, , numOfSearches] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+
+      const numOfSearchesLine = mount(
+        numOfSearches.render!(mockSession.numSearches, mockSession) as ReactElement
+      );
+      expect(numOfSearchesLine.text()).toMatchInlineSnapshot(`"3"`);
+    });
+  });
+
+  // Status column
+  describe('status', () => {
+    test('render in_progress', () => {
+      const [, , , status] = getColumns(
+        mockCoreStart,
+        mockPluginsSetup,
+        api,
+        mockConfig,
+        tz,
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
@@ -165,13 +203,14 @@ describe('Search Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , status] = getColumns(
+      const [, , , status] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       mockSession.status = 'INVALID' as SearchSessionStatus;
@@ -188,13 +227,14 @@ describe('Search Sessions Management table column factory', () => {
     test('render using Browser timezone', () => {
       tz = 'Browser';
 
-      const [, , , createdDateCol] = getColumns(
+      const [, , , , createdDateCol] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
@@ -205,13 +245,14 @@ describe('Search Sessions Management table column factory', () => {
     test('render using AK timezone', () => {
       tz = 'US/Alaska';
 
-      const [, , , createdDateCol] = getColumns(
+      const [, , , , createdDateCol] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
@@ -220,13 +261,14 @@ describe('Search Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , , createdDateCol] = getColumns(
+      const [, , , , createdDateCol] = getColumns(
         mockCoreStart,
         mockPluginsSetup,
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       mockSession.created = 'INVALID';

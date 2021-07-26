@@ -15,7 +15,7 @@ import { combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
-  tuples,
+  tuple,
   threatMapping,
   query,
   inputIndex,
@@ -104,7 +104,7 @@ export const createThreatSignals = async ({
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
-          tuples,
+          tuple,
           threatEnrichment,
           threatMapping,
           query,

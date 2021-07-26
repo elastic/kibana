@@ -96,21 +96,11 @@ export async function cleanKibanaIndices({
   client,
   stats,
   log,
-  kibanaPluginIds,
 }: {
   client: KibanaClient;
   stats: Stats;
   log: ToolingLog;
-  kibanaPluginIds: string[];
 }) {
-  if (!kibanaPluginIds.includes('spaces')) {
-    return await deleteKibanaIndices({
-      client,
-      stats,
-      log,
-    });
-  }
-
   while (true) {
     const resp = await client.deleteByQuery(
       {

@@ -53,7 +53,7 @@ describe('EmptyState', () => {
       });
 
       it('sends a user to engine creation', () => {
-        expect(button.prop('to')).toEqual('/engine_creation');
+        expect(button.prop('to')).toEqual('/engines/new');
       });
     });
   });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, ReactNode } from 'react';
 
-import styled from 'styled-components';
+import styled, { StyledComponent } from 'styled-components';
 
 import {
   EuiFlyout,
@@ -49,7 +49,11 @@ export const RESPONSE_HEADERS = i18n.translate(
   }
 );
 
-const FlyoutContainer = styled(EuiFlyout)`
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
+const FlyoutContainer: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
+  EuiFlyout
+)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 

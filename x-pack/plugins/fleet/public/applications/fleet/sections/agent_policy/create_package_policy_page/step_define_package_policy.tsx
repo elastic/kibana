@@ -29,6 +29,7 @@ import type {
 } from '../../../types';
 import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services';
 import { Loading } from '../../../components';
+import { useStartServices } from '../../../hooks';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
@@ -52,6 +53,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     validationResults,
     submitAttempted,
   }) => {
+    const { docLinks } = useStartServices();
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
@@ -161,25 +163,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   defaultMessage="Description"
                 />
               }
-              helpText={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                  defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
-                  values={{
-                    learnMore: (
-                      <EuiLink
-                        href="https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme"
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
-                          { defaultMessage: 'Learn more' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
               labelAppend={
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
@@ -274,6 +257,25 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       <FormattedMessage
                         id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
                         defaultMessage="Namespace"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
+                        defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                        values={{
+                          learnMore: (
+                            <EuiLink
+                              href={docLinks.links.fleet.datastreamsNamingScheme}
+                              target="_blank"
+                            >
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
                       />
                     }
                   >

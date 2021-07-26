@@ -55,7 +55,8 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const onRowClick = useCallback(
     async (theCase?: Case | SubCase) => {
       openCaseModal(false);
-      await navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      await navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
       });
       dispatch(
@@ -88,7 +89,9 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const handleNewCaseClick = useCallback(() => {
     handlePopoverClose();
-    navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.case,
       path: getCreateCaseUrl(),
     }).then(() => {
       dispatch(

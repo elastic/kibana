@@ -17,14 +17,14 @@ import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
-import { getAPMHref } from '../Links/apm/APMLink';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { units } from '../../../style/variables';
+import { getAPMHref } from '../Links/apm/APMLink';
 
 export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
 
@@ -39,19 +39,20 @@ export function AnomalyDetectionSetupLink() {
   const license = useLicenseContext();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
   const { basePath } = core.http;
+  const theme = useTheme();
 
   return (
     <EuiHeaderLink
-      color="primary"
+      color="text"
       href={getAPMHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
     >
       {canGetJobs && hasValidLicense ? (
         <MissingJobsAlert environment={environment} />
       ) : (
-        <EuiIcon type="inspect" color="primary" />
+        <EuiIcon size="s" type="inspect" color="text" />
       )}
-      <span style={{ marginInlineStart: units.half }}>
+      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>
         {ANOMALY_DETECTION_LINK_LABEL}
       </span>
     </EuiHeaderLink>
@@ -64,7 +65,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
     anomalyDetectionJobsStatus,
   } = useAnomalyDetectionJobsContext();
 
-  const defaultIcon = <EuiIcon type="inspect" color="primary" />;
+  const defaultIcon = <EuiIcon size="s" type="inspect" color="text" />;
 
   if (anomalyDetectionJobsStatus === FETCH_STATUS.LOADING) {
     return <EuiLoadingSpinner />;
@@ -92,7 +93,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
 
   return (
     <EuiToolTip position="bottom" content={getTooltipText(environment)}>
-      <EuiIcon type="alert" color="danger" />
+      <EuiIcon size="s" type="alert" color="danger" />
     </EuiToolTip>
   );
 }

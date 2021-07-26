@@ -144,6 +144,7 @@ describe('ESGeoGridSource', () => {
   };
 
   const vectorSourceRequestMeta: VectorSourceRequestMeta = {
+    isReadOnly: false,
     geogridPrecision: 4,
     filters: [],
     timeFilters: {

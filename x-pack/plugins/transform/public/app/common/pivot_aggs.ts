@@ -18,6 +18,7 @@ import { isPopulatedObject } from '../../../common/shared_imports';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
+import { PivotAggsConfigTopMetrics } from '../sections/create_transform/components/step_define/common/top_metrics_agg/types';
 
 export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
   return (
@@ -240,10 +241,14 @@ export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsCo
 /**
  * Union type for agg configs with extended forms
  */
-type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter;
+type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter | PivotAggsConfigTopMetrics;
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
   return isPopulatedObject(arg, ['AggFormComponent']);
+}
+
+export function isPivotAggConfigTopMetric(arg: unknown): arg is PivotAggsConfigTopMetrics {
+  return isPivotAggsWithExtendedForm(arg) && arg.agg === PIVOT_SUPPORTED_AGGS.TOP_METRICS;
 }
 
 export function isPivotAggsConfigPercentiles(arg: unknown): arg is PivotAggsConfigPercentiles {

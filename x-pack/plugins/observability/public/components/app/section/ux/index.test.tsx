@@ -28,10 +28,11 @@ jest.mock('react-router-dom', () => ({
 describe('UXSection', () => {
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasData: {
+      hasDataMap: {
         ux: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          hasData: { hasData: true, serviceName: 'elastic-co-frontend' },
+          hasData: true,
+          serviceName: 'elastic-co-frontend',
         },
       },
     } as HasDataContextValue);

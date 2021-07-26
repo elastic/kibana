@@ -6,85 +6,47 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
-import { esFilters, Filter, IndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { useSeriesFilters } from '../hooks/use_series_filters';
+import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
+import { SeriesUrl } from '../types';
 
 interface Props {
   field: string;
   label: string;
-  value: string;
-  seriesId: string;
+  value: string | string[];
+  seriesId: number;
+  series: SeriesUrl;
   negate: boolean;
   definitionFilter?: boolean;
-  removeFilter: (field: string, value: string, notVal: boolean) => void;
-}
-export function buildFilterLabel({
-  field,
-  value,
-  label,
-  indexPattern,
-  negate,
-}: {
-  label: string;
-  value: string;
-  negate: boolean;
-  field: string;
   indexPattern: IndexPattern;
-}) {
-  const indexField = indexPattern.getFieldByName(field)!;
-
-  const filter = esFilters.buildPhraseFilter(indexField, value, indexPattern);
-
-  filter.meta.value = value;
-  filter.meta.key = label;
-  filter.meta.alias = null;
-  filter.meta.negate = negate;
-  filter.meta.disabled = false;
-  filter.meta.type = 'phrase';
-
-  return filter;
+  removeFilter: (field: string, value: string | string[], notVal: boolean) => void;
 }
+
 export function FilterLabel({
   label,
   seriesId,
+  series,
   field,
   value,
   negate,
+  indexPattern,
   removeFilter,
   definitionFilter,
 }: Props) {
-  const FilterItem = injectI18n(esFilters.FilterItem);
-
-  const { indexPattern } = useAppIndexPatternContext();
-
-  const filter = buildFilterLabel({ field, value, label, indexPattern, negate });
-
-  const { invertFilter } = useSeriesFilters({ seriesId });
-
-  const {
-    services: { uiSettings },
-  } = useKibana();
+  const { invertFilter } = useSeriesFilters({ seriesId, series });
 
   return indexPattern ? (
-    <FilterItem
-      indexPatterns={[indexPattern]}
-      id={`${field}-${value}-${negate}`}
-      filter={filter}
-      onRemove={() => {
-        removeFilter(field, value, false);
+    <FilterValueLabel
+      indexPattern={indexPattern}
+      removeFilter={removeFilter}
+      invertFilter={(val) => {
+        if (!definitionFilter) invertFilter(val);
       }}
-      onUpdate={(filterN: Filter) => {
-        if (definitionFilter) {
-          // FIXME handle this use case
-        } else if (filterN.meta.negate !== negate) {
-          invertFilter({ field, value, negate });
-        }
-      }}
-      uiSettings={uiSettings!}
-      hiddenPanelOptions={['pinFilter', 'editFilter', 'disableFilter']}
+      field={field}
+      value={value}
+      negate={negate}
+      label={label}
     />
   ) : null;
 }
