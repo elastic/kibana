@@ -59,6 +59,7 @@ const incrementUsageCounters = (
   dayId: string
 ) => {
   const dailyId = getDailyId({ appId, viewId, dayId });
+
   return repository.incrementCounter(
     'application_usage_daily',
     dailyId,
