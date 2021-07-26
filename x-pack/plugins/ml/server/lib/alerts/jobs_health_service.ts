@@ -8,7 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
-import { MlJobState } from '@elastic/elasticsearch/api/types';
+import { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
 import {
   AnomalyDetectionJobsHealthRuleParams,
@@ -28,7 +28,19 @@ interface TestResult {
 
 type TestsResults = TestResult[];
 
-type NotStartedDatafeedResponse = Array<DatafeedStats & { job_id: string; job_state: MlJobState }>;
+type NotStartedDatafeedResponse = Array<{
+  datafeed_id: string;
+  datafeed_state: MlDatafeedState;
+  job_id: string;
+  job_state: MlJobState;
+}>;
+
+interface MmlTestResponse {
+  job_id: string;
+  memory_status: MlJobStats['model_size_stats']['memory_status'];
+  log_time: string | number;
+  failed_category_count: number;
+}
 
 export function jobsHealthServiceProvider(
   mlClient: MlClient,
@@ -73,6 +85,28 @@ export function jobsHealthServiceProvider(
     return resultJobIds;
   };
 
+  const getJobStats: (jobIds: string[]) => Promise<MlJobStats[]> = (() => {
+    const cachedStats = new Map<string, MlJobStats>();
+
+    return async (jobIds: string[]) => {
+      if (jobIds.every((j) => cachedStats.has(j))) {
+        logger.debug(`Return jobs stats from cache`);
+        return Array.from(cachedStats.values());
+      }
+
+      const {
+        body: { jobs: jobsStats },
+      } = await mlClient.getJobStats({ job_id: jobIds.join(',') });
+
+      // update cache
+      jobsStats.forEach((v) => {
+        cachedStats.set(v.job_id, v);
+      });
+
+      return jobsStats;
+    };
+  })();
+
   return {
     /**
      * Gets not started datafeeds for opened jobs.
@@ -82,9 +116,7 @@ export function jobsHealthServiceProvider(
       const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
       if (datafeeds) {
-        const {
-          body: { jobs: jobsStats },
-        } = await mlClient.getJobStats({ job_id: jobIds.join(',') });
+        const jobsStats = await getJobStats(jobIds);
 
         const {
           body: { datafeeds: datafeedsStats },
@@ -99,16 +131,35 @@ export function jobsHealthServiceProvider(
             const jobState =
               jobsStats.find((jobStats) => jobStats.job_id === jobId)?.state ?? 'failed';
             return {
-              ...datafeedStats,
+              datafeed_id: datafeedStats.datafeed_id,
+              datafeed_state: datafeedStats.state,
               job_id: jobId,
               job_state: jobState,
             };
           })
           .filter((datafeedStat) => {
             // Find opened jobs with not started datafeeds
-            return datafeedStat.job_state === 'opened' && datafeedStat.state !== 'started';
+            return datafeedStat.job_state === 'opened' && datafeedStat.datafeed_state !== 'started';
           });
       }
+    },
+    /**
+     * Gets jobs that reached soft or hard model memory limits.
+     * @param jobIds
+     */
+    async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
+      const jobsStats = await getJobStats(jobIds);
+
+      return jobsStats
+        .filter((j) => j.model_size_stats.memory_status !== 'ok')
+        .map(({ job_id: jobId, model_size_stats: modelSizeStats }) => {
+          return {
+            job_id: jobId,
+            memory_status: modelSizeStats.memory_status,
+            log_time: modelSizeStats.log_time,
+            failed_category_count: modelSizeStats.failed_category_count,
+          };
+        });
     },
     /**
      * Retrieves report grouped by test.
@@ -136,13 +187,40 @@ export function jobsHealthServiceProvider(
           results.push({
             name: HEALTH_CHECK_NAMES.datafeed,
             context: {
-              jobIds: [...new Set(response.map((v) => v.job_id))],
+              results: response,
               message: i18n.translate(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
                 {
                   defaultMessage: 'Datafeed is not started for the following jobs:',
                 }
               ),
+            },
+          });
+        }
+      }
+
+      if (config.mml.enabled) {
+        const response = await this.getMmlReport(jobIds);
+        if (response && response.length > 0) {
+          const hardLimitJobsCount = response.reduce((acc, curr) => {
+            return acc + curr.memory_status === 'hard_limit' ? 1 : 0;
+          }, 0);
+
+          results.push({
+            name: HEALTH_CHECK_NAMES.mml,
+            context: {
+              results: response,
+              message: response.some((j) => j.memory_status === 'hard_limit')
+                ? i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlHardLimitMessage', {
+                    defaultMessage:
+                      '{jobsCount, plural, one {# job} other {# jobs}} reached the hard model memory limit',
+                    values: { jobsCount: hardLimitJobsCount },
+                  })
+                : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage', {
+                    defaultMessage:
+                      '{jobsCount, plural, one {# job} other {# jobs}} reached the soft model memory limit',
+                    values: { jobsCount: response.length },
+                  }),
             },
           });
         }

@@ -61,7 +61,14 @@ export function registerJobsHealthAlertingRule(
       {
         defaultMessage: `Anomaly detection jobs health check result:
 \\{\\{context.message\\}\\}
-- Job IDs: \\{\\{context.jobIds\\}\\}
+\\{\\{#context.results\\}\\}
+  Job ID: \\{\\{job_id\\}\\}
+  \\{\\{#datafeed_id\\}\\}Datafeed ID: \\{\\{datafeed_id\\}\\}  \\{\\{/datafeed_id\\}\\}
+  \\{\\{#datafeed_state\\}\\}Datafeed state: \\{\\{datafeed_state\\}\\}  \\{\\{/datafeed_state\\}\\}
+  \\{\\{#memory_status\\}\\}Memory status: \\{\\{memory_status\\}\\}  \\{\\{/memory_status\\}\\}
+  \\{\\{#log_time\\}\\}Memory logging time: \\{\\{log_time\\}\\}  \\{\\{/log_time\\}\\}
+  \\{\\{#failed_category_count\\}\\}Failed category count: \\{\\{failed_category_count\\}\\}  \\{\\{/failed_category_count\\}\\}
+\\{\\{/context.results\\}\\}
 `,
       }
     ),

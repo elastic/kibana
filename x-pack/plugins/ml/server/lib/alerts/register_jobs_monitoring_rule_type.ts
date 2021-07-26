@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from 'kibana/server';
+import { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -22,8 +23,20 @@ import {
   AlertTypeState,
 } from '../../../../alerting/common';
 
+export interface AnomalyDetectionJobHealthResult {
+  job_id: string;
+  job_state?: MlJobState;
+  // Datafeed check
+  datafeed_id?: string;
+  datafeed_state?: MlDatafeedState;
+  // MML check
+  memory_status?: MlJobStats['model_size_stats']['memory_status'];
+  log_time?: string | number;
+  failed_category_count?: number;
+}
+
 export type AnomalyDetectionJobsHealthAlertContext = {
-  jobIds: string[];
+  results: AnomalyDetectionJobHealthResult[];
   message: string;
 } & AlertInstanceContext;
 
