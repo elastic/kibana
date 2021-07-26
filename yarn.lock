@@ -2846,6 +2846,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
