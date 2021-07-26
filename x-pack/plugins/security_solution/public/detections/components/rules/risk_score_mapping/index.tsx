@@ -20,10 +20,10 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
-import { FieldComponent } from '../../../../common/components/autocomplete/field';
 import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
