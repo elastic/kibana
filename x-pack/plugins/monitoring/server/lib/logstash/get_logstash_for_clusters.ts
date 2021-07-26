@@ -6,6 +6,7 @@
  */
 
 import Bluebird from 'bluebird';
+import { get } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
 import { checkParam } from '../error_missing_required';
@@ -18,8 +19,8 @@ const getQueueTypes = (queueBuckets: Array<Bucket & { num_pipelines: { value: nu
   const memory = queueBuckets.find((bucket) => bucket.key === MEMORY);
   const persisted = queueBuckets.find((bucket) => bucket.key === PERSISTED);
   return {
-    [MEMORY]: memory?.num_pipelines.value ?? 0,
-    [PERSISTED]: persisted?.num_pipelines.value ?? 0,
+    [MEMORY]: get(memory, 'num_pipelines.value', 0),
+    [PERSISTED]: get(persisted, 'num_pipelines.value', 0),
   };
 };
 
@@ -48,7 +49,7 @@ export function getLogstashForClusters(
   const config = req.server.config();
 
   return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
+    const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
     const params = {
       index: lsIndexPattern,
       size: 0,
@@ -208,9 +209,9 @@ export function getLogstashForClusters(
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
     return callWithRequest(req, 'search', params).then((result) => {
-      const aggregations = result.aggregations ?? {};
-      const logstashUuids = aggregations.logstash_uuids?.buckets ?? [];
-      const logstashVersions = aggregations.logstash_versions?.buckets ?? [];
+      const aggregations = get(result, 'aggregations', {});
+      const logstashUuids = get(aggregations, 'logstash_uuids.buckets', []);
+      const logstashVersions = get(aggregations, 'logstash_versions.buckets', []);
 
       // everything is initialized such that it won't impact any rollup
       let eventsInTotal = 0;
@@ -221,14 +222,14 @@ export function getLogstashForClusters(
 
       // if the cluster has logstash instances at all
       if (logstashUuids.length) {
-        eventsInTotal = aggregations.events_in_total?.value;
-        eventsOutTotal = aggregations.events_out_total?.value;
-        memory = aggregations.memory?.value;
-        memoryUsed = aggregations.memory_used?.value;
-        maxUptime = aggregations.max_uptime?.value;
+        eventsInTotal = get(aggregations, 'events_in_total.value');
+        eventsOutTotal = get(aggregations, 'events_out_total.value');
+        memory = get(aggregations, 'memory.value');
+        memoryUsed = get(aggregations, 'memory_used.value');
+        maxUptime = get(aggregations, 'max_uptime.value');
       }
 
-      let types = aggregations.pipelines_nested_mb?.queue_types.buckets ?? [];
+      let types = get(aggregations, 'pipelines_nested_mb.queue_types.buckets', []);
       if (!types || types.length === 0) {
         types = aggregations.pipelines_nested?.queue_types.buckets ?? [];
       }
@@ -243,9 +244,8 @@ export function getLogstashForClusters(
           avg_memory_used: memoryUsed,
           max_uptime: maxUptime,
           pipeline_count:
-            aggregations?.pipelines_nested_mb.pipelines.value ??
-            aggregations?.pipelines_nested.pipelines.value ??
-            0,
+            get(aggregations, 'pipelines_nested_mb.pipelines.value') ||
+            get(aggregations, 'pipelines_nested.pipelines.value', 0),
           queue_types: getQueueTypes(types),
           versions: logstashVersions.map((versionBucket: Bucket) => versionBucket.key),
         },
