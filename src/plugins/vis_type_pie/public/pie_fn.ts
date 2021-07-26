@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 import { PieVisParams, PieVisConfig } from './types';
+import { prepareLogTable } from '../../visualizations/common';
 
 export const vislibPieName = 'pie_vis';
 
@@ -132,29 +133,33 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
       },
     } as PieVisParams;
 
-    const getDimensionName = (columnId: number) => {
-      if (columnId === args.metric.accessor) {
-        return 'metric';
-      } else if (args.buckets?.find((bucket) => bucket.accessor === columnId)) {
-        return 'bucket';
-      } else if (args.splitColumn?.find((c) => c.accessor === columnId)) {
-        return 'split column';
-      } else if (args.splitRow?.find((c) => c.accessor === columnId)) {
-        return 'split row';
-      }
-    };
-
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = {
-        columns: context.columns.map((column, index) => ({
-          ...column,
-          meta: {
-            ...column.meta,
-            dimensionName: column.meta.dimensionName || getDimensionName(index),
-          },
-        })),
-        rows: context.rows,
-      };
+      const logTable = prepareLogTable(context, [
+        [
+          [args.metric],
+          i18n.translate('visTypePie.function.args.labelsHelpText', {
+            defaultMessage: 'Slice size',
+          }),
+        ],
+        [
+          args.buckets,
+          i18n.translate('visTypePie.function.args.labelsHelpText', {
+            defaultMessage: 'Slice',
+          }),
+        ],
+        [
+          args.splitColumn,
+          i18n.translate('visTypePie.function.args.labelsHelpText', {
+            defaultMessage: 'Column Split',
+          }),
+        ],
+        [
+          args.splitRow,
+          i18n.translate('visTypePie.function.args.labelsHelpText', {
+            defaultMessage: 'Row Split',
+          }),
+        ],
+      ]);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
