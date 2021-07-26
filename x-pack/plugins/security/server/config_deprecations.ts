@@ -110,4 +110,36 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       });
     }
   },
+  // Default values for session expiration timeouts.
+  (settings, fromPath, addDeprecation) => {
+    if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
+      addDeprecation({
+        message:
+          'Session idle timeout ("xpack.security.session.idleTimeout") will be set to 1 hour by default in the next major version (8.0).',
+        documentationUrl:
+          'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-idle-timeout',
+        correctiveActions: {
+          manualSteps: [
+            `Use "xpack.security.session.idleTimeout" in your Kibana configuration to change default session idle timeout.`,
+            `To disable session idle timeout, set "xpack.security.session.idleTimeout" to 0.`,
+          ],
+        },
+      });
+    }
+
+    if (settings?.xpack?.security?.session?.lifespan === undefined) {
+      addDeprecation({
+        message:
+          'Session lifespan ("xpack.security.session.lifespan") will be set to 30 days by default in the next major version (8.0).',
+        documentationUrl:
+          'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-lifespan',
+        correctiveActions: {
+          manualSteps: [
+            `Use "xpack.security.session.lifespan" in your Kibana configuration to change default session lifespan.`,
+            `To disable session lifespan, set "xpack.security.session.lifespan" to 0.`,
+          ],
+        },
+      });
+    }
+  },
 ];
