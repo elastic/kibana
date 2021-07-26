@@ -7,7 +7,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { compose } from 'recompose';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
@@ -106,6 +105,8 @@ export class EmbeddableFlyoutPortal extends React.Component<ComponentProps> {
   }
 }
 
-export const AddEmbeddablePanel = compose<ComponentProps, { onClose: () => void }>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps)
+export const AddEmbeddablePanel = connect<StateProps, DispatchProps, ComponentProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
 )(EmbeddableFlyoutPortal);
