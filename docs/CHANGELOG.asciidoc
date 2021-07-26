@@ -149,7 +149,7 @@ If you use POST URL snippets to automatically generate PDF reports, regenerate t
 The `/api/security/v1/saml` route has been removed and is reflected in the kibana.yml `server.xsrf.whitelist` setting, {es}, and the Identity Provider SAML settings. For more information, refer to {kibana-pull}47929[#47929]
 
 *Impact* +
-Use the `/api/security/saml/callback` route.
+Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 when the `/api/security/saml/callback` route breaking change is reverted. 
 ====
 
 [discrete]
