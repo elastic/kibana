@@ -348,9 +348,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               name: `${config.signalsIndex}-*`,
             })
             .catch((err) => {
-              this.logger.error(
-                `Failed to get existing legacy siem signals templates: ${err.message}`
-              );
+              // If the siem signals templates have already been converted, we expect a 404 here
+              if (err.meta?.statusCode !== 404) {
+                this.logger.error(
+                  `Failed to get existing legacy siem signals templates: ${err.message}`
+                );
+              }
             });
           if (existingTemplateResponse == null) {
             return;
