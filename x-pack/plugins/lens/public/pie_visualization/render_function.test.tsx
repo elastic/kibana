@@ -16,9 +16,10 @@ import {
   Chart,
 } from '@elastic/charts';
 import { shallow } from 'enzyme';
-import { LensMultiTable } from '../types';
+import type { LensMultiTable } from '../../common';
+import type { PieExpressionArgs } from '../../common/expressions';
 import { PieComponent } from './render_function';
-import { PieExpressionArgs } from './types';
+import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
@@ -311,6 +312,7 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
+      expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder)).toHaveLength(1);
     });
 
@@ -331,6 +333,7 @@ describe('PieVisualization component', () => {
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
 
+      expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder)).toHaveLength(0);
       expect(component.find(Chart)).toHaveLength(1);
     });
@@ -353,6 +356,7 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
+      expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDonut);
     });
   });
