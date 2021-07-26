@@ -29,14 +29,12 @@ import {
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
 
+import { IndexPatternFieldBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';
 import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
-import {
-  IFieldType,
-  IIndexPattern,
-} from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const NestedContent = styled.div`
@@ -88,7 +86,7 @@ export const SeverityField = ({
   );
 
   const handleFieldChange = useCallback(
-    (index: number, severity: Severity, [newField]: IFieldType[]): void => {
+    (index: number, severity: Severity, [newField]: IndexPatternFieldBase[]): void => {
       const newMappingItems: SeverityMapping = [
         {
           ...mapping[index],
@@ -298,8 +296,8 @@ export const SeverityField = ({
 };
 
 /**
- * Looks for field metadata (IFieldType) in existing index pattern.
- * If specified field doesn't exist, returns a stub IFieldType created based on the mapping --
+ * Looks for field metadata (IndexPatternFieldBase) in existing index pattern.
+ * If specified field doesn't exist, returns a stub IndexPatternFieldBase created based on the mapping --
  * because the field might not have been indexed yet, but we still need to display the mapping.
  *
  * @param mapping Mapping of a specified field name + value to a certain severity value.
@@ -308,7 +306,7 @@ export const SeverityField = ({
 const getFieldTypeByMapping = (
   mapping: SeverityMappingItem,
   pattern: IIndexPattern
-): IFieldType => {
+): IndexPatternFieldBase => {
   const { field } = mapping;
   const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);
   return knownFieldType ?? { name: field, type: 'string' };

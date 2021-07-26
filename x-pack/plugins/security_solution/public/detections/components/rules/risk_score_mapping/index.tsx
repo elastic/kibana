@@ -21,10 +21,10 @@ import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
+import { IndexPatternFieldBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
 const NestedContent = styled.div`
@@ -79,7 +79,7 @@ export const RiskScoreField = ({
   );
 
   const handleRiskScoreMappingChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: IndexPatternFieldBase[]): void => {
       setValue({
         value,
         isMappingChecked,
@@ -232,14 +232,17 @@ export const RiskScoreField = ({
 };
 
 /**
- * Looks for field metadata (IFieldType) in existing index pattern.
- * If specified field doesn't exist, returns a stub IFieldType created based on the mapping --
+ * Looks for field metadata (IndexPatternFieldBase) in existing index pattern.
+ * If specified field doesn't exist, returns a stub IndexPatternFieldBase created based on the mapping --
  * because the field might not have been indexed yet, but we still need to display the mapping.
  *
  * @param mapping Mapping of a specified field name to risk score.
  * @param pattern Existing index pattern.
  */
-const getFieldTypeByMapping = (mapping: RiskScoreMapping, pattern: IIndexPattern): IFieldType => {
+const getFieldTypeByMapping = (
+  mapping: RiskScoreMapping,
+  pattern: IIndexPattern
+): IndexPatternFieldBase => {
   const field = mapping?.[0]?.field ?? '';
   const [knownFieldType] = pattern.fields.filter(({ name }) => field != null && field === name);
   return knownFieldType ?? { name: field, type: 'number' };
