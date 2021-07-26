@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { IIndexPattern } from '../../../../data/public';
+export const PLUGIN_ID = 'expressionImage';
+export const PLUGIN_NAME = 'expressionImage';
 
-export const DefaultIndexPatternContext = React.createContext<IIndexPattern | null>(null);
+export const CONTEXT = '_context_';
+export const BASE64 = '`base64`';
+export const URL = 'URL';
