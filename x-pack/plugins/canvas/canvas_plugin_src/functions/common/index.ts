@@ -42,7 +42,6 @@ import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
-import { repeatImage } from './repeat_image';
 import { seriesStyle } from './seriesStyle';
 import { sort } from './sort';
 import { staticColumn } from './staticColumn';
@@ -90,7 +89,6 @@ export const functions = [
   ply,
   progress,
   render,
-  repeatImage,
   replace,
   rounddate,
   rowCount,
