@@ -17,21 +17,21 @@ export interface BodyRowProps<Item> {
   item: Item;
   additionalProps?: object;
   // Cell to put in first column before other columns
-  firstCell?: React.ReactNode;
+  leftAction?: React.ReactNode;
 }
 
 export const BodyRow = <Item extends object>({
   columns,
   item,
   additionalProps,
-  firstCell,
+  leftAction,
 }: BodyRowProps<Item>) => {
   return (
     <div className="reorderableTableRow">
       <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart">
-            {!!firstCell && firstCell}
+            {!!leftAction && leftAction}
             {columns.map((column, columnIndex) => (
               <Cell
                 key={`table_row_cell_${columnIndex}`}

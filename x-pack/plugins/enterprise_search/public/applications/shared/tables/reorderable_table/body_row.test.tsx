@@ -66,7 +66,7 @@ describe('BodyRow', () => {
   });
 
   it('will render an additional cell in the first column if one is provided', () => {
-    const wrapper = shallow(<BodyRow columns={columns} item={item} firstCell={<Cell />} />);
+    const wrapper = shallow(<BodyRow columns={columns} item={item} leftAction={<Cell />} />);
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(3);
   });

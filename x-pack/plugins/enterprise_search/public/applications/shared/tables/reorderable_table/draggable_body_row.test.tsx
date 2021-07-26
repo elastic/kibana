@@ -56,8 +56,8 @@ describe('DraggableBodyRow', () => {
     expect(bodyRow.prop('columns')).toEqual(columns);
     expect(bodyRow.prop('item')).toEqual(item);
     expect(bodyRow.prop('additionalProps')).toEqual(additionalProps);
-    const firstCell = shallow(<div>{bodyRow.prop('firstCell')}</div>);
-    expect(firstCell.find(EuiIcon).exists()).toBe(true);
+    const leftAction = shallow(<div>{bodyRow.prop('leftAction')}</div>);
+    expect(leftAction.find(EuiIcon).exists()).toBe(true);
   });
 
   it('will accept a parameter that disables dragging', () => {

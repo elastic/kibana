@@ -33,7 +33,7 @@ describe('ReorderableTable', () => {
       const header = wrapper.find(HeaderRow);
       expect(header.exists()).toEqual(true);
       expect(header.prop('columns')).toEqual(columns);
-      expect(header.prop('firstCell')).not.toBeUndefined();
+      expect(header.prop('leftAction')).not.toBeUndefined();
     });
 
     it('renders draggable rows inside of the reorderable table', () => {
@@ -126,7 +126,7 @@ describe('ReorderableTable', () => {
         columns,
         item: { id: 1 },
         additionalProps: {},
-        firstCell: expect.anything(),
+        leftAction: expect.anything(),
       });
     });
   });

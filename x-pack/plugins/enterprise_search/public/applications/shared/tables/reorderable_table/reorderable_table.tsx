@@ -49,7 +49,7 @@ export const ReorderableTable = <Item extends object>({
     <div className={classNames(className, 'reorderableTable')}>
       <HeaderRow
         columns={columns}
-        firstCell={!disableReordering ? <Cell {...DRAGGABLE_UX_STYLE} /> : undefined}
+        leftAction={!disableReordering ? <Cell {...DRAGGABLE_UX_STYLE} /> : undefined}
       />
 
       {items.length === 0 && (
@@ -85,7 +85,7 @@ export const ReorderableTable = <Item extends object>({
                   columns={columns}
                   item={item}
                   additionalProps={rowProps(item)}
-                  firstCell={<Cell {...DRAGGABLE_UX_STYLE} />}
+                  leftAction={<Cell {...DRAGGABLE_UX_STYLE} />}
                 />
               )}
             />
