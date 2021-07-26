@@ -41,7 +41,7 @@ export const DraggableBodyRow = <Item extends object>({
         columns={columns}
         item={item}
         additionalProps={additionalProps}
-        leftAction={<EuiIcon type="grab" />}
+        leftAction={!disableDragging ? <EuiIcon type="grab" /> : <></>}
       />
     </EuiDraggable>
   );
