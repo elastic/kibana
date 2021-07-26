@@ -80,7 +80,7 @@ and customize how you want the summary aggregation and label to appear.
 
 * *Color by value*. Visually emphasize specific metric values with flexible
 conditional coloring. {kib} provides you with an out-of-the-box palette,
-or you can define your own custom color palette. To dynamically apply colors,
+or you can define your own color palette. To dynamically apply colors,
 specify the color stops by percent or number values. For values that are outside
 the specified range, control how to apply colors with color continuity.
 +
@@ -104,7 +104,7 @@ on a dashboard. Represent the possible range of values--even when those values
 might not be returned in the current data set.
 
 * *Opacity slider in area charts*. Adjust the transparency with the
-Fill opacity slider. This makes it easier to analyze the area chart
+*Fill opacity* slider. This makes it easier to analyze the area chart
 data that frequently overlaps.
 
 * *Quickly navigate to Maps*
@@ -115,8 +115,8 @@ including any filters you’ve applied.
 [[new-theme-7-14]]
 === New EUI theme
 
-{kib} now uses the new https://elastic.github.io/eui/#/[EUI] theme by default.
-The updated theme brings a more modern look to the entire interface.
+{kib} now uses the new https://elastic.github.io/eui/#/[EUI] theme by default,
+bringing a more modern look to the entire interface.
 Due to small changes to padding, margins, and font sizes in the base components,
 you might notice minor changes to dashboard layouts. During the 7.x cycle,
 you can revert to the old theme in {kibana-ref}/advanced-options.html[Advanced Settings].
@@ -127,7 +127,7 @@ you can revert to the old theme in {kibana-ref}/advanced-options.html[Advanced S
 
 The migration system for saved objects, the data structures that underpin much of {kib},
 has improved. Now upgrading from prior versions is quicker and more seamless,
-even for the largest of deployments. In addition, when problems arise, the error logging
+even for the largest of deployments. When problems arise, the error logging
 is now more clear, so administrators can get migration back on track faster.
 
 [float]
@@ -148,7 +148,7 @@ image::user/images/new-maps-timeslider.png[Map showing time slider that you can 
 [float]
 ==== Create and edit tools
 
-beta[] You can now create a new index, and with a new set of drawing tools,
+beta[] You can now create an index, and with a new set of drawing tools,
 add or delete documents. Use the drawing tools to create new data and add geographic
 context to your map, good for annotation or ad-hoc analysis.
 You can edit both new and existing layers (indices).
@@ -183,7 +183,7 @@ The {es} SQL expression function in *Canvas* has changed to gracefully
 handle arrays in retrieved data. If the data for the SQL expression includes an array,
 the first entry of the array is returned in the result set.
 
-Additionally, the SQL expression function now supports passing parameters into the query,
+In addition, the SQL expression function now supports passing parameters into the query,
 making it easier to pass in variable values to your SQL queries on your workpad.
 
 [role="screenshot"]
@@ -203,7 +203,7 @@ relies on a new service provided by the *Maps* plugin, which automatically
 identifies fields that store location data based on sample values or
 contextual knowledge about the data.
 For example, for jobs with region ISO code partitioning or influencer fields,
-a map is displayed in the *Anomaly Explorer* showing the count of anomalies by location.
+a map showing the count of anomalies by location is displayed in the *Anomaly Explorer* .
 
 [role="screenshot"]
 image::user/images/new-ml-choropleth-map.png[Canvas Elasticsearch SQL expression function]
@@ -211,12 +211,12 @@ image::user/images/new-ml-choropleth-map.png[Canvas Elasticsearch SQL expression
 [float]
 ==== Delayed data visualization for anomaly detection
 
-Delayed data are documents that are indexed after a time that the datafeed
+Delayed data are documents that are indexed after the datafeed
 has already processed the time period for the anomaly detection job.
 For jobs with delayed data, it can be difficult to understand why the current data
 is different from what was processed for the anomaly detection job.
 
-The new visualization&mdash;opened from *Job Management*&mdash;charts the event
+The delayed data visualization&mdash;opened from *Job Management*&mdash;charts the event
 counts of the job and the source data to identify where missing data has occurred
 and understand if it is a persistent problem. It enables you to decide
 whether to take action, such as to increase the query delay of the datafeed
@@ -231,8 +231,8 @@ Beginning in 7.13, you can create rare detector jobs by using the new {anomaly-j
 https://www.elastic.co/blog/using-elastic-machine-learning-rare-analysis-to-hunt-for-the-unusual[Three general detector types are available]:
 rare, rare in population, and frequently rare in population. The latter two require
 a population field to select, and it’s also possible to add a split field to any of the choices.
-A detector summary appears when the configuration details are provided, which
-summarizes what the job will do and which fields it will operate on.
+A detector summary appears when the configuration details are provided,
+showing what the job will do and which fields it will operate on.
 
 [role="screenshot"]
 image::user/images/new-ml-rare-job.jpg[Rare job wizard for anomaly detection]
@@ -257,16 +257,14 @@ image::user/images/new-enterprise-search.png[Enterprise Search home page, where 
 
 With *Labs*, you can now try out and provide feedback on the
 *Canvas* and *Dashboard* features that are in progress or experimental.
-To enable *Labs*, go to {kibana-ref}/advanced-options.html[Advanced Settings].
-Once enabled, you’ll see *Labs* in the toolbar.
+When enabled, you’ll see *Labs* in the toolbar.
 
 [role="screenshot"]
 image::user/images/new-labs.png[Dashboard app showing how to access Labs from the toolbar]
 
 The first *Labs* project is *Defer loading panels below the fold*. To improve dashboard loading time,
-the dashboard panels that users must scroll to see aren't loaded until they
-become visible on the dashboard.
-Give *Defer loading* a try,
+only the visible panels are loaded when you open the dashboard.
+All other panels are loaded as you scroll. Give the *Labs* project a try,
 and let us know what you think.
 
 
