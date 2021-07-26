@@ -164,7 +164,7 @@ Use the `/api/security/saml/callback` route.
 [%collapsible]
 ====
 *Details* +
-To provide the maximum level of protection for most installations, the csp.strict config is now enabled by default. Legacy browsers, such as IE11, are unable to access {kib} unless explicitly enabled. For more information, refer to {kibana-pull}41700[#41700]
+To provide the maximum level of protection for most installations, the csp.strict config is now enabled by default. Legacy browsers not supported by Kibana, such as IE11, are unable to access {kib} unless explicitly enabled. All browsers officially supported by Kibana do not have this issue. For more information, refer to {kibana-pull}41700[#41700]
 
 *Impact* +
 To enable support for legacy browsers, set `csp.strict: false` in kibana.yml.
@@ -270,4 +270,3 @@ Operations::
 //== {kib} 8.0.0
 
 //coming::[8.0.0]
-
