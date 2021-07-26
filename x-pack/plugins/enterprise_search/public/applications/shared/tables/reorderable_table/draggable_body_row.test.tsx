@@ -53,9 +53,7 @@ describe('DraggableBodyRow', () => {
 
     const bodyRow = wrapper.find(BodyRow);
     expect(bodyRow.exists()).toEqual(true);
-    expect(bodyRow.prop('columns')).toEqual(columns);
-    expect(bodyRow.prop('item')).toEqual(item);
-    expect(bodyRow.prop('additionalProps')).toEqual(additionalProps);
+    expect(bodyRow.props()).toEqual(expect.objectContaining({ columns, item, additionalProps }));
     const leftAction = shallow(<div>{bodyRow.prop('leftAction')}</div>);
     expect(leftAction.find(EuiIcon).exists()).toBe(true);
   });
