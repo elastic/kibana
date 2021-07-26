@@ -1,6 +1,6 @@
 # expressionMetric
 
-Expression Metric plugin adds an `metric` renderer to the expression plugin. @todo write a description.
+Expression Metric plugin adds a `metric` renderer and function to the expression plugin. 
 
 ---
 
