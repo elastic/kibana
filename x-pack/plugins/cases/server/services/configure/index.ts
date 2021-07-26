@@ -48,7 +48,7 @@ interface PatchCaseConfigureArgs extends ClientArgs {
   updatedAttributes: Partial<CasesConfigureAttributes>;
 }
 
-function transformUpdateToExternalModel(
+function transformUpdateResponseToExternalModel(
   updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributes>
 ): SavedObjectsUpdateResponse<CasesConfigurePatch> {
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
@@ -88,7 +88,7 @@ function transformToExternalModel(
   };
 }
 
-function transformFindToExternalModel(
+function transformFindResponseToExternalModel(
   configurations: SavedObjectsFindResponse<ESCasesConfigureAttributes>
 ): SavedObjectsFindResponse<CasesConfigureAttributes> {
   return {
@@ -230,7 +230,7 @@ export class CaseConfigureService {
         type: CASE_CONFIGURE_SAVED_OBJECT,
       });
 
-      return transformFindToExternalModel(findResp);
+      return transformFindResponseToExternalModel(findResp);
     } catch (error) {
       this.log.debug(`Attempting to find all case configuration`);
       throw error;
@@ -280,7 +280,7 @@ export class CaseConfigureService {
         }
       );
 
-      return transformUpdateToExternalModel(updatedConfiguration);
+      return transformUpdateResponseToExternalModel(updatedConfiguration);
     } catch (error) {
       this.log.debug(`Error on UPDATE case configuration ${configurationId}: ${error}`);
       throw error;

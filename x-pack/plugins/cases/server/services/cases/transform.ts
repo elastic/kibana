@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsBulkResponse,
+  SavedObjectsFindResponse,
+} from 'kibana/server';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorID } from '.';
 import { connectorIDReferenceName, pushConnectorIDReferenceName } from '..';
 import { CaseAttributes, CaseFullExternalService } from '../../../common';
@@ -26,6 +31,24 @@ function transformStoredExternalService(
   return {
     ...externalService,
     connector_id: connectorIDRef.id,
+  };
+}
+
+export function transformCaseArrayResponseToExternalModel(
+  response: SavedObjectsFindResponse<ESCaseAttributes>
+): SavedObjectsFindResponse<CaseAttributes>;
+export function transformCaseArrayResponseToExternalModel(
+  response: SavedObjectsBulkResponse<ESCaseAttributes>
+): SavedObjectsBulkResponse<CaseAttributes>;
+export function transformCaseArrayResponseToExternalModel(
+  response: SavedObjectsBulkResponse<ESCaseAttributes> | SavedObjectsFindResponse<ESCaseAttributes>
+): SavedObjectsBulkResponse<CaseAttributes> | SavedObjectsFindResponse<CaseAttributes> {
+  return {
+    ...response,
+    saved_objects: response.saved_objects.map((so) => ({
+      ...so,
+      ...transformCaseSavedObjectToExternalModel(so),
+    })),
   };
 }
 

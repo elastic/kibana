@@ -58,7 +58,10 @@ import { ClientArgs } from '..';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
-import { transformCaseSavedObjectToExternalModel } from './model';
+import {
+  transformCaseArrayResponseToExternalModel,
+  transformCaseSavedObjectToExternalModel,
+} from './transform';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;
@@ -773,12 +776,13 @@ export class CasesService {
   public async getCases({
     unsecuredSavedObjectsClient,
     caseIds,
-  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>> {
+  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
-      return await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
+      const cases = await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
+      return transformCaseArrayResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;
@@ -788,14 +792,15 @@ export class CasesService {
   public async findCases({
     unsecuredSavedObjectsClient,
     options,
-  }: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
+  }: FindCasesArgs): Promise<SavedObjectsFindResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
-      return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
+      const cases = await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
         ...options,
         type: CASE_SAVED_OBJECT,
       });
+      return transformCaseArrayResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
       throw error;

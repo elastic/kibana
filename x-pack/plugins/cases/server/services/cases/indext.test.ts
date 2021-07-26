@@ -58,10 +58,13 @@ const basicCaseFields = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-const createSOResponse = (
-  connector?: ESCaseConnector,
-  externalService?: CaseFullExternalService
-): SavedObject<ESCaseAttributes> => {
+const createSOResponse = ({
+  connector,
+  externalService,
+}: {
+  connector?: ESCaseConnector;
+  externalService?: CaseFullExternalService;
+} = {}): SavedObject<ESCaseAttributes> => {
   const references: SavedObjectReference[] = [
     ...(connector
       ? [
@@ -133,6 +136,23 @@ const createExternalService = (
   ...(overrides && { ...overrides }),
 });
 
+const createFindSO = (
+  params: {
+    connector?: ESCaseConnector;
+    externalService?: CaseFullExternalService;
+  } = {}
+): SavedObjectsFindResult<ESCaseAttributes> => ({
+  ...createSOResponse(params),
+  score: 0,
+});
+
+const createSOFindResponse = (savedObjects: Array<SavedObjectsFindResult<ESCaseAttributes>>) => ({
+  saved_objects: savedObjects,
+  total: savedObjects.length,
+  per_page: savedObjects.length,
+  page: 1,
+});
+
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
@@ -145,10 +165,116 @@ describe('CasesService', () => {
   });
 
   describe('transform between external model and Elasticsearch model', () => {
+    describe('find', () => {
+      it('includes the id field in the response', async () => {
+        const findMockReturn = createSOFindResponse([
+          createFindSO({
+            connector: createESConnector(),
+            externalService: createExternalService(),
+          }),
+          createFindSO(),
+        ]);
+        unsecuredSavedObjectsClient.find.mockReturnValue(Promise.resolve(findMockReturn));
+
+        const res = await service.findCases({ unsecuredSavedObjectsClient });
+        expect(res.saved_objects[0].attributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": Object {
+              "issueType": "bug",
+              "parent": "2",
+              "priority": "high",
+            },
+            "id": "1",
+            "name": ".jira",
+            "type": ".jira",
+          }
+        `);
+      });
+
+      it('includes the saved object find response fields in the result', async () => {
+        const findMockReturn = createSOFindResponse([
+          createFindSO({
+            connector: createESConnector(),
+            externalService: createExternalService(),
+          }),
+          createFindSO(),
+        ]);
+        unsecuredSavedObjectsClient.find.mockReturnValue(Promise.resolve(findMockReturn));
+
+        const res = await service.findCases({ unsecuredSavedObjectsClient });
+        const { saved_objects: ignored, ...findResponseFields } = res;
+        expect(findResponseFields).toMatchInlineSnapshot(`
+          Object {
+            "page": 1,
+            "per_page": 2,
+            "total": 2,
+          }
+        `);
+      });
+    });
+
+    describe('bulkGet', () => {
+      it('includes the id field in the response', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockReturnValue(
+          Promise.resolve({
+            saved_objects: [
+              createSOResponse({
+                connector: createESConnector(),
+                externalService: createExternalService(),
+              }),
+              createSOResponse({
+                connector: createESConnector({ id: '2' }),
+                externalService: createExternalService({ connector_id: '200' }),
+              }),
+            ],
+          })
+        );
+
+        const res = await service.getCases({ unsecuredSavedObjectsClient, caseIds: ['a'] });
+
+        expect(res.saved_objects[0].attributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": Object {
+              "issueType": "bug",
+              "parent": "2",
+              "priority": "high",
+            },
+            "id": "1",
+            "name": ".jira",
+            "type": ".jira",
+          }
+        `);
+        expect(
+          res.saved_objects[1].attributes.external_service?.connector_id
+        ).toMatchInlineSnapshot(`"200"`);
+
+        expect(res.saved_objects[1].attributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": Object {
+              "issueType": "bug",
+              "parent": "2",
+              "priority": "high",
+            },
+            "id": "2",
+            "name": ".jira",
+            "type": ".jira",
+          }
+        `);
+        expect(
+          res.saved_objects[0].attributes.external_service?.connector_id
+        ).toMatchInlineSnapshot(`"100"`);
+      });
+    });
+
     describe('get', () => {
       it('includes the id field in the response', async () => {
         unsecuredSavedObjectsClient.get.mockReturnValue(
-          Promise.resolve(createSOResponse(createESConnector(), createExternalService()))
+          Promise.resolve(
+            createSOResponse({
+              connector: createESConnector(),
+              externalService: createExternalService(),
+            })
+          )
         );
 
         const res = await service.getCase({ unsecuredSavedObjectsClient, id: 'a' });
@@ -166,6 +292,55 @@ describe('CasesService', () => {
           }
         `);
         expect(res.attributes.external_service?.connector_id).toMatchInlineSnapshot(`"100"`);
+      });
+
+      it('defaults to the none connector when the connector reference cannot be found', async () => {
+        unsecuredSavedObjectsClient.get.mockReturnValue(
+          Promise.resolve(createSOResponse({ externalService: createExternalService() }))
+        );
+        const res = await service.getCase({ unsecuredSavedObjectsClient, id: 'a' });
+
+        expect(res.attributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          }
+        `);
+      });
+
+      it('sets external services to null when the connector id cannot be found', async () => {
+        unsecuredSavedObjectsClient.get.mockReturnValue(Promise.resolve(createSOResponse()));
+        const res = await service.getCase({ unsecuredSavedObjectsClient, id: 'a' });
+
+        expect(res.attributes.external_service).toMatchInlineSnapshot(`null`);
+      });
+
+      it('defaults to the none connector and null external services when attributes is undefined', async () => {
+        unsecuredSavedObjectsClient.get.mockReturnValue(
+          Promise.resolve(({
+            references: [
+              {
+                id: '1',
+                name: connectorIDReferenceName,
+                type: ACTION_SAVED_OBJECT_TYPE,
+              },
+            ],
+          } as unknown) as SavedObject<ESCaseAttributes>)
+        );
+        const res = await service.getCase({ unsecuredSavedObjectsClient, id: 'a' });
+
+        expect(res.attributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          }
+        `);
+
+        expect(res.attributes.external_service).toMatchInlineSnapshot(`null`);
       });
     });
   });
