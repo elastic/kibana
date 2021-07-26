@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   hasPreviousPage: boolean;
@@ -18,35 +19,41 @@ interface Props {
 
 export function ToolBarPagerButtons(props: Props) {
   return (
-    <div className="kuiButtonGroup">
-      <button
-        className="kuiButton kuiButton--basic kuiButton--icon"
-        onClick={() => props.onPagePrevious()}
-        disabled={!props.hasPreviousPage}
-        data-test-subj="btnPrevPage"
-        aria-label={i18n.translate(
-          'discover.docTable.pager.toolbarPagerButtons.previousButtonAriaLabel',
-          {
-            defaultMessage: 'Previous page in table',
-          }
-        )}
-      >
-        <span className="kuiButton__icon kuiIcon fa-chevron-left" />
-      </button>
-      <button
-        className="kuiButton kuiButton--basic kuiButton--icon"
-        onClick={() => props.onPageNext()}
-        disabled={!props.hasNextPage}
-        data-test-subj="btnNextPage"
-        aria-label={i18n.translate(
-          'discover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
-          {
-            defaultMessage: 'Next page in table',
-          }
-        )}
-      >
-        <span className="kuiButton__icon kuiIcon fa-chevron-right" />
-      </button>
-    </div>
+    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          display="base"
+          iconType="arrowLeft"
+          iconSize="m"
+          size="xs"
+          onClick={() => props.onPagePrevious()}
+          isDisabled={!props.hasPreviousPage}
+          data-test-subj="btnPrevPage"
+          aria-label={i18n.translate(
+            'discover.docTable.pager.toolbarPagerButtons.previousButtonAriaLabel',
+            {
+              defaultMessage: 'Previous page in table',
+            }
+          )}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          display="base"
+          iconType="arrowRight"
+          iconSize="m"
+          size="xs"
+          onClick={() => props.onPageNext()}
+          isDisabled={!props.hasNextPage}
+          data-test-subj="btnNextPage"
+          aria-label={i18n.translate(
+            'discover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
+            {
+              defaultMessage: 'Next page in table',
+            }
+          )}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
