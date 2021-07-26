@@ -1,0 +1,39 @@
+.upgCollapsible {
+  position: relative;
+
+  .upgCollapsibleContent {
+    margin-bottom: $euiSizeL;
+
+    // HACK: to hide empty top row above table
+    >div>div>div[role=row] {
+      display: none;
+    }
+  }
+
+  .upgCollapsibleFooter {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  &.collapsed {
+    .upgCollapsibleContent {
+      height: 100px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .upgCollapsibleFooter {
+      &:before {
+        position: absolute;
+        content: '';
+        height: 60px;
+        width: 100%;
+        top: -55px;
+        left: 0;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #FFF 90%, #FFF 100%);
+      }
+    }
+  }
+}

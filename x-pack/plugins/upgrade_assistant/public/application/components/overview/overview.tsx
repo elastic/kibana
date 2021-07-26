@@ -32,6 +32,7 @@ import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { LogStream } from '../../../../../infra/public';
+import { Collapsible } from './collapsible';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
@@ -155,6 +156,23 @@ const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps
   const endTimestamp = Date.now();
   const startTimestamp = endTimestamp - 120 * 60 * 1000; // 2 hours
 
+  const viewLogs = (
+    <div>
+      <EuiButtonEmpty size="xs" href="/observe">
+        <FormattedMessage
+          id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
+          defaultMessage="View deprecation logs in Observability"
+        />
+      </EuiButtonEmpty>
+      <EuiButtonEmpty size="xs" href="/discover">
+        <FormattedMessage
+          id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
+          defaultMessage="Analyse logs in Discover "
+        />
+      </EuiButtonEmpty>
+    </div>
+  );
+
   return {
     title: i18nTexts.observeStepTitle,
     status: 'incomplete',
@@ -168,15 +186,19 @@ const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps
 
         <DeprecationLoggingToggle />
 
-        <LogStream
-          sourceId="deprecation_logs"
-          startTimestamp={startTimestamp}
-          endTimestamp={endTimestamp}
-          columns={[
-            { type: 'timestamp', header: false },
-            { type: 'message', header: false },
-          ]}
-        />
+        <EuiSpacer size="l" />
+
+        <Collapsible renderFooterLinks={viewLogs}>
+          <LogStream
+            sourceId="deprecation_logs"
+            startTimestamp={startTimestamp}
+            endTimestamp={endTimestamp}
+            columns={[
+              { type: 'timestamp', header: false },
+              { type: 'message', header: false },
+            ]}
+          />
+        </Collapsible>
       </>
     ),
   };
