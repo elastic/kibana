@@ -18,7 +18,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 
 import { TimeseriesVisTypes } from './vis_types';
 import type { PanelData, TimeseriesVisData } from '../../../common/types';
-import { isVisSeriesData, isVisTableData } from '../../../common/vis_data_utils';
+import { isVisTableData } from '../../../common/vis_data_utils';
 import { TimeseriesVisParams } from '../../types';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
 import { getClickFilterData } from './lib/get_click_filter_data';
