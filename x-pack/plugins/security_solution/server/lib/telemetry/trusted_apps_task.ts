@@ -12,13 +12,14 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
+
 import { getPreviousEpMetaTaskTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
 
 export const TelemetryTrustedAppsTaskConstants = {
   TIMEOUT: '1m',
   TYPE: 'security:trusted-apps-telemetry',
-  INTERVAL: '24h',
+  INTERVAL: '1m',
   VERSION: '1.0.0',
 };
 
@@ -109,7 +110,9 @@ export class TelemetryTrustedAppsTask {
       return 0;
     }
 
-    // TODO:@pjhampton - implement the logic to grab the trusted app entries
+    // TODO:@pjhampton - implement the logic to fetch / parse the trusted app entries
+    const response = await this.sender.fetchTrustedApplications();
+    this.logger.debug(`Trusted Apps: ${response}`);
 
     this.logger.debug('finished running the trusted apps task');
     return 0;

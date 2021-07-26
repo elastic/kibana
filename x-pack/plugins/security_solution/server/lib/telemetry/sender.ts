@@ -22,6 +22,8 @@ import { TelemetryEndpointTask } from './endpoint_task';
 import { TelemetryTrustedAppsTask } from './trusted_apps_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
+import { ExceptionListClient } from '../../../lists/server';
+import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -63,6 +65,7 @@ export class TelemetryEventsSender {
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
   private savedObjectClient?: SavedObjectsClientContract;
+  private exceptionListClient?: ExceptionListClient;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -82,13 +85,15 @@ export class TelemetryEventsSender {
     core?: CoreStart,
     telemetryStart?: TelemetryPluginStart,
     taskManager?: TaskManagerStartContract,
-    endpointContextService?: EndpointAppContextService
+    endpointContextService?: EndpointAppContextService,
+    exceptionListClient?: ExceptionListClient
   ) {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.savedObjectClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.exceptionListClient = exceptionListClient;
 
     if (taskManager && this.diagTask && this.epMetricsTask) {
       this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
@@ -258,7 +263,26 @@ export class TelemetryEventsSender {
   }
 
   public async fetchTrustedApplications() {
-    return [];
+    if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
+      throw Error('could not fetch trusted applications. exception list client not available.');
+    }
+
+    /*
+    // Ensure list is created if it does not exist
+    await this.exceptionListClient.createTrustedAppsList();
+
+    return this.exceptionListClient.findExceptionListItem({
+      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      page: 1,
+      perPage: 10_000,
+      filter: undefined, // @pjhampton - kuery?
+      namespaceType: 'agnostic',
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+    */
+
+    return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
