@@ -5,75 +5,66 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
-import { connectAdvanced } from 'react-redux';
-import { compose, withPropsOnChange, mapProps } from 'recompose';
+import { useDispatch, useSelector } from 'react-redux';
+import usePrevious from 'react-use/lib/usePrevious';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
 import { ElementWrapper as Component } from './element_wrapper';
 
-function selectorFactory(dispatch) {
-  let result = {};
-  const createHandlers = createDispatchedHandlerFactory(dispatch);
+const ElementWrapperComponent = ({ element, ...restProps }) => {
+  const dispatch = useDispatch();
 
-  return (nextState, nextOwnProps) => {
-    const { element, ...restOwnProps } = nextOwnProps;
-    const { transformMatrix, width, height } = element;
+  const createHandlers = useMemo(() => createDispatchedHandlerFactory(dispatch), [dispatch]);
 
-    const resolvedArg = getResolvedArgs(nextState, element.id, 'expressionRenderable');
-    const selectedPage = getSelectedPage(nextState);
+  const elementParams = useMemo(
+    () => ({
+      id: element.id,
+      filter: element.filter,
+      expression: element.expression,
+    }),
+    [element]
+  );
 
-    // build interim props object
-    const nextResult = {
-      ...restOwnProps,
-      // state and state-derived props
-      selectedPage,
-      state: getState(resolvedArg),
-      renderable: getValue(resolvedArg),
-      // pass along the handlers creation function
-      createHandlers,
-      // required parts of the element object
-      transformMatrix,
-      width,
-      height,
-      // pass along only the useful parts of the element object
-      // so handlers object can be created
-      element: {
-        id: element.id,
-        filter: element.filter,
-        expression: element.expression,
-      },
-    };
+  const [handlers, setHandlers] = useState(createHandlers(elementParams));
+  const previousElementParams = usePrevious(elementParams);
 
-    // update props only if something actually changed
-    if (!isEqual(result, nextResult)) {
-      result = nextResult;
+  useEffect(() => {
+    if (!isEqual(elementParams, previousElementParams)) {
+      setHandlers(createHandlers(elementParams));
     }
+  }, [createHandlers, elementParams, previousElementParams]);
 
-    return result;
-  };
-}
+  const { transformMatrix, width, height } = element;
+  const resolvedArg = useSelector((state) =>
+    getResolvedArgs(state, element.id, 'expressionRenderable')
+  );
 
-export const ElementWrapper = compose(
-  connectAdvanced(selectorFactory),
-  withPropsOnChange(
-    (props, nextProps) => !isEqual(props.element, nextProps.element),
-    (props) => {
-      const { element, createHandlers } = props;
-      const handlers = createHandlers(element);
-      // this removes element and createHandlers from passed props
-      return { handlers };
-    }
-  ),
-  mapProps((props) => {
-    // remove element and createHandlers from props passed to component
-    // eslint-disable-next-line no-unused-vars
-    const { element, createHandlers, selectedPage, ...restProps } = props;
-    return restProps;
-  })
-)(Component);
+  // eslint-disable-next-line no-unused-vars
+  const selectedPage = useSelector((state) => getSelectedPage(state));
+
+  const state = getState(resolvedArg);
+  const renderable = getValue(resolvedArg);
+
+  return (
+    <Component
+      {...restProps}
+      handlers={handlers}
+      state={state}
+      renderable={renderable}
+      transformMatrix={transformMatrix}
+      width={width}
+      height={height}
+    />
+  );
+};
+
+export const ElementWrapper = memo(ElementWrapperComponent, (prevProps, props) =>
+  isEqual(prevProps, props)
+);
 
 ElementWrapper.propTypes = {
   element: PropTypes.shape({
