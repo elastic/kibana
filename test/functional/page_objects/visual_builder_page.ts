@@ -22,7 +22,6 @@ type Duration =
 
 type FromDuration = Duration | 'Picoseconds' | 'Nanoseconds' | 'Microseconds';
 type ToDuration = Duration | 'Human readable';
-type ChartItem = 'areas' | 'bars' | 'lines';
 
 export class VisualBuilderPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
@@ -863,20 +862,17 @@ export class VisualBuilderPageObject extends FtrService {
     return legendItems.map(({ name }) => name);
   }
 
-  public async getChartItems<ItemType extends ChartItem = 'areas'>(
-    chartData?: DebugState,
-    itemType: ChartItem = 'areas'
-  ) {
-    return (await this.getChartDebugState(chartData))?.[itemType] as DebugState[ItemType];
+  public async getChartItems(chartData?: DebugState, itemType: 'areas' | 'bars' = 'areas') {
+    return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
   public async getAreaChartColors(chartData?: DebugState) {
-    const areas = await this.getChartItems(chartData);
+    const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.map(({ color }) => color);
   }
 
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
-    const areas = await this.getChartItems(chartData);
+    const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
   }
 }
