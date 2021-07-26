@@ -24,7 +24,7 @@ const strings = {
 };
 
 const LazyMetricComponent = lazy(() => import('../components/metric_component'));
-const MetricComponent = withSuspense(LazyMetricComponent, null);
+const MetricComponent = withSuspense(LazyMetricComponent);
 
 export const metricRenderer = (): ExpressionRenderDefinition<MetricRendererConfig> => ({
   name: 'metric',
