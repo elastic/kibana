@@ -40,7 +40,6 @@ import { help as gt } from './dict/gt';
 import { help as gte } from './dict/gte';
 import { help as head } from './dict/head';
 import { help as ifFn } from './dict/if';
-import { help as image } from './dict/image';
 import { help as joinRows } from './dict/join_rows';
 import { help as location } from './dict/location';
 import { help as lt } from './dict/lt';
@@ -199,7 +198,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   head,
   if: ifFn,
   joinRows,
-  image,
   location,
   lt,
   lte,

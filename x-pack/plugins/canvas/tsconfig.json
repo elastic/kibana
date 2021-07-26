@@ -32,6 +32,7 @@
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../../src/plugins/expression_error/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_image/tsconfig.json" },
     { "path": "../../../src/plugins/expression_repeat_image/tsconfig.json" },
     { "path": "../../../src/plugins/expression_reveal_image/tsconfig.json" },
     { "path": "../../../src/plugins/expression_shape/tsconfig.json" },

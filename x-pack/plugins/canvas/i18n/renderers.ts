@@ -55,16 +55,6 @@ export const RendererStrings = {
         defaultMessage: 'Renders an embeddable Saved Object from other parts of Kibana',
       }),
   },
-  image: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.image.displayName', {
-        defaultMessage: 'Image',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.image.helpDescription', {
-        defaultMessage: 'Render an image',
-      }),
-  },
   markdown: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.markdown.displayName', {

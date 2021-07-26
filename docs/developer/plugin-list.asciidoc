@@ -76,6 +76,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
 
 
+|{kib-repo}blob/{branch}/src/plugins/expression_image/README.md[expressionImage]
+|Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
 |Expression Repeat Image plugin adds a repeatImage function to the expression plugin and an associated renderer. The renderer will display the given image in mutliple instances.
 
