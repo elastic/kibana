@@ -34,7 +34,7 @@ export const getSavedObjects = (): SavedObject[] => [
     references: [],
   },
   {
-    id: '935afa20-e0cd-11e7-9d07-1398ccfcefa3',
+    id: 'cb099a20-ea66-11eb-9425-113343a037e3',
     type: 'visualization',
     updated_at: '2021-07-21T21:33:42.541Z',
     version: '1',
