@@ -39,7 +39,7 @@ Any plugin that stores any persistable state as part of their saved object shoul
 and reference extraction and injection methods correctly use the correct `PersistableStateService` implementation.
 
 If a saved object contains state from another plugin, the <DocLink id="kibCoreSavedObjectsPluginApi" section="iaf33fb81-e64a-11eb-8631-9d6e17a74ca4" text-"SavedObjectType.migrations"/> parameter should be a function, which returns a list of migrations. 
- These migration functions will need to merge the migration functions returned from <DocLInk id="" section="" text="PersistableStateServices.getAllMigrations"/> with any migrations provided by the plugin.
+ These migration functions will need to merge the migration functions returned from with any migrations provided by the plugin.
 
 For reference injection and extraction matching methods on PersistableStateService should be called and merged with plugins own array of references.
 
