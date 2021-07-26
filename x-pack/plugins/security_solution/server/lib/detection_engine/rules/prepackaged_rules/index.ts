@@ -562,7 +562,14 @@ import rule549 from './ml_auth_rare_user_logon.json';
 import rule550 from './ml_auth_spike_in_failed_logon_events.json';
 import rule551 from './ml_auth_spike_in_logon_events.json';
 import rule552 from './ml_auth_spike_in_logon_events_from_a_source_ip.json';
-import rule553 from './persistence_via_bits_job_notify_command.json';
+import rule553 from './privilege_escalation_printspooler_malicious_driver_file_changes.json';
+import rule554 from './privilege_escalation_printspooler_malicious_registry_modification.json';
+import rule555 from './privilege_escalation_printspooler_suspicious_file_deletion.json';
+import rule556 from './privilege_escalation_unusual_printspooler_childprocess.json';
+import rule557 from './defense_evasion_disabling_windows_defender_powershell.json';
+import rule558 from './defense_evasion_enable_network_discovery_with_netsh.json';
+import rule559 from './defense_evasion_execution_windefend_unusual_path.json';
+import rule560 from './persistence_via_bits_job_notify_command.json';
 
 export const rawRules = [
   rule1,
@@ -1118,4 +1125,11 @@ export const rawRules = [
   rule551,
   rule552,
   rule553,
+  rule554,
+  rule555,
+  rule556,
+  rule557,
+  rule558,
+  rule559,
+  rule560,
 ];

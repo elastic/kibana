@@ -9,15 +9,14 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
 import moment from 'moment';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
@@ -26,41 +25,22 @@ import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
-import { checkLicense } from '../lib/license_check';
-import {
-  JobQueueEntry,
-  ReportingAPIClient,
-  useInternalApiClient,
-} from '../lib/reporting_api_client';
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
-import type { SharePluginSetup } from '../shared_imports';
+import { Job } from '../lib/job';
+import { checkLicense } from '../lib/license_check';
+import { ReportingAPIClient, useInternalApiClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
+import type { SharePluginSetup } from '../shared_imports';
+import { useKibana } from '../shared_imports';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
-import { ReportDiagnostic } from './report_diagnostic';
-import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import { IlmPolicyLink } from './ilm_policy_link';
-
-export interface Job {
-  id: string;
-  type: string;
-  object_type: string;
-  object_title: string;
-  created_by?: string | false;
-  created_at: string;
-  started_at?: string;
-  completed_at?: string;
-  status: string;
-  statusLabel: string;
-  max_size_reached?: boolean;
-  attempts: number;
-  max_attempts: number;
-  csv_contains_formulas: boolean;
-  warnings?: string[];
-}
+import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
+import { ReportDiagnostic } from './report_diagnostic';
 
 export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
+  capabilities: ApplicationStart['capabilities'];
   license$: LicensingPluginSetup['license$'];
   pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
@@ -144,13 +124,14 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue, urlService, navigateToUrl } = this.props;
+    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
     return (
       <>
         <EuiPageHeader
+          data-test-subj="reportingPageHeader"
           bottomBorder
           pageTitle={
             <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
@@ -166,19 +147,21 @@ class ReportListingUi extends Component<Props, State> {
         <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
 
         <EuiSpacer size={'l'} />
-        {this.renderTable()}
+        <div>{this.renderTable()}</div>
 
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {ilmPolicyContextValue.isLoading ? (
-              <EuiLoadingSpinner />
-            ) : (
-              showIlmPolicyLink && (
-                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
-              )
-            )}
-          </EuiFlexItem>
+          {capabilities?.management?.data?.index_lifecycle_management && (
+            <EuiFlexItem grow={false}>
+              {ilmPolicyContextValue.isLoading ? (
+                <EuiLoadingSpinner />
+              ) : (
+                showIlmPolicyLink && (
+                  <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
+                )
+              )}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
@@ -250,7 +233,7 @@ class ReportListingUi extends Component<Props, State> {
                 id: 'xpack.reporting.listing.table.deleteConfim',
                 defaultMessage: `The {reportTitle} report was deleted`,
               },
-              { reportTitle: record.object_title }
+              { reportTitle: record.title }
             )
           );
         } catch (error) {
@@ -292,7 +275,7 @@ class ReportListingUi extends Component<Props, State> {
       this.setState(() => ({ isLoading: true }));
     }
 
-    let jobs: JobQueueEntry[];
+    let jobs: Job[];
     let total: number;
     try {
       jobs = await this.props.apiClient.list(this.state.page);
@@ -324,28 +307,7 @@ class ReportListingUi extends Component<Props, State> {
       this.setState(() => ({
         isLoading: false,
         total,
-        jobs: jobs.map(
-          (job: JobQueueEntry): Job => {
-            const { _source: source } = job;
-            return {
-              id: job._id,
-              type: source.jobtype,
-              object_type: source.payload.objectType,
-              object_title: source.payload.title,
-              created_by: source.created_by,
-              created_at: source.created_at,
-              started_at: source.started_at,
-              completed_at: source.completed_at,
-              status: source.status,
-              statusLabel: jobStatusLabelsMap.get(source.status as JobStatuses) || source.status,
-              max_size_reached: source.output ? source.output.max_size_reached : false,
-              attempts: source.attempts,
-              max_attempts: source.max_attempts,
-              csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
-              warnings: source.output ? source.output.warnings : undefined,
-            };
-          }
-        ),
+        jobs,
       }));
     }
   };
@@ -368,17 +330,17 @@ class ReportListingUi extends Component<Props, State> {
 
     const tableColumns = [
       {
-        field: 'object_title',
+        field: 'title',
         name: intl.formatMessage({
           id: 'xpack.reporting.listing.tableColumns.reportTitle',
           defaultMessage: 'Report',
         }),
         render: (objectTitle: string, record: Job) => {
           return (
-            <div>
+            <div data-test-subj="reportingListItemObjectTitle">
               <div>{objectTitle}</div>
               <EuiText size="s">
-                <EuiTextColor color="subdued">{record.object_type}</EuiTextColor>
+                <EuiTextColor color="subdued">{record.objectType}</EuiTextColor>
               </EuiText>
             </div>
           );
@@ -527,6 +489,14 @@ class ReportListingUi extends Component<Props, State> {
 
     return (
       <Fragment>
+        {this.state.selectedJobs.length > 0 && (
+          <Fragment>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
+              <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
             defaultMessage: 'Reports generated in Kibana applications',
@@ -552,7 +522,6 @@ class ReportListingUi extends Component<Props, State> {
           onChange={this.onTableChange}
           data-test-subj="reportJobListing"
         />
-        {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>
     );
   }
@@ -561,14 +530,20 @@ class ReportListingUi extends Component<Props, State> {
 const PrivateReportListing = injectI18n(ReportListingUi);
 
 export const ReportListing = (
-  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient'>
+  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities'>
 ) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();
+  const {
+    services: {
+      application: { capabilities },
+    },
+  } = useKibana();
   return (
     <PrivateReportListing
       {...props}
       apiClient={apiClient}
+      capabilities={capabilities}
       ilmPolicyContextValue={ilmPolicyStatusValue}
     />
   );

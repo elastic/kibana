@@ -11,6 +11,7 @@ import {
   FieldLabels,
   FILTER_RECORDS,
   REPORT_METRIC_FIELD,
+  ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
@@ -31,13 +32,14 @@ import {
   URL_FULL,
   SERVICE_ENVIRONMENT,
 } from '../constants/elasticsearch_fieldnames';
+import { CLS_LABEL, FID_LABEL, LCP_LABEL } from '../constants/labels';
 
 export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);
 
   return {
     defaultSeriesType: 'bar_horizontal_percentage_stacked',
-    reportType: 'core-web-vitals',
+    reportType: ReportTypes.CORE_WEB_VITAL,
     seriesTypes: ['bar_horizontal_percentage_stacked'],
     xAxisColumn: {
       sourceField: USE_BREAK_DOWN_COLUMN,
@@ -91,7 +93,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
     metricOptions: [
       {
         id: LCP_FIELD,
-        label: 'Largest contentful paint',
+        label: LCP_LABEL,
         columnType: FILTER_RECORDS,
         columnFilters: [
           {
@@ -109,7 +111,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
         ],
       },
       {
-        label: 'First input delay',
+        label: FID_LABEL,
         id: FID_FIELD,
         columnType: FILTER_RECORDS,
         columnFilters: [
@@ -128,7 +130,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
         ],
       },
       {
-        label: 'Cumulative layout shift',
+        label: CLS_LABEL,
         id: CLS_FIELD,
         columnType: FILTER_RECORDS,
         columnFilters: [
@@ -152,5 +154,6 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
+    query: { query: 'transaction.type: "page-load"', language: 'kuery' },
   };
 }

@@ -7,8 +7,9 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import type { LayerArgs } from './types';
-import type { LensMultiTable, LensFilterEvent, FormatFactory } from '../types';
+import type { LensFilterEvent } from '../types';
+import type { LensMultiTable, FormatFactory } from '../../common';
+import type { LayerArgs } from '../../common/expressions';
 import { LegendActionPopover } from '../shared_components';
 
 export const getLegendAction = (

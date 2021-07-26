@@ -27,6 +27,7 @@ export {
   PackagePolicyPackage,
   Output,
   DataStream,
+  Settings,
   // API schema - misc setup, status
   GetFleetStatusResponse,
   // API schemas - Agent policy

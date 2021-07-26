@@ -26,8 +26,9 @@ import {
   getProcessCodeSignature,
   retrieveAlertOsTypes,
   filterIndexPatterns,
+  getCodeSignatureValue,
 } from './helpers';
-import { AlertData } from './types';
+import { AlertData, Flattened } from './types';
 import {
   ListOperatorTypeEnum as OperatorTypeEnum,
   EntriesArray,
@@ -41,6 +42,7 @@ import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
+import { CodeSignature } from '../../../../common/ecs/file';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -183,7 +185,7 @@ describe('Exception helpers', () => {
         meta: {},
         name: 'some name',
         namespace_type: 'single',
-        os_types: ['linux'],
+        os_types: [],
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
       };
@@ -337,6 +339,17 @@ describe('Exception helpers', () => {
       ];
       const result = entryHasListType(payload);
       expect(result).toEqual(true);
+    });
+  });
+
+  describe('#getCodeSignatureValue', () => {
+    test('it should return empty string if code_signature nested value are undefined', () => {
+      // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
+      const payload = ([{ trusted: undefined, subject_name: undefined }] as unknown) as Flattened<
+        CodeSignature[]
+      >;
+      const result = getCodeSignatureValue(payload);
+      expect(result).toEqual([{ trusted: '', subjectName: '' }]);
     });
   });
 
@@ -925,6 +938,173 @@ describe('Exception helpers', () => {
           operator: 'included',
           type: 'match',
           value: 'ransomware',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory signature items for event code `memory_signature`', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: 'some name',
+          executable: 'some file path',
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'signature',
+        },
+        event: {
+          code: 'memory_signature',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'signature',
+          id: '123',
+        },
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+          id: '123',
+        },
+        {
+          field: 'process.name.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some name',
+          id: '123',
+        },
+        {
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+          id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory shellcode items for event code `malicious_thread`', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: 'some name',
+          executable: 'some file path',
+          Ext: {
+            token: {
+              integrity_level_name: 'high',
+            },
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'shellcode_thread',
+          self_injection: true,
+        },
+        event: {
+          code: 'malicious_thread',
+        },
+        Target: {
+          process: {
+            thread: {
+              Ext: {
+                start_address_allocation_offset: 0,
+                start_address_bytes_disasm_hash: 'a disam hash',
+                start_address_details: {
+                  allocation_type: 'PRIVATE',
+                  allocation_size: 4000,
+                  region_size: 4000,
+                  region_protection: 'RWX',
+                  memory_pe: {
+                    imphash: 'a hash',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'shellcode_thread',
+          id: '123',
+        },
+        {
+          field: 'Memory_protection.self_injection',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+          id: '123',
+        },
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+          id: '123',
+        },
+        {
+          field: 'process.name.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some name',
+          id: '123',
+        },
+        {
+          field: 'process.Ext.token.integrity_level_name',
+          operator: 'included',
+          type: 'match',
+          value: 'high',
+          id: '123',
+        },
+        {
+          field: 'Target.process.thread.Ext.start_address_details',
+          type: 'nested',
+          entries: [
+            {
+              field: 'allocation_type',
+              operator: 'included',
+              type: 'match',
+              value: 'PRIVATE',
+              id: '123',
+            },
+            {
+              field: 'allocation_size',
+              operator: 'included',
+              type: 'match',
+              value: '4000',
+              id: '123',
+            },
+            { field: 'region_size', operator: 'included', type: 'match', value: '4000', id: '123' },
+            {
+              field: 'region_protection',
+              operator: 'included',
+              type: 'match',
+              value: 'RWX',
+              id: '123',
+            },
+            {
+              field: 'memory_pe.imphash',
+              operator: 'included',
+              type: 'match',
+              value: 'a hash',
+              id: '123',
+            },
+          ],
+          id: '123',
         },
       ]);
     });

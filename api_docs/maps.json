@@ -3085,13 +3085,13 @@
       },
       {
         "parentPluginId": "maps",
-        "id": "def-common.KBN_TOO_MANY_FEATURES_PROPERTY",
+        "id": "def-common.KBN_METADATA_FEATURE",
         "type": "string",
         "tags": [],
-        "label": "KBN_TOO_MANY_FEATURES_PROPERTY",
+        "label": "KBN_METADATA_FEATURE",
         "description": [],
         "signature": [
-          "\"__kbn_too_many_features__\""
+          "\"__kbn_metadata_feature__\""
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",

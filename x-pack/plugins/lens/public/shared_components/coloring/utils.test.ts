@@ -48,6 +48,15 @@ describe('applyPaletteParams', () => {
       { color: 'red', stop: 70 },
     ]);
   });
+
+  it('should pick the default palette from the activePalette object when passed', () => {
+    expect(
+      applyPaletteParams(paletteRegistry, { name: 'mocked', type: 'palette' }, { min: 0, max: 100 })
+    ).toEqual([
+      { color: 'blue', stop: 20 },
+      { color: 'yellow', stop: 70 },
+    ]);
+  });
 });
 
 describe('remapStopsByNewInterval', () => {

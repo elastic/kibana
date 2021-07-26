@@ -35,7 +35,7 @@ interface Props {
 }
 
 export function RunExpressionsExample({ expressions, inspector }: Props) {
-  const [expression, updateExpression] = useState('markdown "## expressions explorer"');
+  const [expression, updateExpression] = useState('markdownVis "## expressions explorer"');
   const [result, updateResult] = useState<unknown>({});
 
   const expressionChanged = (value: string) => {

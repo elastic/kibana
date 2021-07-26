@@ -7,7 +7,7 @@
 
 import { ROLES } from '../../../common/test';
 import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
 import {
@@ -95,7 +95,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createCustomRule(newRule);
+        createCustomRule(getNewRule());
         loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();
         goToRuleDetails();
@@ -145,7 +145,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createCustomRule(newRule);
+        createCustomRule(getNewRule());
         loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();
         goToRuleDetails();

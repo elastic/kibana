@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
+import type { IExecutionContextContainer } from 'src/core/public';
 
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
@@ -17,10 +18,15 @@ import { ExecutionContract, ExecutionResult } from '../execution';
 import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
+import {
+  PersistableStateService,
+  SerializableState,
+  VersionedState,
+} from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
+  createTable,
   font,
   variableSet,
   variable,
@@ -77,6 +83,8 @@ export interface ExpressionExecutionParams {
   syncColors?: boolean;
 
   inspectorAdapters?: Adapters;
+
+  executionContext?: IExecutionContextContainer;
 }
 
 /**
@@ -319,13 +327,18 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   };
 
   /**
-   * Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1)
-   * @param state expression AST to update
-   * @param version defines which migration version to run
-   * @returns new migrated expression AST
+   * gets an object with semver mapped to a migration function
    */
-  public readonly migrate = (state: SerializableState, version: string) => {
-    return this.executor.migrate(state, version);
+  public getAllMigrations = () => {
+    return this.executor.getAllMigrations();
+  };
+
+  /**
+   * migrates an old expression to latest version
+   * @param state
+   */
+  public migrateToLatest = (state: VersionedState) => {
+    return this.executor.migrateToLatest(state);
   };
 
   /**
@@ -335,6 +348,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public setup(...args: unknown[]): ExpressionsServiceSetup {
     for (const fn of [
       clog,
+      createTable,
       font,
       variableSet,
       variable,

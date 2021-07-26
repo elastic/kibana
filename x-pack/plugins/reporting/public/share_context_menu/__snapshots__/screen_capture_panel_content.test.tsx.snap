@@ -312,9 +312,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             onResize={[Function]}
           >
             <div>
-              <div
-                className=""
-              >
+              <div>
                 <EuiSpacer
                   size="s"
                 >
@@ -752,9 +750,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             onResize={[Function]}
           >
             <div>
-              <div
-                className=""
-              >
+              <div>
                 <EuiSpacer
                   size="s"
                 >
@@ -1064,9 +1060,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             onResize={[Function]}
           >
             <div>
-              <div
-                className=""
-              >
+              <div>
                 <EuiSpacer
                   size="s"
                 >

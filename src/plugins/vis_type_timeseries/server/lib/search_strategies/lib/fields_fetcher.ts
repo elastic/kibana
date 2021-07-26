@@ -9,7 +9,7 @@
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
-import type { AbstractSearchStrategy, DefaultSearchCapabilities } from '../index';
+import type { SearchStrategy, SearchCapabilities } from '../index';
 import type { IndexPatternsService } from '../../../../../data/common';
 import type { CachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
 import type { IndexPatternValue } from '../../../../common/types';
@@ -17,8 +17,8 @@ import type { IndexPatternValue } from '../../../../common/types';
 export interface FieldsFetcherServices {
   indexPatternsService: IndexPatternsService;
   cachedIndexPatternFetcher: CachedIndexPatternFetcher;
-  searchStrategy: AbstractSearchStrategy;
-  capabilities: DefaultSearchCapabilities;
+  searchStrategy: SearchStrategy;
+  capabilities: SearchCapabilities;
 }
 
 export const createFieldsFetcher = (

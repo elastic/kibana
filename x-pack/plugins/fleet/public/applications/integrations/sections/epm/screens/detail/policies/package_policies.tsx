@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { stringify, parse } from 'query-string';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, useLocation, useHistory } from 'react-router-dom';
 import type {
   CriteriaWithPagination,
@@ -95,6 +95,21 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
 
   const agentEnrollmentFlyoutExtension = useUIExtension(name, 'agent-enrollment-flyout');
 
+  // Handle the "add agent" link displayed in post-installation toast notifications in the case
+  // where a user is clicking the link while on the package policies listing page
+  useEffect(() => {
+    const unlisten = history.listen((location) => {
+      const params = new URLSearchParams(location.search);
+      const addAgentToPolicyId = params.get('addAgentToPolicyId');
+
+      if (addAgentToPolicyId) {
+        setFlyoutOpenForPolicyId(addAgentToPolicyId);
+      }
+    });
+
+    return () => unlisten();
+  }, [history]);
+
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PackagePolicyAndAgentPolicy>) => {
       setPagination({
@@ -136,7 +151,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             />
           </EuiText>
           <EuiSpacer size="l" />
-          <EuiButton href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}>
+          <EuiButton
+            fill
+            href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}
+          >
             {i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
               defaultMessage: 'View assets',
             })}
@@ -205,6 +223,12 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                     iconType="plusInCircle"
                     onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
                     data-test-subj="addAgentButton"
+                    aria-label={i18n.translate(
+                      'xpack.fleet.epm.packageDetails.integrationList.addAgent',
+                      {
+                        defaultMessage: 'Add Agent',
+                      }
+                    )}
                   />
                 </EuiToolTip>
               )}

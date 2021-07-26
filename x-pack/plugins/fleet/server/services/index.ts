@@ -8,11 +8,12 @@
 import type { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
-import type { AgentStatus, Agent, EsAssetReference } from '../types';
+import type { AgentStatus, Agent } from '../types';
 
 import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
+import type { getInstallation } from './epm/packages';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
@@ -33,10 +34,7 @@ export interface ESIndexPatternService {
  */
 
 export interface PackageService {
-  getInstalledEsAssetReferences(
-    savedObjectsClient: SavedObjectsClientContract,
-    pkgName: string
-  ): Promise<EsAssetReference[]>;
+  getInstallation: typeof getInstallation;
 }
 
 /**

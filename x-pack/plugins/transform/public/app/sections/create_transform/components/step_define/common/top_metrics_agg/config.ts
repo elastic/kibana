@@ -17,7 +17,6 @@ import {
 import { PivotAggsConfigTopMetrics } from './types';
 import { TopMetricsAggForm } from './components/top_metrics_agg_form';
 import { isPopulatedObject } from '../../../../../../../../common/shared_imports';
-import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../../common/types/pivot_aggs';
 
 /**
  * Gets initial basic configuration of the top_metrics aggregation.
@@ -31,8 +30,6 @@ export function getTopMetricsAggConfig(
     isMultiField: true,
     field: isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : '',
     AggFormComponent: TopMetricsAggForm,
-    /** Default name */
-    aggName: PIVOT_SUPPORTED_AGGS.TOP_METRICS,
     aggConfig: {},
     getEsAggConfig() {
       // ensure the configuration has been completed

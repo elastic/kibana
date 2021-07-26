@@ -23,7 +23,7 @@ import {
 } from '../../../timelines/components/timeline/body/constants';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions, TimelineEventsDetailsItem } from '../../../../common';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -55,12 +55,12 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    contextId: string;
+    data: TimelineEventsDetailsItem;
     eventId: string;
-    fieldName: string;
-    value: string;
-    fieldType: string;
+    fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
     linkValue: string | undefined;
+    timelineId: string;
+    values: string[] | null | undefined;
   };
 }
 
@@ -197,7 +197,7 @@ export const onEventDetailsTabKeyPressed = ({
 };
 
 const getTitle = (title: string) => (
-  <EuiTitle size="xxs">
+  <EuiTitle size="xxxs">
     <h5>{title}</h5>
   </EuiTitle>
 );
@@ -213,7 +213,7 @@ export const getSummaryColumns = (
       field: 'title',
       truncateText: false,
       render: getTitle,
-      width: '160px',
+      width: '33%',
       name: '',
     },
     {

@@ -65,9 +65,9 @@ export const CTI_DEFAULT_SOURCES = [
   'Abuse Malware',
   'AlienVault OTX',
   'Anomali',
-  'Anomali ThreatStream',
   'Malware Bazaar',
   'MISP',
+  'Recorded Future',
 ];
 
 export const DEFAULT_CTI_SOURCE_INDEX = ['filebeat-*'];

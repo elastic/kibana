@@ -7,30 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summary', {
-  defaultMessage: 'Summary',
-});
-
-export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.alertSummary', {
-  defaultMessage: 'Alert Summary',
-});
-
 export const THREAT_INTEL = i18n.translate('xpack.securitySolution.alertDetails.threatIntel', {
   defaultMessage: 'Threat Intel',
 });
 
-export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.threatSummary', {
-  defaultMessage: 'Threat Summary',
-});
-
-export const VIEW_CTI_DATA = i18n.translate('xpack.securitySolution.alertDetails.threatIntelCta', {
-  defaultMessage: 'View threat intel data',
-});
-
 export const INVESTIGATION_GUIDE = i18n.translate(
-  'xpack.securitySolution.alertDetails.summary.investigationGuide',
+  'xpack.securitySolution.alertDetails.overview.investigationGuide',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.overview', {
+  defaultMessage: 'Overview',
+});
+
+export const DUCOMENT_SUMMARY = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.documentSummary',
+  {
+    defaultMessage: 'Document Summary',
   }
 );
 
@@ -39,7 +34,7 @@ export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table',
 });
 
 export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jsonView', {
-  defaultMessage: 'JSON View',
+  defaultMessage: 'JSON',
 });
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
@@ -87,4 +82,22 @@ export const NESTED_COLUMN = (field: string) =>
 
 export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
   defaultMessage: 'Agent status',
+});
+
+export const MULTI_FIELD_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
+  {
+    defaultMessage: 'Multi-fields can have multiple values per field',
+  }
+);
+
+export const MULTI_FIELD_BADGE = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldBadge',
+  {
+    defaultMessage: 'multi-field',
+  }
+);
+
+export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
+  defaultMessage: 'Actions',
 });

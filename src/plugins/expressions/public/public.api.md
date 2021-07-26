@@ -9,6 +9,7 @@ import { CoreStart } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { EventEmitter } from 'events';
+import { IExecutionContextContainer } from 'src/core/public';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { ObservableLike } from '@kbn/utility-types';
@@ -120,7 +121,7 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
     readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
-    start(input?: Input): Observable<ExecutionResult<Output | ExpressionValueError>>;
+    start(input?: Input, isSubExpression?: boolean): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
     readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 }
@@ -138,6 +139,7 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // @public
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
     abortSignal: AbortSignal;
+    getExecutionContext: () => IExecutionContextContainer | undefined;
     getKibanaRequest?: () => KibanaRequest;
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
@@ -211,6 +213,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     fork(): Executor<Context>;
     // @deprecated (undocumented)
     readonly functions: FunctionsRegistry;
+    // Warning: (ae-forgotten-export) The symbol "MigrateFunctionsObject" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getAllMigrations(): MigrateFunctionsObject;
     // (undocumented)
     getFunction(name: string): ExpressionFunction | undefined;
     // (undocumented)
@@ -223,10 +229,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     //
     // (undocumented)
     inject(ast: ExpressionAstExpression, references: SavedObjectReference[]): ExpressionAstExpression;
-    // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "VersionedState" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    migrate(ast: SerializableState, version: string): ExpressionAstExpression;
+    migrateToLatest(state: VersionedState): ExpressionAstExpression;
     // (undocumented)
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
@@ -597,6 +603,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     };
     // (undocumented)
     readonly fork: () => ExpressionsService;
+    getAllMigrations: () => import("../../../kibana_utils/common").MigrateFunctionsObject;
     // (undocumented)
     readonly getFunction: ExpressionsServiceStart['getFunction'];
     readonly getFunctions: () => ReturnType<Executor['getFunctions']>;
@@ -607,7 +614,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     readonly getType: ExpressionsServiceStart['getType'];
     readonly getTypes: () => ReturnType<Executor['getTypes']>;
     readonly inject: (state: ExpressionAstExpression, references: SavedObjectReference[]) => ExpressionAstExpression;
-    readonly migrate: (state: SerializableState, version: string) => ExpressionAstExpression;
+    migrateToLatest: (state: VersionedState) => ExpressionAstExpression;
     readonly registerFunction: (functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)) => void;
     // (undocumented)
     readonly registerRenderer: (definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)) => void;
@@ -901,6 +908,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
+    executionContext?: IExecutionContextContainer;
+    // (undocumented)
     hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
     // (undocumented)
     inspectorAdapters?: Adapters;
@@ -908,7 +917,6 @@ export interface IExpressionLoaderParams {
     //
     // (undocumented)
     onRenderError?: RenderErrorHandlerFnType;
-    // (undocumented)
     partial?: boolean;
     // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
     //
@@ -920,6 +928,7 @@ export interface IExpressionLoaderParams {
     searchSessionId?: string;
     // (undocumented)
     syncColors?: boolean;
+    throttle?: number;
     // (undocumented)
     uiState?: unknown;
     // (undocumented)
@@ -1184,6 +1193,7 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 // Warnings were encountered during analysis:
 //
 // src/plugins/expressions/common/ast/types.ts:29:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/expression_functions/expression_function.ts:68:5 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // src/plugins/expressions/common/expression_types/specs/error.ts:20:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
