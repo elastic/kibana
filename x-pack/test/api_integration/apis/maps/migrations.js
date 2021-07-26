@@ -76,7 +76,7 @@ export default function ({ getService }) {
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');
-        expect(panels[0].version).to.be('7.14.0');
+        expect(panels[0].version).to.be('7.15.0');
       });
     });
   });
