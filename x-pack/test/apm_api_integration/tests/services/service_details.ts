@@ -51,6 +51,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
+            "cloud": Object {
+              "availabilityZones": Array [
+                "europe-west1-c",
+              ],
+              "machineTypes": Array [
+                "n1-standard-4",
+              ],
+              "projectName": "elastic-observability",
+              "provider": "gcp",
+            },
             "container": Object {
               "isContainerized": true,
               "os": "Linux",
@@ -59,16 +69,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "service": Object {
               "agent": Object {
-                "ephemeral_id": "d27b2271-06b4-48c8-a02a-cfd963c0b4d0",
+                "ephemeral_id": "a44f3d9d-8c18-4a9a-9533-c1c43d5507c5",
                 "name": "java",
-                "version": "1.19.1-SNAPSHOT.null",
+                "version": "1.25.1-SNAPSHOT.UNKNOWN",
               },
               "runtime": Object {
                 "name": "Java",
-                "version": "11.0.9.1",
+                "version": "11.0.11",
               },
               "versions": Array [
-                "2020-12-08 03:35:36",
+                "2021-07-26 03:47:49",
               ],
             },
           }
@@ -106,15 +116,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "service": Object {
               "agent": Object {
                 "name": "python",
-                "version": "5.10.0",
+                "version": "6.3.3",
               },
               "framework": "django",
               "runtime": Object {
                 "name": "CPython",
-                "version": "3.8.6",
+                "version": "3.9.6",
               },
               "versions": Array [
-                "2020-12-08 03:35:35",
+                "2021-07-26 03:47:46",
               ],
             },
           }

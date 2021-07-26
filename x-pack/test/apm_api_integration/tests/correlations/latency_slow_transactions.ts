@@ -64,35 +64,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(significantTerms).to.have.length(9);
         const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
         expectSnapshot(sortedFieldNames).toMatchInline(`
-        Array [
-          "url.original",
-          "url.original",
-          "url.original",
-          "url.original",
-          "user_agent.name",
-          "user_agent.name",
-          "user_agent.name",
-          "user_agent.os.name",
-          "user_agent.os.name",
-        ]
-      `);
+                  Array [
+                    "url.original",
+                    "url.original",
+                    "url.original",
+                    "url.original",
+                    "user_agent.name",
+                    "user_agent.name",
+                    "user_agent.name",
+                    "user_agent.os.name",
+                    "user_agent.os.name",
+                  ]
+              `);
       });
 
       it('returns a distribution per term', () => {
         const { significantTerms } = response.body;
         expectSnapshot(significantTerms.map((term) => term.distribution.length)).toMatchInline(`
-        Array [
-          15,
-          15,
-          15,
-          15,
-          15,
-          15,
-          15,
-          15,
-          15,
-        ]
-      `);
+          Array [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+          ]
+        `);
       });
     }
   );

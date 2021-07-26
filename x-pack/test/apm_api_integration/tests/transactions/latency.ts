@@ -160,7 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
           expectSnapshot(latencyChartReturn.currentPeriod.overallAvgDuration).toMatchInline(
-            `24989.3157894737`
+            `53752.1063829787`
           );
 
           expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);

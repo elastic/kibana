@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', async () => {
-        expectSnapshot(response.body.items.length).toMatchInline(`135`);
+        expectSnapshot(response.body.items.length).toMatchInline(`119`);
       });
 
       it('returns the correct buckets', async () => {
@@ -60,14 +60,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1735,
+            "averageResponseTime": 1039,
             "impact": 0,
             "key": Object {
-              "service.name": "opbeans-java",
-              "transaction.name": "DispatcherServlet#doPost",
+              "service.name": "opbeans-dotnet",
+              "transaction.name": "POST Orders/Post",
             },
-            "serviceName": "opbeans-java",
-            "transactionName": "DispatcherServlet#doPost",
+            "serviceName": "opbeans-dotnet",
+            "transactionName": "POST Orders/Post",
             "transactionType": "request",
             "transactionsPerMinute": 0.0333333333333333,
           }
@@ -75,40 +75,40 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 553058.519181586,
+            "averageResponseTime": 135419.631578947,
             "impact": 100,
             "key": Object {
               "service.name": "kibana",
-              "transaction.name": "POST /api/apm/settings/agent-configuration/search",
+              "transaction.name": "markAvailableTasksAsClaimed",
             },
             "serviceName": "kibana",
-            "transactionName": "POST /api/apm/settings/agent-configuration/search",
-            "transactionType": "request",
-            "transactionsPerMinute": 5.4,
+            "transactionName": "markAvailableTasksAsClaimed",
+            "transactionType": "taskManager markAvailableTasksAsClaimed",
+            "transactionsPerMinute": 40.5333333333333,
           }
         `);
 
         expectSnapshot(groups).toMatchInline(`
           Array [
             Object {
+              "service.name": "opbeans-dotnet",
+              "transaction.name": "POST Orders/Post",
+            },
+            Object {
               "service.name": "opbeans-java",
               "transaction.name": "DispatcherServlet#doPost",
             },
             Object {
-              "service.name": "opbeans-java",
-              "transaction.name": "APIRestController#product",
-            },
-            Object {
-              "service.name": "opbeans-python",
-              "transaction.name": "GET opbeans.views.stats",
-            },
-            Object {
-              "service.name": "opbeans-python",
-              "transaction.name": "GET opbeans.views.orders",
-            },
-            Object {
               "service.name": "opbeans-node",
-              "transaction.name": "GET /api/products/:id",
+              "transaction.name": "POST /api",
+            },
+            Object {
+              "service.name": "opbeans-python",
+              "transaction.name": "GET opbeans.views.product_types",
+            },
+            Object {
+              "service.name": "opbeans-go",
+              "transaction.name": "POST /api/orders",
             },
           ]
         `);

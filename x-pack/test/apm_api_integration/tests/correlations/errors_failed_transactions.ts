@@ -74,6 +74,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             31,
             31,
+            31,
+            31,
           ]
         `);
       });

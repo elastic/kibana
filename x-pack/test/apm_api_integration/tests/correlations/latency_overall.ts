@@ -57,8 +57,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns overall distribution', () => {
-        expectSnapshot(response.body?.distributionInterval).toMatchInline(`238776`);
-        expectSnapshot(response.body?.maxLatency).toMatchInline(`3581640.00000003`);
+        expectSnapshot(response.body?.distributionInterval).toMatchInline(`336506`);
+        expectSnapshot(response.body?.maxLatency).toMatchInline(`5047597.97`);
         expectSnapshot(response.body?.overallDistribution?.length).toMatchInline(`15`);
       });
     }
