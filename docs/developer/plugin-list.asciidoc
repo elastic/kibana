@@ -76,6 +76,14 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
 
 
+|{kib-repo}blob/{branch}/src/plugins/expression_image/README.md[expressionImage]
+|Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
+
+
+|{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
+|Expression Repeat Image plugin adds a repeatImage function to the expression plugin and an associated renderer. The renderer will display the given image in mutliple instances.
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_reveal_image/README.md[expressionRevealImage]
 |Expression Reveal Image plugin adds a revealImage function to the expression plugin and an associated renderer. The renderer will display the given percentage of a given image.
 
@@ -97,6 +105,10 @@ This plugin provides methods which will parse & execute an *expression pipeline*
 string for you, as well as a series of registries for advanced users who might
 want to incorporate their own functions, types, and renderers into the service
 for use in their own application.
+
+
+|{kib-repo}blob/{branch}/src/plugins/expression_shape/README.md[expressionShape]
+|Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 
 |{kib-repo}blob/{branch}/src/plugins/home/README.md[home]
