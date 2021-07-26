@@ -77,13 +77,13 @@ export const getCurrentLocationFilter = (state: Immutable<TrustedAppsListPageSta
 export const getCurrentLocationIncludedPolicies = (
   state: Immutable<TrustedAppsListPageState>
 ): string => {
-  return state.location.includedPolicies;
+  return state.location.included_policies;
 };
 
 export const getCurrentLocationExcludedPolicies = (
   state: Immutable<TrustedAppsListPageState>
 ): string => {
-  return state.location.excludedPolicies;
+  return state.location.excluded_policies;
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {

@@ -129,8 +129,8 @@ export const TrustedAppsPage = memo(() => {
             placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
             hasPolicyFilter={isTrustedAppsByPolicyEnabled}
             policyList={policyList}
-            defaultExcludedPolicies={location.excludedPolicies}
-            defaultIncludedPolicies={location.includedPolicies}
+            defaultExcludedPolicies={location.excluded_policies}
+            defaultIncludedPolicies={location.included_policies}
           />
           <EuiFlexGroup
             direction="column"

@@ -135,11 +135,13 @@ describe('routing', () => {
         page_size: 20,
         show: 'create',
         view_type: 'list',
-        filter: '',
+        filter: 'test',
+        included_policies: 'globally',
+        excluded_policies: 'unassigned',
       };
 
       expect(getTrustedAppsListPath(location)).toEqual(
-        '/administration/trusted_apps?page_index=2&page_size=20&view_type=list&show=create'
+        '/administration/trusted_apps?page_index=2&page_size=20&view_type=list&show=create&filter=test&included_policies=globally&excluded_policies=unassigned'
       );
     });
 
