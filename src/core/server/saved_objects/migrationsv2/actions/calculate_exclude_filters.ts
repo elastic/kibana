@@ -20,7 +20,10 @@ export interface CalculateExcludeFiltersParams {
 }
 
 export interface CalculatedExcludeFilter {
+  /** Composite filter of all calculated filters */
   excludeFilter: estypes.QueryDslQueryContainer;
+  /** Any errors that were encountered during filter calculation */
+  errors: any[];
 }
 
 export const calculateExcludeFilters = ({
@@ -30,15 +33,42 @@ export const calculateExcludeFilters = ({
   RetryableEsClientError,
   CalculatedExcludeFilter
 > => () => {
-  return Promise.all(excludeFromUpgradeFilterHooks.map((hook) => hook(client)))
-    .then((filters) => {
-      const excludeFilter: estypes.QueryDslQueryContainer = {
-        bool: { must_not: filters },
-      };
+  return Promise.all(
+    excludeFromUpgradeFilterHooks.map((hook) =>
+      hook(client)
+        // .then((filter) => ({ filter, error: null }))
+        .then((filter) => Either.right(filter))
+        .catch(catchRetryableEsClientErrors)
+        // .catch((error) => ({ filter: null, error }))
+        .catch((error) => Either.left(error))
+    )
+  ).then((results) => {
+    const errors: any[] = [];
+    const filters: estypes.QueryDslQueryContainer[] = [];
 
-      return Either.right({
-        excludeFilter,
-      });
-    })
-    .catch(catchRetryableEsClientErrors);
+    // Loop through all results and collect successes and errors
+    for (const r of results) {
+      if (Either.isRight(r)) {
+        filters.push(r.right);
+      } else if (Either.isLeft(r)) {
+        // If any errors are retryable, return immediately so this whole action
+        // can be retried.
+        if (r.left.type === 'retryable_es_client_error') {
+          return r;
+        } else {
+          errors.push(r.left);
+        }
+      }
+    }
+
+    // Composite filter from all calculated filters that successfully executed
+    const excludeFilter: estypes.QueryDslQueryContainer = {
+      bool: { must_not: filters },
+    };
+
+    return Either.right({
+      excludeFilter,
+      errors,
+    });
+  });
 };

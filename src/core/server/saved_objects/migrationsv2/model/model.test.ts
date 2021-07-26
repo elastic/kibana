@@ -39,6 +39,7 @@ import type {
   TransformedDocumentsBulkIndex,
   ReindexSourceToTempIndexBulk,
   CheckUnknownDocumentsState,
+  CalculateExcludeFiltersState,
 } from '../types';
 import { SavedObjectsRawDoc } from '../../serialization';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../../migrations/core';
@@ -91,6 +92,7 @@ describe('migrations v2 model', () => {
       },
     },
     knownTypes: ['dashboard', 'config'],
+    excludeFromUpgradeFilterHooks: [],
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -839,14 +841,69 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('SET_SOURCE_WRITE_BLOCK -> CREATE_REINDEX_TEMP if action succeeds with set_write_block_succeeded', () => {
+      test('SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
           'set_write_block_succeeded'
         );
         const newState = model(setWriteBlockState, res);
-        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
+        expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+    });
+
+    describe('CALCULATE_EXCLUDE_FILTERS', () => {
+      const state: CalculateExcludeFiltersState = {
+        ...baseState,
+        controlState: 'CALCULATE_EXCLUDE_FILTERS',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        tempIndexMappings: { properties: {} },
+      };
+      test('CALCULATE_EXCLUDE_FILTERS -> CALCULATE_EXCLUDE_FILTERS if action fails with retryable error', () => {
+        const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.left({
+          type: 'retryable_es_client_error',
+          message: 'Something temporarily broke!',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
+      });
+      test('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
+        const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
+          excludeFilter: { bool: { must: { term: { fieldA: 'abc' } } } },
+          errors: [new Error('an error!')],
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
+        expect(newState.unusedTypesQuery).toEqual({
+          // New filter should be combined unused type query and filter from response
+          bool: {
+            filter: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      term: {
+                        type: 'unused-fleet-agent-events',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: { must: { term: { fieldA: 'abc' } } },
+              },
+            ],
+          },
+        });
+        // Logs should be added for any errors encountered from deleteOnUpgrade hooks
+        expect(newState.logs).toEqual([
+          {
+            level: 'warning',
+            message: `Ignoring deleteOnUpgrade hook that failed with error: "Error: an error!"`,
+          },
+        ]);
       });
     });
 

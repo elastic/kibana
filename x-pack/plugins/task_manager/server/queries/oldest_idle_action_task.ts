@@ -65,7 +65,7 @@ export const getOldestIdleActionTask = async (
     return oldestAlertAction;
   }
 
-  if (response.body?.hits?.hits?.length !== 0) {
+  if (response.body?.hits?.hits?.length > 0) {
     oldestAlertAction = response.body.hits.hits[0]._source?.task.runAt ?? oldestAlertAction;
   }
 

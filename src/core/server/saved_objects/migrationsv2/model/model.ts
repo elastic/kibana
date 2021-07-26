@@ -389,10 +389,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         unusedTypesQuery,
         logs: [
           ...stateP.logs,
-          {
-            level: 'warning',
-            message: `Calculated excludeFilter: ${JSON.stringify(unusedTypesQuery)}`,
-          },
+          ...res.right.errors.map((e) => ({
+            level: 'warning' as const,
+            message: `Ignoring deleteOnUpgrade hook that failed with error: "${e.toString()}"`,
+          })),
         ],
       };
     } else {

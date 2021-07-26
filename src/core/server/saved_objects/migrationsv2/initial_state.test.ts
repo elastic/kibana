@@ -39,6 +39,7 @@ describe('createInitialState', () => {
       batchSize: 1000,
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
+      excludeFromUpgradeFilterHooks: [],
       indexPrefix: '.kibana_task_manager',
       kibanaVersion: '8.1.0',
       knownTypes: [],
@@ -134,6 +135,31 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.knownTypes).toEqual(['foo', 'bar']);
+  });
+
+  it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
+    const fooDeleteOnUpgradeHook = jest.fn();
+    typeRegistry.registerType({
+      name: 'foo',
+      namespaceType: 'single',
+      hidden: false,
+      mappings: { properties: {} },
+      deleteOnUpgrade: fooDeleteOnUpgradeHook,
+    });
+
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig,
+      typeRegistry,
+    });
+
+    expect(initialState.excludeFromUpgradeFilterHooks).toEqual([fooDeleteOnUpgradeHook]);
   });
 
   it('returns state with a preMigration script', () => {

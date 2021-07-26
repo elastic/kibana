@@ -60,10 +60,7 @@ export const createInitialState = ({
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
   const excludeFilterHooks = typeRegistry
     .getAllTypes()
-    .filter(
-      (type) =>
-        /** TODO: calculate this correctly for .kibana types type.indexPattern === indexPrefix && */ !!type.deleteOnUpgrade
-    )
+    .filter((type) => !!type.deleteOnUpgrade)
     .map((type) => type.deleteOnUpgrade!);
 
   return {
