@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
-import {
-  toMountPoint,
-  useKibana,
-} from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import {
   AutoAbortedAPMClient,
@@ -131,7 +128,7 @@ export function useFetcher<TReturn>(
                 defaultMessage: `Error while fetching resource`,
               }),
 
-              body: toMountPoint(
+              body: (
                 <div>
                   <h5>
                     {i18n.translate('xpack.apm.fetcher.error.status', {
