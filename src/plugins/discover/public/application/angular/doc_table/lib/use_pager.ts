@@ -13,67 +13,66 @@ interface MetaParams {
   totalItems: number;
   totalPages: number;
   startIndex: number;
-  startItem: number;
-  endItem: number;
   hasNextPage: boolean;
+  pageSize: number;
 }
 
-function clamp(val: number, min: number, max: number) {
-  return Math.min(Math.max(min, val), max);
+interface ProvidedMeta {
+  updatedPageSize?: number;
+  updatedCurrentPage?: number;
 }
 
-export const PAGE_SIZE = 50;
+const INITIAL_PAGE_SIZE = 50;
 
 export const usePager = ({ totalItems }: { totalItems: number }) => {
   const [meta, setMeta] = useState<MetaParams>({
     currentPage: 0,
     totalItems,
     startIndex: 0,
-    totalPages: Math.ceil(totalItems / PAGE_SIZE),
-    startItem: 1,
-    endItem: PAGE_SIZE,
+    totalPages: Math.ceil(totalItems / INITIAL_PAGE_SIZE),
     hasNextPage: true,
+    pageSize: INITIAL_PAGE_SIZE,
   });
 
   const getNewMeta = useCallback(
-    (updatedCurrentPage?: number) => {
-      const actualCurrentPage = updatedCurrentPage ?? meta.currentPage;
+    (newMeta: ProvidedMeta) => {
+      const actualCurrentPage = newMeta.updatedCurrentPage ?? meta.currentPage;
+      const actualPageSize = newMeta.updatedPageSize ?? meta.pageSize;
 
-      const newTotalPages = Math.ceil(totalItems / PAGE_SIZE);
-      const newCurrentPage = clamp(actualCurrentPage, 0, newTotalPages);
-
-      let newStartItem = newCurrentPage * PAGE_SIZE + 1;
-      newStartItem = clamp(newStartItem, 0, totalItems);
-
-      let newEndItem = newStartItem - 1 + PAGE_SIZE;
-      newEndItem = clamp(newEndItem, 0, totalItems);
-
-      const newStartIndex = newStartItem - 1;
+      const newTotalPages = Math.ceil(totalItems / actualPageSize);
+      const newStartIndex = actualPageSize * actualCurrentPage;
 
       return {
-        currentPage: newCurrentPage,
+        currentPage: actualCurrentPage,
         totalPages: newTotalPages,
         startIndex: newStartIndex,
-        startItem: newStartItem,
-        endItem: newEndItem,
         totalItems,
         hasNextPage: meta.currentPage + 1 < meta.totalPages,
+        pageSize: actualPageSize,
       };
     },
-    [meta.currentPage, meta.totalPages, totalItems]
+    [meta.currentPage, meta.pageSize, meta.totalPages, totalItems]
   );
 
-  const onPageChange = useCallback((pageIndex: number) => setMeta(getNewMeta(pageIndex)), [
-    getNewMeta,
-  ]);
+  const onPageChange = useCallback(
+    (pageIndex: number) => setMeta(getNewMeta({ updatedCurrentPage: pageIndex })),
+    [getNewMeta]
+  );
+
+  const onPageSizeChange = useCallback(
+    (newPageSize: number) =>
+      setMeta(getNewMeta({ updatedPageSize: newPageSize, updatedCurrentPage: 0 })),
+    [getNewMeta]
+  );
 
   /**
    * Update meta on totalItems change
    */
-  useEffect(() => setMeta(getNewMeta()), [getNewMeta, totalItems]);
+  useEffect(() => setMeta(getNewMeta({})), [getNewMeta, totalItems]);
 
   return {
     ...meta,
     onPageChange,
+    onPageSizeChange,
   };
 };
