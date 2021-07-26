@@ -69,3 +69,50 @@ export const getSignalsTemplate = (index: string) => {
   };
   return template;
 };
+
+export const getNewSignalsTemplate = (index: string) => {
+  const template = {
+    index_patterns: [`${index}-*`],
+    template: {
+      settings: {
+        index: {
+          lifecycle: {
+            name: index,
+            rollover_alias: index,
+          },
+        },
+        mapping: {
+          total_fields: {
+            limit: 10000,
+          },
+        },
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          ...ecsMapping.mappings.properties,
+          ...otherMapping.mappings.properties,
+          signal: signalsMapping.mappings.properties.signal,
+          threat: {
+            ...ecsMapping.mappings.properties.threat,
+            properties: {
+              ...ecsMapping.mappings.properties.threat.properties,
+              indicator: {
+                ...otherMapping.mappings.properties.threat.properties.indicator,
+                properties: {
+                  ...otherMapping.mappings.properties.threat.properties.indicator.properties,
+                  event: ecsMapping.mappings.properties.event,
+                },
+              },
+            },
+          },
+        },
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
+      },
+    },
+    version: SIGNALS_TEMPLATE_VERSION,
+  };
+  return template;
+};

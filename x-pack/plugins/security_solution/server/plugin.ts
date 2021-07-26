@@ -92,7 +92,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import signalExtraFields from './lib/detection_engine/routes/index/signal_extra_fields.json';
-import { getSignalsTemplate } from './lib/detection_engine/routes/index/get_signals_template';
+import { getNewSignalsTemplate } from './lib/detection_engine/routes/index/get_signals_template';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 
 export interface SetupPlugins {
@@ -343,9 +343,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       if (isRuleRegistryEnabled) {
         const clusterClient = coreStart.elasticsearch.client.asInternalUser;
         const updateExistingSignalsIndices = async () => {
-          const { body: existingSignalsTemplates } = await clusterClient.indices.getTemplate({
-            name: `${config.signalsIndex}-*`,
-          });
+          const existingTemplateResponse = await clusterClient.indices
+            .getTemplate({
+              name: `${config.signalsIndex}-*`,
+            })
+            .catch((err) => {
+              this.logger.error(
+                `Failed to get existing legacy siem signals templates: ${err.message}`
+              );
+            });
+          if (existingTemplateResponse == null) {
+            return;
+          }
+          const existingSignalsTemplates = existingTemplateResponse.body;
           const fieldAliases: Record<string, unknown> = {};
           Object.entries(aadFieldConversion).forEach(([key, value]) => {
             fieldAliases[value] = {
@@ -367,34 +377,28 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                 },
               },
             };
-            const signalsTemplate = getSignalsTemplate(existingTemplateName);
-            merge(signalsTemplate.mappings.properties, fieldAliases);
-            merge(signalsTemplate, indexAliases);
+            const signalsTemplate = getNewSignalsTemplate(existingTemplateName);
+            merge(signalsTemplate.template.mappings.properties, fieldAliases);
+            merge(signalsTemplate.template, indexAliases);
 
-            await clusterClient.indices
-              .putTemplate({
+            try {
+              await clusterClient.indices.putIndexTemplate({
                 name: existingTemplateName,
                 body: signalsTemplate as Record<string, unknown>,
-              })
-              .catch((err) => {
-                this.logger.error(
-                  `Failed to install new legacy siem signals template: ${err.message}`
-                );
               });
-            await clusterClient.indices
-              .putAlias({
+              await clusterClient.indices.putAlias({
                 index: `${existingTemplateName}-*`,
                 name: aadIndexAliasName,
                 body: {
                   is_write_index: false,
                 },
-              })
-              .catch((err) => {
-                this.logger.error(
-                  `Failed to add alerts as data alias to existing signals indices: ${err.message}`
-                );
               });
+              await clusterClient.indices.deleteTemplate({ name: existingTemplateName });
+            } catch (err) {
+              this.logger.error(`Failed to install new siem signals template: ${err.message}`);
+            }
           }
+
           // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
           // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
           // mapping) or else this call will fail and not update ANY signals indices
