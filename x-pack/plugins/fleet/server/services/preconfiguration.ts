@@ -36,7 +36,7 @@ import { overridePackageInputs } from './package_policy';
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
-  nonFatalErrors?: PreconfigurationError[];
+  nonFatalErrors: PreconfigurationError[];
 }
 
 export async function ensurePreconfiguredPackagesAndPolicies(
