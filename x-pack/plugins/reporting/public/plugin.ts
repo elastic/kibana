@@ -158,7 +158,11 @@ export class ReportingPublicPlugin
           getStartServices(),
           import('./management/mount_management_section'),
         ]);
-        return await mountManagementSection(
+        const {
+          chrome: { docTitle },
+        } = start;
+        docTitle.change(this.title);
+        const umountAppCallback = await mountManagementSection(
           core,
           start,
           license$,
@@ -167,6 +171,11 @@ export class ReportingPublicPlugin
           share.url,
           params
         );
+
+        return () => {
+          docTitle.reset();
+          umountAppCallback();
+        };
       },
     });
 
