@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -39,6 +39,8 @@ interface DispatchProps {
   addEmbeddable: (pageId: string, partialElement: { expression: string }) => void;
 }
 
+type FlyoutProps = Pick<ComponentProps, 'onClose'> & Partial<Omit<ComponentProps, 'onClose'>>;
+
 // FIX: Missing state type
 const mapStateToProps = (state: any) => ({ pageId: getSelectedPage(state) });
 
@@ -50,14 +52,15 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
 const mergeProps = (
   stateProps: StateProps,
   dispatchProps: DispatchProps,
-  ownProps: ComponentProps
+  ownProps: FlyoutProps
 ): ComponentProps => {
   const { pageId, ...remainingStateProps } = stateProps;
   const { addEmbeddable } = dispatchProps;
-
+  const { availableEmbeddables } = ownProps;
   return {
     ...remainingStateProps,
     ...ownProps,
+    availableEmbeddables: availableEmbeddables || [],
     onSelect: (id: string, type: string): void => {
       const partialElement = {
         expression: `markdown "Could not find embeddable for type ${type}" | render`,
@@ -72,40 +75,33 @@ const mergeProps = (
   };
 };
 
-export class EmbeddableFlyoutPortal extends React.Component<ComponentProps> {
-  el?: HTMLElement;
+export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (props) => {
+  const el: HTMLElement = useMemo(() => document.createElement('div'), []);
 
-  constructor(props: ComponentProps) {
-    super(props);
-
-    this.el = document.createElement('div');
-  }
-  componentDidMount() {
-    const body = document.querySelector('body');
-    if (body && this.el) {
-      body.appendChild(this.el);
+  useEffect(() => {
+    let body = document.querySelector('body');
+    if (body && el) {
+      body.appendChild(el);
     }
+    return () => {
+      body = document.querySelector('body');
+      if (body && el) {
+        body.removeChild(el);
+      }
+    };
+  }, [el]);
+
+  if (!el) {
+    return null;
   }
 
-  componentWillUnmount() {
-    const body = document.querySelector('body');
+  return ReactDOM.createPortal(
+    <Component {...props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
+    el
+  );
+};
 
-    if (body && this.el) {
-      body.removeChild(this.el);
-    }
-  }
-
-  render() {
-    if (this.el) {
-      return ReactDOM.createPortal(
-        <Component {...this.props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
-        this.el
-      );
-    }
-  }
-}
-
-export const AddEmbeddablePanel = connect<StateProps, DispatchProps, ComponentProps>(
+export const AddEmbeddablePanel = connect<StateProps, DispatchProps, FlyoutProps, ComponentProps>(
   mapStateToProps,
   mapDispatchToProps,
   mergeProps
