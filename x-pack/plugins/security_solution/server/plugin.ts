@@ -329,7 +329,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-
     core.getStartServices().then(([coreStart, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,

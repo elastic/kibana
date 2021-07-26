@@ -117,31 +117,38 @@ export class RuleDataClient implements IRuleDataClient {
 
     const clusterClient = await this.getClusterClient();
 
-    const concreteIndexName = `${alias}-000001`;
-    try {
-      await clusterClient.indices.create({
-        index: concreteIndexName,
-        body: {
-          aliases: {
-            [alias]: {
-              is_write_index: true,
+    const { body: aliasesResponse } = await clusterClient.indices.getAlias({ name: alias });
+    const aliasWriteIndexExists = Object.entries(aliasesResponse).some(
+      ([_, aliases]) => aliases.aliases[alias].is_write_index
+    );
+
+    if (!aliasWriteIndexExists) {
+      const concreteIndexName = `${alias}-000001`;
+      try {
+        await clusterClient.indices.create({
+          index: concreteIndexName,
+          body: {
+            aliases: {
+              [alias]: {
+                is_write_index: true,
+              },
             },
           },
-        },
-      });
-    } catch (err) {
-      // something might have created the index already, that sounds OK
-      if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
-        const { body: existingIndices } = await clusterClient.indices.get({
-          index: concreteIndexName,
         });
-        if (!existingIndices[concreteIndexName]?.aliases?.[alias]?.is_write_index) {
-          throw Error(
-            `Attempted to create index: ${concreteIndexName} as the write index for alias: ${alias}, but the index already exists and is not the write index for the alias`
-          );
+      } catch (err) {
+        // something might have created the index already, that sounds OK
+        if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+          const { body: existingIndices } = await clusterClient.indices.get({
+            index: concreteIndexName,
+          });
+          if (!existingIndices[concreteIndexName]?.aliases?.[alias]?.is_write_index) {
+            throw Error(
+              `Attempted to create index: ${concreteIndexName} as the write index for alias: ${alias}, but the index already exists and is not the write index for the alias`
+            );
+          }
+        } else {
+          throw err;
         }
-      } else {
-        throw err;
       }
     }
   }
