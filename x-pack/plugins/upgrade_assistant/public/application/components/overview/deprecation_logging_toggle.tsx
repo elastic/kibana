@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  EuiButton,
+  EuiSwitch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiText,
@@ -69,18 +69,9 @@ const i18nTexts = {
       defaultMessage: 'Disabling deprecation logging',
     }
   ),
-  enableButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.enableButtonLabel',
-    {
-      defaultMessage: 'Enable deprecation logging',
-    }
-  ),
-  disableButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.disableButtonLabel',
-    {
-      defaultMessage: 'Disable deprecation logging',
-    }
-  ),
+  buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
+    defaultMessage: 'Collect deprecation logs',
+  }),
   fetchErrorButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.fetchErrorButtonLabel',
     {
@@ -111,11 +102,7 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
       return i18nTexts.fetchErrorButtonLabel;
     }
 
-    if (isEnabled) {
-      return i18nTexts.disableButtonLabel;
-    }
-
-    return i18nTexts.enableButtonLabel;
+    return i18nTexts.buttonLabel;
   };
 
   useEffect(() => {
@@ -151,15 +138,13 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
   return (
     <EuiFlexGroup alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiSwitch
           data-test-subj="upgradeAssistantDeprecationToggle"
-          isLoading={isLoading || isUpdating}
-          onClick={toggleLogging}
-          color={isEnabled ? 'text' : 'primary'}
-          disabled={Boolean(fetchError)}
-        >
-          {getButtonLabel()}
-        </EuiButton>
+          label={getButtonLabel()}
+          checked={!!isEnabled}
+          onChange={toggleLogging}
+          disabled={Boolean(fetchError) || isLoading || isUpdating}
+        />
       </EuiFlexItem>
 
       {fetchError && (
