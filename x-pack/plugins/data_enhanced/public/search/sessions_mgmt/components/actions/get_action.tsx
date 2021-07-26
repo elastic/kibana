@@ -5,93 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
 import { CoreStart } from 'kibana/public';
 import { IClickActionDescriptor } from '../';
-import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
-import { DeleteButton } from './delete_button';
-import { ExtendButton } from './extend_button';
-import { InspectButton } from './inspect_button';
-import { ACTION, OnActionClick, OnActionComplete } from './types';
-import { RenameButton } from './rename_button';
+import { createDeleteActionDescriptor } from './delete_button';
+import { createExtendActionDescriptor } from './extend_button';
+import { createInspectActionDescriptor } from './inspect_button';
+import { ACTION } from './types';
+import { createRenameActionDescriptor } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
   uiSession: UISession,
-  core: CoreStart,
-  onActionClick: OnActionClick,
-  onActionComplete: OnActionComplete
+  core: CoreStart
 ): IClickActionDescriptor | null => {
-  const { id, name, expires } = uiSession;
-  const { overlays, uiSettings } = core;
   switch (actionType) {
     case ACTION.INSPECT:
-      return {
-        iconType: 'document',
-        textColor: 'default',
-        label: (
-          <InspectButton
-            overlays={overlays}
-            searchSession={uiSession}
-            uiSettings={uiSettings}
-            onActionClick={onActionClick}
-          />
-        ),
-      };
-
+      return createInspectActionDescriptor(api, uiSession, core);
     case ACTION.DELETE:
-      return {
-        iconType: 'crossInACircleFilled',
-        textColor: 'default',
-        label: (
-          <DeleteButton
-            api={api}
-            id={id}
-            name={name}
-            overlays={overlays}
-            onActionComplete={onActionComplete}
-            onActionClick={onActionClick}
-          />
-        ),
-      };
-
+      return createDeleteActionDescriptor(api, uiSession, core);
     case ACTION.EXTEND:
-      return {
-        iconType: extendSessionIcon,
-        textColor: 'default',
-        label: (
-          <ExtendButton
-            api={api}
-            id={id}
-            name={name}
-            expires={expires}
-            overlays={overlays}
-            extendBy={api.getExtendByDuration()}
-            onActionComplete={onActionComplete}
-            onActionClick={onActionClick}
-          />
-        ),
-      };
-
+      return createExtendActionDescriptor(api, uiSession, core);
     case ACTION.RENAME:
-      return {
-        iconType: 'pencil',
-        textColor: 'default',
-        label: (
-          <RenameButton
-            api={api}
-            id={id}
-            name={name}
-            overlays={overlays}
-            onActionComplete={onActionComplete}
-            onActionClick={onActionClick}
-          />
-        ),
-      };
-
+      return createRenameActionDescriptor(api, uiSession, core);
     default:
       // eslint-disable-next-line no-console
       console.error(`Unknown action: ${actionType}`);
