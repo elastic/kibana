@@ -67,12 +67,11 @@ export const mountManagementSection = async ({
     <I18nProvider>
       <Router history={history}>
         <Switch>
-          <Route path={'/:service/:id'} exact={true}>
+          <Route path={'/:type/:id'} exact={true}>
             <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
-                  serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
                   history={history}
                 />

@@ -8,7 +8,6 @@
 
 export { fetchExportByTypeAndSearch } from './fetch_export_by_type_and_search';
 export { fetchExportObjects } from './fetch_export_objects';
-export { canViewInApp } from './in_app_url';
 export { getRelationships } from './get_relationships';
 export { getSavedObjectCounts } from './get_saved_object_counts';
 export { getSavedObjectLabel } from './get_saved_object_label';

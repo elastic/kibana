@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { get } from 'lodash';
 import { Query } from '@elastic/eui';
 import { parse } from 'query-string';
@@ -52,6 +52,7 @@ const SavedObjectsTablePage = ({
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
   const { search } = useLocation();
+  const history = useHistory();
 
   const initialQuery = useMemo(() => {
     const query = parse(search);
@@ -97,12 +98,17 @@ const SavedObjectsTablePage = ({
         applications={coreStart.application}
         perPageConfig={itemsPerPage}
         goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            return coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(`/app${editUrl}`)
-            );
-          }
+          coreStart.application.navigateToUrl(
+            coreStart.http.basePath.prepend(
+              `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`
+            )
+          );
+          // const { editUrl } = savedObject.meta;
+          // if (editUrl) {
+          //   return coreStart.application.navigateToUrl(
+          //     coreStart.http.basePath.prepend(`/app${editUrl}`)
+          //   );
+          // }
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;
