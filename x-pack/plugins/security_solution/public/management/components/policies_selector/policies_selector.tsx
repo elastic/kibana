@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useState, useEffect, ChangeEvent } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +18,9 @@ import {
   EuiFilterButton,
   EuiFilterSelectItem,
   FilterChecked,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 
 export interface PoliciesSelectorProps {
@@ -36,6 +39,19 @@ export interface Item {
 interface DefaultPoliciesByKey {
   [key: string]: boolean;
 }
+
+const GLOBAL_ENTRIES = i18n.translate(
+  'pack.securitySolution.management.policiesSelector.globalEntries',
+  {
+    defaultMessage: 'Global entries',
+  }
+);
+const UNASSIGNED_ENTRIES = i18n.translate(
+  'pack.securitySolution.management.policiesSelector.unassignedEntries',
+  {
+    defaultMessage: 'Unassigned entries',
+  }
+);
 
 export const PoliciesSelector = memo<PoliciesSelectorProps>(
   ({ policies, onChangeSelection, defaultExcludedPolicies, defaultIncludedPolicies }) => {
@@ -65,8 +81,8 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
           id: policy.id,
           checked: getCheckedValue(policy.id),
         })),
-        { name: 'Global entries', id: 'global', checked: getCheckedValue('global') },
-        { name: 'Unassigned entries', id: 'unassigned', checked: getCheckedValue('unassigned') },
+        { name: GLOBAL_ENTRIES, id: 'global', checked: getCheckedValue('global') },
+        { name: UNASSIGNED_ENTRIES, id: 'unassigned', checked: getCheckedValue('unassigned') },
       ]);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [policies]);
@@ -138,7 +154,12 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
           hasActiveFilters={!!itemsList.find((item) => item.checked === 'on')}
           numActiveFilters={itemsList.filter((item) => item.checked === 'on').length}
         >
-          {'Policies'}
+          <EuiText>
+            <FormattedMessage
+              id="xpack.securitySolution.management.policiesSelector.label"
+              defaultMessage="Policies"
+            />
+          </EuiText>
         </EuiFilterButton>
       ),
       [isPopoverOpen, itemsList]

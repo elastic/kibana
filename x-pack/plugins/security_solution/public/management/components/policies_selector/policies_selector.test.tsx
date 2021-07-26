@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { render, act, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -23,7 +24,13 @@ describe('Policies selector', () => {
   policy.id = 'abc123';
   const getElement = (params: Partial<PoliciesSelectorProps>) => {
     return render(
-      <PoliciesSelector policies={[policy]} onChangeSelection={onChangeSelectionMock} {...params} />
+      <I18nProvider>
+        <PoliciesSelector
+          policies={[policy]}
+          onChangeSelection={onChangeSelectionMock}
+          {...params}
+        />
+      </I18nProvider>
     );
   };
 
