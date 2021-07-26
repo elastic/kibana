@@ -147,7 +147,7 @@ class ReportListingUi extends Component<Props, State> {
         />
 
         <EuiSpacer size={'l'} />
-        {this.renderTable()}
+        <div>{this.renderTable()}</div>
 
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
@@ -499,6 +499,14 @@ class ReportListingUi extends Component<Props, State> {
 
     return (
       <Fragment>
+        {this.state.selectedJobs.length > 0 && (
+          <Fragment>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
+              <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
             defaultMessage: 'Reports generated in Kibana applications',
@@ -524,7 +532,6 @@ class ReportListingUi extends Component<Props, State> {
           onChange={this.onTableChange}
           data-test-subj="reportJobListing"
         />
-        {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>
     );
   }
