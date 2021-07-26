@@ -28,10 +28,3 @@ export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
 export const isPartialResponse = (response?: IKibanaSearchResponse) => {
   return Boolean(response && response.isRunning && response.isPartial);
 };
-
-/**
- * @returns true if request has warnings that should be surfaced to the end user
- */
-export const isWarningResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && response.warning);
-};

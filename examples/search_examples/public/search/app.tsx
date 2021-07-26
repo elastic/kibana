@@ -47,7 +47,6 @@ import {
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
 import { IMyStrategyResponse } from '../../common/types';
-import { isWarningResponse } from '../../../../src/plugins/data/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
@@ -228,7 +227,7 @@ export const SearchExamplesApp = ({
               }
             );
             searchSubscription$.unsubscribe();
-            if (isWarningResponse(res)) {
+            if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
                 text: mountReactNode(res.warning),
@@ -590,9 +589,7 @@ export const SearchExamplesApp = ({
               </EuiTitle>
               <EuiText>
                 When fetching data from Elasticsearch, there are several different ways warnings and
-                errors may be returned. In general, it is recommended to use the utility functions
-                <EuiCode>isWarningResponse</EuiCode> and <EuiCode>isErrorResponse</EuiCode> when
-                handling responses.
+                errors may be returned. In general, it is recommended to surface these in the UX.
                 <EuiSpacer />
                 <EuiButtonEmpty
                   size="xs"
