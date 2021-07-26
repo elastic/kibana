@@ -12,10 +12,11 @@ import {
 } from '../../../common/runtime_types/ping/synthetics';
 
 export interface PendingBlock {
-  isPending: true;
+  status: 'pending' | 'loading';
 }
+
 export function isPendingBlock(data: unknown): data is PendingBlock {
-  return (data as PendingBlock)?.isPending === true;
+  return ['pending', 'loading'].some((s) => s === (data as PendingBlock)?.status);
 }
 export type StoreScreenshotBlock = ScreenshotBlockDoc | PendingBlock;
 export interface ScreenshotBlockCache {
@@ -37,13 +38,18 @@ export interface PutBlocksPayload {
   blocks: ScreenshotBlockDoc[];
 }
 
+// this action denotes a set of blocks is required
 export const fetchBlocksAction = createAction<string[]>('FETCH_BLOCKS');
+// this action denotes a request for a set of blocks is in flight
+export const setBlockLoadingAction = createAction<string[]>('IN_FLIGHT_BLOCKS_ACTION');
+// block data has been received, and should be added to the store
 export const putBlocksAction = createAction<PutBlocksPayload>('PUT_SCREENSHOT_BLOCKS');
+// updates the total size of the image blob data cached in the store
 export const putCacheSize = createAction<number>('PUT_CACHE_SIZE');
+// keeps track of the most-requested blocks
 export const updateHitCountsAction = createAction<string[]>('UPDATE_HIT_COUNTS');
+// reduce the cache size to the value in the action payload
 export const pruneCacheAction = createAction<number>('PRUNE_SCREENSHOT_BLOCK_CACHE');
-
-type Payload = PutBlocksPayload & string[] & string & number;
 
 const initialState: SyntheticsReducerState = {
   blocks: {},
@@ -51,8 +57,17 @@ const initialState: SyntheticsReducerState = {
   hitCount: [],
 };
 
-export const syntheticsReducer = handleActions<SyntheticsReducerState, Payload>(
+// using `any` here because `handleActions` is not set up well to handle the multi-type
+// nature of all the actions it supports. redux-actions is looking for new maintainers https://github.com/redux-utilities/redux-actions#looking-for-maintainers
+// and seems that we should move to something else like Redux Toolkit.
+export const syntheticsReducer = handleActions<SyntheticsReducerState, any>(
   {
+    /**
+     * When removing blocks from the cache, we receive an action with a number.
+     * The number equates to the desired ceiling size of the cache. We then discard
+     * blocks, ordered by the least-requested. We continue dropping blocks until
+     * the newly-pruned size will be less than the ceiling supplied by the action.
+     */
     [String(pruneCacheAction)]: (state, action: Action<number>) => {
       const { blocks, hitCount } = state;
       const hashesToPrune: string[] = [];
@@ -64,7 +79,7 @@ export const syntheticsReducer = handleActions<SyntheticsReducerState, Payload>(
         if (!blocks[hash]) continue;
         const block = blocks[hash];
         if (isScreenshotBlockDoc(block)) {
-          sizeToRemove += block.synthetics.blob.length ?? 0;
+          sizeToRemove += block.synthetics.blob.length;
           hashesToPrune.push(hash);
         }
       }
@@ -73,17 +88,20 @@ export const syntheticsReducer = handleActions<SyntheticsReducerState, Payload>(
       }
       return {
         cacheSize: state.cacheSize - sizeToRemove,
-        blocks: Object.assign({}, blocks),
+        blocks: { ...blocks },
         hitCount: hitCount.slice(0, removeIndex + 1),
       };
     },
+    /**
+     * Keep track of the least- and most-requested blocks, so when it is time to
+     * prune we keep the most commonly-used ones.
+     */
     [String(updateHitCountsAction)]: (state, action: Action<string[]>) => {
       const newHitCount = [...state.hitCount];
       const hitTime = Date.now();
       action.payload.forEach((hash) => {
         const countItem = newHitCount.find((item) => item.hash === hash);
         if (!countItem) {
-          // console.log('made it in here');
           newHitCount.push({ hash, hitTime });
         } else {
           countItem.hitTime = hitTime;
@@ -91,14 +109,12 @@ export const syntheticsReducer = handleActions<SyntheticsReducerState, Payload>(
       });
       // sorts in descending order
       newHitCount.sort((a, b) => b.hitTime - a.hitTime);
-      // console.log('new hit count', newHitCount);
       return {
         ...state,
         hitCount: newHitCount,
       };
     },
     [String(putCacheSize)]: (state, action: Action<number>) => {
-      // console.log('new cache size', state.cacheSize + action.payload);
       return {
         ...state,
         cacheSize: state.cacheSize + action.payload,
@@ -119,10 +135,29 @@ export const syntheticsReducer = handleActions<SyntheticsReducerState, Payload>(
             .reduce(
               (acc, cur) => ({
                 ...acc,
-                [cur]: { isPending: true },
+                [cur]: { status: 'pending' },
               }),
               {}
             ),
+        },
+      };
+    },
+    /**
+     * All hashes contained in the action payload have been requested, so we can
+     * indicate that they're loading. Subsequent requests will skip them.
+     */
+    [String(setBlockLoadingAction)]: (state, action: Action<string[]>) => {
+      return {
+        ...state,
+        blocks: {
+          ...state.blocks,
+          ...action.payload.reduce(
+            (acc, cur) => ({
+              ...acc,
+              [cur]: { status: 'loading' },
+            }),
+            {}
+          ),
         },
       };
     },

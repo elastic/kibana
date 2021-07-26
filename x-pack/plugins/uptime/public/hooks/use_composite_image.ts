@@ -36,49 +36,6 @@ function isNewRef(a: ScreenshotRefImageData, b: ScreenshotRefImageData): boolean
   return stepA.index !== stepB.index || stepA.name !== stepB.name;
 }
 
-/**
- * Assembles the data for a composite image and returns the composite to a callback.
- * @param imgRef the data and dimensions for the composite image.
- * @param callback sends the composited image to this callback.
- * @param url this is the composited image value, if it is truthy the function will skip the compositing process
- */
-export const useCompositeImage = (
-  imgRef: ScreenshotRefImageData,
-  onComposeImageSuccess: React.Dispatch<string | undefined>,
-  imageData?: string
-): void => {
-  const dispatch = useDispatch();
-  const blocks = useSelector(journeyScreenshotBlockSelector);
-  // console.log('blocks size', Object.keys(blocks).length);
-  React.useEffect(() => {
-    dispatch(
-      fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
-    );
-  }, [dispatch, imgRef.ref.screenshotRef.screenshot_ref.blocks]);
-
-  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData>(imgRef);
-  React.useEffect(() => {
-    const canvas = document.createElement('canvas');
-
-    async function compose() {
-      await composeScreenshotRef(imgRef, canvas, blocks);
-      const imgData = canvas.toDataURL('image/jpg', 1.0);
-      onComposeImageSuccess(imgData);
-    }
-
-    // if the URL is truthy it means it's already been composed, so there
-    // is no need to call the function
-    // console.log('evaluating ', imgRef.ref.screenshotRef.monitor.check_group);
-    if (shouldCompose(imageData, imgRef, curRef, blocks)) {
-      compose();
-      setCurRef(imgRef);
-    }
-    return () => {
-      canvas.parentElement?.removeChild(canvas);
-    };
-  }, [blocks, curRef, imageData, imgRef, onComposeImageSuccess]);
-};
-
 function shouldCompose(
   imageData: string | undefined,
   imgRef: ScreenshotRefImageData,
@@ -93,3 +50,46 @@ function shouldCompose(
     (typeof imageData === 'undefined' || isNewRef(imgRef, curRef))
   );
 }
+
+/**
+ * Assembles the data for a composite image and returns the composite to a callback.
+ * @param imgRef the data and dimensions for the composite image.
+ * @param onComposeImageSuccess sends the composited image to this callback.
+ * @param imageData this is the composited image value, if it is truthy the function will skip the compositing process
+ */
+export const useCompositeImage = (
+  imgRef: ScreenshotRefImageData,
+  onComposeImageSuccess: React.Dispatch<string | undefined>,
+  imageData?: string
+): void => {
+  const dispatch = useDispatch();
+  const blocks: ScreenshotBlockCache = useSelector(journeyScreenshotBlockSelector);
+
+  React.useEffect(() => {
+    dispatch(
+      fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
+    );
+  }, [dispatch, imgRef.ref.screenshotRef.screenshot_ref.blocks]);
+
+  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData>(imgRef);
+
+  React.useEffect(() => {
+    const canvas = document.createElement('canvas');
+
+    async function compose() {
+      await composeScreenshotRef(imgRef, canvas, blocks);
+      const imgData = canvas.toDataURL('image/jpg', 1.0);
+      onComposeImageSuccess(imgData);
+    }
+
+    // if the URL is truthy it means it's already been composed, so there
+    // is no need to call the function
+    if (shouldCompose(imageData, imgRef, curRef, blocks)) {
+      compose();
+      setCurRef(imgRef);
+    }
+    return () => {
+      canvas.parentElement?.removeChild(canvas);
+    };
+  }, [blocks, curRef, imageData, imgRef, onComposeImageSuccess]);
+};

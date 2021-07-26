@@ -6,9 +6,10 @@
  */
 
 import {
-  ScreenshotBlockBlob,
+  isScreenshotBlockDoc,
   ScreenshotRefImageData,
 } from '../../../common/runtime_types/ping/synthetics';
+import { ScreenshotBlockCache } from '../../state/reducers/synthetics';
 
 /**
  * Draws image fragments on a canvas.
@@ -19,7 +20,7 @@ import {
 export async function composeScreenshotRef(
   data: ScreenshotRefImageData,
   canvas: HTMLCanvasElement,
-  blocks: { [key: string]: ScreenshotBlockBlob }
+  blocks: ScreenshotBlockCache
 ) {
   const {
     ref: { screenshotRef },
@@ -41,7 +42,7 @@ export async function composeScreenshotRef(
       new Promise<void>((resolve, reject) => {
         const img = new Image();
         const blob = blocks[hash];
-        if (!blob) {
+        if (!blob || !isScreenshotBlockDoc(blob)) {
           reject(Error(`Error processing image. Expected image data with hash ${hash} is missing`));
         } else {
           img.onload = () => {

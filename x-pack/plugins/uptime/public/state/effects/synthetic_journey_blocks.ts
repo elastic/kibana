@@ -6,11 +6,12 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, fork, put, select, takeEvery } from 'redux-saga/effects';
+import { call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
 import { ScreenshotBlockDoc } from '../../../common/runtime_types/ping/synthetics';
 import { fetchScreenshotBlockSet } from '../api/journey';
 import {
   fetchBlocksAction,
+  setBlockLoadingAction,
   isPendingBlock,
   pruneCacheAction,
   putBlocksAction,
@@ -20,24 +21,36 @@ import {
 } from '../reducers/synthetics';
 import { journeyScreenshotBlockSelector, syntheticsImageCacheSizeSelector } from '../selectors';
 
-function* fetchBlock(hashes: string[]) {
+function* fetchBlocks(hashes: string[]) {
+  yield put(setBlockLoadingAction(hashes));
   const blocks: ScreenshotBlockDoc[] = yield call(fetchScreenshotBlockSet, hashes);
   yield put(putBlocksAction({ blocks }));
 }
 
 export function* fetchScreenshotBlocks() {
+  /**
+   * We maintain a list of each hash and how many times it is requested so we can avoid
+   * subsequent re-requests if the block is dropped due to cache pruning.
+   */
   yield takeEvery(String(fetchBlocksAction), function* (action: Action<string[]>) {
-    const blocks: ScreenshotBlockCache = yield select(journeyScreenshotBlockSelector);
-    const toFetch = action.payload.filter(
-      (hash) => !blocks.hasOwnProperty(hash) || isPendingBlock(blocks[hash])
-    );
-
-    if (toFetch.length > 0) {
-      yield fork(fetchBlock, toFetch);
-    }
-
     if (action.payload.length > 0) {
       yield put(updateHitCountsAction(action.payload));
+    }
+  });
+
+  /**
+   * We do a short delay to allow multiple item renders to queue up before dispatching
+   * a fetch to the backend.
+   */
+  yield throttle(20, String(fetchBlocksAction), function* () {
+    const blocks: ScreenshotBlockCache = yield select(journeyScreenshotBlockSelector);
+    const toFetch = Object.keys(blocks).filter((hash) => {
+      const block = blocks[hash];
+      return isPendingBlock(block) && block.status !== 'loading';
+    });
+
+    if (toFetch.length > 0) {
+      yield fork(fetchBlocks, toFetch);
     }
   });
 }
@@ -62,10 +75,6 @@ export function* pruneBlockCache() {
     const cacheSize: number = yield select(syntheticsImageCacheSizeSelector);
 
     if (cacheSize > MAX_CACHE_SIZE) {
-      // console.log(
-      //   `prune block called because ${cacheSize} is greater than ${MAX_CACHE_SIZE}`,
-      //   action
-      // );
       yield put(pruneCacheAction(cacheSize - MAX_CACHE_SIZE));
     }
   });

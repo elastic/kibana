@@ -7,7 +7,9 @@
 
 import {
   fetchBlocksAction,
+  isPendingBlock,
   pruneCacheAction,
+  setBlockLoadingAction,
   putBlocksAction,
   putCacheSize,
   syntheticsReducer,
@@ -19,6 +21,22 @@ const MIME = 'image/jpeg';
 
 describe('syntheticsReducer', () => {
   jest.spyOn(Date, 'now').mockImplementation(() => 10);
+
+  describe('isPendingBlock', () => {
+    it('returns true for pending block', () => {
+      expect(isPendingBlock({ status: 'pending' })).toBe(true);
+    });
+
+    it('returns true for loading block', () => {
+      expect(isPendingBlock({ status: 'loading' })).toBe(true);
+    });
+
+    it('returns false for non-pending block', () => {
+      expect(isPendingBlock({ synthetics: { blob: 'blobdata', blob_mime: MIME } })).toBe(false);
+      expect(isPendingBlock({})).toBe(false);
+    });
+  });
+
   describe('prune cache', () => {
     let state: SyntheticsReducerState;
 
@@ -99,7 +117,71 @@ describe('syntheticsReducer', () => {
         }
       `);
     });
+
+    it('skips pending blocks', () => {
+      state.blocks = { ...state.blocks, '000': { status: 'pending' } };
+      state.hitCount.push({ hash: '000', hitTime: 1 });
+      const newState = syntheticsReducer(state, pruneCacheAction(10));
+      expect(newState.blocks['000']).toEqual({ status: 'pending' });
+    });
+
+    it('ignores a hash from `hitCount` that does not exist', () => {
+      state.hitCount.push({ hash: 'not exist', hitTime: 1 });
+      expect(syntheticsReducer(state, pruneCacheAction(2))).toMatchInlineSnapshot(`
+        Object {
+          "blocks": Object {
+            "123": Object {
+              "id": "123",
+              "synthetics": Object {
+                "blob": "large",
+                "blob_mime": "image/jpeg",
+              },
+            },
+            "234": Object {
+              "id": "234",
+              "synthetics": Object {
+                "blob": "large2",
+                "blob_mime": "image/jpeg",
+              },
+            },
+            "345": Object {
+              "id": "345",
+              "synthetics": Object {
+                "blob": "large3",
+                "blob_mime": "image/jpeg",
+              },
+            },
+          },
+          "cacheSize": 17,
+          "hitCount": Array [
+            Object {
+              "hash": "123",
+              "hitTime": 89,
+            },
+            Object {
+              "hash": "234",
+              "hitTime": 23,
+            },
+            Object {
+              "hash": "345",
+              "hitTime": 4,
+            },
+          ],
+        }
+      `);
+    });
+
+    it('will prune a block with an empty blob', () => {
+      state.blocks = {
+        ...state.blocks,
+        '000': { id: '000', synthetics: { blob: '', blob_mime: MIME } },
+      };
+      state.hitCount.push({ hash: '000', hitTime: 1 });
+      const newState = syntheticsReducer(state, pruneCacheAction(10));
+      expect(Object.keys(newState.blocks)).not.toContain('000');
+    });
   });
+
   describe('fetch blocks', () => {
     it('sets targeted blocks as pending', () => {
       const state: SyntheticsReducerState = { blocks: {}, cacheSize: 0, hitCount: [] };
@@ -108,10 +190,10 @@ describe('syntheticsReducer', () => {
         Object {
           "blocks": Object {
             "123": Object {
-              "isPending": true,
+              "status": "pending",
             },
             "234": Object {
-              "isPending": true,
+              "status": "pending",
             },
           },
           "cacheSize": 0,
@@ -223,6 +305,29 @@ describe('syntheticsReducer', () => {
       });
     });
   });
+
+  describe('in-flight blocks', () => {
+    let state: SyntheticsReducerState;
+
+    beforeEach(() => {
+      state = {
+        blocks: {
+          '123': { status: 'pending' },
+        },
+        cacheSize: 1,
+        hitCount: [{ hash: '123', hitTime: 1 }],
+      };
+    });
+
+    it('sets pending blocks to in-flight', () => {
+      expect(syntheticsReducer(state, setBlockLoadingAction(['123']))).toEqual({
+        blocks: { '123': { status: 'loading' } },
+        cacheSize: 1,
+        hitCount: [{ hash: '123', hitTime: 1 }],
+      });
+    });
+  });
+
   describe('put blocks', () => {
     let state: SyntheticsReducerState;
 
@@ -230,7 +335,7 @@ describe('syntheticsReducer', () => {
       state = {
         blocks: {
           '123': {
-            isPending: true,
+            status: 'pending',
           },
         },
         cacheSize: 0,
@@ -245,7 +350,7 @@ describe('syntheticsReducer', () => {
             id: '123',
             synthetics: {
               blob: 'reallybig',
-              blob_mime: 'image/jpeg',
+              blob_mime: MIME,
             },
           },
         ],
@@ -289,7 +394,7 @@ describe('syntheticsReducer', () => {
         Object {
           "blocks": Object {
             "123": Object {
-              "isPending": true,
+              "status": "pending",
             },
             "234": Object {
               "id": "234",

@@ -23,10 +23,6 @@ export async function fetchScreenshotBlockSet(params: string[]): Promise<Screens
   return apiService.post('/api/uptime/journey/screenshot/block', { hashes: params });
 }
 
-export async function fetchScreenshotBlock(params: string): Promise<ScreenshotBlockDoc[]> {
-  return apiService.get(`/api/uptime/journey/screenshot/block/${params}`);
-}
-
 export async function fetchJourneySteps(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
