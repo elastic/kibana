@@ -14,9 +14,14 @@ import { requestMock, serverMock } from './__mocks__/server';
 
 const getMockAlert = (): ParsedTechnicalFields => ({
   '@timestamp': '2021-06-21T21:33:05.713Z',
+  'ecs.version': '1.0.0',
+  'kibana.consumers': [],
+  'kibana.version': '7.13.0',
   'rule.id': 'apm.error_rate',
   'kibana.rac.alert.owner': 'apm',
-  'kibana.rac.alert.status': 'open',
+  'kibana.alert.status': 'open',
+  'kibana.alert.rule.risk_score': 20,
+  'kibana.alert.rule.severity': 'warning',
 });
 
 describe('getAlertByIdRoute', () => {

@@ -16,8 +16,8 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
+import { RuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
-import { RuleDataClient } from '../../target/types/server';
 
 export type PersistenceAlertService<
   TState extends AlertInstanceState = never,
