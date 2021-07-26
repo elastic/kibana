@@ -38,6 +38,7 @@ import {
   deleteSavedWorkspace,
 } from './helpers/saved_workspace_utils';
 import { ControlPanel } from './components/control_panel';
+import { InspectPanel } from './components/inspect_panel/inspect_panel';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -56,6 +57,7 @@ export function initGraphApp(angularModule, deps) {
     overlays,
     savedObjects,
     setHeaderActionMenu,
+    uiSettings,
   } = deps;
 
   const app = angularModule;
@@ -127,6 +129,23 @@ export function initGraphApp(angularModule, deps) {
       ],
       {
         restrict: 'E',
+      }
+    );
+  });
+
+  app.directive('inspectPanel', function (reactDirective) {
+    return reactDirective(
+      InspectPanel,
+      [
+        ['showInspect', { watchDepth: 'reference' }],
+        ['lastRequest', { watchDepth: 'reference' }],
+        ['lastResponse', { watchDepth: 'reference' }],
+        ['indexPattern', { watchDepth: 'reference' }],
+        ['uiSettings', { watchDepth: 'reference' }],
+      ],
+      { restrict: 'E' },
+      {
+        uiSettings,
       }
     );
   });
