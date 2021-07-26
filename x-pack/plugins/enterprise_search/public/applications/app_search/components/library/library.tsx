@@ -349,7 +349,7 @@ export const Library: React.FC = () => {
             noItemsMessage={NO_ITEMS}
             items={[]}
             columns={[
-              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'ID', render: (item: { id: number }) => <div>{item.id}</div> },
               { name: 'Whatever', render: (item) => <div>Whatever</div> },
             ]}
           />
