@@ -21,23 +21,21 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import {
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type {
   VisualizationLayerWidgetProps,
   VisualizationToolbarProps,
   VisualizationDimensionEditorProps,
-  FormatFactory,
   FramePublicAPI,
 } from '../types';
-import {
-  State,
+import { State, visualizationTypes, XYState } from './types';
+import type { FormatFactory } from '../../common';
+import type {
   SeriesType,
-  visualizationTypes,
   YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
-  XYState,
-} from './types';
+} from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
