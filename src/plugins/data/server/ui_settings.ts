@@ -711,11 +711,13 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: 'terms_enum',
       description: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodText', {
         defaultMessage:
-          'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the Elasticsearch terms enum API for improved autocomplete suggestion performance. Select terms_agg to use an Elasticsearch terms aggregation. {learnMoreLink}',
+          'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
+          'Elasticsearch terms enum API for improved autocomplete suggestion performance. Select terms_agg to use an ' +
+          'Elasticsearch terms aggregation. {learnMoreLink}',
         values: {
           learnMoreLink:
             '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
-            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod.learnMore', {
+            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLink', {
               defaultMessage: 'Learn more.',
             }) +
             '</a>',
@@ -736,7 +738,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         values: {
           learnMoreLink:
             '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
-            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod.learnMore', {
+            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLearnMoreLink', {
               defaultMessage: 'Learn more.',
             }) +
             '</a>',
