@@ -826,7 +826,8 @@ describe('Exception helpers', () => {
         },
       ]);
     });
-
+  });
+  describe('ransomware protection exception items', () => {
     test('it should return pre-populated ransomware items for event code `ransomware`', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
@@ -941,7 +942,9 @@ describe('Exception helpers', () => {
         },
       ]);
     });
+  });
 
+  describe('memory protection exception items', () => {
     test('it should return pre-populated memory signature items for event code `memory_signature`', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
@@ -981,6 +984,44 @@ describe('Exception helpers', () => {
           operator: 'included',
           type: 'match',
           value: 'some name',
+          id: '123',
+        },
+        {
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+          id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory signature items for event code `memory_signature` and skip Empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: '', // name is empty
+          // executable: '',  left intentionally commented
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'signature',
+        },
+        event: {
+          code: 'memory_signature',
+        },
+      });
+
+      // should not contain name or executable
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'signature',
           id: '123',
         },
         {
@@ -1088,7 +1129,115 @@ describe('Exception helpers', () => {
               value: '4000',
               id: '123',
             },
-            { field: 'region_size', operator: 'included', type: 'match', value: '4000', id: '123' },
+            {
+              field: 'region_size',
+              operator: 'included',
+              type: 'match',
+              value: '4000',
+              id: '123',
+            },
+            {
+              field: 'region_protection',
+              operator: 'included',
+              type: 'match',
+              value: 'RWX',
+              id: '123',
+            },
+            {
+              field: 'memory_pe.imphash',
+              operator: 'included',
+              type: 'match',
+              value: 'a hash',
+              id: '123',
+            },
+          ],
+          id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory shellcode items for event code `malicious_thread` and skip empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: '', // name is empty
+          // executable: '',  left intentionally commented
+          Ext: {
+            token: {
+              integrity_level_name: 'high',
+            },
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'shellcode_thread',
+          self_injection: true,
+        },
+        event: {
+          code: 'malicious_thread',
+        },
+        Target: {
+          process: {
+            thread: {
+              Ext: {
+                start_address_allocation_offset: 0,
+                start_address_bytes_disasm_hash: 'a disam hash',
+                start_address_details: {
+                  // allocation_type: '', left intentionally commented
+                  allocation_size: 4000,
+                  region_size: 4000,
+                  region_protection: 'RWX',
+                  memory_pe: {
+                    imphash: 'a hash',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // no name, no exceutable, no allocation_type
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'shellcode_thread',
+          id: '123',
+        },
+        {
+          field: 'Memory_protection.self_injection',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+          id: '123',
+        },
+        {
+          field: 'process.Ext.token.integrity_level_name',
+          operator: 'included',
+          type: 'match',
+          value: 'high',
+          id: '123',
+        },
+        {
+          field: 'Target.process.thread.Ext.start_address_details',
+          type: 'nested',
+          entries: [
+            {
+              field: 'allocation_size',
+              operator: 'included',
+              type: 'match',
+              value: '4000',
+              id: '123',
+            },
+            {
+              field: 'region_size',
+              operator: 'included',
+              type: 'match',
+              value: '4000',
+              id: '123',
+            },
             {
               field: 'region_protection',
               operator: 'included',
