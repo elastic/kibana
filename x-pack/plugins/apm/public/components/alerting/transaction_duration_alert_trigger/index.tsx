@@ -32,14 +32,14 @@ import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
-interface AlertParams {
+export interface AlertParams {
+  aggregationType: 'avg' | '95th' | '99th';
+  environment: string;
+  serviceName: string;
+  threshold: number;
+  transactionType: string;
   windowSize: number;
   windowUnit: string;
-  threshold: number;
-  aggregationType: 'avg' | '95th' | '99th';
-  serviceName: string;
-  transactionType: string;
-  environment: string;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES = {
