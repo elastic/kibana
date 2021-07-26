@@ -68,11 +68,13 @@ For more information, refer to {ref}/security-privileges.html[Security privilege
 
 .. Click *Add Kibana privilege*.
 
-.. Select one or more *Spaces* that you want to grant reporting privileges to.
+.. Select one or more *Spaces*.
 
 .. Click *Customize*, then click *Analytics*.
 
-.. Next to each application you want to grant reporting privileges to, click *All*.
+.. Next to the applications you want to grant reporting privileges, click *All*.
++
+If the *Reporting* option is unavailable, contact your administrator, or <<reporting-advanced-settings,enable the option in kibana.yml>>. 
 
 .. Click *Add {kib} privilege*.
 
