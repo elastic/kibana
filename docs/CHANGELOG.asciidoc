@@ -195,7 +195,7 @@ Use the following default values:
 [%collapsible]
 ====
 *Details* +
-Support for configuring {kib} with `0` as the `server.host` has been removed. For more information, refer to {kibana-pull}87114[#87114]
+Support for configuring {kib} with `0` as the `server.host` has been removed. Please use `0.0.0.0` instead. For more information, refer to {kibana-pull}87114[#87114]
 
 *Impact* +
 You are now unable to use `0` as the `server.host`.
