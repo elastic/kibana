@@ -32,7 +32,8 @@ initHttp(
 );
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
-const testDate = '2021-07-21T14:16:58.666Z';
+// use a date far in the past to check the sorting
+const testDate = '2020-07-21T14:16:58.666Z';
 const testDateFormatted = moment(testDate).format('YYYY-MM-DD HH:mm:ss');
 
 const policies: PolicyFromES[] = [];
