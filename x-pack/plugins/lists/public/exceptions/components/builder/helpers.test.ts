@@ -52,7 +52,7 @@ import {
   isOneOfOperator,
   isOperator,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -61,7 +61,7 @@ import {
   fields,
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { FieldSpec, IFieldType } from '../../../../../../../src/plugins/data/common';
+import { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
@@ -168,8 +168,8 @@ const mockEndpointFields = [
   },
 ];
 
-export const getEndpointField = (name: string): IFieldType =>
-  mockEndpointFields.find((field) => field.name === name) as IFieldType;
+export const getEndpointField = (name: string): IndexPatternFieldBase =>
+  mockEndpointFields.find((field) => field.name === name) as IndexPatternFieldBase;
 
 const filterIndexPatterns = (
   patterns: IndexPatternBase,
@@ -637,7 +637,7 @@ describe('Exception builder helpers', () => {
   describe('#getEntryOnFieldChange', () => {
     test('it returns nested entry with single new subentry when "item.nested" is "parent"', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
-      const payloadIFieldType: IFieldType = getField('nestedField.child');
+      const payloadIFieldType = getField('nestedField.child');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
       const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
@@ -674,7 +674,7 @@ describe('Exception builder helpers', () => {
           parentIndex: 0,
         },
       };
-      const payloadIFieldType: IFieldType = getField('nestedField.child');
+      const payloadIFieldType = getField('nestedField.child');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
       const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
@@ -699,7 +699,7 @@ describe('Exception builder helpers', () => {
 
     test('it returns field of type "match" with updated field if not a nested entry', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const payloadIFieldType: IFieldType = getField('ip');
+      const payloadIFieldType = getField('ip');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
       const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,

@@ -35,10 +35,9 @@ import {
   FieldComponent,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
-import { IndexPatternBase } from '@kbn/es-query';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { HttpStart } from '../../../../../../../src/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
@@ -91,7 +90,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const handleFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: IndexPatternFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },
