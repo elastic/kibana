@@ -10,7 +10,13 @@ import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  StartServicesAccessor,
+  CorePreboot,
+} from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
@@ -31,6 +37,7 @@ import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
+import { prebootServiceMock } from './preboot/preboot_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -106,8 +113,23 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         dist: false,
       },
       instanceUuid: 'instance-uuid',
+      configs: ['/some/path/to/config/kibana.yml'],
     },
     config: pluginInitializerContextConfigMock<T>(config),
+  };
+
+  return mock;
+}
+
+type CorePrebootMockType = MockedKeys<CorePreboot> & {
+  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createPreboot>;
+};
+
+function createCorePrebootMock() {
+  const mock: CorePrebootMockType = {
+    elasticsearch: elasticsearchServiceMock.createPreboot(),
+    http: httpServiceMock.createPrebootContract(),
+    preboot: prebootServiceMock.createPrebootContract(),
   };
 
   return mock;
@@ -171,6 +193,19 @@ function createCoreStartMock() {
   return mock;
 }
 
+function createInternalCorePrebootMock() {
+  const prebootDeps = {
+    context: contextServiceMock.createPrebootContract(),
+    elasticsearch: elasticsearchServiceMock.createInternalPreboot(),
+    http: httpServiceMock.createInternalPrebootContract(),
+    httpResources: httpResourcesMock.createPrebootContract(),
+    uiSettings: uiSettingsServiceMock.createPrebootContract(),
+    logging: loggingServiceMock.createInternalPrebootContract(),
+    preboot: prebootServiceMock.createInternalPrebootContract(),
+  };
+  return prebootDeps;
+}
+
 function createInternalCoreSetupMock() {
   const setupDeps = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
@@ -229,8 +264,10 @@ function createCoreRequestHandlerContextMock() {
 }
 
 export const coreMock = {
+  createPreboot: createCorePrebootMock,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
+  createInternalPreboot: createInternalCorePrebootMock,
   createInternalSetup: createInternalCoreSetupMock,
   createInternalStart: createInternalCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,

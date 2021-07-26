@@ -35,8 +35,9 @@ import {
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   IScopedClusterClient,
+  ElasticsearchServicePreboot,
 } from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -57,8 +58,13 @@ import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
+<<<<<<< HEAD
 import { DeprecationsServiceSetup, DeprecationsServiceStart } from './deprecations';
 // Because of #79265 we need to explicity import, then export these types for
+=======
+import { DeprecationsServiceSetup } from './deprecations';
+// Because of #79265 we need to explicitly import, then export these types for
+>>>>>>> 2392b4f24a2358621a5d841f451efe40f64275ba
 // scripts/telemetry_check.js to work as expected
 import {
   CoreUsageStats,
@@ -68,6 +74,9 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
+import { PrebootServicePreboot } from './preboot';
+
+export type { PrebootServicePreboot } from './preboot';
 
 export type {
   CoreUsageStats,
@@ -81,8 +90,6 @@ export type {
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 
 export type {
-  ExecutionContextSetup,
-  ExecutionContextStart,
   IExecutionContextContainer,
   KibanaServerExecutionContext,
   KibanaExecutionContext,
@@ -127,6 +134,7 @@ export type {
   LegacyElasticsearchClientConfig,
   LegacyElasticsearchError,
   LegacyElasticsearchErrorHelpers,
+  ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
@@ -145,6 +153,7 @@ export type {
   ShardsResponse,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchConfigPreboot,
 } from './elasticsearch';
 
 export type {
@@ -181,6 +190,7 @@ export type {
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerInfo,
+  HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
@@ -262,8 +272,11 @@ export type {
   AppenderConfigType,
 } from './logging';
 
+export { PluginType } from './plugins';
+
 export type {
   DiscoveredPlugin,
+  PrebootPlugin,
   Plugin,
   AsyncPlugin,
   PluginConfigDescriptor,
@@ -471,7 +484,20 @@ export interface RequestHandlerContext {
 }
 
 /**
- * Context passed to the plugins `setup` method.
+ * Context passed to the `setup` method of `preboot` plugins.
+ * @public
+ */
+export interface CorePreboot {
+  /** {@link ElasticsearchServicePreboot} */
+  elasticsearch: ElasticsearchServicePreboot;
+  /** {@link HttpServicePreboot} */
+  http: HttpServicePreboot;
+  /** {@link PrebootServicePreboot} */
+  preboot: PrebootServicePreboot;
+}
+
+/**
+ * Context passed to the `setup` method of `standard` plugins.
  *
  * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
  *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
@@ -554,6 +580,8 @@ export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  ExecutionContextSetup,
+  ExecutionContextStart,
   HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,

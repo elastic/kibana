@@ -7,7 +7,6 @@
 
 import { once } from 'lodash';
 import { Observable } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
 
 import {
@@ -17,7 +16,6 @@ import {
   Plugin as IPlugin,
   PluginInitializerContext,
   SavedObjectsClient,
-  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
 import {
   PluginSetup as DataPluginSetup,
@@ -48,7 +46,6 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { compose } from './lib/compose/kibana';
 import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
 import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
 import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
@@ -58,7 +55,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { ManifestTask } from './endpoint/lib/artifacts';
-import { initSavedObjects, savedObjectTypes } from './saved_objects';
+import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
@@ -91,6 +88,7 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { getKibanaPrivilegesFeaturePrivileges } from './features';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -279,107 +277,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ...(isRuleRegistryEnabled ? referenceRuleTypes : []),
     ];
 
-    plugins.features.registerKibanaFeature({
-      id: SERVER_APP_ID,
-      name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
-        defaultMessage: 'Security',
-      }),
-      order: 1100,
-      category: DEFAULT_APP_CATEGORIES.security,
-      app: [APP_ID, 'kibana'],
-      catalogue: ['securitySolution'],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
-      alerting: ruleTypes,
-      cases: [APP_ID],
-      subFeatures: [
-        {
-          name: 'Cases',
-          privilegeGroups: [
-            {
-              groupType: 'mutually_exclusive',
-              privileges: [
-                {
-                  id: 'cases_all',
-                  includeIn: 'all',
-                  name: 'All',
-                  savedObject: {
-                    all: [],
-                    read: [],
-                  },
-                  // using variables with underscores here otherwise when we retrieve them from the kibana
-                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                  ui: ['crud_cases', 'read_cases'], // uiCapabilities.siem.crud_cases
-                  cases: {
-                    all: [APP_ID],
-                  },
-                },
-                {
-                  id: 'cases_read',
-                  includeIn: 'read',
-                  name: 'Read',
-                  savedObject: {
-                    all: [],
-                    read: [],
-                  },
-                  // using variables with underscores here otherwise when we retrieve them from the kibana
-                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                  ui: ['read_cases'], // uiCapabilities.siem.read_cases
-                  cases: {
-                    read: [APP_ID],
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      privileges: {
-        all: {
-          app: [APP_ID, 'kibana'],
-          catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-all', 'lists-read', 'rac'],
-          savedObject: {
-            all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
-            read: [],
-          },
-          alerting: {
-            rule: {
-              all: ruleTypes,
-            },
-            alert: {
-              all: ruleTypes,
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show', 'crud'],
-        },
-        read: {
-          app: [APP_ID, 'kibana'],
-          catalogue: ['securitySolution'],
-          api: ['securitySolution', 'lists-read', 'rac'],
-          savedObject: {
-            all: [],
-            read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],
-          },
-          alerting: {
-            rule: {
-              read: ruleTypes,
-            },
-            alert: {
-              read: ruleTypes,
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
+    plugins.features.registerKibanaFeature(
+      getKibanaPrivilegesFeaturePrivileges(ruleTypes, isRuleRegistryEnabled)
+    );
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
@@ -390,6 +290,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ml: plugins.ml,
         lists: plugins.lists,
         mergeStrategy: this.config.alertMergeStrategy,
+        experimentalFeatures,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
@@ -415,8 +316,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         taskManager: plugins.taskManager!,
       });
     }
-
-    compose(core, plugins, endpointContext);
 
     core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
