@@ -1817,6 +1817,15 @@
               },
               "type": "text"
             },
+            "search-telemetry": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
             "space": {
               "fields": {
                 "keyword": {

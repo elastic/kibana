@@ -14,6 +14,17 @@ export default function createGetExistingTests({ getService }: FtrProviderContex
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  async function registerWithTaskManager(spaceId: string, id: string) {
+    await supertest
+      .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${id}/_disable`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204);
+    await supertest
+      .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${id}/_enable`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204);
+  }
+
   describe('get existing', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/alerts_in_multiple_spaces');
@@ -24,10 +35,9 @@ export default function createGetExistingTests({ getService }: FtrProviderContex
     });
 
     it('should show the alias resolve match for the non default space rule', async () => {
-      const response = await supertest.get(
-        `${getUrlPrefix(`chrisspace`)}/api/alerting/rule/100ff690-eaf9-11eb-9cd0-ed3f761f7f83`
-      );
-
+      const id = '100ff690-eaf9-11eb-9cd0-ed3f761f7f83';
+      await registerWithTaskManager('chrisspace', id);
+      const response = await supertest.get(`${getUrlPrefix(`chrisspace`)}/api/alerting/rule/${id}`);
       expect(response.body.resolveResponse).to.eql({
         outcome: 'aliasMatch',
         aliasTargetId: 'fdc84d89-1f92-5511-b4a4-65034392a07a',
