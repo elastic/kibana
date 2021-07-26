@@ -40,14 +40,10 @@ interface BooleanSetting extends BaseSetting {
 
 interface IntegerSetting extends BaseSetting {
   type: 'integer';
-  min?: number;
-  max?: number;
 }
 
 interface BytesSetting extends BaseSetting {
   type: 'bytes';
-  min?: number;
-  max?: number;
 }
 
 interface DurationSetting extends BaseSetting {

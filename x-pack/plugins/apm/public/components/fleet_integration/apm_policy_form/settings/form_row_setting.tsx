@@ -65,8 +65,6 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
       return (
         <EuiFieldNumber
           value={value}
-          min={setting.min}
-          max={setting.max}
           onChange={(e) => {
             onChange(setting.key, e.target.value);
           }}
