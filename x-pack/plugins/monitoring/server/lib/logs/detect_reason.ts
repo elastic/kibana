@@ -130,15 +130,15 @@ async function doesFilebeatIndexExist(
   } = await callWithRequest(req, 'msearch', { body });
 
   return {
-    indexPatternExists: indexPatternExistsResponse?.hits?.total.value ?? 0 > 0,
+    indexPatternExists: (indexPatternExistsResponse?.hits?.total.value ?? 0) > 0,
     indexPatternInTimeRangeExists:
-      indexPatternExistsInTimeRangeResponse?.hits?.total.value ?? 0 > 0,
-    typeExistsAtAnyTime: typeExistsAtAnyTimeResponse?.hits?.total.value ?? 0 > 0,
-    typeExists: typeExistsResponse?.hits?.total.value ?? 0 > 0,
-    usingStructuredLogs: usingStructuredLogsResponse?.hits?.total.value ?? 0 > 0,
-    clusterExists: clusterUuid ? clusterExistsResponse?.hits?.total.value ?? 0 > 0 : null,
-    nodeExists: nodeUuid ? nodeExistsResponse?.hits?.total.value ?? 0 > 0 : null,
-    indexExists: indexUuid ? indexExistsResponse?.hits?.total.value ?? 0 > 0 : null,
+      (indexPatternExistsInTimeRangeResponse?.hits?.total.value ?? 0) > 0,
+    typeExistsAtAnyTime: (typeExistsAtAnyTimeResponse?.hits?.total.value ?? 0) > 0,
+    typeExists: (typeExistsResponse?.hits?.total.value ?? 0) > 0,
+    usingStructuredLogs: (usingStructuredLogsResponse?.hits?.total.value ?? 0) > 0,
+    clusterExists: clusterUuid ? (clusterExistsResponse?.hits?.total.value ?? 0) > 0 : null,
+    nodeExists: nodeUuid ? (nodeExistsResponse?.hits?.total.value ?? 0) > 0 : null,
+    indexExists: indexUuid ? (indexExistsResponse?.hits?.total.value ?? 0) > 0 : null,
   };
 }
 
