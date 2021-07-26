@@ -230,7 +230,11 @@ export class DashboardPageObject extends FtrService {
   public async expectToolbarPaginationDisplayed() {
     const isLegacyDefault = await this.discover.useLegacyTable();
     if (isLegacyDefault) {
-      const subjects = ['pagination-button-previous', 'pagination-button-next', 'toolBarPagerText'];
+      const subjects = [
+        'pagination-button-previous',
+        'pagination-button-next',
+        'toolBarTotalDocsText',
+      ];
       await Promise.all(subjects.map(async (subj) => await this.testSubjects.existOrFail(subj)));
     } else {
       const subjects = ['pagination-button-previous', 'pagination-button-next'];

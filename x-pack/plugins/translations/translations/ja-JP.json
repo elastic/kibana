@@ -1602,7 +1602,6 @@
     "discover.doc.somethingWentWrongDescriptionAddon": "インデックスが存在することを確認してください。",
     "discover.docTable.limitedSearchResultLabel": "{resultCount}件の結果のみが表示されます。検索結果を絞り込みます。",
     "discover.docTable.noResultsTitle": "結果が見つかりませんでした",
-    "discover.docTable.pagerControl.pagesCountLabel": "{startItem}–{endItem}/{totalItems}",
     "discover.docTable.tableHeader.documentHeader": "ドキュメント",
     "discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel": "{columnName}列を左に移動",
     "discover.docTable.tableHeader.moveColumnLeftButtonTooltip": "列を左に移動",

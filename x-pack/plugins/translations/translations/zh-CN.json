@@ -1611,7 +1611,6 @@
     "discover.doc.somethingWentWrongDescriptionAddon": "请确保索引存在。",
     "discover.docTable.limitedSearchResultLabel": "仅限于 {resultCount} 个结果。优化您的搜索。",
     "discover.docTable.noResultsTitle": "找不到结果",
-    "discover.docTable.pagerControl.pagesCountLabel": "{startItem}–{endItem}/{totalItems}",
     "discover.docTable.tableHeader.documentHeader": "文档",
     "discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel": "向左移动“{columnName}”列",
     "discover.docTable.tableHeader.moveColumnLeftButtonTooltip": "向左移动列",

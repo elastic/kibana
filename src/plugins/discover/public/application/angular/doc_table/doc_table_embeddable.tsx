@@ -55,7 +55,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
               </EuiText>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
             <EuiText grow={false} size="s">
               <FormattedMessage
                 id="discover.docTable.totalDocuments"
