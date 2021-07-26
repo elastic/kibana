@@ -328,6 +328,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           })}
           data-test-subj="lnsXY_axisOrientation_groups"
           name="axisOrientation"
+          isDisabled={!areTickLabelsVisible}
           buttonSize="compressed"
           options={axisOrientationOptions}
           idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
