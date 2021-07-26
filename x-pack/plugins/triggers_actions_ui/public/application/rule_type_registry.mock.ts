@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ruleTypeRegistryContract } from '../types';
+import { RuleTypeRegistryContract } from '../types';
 
 const createruleTypeRegistryMock = () => {
-  const mocked: jest.Mocked<ruleTypeRegistryContract> = {
+  const mocked: jest.Mocked<RuleTypeRegistryContract> = {
     has: jest.fn(),
     register: jest.fn(),
     get: jest.fn(),

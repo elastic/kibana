@@ -12,7 +12,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
-import { ruleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
+import { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -23,7 +23,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       register: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
-    } as ruleTypeRegistryContract,
+    } as RuleTypeRegistryContract,
     dataPlugin: jest.fn(),
     navigateToApp: jest.fn(),
     alerting: {

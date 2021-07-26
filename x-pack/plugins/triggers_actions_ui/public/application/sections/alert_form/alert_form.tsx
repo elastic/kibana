@@ -51,7 +51,7 @@ import {
   AlertTypeIndex,
   AlertType,
   ValidationResult,
-  ruleTypeRegistryContract,
+  RuleTypeRegistryContract,
   ActionTypeRegistryContract,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
@@ -176,7 +176,7 @@ interface AlertFormProps<MetaData = Record<string, any>> {
   alert: InitialAlert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
-  ruleTypeRegistry: ruleTypeRegistryContract;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button

@@ -2535,10 +2535,10 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ruleTypeRegistryContract",
+        "id": "def-public.RuleTypeRegistryContract",
         "type": "Type",
         "tags": [],
-        "label": "ruleTypeRegistryContract",
+        "label": "RuleTypeRegistryContract",
         "description": [],
         "signature": [
           "{ get: (id: string) => ",

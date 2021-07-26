@@ -13,7 +13,7 @@ export type {
   AlertTypeModel,
   ActionType,
   ActionTypeRegistryContract,
-  ruleTypeRegistryContract,
+  RuleTypeRegistryContract,
   AlertTypeParamsExpressionProps,
   ValidationResult,
   ActionVariables,
