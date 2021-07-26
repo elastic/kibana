@@ -9,7 +9,7 @@
  * Actions and connectors API endpoint helpers
  */
 
-import { ACTION_URL, ACTION_TYPES_URL } from '../../common';
+import { ACTION_URL, ACTION_TYPES_URL, CONNECTORS_URL } from '../../common';
 
 /**
  *
@@ -30,3 +30,9 @@ export const getExecuteConnectorUrl = (connectorId: string): string =>
  * @returns {string} Create connector endpoint
  */
 export const getCreateConnectorUrl = (): string => `${ACTION_URL}/connector`;
+
+/**
+ *
+ * @returns {string} All connectors endpoint
+ */
+export const getAllConnectorsUrl = (): string => CONNECTORS_URL;

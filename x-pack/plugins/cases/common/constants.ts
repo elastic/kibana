@@ -61,6 +61,7 @@ export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts`;
 
 export const ACTION_URL = '/api/actions';
 export const ACTION_TYPES_URL = `${ACTION_URL}/connector_types`;
+export const CONNECTORS_URL = `${ACTION_URL}/connectors`;
 
 export const SUPPORTED_CONNECTORS = [
   `${ConnectorTypes.serviceNowITSM}`,
