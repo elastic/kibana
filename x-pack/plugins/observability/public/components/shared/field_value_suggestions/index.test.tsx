@@ -122,7 +122,7 @@ describe('FieldValueSuggestions', () => {
         />
       </EuiThemeProvider>
     );
-    
+
     fireEvent.click(screen.getByText('Service name'));
 
     fireEvent.click(await screen.findByText('US'));
