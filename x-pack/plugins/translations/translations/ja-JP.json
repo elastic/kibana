@@ -21786,7 +21786,6 @@
     "xpack.securitySolution.endpointManagement.noPermissionsSubText": "Fleetが無効である可能性があります。この機能を使用するには、Fleetを有効にする必要があります。Fleetを有効にする権限がない場合は、Kibana管理者に連絡してください。",
     "xpack.securitySolution.endpointManagemnet.noPermissionsText": "Elastic Security Administrationを使用するために必要なKibana権限がありません。",
     "xpack.securitySolution.endpointsTab": "エンドポイント",
-    "xpack.securitySolution.enpdoint.resolver.panelutils.betaBadgeLabel": "BETA",
     "xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate": "無効な日付",
     "xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved": "タイムスタンプが取得されていません",
     "xpack.securitySolution.event.module.linkToElasticEndpointSecurityDescription": "Endpoint Securityで開く",
