@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { metricChart, MetricChart } from './expression';
-import { LensMultiTable } from '../types';
+import { MetricChart, metricChart } from './expression';
+import { MetricConfig } from '../../common/expressions';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { MetricConfig } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import type { LensMultiTable } from '../../common';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -249,10 +249,16 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-              <EmptyPlaceholder
-                icon={[Function]}
-              />
-          `);
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
+      `);
     });
 
     test('it renders an EmptyPlaceholder when null value is passed as data', () => {
@@ -269,9 +275,15 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-        <EmptyPlaceholder
-          icon={[Function]}
-        />
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
       `);
     });
 
