@@ -7,7 +7,6 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import { join } from 'path';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
@@ -511,7 +510,7 @@ export class SavedObjectsClient {
   }
 
   private getPath(path: Array<string | undefined>): string {
-    return join(API_BASE_URL, joinUriComponents(...path));
+    return API_BASE_URL + joinUriComponents(...path);
   }
 
   /**
