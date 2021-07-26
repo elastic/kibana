@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, memo } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,11 +16,11 @@ import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { Chart as IChart } from './point_series';
 import { DiscoverHistogram } from './histogram';
-import { DataMain$ } from '../../services/use_saved_search';
+import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 
-const TimechartHeaderMemoized = React.memo(TimechartHeader);
-const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
+const TimechartHeaderMemoized = memo(TimechartHeader);
+const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export function DiscoverChart({
   isLegacy,
   resetQuery,
@@ -37,8 +37,8 @@ export function DiscoverChart({
   isLegacy: boolean;
   resetQuery: () => void;
   savedSearch: SavedSearch;
-  savedSearchDataChart$: DataMain$;
-  savedSearchDataTotalHits$: DataMain$;
+  savedSearchDataChart$: DataCharts$;
+  savedSearchDataTotalHits$: DataTotalHits$;
   services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
