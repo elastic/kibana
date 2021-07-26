@@ -38,7 +38,7 @@ const MappingComponent: React.FC<MappingProps> = ({ actionTypeName, isLoading, m
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">
+        <EuiText size="xs" data-test-subj="field-mapping-text">
           <h4>{i18n.FIELD_MAPPING_TITLE(actionTypeName)}</h4>
           <EuiTextColor data-test-subj="field-mapping-desc" color={fieldMappingDesc.color}>
             {fieldMappingDesc.desc}

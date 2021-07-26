@@ -38,7 +38,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
           <EuiFlexItem>
             <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="case-configure-field-mappings-second-col-label">
             <span className="euiFormLabel">{i18n.FIELD_MAPPING_SECOND_COL(actionTypeName)}</span>
           </EuiFlexItem>
           <EuiFlexItem>
