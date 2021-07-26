@@ -131,7 +131,16 @@ export class RuleDataClient implements IRuleDataClient {
       });
     } catch (err) {
       // something might have created the index already, that sounds OK
-      if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+      if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+        const { body: existingIndices } = await clusterClient.indices.get({
+          index: concreteIndexName,
+        });
+        if (!existingIndices[concreteIndexName]?.aliases?.[alias]?.is_write_index) {
+          throw Error(
+            `Attempted to create index: ${concreteIndexName} as the write index for alias: ${alias}, but the index already exists and is not the write index for the alias`
+          );
+        }
+      } else {
         throw err;
       }
     }
