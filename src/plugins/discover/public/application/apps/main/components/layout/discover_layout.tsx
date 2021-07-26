@@ -51,6 +51,7 @@ import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
+import { useRegisteredTopNavLinks } from '../../../../helpers/use_registered_top_nav_links';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -133,7 +134,6 @@ export function DiscoverLayout({
     state,
     useNewFieldsApi,
   });
-
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     if (inspectorAdapters) {
@@ -217,6 +217,20 @@ export function DiscoverLayout({
     [uiSettings, indexPattern.timeFieldName]
   );
 
+  const registeredTopNavLinks = useRegisteredTopNavLinks({
+    services,
+    indexPattern,
+    onOpenInspector,
+    query: state.query,
+    savedQuery: state.savedQuery,
+    stateContainer,
+    updateQuery: onUpdateQuery,
+    searchSource,
+    navigateTo,
+    savedSearch,
+    columns,
+  });
+
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -231,6 +245,7 @@ export function DiscoverLayout({
           services={services}
           stateContainer={stateContainer}
           updateQuery={onUpdateQuery}
+          registeredTopNavLinks={registeredTopNavLinks}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">

@@ -11,6 +11,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
+import type { TopNavMenuData } from '../../../../../../../navigation/public';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -21,6 +22,7 @@ export type DiscoverTopNavProps = Pick<
   savedQuery?: string;
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   stateContainer: GetStateReturn;
+  registeredTopNavLinks: TopNavMenuData[];
 };
 
 export const DiscoverTopNav = ({
@@ -34,6 +36,7 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   services,
+  registeredTopNavLinks,
 }: DiscoverTopNavProps) => {
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = services.navigation.ui;
@@ -47,8 +50,18 @@ export const DiscoverTopNav = ({
         state: stateContainer,
         onOpenInspector,
         searchSource,
+        registeredTopNavLinks,
       }),
-    [indexPattern, navigateTo, onOpenInspector, searchSource, stateContainer, savedSearch, services]
+    [
+      indexPattern,
+      navigateTo,
+      onOpenInspector,
+      searchSource,
+      stateContainer,
+      savedSearch,
+      services,
+      registeredTopNavLinks,
+    ]
   );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {

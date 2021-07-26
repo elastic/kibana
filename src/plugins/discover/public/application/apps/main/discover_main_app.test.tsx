@@ -16,11 +16,12 @@ import { SavedObject } from '../../../../../../core/types';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { setHeaderActionMenuMounter } from '../../../kibana_services';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { waitFor } from '@testing-library/react';
 
 setHeaderActionMenuMounter(jest.fn());
 
 describe('DiscoverMainApp', () => {
-  test('renders', () => {
+  test('renders', async () => {
     const { history } = createSearchSessionMock();
     const indexPatternList = ([indexPatternMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
@@ -38,9 +39,10 @@ describe('DiscoverMainApp', () => {
         }}
       />
     );
-
-    expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
-      indexPatternMock.title
-    );
+    await waitFor(() => {
+      expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
+        indexPatternMock.title
+      );
+    });
   });
 });

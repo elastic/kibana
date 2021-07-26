@@ -12,9 +12,11 @@ import { DEFAULT_COLUMNS_SETTING } from '../../common';
 import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
 import { TopNavMenu } from '../../../navigation/public';
+import { addTopNavDataServiceMock } from '../application/apps/main/services/add_top_nav_data.mock';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = ({
+  addTopNavData: addTopNavDataServiceMock.create(),
   core: coreMock.createStart(),
   chrome: chromeServiceMock.createStartContract(),
   history: () => ({

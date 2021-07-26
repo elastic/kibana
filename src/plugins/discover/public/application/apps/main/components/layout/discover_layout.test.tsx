@@ -23,6 +23,7 @@ import { DiscoverLayoutProps } from './types';
 import { SavedSearchDataSubject } from '../../services/use_saved_search';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { FetchStatus } from '../../../../types';
+import { waitFor } from '@testing-library/react';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -63,14 +64,18 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
 }
 
 describe('Discover component', () => {
-  test('selected index pattern without time field displays no chart toggle', () => {
+  test('selected index pattern without time field displays no chart toggle', async () => {
     const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    await waitFor(() => {
+      expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    });
   });
-  test('selected index pattern with time field displays chart toggle', () => {
+  test('selected index pattern with time field displays chart toggle', async () => {
     const component = mountWithIntl(
       <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
     );
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    });
   });
 });
