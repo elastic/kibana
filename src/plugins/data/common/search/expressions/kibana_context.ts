@@ -146,7 +146,7 @@ export const getKibanaContextFn = (
       return {
         type: 'kibana_context',
         query: queries,
-        filters: uniqFilters(filters).filter((f: any) => !f.meta?.disabled),
+        filters: uniqFilters(filters.filter((f: any) => !f.meta?.disabled)),
         timeRange,
       };
     },

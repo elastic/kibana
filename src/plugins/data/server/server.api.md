@@ -440,7 +440,9 @@ export enum ES_FIELD_TYPES {
     // (undocumented)
     _TYPE = "_type",
     // (undocumented)
-    UNSIGNED_LONG = "unsigned_long"
+    UNSIGNED_LONG = "unsigned_long",
+    // (undocumented)
+    VERSION = "version"
 }
 
 // Warning: (ae-missing-release-tag) "ES_SEARCH_STRATEGY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

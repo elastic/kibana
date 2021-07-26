@@ -392,6 +392,12 @@ function createUrlGeneratorState({
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
     useHash: false,
   };
 }
