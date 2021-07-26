@@ -26,7 +26,7 @@ import { KBN_FIELD_TYPES, Query } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
-import { IndexPatternSelect } from './lib/index_pattern_select';
+import { IndexPatternSelect, IndexPatternSelectProps } from './lib/index_pattern_select';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { YesNo } from './yes_no';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
@@ -35,7 +35,7 @@ import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 // @ts-expect-error not typed yet
 import { IconSelect } from './icon_select/icon_select';
 
-import type { Annotation, FetchedIndexPattern, IndexPatternValue } from '../../../common/types';
+import type { Annotation, IndexPatternValue } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
@@ -68,20 +68,28 @@ export const AnnotationRow = ({
   const model = useMemo(() => ({ ...getAnnotationDefaults(), ...annotation }), [annotation]);
   const htmlId = htmlIdGenerator(model.id);
 
-  const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>(null);
+  const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
       const { indexPatterns } = getDataStart();
+      let fetchedIndexPattern: IndexPatternSelectProps['fetchedIndex'] = {
+        indexPattern: undefined,
+        indexPatternString: undefined,
+      };
 
-      setFetchedIndex(
-        index
+      try {
+        fetchedIndexPattern = index
           ? await fetchIndexPattern(index, indexPatterns)
           : {
-              indexPattern: undefined,
-              indexPatternString: undefined,
-            }
-      );
+              ...fetchedIndexPattern,
+              defaultIndex: await indexPatterns.getDefault(),
+            };
+      } catch {
+        // nothing to be here
+      }
+
+      setFetchedIndex(fetchedIndexPattern);
     };
 
     updateFetchedIndex(model.index_pattern);
@@ -124,7 +132,6 @@ export const AnnotationRow = ({
           <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
             <EuiFlexItem>
               <IndexPatternSelect
-                value={model[INDEX_PATTERN_KEY]}
                 indexPatternName={INDEX_PATTERN_KEY}
                 onChange={onChange}
                 fetchedIndex={fetchedIndex}
