@@ -11,9 +11,11 @@ export { findTestSubject, TestBed } from '@kbn/test/jest';
 export {
   setupEnvironment,
   WithFieldEditorDependencies,
-  spySearchResult,
+  spySearchQuery,
+  spySearchQueryResponse,
   spyIndexPatternGetAllFields,
   fieldFormatsOptions,
+  indexPatternNameForTest,
 } from './setup_environment';
 
 export { getCommonActions } from './common_actions';

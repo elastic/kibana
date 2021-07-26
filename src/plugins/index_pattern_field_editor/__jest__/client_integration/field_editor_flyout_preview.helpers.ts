@@ -19,6 +19,8 @@ import {
   WithFieldEditorDependencies,
   getCommonActions,
   spyIndexPatternGetAllFields,
+  spySearchQuery,
+  spySearchQueryResponse,
 } from './helpers';
 
 const defaultProps: Props = {
@@ -34,6 +36,41 @@ const defaultProps: Props = {
  */
 export const setIndexPatternFields = (fields: Array<{ name: string; displayName: string }>) => {
   spyIndexPatternGetAllFields.mockReturnValue(fields);
+};
+
+export interface TestDoc {
+  title: string;
+  subTitle: string;
+  description: string;
+}
+
+export const getSearchCallMeta = () => {
+  const totalCalls = spySearchQuery.mock.calls.length;
+  const lastCall = spySearchQuery.mock.calls[totalCalls - 1] ?? null;
+  let lastCallParams = null;
+
+  if (lastCall) {
+    lastCallParams = lastCall[0];
+  }
+
+  return {
+    totalCalls,
+    lastCall,
+    lastCallParams,
+  };
+};
+
+export const setSearchResponse = (
+  documents: Array<{ _id: string; _index: string; _source: TestDoc }>
+) => {
+  spySearchQueryResponse.mockResolvedValue({
+    rawResponse: {
+      hits: {
+        total: documents.length,
+        hits: documents,
+      },
+    },
+  });
 };
 
 const getActions = (testBed: TestBed) => {

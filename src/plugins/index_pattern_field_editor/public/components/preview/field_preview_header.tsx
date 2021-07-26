@@ -47,7 +47,7 @@ export const FieldPreviewHeader = () => {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
-            <h2>{i18nTexts.title}</h2>
+            <h2 data-test-subj="title">{i18nTexts.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
 
@@ -63,7 +63,7 @@ export const FieldPreviewHeader = () => {
         )}
       </EuiFlexGroup>
       <EuiText>
-        <EuiTextColor color="subdued">
+        <EuiTextColor color="subdued" data-test-subj="subTitle">
           {i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle', {
             defaultMessage: 'From: {from}',
             values: {

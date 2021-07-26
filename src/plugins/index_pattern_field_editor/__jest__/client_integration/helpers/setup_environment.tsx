@@ -24,13 +24,22 @@ const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const dataStart = dataPluginMock.createStartContract();
 const { search, fieldFormats } = dataStart;
 
-export const spySearchResult = jest.fn();
+export const spySearchQuery = jest.fn();
+export const spySearchQueryResponse = jest.fn();
 export const spyIndexPatternGetAllFields = jest.fn().mockImplementation(() => []);
 
-search.search = () =>
-  ({
-    toPromise: spySearchResult,
-  } as any);
+spySearchQuery.mockImplementation((params) => {
+  return {
+    toPromise: () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(undefined);
+        }, 2000); // simulate 2s latency for the HTTP request
+      }).then(() => spySearchQueryResponse());
+    },
+  };
+});
+search.search = spySearchQuery;
 
 let apiService: ApiService;
 
@@ -45,7 +54,10 @@ export const setupEnvironment = () => {
   };
 };
 
+// The format options available in the dropdown select for our tests.
 export const fieldFormatsOptions = [{ id: 'upper', title: 'UpperCaseString' } as any];
+
+export const indexPatternNameForTest = 'testIndexPattern';
 
 export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
   Comp: FunctionComponent<T>,
@@ -66,7 +78,7 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
     if (id === 'upper') {
       return {
         convertObject: {
-          html(value: string) {
+          html(value: string = '') {
             return `<span>${value.toUpperCase()}</span>`;
           },
         },
@@ -76,7 +88,7 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
 
   const dependencies: Context = {
     indexPattern: {
-      title: 'testIndexPattern',
+      title: indexPatternNameForTest,
       fields: { getAll: spyIndexPatternGetAllFields },
     } as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),

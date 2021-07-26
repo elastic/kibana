@@ -25,9 +25,8 @@ export const FieldPreview = () => {
 
   const {
     params: {
-      value: { name, script },
+      value: { name, script, format },
     },
-    previewCount,
     fields,
     error,
     reset,
@@ -36,13 +35,14 @@ export const FieldPreview = () => {
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
   const isEmptyPromptVisible =
-    name === null && script === null
+    name === null && script === null && format === null
       ? true
-      : // We have a response from the preview
+      : // If we have some result from the _execute API call don't show the empty prompt
       error !== null || fields.length > 0
       ? false
-      : // We leave it on until we have at least called once the _execute API
-        previewCount === 0;
+      : name === null && format === null
+      ? true
+      : false;
 
   const onFieldListResize = useCallback(({ height }: { height: number }) => {
     setFieldListHeight(height);

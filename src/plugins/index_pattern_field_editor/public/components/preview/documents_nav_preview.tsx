@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -21,14 +20,11 @@ import { useFieldPreviewContext } from './field_preview_context';
 
 export const DocumentsNavPreview = () => {
   const {
-    currentDocument: { value: currentDocument, loadSingle, loadFromCluster, isLoading },
+    currentDocument: { id: documentId, isCustomId },
+    documents: { loadSingle, loadFromCluster },
     navigation: { prev, next },
     error,
   } = useFieldPreviewContext();
-
-  const lastDocumentLoaded = useRef<string | null>(null);
-  const [documentId, setDocumentId] = useState('');
-  const [isCustomId, setIsCustomId] = useState(false);
 
   const errorMessage =
     error !== null && error.code === 'DOC_NOT_FOUND'
@@ -45,40 +41,12 @@ export const DocumentsNavPreview = () => {
   // document ID as at that point there is no more reference to what's "next"
   const showNavButtons = isCustomId === false;
 
-  const onDocumentIdChange = useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
-    setIsCustomId(true);
-    const nextId = e.currentTarget.value;
-    setDocumentId(nextId);
-  }, []);
-
-  const loadDocFromCluster = useCallback(() => {
-    lastDocumentLoaded.current = null;
-    setIsCustomId(false);
-    loadFromCluster();
-  }, [loadFromCluster]);
-
-  useEffect(() => {
-    if (currentDocument && !isCustomId) {
-      setDocumentId(currentDocument._id);
-    }
-  }, [currentDocument, isCustomId]);
-
-  useDebounce(
-    () => {
-      if (!isCustomId || !Boolean(documentId.trim())) {
-        return;
-      }
-
-      if (lastDocumentLoaded.current === documentId) {
-        return;
-      }
-
-      lastDocumentLoaded.current = documentId;
-
-      loadSingle(documentId);
+  const onDocumentIdChange = useCallback(
+    (e: React.SyntheticEvent<HTMLInputElement>) => {
+      const nextId = (e.target as HTMLInputElement).value;
+      loadSingle(nextId);
     },
-    500,
-    [documentId, isCustomId]
+    [loadSingle]
   );
 
   return (
@@ -97,14 +65,19 @@ export const DocumentsNavPreview = () => {
               isInvalid={isInvalid}
               value={documentId}
               onChange={onDocumentIdChange}
-              isLoading={isLoading}
               fullWidth
               data-test-subj="documentIdField"
             />
           </EuiFormRow>
           {isCustomId && (
             <span>
-              <EuiButtonEmpty color="primary" size="xs" flush="left" onClick={loadDocFromCluster}>
+              <EuiButtonEmpty
+                color="primary"
+                size="xs"
+                flush="left"
+                onClick={() => loadFromCluster()}
+                data-test-subj="loadDocsFromClusterButton"
+              >
                 {i18n.translate(
                   'indexPatternFieldEditor.fieldPreview.documentIdField.loadDocumentsFromCluster',
                   {
@@ -117,7 +90,7 @@ export const DocumentsNavPreview = () => {
         </EuiFlexItem>
 
         {showNavButtons && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="documentsNav">
             <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon

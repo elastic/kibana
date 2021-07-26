@@ -66,11 +66,32 @@ export const getCommonActions = (testBed: TestBed) => {
     testBed.component.update();
   };
 
-  // The preview updates on a debounce of 500ms whenever
-  // a parameter changes (script, type)
-  const waitForPreviewUpdate = async () => {
+  /**
+   * The prev preview update occurs after a debounce of 500ms and we simulate
+   * latency when searching ES documents (see setup_environment.tsx).
+   * This handler allows us to advance the jest timer and update the component
+   * @param ms time to move timer forward
+   */
+  const waitForUpdates = async (ms = 3000) => {
     await act(async () => {
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(ms);
+    });
+
+    testBed.component.update();
+  };
+
+  /**
+   * When often need to both wait for the documents to be fetched and
+   * then the preview to be fetched. We can't increase the `jest.advanceTimersByTime` time
+   * as those are 2 different operations. We will for that run all the timers to get to a stable state.
+   */
+  const waitForDocumentsAndPreviewUpdate = async () => {
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    await act(async () => {
+      jest.runAllTimers();
     });
 
     testBed.component.update();
@@ -78,7 +99,8 @@ export const getCommonActions = (testBed: TestBed) => {
 
   return {
     toggleFormRow,
-    waitForPreviewUpdate,
+    waitForUpdates,
+    waitForDocumentsAndPreviewUpdate,
     fields: {
       updateName,
       updateType,
