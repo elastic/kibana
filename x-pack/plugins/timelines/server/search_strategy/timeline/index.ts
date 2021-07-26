@@ -17,7 +17,7 @@ import {
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
-  PluginStartContract as AlertPluginStartContract,
+  PluginStartContract as AlertingPluginStartContract,
 } from '../../../../alerting/server';
 import {
   ISearchStrategy,
@@ -40,7 +40,7 @@ import {
 
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
-  alerting: AlertPluginStartContract
+  alerting: AlertingPluginStartContract
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   let isUsingInternal = false;
   const esAsInternal = data.search.searchAsInternalUser;
@@ -58,7 +58,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
 
       const queryFactory: TimelineFactory<T> = timelineFactory[factoryQueryType];
 
-      if (entityType != null && entityType === EntityType.ALERTS) {
+      if (alertConsumers != null && entityType != null && entityType === EntityType.ALERTS) {
         isUsingInternal = true;
 
         const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
@@ -128,10 +128,12 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   request: TimelineStrategyRequestType<T>;
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
-  alerting: AlertPluginStartContract;
+  alerting: AlertingPluginStartContract;
   queryFactory: TimelineFactory<T>;
   alertConsumers: ALERTS_CONSUMERS[];
 }) => {
+  // Based on what solution alerts you want to see, figures out what corresponding
+  // index to query (ex: siem --> .alerts-security.alerts)
   const indices = alertConsumers.flatMap((consumer) => mapConsumerToIndexName[consumer]);
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
@@ -141,6 +143,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   const getAuthFilter = async () =>
     alertingAuthorizationClient.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alert, {
       type: AlertingAuthorizationFilterType.ESDSL,
+      // Not passing in values, these are the paths for these fields
       fieldNames: {
         consumer: OWNER,
         ruleTypeId: RULE_ID,

@@ -74,7 +74,8 @@ export class AlertsClient {
     this.authorization = authorization;
     this.esClient = esClient;
     this.auditLogger = auditLogger;
-
+    // If spaceId is undefined, it means that spaces is disabled
+    // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
   }
 
