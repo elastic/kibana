@@ -7,8 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { get } from 'lodash';
 import { withServices } from '../../services';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
@@ -20,22 +19,18 @@ const getRenderFunction = (renderable, services) =>
 const ElementContentComponent = (props) => {
   const { renderable, services } = props;
   const [renderFunction, setRenderFunctions] = useState(getRenderFunction(renderable, services));
+  const backgroundColor = useSelector(
+    (state) => getPageById(state, getSelectedPage(state)).style.background
+  );
 
   useEffect(() => {
     setRenderFunctions(getRenderFunction(renderable, services));
   }, [renderable, services]);
 
-  return <Component {...props} renderFunction={renderFunction} />;
+  return <Component {...props} backgroundColor={backgroundColor} renderFunction={renderFunction} />;
 };
 
-const mapStateToProps = (state) => ({
-  backgroundColor: getPageById(state, getSelectedPage(state)).style.background,
-});
-
-export const ElementContent = compose(
-  connect(mapStateToProps),
-  withServices
-)(ElementContentComponent);
+export const ElementContent = withServices(ElementContentComponent);
 
 ElementContent.propTypes = {
   renderable: PropTypes.shape({
