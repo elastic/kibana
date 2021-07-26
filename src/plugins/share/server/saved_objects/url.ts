@@ -51,7 +51,7 @@ export const url: SavedObjectsType = {
           },
         },
       },
-      // Information needed to load an execute a locator.
+      // Information needed to load and execute a locator.
       locatorJSON: {
         type: 'text',
         index: false,
