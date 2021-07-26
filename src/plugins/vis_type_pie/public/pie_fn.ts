@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/common';
 import { PieVisParams, PieVisConfig } from './types';
 import { prepareLogTable } from '../../visualizations/common';
 
@@ -137,26 +137,26 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(context, [
         [
           [args.metric],
-          i18n.translate('visTypePie.function.args.labelsHelpText', {
+          i18n.translate('visTypePie.function.dimension.metric', {
             defaultMessage: 'Slice size',
           }),
         ],
         [
           args.buckets,
-          i18n.translate('visTypePie.function.args.labelsHelpText', {
+          i18n.translate('visTypePie.function.adimension.buckets', {
             defaultMessage: 'Slice',
           }),
         ],
         [
           args.splitColumn,
-          i18n.translate('visTypePie.function.args.labelsHelpText', {
-            defaultMessage: 'Column Split',
+          i18n.translate('visTypePie.function.dimension.splitcolumn', {
+            defaultMessage: 'Column split',
           }),
         ],
         [
           args.splitRow,
-          i18n.translate('visTypePie.function.args.labelsHelpText', {
-            defaultMessage: 'Row Split',
+          i18n.translate('visTypePie.function.dimension.splitrow', {
+            defaultMessage: 'Row split',
           }),
         ],
       ]);
