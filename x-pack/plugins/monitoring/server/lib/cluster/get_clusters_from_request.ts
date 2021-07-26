@@ -200,9 +200,10 @@ export async function getClustersFromRequest(
           cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid === logstash.clusterUuid
       );
       // withhold LS overview stats until there is at least 1 pipeline
-      if (logstash.clusterUuid !== clusterUuid && pipelines.length) {
-        set(clusters[clusterIndex], 'logstash', logstash.stats);
+      if (logstash.clusterUuid === clusterUuid && !pipelines.length) {
+        Reflect.set(logstash.stats, {});
       }
+      set(clusters[clusterIndex], 'logstash', logstash.stats);
     });
   }
 
