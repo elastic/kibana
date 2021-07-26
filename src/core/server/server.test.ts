@@ -21,12 +21,9 @@ import {
   mockStatusService,
   mockLoggingService,
   mockI18nService,
-<<<<<<< HEAD
-  mockDeprecationService,
-=======
   mockEnvironmentService,
   mockPrebootService,
->>>>>>> 2392b4f24a2358621a5d841f451efe40f64275ba
+  mockDeprecationService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';

@@ -96,15 +96,14 @@ jest.doMock('./i18n/i18n_service', () => ({
   I18nService: jest.fn(() => mockI18nService),
 }));
 
-<<<<<<< HEAD
-import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-export const mockDeprecationService = deprecationsServiceMock.create();
-jest.doMock('./deprecations/deprecations_service', () => ({
-  DeprecationsService: jest.fn(() => mockDeprecationService),
-=======
 import { prebootServiceMock } from './preboot/preboot_service.mock';
 export const mockPrebootService = prebootServiceMock.create();
 jest.doMock('./preboot/preboot_service', () => ({
   PrebootService: jest.fn(() => mockPrebootService),
->>>>>>> 2392b4f24a2358621a5d841f451efe40f64275ba
+}));
+
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export const mockDeprecationService = deprecationsServiceMock.create();
+jest.doMock('./deprecations/deprecations_service', () => ({
+  DeprecationsService: jest.fn(() => mockDeprecationService),
 }));
