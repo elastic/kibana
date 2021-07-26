@@ -133,6 +133,12 @@ function createRoot() {
           },
         ],
       },
+      xpack: {
+        reporting: {
+          // browser install causes issues with Jest
+          capture: { browser: { autoDownload: false } },
+        },
+      },
     },
     {
       oss: false,
