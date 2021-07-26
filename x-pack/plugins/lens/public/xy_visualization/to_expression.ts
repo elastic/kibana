@@ -8,9 +8,10 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { State, ValidLayer, XYLayerConfig } from './types';
+import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
+import { ValidLayer, XYLayerConfig } from '../../common/expressions';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -142,6 +143,18 @@ export const buildExpression = (
                       ? [state.legend.showSingleSeries]
                       : [],
                     position: [state.legend.position],
+                    isInside: state.legend.isInside ? [state.legend.isInside] : [],
+                    horizontalAlignment: state.legend.horizontalAlignment
+                      ? [state.legend.horizontalAlignment]
+                      : [],
+                    verticalAlignment: state.legend.verticalAlignment
+                      ? [state.legend.verticalAlignment]
+                      : [],
+                    // ensure that even if the user types more than 5 columns
+                    // we will only show 5
+                    floatingColumns: state.legend.floatingColumns
+                      ? [Math.min(5, state.legend.floatingColumns)]
+                      : [],
                   },
                 },
               ],

@@ -81,6 +81,7 @@ export class AlertingAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly exemptConsumerIds: string[];
+  private readonly spaceId: Promise<string | undefined>;
 
   constructor({
     alertTypeRegistry,
@@ -100,6 +101,8 @@ export class AlertingAuthorization {
     // An example of this is the Rules Management `consumer` as we don't want to have to
     // manually authorize each rule type in the management UI.
     this.exemptConsumerIds = exemptConsumerIds;
+
+    this.spaceId = getSpace(request).then((maybeSpace) => maybeSpace?.id);
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -136,6 +139,10 @@ export class AlertingAuthorization {
 
   private shouldCheckAuthorization(): boolean {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
+  }
+
+  public async getSpaceId(): Promise<string | undefined> {
+    return this.spaceId;
   }
 
   /*
