@@ -149,7 +149,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
         ruleTypeId: RULE_ID,
         spaceIds: SPACE_IDS,
       },
-      includeSpaceId: true,
     });
 
   return from(getAuthFilter()).pipe(

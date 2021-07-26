@@ -190,7 +190,6 @@ const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
-  includeSpaceId: false,
 };
 export class RulesClient {
   private readonly logger: Logger;

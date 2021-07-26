@@ -40,7 +40,6 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-          includeSpaceId: false,
         },
         'space1'
       )
@@ -76,7 +75,6 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-          includeSpaceId: false,
         },
         'space1'
       )
@@ -149,7 +147,6 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-          includeSpaceId: false,
         },
         'space1'
       )
@@ -160,7 +157,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
     );
   });
 
-  test('constructs KQL filter with spaceId filter when "includeSpaceId" is true', async () => {
+  test('constructs KQL filter with spaceId filter when spaceIds field path exists', async () => {
     expect(
       asFiltersByRuleTypeAndConsumer(
         new Set([
@@ -206,7 +203,6 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             consumer: 'consumer-field',
             spaceIds: 'path.to.spaceIds',
           },
-          includeSpaceId: true,
         },
         'space1'
       )
@@ -217,7 +213,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
     );
   });
 
-  test('constructs KQL filter without spaceId filter when "includeSpaceId" is true, but spaceId is undefined', async () => {
+  test('constructs KQL filter without spaceId filter when spaceIds path is specified, but spaceId is undefined', async () => {
     expect(
       asFiltersByRuleTypeAndConsumer(
         new Set([
@@ -263,7 +259,6 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             consumer: 'consumer-field',
             spaceIds: 'path.to.spaceIds',
           },
-          includeSpaceId: true,
         },
         undefined
       )
@@ -301,7 +296,6 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-          includeSpaceId: false,
         },
         'space1'
       )
@@ -364,7 +358,6 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-          includeSpaceId: false,
         },
         'space1'
       )
@@ -469,7 +462,6 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-          includeSpaceId: false,
         },
         'space1'
       )
@@ -623,7 +615,6 @@ describe('asFiltersBySpaceId', () => {
             consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
-          includeSpaceId: true,
         },
         'space1'
       )
@@ -642,7 +633,6 @@ describe('asFiltersBySpaceId', () => {
             consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
-          includeSpaceId: true,
         },
         'space1'
       )
@@ -658,14 +648,13 @@ describe('asFiltersBySpaceId', () => {
             ruleTypeId: 'path.to.rule.id',
             consumer: 'consumer-field',
           },
-          includeSpaceId: true,
         },
         'space1'
       )
     ).toBeUndefined();
   });
 
-  test('returns undefined if "includeSpaceId" is false', () => {
+  test('returns undefined if spaceId is undefined', () => {
     expect(
       asFiltersBySpaceId(
         {
@@ -675,24 +664,9 @@ describe('asFiltersBySpaceId', () => {
             consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
-          includeSpaceId: false,
         },
-        'space1'
+        undefined
       )
-    ).toBeUndefined();
-  });
-
-  test('returns undefined if no spaceId is provided', () => {
-    expect(
-      asFiltersBySpaceId({
-        type: AlertingAuthorizationFilterType.ESDSL,
-        fieldNames: {
-          ruleTypeId: 'path.to.rule.id',
-          consumer: 'consumer-field',
-          spaceIds: 'path.to.space.id',
-        },
-        includeSpaceId: true,
-      })
     ).toBeUndefined();
   });
 });

@@ -19,7 +19,6 @@ export enum AlertingAuthorizationFilterType {
 export interface AlertingAuthorizationFilterOpts {
   type: AlertingAuthorizationFilterType;
   fieldNames: AlertingAuthorizationFilterFieldNames;
-  includeSpaceId: boolean;
 }
 
 interface AlertingAuthorizationFilterFieldNames {
@@ -53,7 +52,7 @@ export function asFiltersByRuleTypeAndConsumer(
         ),
       ];
 
-      if (opts.includeSpaceId && opts.fieldNames.spaceIds != null && spaceId != null) {
+      if (opts.fieldNames.spaceIds != null && spaceId != null) {
         andNodes.push(nodeBuilder.is(opts.fieldNames.spaceIds, spaceId));
       }
 
@@ -77,15 +76,17 @@ export function asFiltersBySpaceId(
   opts: AlertingAuthorizationFilterOpts,
   spaceId: string | undefined
 ): KueryNode | JsonObject | undefined {
-  const filterBySpace = opts.includeSpaceId && opts.fieldNames.spaceIds != null && spaceId != null;
-  const kueryNode = nodeBuilder.is(opts.fieldNames.spaceIds, spaceId);
+  if (opts.fieldNames.spaceIds != null && spaceId != null) {
+    const kueryNode = nodeBuilder.is(opts.fieldNames.spaceIds, spaceId);
 
-  if (filterBySpace && opts.type === AlertingAuthorizationFilterType.ESDSL) {
-    return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
-  }
-
-  if (filterBySpace && opts.type === AlertingAuthorizationFilterType.KQL) {
-    return kueryNode;
+    switch (opts.type) {
+      case AlertingAuthorizationFilterType.ESDSL:
+        return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
+      case AlertingAuthorizationFilterType.KQL:
+        return kueryNode;
+      default:
+        return undefined;
+    }
   }
 
   return undefined;

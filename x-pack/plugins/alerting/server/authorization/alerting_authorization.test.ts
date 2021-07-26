@@ -958,7 +958,6 @@ describe('AlertingAuthorization', () => {
           ruleTypeId: 'ruleId',
           consumer: 'consumer',
         },
-        includeSpaceId: false,
       });
       expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
       expect(filter).toEqual(undefined);
@@ -981,7 +980,6 @@ describe('AlertingAuthorization', () => {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
-          includeSpaceId: false,
         }
       );
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
@@ -1018,7 +1016,6 @@ describe('AlertingAuthorization', () => {
               ruleTypeId: 'path.to.rule.id',
               consumer: 'consumer-field',
             },
-            includeSpaceId: false,
           })
         ).filter
       ).toEqual(
@@ -1082,7 +1079,6 @@ describe('AlertingAuthorization', () => {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
-          includeSpaceId: false,
         }
       );
       expect(() => {
@@ -1157,7 +1153,6 @@ describe('AlertingAuthorization', () => {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
-          includeSpaceId: false,
         }
       );
       expect(() => {
@@ -1234,7 +1229,6 @@ describe('AlertingAuthorization', () => {
           ruleTypeId: 'ruleId',
           consumer: 'consumer',
         },
-        includeSpaceId: false,
       });
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
@@ -1278,18 +1272,17 @@ describe('AlertingAuthorization', () => {
         getSpaceId,
         exemptConsumerIds,
       });
-      const {
-        filter,
-        ensureRuleTypeIsAuthorized,
-      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alerts, {
-        type: AlertingAuthorizationFilterType.ESDSL,
-        fieldNames: {
-          ruleTypeId: 'ruleId',
-          consumer: 'consumer',
-          spaceIds: 'path.to.space.id',
-        },
-        includeSpaceId: true,
-      });
+      const { filter } = await alertAuthorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: {
+            ruleTypeId: 'ruleId',
+            consumer: 'consumer',
+            spaceIds: 'path.to.space.id',
+          },
+        }
+      );
 
       expect(filter).toEqual({
         bool: { minimum_should_match: 1, should: [{ match: { 'path.to.space.id': 'space1' } }] },
