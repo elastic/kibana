@@ -236,6 +236,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
 
 export const NOTE_URL = '/api/note';
 export const PINNED_EVENT_URL = '/api/pinned_event';
+export const SOURCERER_API_URL = '/api/sourcerer';
 
 /**
  * Default signals index key for kibana.dev.yml

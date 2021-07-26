@@ -56,6 +56,8 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { createSourcererIndexPatternRoute } from '../lib/sourcerer/routes';
+import { IndexPatternsServiceStart } from '../../../../../src/plugins/data/server/index_patterns';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -63,7 +65,8 @@ export const initRoutes = (
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
-  ruleDataClient: RuleDataClient | null
+  ruleDataClient: RuleDataClient | null,
+  indexPatternService: IndexPatternsServiceStart
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -126,4 +129,7 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
+
+  // Sourcerer API to generate default pattern
+  createSourcererIndexPatternRoute(router, indexPatternService);
 };

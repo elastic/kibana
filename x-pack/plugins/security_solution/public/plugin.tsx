@@ -45,6 +45,7 @@ import {
   APP_ICON_SOLUTION,
   DEFAULT_INDEX_PATTERN_ID,
   DEFAULT_TIME_FIELD,
+  SOURCERER_API_URL,
 } from '../common/constants';
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
@@ -344,11 +345,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     defaultIndicesName: string[]
   ): Promise<KibanaIndexPattern> {
     let indexPattern: KibanaIndexPattern;
+    console.log('getKibanaIndexPattern');
     try {
       indexPattern = (await indexPatternsService.get(
         DEFAULT_INDEX_PATTERN_ID
       )) as KibanaIndexPattern; // types are messy here, this is cleanest see property on IndexPatternsService.savedObjectsCache
     } catch (e) {
+      console.log('ERR', e);
       indexPattern = (await indexPatternsService.createAndSave({
         id: DEFAULT_INDEX_PATTERN_ID,
         title: defaultIndicesName.join(','),
@@ -377,6 +380,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.getKibanaIndexPattern(startPlugins.data.indexPatterns, defaultIndicesName),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
       ]);
+      const heyo = await coreStart.http.fetch(
+        `${SOURCERER_API_URL}?patterns=${defaultIndicesName}`,
+        {
+          method: 'GET',
+        }
+      );
+      debugger;
 
       let signal: { name: string | null } = { name: null };
       try {

@@ -251,15 +251,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    // TO DO We need to get the endpoint routes inside of initRoutes
-    initRoutes(
-      router,
-      config,
-      plugins.encryptedSavedObjects?.canEncrypt === true,
-      plugins.security,
-      plugins.ml,
-      ruleDataClient
-    );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router);
@@ -318,6 +309,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     core.getStartServices().then(([_, depsStart]) => {
+      // TO DO We need to get the endpoint routes inside of initRoutes
+      initRoutes(
+        router,
+        config,
+        plugins.encryptedSavedObjects?.canEncrypt === true,
+        plugins.security,
+        plugins.ml,
+        ruleDataClient,
+        depsStart.data.indexPatterns
+      );
+
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext
