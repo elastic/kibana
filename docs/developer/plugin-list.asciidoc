@@ -81,7 +81,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_metric/README.md[expressionMetric]
-|Expression Metric plugin adds an metric renderer to the expression plugin. @todo write a description.
+|Expression Metric plugin adds a metric renderer and function to the expression plugin.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
