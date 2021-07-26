@@ -30,9 +30,6 @@ export class TrackApplicationViewComponent extends React.Component<Props> {
     const { applicationUsageTracker, viewId } = this.props;
     if (applicationUsageTracker) {
       applicationUsageTracker.trackApplicationViewUsage(viewId);
-      setTimeout(() => {
-        this.parentNode = ReactDOM.findDOMNode(this)?.parentNode;
-      });
       document.addEventListener('click', this.onClick);
     }
   }

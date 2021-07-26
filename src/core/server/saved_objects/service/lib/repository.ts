@@ -1706,7 +1706,13 @@ export class SavedObjectsRepository {
 
     const normalizedCounterFields = counterFields.map((counterField) => {
       const fieldName = typeof counterField === 'string' ? counterField : counterField.fieldName;
-      const incrementBy = typeof counterField === 'string' ? 1 : counterField.incrementBy || 1;
+      const incrementBy =
+        typeof counterField === 'string'
+          ? 1
+          : typeof counterField.incrementBy === 'number'
+          ? counterField.incrementBy
+          : 1;
+
       return {
         fieldName,
         incrementBy: initialize ? 0 : incrementBy,
