@@ -208,6 +208,7 @@ a map showing the count of anomalies by location is displayed in the *Anomaly Ex
 [role="screenshot"]
 image::user/images/new-ml-choropleth-map.png[Canvas Elasticsearch SQL expression function]
 
+For more details, see {ml-docs}/mapping-anomalies.html[Mapping anomalies by location].
 [float]
 ==== Delayed data visualization for anomaly detection
 
