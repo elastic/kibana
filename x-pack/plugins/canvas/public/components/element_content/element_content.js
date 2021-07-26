@@ -15,7 +15,6 @@ import { ElementShareContainer } from '../element_share_container';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 
-// const isLoading = (renderable, state) => !state || !renderable;
 const isLoading = (renderable, state) => !state || !renderable;
 
 const isNotValidForRendering = (renderable, renderFunction) =>
