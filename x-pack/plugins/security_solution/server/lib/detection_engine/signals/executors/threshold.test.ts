@@ -16,6 +16,7 @@ import { getEntryListMock } from '../../../../../../lists/common/schemas/types/e
 import { getThresholdRuleParams } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
 import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';
@@ -70,6 +71,7 @@ describe('threshold_executor', () => {
         rule: thresholdSO,
         tuple,
         exceptionItems,
+        experimentalFeatures: allowedExperimentalValues,
         services: alertServices,
         version,
         logger,
