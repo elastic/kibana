@@ -13,7 +13,7 @@ get:
                 $ref: ../components/schemas/package_policy.yaml
             required:
               - item
-  operationId: get-packagePolicies-packagePolicyId
+  operationId: get-package-policy
 parameters:
   - schema:
       type: string
@@ -22,7 +22,7 @@ parameters:
     required: true
 put:
   summary: Package policy - Update
-  operationId: put-packagePolicies-packagePolicyId
+  operationId: update-package-policy
   requestBody:
     content:
       application/json:
