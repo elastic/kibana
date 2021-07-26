@@ -17,13 +17,7 @@ import { setupFleetAndAgents } from '../agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
   const esArchiver = getService('esArchiver');
-
-  const server = dockerServers.get('registry');
-  // use function () {} and not () => {} here
-  // because `this` has to point to the Mocha context
-  // see https://mochajs.org/#arrow-functions
 
   describe('Package Policy - upgrade', async function () {
     skipIfNoDockerRegistry(providerContext);
@@ -37,57 +31,10 @@ export default function (providerContext: FtrProviderContext) {
 
     setupFleetAndAgents(providerContext);
 
-    before(async function () {
-      if (!server.enabled) {
-        return;
-      }
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test policy',
-          namespace: 'default',
-        });
-
-      agentPolicyId = agentPolicyResponse.item.id;
-
-      const { body: packagePolicyResponse } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'multiple_versions_1',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          output_id: '',
-          inputs: [],
-          package: {
-            name: 'multiple_versions',
-            title: 'This is a test package for installing or updating a package',
-            version: '0.1.0',
-          },
-        });
-
-      packagePolicyId = packagePolicyResponse.item.id;
-    });
-
-    after(async function () {
-      await supertest
-        .post(`/api/fleet/agent_policies/delete`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ agentPolicyId });
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    describe('when package is installed', async function () {
+    describe('when package is installed', function () {
       before(async function () {
         await supertest
-          .post(`/api/fleet/epm/packages/multiple_versions-0.3.0`)
+          .post(`/api/fleet/epm/packages/package_policy_upgrade-0.3.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
@@ -95,8 +42,58 @@ export default function (providerContext: FtrProviderContext) {
 
       after(async function () {
         await supertest
-          .delete(`/api/fleet/epm/packages/multiple_version-0.3.0`)
-          .set('kbn-xsrf', 'xxxx');
+          .delete(`/api/fleet/epm/packages/package_policy_upgrade-0.3.0`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      beforeEach(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'package_policy_upgrade_1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'package_policy_upgrade',
+              title: 'This is a test package for upgrading package policies',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
       });
 
       it('should return valid diff when "dryRun: true" is provided', async function () {
@@ -131,6 +128,127 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.length).to.be(1);
         expect(body[0].success).to.be(true);
+      });
+    });
+
+    describe('when upgrading to a version where an input has been removed', function () {
+      before(async function () {
+        await supertest
+          .post(`/api/fleet/epm/packages/package_policy_upgrade-0.3.0`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      after(async function () {
+        await supertest
+          .delete(`/api/fleet/epm/packages/package_policy_upgrade-0.3.0`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      beforeEach(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'package_policy_upgrade_1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [
+              {
+                policy_template: 'package_policy_upgrade',
+                type: 'test_input',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'test-package_policy_upgrade-xxxx',
+                    enabled: true,
+                    data_stream: {
+                      type: 'test_stream',
+                      dataset: 'package_policy_upgrade.test',
+                    },
+                    vars: {
+                      test_var: {
+                        value: 'Test Value',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: {
+              name: 'package_policy_upgrade',
+              title: 'This is a test package for upgrading package policies',
+              // The upgrade from `0.2.0` to `0.3.0` incurs an error state because a breaking
+              // change exists between these test package version
+              version: '0.2.0',
+            },
+          });
+
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
+      });
+
+      describe('when "dryRun: true" is provided', function () {
+        it('should return a diff with errors', async function () {
+          const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+              dryRun: true,
+            })
+            .expect(200);
+
+          expect(body.length).to.be(1);
+          expect(body[0].diff?.length).to.be(2);
+          expect(body[0].hasErrors).to.be(true);
+        });
+      });
+
+      describe('when "dryRun: false" is provided', function () {
+        it('should respond with an error', async function () {
+          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+              dryRun: false,
+            })
+            .expect(200);
+
+          expect(body.length).to.be(1);
+          expect(body[0].success).to.be(false);
+        });
       });
     });
 
