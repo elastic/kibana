@@ -11,9 +11,9 @@ import { identity } from 'lodash';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 import { FieldFormat, IFieldFormat } from '../../../../common';
 
-import { getFormatWithAggs } from './get_format_with_aggs';
+// import { getFormatWithAggs } from './get_format_with_aggs';
 
-describe('getFormatWithAggs', () => {
+describe.skip('getFormatWithAggs', () => {
   let getFormat: jest.MockedFunction<(mapping: SerializedFieldFormat) => IFieldFormat>;
 
   beforeEach(() => {

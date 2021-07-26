@@ -30,7 +30,7 @@ export class FieldFormatsRegistry {
   protected defaultMap: Record<string, FieldFormatConfig> = {};
   protected metaParamsOptions: Record<string, any> = {};
   protected getConfig?: FieldFormatsGetConfigFn;
-  // overriden on the public contract
+
   public deserialize: FormatFactory = (mapping?: SerializedFieldFormat) => {
     if (!mapping) {
       return new (FieldFormat.from(identity))();
@@ -215,7 +215,8 @@ export class FieldFormatsRegistry {
   }
 
   /**
-   * Get filtered list of field formats by format type
+   * Get filtered list of field formats by format type,
+   * Skips hidden field formats
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @return {FieldFormatInstanceType[]}
@@ -223,7 +224,8 @@ export class FieldFormatsRegistry {
   getByFieldType(fieldType: KBN_FIELD_TYPES): FieldFormatInstanceType[] {
     return [...this.fieldFormats.values()]
       .filter(
-        (format: FieldFormatInstanceType) => format && format.fieldType.indexOf(fieldType) !== -1
+        (format: FieldFormatInstanceType) =>
+          format && !format.hidden && format.fieldType.indexOf(fieldType) !== -1
       )
       .map(
         (format: FieldFormatInstanceType) =>
@@ -253,7 +255,14 @@ export class FieldFormatsRegistry {
   }
 
   register(fieldFormats: FieldFormatInstanceType[]) {
-    fieldFormats.forEach((fieldFormat) => this.fieldFormats.set(fieldFormat.id, fieldFormat));
+    fieldFormats.forEach((fieldFormat) => {
+      if (this.fieldFormats.has(fieldFormat.id))
+        throw new Error(
+          `Fail to register fieldFormat with id "${fieldFormat.id}" as it is already registered`
+        );
+
+      this.fieldFormats.set(fieldFormat.id, fieldFormat);
+    });
   }
 
   /**
