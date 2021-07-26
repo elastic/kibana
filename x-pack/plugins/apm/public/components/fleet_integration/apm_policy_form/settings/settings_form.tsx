@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import {
   EuiDescribedFormGroup,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -15,135 +13,115 @@ import {
   EuiIcon,
   EuiLink,
   EuiPanel,
-  EuiSwitch,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { PackagePolicyVars } from '../typings';
-import { FormRowField } from './form_row_field';
-
-interface AdvancedOptionsField {
-  type: 'advanced_option';
-  fields: Field[];
-}
-
-export interface Settings {
-  title: string;
-  subtitle: string;
-  requiredErrorMessage?: string;
-  fields: SettingsField[];
-}
-
-export interface Field {
-  type: 'text' | 'bool' | 'select' | 'area' | 'integer';
-  key: string;
-  title?: string;
-  description?: string;
-  label?: string;
-  helpText?: string;
-  required: boolean;
-  fields?: SettingsField[];
-  prependIcon?: string;
-  validation?: t.Type<any, string, unknown>;
-}
-
-type SettingsField = Field | AdvancedOptionsField;
+import { FormRowSetting } from './form_row_setting';
+import { SettingDefinition } from './types';
+import { validateSettingValue } from './utils';
 
 export type FormRowOnChange = (key: string, value: any) => void;
 
-interface Props {
-  settings: Settings;
-  vars?: PackagePolicyVars;
-  onChange: FormRowOnChange;
-}
-
 function FormRow({
-  field,
+  setting,
   vars,
   onChange,
-  requiredErrorMessage,
 }: {
-  field: SettingsField;
+  setting: SettingDefinition;
   vars?: PackagePolicyVars;
   onChange: FormRowOnChange;
-  requiredErrorMessage?: string;
 }) {
-  if (field.type === 'advanced_option') {
+  if (setting.type === 'advanced_option') {
     return (
       <AdvancedOptions>
-        {field.fields.map((advancedField) =>
+        {setting.settings.map((advancedSetting) =>
           FormRow({
-            field: advancedField,
+            setting: advancedSetting,
             vars,
             onChange,
-            requiredErrorMessage,
           })
         )}
       </AdvancedOptions>
     );
   } else {
-    const value = vars?.[field.key]?.value;
-    const isInvalid = field.required && !value;
+    const { key } = setting;
+    const value = vars?.[key]?.value;
+    const { isValid, message } = validateSettingValue(setting, value);
     return (
-      <React.Fragment key={field.key}>
+      <React.Fragment key={key}>
         <EuiDescribedFormGroup
-          title={<h3>{field.title}</h3>}
-          description={field.description}
+          title={<h3>{setting.rowTitle}</h3>}
+          description={setting.rowDescription}
         >
           <EuiFormRow
-            label={field.label}
-            isInvalid={isInvalid}
-            error={isInvalid ? requiredErrorMessage : undefined}
-            helpText={<EuiText size="xs">{field.helpText}</EuiText>}
+            label={setting.label}
+            isInvalid={!isValid}
+            error={isValid ? undefined : message}
+            helpText={<EuiText size="xs">{setting.helpText}</EuiText>}
             labelAppend={
               <EuiText size="xs" color="subdued">
-                {field.required ? 'Required' : 'Optional'}
+                {setting.labelAppend}
               </EuiText>
             }
           >
-            <FormRowField field={field} onChange={onChange} value={value} />
+            <FormRowSetting
+              setting={setting}
+              onChange={onChange}
+              value={value}
+            />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-        {field.fields &&
+        {setting.settings &&
           value &&
-          field.fields.map((childField) =>
+          setting.settings.map((childSettings) =>
             FormRow({
-              field: childField,
+              setting: childSettings,
               vars,
               onChange,
-              requiredErrorMessage,
             })
           )}
       </React.Fragment>
     );
   }
 }
+interface Props {
+  title: string;
+  subtitle: string;
+  settings: SettingDefinition[];
+  vars?: PackagePolicyVars;
+  onChange: FormRowOnChange;
+}
 
-export function SettingsForm({ settings, vars, onChange }: Props) {
+export function SettingsForm({
+  title,
+  subtitle,
+  settings,
+  vars,
+  onChange,
+}: Props) {
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h4>{settings.title}</h4>
+            <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" color="subdued">
-            {settings.subtitle}
+            {subtitle}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
 
-      {settings.fields.map((field) => {
+      {settings.map((setting) => {
         return FormRow({
-          field,
+          setting,
           vars,
           onChange,
-          requiredErrorMessage: settings.requiredErrorMessage,
         });
       })}
     </EuiPanel>

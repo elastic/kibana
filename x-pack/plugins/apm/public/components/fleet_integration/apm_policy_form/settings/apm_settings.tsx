@@ -4,157 +4,171 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
 import React from 'react';
+import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
+import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
-import { Field, Settings, SettingsForm } from './settings_form';
-import { handleFormChange } from './utils';
+import { SettingsForm } from './settings_form';
+import { SettingDefinition } from './types';
+import {
+  handleFormChange,
+  isSettingsFormValid,
+  OPTIONAL_LABEL,
+  REQUIRED_LABEL,
+} from './utils';
 
-const basicFields: Field[] = [
+const basicSettings: SettingDefinition[] = [
   {
+    type: 'text',
     key: 'host',
-    type: 'text',
-    required: true,
+    labelAppend: REQUIRED_LABEL,
     label: 'Host',
-    title: 'Server configuration',
-    description:
+    rowTitle: 'Server configuration',
+    rowDescription:
       'Choose a name and description to help identify how this integration will be used.',
-  },
-  {
-    key: 'url',
-    type: 'text',
     required: true,
-    label: 'URL',
   },
   {
+    type: 'text',
+    key: 'url',
+    labelAppend: REQUIRED_LABEL,
+    label: 'URL',
+    required: true,
+  },
+  {
+    type: 'text',
+    key: 'secret_token',
+    labelAppend: OPTIONAL_LABEL,
+    label: 'Secret token',
+  },
+  {
+    type: 'boolean',
     key: 'api_key_enabled',
-    type: 'bool',
-    required: false,
-    label: 'API key for agent authentication',
+    labelAppend: OPTIONAL_LABEL,
+    placeholder: 'API key for agent authentication',
     helpText: 'Enable API Key auth between APM Server and APM Agents.',
   },
 ];
 
-const advancedFields: Field[] = [
+const advancedSettings: SettingDefinition[] = [
   {
     key: 'max_header_bytes',
     type: 'integer',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: "Maximum size of a request's header (bytes)",
-    title: 'Limits',
-    description:
+    rowTitle: 'Limits',
+    rowDescription:
       'Set limits on request headers sizes and timing configurations.',
+    validation: getIntegerRt({ min: 1 }),
   },
   {
     key: 'idle_timeout',
     type: 'text',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Idle time before underlying connection is closed',
+    validation: getDurationRt({ min: '1ms' }),
   },
   {
     key: 'read_timeout',
     type: 'text',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Maximum duration for reading an entire request',
+    validation: getDurationRt({ min: '1ms' }),
   },
   {
     key: 'shutdown_timeout',
     type: 'text',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Maximum duration before releasing resources when shutting down',
+    validation: getDurationRt({ min: '1ms' }),
   },
   {
     key: 'write_timeout',
     type: 'text',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Maximum duration for writing a response',
+    validation: getDurationRt({ min: '1ms' }),
   },
   {
     key: 'max_event_bytes',
     type: 'integer',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Maximum size per event (bytes)',
+    validation: getIntegerRt({ min: 1 }),
   },
   {
     key: 'max_connections',
     type: 'integer',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Simultaneously accepted connections',
+    validation: getIntegerRt({ min: 1 }),
   },
   {
     key: 'response_headers',
     type: 'area',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Custom HTTP headers added to HTTP responses',
     helpText: 'Might be used for security policy compliance.',
-    title: 'Custom headers',
-    description:
+    rowTitle: 'Custom headers',
+    rowDescription:
       'Set limits on request headers sizes and timing configurations.',
   },
   {
     key: 'api_key_limit',
     type: 'integer',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Number of keys',
     helpText: 'Might be used for security policy compliance.',
-    title: 'Maximum number of API keys of Agent authentication',
-    description:
+    rowTitle: 'Maximum number of API keys of Agent authentication',
+    rowDescription:
       'Restrict number of unique API keys per minute, used for auth between aPM Agents and Server.',
+    validation: getIntegerRt({ min: 1 }),
   },
   {
     key: 'capture_personal_data',
-    type: 'bool',
-    required: false,
-    title: 'Capture personal data',
-    description: 'Capture personal data such as IP or User Agent',
+    type: 'boolean',
+    rowTitle: 'Capture personal data',
+    rowDescription: 'Capture personal data such as IP or User Agent',
   },
   {
     key: 'default_service_environment',
     type: 'text',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
     label: 'Default Service Environment',
-    title: 'Service configuration',
-    description:
+    rowTitle: 'Service configuration',
+    rowDescription:
       'Default service environment to record in events which have no service environment defined.',
   },
   {
     key: 'expvar_enabled',
-    type: 'bool',
-    required: false,
-    title: 'Enable APM Server Golang expvar support',
-    description: 'Exposed under /debug/vars',
+    type: 'boolean',
+    labelAppend: OPTIONAL_LABEL,
+    rowTitle: 'Enable APM Server Golang expvar support',
+    rowDescription: 'Exposed under /debug/vars',
   },
 ];
 
-const apmSettings: Settings = {
-  title: 'General',
-  subtitle: 'Settings for the APM integration.',
-  requiredErrorMessage: 'Required field',
-  fields: [
-    ...basicFields,
-    {
-      type: 'advanced_option',
-      fields: advancedFields,
-    },
-  ],
-};
-
-const apmFields = [...basicFields, ...advancedFields];
-
+const apmFields = [...basicSettings, ...advancedSettings];
 function validateAPMForm(vars: PackagePolicyVars) {
-  return apmFields
-    .filter((field) => field.required)
-    .every((field) => !isEmpty(vars[field.key].value));
+  return isSettingsFormValid(apmFields, vars);
 }
+
+const advancedOptionsSettings: SettingDefinition = {
+  key: 'advanced_option',
+  type: 'advanced_option',
+  settings: advancedSettings,
+};
+const apmSettings = [...basicSettings, advancedOptionsSettings];
 
 interface Props {
   vars: PackagePolicyVars;
   onChange: OnFormChangeFn;
 }
-
 export function APMSettingsForm({ vars, onChange }: Props) {
   return (
     <SettingsForm
+      title="General"
+      subtitle="Settings for the APM integration."
       settings={apmSettings}
       vars={vars}
       onChange={(key, value) => {

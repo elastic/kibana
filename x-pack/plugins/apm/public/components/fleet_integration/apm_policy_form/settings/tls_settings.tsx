@@ -5,72 +5,67 @@
  * 2.0.
  */
 import React from 'react';
-import { isEmpty } from 'lodash';
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
-import { Settings, Field, SettingsForm } from './settings_form';
-import { handleFormChange } from './utils';
+import { SettingsForm } from './settings_form';
+import { SettingDefinition } from './types';
+import {
+  handleFormChange,
+  isSettingsFormValid,
+  REQUIRED_LABEL,
+  OPTIONAL_LABEL,
+} from './utils';
 
-const basicFields: Field[] = [
+const basicsettings: SettingDefinition[] = [
   {
     key: 'tls_certificate',
     type: 'text',
-    title: 'TLS certificate',
+    rowTitle: 'TLS certificate',
     label: 'File path to server certificate',
+    labelAppend: REQUIRED_LABEL,
     required: true,
   },
   {
     key: 'tls_key',
     type: 'text',
     label: 'File path to server certificate key',
+    labelAppend: REQUIRED_LABEL,
     required: true,
   },
   {
     key: 'tls_supported_protocols',
-    type: 'text',
+    type: 'combo',
     label: 'Supported protocol versions',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
   },
   {
     key: 'tls_cipher_suites',
-    type: 'text',
+    type: 'combo',
     label: 'Cipher suites for TLS connections',
     helpText: 'Not configurable for TLS 1.3.',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
   },
   {
     key: 'tls_curve_types',
-    type: 'text',
+    type: 'combo',
     label: 'Curve types for ECDHE based cipher suites',
-    required: false,
+    labelAppend: OPTIONAL_LABEL,
   },
 ];
 
 const TLS_ENABLED_KEY = 'tls_enabled';
-const tlsSettings: Settings = {
-  title: 'TLS Settings',
-  subtitle: 'Settings for TLS certification.',
-  requiredErrorMessage: 'Required when TLS is enabled',
-  fields: [
-    {
-      key: TLS_ENABLED_KEY,
-      title: 'Enable TLS',
-      type: 'bool',
-      required: false,
-      fields: basicFields,
-    },
-  ],
-};
+const tlsSettings: SettingDefinition[] = [
+  {
+    key: TLS_ENABLED_KEY,
+    rowTitle: 'Enable TLS',
+    type: 'boolean',
+    settings: basicsettings,
+  },
+];
 
-const tlsFields = basicFields;
-
+const tlsFields = basicsettings;
 function validateTLSForm(vars: PackagePolicyVars) {
-  // if TLS is disable it means that its form is valid
-  if (!vars[TLS_ENABLED_KEY].value) {
-    return true;
-  }
-  return tlsFields
-    .filter((field) => field.required)
-    .every((field) => !isEmpty(vars[field.key].value));
+  // only validates TLS when its flag is enabled
+  return !vars[TLS_ENABLED_KEY].value || isSettingsFormValid(tlsFields, vars);
 }
 
 interface Props {
@@ -81,6 +76,8 @@ interface Props {
 export function TLSSettingsForm({ vars, onChange }: Props) {
   return (
     <SettingsForm
+      title="TLS Settings"
+      subtitle="Settings for TLS certification."
       settings={tlsSettings}
       vars={vars}
       onChange={(key, value) => {
