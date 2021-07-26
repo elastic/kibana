@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     [...authorizedInAllSpaces].forEach(({ username, password }) => {
       it(`${username} - should return 200 for authorized users`, async () => {
-        const resp = await supertestWithoutAuth
+        await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix()}${TEST_URL}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     [...unauthorized].forEach(({ username, password }) => {
       it(`${username} - should return 403 for unauthorized users`, async () => {
-        const resp = await supertestWithoutAuth
+        await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix()}${TEST_URL}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')

@@ -8,12 +8,6 @@
 import expect from '@kbn/expect';
 import { JsonObject } from '@kbn/common-utils';
 
-import { TimelineEdges, TimelineNonEcsData } from '../../../../plugins/timelines/common/';
-
-import {
-  createSpacesAndUsers,
-  deleteSpacesAndUsers,
-} from '../../../rule_registry/common/lib/authentication/';
 import {
   Direction,
   TimelineEventsQueries,

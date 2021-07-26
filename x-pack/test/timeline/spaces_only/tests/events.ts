@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { JsonObject } from '@kbn/common-utils';
 
-import { superUser } from '../../../rule_registry/common/lib/authentication/users';
-import type { User } from '../../../rule_registry/common/lib/authentication/types';
 import { FtrProviderContext } from '../../../rule_registry/common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../rule_registry/common/lib/authentication/spaces';
 import {
@@ -25,7 +24,6 @@ export default ({ getService }: FtrProviderContext) => {
   const FROM = '2000-01-01T00:00:00.000Z';
   const TEST_URL = '/internal/search/timelineSearchStrategy/';
   const SPACE1 = 'space1';
-  const SPACE2 = 'space2';
   const OTHER = 'other';
 
   const getPostBody = (): JsonObject => ({
