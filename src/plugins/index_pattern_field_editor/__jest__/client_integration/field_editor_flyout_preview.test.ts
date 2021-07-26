@@ -346,7 +346,7 @@ describe('Field editor Preview panel', () => {
         actions: {
           toggleFormRow,
           fields,
-          waitForUpdates,
+          waitForDocumentsAndPreviewUpdate,
           getLatestPreviewHttpRequest,
           getRenderedFieldsPreview,
         },
@@ -355,8 +355,7 @@ describe('Field editor Preview panel', () => {
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
-      await waitForUpdates(); // fetch documents
-      await waitForUpdates(); // fetch preview
+      await waitForDocumentsAndPreviewUpdate();
       const request = getLatestPreviewHttpRequest(server);
 
       // Make sure the payload sent is correct
@@ -384,7 +383,7 @@ describe('Field editor Preview panel', () => {
 
       const {
         exists,
-        actions: { toggleFormRow, fields, waitForUpdates },
+        actions: { toggleFormRow, fields, waitForUpdates, waitForDocumentsAndPreviewUpdate },
       } = testBed;
 
       await toggleFormRow('value');
@@ -394,8 +393,7 @@ describe('Field editor Preview panel', () => {
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true);
 
-      await waitForUpdates(); // fetch documents
-      await waitForUpdates(); // fetch preview
+      await waitForDocumentsAndPreviewUpdate();
       expect(exists('isUpdatingIndicator')).toBe(false);
     });
 
@@ -404,7 +402,7 @@ describe('Field editor Preview panel', () => {
 
       const {
         exists,
-        actions: { toggleFormRow, fields, waitForUpdates },
+        actions: { toggleFormRow, fields, waitForUpdates, waitForDocumentsAndPreviewUpdate },
       } = testBed;
 
       await toggleFormRow('value');
@@ -412,8 +410,7 @@ describe('Field editor Preview panel', () => {
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true);
-      await waitForUpdates(); // fetch documents
-      await waitForUpdates(); // fetch preview
+      await waitForDocumentsAndPreviewUpdate();
       expect(exists('isUpdatingIndicator')).toBe(false);
 
       await fields.updateName('nameChanged');
@@ -424,13 +421,17 @@ describe('Field editor Preview panel', () => {
     describe('read from _source', () => {
       test('should display the _source value when no script is provided and the name matched one of the fields in _source', async () => {
         const {
-          actions: { toggleFormRow, fields, getRenderedFieldsPreview, waitForUpdates },
+          actions: {
+            toggleFormRow,
+            fields,
+            getRenderedFieldsPreview,
+            waitForDocumentsAndPreviewUpdate,
+          },
         } = testBed;
 
         await toggleFormRow('value');
         await fields.updateName('subTitle');
-        await waitForUpdates();
-        await waitForUpdates();
+        await waitForDocumentsAndPreviewUpdate();
 
         expect(getRenderedFieldsPreview()).toEqual([
           { key: 'subTitle', value: 'First doc - subTitle' },
@@ -479,14 +480,19 @@ describe('Field editor Preview panel', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: [scriptEmitResponse] });
 
       const {
-        actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
+        actions: {
+          toggleFormRow,
+          fields,
+          waitForUpdates,
+          waitForDocumentsAndPreviewUpdate,
+          getRenderedFieldsPreview,
+        },
       } = testBed;
 
       await fields.updateName('myRuntimeField');
       await toggleFormRow('value');
       await fields.updateScript('echo("hello")');
-      await waitForUpdates();
-      await waitForUpdates();
+      await waitForDocumentsAndPreviewUpdate();
 
       // before
       expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'hello' }]);
@@ -507,14 +513,19 @@ describe('Field editor Preview panel', () => {
       const {
         exists,
         find,
-        actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
+        actions: {
+          toggleFormRow,
+          fields,
+          waitForUpdates,
+          waitForDocumentsAndPreviewUpdate,
+          getRenderedFieldsPreview,
+        },
       } = testBed;
 
       await fields.updateName('myRuntimeField');
       await toggleFormRow('value');
       await fields.updateScript('bad()');
-      await waitForUpdates();
-      await waitForUpdates();
+      await waitForDocumentsAndPreviewUpdate();
 
       expect(exists('fieldPreviewItem')).toBe(false);
       expect(exists('indexPatternFieldList')).toBe(false);
@@ -536,13 +547,12 @@ describe('Field editor Preview panel', () => {
         exists,
         find,
         form,
-        actions: { toggleFormRow, fields, waitForUpdates },
+        actions: { toggleFormRow, fields, waitForUpdates, waitForDocumentsAndPreviewUpdate },
       } = testBed;
 
       await fields.updateName('myRuntimeField');
       await toggleFormRow('value');
-      await waitForUpdates();
-      await waitForUpdates();
+      await waitForDocumentsAndPreviewUpdate();
 
       // We will return no document from the search
       setSearchResponse([]);
@@ -630,6 +640,7 @@ describe('Field editor Preview panel', () => {
           toggleFormRow,
           fields,
           waitForUpdates,
+          waitForDocumentsAndPreviewUpdate,
           getRenderedFieldsPreview,
           goToNextDocument,
         },
@@ -638,8 +649,7 @@ describe('Field editor Preview panel', () => {
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello world")');
-      await waitForUpdates();
-      await waitForUpdates();
+      await waitForDocumentsAndPreviewUpdate();
 
       expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'valueDoc1' }]);
 

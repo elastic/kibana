@@ -196,79 +196,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [format, fieldFormats]
   );
 
-  const updatePreview = useCallback(async () => {
-    if (!needToUpdatePreview) {
-      return;
-    }
-
-    setLastExecutePainlessReqParams({
-      type: params.type,
-      script: params.script?.source,
-      documentId: currentDocId,
-    });
-
-    const currentApiCall = ++previewCount.current;
-
-    const response = await getFieldPreview({
-      index: currentDocIndex,
-      document: params.document!,
-      context: `${params.type!}_field` as FieldPreviewContext,
-      script: params.script!,
-    });
-
-    if (currentApiCall !== previewCount.current) {
-      // Discard this response as there is another one inflight
-      // or we have called reset() and don't need the response anymore.
-      return;
-    }
-
-    setIsLoadingPreview(false);
-
-    const { error: serverError } = response;
-
-    if (serverError) {
-      // Server error (not an ES error)
-      const title = i18n.translate('indexPatternFieldEditor.fieldPreview.errorTitle', {
-        defaultMessage: 'Failed to load field preview',
-      });
-      notifications.toasts.addError(serverError, { title });
-
-      return;
-    }
-
-    const data = response.data ?? { values: [], error: {} };
-    const { values, error } = data;
-
-    if (error) {
-      const fallBackError = {
-        message: i18n.translate('indexPatternFieldEditor.fieldPreview.defaultErrorTitle', {
-          defaultMessage: 'Error executing the script.',
-        }),
-      };
-
-      setPreviewResponse({
-        fields: [],
-        error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error, true) ?? fallBackError },
-      });
-    } else {
-      const [value] = values;
-      const formattedValue = valueFormatter(value);
-
-      setPreviewResponse({
-        fields: [{ key: params.name!, value, formattedValue }],
-        error: null,
-      });
-    }
-  }, [
-    needToUpdatePreview,
-    params,
-    currentDocIndex,
-    currentDocId,
-    getFieldPreview,
-    notifications.toasts,
-    valueFormatter,
-  ]);
-
   const fetchSampleDocuments = useCallback(
     async (limit: number = 50) => {
       if (typeof limit !== 'number') {
@@ -375,12 +302,83 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         // Make sure we disable the "Updating..." indicator as we have an error
         // and we won't fetch the preview
         setIsLoadingPreview(false);
-      } else {
-        updatePreview();
       }
     },
-    [indexPattern, search, updatePreview]
+    [indexPattern, search]
   );
+
+  const updatePreview = useCallback(async () => {
+    if (!needToUpdatePreview) {
+      return;
+    }
+
+    setLastExecutePainlessReqParams({
+      type: params.type,
+      script: params.script?.source,
+      documentId: currentDocId,
+    });
+
+    const currentApiCall = ++previewCount.current;
+
+    const response = await getFieldPreview({
+      index: currentDocIndex,
+      document: params.document!,
+      context: `${params.type!}_field` as FieldPreviewContext,
+      script: params.script!,
+    });
+
+    if (currentApiCall !== previewCount.current) {
+      // Discard this response as there is another one inflight
+      // or we have called reset() and don't need the response anymore.
+      return;
+    }
+
+    setIsLoadingPreview(false);
+
+    const { error: serverError } = response;
+
+    if (serverError) {
+      // Server error (not an ES error)
+      const title = i18n.translate('indexPatternFieldEditor.fieldPreview.errorTitle', {
+        defaultMessage: 'Failed to load field preview',
+      });
+      notifications.toasts.addError(serverError, { title });
+
+      return;
+    }
+
+    const data = response.data ?? { values: [], error: {} };
+    const { values, error } = data;
+
+    if (error) {
+      const fallBackError = {
+        message: i18n.translate('indexPatternFieldEditor.fieldPreview.defaultErrorTitle', {
+          defaultMessage: 'Error executing the script.',
+        }),
+      };
+
+      setPreviewResponse({
+        fields: [],
+        error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error, true) ?? fallBackError },
+      });
+    } else {
+      const [value] = values;
+      const formattedValue = valueFormatter(value);
+
+      setPreviewResponse({
+        fields: [{ key: params.name!, value, formattedValue }],
+        error: null,
+      });
+    }
+  }, [
+    needToUpdatePreview,
+    params,
+    currentDocIndex,
+    currentDocId,
+    getFieldPreview,
+    notifications.toasts,
+    valueFormatter,
+  ]);
 
   const goToNextDoc = useCallback(() => {
     if (currentIdx >= totalDocs - 1) {
