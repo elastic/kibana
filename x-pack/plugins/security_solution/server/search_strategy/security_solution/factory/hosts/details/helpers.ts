@@ -24,6 +24,8 @@ import {
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { getHostMetaData } from '../../../../../endpoint/routes/metadata/handlers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
+import { fleetAgentStatusToEndpointHostStatus } from '../../../../../endpoint/utils';
+import { getPendingActionCounts } from '../../../../../endpoint/services';
 
 export const HOST_FIELDS = [
   '_id',
@@ -197,18 +199,33 @@ export const getHostEndpoint = async (
     };
     const endpointData =
       id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-        ? await getHostMetaData(metadataRequestContext, id, undefined)
+        ? await getHostMetaData(metadataRequestContext, id)
         : null;
 
-    return endpointData != null && endpointData.metadata
+    const fleetAgentId = endpointData?.elastic.agent.id;
+    const [fleetAgentStatus, pendingActions] = !fleetAgentId
+      ? [undefined, {}]
+      : await Promise.all([
+          // Get Agent Status
+          agentService.getAgentStatusById(esClient.asCurrentUser, fleetAgentId),
+          // Get a list of pending actions (if any)
+          getPendingActionCounts(esClient.asCurrentUser, [fleetAgentId]).then((results) => {
+            return results[0].pending_actions;
+          }),
+        ]);
+
+    return endpointData != null && endpointData
       ? {
-          endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
-          policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
-          sensorVersion: endpointData.metadata.agent.version,
+          endpointPolicy: endpointData.Endpoint.policy.applied.name,
+          policyStatus: endpointData.Endpoint.policy.applied.status,
+          sensorVersion: endpointData.agent.version,
+          elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
+          isolation: endpointData.Endpoint.state?.isolation ?? false,
+          pendingActions,
         }
       : null;
   } catch (err) {
-    logger.warn(JSON.stringify(err, null, 2));
+    logger.warn(err);
     return null;
   }
 };

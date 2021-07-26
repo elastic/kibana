@@ -49,9 +49,9 @@ import {
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
-import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -135,6 +135,7 @@ interface Props {
   rowRenderers: RowRenderer[];
   start: string;
   sort: Sort[];
+  showTotalCount?: boolean;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
@@ -163,6 +164,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   sort,
+  showTotalCount = true,
   utilityBar,
   graphEventId,
 }) => {
@@ -243,7 +245,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     sort: sortField,
     startDate: start,
     endDate: end,
-    skip: !canQueryTimeline,
+    skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined, // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
   });
 
   const totalCountMinusDeleted = useMemo(
@@ -253,8 +255,12 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   const subtitle = useMemo(
     () =>
-      `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${unit(totalCountMinusDeleted)}`,
-    [totalCountMinusDeleted, unit]
+      showTotalCount
+        ? `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${unit(
+            totalCountMinusDeleted
+          )}`
+        : null,
+    [showTotalCount, totalCountMinusDeleted, unit]
   );
 
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
@@ -286,6 +292,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     <StyledEuiPanel
       data-test-subj="events-viewer-panel"
       $isFullScreen={globalFullScreen && id !== TimelineId.active}
+      hasBorder
     >
       {canQueryTimeline ? (
         <EventDetailsWidthProvider>
@@ -295,6 +302,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+              isInspectDisabled={combinedQueries!.filterQuery === undefined}
             >
               {HeaderSectionContent}
             </HeaderSection>

@@ -8,18 +8,39 @@
 import React, { FC, useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
 import { CanvasElement } from '../../../types';
-import { ComponentStrings } from '../../../i18n';
 import { RoutingButtonIcon } from '../routing';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
-const { Toolbar: strings } = ComponentStrings;
+const strings = {
+  getEditorButtonLabel: () =>
+    i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
+      defaultMessage: 'Expression editor',
+    }),
+  getNextPageAriaLabel: () =>
+    i18n.translate('xpack.canvas.toolbar.nextPageAriaLabel', {
+      defaultMessage: 'Next Page',
+    }),
+  getPageButtonLabel: (pageNum: number, totalPages: number) =>
+    i18n.translate('xpack.canvas.toolbar.pageButtonLabel', {
+      defaultMessage: 'Page {pageNum}{rest}',
+      values: {
+        pageNum,
+        rest: totalPages > 1 ? ` of ${totalPages}` : '',
+      },
+    }),
+  getPreviousPageAriaLabel: () =>
+    i18n.translate('xpack.canvas.toolbar.previousPageAriaLabel', {
+      defaultMessage: 'Previous Page',
+    }),
+};
 
 type TrayType = 'pageManager' | 'expression';
 
@@ -72,43 +93,50 @@ export const Toolbar: FC<Props> = ({
     <div className="canvasToolbar hide-for-sharing">
       {activeTray !== null && <Tray done={() => setActiveTray(null)}>{trays[activeTray]}</Tray>}
       <div className="canvasToolbar__container">
-        <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
-          <EuiFlexItem grow={false}>
-            <RoutingButtonIcon
-              color="text"
-              to={getUrl(selectedPageNumber - 1)}
-              iconType="arrowLeft"
-              isDisabled={selectedPageNumber <= 1}
-              aria-label={strings.getPreviousPageAriaLabel()}
-            />
+        <EuiFlexGroup gutterSize="none" alignItems="center">
+          <EuiFlexItem grow={false} className="canvasToolbar__home">
+            {workpadName}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" onClick={() => toggleTray('pageManager')}>
-              {strings.getPageButtonLabel(selectedPageNumber, totalPages)}
-            </EuiButtonEmpty>
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
+              <EuiFlexItem grow={false}>
+                <RoutingButtonIcon
+                  color="text"
+                  to={getUrl(selectedPageNumber - 1)}
+                  iconType="arrowLeft"
+                  isDisabled={selectedPageNumber <= 1}
+                  aria-label={strings.getPreviousPageAriaLabel()}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty color="text" onClick={() => toggleTray('pageManager')}>
+                  {strings.getPageButtonLabel(selectedPageNumber, totalPages)}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <RoutingButtonIcon
+                  color="text"
+                  to={getUrl(selectedPageNumber + 1)}
+                  iconType="arrowRight"
+                  isDisabled={selectedPageNumber >= totalPages}
+                  aria-label={strings.getNextPageAriaLabel()}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem />
+              {elementIsSelected && isWriteable && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="text"
+                    iconType="editorCodeBlock"
+                    onClick={() => toggleTray('expression')}
+                    data-test-subj="canvasExpressionEditorButton"
+                  >
+                    {strings.getEditorButtonLabel()}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <RoutingButtonIcon
-              color="text"
-              to={getUrl(selectedPageNumber + 1)}
-              iconType="arrowRight"
-              isDisabled={selectedPageNumber >= totalPages}
-              aria-label={strings.getNextPageAriaLabel()}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem />
-          {elementIsSelected && isWriteable && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="text"
-                iconType="editorCodeBlock"
-                onClick={() => toggleTray('expression')}
-                data-test-subj="canvasExpressionEditorButton"
-              >
-                {strings.getEditorButtonLabel()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </div>
     </div>

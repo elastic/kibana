@@ -8,7 +8,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ErrorCountAlertTrigger } from '.';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
@@ -20,19 +19,15 @@ export default {
   component: ErrorCountAlertTrigger,
   decorators: [
     (Story: React.ComponentClass) => (
-      <EuiThemeProvider>
-        <MockApmPluginContextWrapper
-          value={
-            (mockApmPluginContextValue as unknown) as ApmPluginContextValue
-          }
-        >
-          <MemoryRouter>
-            <div style={{ width: 400 }}>
-              <Story />
-            </div>
-          </MemoryRouter>
-        </MockApmPluginContextWrapper>
-      </EuiThemeProvider>
+      <MockApmPluginContextWrapper
+        value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}
+      >
+        <MemoryRouter>
+          <div style={{ width: 400 }}>
+            <Story />
+          </div>
+        </MemoryRouter>
+      </MockApmPluginContextWrapper>
     ),
   ],
 };

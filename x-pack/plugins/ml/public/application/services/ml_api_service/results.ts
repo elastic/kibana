@@ -16,6 +16,11 @@ import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import { PartitionFieldsConfig } from '../../../../common/types/storage';
+import {
+  ESSearchRequest,
+  ESSearchResponse,
+} from '../../../../../../../src/core/types/elasticsearch';
+import { MLAnomalyDoc } from '../../../../common/types/anomalies';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -112,18 +117,18 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch(query: any, jobIds: string[]) {
+  anomalySearch(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http<any>({
+    return httpService.http<ESSearchResponse<MLAnomalyDoc>>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
       body,
     });
   },
 
-  anomalySearch$(query: any, jobIds: string[]) {
+  anomalySearch$(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http$<any>({
+    return httpService.http$<ESSearchResponse<MLAnomalyDoc>>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
       body,

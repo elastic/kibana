@@ -10,7 +10,7 @@
   "license": "Elastic License v2",
   "name": "Zoom Meeting with no Passcode",
   "note": "## Config\n\nThe Zoom Filebeat module or similarly structured data is required to be compatible with this rule.",
-  "query": "event.type:creation and event.module:zoom and event.dataset:zoom.webhook and event.action:meeting.created and not zoom.meeting.password:*",
+  "query": "event.type:creation and event.module:zoom and event.dataset:zoom.webhook and\n  event.action:meeting.created and not zoom.meeting.password:*\n",
   "references": [
     "https://blog.zoom.us/a-message-to-our-users/",
     "https://www.fbi.gov/contact-us/field-offices/boston/news/press-releases/fbi-warns-of-teleconferencing-and-online-classroom-hijacking-during-covid-19-pandemic"

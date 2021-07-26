@@ -15,8 +15,6 @@ import type {
   LensToggleAction,
 } from './types';
 import { ColumnConfig } from './table_basic';
-
-import { desanitizeFilterContext } from '../../utils';
 import { getOriginalId } from '../transpose_helpers';
 
 export const createGridResizeHandler = (
@@ -92,7 +90,7 @@ export const createGridFilterHandler = (
     timeFieldName,
   };
 
-  onClickValue(desanitizeFilterContext(data));
+  onClickValue(data);
 };
 
 export const createTransposeColumnFilterHandler = (
@@ -125,7 +123,7 @@ export const createTransposeColumnFilterHandler = (
     timeFieldName,
   };
 
-  onClickValue(desanitizeFilterContext(data));
+  onClickValue(data);
 };
 
 export const createGridSortingConfig = (

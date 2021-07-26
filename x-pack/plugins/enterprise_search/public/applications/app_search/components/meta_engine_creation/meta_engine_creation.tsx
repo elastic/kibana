@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { AppLogic } from '../../app_logic';
+import { ENGINES_TITLE } from '../engines';
 import { AppSearchPageTemplate } from '../layout';
 
 import {
@@ -73,7 +74,7 @@ export const MetaEngineCreation: React.FC = () => {
 
   return (
     <AppSearchPageTemplate
-      pageChrome={[META_ENGINE_CREATION_TITLE]}
+      pageChrome={[ENGINES_TITLE, META_ENGINE_CREATION_TITLE]}
       pageHeader={{
         pageTitle: META_ENGINE_CREATION_TITLE,
         description: (

@@ -12,7 +12,7 @@ import { ServiceNowActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');
 
 describe('ServiceNowActionConnectorFields renders', () => {
-  test('alerting servicenow connector fields is rendered', () => {
+  test('alerting servicenow connector fields are rendered', () => {
     const actionConnector = {
       secrets: {
         username: 'user',

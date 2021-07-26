@@ -11,10 +11,12 @@ import type {
 } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
 import { alertsChartPreviewRouteRepository } from './alerts/chart_preview';
+import { backendsRouteRepository } from './backends';
 import { correlationsRouteRepository } from './correlations';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentsRouteRepository } from './environments';
 import { errorsRouteRepository } from './errors';
+import { apmFleetRouteRepository } from './fleet';
 import { indexPatternRouteRepository } from './index_pattern';
 import { metricsRouteRepository } from './metrics';
 import { observabilityOverviewRouteRepository } from './observability_overview';
@@ -50,7 +52,9 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(anomalyDetectionRouteRepository)
     .merge(apmIndicesRouteRepository)
     .merge(customLinkRouteRepository)
-    .merge(sourceMapsRouteRepository);
+    .merge(sourceMapsRouteRepository)
+    .merge(apmFleetRouteRepository)
+    .merge(backendsRouteRepository);
 
   return repository;
 };

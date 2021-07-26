@@ -11,7 +11,6 @@ import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
-import * as CSS from 'csstype';
 import { DetailedPeerCertificate } from 'tls';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
 import { EnvironmentMode } from '@kbn/config';
@@ -44,7 +43,6 @@ import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
 import { PluginInitializerContext } from 'src/core/public';
-import * as PropTypes from 'prop-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
@@ -95,8 +93,7 @@ export interface Adapters {
 //
 // @public (undocumented)
 export class AddPanelAction implements Action_3<ActionContext_2> {
-    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
-    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React_2.ComponentType<any>, reportUiCounter?: ((appName: string, type: import("@kbn/analytics").UiCounterMetricType, eventNames: string | string[], count?: number | undefined) => void) | undefined);
+    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React.ComponentType<any>, reportUiCounter?: ((appName: string, type: import("@kbn/analytics").UiCounterMetricType, eventNames: string | string[], count?: number | undefined) => void) | undefined);
     // (undocumented)
     execute(context: ActionExecutionContext_2<ActionContext_2>): Promise<void>;
     // (undocumented)
@@ -365,6 +362,7 @@ export interface EmbeddableEditorState {
     embeddableId?: string;
     // (undocumented)
     originatingApp: string;
+    searchSessionId?: string;
     // (undocumented)
     valueInput?: EmbeddableInput;
 }
@@ -467,6 +465,7 @@ export interface EmbeddablePackageState {
     embeddableId?: string;
     // (undocumented)
     input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
+    searchSessionId?: string;
     // (undocumented)
     type: string;
 }
@@ -842,6 +841,11 @@ export interface SavedObjectEmbeddableInput extends EmbeddableInput {
 //
 // @public (undocumented)
 export const SELECT_RANGE_TRIGGER = "SELECT_RANGE_TRIGGER";
+
+// Warning: (ae-missing-release-tag) "useEmbeddableFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function useEmbeddableFactory<I extends EmbeddableInput>({ input, factory, onInputUpdated, }: EmbeddableRendererWithFactory<I>): readonly [ErrorEmbeddable | IEmbeddable<I, import("./i_embeddable").EmbeddableOutput> | undefined, boolean, string | undefined];
 
 // Warning: (ae-missing-release-tag) "VALUE_CLICK_TRIGGER" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

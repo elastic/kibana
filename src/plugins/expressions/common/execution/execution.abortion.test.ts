@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
 import { waitFor } from '@testing-library/react';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
@@ -40,9 +39,9 @@ describe('Execution abortion tests', () => {
     execution.start();
     execution.cancel();
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -58,9 +57,9 @@ describe('Execution abortion tests', () => {
     jest.advanceTimersByTime(100);
     execution.cancel();
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -76,7 +75,7 @@ describe('Execution abortion tests', () => {
 
     execution.start();
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const { result } = await execution.result.toPromise();
 
     execution.cancel();
 
@@ -136,7 +135,7 @@ describe('Execution abortion tests', () => {
     await waitFor(() => expect(started).toHaveBeenCalledTimes(1));
 
     execution.cancel();
-    const result = await execution.result.pipe(first()).toPromise();
+    const { result } = await execution.result.toPromise();
     expect(result).toMatchObject({
       type: 'error',
       error: {

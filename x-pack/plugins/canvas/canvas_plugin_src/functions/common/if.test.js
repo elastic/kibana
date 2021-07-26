@@ -7,11 +7,12 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { ifFn } from './if';
 
 describe('if', () => {
   const fn = functionWrapper(ifFn);
+
   let testScheduler;
 
   beforeEach(() => {

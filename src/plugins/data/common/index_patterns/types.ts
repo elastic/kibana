@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import type { IndexPatternFieldBase, IFieldSubType, IndexPatternBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
@@ -29,10 +30,9 @@ export interface RuntimeField {
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
  * Use IndexPattern or IndexPatternSpec instead
  */
-export interface IIndexPattern {
-  fields: IFieldType[];
+export interface IIndexPattern extends IndexPatternBase {
   title: string;
-  id?: string;
+  fields: IFieldType[];
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
    */
@@ -151,14 +151,16 @@ export type AggregationRestrictions = Record<
   }
 >;
 
-export interface IFieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
-
 export interface TypeMeta {
   aggs?: Record<string, AggregationRestrictions>;
-  [key: string]: any;
+  params?: {
+    rollup_index: string;
+  };
+}
+
+export enum IndexPatternType {
+  DEFAULT = 'default',
+  ROLLUP = 'rollup',
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
@@ -184,30 +186,17 @@ export interface FieldSpecExportFmt {
 /**
  * Serialized version of IndexPatternField
  */
-export interface FieldSpec {
+export interface FieldSpec extends IndexPatternFieldBase {
   /**
    * Popularity count is used by discover
    */
   count?: number;
-  /**
-   * Scripted field painless script
-   */
-  script?: string;
-  /**
-   * Scripted field langauge
-   * Painless is the only valid scripted field language
-   */
-  lang?: estypes.ScriptLanguage;
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
-  name: string;
-  type: string;
   esTypes?: string[];
-  scripted?: boolean;
   searchable: boolean;
   aggregatable: boolean;
   readFromDocValues?: boolean;
-  subType?: IFieldSubType;
   indexed?: boolean;
   customLabel?: string;
   runtimeField?: RuntimeField;

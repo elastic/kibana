@@ -47,8 +47,16 @@
 }
 
 .lnsFormula__editorContent {
+  min-height: 0;
   position: relative;
-  height: 201px;
+
+  .lnsIndexPatternDimensionEditor:not(.lnsIndexPatternDimensionEditor-isFullscreen) & {
+    height: 200px;
+  }
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    flex: 1;
+  }
 }
 
 .lnsFormula__editorPlaceholder {
@@ -60,11 +68,6 @@
   // Matches monaco editor
   font-family: Menlo, Monaco, 'Courier New', monospace;
   pointer-events: none;
-}
-
-.lnsIndexPatternDimensionEditor-isFullscreen .lnsFormula__editorContent {
-  flex: 1;
-  min-height: 201px;
 }
 
 .lnsFormula__warningText + .lnsFormula__warningText {

@@ -42,6 +42,7 @@ export interface UseExceptionListsProps {
   notifications: NotificationsStart;
   pagination?: Pagination;
   showTrustedApps: boolean;
+  showEventFilters: boolean;
 }
 
 export interface UseExceptionListProps {

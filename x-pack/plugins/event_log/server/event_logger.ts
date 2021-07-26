@@ -88,7 +88,7 @@ export class EventLogger implements IEventLogger {
     try {
       validatedEvent = validateEvent(this.eventLogService, event);
     } catch (err) {
-      this.systemLogger.warn(`invalid event logged: ${err.message}`);
+      this.systemLogger.warn(`invalid event logged: ${err.message}; ${JSON.stringify(event)})`);
       return;
     }
 

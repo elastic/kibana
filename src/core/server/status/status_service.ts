@@ -109,10 +109,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       ...commonRouteDeps,
     });
 
-    if (http.notReadyServer && commonRouteDeps.config.allowAnonymous) {
-      http.notReadyServer.registerRoutes('', (notReadyRouter) => {
+    if (commonRouteDeps.config.allowAnonymous) {
+      http.registerPrebootRoutes('', (prebootRouter) => {
         registerStatusRoute({
-          router: notReadyRouter,
+          router: prebootRouter,
           ...commonRouteDeps,
           config: {
             ...commonRouteDeps.config,
@@ -135,9 +135,11 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   }
 
   public start() {
-    if (!this.overall$) {
-      throw new Error('cannot call `start` before `setup`');
+    if (!this.pluginsStatus || !this.overall$) {
+      throw new Error(`StatusService#setup must be called before #start`);
     }
+    this.pluginsStatus.blockNewRegistrations();
+
     getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
       this.logger.info(message);
     });

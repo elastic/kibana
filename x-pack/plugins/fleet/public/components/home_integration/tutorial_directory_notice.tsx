@@ -66,19 +66,18 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
 
   return hasIngestManager && !hasSeenNotice ? (
     <>
-      <EuiSpacer size="m" />
       <EuiCallOut
         iconType="cheer"
         title={
           <FormattedMessage
             id="xpack.fleet.homeIntegration.tutorialDirectory.noticeTitle"
-            defaultMessage="{newPrefix} Elastic Agent and Fleet Beta"
+            defaultMessage="{newPrefix} Elastic Agent integrations"
             values={{
               newPrefix: (
                 <strong>
                   <FormattedMessage
                     id="xpack.fleet.homeIntegration.tutorialDirectory.noticeTitle.newPrefix"
-                    defaultMessage="New:"
+                    defaultMessage="Now generally available:"
                   />
                 </strong>
               ),
@@ -89,12 +88,16 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
         <p>
           <FormattedMessage
             id="xpack.fleet.homeIntegration.tutorialDirectory.noticeText"
-            defaultMessage="The Elastic Agent provides a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts.
-                You no longer need to install multiple Beats and other agents, which makes it easier and faster to deploy policies across your infrastructure.
-                For more information, read our {blogPostLink}."
+            defaultMessage="Elastic Agent integrations provide a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts.
+              You no longer need to install multiple Beats, which makes it easier and faster to deploy policies across your infrastructure.
+              For more information, read our {blogPostLink}."
             values={{
               blogPostLink: (
-                <EuiLink href="https://ela.st/ingest-manager-announcement" external target="_blank">
+                <EuiLink
+                  href="https://ela.st/elastic-agent-ga-announcement"
+                  external
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.fleet.homeIntegration.tutorialDirectory.noticeText.blogPostLink"
                     defaultMessage="announcement blog post"
@@ -108,10 +111,10 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
           <FlexItemButtonWrapper grow={false}>
             <div>
               <RedirectAppLinks application={application}>
-                <EuiButton size="s" href={getHref('overview')}>
+                <EuiButton size="s" href={getHref('integrations')}>
                   <FormattedMessage
                     id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
-                    defaultMessage="Try Fleet Beta"
+                    defaultMessage="Try Integrations"
                   />
                 </EuiButton>
               </RedirectAppLinks>
@@ -134,6 +137,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
           </FlexItemButtonWrapper>
         </EuiFlexGroup>
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </>
   ) : null;
 });

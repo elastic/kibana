@@ -8,10 +8,11 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { image } from '../image';
+import { getElasticLogo } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { waitFor } from '../../../../../../src/plugins/presentation_util/public/__stories__';
 import { Render } from './render';
-import { elasticLogo } from '../../lib/elastic_logo';
 
-storiesOf('renderers/image', module).add('default', () => {
+const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   const config = {
     type: 'image' as 'image',
     mode: 'cover',
@@ -19,4 +20,10 @@ storiesOf('renderers/image', module).add('default', () => {
   };
 
   return <Render renderer={image} config={config} width="400px" />;
-});
+};
+
+storiesOf('renderers/image', module).add(
+  'default',
+  (_, props) => <Renderer elasticLogo={props?.elasticLogo} />,
+  { decorators: [waitFor(getElasticLogo())] }
+);

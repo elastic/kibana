@@ -13,7 +13,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/cloud/public/plugin.ts",
-          "lineNumber": 17
+          "lineNumber": 28
         },
         "deprecated": false,
         "children": [
@@ -29,7 +29,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 18
+              "lineNumber": 29
             },
             "deprecated": false
           },
@@ -45,7 +45,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 19
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -61,7 +61,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 20
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -77,7 +77,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 21
+              "lineNumber": 32
             },
             "deprecated": false
           },
@@ -93,7 +93,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 22
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -109,7 +109,23 @@
             ],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 23
+              "lineNumber": 34
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.full_story",
+            "type": "Object",
+            "tags": [],
+            "label": "full_story",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; org_id?: string | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 35
             },
             "deprecated": false
           }
@@ -129,7 +145,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/cloud/public/plugin.ts",
-        "lineNumber": 35
+        "lineNumber": 50
       },
       "deprecated": false,
       "children": [
@@ -145,7 +161,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 36
+            "lineNumber": 51
           },
           "deprecated": false
         },
@@ -161,7 +177,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 37
+            "lineNumber": 52
           },
           "deprecated": false
         },
@@ -177,7 +193,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 38
+            "lineNumber": 53
           },
           "deprecated": false
         },
@@ -193,7 +209,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 39
+            "lineNumber": 54
           },
           "deprecated": false
         },
@@ -209,7 +225,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 40
+            "lineNumber": 55
           },
           "deprecated": false
         },
@@ -225,7 +241,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 41
+            "lineNumber": 56
           },
           "deprecated": false
         },
@@ -238,7 +254,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 42
+            "lineNumber": 57
           },
           "deprecated": false
         }
@@ -263,7 +279,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/cloud/server/plugin.ts",
-        "lineNumber": 19
+        "lineNumber": 20
       },
       "deprecated": false,
       "children": [
@@ -279,7 +295,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 20
+            "lineNumber": 21
           },
           "deprecated": false
         },
@@ -295,7 +311,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 21
+            "lineNumber": 22
           },
           "deprecated": false
         },
@@ -308,7 +324,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 22
+            "lineNumber": 23
           },
           "deprecated": false
         },
@@ -324,7 +340,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 23
+            "lineNumber": 24
           },
           "deprecated": false
         }

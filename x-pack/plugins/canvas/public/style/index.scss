@@ -19,7 +19,6 @@
 @import '../components/datasource/datasource';
 @import '../components/datasource/datasource_preview/datasource_preview';
 @import '../components/datatable/datatable';
-@import '../components/debug/debug';
 @import '../components/dom_preview/dom_preview';
 @import '../components/element_card/element_card';
 @import '../components/element_content/element_content';
@@ -43,11 +42,15 @@
 @import '../components/workpad_page/workpad_page';
 @import '../components/workpad_page/workpad_interactive_page/workpad_interactive_page';
 @import '../components/workpad_page/workpad_static_page/workpad_static_page';
-
+@import '../components/var_config/edit_var';
+@import '../components/var_config/var_config';
+@import '../transitions/fade/fade';
+@import '../transitions/rotate/rotate';
+@import '../transitions/slide/slide';
+@import '../transitions/zoom/zoom';
 @import '../../canvas_plugin_src/renderers/filters/advanced_filter/component/advanced_filter.scss';
 @import '../../canvas_plugin_src/renderers/filters/dropdown_filter/component/dropdown_filter.scss';
 @import '../../canvas_plugin_src/renderers/embeddable/embeddable.scss';
 @import '../../canvas_plugin_src/renderers/plot/plot.scss';
-@import '../../canvas_plugin_src/renderers/reveal_image/reveal_image.scss';
 @import '../../canvas_plugin_src/renderers/filters/time_filter/time_filter.scss';
 @import '../../canvas_plugin_src/uis/arguments/image_upload/image_upload.scss';

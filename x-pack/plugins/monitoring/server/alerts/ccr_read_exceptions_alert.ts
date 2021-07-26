@@ -47,20 +47,20 @@ export class CCRReadExceptionsAlert extends BaseAlert {
       },
       actionVariables: [
         {
-          name: 'remoteClusters',
+          name: 'remoteCluster',
           description: i18n.translate(
-            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.remoteClusters',
+            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.remoteCluster',
             {
-              defaultMessage: 'List of remote clusters that are experiencing CCR read exceptions.',
+              defaultMessage: 'The remote cluster experiencing CCR read exceptions.',
             }
           ),
         },
         {
-          name: 'followerIndices',
+          name: 'followerIndex',
           description: i18n.translate(
-            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.followerIndices',
+            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.followerIndex',
             {
-              defaultMessage: 'List of follower indices reporting CCR read exceptions.',
+              defaultMessage: 'The follower index reporting CCR read exceptions.',
             }
           ),
         },
@@ -229,18 +229,17 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    const remoteClustersList = alertStates
-      .map((alertState) => (alertState.meta as CCRReadExceptionsUIMeta).remoteCluster)
-      .join(', ');
-    const followerIndicesList = alertStates
-      .map((alertState) => (alertState.meta as CCRReadExceptionsUIMeta).followerIndex)
-      .join(', ');
+    if (alertStates.length === 0) {
+      return;
+    }
+    const CCRReadExceptionsMeta = alertStates[0].meta as CCRReadExceptionsUIMeta;
+    const { remoteCluster, followerIndex } = CCRReadExceptionsMeta;
 
     const shortActionText = i18n.translate(
       'xpack.monitoring.alerts.ccrReadExceptions.shortAction',
       {
         defaultMessage:
-          'Verify follower and leader index relationships across the affected remote clusters.',
+          'Verify follower and leader index relationships on the affected remote cluster.',
       }
     );
     const fullActionText = i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.fullAction', {
@@ -258,9 +257,9 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     const internalShortMessage = i18n.translate(
       'xpack.monitoring.alerts.ccrReadExceptions.firing.internalShortMessage',
       {
-        defaultMessage: `CCR read exceptions alert is firing for the following remote clusters: {remoteClustersList}. {shortActionText}`,
+        defaultMessage: `CCR read exceptions alert is firing for the following remote cluster: {remoteCluster}. {shortActionText}`,
         values: {
-          remoteClustersList,
+          remoteCluster,
           shortActionText,
         },
       }
@@ -268,11 +267,11 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     const internalFullMessage = i18n.translate(
       'xpack.monitoring.alerts.ccrReadExceptions.firing.internalFullMessage',
       {
-        defaultMessage: `CCR read exceptions alert is firing for the following remote clusters: {remoteClustersList}. Current 'follower_index' indices are affected: {followerIndicesList}. {action}`,
+        defaultMessage: `CCR read exceptions alert is firing for the following remote cluster: {remoteCluster}. Current 'follower_index' index affected: {followerIndex}. {action}`,
         values: {
           action,
-          remoteClustersList,
-          followerIndicesList,
+          remoteCluster,
+          followerIndex,
         },
       }
     );
@@ -281,8 +280,14 @@ export class CCRReadExceptionsAlert extends BaseAlert {
       internalShortMessage,
       internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
-      remoteClusters: remoteClustersList,
-      followerIndices: followerIndicesList,
+      remoteCluster,
+      followerIndex,
+      /* continue to send "remoteClusters" and "followerIndices" values for users still using it though 
+        we have replaced it with "remoteCluster" and "followerIndex" in the template due to alerts per index instead of all indices
+        see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
+        */
+      remoteClusters: remoteCluster,
+      followerIndices: followerIndex,
       clusterName: cluster.clusterName,
       action,
       actionPlain: shortActionText,

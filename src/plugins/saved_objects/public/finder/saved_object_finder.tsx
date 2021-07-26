@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -116,7 +116,7 @@ class SavedObjectFinderUi extends React.Component<
 
   private isComponentMounted: boolean = false;
 
-  private debouncedFetch = _.debounce(async (query: string) => {
+  private debouncedFetch = debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
 
     const fields = Object.values(metaDataMap)

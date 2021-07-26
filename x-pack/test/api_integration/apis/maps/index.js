@@ -14,9 +14,15 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
     });
 
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+    });
+
     describe('', () => {
       loadTestFile(require.resolve('./get_indexes_matching_pattern'));
       loadTestFile(require.resolve('./create_doc_source'));
+      loadTestFile(require.resolve('./delete_feature'));
       loadTestFile(require.resolve('./index_data'));
       loadTestFile(require.resolve('./fonts_api'));
       loadTestFile(require.resolve('./index_settings'));

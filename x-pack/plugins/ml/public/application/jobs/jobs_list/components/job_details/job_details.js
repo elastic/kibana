@@ -15,7 +15,7 @@ import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
-import { DatafeedModal } from '../datafeed_modal';
+import { DatafeedChartFlyout } from '../datafeed_chart_flyout';
 import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
 import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
@@ -28,7 +28,7 @@ export class JobDetailsUI extends Component {
     super(props);
 
     this.state = {
-      datafeedModalVisible: false,
+      datafeedChartFlyoutVisible: false,
     };
     if (this.props.addYourself) {
       this.props.addYourself(props.jobId, (j) => this.updateJob(j));
@@ -58,7 +58,7 @@ export class JobDetailsUI extends Component {
         </div>
       );
     } else {
-      const { showFullDetails, refreshJobList } = this.props;
+      const { showFullDetails, refreshJobList, showClearButton } = this.props;
 
       const {
         general,
@@ -97,7 +97,7 @@ export class JobDetailsUI extends Component {
             iconType="visAreaStacked"
             onClick={() =>
               this.setState({
-                datafeedModalVisible: true,
+                datafeedChartFlyoutVisible: true,
               })
             }
           />
@@ -144,11 +144,11 @@ export class JobDetailsUI extends Component {
                 data-test-subj="mlJobDetails-datafeed"
                 sections={[datafeed, datafeedTimingStats]}
               />
-              {this.props.jobId && this.state.datafeedModalVisible ? (
-                <DatafeedModal
+              {this.props.jobId && this.state.datafeedChartFlyoutVisible ? (
+                <DatafeedChartFlyout
                   onClose={() => {
                     this.setState({
-                      datafeedModalVisible: false,
+                      datafeedChartFlyoutVisible: false,
                     });
                   }}
                   end={job.data_counts.latest_bucket_timestamp}
@@ -185,7 +185,13 @@ export class JobDetailsUI extends Component {
           name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel', {
             defaultMessage: 'Job messages',
           }),
-          content: <JobMessagesPane jobId={job.job_id} />,
+          content: (
+            <JobMessagesPane
+              jobId={job.job_id}
+              refreshJobList={refreshJobList}
+              showClearButton={showClearButton}
+            />
+          ),
         },
       ];
 

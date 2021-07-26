@@ -87,3 +87,68 @@ export interface LensDocShapePost712<VisualizationState = unknown> {
     filters: Filter[];
   };
 }
+
+export type LensDocShape713 = Omit<LensDocShapePost712, 'state'> & {
+  state: Omit<LensDocShapePost712['state'], 'datasourceStates'> & {
+    datasourceStates: {
+      indexpattern: Omit<
+        LensDocShapePost712['state']['datasourceStates']['indexpattern'],
+        'layers'
+      > & {
+        layers: Record<
+          string,
+          Omit<
+            LensDocShapePost712['state']['datasourceStates']['indexpattern']['layers'][string],
+            'columns'
+          > & {
+            columns: Record<
+              string,
+              | {
+                  operationType: OperationTypePost712;
+                }
+              | {
+                  operationType: 'date_histogram';
+                  params: {
+                    interval: string;
+                    timeZone?: string;
+                  };
+                }
+            >;
+          }
+        >;
+      };
+    };
+  };
+};
+
+export type LensDocShape714 = Omit<LensDocShapePost712, 'state'> & {
+  state: Omit<LensDocShapePost712['state'], 'datasourceStates'> & {
+    datasourceStates: {
+      indexpattern: Omit<
+        LensDocShapePost712['state']['datasourceStates']['indexpattern'],
+        'layers'
+      > & {
+        layers: Record<
+          string,
+          Omit<
+            LensDocShapePost712['state']['datasourceStates']['indexpattern']['layers'][string],
+            'columns'
+          > & {
+            columns: Record<
+              string,
+              | {
+                  operationType: OperationTypePost712;
+                }
+              | {
+                  operationType: 'date_histogram';
+                  params: {
+                    interval: string;
+                  };
+                }
+            >;
+          }
+        >;
+      };
+    };
+  };
+};

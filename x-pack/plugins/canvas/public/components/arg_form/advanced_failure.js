@@ -9,12 +9,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
 import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
+
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { ArgFormAdvancedFailure: strings } = ComponentStrings;
+const strings = {
+  getApplyButtonLabel: () =>
+    i18n.translate('xpack.canvas.argFormAdvancedFailure.applyButtonLabel', {
+      defaultMessage: 'Apply',
+    }),
+  getResetButtonLabel: () =>
+    i18n.translate('xpack.canvas.argFormAdvancedFailure.resetButtonLabel', {
+      defaultMessage: 'Reset',
+    }),
+  getRowErrorMessage: () =>
+    i18n.translate('xpack.canvas.argFormAdvancedFailure.rowErrorMessage', {
+      defaultMessage: 'Invalid Expression',
+    }),
+};
 
 export const AdvancedFailureComponent = (props) => {
   const {

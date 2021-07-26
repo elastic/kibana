@@ -11,7 +11,6 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { useActions } from 'kea';
 
 import {
-  ORG_SETTINGS_PATH,
   ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
@@ -33,7 +32,6 @@ export const SettingsRouter: React.FC = () => {
 
   return (
     <Switch>
-      <Redirect exact from={ORG_SETTINGS_PATH} to={ORG_SETTINGS_CUSTOMIZE_PATH} />
       <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH}>
         <Customize />
       </Route>
@@ -48,6 +46,9 @@ export const SettingsRouter: React.FC = () => {
           <SourceConfig sourceIndex={i} />
         </Route>
       ))}
+      <Route>
+        <Redirect to={ORG_SETTINGS_CUSTOMIZE_PATH} />
+      </Route>
     </Switch>
   );
 };

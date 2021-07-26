@@ -28,8 +28,17 @@ const domains: CrawlerDomain[] = [
     crawlRules: [],
     entryPoints: [],
     sitemaps: [],
-    lastCrawl: '2020-01-01T00:00:00-05:00',
-    createdOn: '2020-01-01T00:00:00-05:00',
+    lastCrawl: '2020-01-01T00:00:00-12:00',
+    createdOn: '2020-01-01T00:00:00-12:00',
+  },
+  {
+    id: '4567',
+    documentCount: 0,
+    url: 'empty.site',
+    crawlRules: [],
+    entryPoints: [],
+    sitemaps: [],
+    createdOn: '1970-01-01T00:00:00-12:00',
   },
 ];
 
@@ -68,15 +77,6 @@ describe('DomainsTable', () => {
   });
 
   describe('columns', () => {
-    const getTable = () => wrapper.find(EuiInMemoryTable).dive().find(EuiBasicTable).dive();
-
-    beforeEach(() => {
-      wrapper = shallow(<DomainsTable />);
-      tableContent = mountWithIntl(<DomainsTable />)
-        .find(EuiInMemoryTable)
-        .text();
-    });
-
     it('renders a url column', () => {
       expect(tableContent).toContain('elastic.co');
     });
@@ -92,8 +92,9 @@ describe('DomainsTable', () => {
     });
 
     describe('actions column', () => {
+      const getTable = () => wrapper.find(EuiInMemoryTable).dive().find(EuiBasicTable).dive();
       const getActions = () => getTable().find('ExpandedItemActions');
-      const getActionItems = () => getActions().dive().find('DefaultItemAction');
+      const getActionItems = () => getActions().first().dive().find('DefaultItemAction');
 
       it('will hide the action buttons if the user cannot manage/delete engines', () => {
         setMockValues({

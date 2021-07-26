@@ -22,9 +22,12 @@ import {
   StackMode,
   VerticalAlignment,
   HorizontalAlignment,
+  LayoutDirection,
   ElementClickListener,
   BrushEndListener,
   CurveType,
+  LegendPositionConfig,
+  LabelOverflowConstraint,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -53,7 +56,6 @@ import {
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
-import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
@@ -575,7 +577,7 @@ export function XYChart({
       })),
       timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
-    onClickValue(desanitizeFilterContext(context));
+    onClickValue(context);
   };
 
   const brushHandler: BrushEndListener = ({ x }) => {
@@ -602,6 +604,14 @@ export function XYChart({
     onSelectRange(context);
   };
 
+  const legendInsideParams = {
+    vAlign: legend.verticalAlignment ?? VerticalAlignment.Top,
+    hAlign: legend?.horizontalAlignment ?? HorizontalAlignment.Right,
+    direction: LayoutDirection.Vertical,
+    floating: true,
+    floatingColumns: legend?.floatingColumns ?? 1,
+  } as LegendPositionConfig;
+
   return (
     <Chart>
       <Settings
@@ -611,7 +621,7 @@ export function XYChart({
             ? chartHasMoreThanOneSeries
             : legend.isVisible
         }
-        legendPosition={legend.position}
+        legendPosition={legend?.isInside ? legendInsideParams : legend.position}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
@@ -910,7 +920,7 @@ export function XYChart({
                   showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
                   isAlternatingValueLabel: false,
                   isValueContainedInElement: true,
-                  hideClippedValue: true,
+                  overflowConstraints: [LabelOverflowConstraint.ChartEdges],
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;

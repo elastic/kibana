@@ -9,5 +9,5 @@ Future that tracks result or error of this execution.
 <b>Signature:</b>
 
 ```typescript
-readonly result: Observable<Output | ExpressionValueError>;
+readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
 ```

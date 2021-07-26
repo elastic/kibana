@@ -121,7 +121,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     signature: i18n.translate('xpack.lens.indexPattern.cardinality.signature', {
       defaultMessage: 'field: string',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.cardinality.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.cardinality.documentation.markdown', {
       defaultMessage: `
 Calculates the number of unique values of a specified field. Works for number, string, date and boolean values.
 

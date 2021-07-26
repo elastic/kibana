@@ -15,17 +15,7 @@ import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
-
+jest.mock('../../lib/kibana');
 jest.mock('../link_to');
 
 describe('HeaderPage', () => {
@@ -51,13 +41,13 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage
-          backOptions={{ href: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
+          backOptions={{ path: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
           title="Test title"
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(true);
+    expect(wrapper.find('.securitySolutionHeaderPage__linkBack').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render the back link when not provided', () => {
@@ -67,7 +57,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(false);
+    expect(wrapper.find('.securitySolutionHeaderPage__linkBack').first().exists()).toBe(false);
   });
 
   test('it renders the first subtitle when provided', () => {
@@ -134,27 +124,21 @@ describe('HeaderPage', () => {
     expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(false);
   });
 
-  test('it applies border styles when border is true', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage border title="Test title" />
-      </TestProviders>
-    );
-    const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
-
-    expect(siemHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
-  });
-
   test('it DOES NOT apply border styles when border is false', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
       </TestProviders>
     );
-    const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
+    const securitySolutionHeaderPage = wrapper.find('.securitySolutionHeaderPage').first();
 
-    expect(siemHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
+      'border-bottom',
+      euiDarkVars.euiBorderThin
+    );
+    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
+      'padding-bottom',
+      euiDarkVars.paddingSizes.l
+    );
   });
 });

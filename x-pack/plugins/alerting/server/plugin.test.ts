@@ -18,7 +18,6 @@ import { AlertsConfig } from './config';
 import { AlertType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
-import mappings from './saved_objects/mappings.json';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -37,7 +36,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
+        maxEphemeralActionsPerAlert: 10,
       });
       plugin = new AlertingPlugin(context);
 
@@ -61,78 +60,13 @@ describe('Alerting Plugin', () => {
       );
     });
 
-    it('should register saved object with no management capability if enableImportExport is false', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-        healthCheck: {
-          interval: '5m',
-        },
-        invalidateApiKeysTask: {
-          interval: '5m',
-          removalDelay: '1h',
-        },
-        enableImportExport: false,
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupMocks = coreMock.createSetup();
-      await plugin.setup(setupMocks, {
-        licensing: licensingMock.createSetup(),
-        encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
-        taskManager: taskManagerMock.createSetup(),
-        eventLog: eventLogServiceMock.create(),
-        actions: actionsMock.createSetup(),
-        statusService: statusServiceMock.createSetupContract(),
-      });
-
-      expect(setupMocks.savedObjects.registerType).toHaveBeenCalledTimes(2);
-      const registerAlertingSavedObject = setupMocks.savedObjects.registerType.mock.calls[0][0];
-      expect(registerAlertingSavedObject.name).toEqual('alert');
-      expect(registerAlertingSavedObject.hidden).toBe(true);
-      expect(registerAlertingSavedObject.mappings).toEqual(mappings.alert);
-      expect(registerAlertingSavedObject.management).toBeUndefined();
-    });
-
-    it('should register saved object with import/export capability if enableImportExport is true', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-        healthCheck: {
-          interval: '5m',
-        },
-        invalidateApiKeysTask: {
-          interval: '5m',
-          removalDelay: '1h',
-        },
-        enableImportExport: true,
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupMocks = coreMock.createSetup();
-      await plugin.setup(setupMocks, {
-        licensing: licensingMock.createSetup(),
-        encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
-        taskManager: taskManagerMock.createSetup(),
-        eventLog: eventLogServiceMock.create(),
-        actions: actionsMock.createSetup(),
-        statusService: statusServiceMock.createSetupContract(),
-      });
-
-      expect(setupMocks.savedObjects.registerType).toHaveBeenCalledTimes(2);
-      const registerAlertingSavedObject = setupMocks.savedObjects.registerType.mock.calls[0][0];
-      expect(registerAlertingSavedObject.name).toEqual('alert');
-      expect(registerAlertingSavedObject.hidden).toBe(true);
-      expect(registerAlertingSavedObject.mappings).toEqual(mappings.alert);
-      expect(registerAlertingSavedObject.management).not.toBeUndefined();
-      expect(registerAlertingSavedObject.management?.importableAndExportable).toBe(true);
-      expect(registerAlertingSavedObject.management?.getTitle).not.toBeUndefined();
-      expect(registerAlertingSavedObject.management?.onImport).not.toBeUndefined();
-      expect(registerAlertingSavedObject.management?.onExport).not.toBeUndefined();
-    });
-
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, 'default'> = {
+      const sampleAlertType: AlertType<never, never, never, never, never, 'default'> = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         actionGroups: [],
         defaultActionGroupId: 'default',
         producer: 'test',
@@ -179,7 +113,7 @@ describe('Alerting Plugin', () => {
   });
 
   describe('start()', () => {
-    describe('getAlertsClientWithRequest()', () => {
+    describe('getRulesClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
@@ -189,7 +123,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
-          enableImportExport: false,
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -214,7 +148,7 @@ describe('Alerting Plugin', () => {
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
         expect(() =>
-          startContract.getAlertsClientWithRequest({} as KibanaRequest)
+          startContract.getRulesClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
@@ -229,7 +163,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
-          enableImportExport: false,
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -270,7 +204,7 @@ describe('Alerting Plugin', () => {
           },
           getSavedObjectsClient: jest.fn(),
         } as unknown) as KibanaRequest;
-        startContract.getAlertsClientWithRequest(fakeRequest);
+        startContract.getRulesClientWithRequest(fakeRequest);
       });
     });
 
@@ -283,7 +217,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
-        enableImportExport: false,
+        maxEphemeralActionsPerAlert: 100,
       });
       const plugin = new AlertingPlugin(context);
 

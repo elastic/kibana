@@ -41,30 +41,6 @@ async function getCompatibleActions(
   return compatibleActions;
 }
 
-export async function getVisualizeHref(
-  field: IndexPatternField,
-  indexPatternId: string | undefined,
-  contextualFields: string[]
-) {
-  if (!indexPatternId) return undefined;
-  const triggerOptions = {
-    indexPatternId,
-    fieldName: field.name,
-    contextualFields,
-    trigger: getTrigger(field.type),
-  };
-  const compatibleActions = await getCompatibleActions(
-    field.name,
-    indexPatternId,
-    contextualFields,
-    getTriggerConstant(field.type)
-  );
-  // enable the link only if only one action is registered
-  return compatibleActions.length === 1
-    ? compatibleActions[0].getHref?.(triggerOptions)
-    : undefined;
-}
-
 export function triggerVisualizeActions(
   field: IndexPatternField,
   indexPatternId: string | undefined,
@@ -80,21 +56,55 @@ export function triggerVisualizeActions(
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
 
-export async function isFieldVisualizable(
+export interface VisualizeInformation {
+  field: IndexPatternField;
+  href?: string;
+}
+
+/**
+ * Returns the field name and potentially href of the field or the first multi-field
+ * that has a compatible visualize uiAction.
+ */
+export async function getVisualizeInformation(
   field: IndexPatternField,
   indexPatternId: string | undefined,
-  contextualFields: string[]
-) {
+  contextualFields: string[],
+  multiFields: IndexPatternField[] = []
+): Promise<VisualizeInformation | undefined> {
   if (field.name === '_id' || !indexPatternId) {
-    // for first condition you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
-    return false;
+    // _id fields are not visualizeable in ES
+    return undefined;
   }
-  const trigger = getTriggerConstant(field.type);
-  const compatibleActions = await getCompatibleActions(
-    field.name,
-    indexPatternId,
-    contextualFields,
-    trigger
-  );
-  return compatibleActions.length > 0 && field.visualizable;
+
+  for (const f of [field, ...multiFields]) {
+    if (!f.visualizable) {
+      continue;
+    }
+    // Retrieve compatible actions for the specific field
+    const actions = await getCompatibleActions(
+      f.name,
+      indexPatternId,
+      contextualFields,
+      getTriggerConstant(f.type)
+    );
+
+    // if the field has compatible actions use this field for visualizing
+    if (actions.length > 0) {
+      const triggerOptions = {
+        indexPatternId,
+        fieldName: f.name,
+        contextualFields,
+        trigger: getTrigger(f.type),
+      };
+
+      return {
+        field: f,
+        // We use the href of the first action always. Multiple actions will only work
+        // via the modal shown by triggerVisualizeActions that should be called via onClick.
+        href: await actions[0].getHref?.(triggerOptions),
+      };
+    }
+  }
+
+  return undefined;
 }

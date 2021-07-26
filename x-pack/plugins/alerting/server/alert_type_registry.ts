@@ -46,6 +46,7 @@ export interface RegistryAlertType
     | 'actionVariables'
     | 'producer'
     | 'minimumLicenseRequired'
+    | 'isExportable'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -73,6 +74,7 @@ const alertIdSchema = schema.string({
 
 export type NormalizedAlertType<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -81,13 +83,22 @@ export type NormalizedAlertType<
 > = {
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
-  AlertType<Params, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>,
+  AlertType<
+    Params,
+    ExtractedParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >,
   'recoveryActionGroup' | 'actionGroups'
 > &
   Pick<
     Required<
       AlertType<
         Params,
+        ExtractedParams,
         State,
         InstanceState,
         InstanceContext,
@@ -99,6 +110,7 @@ export type NormalizedAlertType<
   >;
 
 export type UntypedNormalizedAlertType = NormalizedAlertType<
+  AlertTypeParams,
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -131,6 +143,7 @@ export class AlertTypeRegistry {
 
   public register<
     Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams,
     State extends AlertTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
@@ -139,6 +152,7 @@ export class AlertTypeRegistry {
   >(
     alertType: AlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -160,6 +174,7 @@ export class AlertTypeRegistry {
 
     const normalizedAlertType = augmentActionGroupsWithReserved<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -178,6 +193,7 @@ export class AlertTypeRegistry {
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
+            ExtractedParams,
             State,
             InstanceState,
             InstanceContext,
@@ -197,6 +213,7 @@ export class AlertTypeRegistry {
 
   public get<
     Params extends AlertTypeParams = AlertTypeParams,
+    ExtractedParams extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
@@ -206,6 +223,7 @@ export class AlertTypeRegistry {
     id: string
   ): NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -229,6 +247,7 @@ export class AlertTypeRegistry {
      */
     return (this.alertTypes.get(id)! as unknown) as NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -250,6 +269,7 @@ export class AlertTypeRegistry {
             actionVariables,
             producer,
             minimumLicenseRequired,
+            isExportable,
           },
         ]: [string, UntypedNormalizedAlertType]) => ({
           id,
@@ -260,6 +280,7 @@ export class AlertTypeRegistry {
           actionVariables,
           producer,
           minimumLicenseRequired,
+          isExportable,
           enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
             id,
             name,
@@ -281,6 +302,7 @@ function normalizedActionVariables(actionVariables: AlertType['actionVariables']
 
 function augmentActionGroupsWithReserved<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -289,6 +311,7 @@ function augmentActionGroupsWithReserved<
 >(
   alertType: AlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -297,6 +320,7 @@ function augmentActionGroupsWithReserved<
   >
 ): NormalizedAlertType<
   Params,
+  ExtractedParams,
   State,
   InstanceState,
   InstanceContext,

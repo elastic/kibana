@@ -42,10 +42,7 @@ import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
-import { repeatImage } from './repeat_image';
-import { revealImage } from './revealImage';
 import { seriesStyle } from './seriesStyle';
-import { shape } from './shape';
 import { sort } from './sort';
 import { staticColumn } from './staticColumn';
 import { string } from './string';
@@ -92,13 +89,10 @@ export const functions = [
   ply,
   progress,
   render,
-  repeatImage,
   replace,
-  revealImage,
   rounddate,
   rowCount,
   seriesStyle,
-  shape,
   sort,
   staticColumn,
   string,

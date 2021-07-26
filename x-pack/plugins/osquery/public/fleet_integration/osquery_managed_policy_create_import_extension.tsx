@@ -57,7 +57,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     return getUrlForApp(PLUGIN_ID, {
       path:
         `#` +
-        pagePathGetters.policy_details({ policyId: policy?.policy_id }) +
+        pagePathGetters.policy_details({ policyId: policy?.policy_id })[1] +
         '?openEnrollmentFlyout=true',
     });
   }, [getUrlForApp, policy?.policy_id]);
@@ -207,7 +207,8 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         integrationPolicyId={policy?.id}
         agentPolicyId={policy?.policy_id}
       />
-      <EuiSpacer />
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
 
       {editMode && scheduledQueryGroupTableData.inputs[0].streams.length ? (
         <EuiFlexGroup>

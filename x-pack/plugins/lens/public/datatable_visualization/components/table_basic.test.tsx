@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType, IFieldFormat } from 'src/plugins/data/public';
+import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
@@ -83,6 +85,13 @@ function copyData(data: LensMultiTable): LensMultiTable {
   return JSON.parse(JSON.stringify(data));
 }
 
+async function waitForWrapperUpdate(wrapper: ReactWrapper) {
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 0));
+  });
+  wrapper.update();
+}
+
 describe('DatatableComponent', () => {
   let onDispatchEvent: jest.Mock;
 
@@ -149,7 +158,7 @@ describe('DatatableComponent', () => {
     ).toMatchSnapshot();
   });
 
-  test('it invokes executeTriggerActions with correct context on click on top value', () => {
+  test('it invokes executeTriggerActions with correct context on click on top value', async () => {
     const { args, data } = sampleArgs();
 
     const wrapper = mountWithIntl(
@@ -173,6 +182,8 @@ describe('DatatableComponent', () => {
 
     wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
 
+    await waitForWrapperUpdate(wrapper);
+
     wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -192,7 +203,7 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it invokes executeTriggerActions with correct context on click on timefield', () => {
+  test('it invokes executeTriggerActions with correct context on click on timefield', async () => {
     const { args, data } = sampleArgs();
 
     const wrapper = mountWithIntl(
@@ -216,6 +227,8 @@ describe('DatatableComponent', () => {
 
     wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('focus');
 
+    await waitForWrapperUpdate(wrapper);
+
     wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -235,7 +248,7 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it invokes executeTriggerActions with correct context on click on timefield from range', () => {
+  test('it invokes executeTriggerActions with correct context on click on timefield from range', async () => {
     const data: LensMultiTable = {
       type: 'lens_multitable',
       tables: {
@@ -298,6 +311,8 @@ describe('DatatableComponent', () => {
 
     wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('focus');
 
+    await waitForWrapperUpdate(wrapper);
+
     wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -343,6 +358,7 @@ describe('DatatableComponent', () => {
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
+    expect(component.find(VisualizationContainer)).toHaveLength(1);
     expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
   });
 

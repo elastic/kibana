@@ -216,7 +216,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         <EuiModalBody>
           <ValueListsForm onSuccess={handleUploadSuccess} onError={handleUploadError} />
           <EuiSpacer />
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiText size="s">
               <h2>{i18n.TABLE_TITLE}</h2>
             </EuiText>

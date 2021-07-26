@@ -36,13 +36,13 @@ describe('UI Extension services', () => {
       register({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
 
       expect(storage.endpoint['package-policy-edit']).toEqual({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
     });
 
@@ -57,21 +57,21 @@ describe('UI Extension services', () => {
       register({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
 
       expect(() => {
         register({
           view: 'package-policy-edit',
           package: 'endpoint',
-          component: LazyCustomView2,
+          Component: LazyCustomView2,
         });
       }).toThrow();
 
       expect(storage.endpoint['package-policy-edit']).toEqual({
         view: 'package-policy-edit',
         package: 'endpoint',
-        component: LazyCustomView,
+        Component: LazyCustomView,
       });
     });
   });

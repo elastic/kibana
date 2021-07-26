@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
@@ -13,6 +14,7 @@ import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
+  monitoringTypes,
   installationStatuses,
 } from '../../constants';
 import type { ValueOf } from '../../types';
@@ -91,7 +93,7 @@ export enum ElasticsearchAssetType {
 }
 
 export type DataType = typeof dataTypes;
-
+export type MonitoringType = typeof monitoringTypes;
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
@@ -299,8 +301,8 @@ export interface RegistryDataStream {
 }
 
 export interface RegistryElasticsearch {
-  'index_template.settings'?: object;
-  'index_template.mappings'?: object;
+  'index_template.settings'?: estypes.IndicesIndexSettings;
+  'index_template.mappings'?: estypes.MappingTypeMapping;
 }
 
 export interface RegistryDataStreamPermissions {
@@ -412,7 +414,7 @@ export interface IndexTemplateMappings {
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
 // until "proper" documentation of the new format is available.
-// Ingest Manager does not use nor support the legacy index template v1 format at all
+// Fleet does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
   priority: number;
   index_patterns: string[];
@@ -425,7 +427,7 @@ export interface IndexTemplate {
   _meta: object;
 }
 
-export interface TemplateRef {
+export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }

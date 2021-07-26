@@ -38,6 +38,7 @@ import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { AppSearchPageTemplate } from '../layout';
+import { NotFound } from '../not_found';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
 import { SchemaRouter } from '../schema';
@@ -45,7 +46,7 @@ import { SearchUI } from '../search_ui';
 import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
-import { EngineLogic } from './';
+import { EngineLogic, getEngineBreadcrumbs } from './';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -65,13 +66,20 @@ export const EngineRouter: React.FC = () => {
   } = useValues(AppLogic);
 
   const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
-  const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
-  const { setEngineName, initializeEngine, clearEngine } = useActions(EngineLogic);
+  const { engineName, dataLoading, engineNotFound, isMetaEngine } = useValues(EngineLogic);
+  const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } = useActions(
+    EngineLogic
+  );
 
   useEffect(() => {
     setEngineName(engineNameFromUrl);
     initializeEngine();
-    return clearEngine;
+    pollEmptyEngine();
+
+    return () => {
+      stopPolling();
+      clearEngine();
+    };
   }, [engineNameFromUrl]);
 
   if (engineNotFound) {
@@ -112,12 +120,12 @@ export const EngineRouter: React.FC = () => {
           <SchemaRouter />
         </Route>
       )}
-      {canViewMetaEngineSourceEngines && (
+      {canViewMetaEngineSourceEngines && isMetaEngine && (
         <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
           <SourceEngines />
         </Route>
       )}
-      {canViewEngineCrawler && (
+      {canViewEngineCrawler && !isMetaEngine && (
         <Route path={ENGINE_CRAWLER_PATH}>
           <CrawlerRouter />
         </Route>
@@ -152,6 +160,9 @@ export const EngineRouter: React.FC = () => {
           <ApiLogs />
         </Route>
       )}
+      <Route>
+        <NotFound pageChrome={getEngineBreadcrumbs()} />
+      </Route>
     </Switch>
   );
 };

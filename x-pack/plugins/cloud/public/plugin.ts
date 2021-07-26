@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, HttpStart } from 'src/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  HttpStart,
+  IBasePath,
+} from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -21,6 +32,10 @@ export interface CloudConfigType {
   profile_url?: string;
   deployment_url?: string;
   organization_url?: string;
+  full_story: {
+    enabled: boolean;
+    org_id?: string;
+  };
 }
 
 interface CloudSetupDependencies {
@@ -51,7 +66,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isCloudEnabled = false;
   }
 
-  public setup(core: CoreSetup, { home }: CloudSetupDependencies) {
+  public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
+    this.setupFullstory({ basePath: core.http.basePath, security }).catch((e) =>
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up FullStory: ${e.toString()}`)
+    );
+
     const {
       id,
       cname,
@@ -135,4 +155,85 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const user = await security.authc.getCurrentUser().catch(() => null);
     return user?.roles.includes('superuser') ?? true;
   }
+
+  private async setupFullstory({
+    basePath,
+    security,
+  }: CloudSetupDependencies & { basePath: IBasePath }) {
+    const { enabled, org_id: orgId } = this.config.full_story;
+    if (!enabled || !orgId) {
+      return; // do not load any fullstory code in the browser if not enabled
+    }
+
+    // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
+    const fullStoryChunkPromise = import('./fullstory');
+    const userIdPromise: Promise<string | undefined> = security
+      ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
+      : Promise.resolve(undefined);
+
+    // We need to call FS.identify synchronously after FullStory is initialized, so we must load the user upfront
+    const [{ initializeFullStory }, userId] = await Promise.all([
+      fullStoryChunkPromise,
+      userIdPromise,
+    ]);
+
+    const { fullStory, sha256 } = initializeFullStory({
+      basePath,
+      orgId,
+      packageInfo: this.initializerContext.env.packageInfo,
+    });
+
+    // Very defensive try/catch to avoid any UnhandledPromiseRejections
+    try {
+      // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
+      // across domains work
+      if (userId) {
+        // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
+        const hashedId = sha256(userId.toString());
+        fullStory.identify(hashedId);
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`,
+        e
+      );
+    }
+
+    // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
+    fullStory.event('Loaded Kibana', {
+      // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
+      kibana_version_str: this.initializerContext.env.packageInfo.version,
+    });
+  }
 }
+
+/** @internal exported for testing */
+export const loadFullStoryUserId = async ({
+  getCurrentUser,
+}: {
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+}) => {
+  try {
+    const currentUser = await getCurrentUser().catch(() => undefined);
+    if (!currentUser) {
+      return undefined;
+    }
+
+    // Log very defensively here so we can debug this easily if it breaks
+    if (!currentUser.username) {
+      // eslint-disable-next-line no-console
+      console.debug(
+        `[cloud.full_story] username not specified. User metadata: ${JSON.stringify(
+          currentUser.metadata
+        )}`
+      );
+    }
+
+    return currentUser.username;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
+    return undefined;
+  }
+};

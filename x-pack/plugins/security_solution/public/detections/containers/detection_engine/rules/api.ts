@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { camelCase } from 'lodash';
 import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
@@ -117,8 +118,9 @@ export const fetchRules = async ({
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filterString = convertRulesFilterToKQL(filterOptions);
 
+  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
   const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : field;
+    return field === 'name' ? `${field}.keyword` : camelCase(field);
   };
 
   const query = {

@@ -30,6 +30,7 @@ jest.mock('./inject_action_params', () => ({
 
 const alertType: NormalizedAlertType<
   AlertTypeParams,
+  AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -44,6 +45,7 @@ const alertType: NormalizedAlertType<
   ],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -58,6 +60,7 @@ const mockActionsPlugin = actionsMock.createStart();
 const mockEventLogger = eventLoggerMock.create();
 const createExecutionHandlerParams: jest.Mocked<
   CreateExecutionHandlerOptions<
+    AlertTypeParams,
     AlertTypeParams,
     AlertTypeState,
     AlertInstanceState,
@@ -95,6 +98,8 @@ const createExecutionHandlerParams: jest.Mocked<
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  supportsEphemeralTasks: false,
+  maxEphemeralActionsPerAlert: Promise.resolve(10),
 };
 
 beforeEach(() => {
@@ -195,7 +200,6 @@ test('enqueues execution per selected action', async () => {
             "id": "1",
             "license": "basic",
             "name": "name-of-alert",
-            "namespace": "test1",
             "ruleset": "alerts",
           },
         },

@@ -84,7 +84,6 @@ const checkboxDisabledCheck = (item: FieldSelectionItem) =>
 export const AnalysisFieldsTable: FC<{
   dependentVariable?: string;
   includes: string[];
-  loadingItems: boolean;
   setFormState: React.Dispatch<React.SetStateAction<any>>;
   minimumFieldsRequiredMessage?: string;
   setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
@@ -94,7 +93,6 @@ export const AnalysisFieldsTable: FC<{
 }> = ({
   dependentVariable,
   includes,
-  loadingItems,
   setFormState,
   minimumFieldsRequiredMessage,
   setMinimumFieldsRequiredMessage,

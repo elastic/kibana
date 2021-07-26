@@ -10,13 +10,11 @@ import { GroupDetails, SourcePriority } from '../../../types';
 export const mockGroupValues = {
   group: {} as GroupDetails,
   dataLoading: true,
-  manageUsersModalVisible: false,
   managerModalFormErrors: [],
   sharedSourcesModalVisible: false,
   confirmDeleteModalVisible: false,
   groupNameInputValue: '',
   selectedGroupSources: [],
-  selectedGroupUsers: [],
   groupPrioritiesUnchanged: true,
   activeSourcePriorities: {} as SourcePriority,
   cachedSourcePriorities: {} as SourcePriority,

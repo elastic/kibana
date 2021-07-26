@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('migrations', () => {
     describe('saved object migrations', () => {
@@ -51,11 +51,15 @@ export default function ({ getService }) {
 
     describe('embeddable migrations', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/maps/kibana');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/maps/kibana');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        );
       });
 
       it('should apply embeddable migrations', async () => {

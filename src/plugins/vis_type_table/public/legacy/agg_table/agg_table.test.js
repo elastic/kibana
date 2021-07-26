@@ -15,7 +15,7 @@ import { round } from 'lodash';
 
 import { getFieldFormatsRegistry } from '../../../../data/public/test_utils';
 import { coreMock } from '../../../../../core/public/mocks';
-import { initAngularBootstrap } from '../../../../kibana_legacy/public';
+import { initAngularBootstrap } from '../../../../kibana_legacy/public/angular_bootstrap';
 import { setUiSettings } from '../../../../data/public/services';
 import { UI_SETTINGS } from '../../../../data/public/';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../../share/public';
@@ -60,10 +60,12 @@ describe('Table Vis - AggTable Directive', function () {
     initTableVisLegacyModule(tableVisModule);
   };
 
+  beforeAll(async () => {
+    await initAngularBootstrap();
+  });
   beforeEach(() => {
     setUiSettings(core.uiSettings);
     setFormatService(getFieldFormatsRegistry(core));
-    initAngularBootstrap();
     initLocalAngular();
     angular.mock.module('kibana/table_vis');
     angular.mock.inject(($injector, config) => {

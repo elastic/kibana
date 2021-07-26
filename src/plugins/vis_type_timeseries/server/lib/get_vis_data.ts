@@ -9,7 +9,7 @@
 import _ from 'lodash';
 
 import { Framework } from '../plugin';
-import type { TimeseriesVisData } from '../../common/types';
+import type { TimeseriesVisData, FetchedIndexPattern, Series } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import type {
   VisTypeTimeseriesVisDataRequest,
@@ -20,6 +20,8 @@ import { getSeriesData } from './vis_data/get_series_data';
 import { getTableData } from './vis_data/get_table_data';
 import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
 import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
+import { MAX_BUCKETS_SETTING } from '../../common/constants';
+import { getIntervalAndTimefield } from './vis_data/get_interval_and_timefield';
 
 export async function getVisData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -32,15 +34,41 @@ export async function getVisData(
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   const promises = request.body.panels.map((panel) => {
+    const cachedIndexPatternFetcher = getCachedIndexPatternFetcher(indexPatternsService, {
+      fetchKibanaIndexForStringIndexes: Boolean(panel.use_kibana_indexes),
+    });
     const services: VisTypeTimeseriesRequestServices = {
       esQueryConfig,
       esShardTimeout,
       indexPatternsService,
       uiSettings,
+      cachedIndexPatternFetcher,
       searchStrategyRegistry: framework.searchStrategyRegistry,
-      cachedIndexPatternFetcher: getCachedIndexPatternFetcher(indexPatternsService, {
-        fetchKibanaIndexForStringIndexes: Boolean(panel.use_kibana_indexes),
-      }),
+      buildSeriesMetaParams: async (
+        index: FetchedIndexPattern,
+        useKibanaIndexes: boolean,
+        series?: Series
+      ) => {
+        /** This part of code is required to try to get the default timefield for string indices.
+         *  The rest of the functionality available for Kibana indexes should not be active **/
+        if (!useKibanaIndexes && index.indexPatternString) {
+          index = await cachedIndexPatternFetcher(index.indexPatternString, true);
+        }
+
+        const maxBuckets = await uiSettings.get<number>(MAX_BUCKETS_SETTING);
+        const { min, max } = request.body.timerange;
+
+        return getIntervalAndTimefield(
+          panel,
+          index,
+          {
+            min,
+            max,
+            maxBuckets,
+          },
+          series
+        );
+      },
     };
 
     return panel.type === PANEL_TYPES.TABLE

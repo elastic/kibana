@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "AWS Management Console Root Login",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and event.action:ConsoleLogin and aws.cloudtrail.user_identity.type:Root and event.outcome:success",
+  "query": "event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and event.action:ConsoleLogin and aws.cloudtrail.user_identity.type:Root and event.outcome:success\n",
   "references": [
     "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html"
   ],

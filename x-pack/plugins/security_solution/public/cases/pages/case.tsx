@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AllCases } from '../components/all_cases';
@@ -20,9 +20,9 @@ export const CasesPage = React.memo(() => {
 
   return userPermissions == null || userPermissions?.read ? (
     <>
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <AllCases userCanCrud={userPermissions?.crud ?? false} />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.case} />
     </>
   ) : (

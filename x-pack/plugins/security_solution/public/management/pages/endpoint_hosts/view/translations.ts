@@ -15,18 +15,52 @@ export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.activityLog', {
     defaultMessage: 'Activity Log',
   }),
+  datePicker: {
+    startDate: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.datePicker.startDate',
+      {
+        defaultMessage: 'Pick a start date',
+      }
+    ),
+    endDate: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.datePicker.endDate',
+      {
+        defaultMessage: 'Pick an end date',
+      }
+    ),
+  },
   LogEntry: {
+    endOfLog: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.endOfLog',
+      {
+        defaultMessage: 'Nothing more to show',
+      }
+    ),
+    emptyState: {
+      title: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.title',
+        {
+          defaultMessage: 'No logged actions',
+        }
+      ),
+      body: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.body',
+        {
+          defaultMessage: 'No actions have been logged for this endpoint.',
+        }
+      ),
+    },
     action: {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',
         {
-          defaultMessage: 'isolated host',
+          defaultMessage: 'submitted request: Isolate host',
         }
       ),
       unisolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.unisolated',
         {
-          defaultMessage: 'released host',
+          defaultMessage: 'submitted request: Release host',
         }
       ),
     },
@@ -34,25 +68,25 @@ export const ACTIVITY_LOG = {
       isolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationSuccessful',
         {
-          defaultMessage: 'host isolation successful',
+          defaultMessage: 'Host isolation request received by Endpoint',
         }
       ),
       isolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationFailed',
         {
-          defaultMessage: 'host isolation failed',
+          defaultMessage: 'Host isolation request received by Endpoint with errors',
         }
       ),
       unisolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationSuccessful',
         {
-          defaultMessage: 'host release successful',
+          defaultMessage: 'Release host request received by Endpoint',
         }
       ),
       unisolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationFailed',
         {
-          defaultMessage: 'host release failed',
+          defaultMessage: 'Release host request received by Endpoint with errors',
         }
       ),
     },

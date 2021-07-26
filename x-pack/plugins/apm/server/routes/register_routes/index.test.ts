@@ -109,6 +109,11 @@ const initApi = (
         params: {},
         query: {},
         body: null,
+        events: {
+          aborted$: {
+            toPromise: () => new Promise(() => {}),
+          },
+        },
         ...request,
       },
       responseMock
@@ -202,7 +207,7 @@ describe('createApi', () => {
   describe('when validating', () => {
     describe('_inspect', () => {
       it('allows _inspect=true', async () => {
-        const handlerMock = jest.fn();
+        const handlerMock = jest.fn().mockResolvedValue({});
         const {
           simulateRequest,
           mocks: { response },
@@ -234,7 +239,7 @@ describe('createApi', () => {
       });
 
       it('rejects _inspect=1', async () => {
-        const handlerMock = jest.fn();
+        const handlerMock = jest.fn().mockResolvedValue({});
 
         const {
           simulateRequest,
@@ -260,14 +265,14 @@ describe('createApi', () => {
           body: {
             attributes: { _inspect: [] },
             message:
-              'Invalid value 1 supplied to : strict_keys/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
+              'Invalid value 1 supplied to : Partial<{| query: Partial<{| _inspect: pipe(JSON, boolean) |}> |}>/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
           },
           statusCode: 400,
         });
       });
 
       it('allows omitting _inspect', async () => {
-        const handlerMock = jest.fn();
+        const handlerMock = jest.fn().mockResolvedValue({});
 
         const {
           simulateRequest,
@@ -297,7 +302,11 @@ describe('createApi', () => {
         simulateRequest,
         mocks: { response },
       } = initApi([
-        { endpoint: 'GET /foo', options: { tags: [] }, handler: jest.fn() },
+        {
+          endpoint: 'GET /foo',
+          options: { tags: [] },
+          handler: jest.fn().mockResolvedValue({}),
+        },
       ]);
 
       await simulateRequest({
@@ -328,7 +337,7 @@ describe('createApi', () => {
     });
 
     it('validates path parameters', async () => {
-      const handlerMock = jest.fn();
+      const handlerMock = jest.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },
@@ -402,7 +411,7 @@ describe('createApi', () => {
     });
 
     it('validates body parameters', async () => {
-      const handlerMock = jest.fn();
+      const handlerMock = jest.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },
@@ -448,7 +457,7 @@ describe('createApi', () => {
     });
 
     it('validates query parameters', async () => {
-      const handlerMock = jest.fn();
+      const handlerMock = jest.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },

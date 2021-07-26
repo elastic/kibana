@@ -4,19 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPanel, EuiResizableContainer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { useRouteMatch } from 'react-router-dom';
+import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
-import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
-import { SeriesBuilder } from './series_builder/series_builder';
+import { SeriesViews } from './views/series_views';
+import { LensEmbeddable } from './lens_embeddable';
+import { EmptyView } from './components/empty_view';
+
+export type PanelId = 'seriesPanel' | 'chartPanel';
 
 export function ExploratoryView({
   saveAttributes,
@@ -24,14 +30,15 @@ export function ExploratoryView({
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   const {
-    services: { lens, notifications },
+    services: { lens },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const seriesBuilderRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [height, setHeight] = useState<string>('100vh');
-  const [seriesId, setSeriesId] = useState<string>('');
+
+  const [lastUpdated, setLastUpdated] = useState<number | undefined>();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -39,31 +46,24 @@ export function ExploratoryView({
 
   const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
-  const LensComponent = lens?.EmbeddableComponent;
+  const { firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
-  const { firstSeriesId, firstSeries: series, setSeries, allSeries } = useSeriesStorage();
-
-  useEffect(() => {
-    setSeriesId(firstSeriesId);
-  }, [allSeries, firstSeriesId]);
-
-  const lensAttributesT = useLensAttributes({
-    seriesId,
-  });
+  const lensAttributesT = useLensAttributes();
 
   const setHeightOffset = () => {
     if (seriesBuilderRef?.current && wrapperRef.current) {
       const headerOffset = wrapperRef.current.getBoundingClientRect().top;
-      const seriesOffset = seriesBuilderRef.current.getBoundingClientRect().height;
-      setHeight(`calc(100vh - ${seriesOffset + headerOffset + 40}px)`);
+      setHeight(`calc(100vh - ${headerOffset + 40}px)`);
     }
   };
 
   useEffect(() => {
-    if (series?.dataType) {
-      loadIndexPattern({ dataType: series?.dataType });
-    }
-  }, [series?.dataType, loadIndexPattern]);
+    allSeries.forEach((seriesT) => {
+      loadIndexPattern({
+        dataType: seriesT.dataType,
+      });
+    });
+  }, [allSeries, loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
@@ -72,56 +72,104 @@ export function ExploratoryView({
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
+  }, [JSON.stringify(lensAttributesT ?? {}), lastRefresh]);
 
   useEffect(() => {
     setHeightOffset();
   });
 
+  const collapseFn = useRef<(id: PanelId, direction: PanelDirection) => void>();
+
+  const [hiddenPanel, setHiddenPanel] = useState('');
+
+  const isPreview = !!useRouteMatch('/exploratory-view/preview');
+
+  const onCollapse = (panelId: string) => {
+    setHiddenPanel((prevState) => (panelId === prevState ? '' : panelId));
+  };
+
+  const onChange = (panelId: PanelId) => {
+    onCollapse(panelId);
+    if (collapseFn.current) {
+      collapseFn.current(panelId, panelId === 'seriesPanel' ? 'right' : 'left');
+    }
+  };
+
   return (
     <Wrapper>
       {lens ? (
         <>
-          <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
+          <ExploratoryViewHeader
+            lensAttributes={lensAttributes}
+            seriesId={0}
+            lastUpdated={lastUpdated}
+          />
           <LensWrapper ref={wrapperRef} height={height}>
-            {lensAttributes && seriesId && series?.reportType && series?.time ? (
-              <LensComponent
-                id="exploratoryView"
-                timeRange={series?.time}
-                attributes={lensAttributes}
-                onBrushEnd={({ range }) => {
-                  if (series?.reportType !== 'dist') {
-                    setSeries(seriesId, {
-                      ...series,
-                      time: {
-                        from: new Date(range[0]).toISOString(),
-                        to: new Date(range[1]).toISOString(),
-                      },
-                    });
-                  } else {
-                    notifications?.toasts.add(
-                      i18n.translate('xpack.observability.exploratoryView.noBrusing', {
-                        defaultMessage:
-                          'Zoom by brush selection is only available on time series charts.',
-                      })
-                    );
-                  }
-                }}
-              />
-            ) : (
-              <EmptyView series={series} loading={loading} height={height} />
+            <EuiResizableContainer
+              style={{ height: '100%' }}
+              direction="vertical"
+              onToggleCollapsed={onCollapse}
+            >
+              {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+                collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
+
+                return (
+                  <>
+                    <EuiResizablePanel
+                      initialSize={isPreview ? 70 : 40}
+                      minSize={isPreview ? '70%' : '30%'}
+                      mode={isPreview ? 'main' : 'collapsible'}
+                      id="chartPanel"
+                    >
+                      {lensAttributes ? (
+                        <LensEmbeddable
+                          setLastUpdated={setLastUpdated}
+                          lensAttributes={lensAttributes}
+                        />
+                      ) : (
+                        <EmptyView series={firstSeries} loading={loading} reportType={reportType} />
+                      )}
+                    </EuiResizablePanel>
+                    <EuiResizableButton />
+                    <EuiResizablePanel
+                      initialSize={isPreview ? 30 : 60}
+                      minSize="10%"
+                      mode={isPreview ? 'collapsible' : 'main'}
+                      id="seriesPanel"
+                    >
+                      {!isPreview &&
+                        (hiddenPanel === 'chartPanel' ? (
+                          <ShowChart onClick={() => onChange('chartPanel')} iconType="arrowDown">
+                            {SHOW_CHART_LABEL}
+                          </ShowChart>
+                        ) : (
+                          <HideChart
+                            onClick={() => onChange('chartPanel')}
+                            iconType="arrowUp"
+                            color="text"
+                          >
+                            {HIDE_CHART_LABEL}
+                          </HideChart>
+                        ))}
+                      <SeriesViews
+                        seriesBuilderRef={seriesBuilderRef}
+                        onSeriesPanelCollapse={onChange}
+                      />
+                    </EuiResizablePanel>
+                  </>
+                );
+              }}
+            </EuiResizableContainer>
+            {hiddenPanel === 'seriesPanel' && (
+              <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
+                {PREVIEW_LABEL}
+              </ShowPreview>
             )}
           </LensWrapper>
-          <SeriesBuilder seriesId={seriesId} seriesBuilderRef={seriesBuilderRef} />
         </>
       ) : (
         <EuiTitle>
-          <h2>
-            {i18n.translate('xpack.observability.overview.exploratoryView.lensDisabled', {
-              defaultMessage:
-                'Lens app is not available, please enable Lens to use exploratory view.',
-            })}
-          </h2>
+          <h2>{LENS_NOT_AVAILABLE}</h2>
         </EuiTitle>
       )}
     </Wrapper>
@@ -141,4 +189,39 @@ const Wrapper = styled(EuiPanel)`
   margin: 0 auto;
   width: 100%;
   overflow-x: auto;
+  position: relative;
 `;
+
+const ShowPreview = styled(EuiButtonEmpty)`
+  position: absolute;
+  bottom: 34px;
+`;
+const HideChart = styled(EuiButtonEmpty)`
+  position: absolute;
+  top: -35px;
+  right: 50px;
+`;
+const ShowChart = styled(EuiButtonEmpty)`
+  position: absolute;
+  top: -10px;
+  right: 50px;
+`;
+
+const HIDE_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.hideChart', {
+  defaultMessage: 'Hide chart',
+});
+
+const SHOW_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.showChart', {
+  defaultMessage: 'Show chart',
+});
+
+const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.preview', {
+  defaultMessage: 'Preview',
+});
+
+const LENS_NOT_AVAILABLE = i18n.translate(
+  'xpack.observability.overview.exploratoryView.lensDisabled',
+  {
+    defaultMessage: 'Lens app is not available, please enable Lens to use exploratory view.',
+  }
+);

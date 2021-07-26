@@ -9,7 +9,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { Note } from '../../lib/note';
 
-import { addError, addNotes, removeError, updateNote } from './actions';
+import { addError, addErrorHash, addNotes, removeError, updateNote } from './actions';
 import { AppModel, NotesById } from './model';
 
 export type AppState = AppModel;
@@ -17,6 +17,13 @@ export type AppState = AppModel;
 export const initialAppState: AppState = {
   notesById: {},
   errors: [],
+  enableExperimental: {
+    trustedAppsByPolicyEnabled: false,
+    metricsEntitiesEnabled: false,
+    ruleRegistryEnabled: false,
+    tGridEnabled: false,
+    uebaEnabled: false,
+  },
 };
 
 interface UpdateNotesByIdParams {
@@ -46,4 +53,26 @@ export const appReducer = reducerWithInitialState(initialAppState)
     ...state,
     errors: state.errors.filter((error) => error.id !== id),
   }))
+  .case(addErrorHash, (state, { id, hash, title, message }) => {
+    const errorIdx = state.errors.findIndex((e) => e.id === id);
+    const errorObj = state.errors.find((e) => e.id === id) || { id, title, message };
+    if (errorIdx === -1) {
+      return {
+        ...state,
+        errors: state.errors.concat({
+          ...errorObj,
+          hash,
+          displayError: !state.errors.some((e) => e.hash === hash),
+        }),
+      };
+    }
+    return {
+      ...state,
+      errors: [
+        ...state.errors.slice(0, errorIdx),
+        { ...errorObj, hash, displayError: !state.errors.some((e) => e.hash === hash) },
+        ...state.errors.slice(errorIdx + 1),
+      ],
+    };
+  })
   .build();

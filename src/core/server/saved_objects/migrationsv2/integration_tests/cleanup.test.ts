@@ -98,7 +98,20 @@ describe('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
-    await root.setup();
+    await root.preboot();
+    const coreSetup = await root.setup();
+
+    coreSetup.savedObjects.registerType({
+      name: 'foo',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'agnostic',
+      migrations: {
+        '7.14.0': (doc) => doc,
+      },
+    });
 
     await expect(root.start()).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 1 corrupt saved object documents were found: index-pattern:test_index*
