@@ -23,7 +23,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async openMonitorStatusAlertType(alertType: string) {
-      return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`);
+      await testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`);
     },
     async setAlertTags(tags: string[]) {
       for (let i = 0; i < tags.length; i += 1) {
@@ -33,15 +33,15 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async setAlertName(name: string) {
-      return testSubjects.setValue('alertNameInput', name);
+      await testSubjects.setValue('alertNameInput', name);
     },
     async setAlertInterval(value: string) {
-      return testSubjects.setValue('intervalInput', value);
+      await testSubjects.setValue('intervalInput', value);
     },
     async setAlertThrottleInterval(value: string) {
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
-      return testSubjects.setValue('throttleInput', value);
+      await testSubjects.setValue('throttleInput', value);
     },
     async setAlertExpressionValue(
       expressionAttribute: string,
@@ -50,17 +50,17 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     ) {
       await testSubjects.click(expressionAttribute);
       await testSubjects.setValue(fieldAttribute, value);
-      return await testSubjects.click(expressionAttribute);
+      await testSubjects.click(expressionAttribute);
     },
     async setAlertStatusNumTimes(value: string) {
-      return this.setAlertExpressionValue(
+      await this.setAlertExpressionValue(
         'xpack.uptime.alerts.monitorStatus.numTimesExpression',
         'xpack.uptime.alerts.monitorStatus.numTimesField',
         value
       );
     },
     async setAlertTimerangeSelection(value: string) {
-      return this.setAlertExpressionValue(
+      await this.setAlertExpressionValue(
         'xpack.uptime.alerts.monitorStatus.timerangeValueExpression',
         'xpack.uptime.alerts.monitorStatus.timerangeValueField',
         value
@@ -108,12 +108,12 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     async clickPortExpression(filter: string) {
       await testSubjects.click('uptimeCreateStatusAlert.filter_port');
       await testSubjects.click(`filter-popover-item_${filter}`);
-      return find.clickByCssSelector('body');
+      await find.clickByCssSelector('body');
     },
     async clickTypeExpression(filter: string) {
       await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
       await testSubjects.click(`filter-popover-item_${filter}`);
-      return find.clickByCssSelector('body');
+      await find.clickByCssSelector('body');
     },
     async clickSaveAlertButton() {
       await testSubjects.click('saveAlertButton');
