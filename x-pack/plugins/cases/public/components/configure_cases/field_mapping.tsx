@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -13,7 +13,6 @@ import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
 
 import { CaseConnectorMapping } from '../../containers/configure/types';
-import { useKibana } from '../../common/lib/kibana';
 
 const FieldRowWrapper = styled.div`
   margin: 10px 0;
@@ -21,22 +20,16 @@ const FieldRowWrapper = styled.div`
 `;
 
 export interface FieldMappingProps {
-  connectorActionTypeId: string;
+  actionTypeName: string;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
 }
 
 const FieldMappingComponent: React.FC<FieldMappingProps> = ({
-  connectorActionTypeId,
+  actionTypeName,
   isLoading,
   mappings,
 }) => {
-  const { triggersActionsUi } = useKibana().services;
-  const selectedConnector = useMemo(
-    () => triggersActionsUi.actionTypeRegistry.get(connectorActionTypeId) ?? { fields: {} },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorActionTypeId]
-  );
   return mappings.length ? (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -46,9 +39,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
             <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
           </EuiFlexItem>
           <EuiFlexItem>
-            <span className="euiFormLabel">
-              {i18n.FIELD_MAPPING_SECOND_COL(selectedConnector.actionTypeTitle ?? '')}
-            </span>
+            <span className="euiFormLabel">{i18n.FIELD_MAPPING_SECOND_COL(actionTypeName)}</span>
           </EuiFlexItem>
           <EuiFlexItem>
             <span className="euiFormLabel">{i18n.FIELD_MAPPING_THIRD_COL}</span>
