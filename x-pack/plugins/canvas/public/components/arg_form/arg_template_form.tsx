@@ -12,7 +12,11 @@ import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
 
 interface Props {
-  template?: (domNode: HTMLElement, config: any, handlers: Props['handlers']) => void;
+  template?: (
+    domNode: HTMLElement,
+    config: Props['argumentProps'],
+    handlers: Props['handlers']
+  ) => void;
   argumentProps: {
     valueMissing?: boolean;
     label?: string;
