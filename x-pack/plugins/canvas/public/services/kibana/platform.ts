@@ -25,7 +25,7 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({ coreStart,
     getBasePathInterface: () => coreStart.http.basePath,
     getElasticWebsiteUrl: () => coreStart.docLinks.ELASTIC_WEBSITE_URL,
     getDocLinkVersion: () => coreStart.docLinks.DOC_LINK_VERSION,
-    getKibanaVersion: () => initContext?.env.packageInfo.version,
+    getKibanaVersion: () => initContext.env.packageInfo.version,
     // TODO: is there a better type for this?  The capabilities type allows for a Record,
     // though we don't do this.  So this cast may be the best option.
     getHasWriteAccess: () => coreStart.application.capabilities.canvas.save as boolean,
