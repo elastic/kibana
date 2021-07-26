@@ -4,5 +4,10 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data", "urlForwarding", "indexPatternFieldEditor"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Index pattern management app"
 }
