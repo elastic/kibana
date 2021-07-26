@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import PropTypes from 'prop-types';
 import usePrevious from 'react-use/lib/usePrevious';
 import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
@@ -87,21 +86,4 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
       }}
     />
   );
-};
-
-ArgTemplateForm.propTypes = {
-  template: PropTypes.func,
-  argumentProps: PropTypes.shape({
-    valueMissing: PropTypes.bool,
-    label: PropTypes.string,
-    setLabel: PropTypes.func.isRequired,
-    expand: PropTypes.bool,
-    setExpand: PropTypes.func,
-    onValueRemove: PropTypes.func,
-    resetErrorState: PropTypes.func.isRequired,
-    renderError: PropTypes.func.isRequired,
-  }),
-  handlers: PropTypes.object,
-  error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
-  errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
 };
