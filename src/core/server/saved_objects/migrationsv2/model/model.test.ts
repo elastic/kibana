@@ -897,11 +897,11 @@ describe('migrations v2 model', () => {
             ],
           },
         });
-        // Logs should be added for any errors encountered from deleteOnUpgrade hooks
+        // Logs should be added for any errors encountered from excludeOnUpgrade hooks
         expect(newState.logs).toEqual([
           {
             level: 'warning',
-            message: `Ignoring deleteOnUpgrade hook that failed with error: "Error: an error!"`,
+            message: `Ignoring excludeOnUpgrade hook that failed with error: "Error: an error!"`,
           },
         ]);
       });

@@ -3079,7 +3079,7 @@ export interface SavedObjectsType<Attributes = any> {
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectTypeExcludeFromUpgradeFilterHook" needs to be exported by the entry point index.d.ts
-    deleteOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
+    excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
     hidden: boolean;
     indexPattern?: string;
     management?: SavedObjectsTypeManagementDefinition<Attributes>;

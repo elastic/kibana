@@ -391,7 +391,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP.logs,
           ...res.right.errors.map((e) => ({
             level: 'warning' as const,
-            message: `Ignoring deleteOnUpgrade hook that failed with error: "${e.toString()}"`,
+            message: `Ignoring excludeOnUpgrade hook that failed with error: "${e.toString()}"`,
           })),
         ],
       };

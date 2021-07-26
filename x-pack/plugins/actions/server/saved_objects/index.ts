@@ -71,7 +71,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
-    deleteOnUpgrade: async (client) => {
+    excludeOnUpgrade: async (client) => {
       const oldestIdleActionTask = await getOldestIdleActionTask(client, taskManagerIndex);
       return {
         bool: {

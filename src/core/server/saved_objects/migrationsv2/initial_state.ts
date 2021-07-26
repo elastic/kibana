@@ -60,8 +60,8 @@ export const createInitialState = ({
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
   const excludeFilterHooks = typeRegistry
     .getAllTypes()
-    .filter((type) => !!type.deleteOnUpgrade)
-    .map((type) => type.deleteOnUpgrade!);
+    .filter((type) => !!type.excludeOnUpgrade)
+    .map((type) => type.excludeOnUpgrade!);
 
   return {
     controlState: 'INIT',

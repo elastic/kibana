@@ -138,13 +138,13 @@ describe('createInitialState', () => {
   });
 
   it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
-    const fooDeleteOnUpgradeHook = jest.fn();
+    const fooExcludeOnUpgradeHook = jest.fn();
     typeRegistry.registerType({
       name: 'foo',
       namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
-      deleteOnUpgrade: fooDeleteOnUpgradeHook,
+      excludeOnUpgrade: fooExcludeOnUpgradeHook,
     });
 
     const initialState = createInitialState({
@@ -159,7 +159,7 @@ describe('createInitialState', () => {
       typeRegistry,
     });
 
-    expect(initialState.excludeFromUpgradeFilterHooks).toEqual([fooDeleteOnUpgradeHook]);
+    expect(initialState.excludeFromUpgradeFilterHooks).toEqual([fooExcludeOnUpgradeHook]);
   });
 
   it('returns state with a preMigration script', () => {
