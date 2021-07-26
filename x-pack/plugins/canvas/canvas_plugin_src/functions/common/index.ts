@@ -29,7 +29,6 @@ import { gt } from './gt';
 import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
-import { image } from './image';
 import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
@@ -79,7 +78,6 @@ export const functions = [
   gte,
   head,
   ifFn,
-  image,
   lt,
   lte,
   joinRows,
