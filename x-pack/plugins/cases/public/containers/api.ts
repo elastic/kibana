@@ -8,7 +8,6 @@
 import { assign, omit } from 'lodash';
 
 import {
-  ACTION_TYPES_URL,
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
@@ -361,5 +360,5 @@ export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicen
     }
   );
 
-  return response;
+  return convertArrayToCamelCase(response) as ActionLicense[];
 };

@@ -22,6 +22,7 @@ import { KibanaServices } from '../../common/lib/kibana';
 
 import { ApiProps } from '../types';
 import {
+  convertArrayToCamelCase,
   convertToCamelCase,
   decodeCaseConfigurationsResponse,
   decodeCaseConfigureResponse,
@@ -58,15 +59,6 @@ export const getCaseConfigure = async ({
   }
 
   return null;
-};
-
-export const getConnectorMappings = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
-    method: 'GET',
-    signal,
-  });
-
-  return response;
 };
 
 export const postCaseConfigure = async (
@@ -110,5 +102,5 @@ export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionType
     signal,
   });
 
-  return response;
+  return convertArrayToCamelCase(response) as ActionTypeConnector[];
 };
