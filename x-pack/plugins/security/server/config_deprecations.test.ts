@@ -29,11 +29,45 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
 };
 
 describe('Config Deprecations', () => {
-  it('does not report deprecations for default configuration', () => {
-    const defaultConfig = { xpack: { security: {} } };
+  it('does not report any deprecations if session timeouts are specified', () => {
+    const defaultConfig = { xpack: { security: { session: { idleTimeout: 123, lifespan: 345 } } } };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toHaveLength(0);
+  });
+
+  it('reports that session idleTimeout and lifespan will have default values if none of them is specified', () => {
+    const defaultConfig = { xpack: { security: {} } };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    expect(migrated).toEqual(defaultConfig);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Session idle timeout (\\"xpack.security.session.idleTimeout\\") will be set to 1 hour by default in the next major version (8.0).",
+        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+      ]
+    `);
+  });
+
+  it('reports that session idleTimeout will have a default value if it is not specified', () => {
+    const defaultConfig = { xpack: { security: { session: { lifespan: 345 } } } };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    expect(migrated).toEqual(defaultConfig);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Session idle timeout (\\"xpack.security.session.idleTimeout\\") will be set to 1 hour by default in the next major version (8.0).",
+      ]
+    `);
+  });
+
+  it('reports that session lifespan will have a default value if it is not specified', () => {
+    const defaultConfig = { xpack: { security: { session: { idleTimeout: 123 } } } };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    expect(migrated).toEqual(defaultConfig);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+      ]
+    `);
   });
 
   it('renames sessionTimeout to session.idleTimeout', () => {
@@ -50,6 +84,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "\\"xpack.security.sessionTimeout\\" is deprecated and has been replaced by \\"xpack.security.session.idleTimeout\\"",
+        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
       ]
     `);
   });
@@ -58,6 +93,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             appender: {
               kind: 'console',
@@ -80,6 +116,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             appender: {
               layout: { kind: 'pattern' },
@@ -102,6 +139,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             appender: {
               policy: { kind: 'time-interval' },
@@ -124,6 +162,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             appender: {
               strategy: { kind: 'numeric' },
@@ -146,6 +185,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             appender: {
               type: 'file',
@@ -169,6 +209,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             enabled: true,
           },
@@ -188,6 +229,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             enabled: true,
             appender: {
@@ -207,6 +249,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           audit: {
             enabled: true,
             appender: {
@@ -231,6 +274,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           authorization: {
             legacyFallback: {
               enabled: true,
@@ -251,6 +295,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           authc: {
             saml: {
               maxRedirectURLSize: 123,
@@ -271,6 +316,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           authc: {
             providers: {
               saml: {
@@ -295,6 +341,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           authc: {
             providers: ['basic', 'saml'],
           },
@@ -314,6 +361,7 @@ describe('Config Deprecations', () => {
     const config = {
       xpack: {
         security: {
+          session: { idleTimeout: 123, lifespan: 345 },
           authc: {
             providers: ['basic', 'token'],
           },
@@ -335,6 +383,7 @@ describe('Config Deprecations', () => {
       xpack: {
         security: {
           enabled: false,
+          session: { idleTimeout: 123, lifespan: 345 },
         },
       },
     };
@@ -352,6 +401,7 @@ describe('Config Deprecations', () => {
       xpack: {
         security: {
           enabled: true,
+          session: { idleTimeout: 123, lifespan: 345 },
         },
       },
     };
