@@ -11,12 +11,20 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
+  PluginInitializerContext,
 } from '../../../../src/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { SetupDeps, StartDeps } from './types';
 
 export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
+  private initContext: PluginInitializerContext;
+
+  constructor(initContext: PluginInitializerContext) {
+    this.initContext = initContext;
+  }
+
   public setup(core: CoreSetup, { developerExamples, screenshotMode }: SetupDeps): void {
+    const version = this.initContext.env.packageInfo.version;
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -30,7 +38,7 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
           unknown
         ];
         // Render the application
-        return renderApp(coreStart, { ...depsStart, screenshotMode }, params);
+        return renderApp(coreStart, { ...depsStart, screenshotMode }, params, version);
       },
     });
 

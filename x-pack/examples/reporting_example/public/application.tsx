@@ -14,9 +14,13 @@ import { ReportingExampleApp } from './components/app';
 export const renderApp = (
   coreStart: CoreStart,
   deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
-  { appBasePath, element }: AppMountParameters
+  { appBasePath, element }: AppMountParameters,
+  version: string
 ) => {
-  ReactDOM.render(<ReportingExampleApp basename={appBasePath} {...coreStart} {...deps} />, element);
+  ReactDOM.render(
+    <ReportingExampleApp basename={appBasePath} {...coreStart} {...deps} version={version} />,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

@@ -33,24 +33,24 @@ import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigati
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
 import { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
 
-interface ReportingExampleAppDeps {
+interface ReportingExampleAppProps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
+  version: string;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
 
 export const ReportingExampleApp = ({
   basename,
-  notifications,
-  http,
   reporting,
   screenshotMode,
-}: ReportingExampleAppDeps) => {
+  version,
+}: ReportingExampleAppProps) => {
   const { getDefaultLayoutSelectors } = reporting;
 
   // Context Menu
@@ -83,6 +83,7 @@ export const ReportingExampleApp = ({
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
+      version,
     };
   };
 
