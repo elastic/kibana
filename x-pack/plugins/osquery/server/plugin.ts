@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -21,6 +22,166 @@ import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
+import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
+
+const registerFeatures = (features: SetupPlugins['features']) => {
+  features.registerKibanaFeature({
+    id: 'osquery',
+    name: i18n.translate('xpack.features.osqueryFeatureName', {
+      defaultMessage: 'Osquery',
+    }),
+    order: 1300,
+    category: DEFAULT_APP_CATEGORIES.management,
+    app: ['osquery', 'kibana'],
+    catalogue: ['osquery'],
+    privileges: {
+      all: {
+        app: ['osquery', 'kibana'],
+        catalogue: ['osquery'],
+        savedObject: {
+          all: ['search', 'query'],
+          read: ['index-pattern'],
+        },
+        ui: ['show', 'save'],
+      },
+      read: {
+        app: ['osquery', 'kibana'],
+        catalogue: ['osquery'],
+        savedObject: {
+          all: [],
+          read: ['index-pattern', 'search', 'query'],
+        },
+        ui: ['show'],
+      },
+    },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+          defaultMessage: 'Live queries',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'live_queries_all',
+                includeIn: 'all',
+                name: 'All',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                // using variables with underscores here otherwise when we retrieve them from the kibana
+                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                ui: ['crudLiveQueries', 'readLiveQueries'], // uiCapabilities.siem.crud_cases
+              },
+              {
+                id: 'live_queries_read',
+                includeIn: 'read',
+                name: 'Read',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                // using variables with underscores here otherwise when we retrieve them from the kibana
+                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                ui: ['readLiveQueries'], // uiCapabilities.siem.read_cases
+              },
+            ],
+          },
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'saved_queries_only',
+                name: i18n.translate(
+                  'xpack.features.ossFeatures.discoverCreateShortUrlPrivilegeName',
+                  {
+                    defaultMessage: 'Run Saved queries only',
+                  }
+                ),
+                includeIn: 'none',
+                savedObject: {
+                  all: [],
+                  read: [savedQuerySavedObjectType],
+                },
+                ui: ['savedQueriesOnly'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+          defaultMessage: 'Saved queries',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'saved_queries_all',
+                includeIn: 'all',
+                name: 'All',
+                savedObject: {
+                  all: [savedQuerySavedObjectType],
+                  read: [savedQuerySavedObjectType],
+                },
+                ui: ['crudSavedQueries', 'readSavedQueries'],
+              },
+              {
+                id: 'saved_queries_read',
+                includeIn: 'read',
+                name: 'Read',
+                savedObject: {
+                  all: [],
+                  read: [savedQuerySavedObjectType],
+                },
+                ui: ['readSavedQueries'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+          defaultMessage: 'Scheduled query groups',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'packs_all',
+                includeIn: 'all',
+                name: 'All',
+                savedObject: {
+                  all: [packSavedObjectType],
+                  read: [packSavedObjectType],
+                },
+                // using variables with underscores here otherwise when we retrieve them from the kibana
+                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                ui: ['crudPacks', 'readPacks'], // uiCapabilities.siem.crud_cases
+              },
+              {
+                id: 'packs_read',
+                includeIn: 'read',
+                name: 'Read',
+                savedObject: {
+                  all: [],
+                  read: [packSavedObjectType],
+                },
+                // using variables with underscores here otherwise when we retrieve them from the kibana
+                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                ui: ['savedLiveQueries'], // uiCapabilities.siem.read_cases
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+};
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -39,6 +200,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     if (!config.enabled) {
       return {};
     }
+
+    registerFeatures(plugins.features);
 
     const router = core.http.createRouter();
 
