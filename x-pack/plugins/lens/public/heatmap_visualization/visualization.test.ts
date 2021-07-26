@@ -19,8 +19,8 @@ import {
   LEGEND_FUNCTION,
 } from './constants';
 import { Position } from '@elastic/charts';
-import { HeatmapVisualizationState } from './types';
-import { DatasourcePublicAPI, Operation } from '../types';
+import type { HeatmapVisualizationState } from './types';
+import type { DatasourcePublicAPI, Operation } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 function exampleState(): HeatmapVisualizationState {
