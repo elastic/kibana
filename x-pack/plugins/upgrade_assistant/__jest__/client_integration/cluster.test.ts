@@ -22,7 +22,7 @@ describe('Cluster tab', () => {
     const snapshotId = '1';
     const jobId = 'deprecation_check_job';
     const upgradeStatusMockResponse: UpgradeAssistantStatus = {
-      readyForUpgrade: false,
+      totalCriticalDeprecations: 1,
       cluster: [
         {
           level: 'critical',
@@ -233,7 +233,7 @@ describe('Cluster tab', () => {
   describe('no deprecations', () => {
     beforeEach(async () => {
       const noDeprecationsResponse = {
-        readyForUpgrade: false,
+        totalCriticalDeprecations: 0,
         cluster: [],
         indices: [],
       };

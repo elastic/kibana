@@ -21,7 +21,7 @@ describe('Indices tab', () => {
 
   describe('with deprecations', () => {
     const upgradeStatusMockResponse: UpgradeAssistantStatus = {
-      readyForUpgrade: false,
+      totalCriticalDeprecations: 0,
       cluster: [],
       indices: [
         {
@@ -117,7 +117,7 @@ describe('Indices tab', () => {
   describe('no deprecations', () => {
     beforeEach(async () => {
       const noDeprecationsResponse = {
-        readyForUpgrade: false,
+        totalCriticalDeprecations: 0,
         cluster: [],
         indices: [],
       };

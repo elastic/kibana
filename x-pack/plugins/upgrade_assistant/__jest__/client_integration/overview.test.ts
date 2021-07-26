@@ -18,7 +18,7 @@ describe('Overview page', () => {
 
   beforeEach(async () => {
     const esDeprecationsMockResponse: UpgradeAssistantStatus = {
-      readyForUpgrade: false,
+      totalCriticalDeprecations: 1,
       cluster: [
         {
           level: 'critical',
