@@ -19,10 +19,9 @@ import {
   VisualizeEmbeddableContract,
 } from '../../../../../plugins/visualizations/public';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
-import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
-import type { IIndexPattern, TimeRange } from '../../../../../plugins/data/public';
+import type { TimeRange } from '../../../../../plugins/data/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 
 // @ts-expect-error
@@ -51,7 +50,6 @@ export interface TimeseriesEditorProps {
 interface TimeseriesEditorState {
   autoApply: boolean;
   dirty: boolean;
-  defaultIndex: IIndexPattern | null;
   extractedIndexPatterns: IndexPatternValue[];
   model: TimeseriesVisParams;
   visFields?: VisFields;
@@ -69,7 +67,6 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.state = {
       autoApply: true,
       dirty: false,
-      defaultIndex: null,
       model: {
         // we should set default value for 'time_range_mode' in model so that when user save visualization
         // we set right mode in savedObject
@@ -126,7 +123,9 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       ...this.state.model,
       ...partialModel,
     };
-    const extractedIndexPatterns = extractIndexPatternValues(nextModel, this.state.defaultIndex);
+
+    const extractedIndexPatterns = extractIndexPatternValues(nextModel, this.getDefaultIndex());
+
     if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
       this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
         this.setState({
@@ -180,53 +179,46 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
           ...getCoreStart(),
         }}
       >
-        <DefaultIndexPatternContext.Provider value={this.state.defaultIndex}>
-          <div className="tvbEditor" data-test-subj="tvbVisEditor">
-            {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
-            <div className="tvbEditor--hideForReporting">
-              <VisPicker currentVisType={model.type} onChange={this.handleChange} />
-            </div>
-            <VisEditorVisualization
-              dirty={this.state.dirty}
-              autoApply={this.state.autoApply}
-              model={model}
-              embeddableHandler={this.props.embeddableHandler}
-              eventEmitter={this.props.eventEmitter}
-              vis={this.props.vis}
-              timeRange={this.props.timeRange}
-              uiState={this.props.uiState}
-              onCommit={this.handleCommit}
-              onToggleAutoApply={this.handleAutoApplyToggle}
-              title={this.props.vis.title}
-              description={this.props.vis.description}
-              onDataChange={this.onDataChange}
-            />
-            <div className="tvbEditor--hideForReporting">
-              <PanelConfig
-                fields={visFields}
-                model={model}
-                visData$={this.visData$}
-                onChange={this.handleChange}
-                getConfig={this.getConfig}
-              />
-            </div>
+        <div className="tvbEditor" data-test-subj="tvbVisEditor">
+          {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
+          <div className="tvbEditor--hideForReporting">
+            <VisPicker currentVisType={model.type} onChange={this.handleChange} />
           </div>
-        </DefaultIndexPatternContext.Provider>
+          <VisEditorVisualization
+            dirty={this.state.dirty}
+            autoApply={this.state.autoApply}
+            model={model}
+            embeddableHandler={this.props.embeddableHandler}
+            eventEmitter={this.props.eventEmitter}
+            vis={this.props.vis}
+            timeRange={this.props.timeRange}
+            uiState={this.props.uiState}
+            onCommit={this.handleCommit}
+            onToggleAutoApply={this.handleAutoApplyToggle}
+            title={this.props.vis.title}
+            description={this.props.vis.description}
+            onDataChange={this.onDataChange}
+          />
+          <div className="tvbEditor--hideForReporting">
+            <PanelConfig
+              fields={visFields}
+              model={model}
+              visData$={this.visData$}
+              onChange={this.handleChange}
+              getConfig={this.getConfig}
+            />
+          </div>
+        </div>
       </KibanaContextProvider>
     );
   }
 
-  componentDidMount() {
-    const dataStart = getDataStart();
+  async componentDidMount() {
+    const indexPatterns = extractIndexPatternValues(this.props.vis.params, this.getDefaultIndex());
+    const visFields = await fetchFields(indexPatterns);
 
-    dataStart.indexPatterns.getDefault().then(async (index) => {
-      const indexPatterns = extractIndexPatternValues(this.props.vis.params, index);
-      const visFields = await fetchFields(indexPatterns);
-
-      this.setState({
-        defaultIndex: index,
-        visFields,
-      });
+    this.setState({
+      visFields,
     });
 
     this.props.eventEmitter.on('updateEditor', this.updateModel);
@@ -235,6 +227,10 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
   componentWillUnmount() {
     this.updateVisState.cancel();
     this.props.eventEmitter.off('updateEditor', this.updateModel);
+  }
+
+  private getDefaultIndex() {
+    return this.props.config.get<string>('defaultIndex') ?? '';
   }
 }
 
