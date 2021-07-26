@@ -6,8 +6,9 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import React, { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { useState, useCallback, ReactNode } from 'react';
 import styled from 'styled-components';
+import { useIsOverflow } from '../../hooks/use_is_overflow';
 import * as i18n from './translations';
 
 const LINE_CLAMP = 3;
@@ -38,32 +39,12 @@ const StyledLineClamp = styled.div<{ lineClampHeight: number }>`
 const LineClampComponent: React.FC<{
   children: ReactNode;
   lineClampHeight?: number;
-  /**
-   * Overwrites tooggle behaviour.
-   */
-  onReadMore?: () => void;
-}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT, onReadMore }) => {
-  const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
+}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT }) => {
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
+  const [isOverflow, descriptionRef] = useIsOverflow(children);
+
   const toggleReadMore = useCallback(() => {
     setIsExpanded((prevState) => !prevState);
-  }, []);
-
-  useEffect(() => {
-    if (descriptionRef?.current?.clientHeight != null) {
-      if (
-        (descriptionRef?.current?.scrollHeight ?? 0) > (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(true);
-      }
-
-      if (
-        (descriptionRef?.current?.scrollHeight ?? 0) <= (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(false);
-      }
-    }
   }, []);
 
   if (isExpanded) {
@@ -95,11 +76,7 @@ const LineClampComponent: React.FC<{
         children
       )}
       {isOverflow && (
-        <ReadMore
-          onClick={onReadMore ?? toggleReadMore}
-          size="s"
-          data-test-subj="summary-view-readmore"
-        >
+        <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
           {i18n.READ_MORE}
         </ReadMore>
       )}

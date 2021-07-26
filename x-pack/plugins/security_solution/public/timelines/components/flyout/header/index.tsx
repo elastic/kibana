@@ -12,9 +12,10 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
+  EuiButtonEmpty,
   EuiTextColor,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { MouseEventHandler, MouseEvent, useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -52,8 +53,9 @@ import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
 import { getTimelineStatusByIdSelector } from './selectors';
 import { TimelineKPIs } from './kpis';
-import { LineClamp } from '../../../../common/components/line_clamp';
+
 import { setActiveTabTimeline } from '../../../store/timeline/actions';
+import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -195,6 +197,34 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 
 export const FlyoutHeaderPanel = React.memo(FlyoutHeaderPanelComponent);
 
+const StyledDiv = styled.div`
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
+
+const ReadMoreButton = ({
+  description,
+  onclick,
+}: {
+  description: string;
+  onclick: MouseEventHandler<HTMLButtonElement>;
+}) => {
+  const [isOverflow, ref] = useIsOverflow(description);
+  return (
+    <>
+      <StyledDiv ref={ref}>{description}</StyledDiv>
+      {isOverflow && (
+        <EuiButtonEmpty flush="left" onClick={onclick}>
+          {i18n.READ_MORE}
+        </EuiButtonEmpty>
+      )}
+    </>
+  );
+};
+
 const StyledTimelineHeader = styled(EuiFlexGroup)`
   ${({ theme }) => `margin: ${theme.eui.euiSizeXS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
   flex: 0;
@@ -255,29 +285,22 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   );
   const dispatch = useDispatch();
 
+  const onReadMore: MouseEventHandler<HTMLButtonElement> = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      dispatch(
+        setActiveTabTimeline({
+          id: timelineId,
+          activeTab: TimelineTabs.notes,
+          scrollToTop: true,
+        })
+      );
+    },
+    [dispatch, timelineId]
+  );
+
   return (
     <EuiText size="s" data-test-subj="timeline-description">
-      {description ? (
-        <LineClamp
-          key={description.length}
-          lineClampHeight={1.5}
-          onReadMore={() => {
-            dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes }));
-
-            setTimeout(() => {
-              // Allows the tab to update before scrolling to the element
-              const moveToTarget = document.getElementById('note-preview-description');
-              if (moveToTarget) {
-                moveToTarget.scrollIntoView({ behavior: 'smooth' });
-              }
-            }, 100);
-          }}
-        >
-          {description}
-        </LineClamp>
-      ) : (
-        commonI18n.DESCRIPTION
-      )}
+      <ReadMoreButton description={description || commonI18n.DESCRIPTION} onclick={onReadMore} />
     </EuiText>
   );
 };

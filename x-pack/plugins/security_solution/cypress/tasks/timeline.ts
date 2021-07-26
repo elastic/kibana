@@ -132,14 +132,16 @@ export const goToQueryTab = () => {
 };
 
 export const addNotesToTimeline = (notes: string) => {
+  let notesCount = 0;
   goToNotesTab().then(() => {
     cy.get(NOTES_TEXT_AREA).type(notes);
     cy.root()
       .pipe(($el) => {
+        notesCount = parseInt($el.find(NOTES_TAB_BUTTON).find('.euiBadge').text(), 10);
         $el.find(ADD_NOTE_BUTTON).trigger('click');
         return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
       })
-      .should('have.text', '1');
+      .should('have.text', notesCount + 1);
   });
 
   goToQueryTab();
