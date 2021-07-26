@@ -510,6 +510,12 @@ class PackagePolicyService {
           packagePolicy.inputs as InputsOverride[]
         );
 
+        updatePackagePolicy.inputs = await this.compilePackagePolicyInputs(
+          installedPkgInfo,
+          updatePackagePolicy.vars || {},
+          updatePackagePolicy.inputs as PackagePolicyInput[]
+        );
+
         await this.update(soClient, esClient, id, updatePackagePolicy, options);
         result.push({
           id,
@@ -549,6 +555,12 @@ class PackagePolicyService {
         },
         packagePolicy.inputs as InputsOverride[],
         true
+      );
+
+      updatedPackagePolicy.inputs = await this.compilePackagePolicyInputs(
+        installedPkgInfo,
+        updatedPackagePolicy.vars || {},
+        updatedPackagePolicy.inputs as PackagePolicyInput[]
       );
 
       const hasErrors = 'errors' in updatedPackagePolicy;
