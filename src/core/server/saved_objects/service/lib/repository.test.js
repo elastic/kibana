@@ -3170,7 +3170,6 @@ describe('SavedObjectsRepository', () => {
           createGenericNotFoundError(type, id)
         );
       };
-
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           savedObjectsRepository.get(type, id, { namespace: ALL_NAMESPACES_STRING })
@@ -3189,7 +3188,11 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { found: false },
+            undefined,
+            { 'x-elastic-product': 'Elasticsearch' }
+          )
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3197,7 +3200,11 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            {},
+            { statusCode: 404 },
+            { 'x-elastic-product': 'Elasticsearch' }
+          )
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3211,6 +3218,19 @@ describe('SavedObjectsRepository', () => {
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id, {
           namespace: 'bar-namespace',
         });
+        expect(client.get).toHaveBeenCalledTimes(1);
+      });
+
+      it.skip(`throws when ES does not return the correct header when finding the document during get`, async () => {
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { found: false },
+            undefined,
+            {}
+          )
+        );
+        await savedObjectsRepository.get(type, id);
+
         expect(client.get).toHaveBeenCalledTimes(1);
       });
     });
@@ -3314,9 +3334,12 @@ describe('SavedObjectsRepository', () => {
 
         it('because alias is not used and actual object is not found', async () => {
           const options = { namespace: undefined };
-          const response = { found: false };
           client.get.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+            elasticsearchClientMock.createSuccessTransportRequestPromise(
+              { found: false },
+              undefined,
+              { 'x-elastic-product': 'Elasticsearch' }
+            ) // for actual target
           );
 
           await expectNotFoundError(type, id, options);

@@ -1009,7 +1009,6 @@ export class SavedObjectsRepository {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
     const namespace = normalizeNamespace(options.namespace);
     const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
@@ -1025,10 +1024,11 @@ export class SavedObjectsRepository {
         : false;
     // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
     if (!isFoundGetResponse(body) && !esHeaderFound) {
-      const responseError = SavedObjectsErrorHelpers.decorateEsUnavailableError(
-        new Error('x-elastic-product not present or not recognized')
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      throw SavedObjectsErrorHelpers.decorateEsUnavailableError(
+        new Error(`${notFoundError.message}`),
+        `x-elastic-product not present or not recognized` // alternative: cannot verify response from elasticsearch
       );
-      throw SavedObjectsErrorHelpers.isEsUnavailableError(responseError);
     }
     if (
       !isFoundGetResponse(body) ||
@@ -1038,7 +1038,6 @@ export class SavedObjectsRepository {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
     return getSavedObjectFromSource(this._registry, type, id, body);
   }
 
