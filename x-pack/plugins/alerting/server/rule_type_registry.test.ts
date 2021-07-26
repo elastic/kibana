@@ -29,12 +29,12 @@ beforeEach(() => {
 });
 
 describe('has()', () => {
-  test('returns false for unregistered alert types', () => {
+  test('returns false for unregistered rule types', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     expect(registry.has('foo')).toEqual(false);
   });
 
-  test('returns true for registered alert types', () => {
+  test('returns true for registered rule types', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register({
       id: 'foo',
@@ -112,7 +112,7 @@ describe('register()', () => {
     );
   });
 
-  test('throws if AlertType action groups contains reserved group id', () => {
+  test('throws if RuleType action groups contains reserved group id', () => {
     const alertType: AlertType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
       name: 'Test',
@@ -140,7 +140,7 @@ describe('register()', () => {
 
     expect(() => registry.register(alertType)).toThrowError(
       new Error(
-        `Alert type [id="${alertType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
+        `Rule type [id="${alertType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
       )
     );
   });
@@ -217,7 +217,7 @@ describe('register()', () => {
 
     expect(() => registry.register(alertType)).toThrowError(
       new Error(
-        `Alert type [id="${alertType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
+        `Rule type [id="${alertType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
       )
     );
   });
@@ -253,7 +253,7 @@ describe('register()', () => {
     `);
   });
 
-  test('shallow clones the given alert type', () => {
+  test('shallow clones the given rule type', () => {
     const alertType: AlertType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
@@ -308,7 +308,7 @@ describe('register()', () => {
         executor: jest.fn(),
         producer: 'alerts',
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
+    ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
   });
 });
 
@@ -366,7 +366,7 @@ describe('get()', () => {
   test(`should throw an error if type isn't registered`, () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     expect(() => registry.get('test')).toThrowErrorMatchingInlineSnapshot(
-      `"Alert type \\"test\\" is not registered."`
+      `"Rule type \\"test\\" is not registered."`
     );
   });
 });
