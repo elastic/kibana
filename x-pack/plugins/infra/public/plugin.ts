@@ -34,7 +34,7 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(createInventoryMetricAlertType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createInventoryMetricAlertType()
     );
 
@@ -43,7 +43,6 @@ export class Plugin implements InfraClientPluginClass {
     );
     pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(createMetricThresholdAlertType());
 
-    pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(createMetricThresholdAlertType());
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',
       hasData: getLogsHasDataFetcher(core.getStartServices),
