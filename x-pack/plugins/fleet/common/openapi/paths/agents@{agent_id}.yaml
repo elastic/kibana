@@ -19,7 +19,7 @@ get:
                 $ref: ../components/schemas/agent.yaml
             required:
               - item
-  operationId: get-fleet-agents-agentId
+  operationId: get-agent
 put:
   summary: Agent - Update
   tags: []
@@ -35,7 +35,7 @@ put:
                 $ref: ../components/schemas/agent.yaml
             required:
               - item
-  operationId: put-fleet-agents-agentId
+  operationId: update-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 delete:
@@ -55,6 +55,6 @@ delete:
                   - deleted
             required:
               - action
-  operationId: delete-fleet-agents-agentId
+  operationId: delete-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

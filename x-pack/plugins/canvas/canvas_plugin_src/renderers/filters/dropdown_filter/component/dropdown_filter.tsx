@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
+import React, { ChangeEvent, FocusEvent, FunctionComponent, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,19 +28,22 @@ export interface Props {
    * Optional value for the component. If the value is not present in the
    * choices collection, it will be discarded.
    */
-  value?: string;
-  /** Function to invoke when the dropdown value is changed */
-  onChange: (value: string) => void;
+  initialValue?: string;
   /** Function to invoke when the dropdown value is committed */
   commit: (value: string) => void;
 }
 
 export const DropdownFilter: FunctionComponent<Props> = ({
-  value,
-  onChange,
+  initialValue = '',
   commit,
   choices = [],
 }) => {
+  const [value, setValue] = useState<string>(initialValue);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   let options = [
     { value: '%%CANVAS_MATCH_ALL%%', text: `-- ${strings.getMatchAllOptionLabel()} --` },
   ];
@@ -49,7 +52,7 @@ export const DropdownFilter: FunctionComponent<Props> = ({
   const changeHandler = (e: FocusEvent<HTMLSelectElement> | ChangeEvent<HTMLSelectElement>) => {
     if (e && e.target) {
       const target = e.target as HTMLSelectElement;
-      onChange(target.value);
+      setValue(target.value);
       commit(target.value);
     }
   };
@@ -84,7 +87,6 @@ export const DropdownFilter: FunctionComponent<Props> = ({
 
 DropdownFilter.propTypes = {
   choices: PropTypes.array,
-  value: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
+  initialValue: PropTypes.string,
   commit: PropTypes.func.isRequired,
 };
