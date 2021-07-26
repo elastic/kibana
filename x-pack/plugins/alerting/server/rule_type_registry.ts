@@ -134,7 +134,7 @@ export class RuleTypeRegistry {
   }
 
   public has(id: string) {
-    return this.alertTypes.has(id);
+    return this.ruleTypes.has(id);
   }
 
   public ensureRuleTypeEnabled(id: string) {
@@ -182,7 +182,7 @@ export class RuleTypeRegistry {
       RecoveryActionGroupId
     >(alertType);
 
-    this.alertTypes.set(
+    this.ruleTypes.set(
       alertIdSchema.validate(alertType.id),
       /** stripping the typing is required in order to store the AlertTypes in a Map */
       (normalizedAlertType as unknown) as UntypedNormalizedAlertType
@@ -245,7 +245,7 @@ export class RuleTypeRegistry {
      * This means that returning a typed AlertType in `get` is an inherently
      * unsafe operation. Down casting to `unknown` is the only way to achieve this.
      */
-    return (this.alertTypes.get(id)! as unknown) as NormalizedAlertType<
+    return (this.ruleTypes.get(id)! as unknown) as NormalizedAlertType<
       Params,
       ExtractedParams,
       State,
@@ -258,7 +258,7 @@ export class RuleTypeRegistry {
 
   public list(): Set<RegistryRuleType> {
     return new Set(
-      Array.from(this.alertTypes).map(
+      Array.from(this.ruleTypes).map(
         ([
           id,
           {

@@ -13,7 +13,7 @@ import {
 } from 'src/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { RulesClient } from './rules_client';
-import { ruleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
+import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
@@ -23,7 +23,7 @@ import { ALERTS_FEATURE_ID } from '../common';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
-  ruleTypeRegistry: ruleTypeRegistry;
+  ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpaceId: (request: KibanaRequest) => string | undefined;
@@ -39,7 +39,7 @@ export class RulesClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private taskManager!: TaskManagerStartContract;
-  private ruleTypeRegistry!: ruleTypeRegistry;
+  private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
