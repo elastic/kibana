@@ -20,19 +20,13 @@ This section summarizes the changes in each release.
 
 coming[8.0.0]
 
-The following changes have been released for the first time in {kib} 8.0.0-alpha1.
+The following changes are released for the first time in {kib} 8.0.0-alpha1. Review the changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
 [[breaking-changes-8.0.0]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance.
-
-1. Review the breaking changes.
-
-2. Mitigate the impact to your application.
-
-3. To complete the upgrade, use the <<upgrade-assistant,Upgrade Assistant>>.
+Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigrate the impact to your appilication. 
 
 // tag::notable-breaking-changes[]
 
@@ -225,7 +219,7 @@ The default timezone is UTC. To change the timezone, set `logging.timezone: fals
 [[deprecations-8.0.0]]
 === Deprecations
 
-The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0. Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you upgrade to 8.0.0.
+The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0. Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
 [discrete]
 [[deprecation-74424]]
