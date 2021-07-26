@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { either, fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { either } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import { failure } from 'io-ts/lib/PathReporter';
 import get from 'lodash/get';
-
-type ErrorFactory = (message: string) => Error;
 
 export type GenericIntersectionC =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,18 +18,6 @@ export type GenericIntersectionC =
   | rt.IntersectionC<[any, any, any, any]>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | rt.IntersectionC<[any, any, any, any, any]>;
-
-export const createPlainError = (message: string) => new Error(message);
-
-export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
-  throw createError(failure(errors).join('\n'));
-};
-
-export const decodeOrThrow = <A, O, I>(
-  runtimeType: rt.Type<A, O, I>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: I) =>
-  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 const getProps = (
   codec:

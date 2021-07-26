@@ -7,14 +7,6 @@
  */
 
 module.exports = {
-  kuery: {
-    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
-    dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
-    options: {
-      allowedStartRules: ['start', 'Literal'],
-      cache: true,
-    },
-  },
   timelion_chain: {
     src: 'src/plugins/vis_type_timelion/common/chain.peg',
     dest: 'src/plugins/vis_type_timelion/common/_generated_/chain.js',
