@@ -29,7 +29,9 @@ export const ElementContent = (props) => {
   const { renderable, renderFunction, width, height, handlers, backgroundColor, state } = props;
   const { onComplete } = handlers;
 
-  if (isLoading(renderable, state)) return <Loading backgroundColor={backgroundColor} />;
+  if (isLoading(renderable, state)) {
+    return <Loading backgroundColor={backgroundColor} />;
+  }
 
   // renderable is available, but no matching element is found, render invalid
   if (isNotValidForRendering(renderable, renderFunction)) {
