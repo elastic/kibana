@@ -39,7 +39,7 @@ export const AdditionalContent = styled.div`
 AdditionalContent.displayName = 'AdditionalContent';
 
 const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
-  padding: ${(props) => (props.$showTopN ? 'none' : `0 ${props.theme.eui.paddingSizes.s}`)};
+  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
 
   &:focus-within {
@@ -58,7 +58,7 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
 
   .timelines__hoverActionButton,
   .securitySolution__hoverActionButton {
-    opacity: 0;
+    opacity: ${(props) => (props.$showTopN ? 1 : 0)};
 
     &:focus {
       opacity: 1;
@@ -268,7 +268,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       ]
     );
 
-    const showFilters = !showTopN && values != null;
+    const showFilters = values != null;
 
     return (
       <StyledHoverActionsContainer onKeyDown={onKeyDown} ref={panelRef} $showTopN={showTopN}>
@@ -342,7 +342,7 @@ export const HoverActions: React.FC<Props> = React.memo(
               value={values}
             />
           )}
-          {!showTopN && (
+          {showFilters && (
             <CopyButton
               data-test-subj="hover-actions-copy-button"
               field={field}
