@@ -37,6 +37,7 @@ import {
   comparisonRangeRt,
   environmentRt,
   kueryRt,
+  offsetRt,
   rangeRt,
 } from './default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
@@ -611,6 +612,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
       }),
       environmentRt,
       rangeRt,
+      offsetRt,
     ]),
   }),
   options: {
@@ -620,16 +622,36 @@ export const serviceDependenciesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, numBuckets } = params.query;
+    const { environment, numBuckets, start, end, offset } = params.query;
 
-    const serviceDependencies = await getServiceDependencies({
+    const opts = {
+      setup,
+      start,
+      end,
       serviceName,
       environment,
-      setup,
       numBuckets,
-    });
+    };
 
-    return { serviceDependencies };
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceDependencies(opts),
+      ...(offset ? [getServiceDependencies({ ...opts, offset })] : []),
+    ]);
+
+    return {
+      serviceItems: currentPeriod.map((item) => {
+        const { metrics, ...rest } = item;
+        const previousPeriodItem = previousPeriod.find(
+          (prevItem) => item.to.id === prevItem.to.id
+        );
+
+        return {
+          ...rest,
+          currentMetrics: metrics,
+          previousMetrics: previousPeriodItem?.metrics || null,
+        };
+      }),
+    };
   },
 });
 
