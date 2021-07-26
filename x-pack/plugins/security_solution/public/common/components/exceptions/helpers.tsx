@@ -536,26 +536,26 @@ export const getPrepopulatedMemorySignatureException = ({
   const entries = filterEmptyExceptionEntries([
     {
       field: 'Memory_protection.feature',
-      operator: 'included',
-      type: 'match',
+      operator: 'included' as const,
+      type: 'match' as const,
       value: alertEcsData.Memory_protection?.feature ?? '',
     },
     {
       field: 'process.executable.caseless',
-      operator: 'included',
-      type: 'match',
+      operator: 'included' as const,
+      type: 'match' as const,
       value: process?.executable ?? '',
     },
     {
       field: 'process.name.caseless',
-      operator: 'included',
-      type: 'match',
+      operator: 'included' as const,
+      type: 'match' as const,
       value: process?.name ?? '',
     },
     {
       field: 'process.hash.sha256',
-      operator: 'included',
-      type: 'match',
+      operator: 'included' as const,
+      type: 'match' as const,
       value: process?.hash?.sha256 ?? '',
     },
   ]);
