@@ -10,14 +10,14 @@ import { indexSettingDeprecations } from '../../common/constants';
 import {
   DeprecationAPIResponse,
   EnrichedDeprecationInfo,
-  UpgradeAssistantStatus,
+  ESUpgradeStatus,
 } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient
-): Promise<UpgradeAssistantStatus> {
+): Promise<ESUpgradeStatus> {
   const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
 
   const cluster = getClusterDeprecations(deprecations);

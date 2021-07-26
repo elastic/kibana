@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { indexSettingDeprecations } from '../../common/constants';
-import { UpgradeAssistantStatus } from '../../common/types';
+import { ESUpgradeStatus } from '../../common/types';
 
 import { IndicesTestBed, setupIndicesPage, setupEnvironment } from './helpers';
 
@@ -20,7 +20,7 @@ describe('Indices tab', () => {
   });
 
   describe('with deprecations', () => {
-    const upgradeStatusMockResponse: UpgradeAssistantStatus = {
+    const esDeprecationsMockResponse: ESUpgradeStatus = {
       totalCriticalDeprecations: 0,
       cluster: [],
       indices: [
@@ -38,7 +38,7 @@ describe('Indices tab', () => {
     };
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(upgradeStatusMockResponse);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
 
       await act(async () => {
@@ -93,7 +93,7 @@ describe('Indices tab', () => {
         expect(modal).not.toBe(null);
         expect(modal!.textContent).toContain('Remove deprecated settings');
 
-        const indexName = upgradeStatusMockResponse.indices[0].index;
+        const indexName = esDeprecationsMockResponse.indices[0].index;
 
         httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
           acknowledged: true,

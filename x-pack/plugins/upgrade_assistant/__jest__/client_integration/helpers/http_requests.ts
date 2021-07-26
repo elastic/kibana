@@ -7,15 +7,12 @@
 
 import sinon, { SinonFakeServer } from 'sinon';
 import { API_BASE_PATH } from '../../../common/constants';
-import { UpgradeAssistantStatus } from '../../../common/types';
+import { ESUpgradeStatus } from '../../../common/types';
 import { ResponseError } from '../../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadEsDeprecationsResponse = (
-    response?: UpgradeAssistantStatus,
-    error?: ResponseError
-  ) => {
+  const setLoadEsDeprecationsResponse = (response?: ESUpgradeStatus, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 

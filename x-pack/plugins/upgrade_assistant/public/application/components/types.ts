@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../../common/types';
+import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../../common/types';
 import { ResponseError } from '../lib/api';
 
 export interface UpgradeAssistantTabProps {
   alertBanner?: React.ReactNode;
-  checkupData?: UpgradeAssistantStatus | null;
+  checkupData?: ESUpgradeStatus | null;
   deprecations?: EnrichedDeprecationInfo[];
   refreshCheckupData: () => void;
   error: ResponseError | null;
