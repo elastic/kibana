@@ -915,6 +915,8 @@ export interface DeprecationsDetails {
     level: 'warning' | 'critical' | 'fetch_error';
     // (undocumented)
     message: string;
+    // (undocumented)
+    requireRestart?: boolean;
 }
 
 // @public
