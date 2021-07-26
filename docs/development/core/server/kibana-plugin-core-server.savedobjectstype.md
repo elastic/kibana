@@ -52,6 +52,7 @@ Example after converting to a multi-namespace (shareable) type in 8.1:
 
 ```
 Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process. |
+|  [deleteOnUpgrade](./kibana-plugin-core-server.savedobjectstype.deleteonupgrade.md) | <code>SavedObjectTypeExcludeFromUpgradeFilterHook</code> | If defined, allows a type to run a search query and return a query filter that may match any documents which may be excluded from the next migration upgrade process. Useful for cleaning up old documents which are no longer needed. |
 |  [hidden](./kibana-plugin-core-server.savedobjectstype.hidden.md) | <code>boolean</code> | Is the type hidden by default. If true, repositories will not have access to this type unless explicitly declared as an <code>extraType</code> when creating the repository.<!-- -->See [createInternalRepository](./kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md)<!-- -->. |
 |  [indexPattern](./kibana-plugin-core-server.savedobjectstype.indexpattern.md) | <code>string</code> | If defined, the type instances will be stored in the given index instead of the default one. |
 |  [management](./kibana-plugin-core-server.savedobjectstype.management.md) | <code>SavedObjectsTypeManagementDefinition&lt;Attributes&gt;</code> | An optional [saved objects management section](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) definition for the type. |
