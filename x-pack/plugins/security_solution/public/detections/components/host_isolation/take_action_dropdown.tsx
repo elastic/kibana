@@ -27,7 +27,25 @@ import {
   ACTION_ADD_EVENT_FILTER,
   ACTION_ADD_EXCEPTION,
   ACTION_INVESTIGATE_IN_TIMELINE,
+  ACTION_ADD_TO_CASE,
 } from '../alerts_table/translations';
+import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
+import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
+
+function flattenPanelTree(tree, array = []) {
+  array.push(tree);
+
+  if (tree.items) {
+    tree.items.forEach((item) => {
+      if (item.panel) {
+        flattenPanelTree(item.panel, array);
+        item.panel = item.panel.id;
+      }
+    });
+  }
+
+  return array;
+}
 
 export const TakeActionDropdown = React.memo(
   ({
@@ -64,6 +82,9 @@ export const TakeActionDropdown = React.memo(
     });
 
     const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
+    const casePermissions = useGetUserCasesPermissions();
+    const { timelines: timelinesUi } = useKibana().services;
+    const insertTimelineHook = useInsertTimeline;
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
@@ -94,7 +115,6 @@ export const TakeActionDropdown = React.memo(
       }
     }, [onChange, isolationStatus]);
 
-    const isolateHostKey = isolationStatus === false ? 'isolateHost' : 'unisolateHost';
     const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
     const eventType = ecsData != null ? getEventType(ecsData) : null;
 
@@ -134,67 +154,69 @@ export const TakeActionDropdown = React.memo(
       nonEcsRowData: nonEcsData ?? [],
     });
 
-    const panels = useMemo(
-      () => [
-        {
-          id: 0,
-          items: [
-            ...(showStatusFilter
-              ? [
-                  {
-                    name: CHANGE_ALERT_STATUS,
-                    panel: 1,
-                  },
-                  {
-                    name: ACTION_ADD_ENDPOINT_EXCEPTION,
-                    onClick: handleAddEndpointExceptionClick,
-                    disabled: disabledAddEndpointException,
-                  },
-                  {
-                    name: ACTION_ADD_EXCEPTION,
-                    onClick: handleAddExceptionClick,
-                    disabled: disabledAddException,
-                  },
-                ]
-              : [
-                  {
-                    name: ACTION_ADD_EVENT_FILTER,
-                    onClick: handleAddEventFilterClick,
-                  },
-                ]),
-            // ...(ecsData != null
-            //   ? [<AddToCaseAction key="attach-to-case" ecsRowData={ecsData} type="text" />]
-            //   : []),
-            ...(isIsolationAllowed &&
-            isEndpointAlert &&
-            isolationSupported &&
-            isHostIsolationPanelOpen === false
-              ? [
-                  {
-                    name: isolateHostTitle,
-                    onClick: isolateHostHandler,
-                    disabled: loading || agentStatus === HostStatus.UNENROLLED,
-                  },
-                ]
-              : []),
-            ...(eventType === 'signal' && ecsData != null
-              ? [
-                  {
-                    name: ACTION_INVESTIGATE_IN_TIMELINE,
-                    onClick: handleInvestigateInTimelineAlertClick,
-                  },
-                ]
-              : []),
-          ],
-        },
-        {
-          id: 1,
-          title: CHANGE_ALERT_STATUS,
-          items: [...(showStatusFilter ? statusFiltersActions : [])],
-        },
-      ],
+    const caseActions = timelinesUi.getAddToCaseAction({
+      ecsRowData: ecsData,
+      useInsertTimeline: insertTimelineHook,
+      casePermissions,
+      showIcon: false,
+    });
+
+    const panel = useMemo(
+      () => ({
+        id: 0,
+        items: [
+          ...(showStatusFilter
+            ? [
+                {
+                  name: CHANGE_ALERT_STATUS,
+                  panel: 1,
+                },
+                {
+                  name: ACTION_ADD_ENDPOINT_EXCEPTION,
+                  onClick: handleAddEndpointExceptionClick,
+                  disabled: disabledAddEndpointException,
+                },
+                {
+                  name: ACTION_ADD_EXCEPTION,
+                  onClick: handleAddExceptionClick,
+                  disabled: disabledAddException,
+                },
+              ]
+            : [
+                {
+                  name: ACTION_ADD_EVENT_FILTER,
+                  onClick: handleAddEventFilterClick,
+                },
+              ]),
+          {
+            name: ACTION_ADD_TO_CASE,
+            panel: { id: 2, title: ACTION_ADD_TO_CASE, content: <>{caseActions}</> },
+          },
+          ...(isIsolationAllowed &&
+          isEndpointAlert &&
+          isolationSupported &&
+          isHostIsolationPanelOpen === false
+            ? [
+                {
+                  name: isolateHostTitle,
+                  onClick: isolateHostHandler,
+                  disabled: loading || agentStatus === HostStatus.UNENROLLED,
+                },
+              ]
+            : []),
+          ...(eventType === 'signal' && ecsData != null
+            ? [
+                {
+                  name: ACTION_INVESTIGATE_IN_TIMELINE,
+                  onClick: handleInvestigateInTimelineAlertClick,
+                },
+              ]
+            : []),
+        ],
+      }),
       [
         agentStatus,
+        caseActions,
         disabledAddEndpointException,
         disabledAddException,
         ecsData,
@@ -211,9 +233,14 @@ export const TakeActionDropdown = React.memo(
         isolationSupported,
         loading,
         showStatusFilter,
-        statusFiltersActions,
       ]
     );
+
+    const createPanelTree = () => {
+      return flattenPanelTree(panel);
+    };
+
+    const panels = createPanelTree();
 
     const takeActionButton = useMemo(() => {
       return (
@@ -223,7 +250,7 @@ export const TakeActionDropdown = React.memo(
       );
     }, [togglePopoverHandler]);
 
-    return panels[0].items.length > 0 && !loadingEventDetails ? (
+    return panels[0].items?.length && !loadingEventDetails ? (
       <>
         <EuiPopover
           id="hostIsolationTakeActionPanel"

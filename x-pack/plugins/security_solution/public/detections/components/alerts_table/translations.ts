@@ -178,6 +178,13 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
   }
 );
 
+export const ACTION_ADD_TO_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
+  {
+    defaultMessage: 'Add to case',
+  }
+);
+
 export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEndpointException',
   {
