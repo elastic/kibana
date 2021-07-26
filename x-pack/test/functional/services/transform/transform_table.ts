@@ -235,6 +235,21 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
+    public async assertTransformRowActionsButtonEnabled(
+      transformId: string,
+      expectedValue: boolean
+    ) {
+      const isEnabled = await testSubjects.isEnabled(
+        this.rowSelector(transformId, 'euiCollapsedItemActionsButton')
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected transform row actions button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
     public async assertTransformRowActions(transformId: string, isTransformRunning = false) {
       await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
 
@@ -264,7 +279,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         await browser.pressKeys(browser.keys.ESCAPE);
         await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
 
-        await testSubjects.existOrFail(selector);
+        await testSubjects.existOrFail(selector, { timeout: 1000 });
         const isEnabled = await testSubjects.isEnabled(selector);
         expect(isEnabled).to.eql(
           expectedValue,
@@ -272,6 +287,9 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             isEnabled ? 'enabled' : 'disabled'
           }')`
         );
+
+        // Close the actions menu
+        await browser.pressKeys(browser.keys.ESCAPE);
       });
     }
 
