@@ -40,7 +40,6 @@ import { help as gt } from './dict/gt';
 import { help as gte } from './dict/gte';
 import { help as head } from './dict/head';
 import { help as ifFn } from './dict/if';
-import { help as image } from './dict/image';
 import { help as joinRows } from './dict/join_rows';
 import { help as location } from './dict/location';
 import { help as lt } from './dict/lt';
@@ -55,7 +54,6 @@ import { help as ply } from './dict/ply';
 import { help as pointseries } from './dict/pointseries';
 import { help as progress } from './dict/progress';
 import { help as render } from './dict/render';
-import { help as repeatImage } from './dict/repeat_image';
 import { help as replace } from './dict/replace';
 import { help as rounddate } from './dict/rounddate';
 import { help as rowCount } from './dict/row_count';
@@ -200,7 +198,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   head,
   if: ifFn,
   joinRows,
-  image,
   location,
   lt,
   lte,
@@ -214,7 +211,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   pointseries,
   progress,
   render,
-  repeatImage,
   replace,
   rounddate,
   rowCount,
