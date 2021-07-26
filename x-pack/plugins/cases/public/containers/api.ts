@@ -38,6 +38,8 @@ import {
   User,
 } from '../../common';
 
+import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
+
 import { KibanaServices } from '../common/lib/kibana';
 
 import {
@@ -351,9 +353,13 @@ export const pushCase = async (
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {
-  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(ACTION_TYPES_URL, {
-    method: 'GET',
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(
+    getAllConnectorTypesUrl(),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
   return response;
 };

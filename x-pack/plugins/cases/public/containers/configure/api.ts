@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
 import {
-  ACTION_TYPES_URL,
   ActionConnector,
   ActionTypeConnector,
   CASE_CONFIGURE_CONNECTORS_URL,
@@ -105,7 +105,7 @@ export const patchCaseConfigure = async (
 };
 
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(ACTION_TYPES_URL, {
+  const response = await KibanaServices.get().http.fetch(getAllConnectorTypesUrl(), {
     method: 'GET',
     signal,
   });
