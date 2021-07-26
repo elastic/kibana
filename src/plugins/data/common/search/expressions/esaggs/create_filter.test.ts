@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isRangeFilter } from '../../../es_query/filters';
+import { isRangeFilter } from '@kbn/es-query';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../field_formats';
 import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
