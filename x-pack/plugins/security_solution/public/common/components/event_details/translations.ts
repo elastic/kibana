@@ -34,7 +34,7 @@ export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table',
 });
 
 export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jsonView', {
-  defaultMessage: 'JSON View',
+  defaultMessage: 'JSON',
 });
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
