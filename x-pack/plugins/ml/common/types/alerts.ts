@@ -108,3 +108,38 @@ export type MlAnomalyDetectionAlertRule = Omit<Alert<MlAnomalyDetectionAlertPara
 export interface JobAlertingRuleStats {
   alerting_rules?: MlAnomalyDetectionAlertRule[];
 }
+
+interface CommonHealthCheckConfig {
+  enabled: boolean;
+}
+
+export type MlAnomalyDetectionJobsHealthRuleParams = {
+  includeJobs: {
+    jobIds?: string[];
+    groupIds?: string[];
+  };
+  excludeJobs?: {
+    jobIds?: string[];
+    groupIds?: string[];
+  } | null;
+  testsConfig?: {
+    datafeed?: CommonHealthCheckConfig | null;
+    mml?: CommonHealthCheckConfig | null;
+    delayedData?:
+      | (CommonHealthCheckConfig & {
+          docsCount?: number | null;
+          timeInterval?: string | null;
+        })
+      | null;
+    behindRealtime?:
+      | (CommonHealthCheckConfig & {
+          timeInterval?: string | null;
+        })
+      | null;
+    errorMessages?: CommonHealthCheckConfig | null;
+  } | null;
+} & AlertTypeParams;
+
+export type JobsHealthRuleTestsConfig = MlAnomalyDetectionJobsHealthRuleParams['testsConfig'];
+
+export type JobsHealthTests = keyof Exclude<JobsHealthRuleTestsConfig, null | undefined>;
