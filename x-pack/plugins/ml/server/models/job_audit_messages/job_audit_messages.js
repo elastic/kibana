@@ -39,6 +39,14 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
+function isClearable(index) {
+  if (typeof index === 'string') {
+    const match = index.match(/\d{6}$/);
+    return match !== null && match.length && Number(match[match.length - 1]) >= 2;
+  }
+  return false;
+}
+
 export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
@@ -128,7 +136,7 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
     let messages = [];
     if (body.hits.total.value > 0) {
       messages = body.hits.hits.map((hit) => ({
-        clearable: hit._index === ML_NOTIFICATION_INDEX_02,
+        clearable: isClearable(hit._index),
         ...hit._source,
       }));
     }
