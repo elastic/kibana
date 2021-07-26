@@ -23,19 +23,17 @@ export const DraggableBodyRows = <Item extends object>({
   renderItem,
 }: DraggableBodyRowsProps<Item>) => {
   return (
-    <div>
-      <EuiDragDropContext
-        onDragEnd={({ source, destination }) => {
-          if (source && destination) {
-            const reorderedItems = euiDragDropReorder(items, source.index, destination?.index);
-            onReorder(reorderedItems, items);
-          }
-        }}
-      >
-        <EuiDroppable droppableId="ReorderingArea" grow={false}>
-          <BodyRows items={items} renderItem={renderItem} />
-        </EuiDroppable>
-      </EuiDragDropContext>
-    </div>
+    <EuiDragDropContext
+      onDragEnd={({ source, destination }) => {
+        if (source && destination) {
+          const reorderedItems = euiDragDropReorder(items, source.index, destination?.index);
+          onReorder(reorderedItems, items);
+        }
+      }}
+    >
+      <EuiDroppable droppableId="ReorderingArea" grow={false}>
+        <BodyRows items={items} renderItem={renderItem} />
+      </EuiDroppable>
+    </EuiDragDropContext>
   );
 };
