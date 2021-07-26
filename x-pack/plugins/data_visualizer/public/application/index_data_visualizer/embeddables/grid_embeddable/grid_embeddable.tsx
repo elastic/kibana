@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, Subject } from 'rxjs';
+import { merge, Observable, Subject } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React, {
@@ -67,11 +67,13 @@ import { TimeBuckets } from '../../services/time_buckets';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { getActions } from '../../../common/components/field_data_row/action_menu';
+import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;
   savedSearch?: SavedSearch;
   query?: Query;
+  visibleFieldNames?: string[];
 }
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
@@ -88,24 +90,20 @@ const useDataVisualizerGridData = (
   const { services } = useDataVisualizerKibana();
   const { notifications, uiSettings } = services;
   const { toasts } = notifications;
-  const {
-    samplerShardSize,
-    visibleFieldTypes,
-    visibleFieldNames,
-    showEmptyFields,
-  } = dataVisualizerListState;
+  // @todo: consolidate dataVisualizerListState and input
+  const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
-  const { currentSavedSearch, currentIndexPattern, currentQuery } = useMemo(
+  const [lastRefresh, setLastRefresh] = useState(0);
+
+  const { currentSavedSearch, currentIndexPattern, currentQuery, visibleFieldNames } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
       currentIndexPattern: input.indexPattern,
-      currentQuery: input.query,
+      currentQuery: input?.query,
+      visibleFieldNames: input?.visibleFieldNames ?? [],
     }),
     [input]
   );
-  console.log('--currentSavedSearch--', currentSavedSearch);
-  console.log('--currentIndexPattern--', currentIndexPattern);
-  console.log('--currentIndexPattern--', input.query);
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     // Prioritize current query in the search bar first
@@ -170,6 +168,18 @@ const useDataVisualizerGridData = (
   const timefilter = useTimefilter({
     timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
     autoRefreshSelector: true,
+  });
+
+  useEffect(() => {
+    const timeUpdateSubscription = merge(
+      timefilter.getTimeUpdate$(),
+      dataVisualizerRefresh$
+    ).subscribe(() => {
+      setLastRefresh(Date.now());
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
   });
 
   const getTimeBuckets = useCallback(() => {
@@ -538,9 +548,8 @@ const useDataVisualizerGridData = (
 
   useEffect(() => {
     loadOverallStats();
-    // @todo: add back lastRefresh as dep
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, samplerShardSize]);
+  }, [searchQuery, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();
@@ -628,7 +637,7 @@ const useDataVisualizerGridData = (
   return { configs, searchQueryLanguage, searchString, searchQuery, extendedColumns };
 };
 
-export const Test = ({ input }: { input: DataVisualizerGridEmbeddableInput }) => {
+export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddableInput }) => {
   const [
     dataVisualizerListState,
     setDataVisualizerListState,
@@ -681,12 +690,10 @@ export const IndexDataVisualizerViewWrapper = (props: {
 
   const input = useObservable(embeddableInput);
   if (input && input.indexPattern) {
-    return <Test input={input} />;
+    return <DiscoverWrapper input={input} />;
   } else {
     return <div />;
   }
-
-  return <div>Hello world 2</div>;
 };
 export class DataVisualizerGridEmbeddable extends Embeddable<
   DataVisualizerGridEmbeddableInput,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import { IndexPattern, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
@@ -52,7 +52,7 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 });
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
-  const { services, indexPattern, savedSearch, query } = props;
+  const { services, indexPattern, savedSearch, query, columns } = props;
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -60,7 +60,6 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   >();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
-  const timeBounds = useMemo(() => services.timefilter.getBounds(), [services.timefilter]);
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
@@ -68,11 +67,11 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
         indexPattern,
         savedSearch,
         query,
-        timeBounds,
+        visibleFieldNames: columns,
       });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query, timeBounds]);
+  }, [embeddable, indexPattern, savedSearch, query, columns]);
 
   useEffect(() => {
     return () => {
@@ -93,7 +92,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
         if (factory) {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
-            id: 'test',
+            id: 'discover_data_visualizer_grid',
             indexPattern,
             savedSearch,
             query,
@@ -113,9 +112,5 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     }
   }, [embeddable, embeddableRoot]);
 
-  return (
-    <>
-      <div data-test-subj="dataVisualizerEmbeddedContent" ref={embeddableRoot} />
-    </>
-  );
+  return <div data-test-subj="dataVisualizerEmbeddedContent" ref={embeddableRoot} />;
 };
