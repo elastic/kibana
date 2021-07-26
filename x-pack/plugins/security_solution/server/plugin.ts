@@ -254,6 +254,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
 
       // sec
+      ruleDataClient
+        .getWriter({ namespace: 'default' })
+        .bulk({ body: [{ index: {} }, { '@timestamp': 1626499490000 }] });
+      ruleDataClient
+        .getWriter({ namespace: 'default' })
+        .bulk({ body: [{ index: {} }, { '@timestamp': 1626499490000 }] });
 
       // Register reference rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
