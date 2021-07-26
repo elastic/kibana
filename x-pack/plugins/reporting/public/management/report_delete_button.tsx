@@ -92,7 +92,7 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
           {intl.formatMessage(
             {
               id: 'xpack.reporting.listing.table.deleteReportButton',
-              defaultMessage: `Delete ({num})`,
+              defaultMessage: `Delete {num, plural, one {report} other {reports} }`,
             },
             { num: jobsToDelete.length }
           )}
