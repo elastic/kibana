@@ -9,6 +9,8 @@
     // the plugin contains some heavy json files
     "resolveJsonModule": false,
     "lib": [
+      "esnext",
+      "dom",
       "DOM.Iterable"
     ],
   },
