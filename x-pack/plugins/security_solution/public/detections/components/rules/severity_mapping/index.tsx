@@ -29,12 +29,11 @@ import {
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';
 import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const NestedContent = styled.div`
@@ -57,7 +56,7 @@ interface SeverityFieldProps {
   dataTestSubj: string;
   field: FieldHook<AboutStepSeverity>;
   idAria: string;
-  indices: IIndexPattern;
+  indices: IndexPatternBase;
   isDisabled: boolean;
   options: SeverityOptionItem[];
 }
@@ -305,7 +304,7 @@ export const SeverityField = ({
  */
 const getFieldTypeByMapping = (
   mapping: SeverityMappingItem,
-  pattern: IIndexPattern
+  pattern: IndexPatternBase
 ): IndexPatternFieldBase => {
   const { field } = mapping;
   const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);

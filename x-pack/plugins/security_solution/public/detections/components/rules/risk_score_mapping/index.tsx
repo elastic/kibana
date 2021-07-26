@@ -21,11 +21,10 @@ import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -47,7 +46,7 @@ interface RiskScoreFieldProps {
   dataTestSubj: string;
   field: FieldHook<AboutStepRiskScore>;
   idAria: string;
-  indices: IIndexPattern;
+  indices: IndexPatternBase;
   isDisabled: boolean;
   placeholder?: string;
 }
@@ -241,7 +240,7 @@ export const RiskScoreField = ({
  */
 const getFieldTypeByMapping = (
   mapping: RiskScoreMapping,
-  pattern: IIndexPattern
+  pattern: IndexPatternBase
 ): IndexPatternFieldBase => {
   const field = mapping?.[0]?.field ?? '';
   const [knownFieldType] = pattern.fields.filter(({ name }) => field != null && field === name);
