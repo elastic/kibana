@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Cell } from './cell';
+import { DRAGGABLE_UX_STYLE } from './constants';
 import { Column } from './types';
 
 export interface BodyRowProps<Item> {
@@ -31,7 +32,7 @@ export const BodyRow = <Item extends object>({
       <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart">
-            {!!leftAction && leftAction}
+            {!!leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
             {columns.map((column, columnIndex) => (
               <Cell
                 key={`table_row_cell_${columnIndex}`}

@@ -31,7 +31,7 @@ describe('HeaderRow', () => {
   });
 
   it('will render an additional cell in the first column if one is provided', () => {
-    const wrapper = shallow(<HeaderRow columns={columns} leftAction={<Cell />} />);
+    const wrapper = shallow(<HeaderRow columns={columns} leftAction={<div>Left Action</div>} />);
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(3);
   });

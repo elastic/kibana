@@ -10,8 +10,6 @@ import React from 'react';
 import { EuiDraggable, EuiIcon } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
-import { Cell } from './cell';
-import { DRAGGABLE_UX_STYLE } from './constants';
 import { Column } from './types';
 
 export interface DraggableBodyRowProps<Item> {
@@ -43,7 +41,7 @@ export const DraggableBodyRow = <Item extends object>({
         columns={columns}
         item={item}
         additionalProps={additionalProps}
-        leftAction={<Cell {...DRAGGABLE_UX_STYLE}>{<EuiIcon type="grab" />}</Cell>}
+        leftAction={<EuiIcon type="grab" />}
       />
     </EuiDraggable>
   );

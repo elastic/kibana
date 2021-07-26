@@ -15,8 +15,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
-import { Cell } from './cell';
-import { DRAGGABLE_UX_STYLE } from './constants';
 import { DraggableBodyRow } from './draggable_body_row';
 import { DraggableBodyRows } from './draggable_body_rows';
 import { HeaderRow } from './header_row';
@@ -47,10 +45,7 @@ export const ReorderableTable = <Item extends object>({
 }: ReorderableTableProps<Item>) => {
   return (
     <div className={classNames(className, 'reorderableTable')}>
-      <HeaderRow
-        columns={columns}
-        leftAction={!disableReordering ? <Cell {...DRAGGABLE_UX_STYLE} /> : undefined}
-      />
+      <HeaderRow columns={columns} leftAction={!disableReordering ? <></> : undefined} />
 
       {items.length === 0 && (
         <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -85,7 +80,7 @@ export const ReorderableTable = <Item extends object>({
                   columns={columns}
                   item={item}
                   additionalProps={rowProps(item)}
-                  leftAction={<Cell {...DRAGGABLE_UX_STYLE} />}
+                  leftAction={<></>}
                 />
               )}
             />

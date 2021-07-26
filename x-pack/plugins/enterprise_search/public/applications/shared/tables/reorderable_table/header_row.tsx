@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { Cell } from './cell';
+import { DRAGGABLE_UX_STYLE } from './constants';
 import { Column } from './types';
 
 interface HeaderRowProps<Item> {
@@ -24,7 +25,7 @@ export const HeaderRow = <Item extends object>({ columns, leftAction }: HeaderRo
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFlexGroup>
-            {!!leftAction && leftAction}
+            {!!leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
             {columns.map((column, columnIndex) => (
               <Cell key={`table_header_cell_${columnIndex}`} {...column}>
                 <EuiText size="s">
