@@ -12,6 +12,7 @@ export const ConfigSchema = schema.object({
   actionEnabled: schema.boolean({ defaultValue: false }),
   savedQueries: schema.boolean({ defaultValue: true }),
   packs: schema.boolean({ defaultValue: false }),
+  rbac: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
