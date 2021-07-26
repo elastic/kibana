@@ -14,22 +14,23 @@ import { EuiFormRow, EuiText, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { getCoreStart } from '../../../../services';
 import { PanelModelContext } from '../../../contexts/panel_model_context';
 
-import { isStringTypeIndexPattern } from '../../../../../common/index_patterns_utils';
-
 import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
-import { DefaultIndexPatternContext } from '../../../contexts/default_index_context';
 import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
+import { IndexPattern } from '../../../../../../data/common';
 
-interface IndexPatternSelectProps {
-  value: IndexPatternValue;
+export interface IndexPatternSelectProps {
   indexPatternName: string;
   onChange: Function;
   disabled?: boolean;
   allowIndexSwitchingMode?: boolean;
-  fetchedIndex: FetchedIndexPattern | null;
+  fetchedIndex:
+    | (FetchedIndexPattern & {
+        defaultIndex?: IndexPattern | null;
+      })
+    | null;
 }
 
 const defaultIndexPatternHelpText = i18n.translate(
@@ -51,7 +52,6 @@ const indexPatternLabel = i18n.translate('visTypeTimeseries.indexPatternSelect.l
 });
 
 export const IndexPatternSelect = ({
-  value,
   indexPatternName,
   onChange,
   disabled,
@@ -60,7 +60,6 @@ export const IndexPatternSelect = ({
 }: IndexPatternSelectProps) => {
   const htmlId = htmlIdGenerator();
   const panelModel = useContext(PanelModelContext);
-  const defaultIndex = useContext(DefaultIndexPatternContext);
 
   const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
   const Component = useKibanaIndices ? ComboBoxSelect : FieldTextSelect;
@@ -105,13 +104,11 @@ export const IndexPatternSelect = ({
       id={htmlId('indexPattern')}
       label={indexPatternLabel}
       helpText={
-        !value && defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
+        fetchedIndex.defaultIndex &&
+        defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
       }
       labelAppend={
-        value &&
-        allowIndexSwitchingMode &&
-        isStringTypeIndexPattern(value) &&
-        !fetchedIndex.indexPattern ? (
+        fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
             <EuiText size="xs">
               <FormattedMessage
@@ -129,7 +126,7 @@ export const IndexPatternSelect = ({
         allowSwitchMode={allowIndexSwitchingMode}
         onIndexChange={onIndexChange}
         onModeChange={onModeChange}
-        placeholder={defaultIndex?.title ?? ''}
+        placeholder={fetchedIndex.defaultIndex?.title ?? ''}
         data-test-subj="metricsIndexPatternInput"
       />
     </EuiFormRow>
