@@ -57,6 +57,7 @@ export const AdminSearchBar = memo(() => {
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
             isLoading={false}
+            iconType="search"
             showFilterBar={false}
             showDatePicker={false}
             showQueryBar={true}
