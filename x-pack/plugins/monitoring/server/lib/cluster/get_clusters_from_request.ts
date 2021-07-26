@@ -203,7 +203,7 @@ export async function getClustersFromRequest(
       );
       // withhold LS overview stats until there is at least 1 pipeline
       if (logstash.clusterUuid === clusterUuid && !pipelines.length) {
-        Reflect.set(logstash.stats, {});
+        Reflect.set(logstash, 'stats', {});
       }
       set(clusters[clusterIndex], 'logstash', logstash.stats);
     });
