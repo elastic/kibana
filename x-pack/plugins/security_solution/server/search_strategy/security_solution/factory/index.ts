@@ -9,6 +9,7 @@ import type { FactoryQueryTypes } from '../../../../common/search_strategy/secur
 import type { SecuritySolutionFactory } from './types';
 
 import { hostsFactory } from './hosts';
+import { uebaFactory } from './ueba';
 import { matrixHistogramFactory } from './matrix_histogram';
 import { networkFactory } from './network';
 import { ctiFactoryTypes } from './cti';
@@ -18,6 +19,7 @@ export const securitySolutionFactory: Record<
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   ...hostsFactory,
+  ...uebaFactory,
   ...matrixHistogramFactory,
   ...networkFactory,
   ...ctiFactoryTypes,
