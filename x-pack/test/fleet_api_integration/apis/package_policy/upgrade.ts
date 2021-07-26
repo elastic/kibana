@@ -183,6 +183,9 @@ export default function (providerContext: FtrProviderContext) {
                       type: 'test_stream',
                       dataset: 'package_policy_upgrade.test',
                     },
+                    compiled_stream: {
+                      test_var: 'Test Value',
+                    },
                     vars: {
                       test_var: {
                         value: 'Test Value',
