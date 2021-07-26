@@ -300,9 +300,9 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await retry.tryForTime(30 * 1000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
         await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
-        await testSubjects.existOrFail(`transformAction${action}`);
+        await testSubjects.existOrFail(`transformAction${action}`, { timeout: 1000 });
         await testSubjects.click(`transformAction${action}`);
-        await testSubjects.missingOrFail(`transformAction${action}`);
+        await testSubjects.missingOrFail(`transformAction${action}`, { timeout: 1000 });
       });
     }
 
