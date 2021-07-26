@@ -5,7 +5,7 @@
  * 2.0.
  */
 export const sampleAttributeCoreWebVital = {
-  description: '',
+  description: 'undefined',
   references: [
     {
       id: 'apm-*',
@@ -94,7 +94,7 @@ export const sampleAttributeCoreWebVital = {
     filters: [],
     query: {
       language: 'kuery',
-      query: '',
+      query: 'transaction.type: "page-load"',
     },
     visualization: {
       axisTitlesVisibilitySettings: {
