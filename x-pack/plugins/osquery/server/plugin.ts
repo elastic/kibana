@@ -71,9 +71,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [],
                   read: [],
                 },
-                // using variables with underscores here otherwise when we retrieve them from the kibana
-                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                ui: ['crudLiveQueries', 'readLiveQueries'], // uiCapabilities.siem.crud_cases
+                ui: ['crudLiveQueries', 'readLiveQueries'],
               },
               {
                 id: 'live_queries_read',
@@ -83,9 +81,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [],
                   read: [],
                 },
-                // using variables with underscores here otherwise when we retrieve them from the kibana
-                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                ui: ['readLiveQueries'], // uiCapabilities.siem.read_cases
+                ui: ['readLiveQueries'],
               },
             ],
           },
@@ -159,9 +155,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [packSavedObjectType],
                   read: [packSavedObjectType],
                 },
-                // using variables with underscores here otherwise when we retrieve them from the kibana
-                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                ui: ['crudPacks', 'readPacks'], // uiCapabilities.siem.crud_cases
+                ui: ['crudPacks', 'readPacks'],
               },
               {
                 id: 'packs_read',
@@ -171,9 +165,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [],
                   read: [packSavedObjectType],
                 },
-                // using variables with underscores here otherwise when we retrieve them from the kibana
-                // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
-                ui: ['savedLiveQueries'], // uiCapabilities.siem.read_cases
+                ui: ['savedLiveQueries'],
               },
             ],
           },
