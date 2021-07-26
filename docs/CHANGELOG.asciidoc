@@ -1,5 +1,5 @@
 [[release-notes]]
-= Release Notes
+= Release notes
 
 [partintro]
 --
@@ -26,7 +26,13 @@ The following changes have been released for the first time in {kib} 8.0.0-alpha
 [[breaking-changes-8.0.0]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 8.0.0, review the breaking changes, then mitigate the impact to your application.
+Breaking changes can prevent your application from optimal operation and performance.
+
+1. Review the breaking changes.
+
+2. Mitigate the impact to your application.
+
+3. To complete the upgrade, use the <<upgrade-assistant,Upgrade Assistant>>.
 
 // tag::notable-breaking-changes[]
 
@@ -117,18 +123,6 @@ To log responses, set `logging.events.response=*` in kibana.yml.
 [float]
 [[reporting-changes-8.0.0-alpha1]]
 ==== Reporting changes
-
-[discrete]
-[[breaking-64853]]
-.Task Manager integration for Reporting
-[%collapsible]
-====
-*Details* +
-The ES-Queue subservice of *Reporting* has been removed and replaced with *Task Manager* integration. For more information, refer to {kibana-pull}64853[#64853]
-
-*Impact* +
-Before you upgrade, make sure there are no pending reporting jobs. Any pending reporting jobs will remain in the pending state.
-====
       
 [discrete]
 [[breaking-52539]]
