@@ -212,7 +212,7 @@ For more details, see {ml-docs}/mapping-anomalies.html[Mapping anomalies by loca
 [float]
 ==== Delayed data visualization for anomaly detection
 
-Delayed data are documents that are indexed after the datafeed
+{ml-docs}/ml-delayed-data-detection.html[Delayed data] are documents that are indexed after the {dfeed}
 has already processed the time period for the anomaly detection job.
 For jobs with delayed data, it can be difficult to understand why the current data
 is different from what was processed for the anomaly detection job.
