@@ -11,12 +11,36 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
 
-const mergeWithFormHandlers = (handlers) => Object.assign(new ExpressionFormHandlers(), handlers);
+interface Props {
+  template?: (domNode: HTMLElement, config: any, handlers: Props['handlers']) => void;
+  argumentProps: {
+    valueMissing?: boolean;
+    label?: string;
+    setLabel: (label: string) => void;
+    expand?: boolean;
+    setExpand?: (expand: boolean) => void;
+    onValueRemove?: (argName: string, argIndex: string) => void;
+    resetErrorState: () => void;
+    renderError: () => void;
+  };
+  handlers?: { [key: string]: (...args: any[]) => any };
+  error?: unknown;
+  errorTemplate: React.FunctionComponent<Props['argumentProps']>;
+}
 
-export const ArgTemplateForm = ({ template, argumentProps, handlers, error, errorTemplate }) => {
+const mergeWithFormHandlers = (handlers: Props['handlers']) =>
+  Object.assign(new ExpressionFormHandlers(), handlers);
+
+export const ArgTemplateForm: React.FunctionComponent<Props> = ({
+  template,
+  argumentProps,
+  handlers,
+  error,
+  errorTemplate,
+}) => {
   const [updatedHandlers, setHandlers] = useState(mergeWithFormHandlers(handlers));
   const previousError = usePrevious(error);
-  const domNodeRef = useRef();
+  const domNodeRef = useRef<HTMLElement>();
   const renderTemplate = useCallback(
     (domNode) => template && template(domNode, argumentProps, updatedHandlers),
     [template, argumentProps, updatedHandlers]
@@ -64,7 +88,7 @@ ArgTemplateForm.propTypes = {
     resetErrorState: PropTypes.func.isRequired,
     renderError: PropTypes.func.isRequired,
   }),
-  handlers: PropTypes.object.isRequired,
+  handlers: PropTypes.object,
   error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
 };
