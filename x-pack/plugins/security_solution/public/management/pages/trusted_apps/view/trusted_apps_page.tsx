@@ -60,8 +60,8 @@ export const TrustedAppsPage = memo(() => {
   const navigationCallbackQuery = useTrustedAppsNavigateCallback(
     (query: string, includedPolicies?: string, excludedPolicies?: string) => ({
       filter: query,
-      includedPolicies,
-      excludedPolicies,
+      included_policies: includedPolicies,
+      excluded_policies: excludedPolicies,
     })
   );
 

@@ -41,13 +41,13 @@ interface DefaultPoliciesByKey {
 }
 
 const GLOBAL_ENTRIES = i18n.translate(
-  'pack.securitySolution.management.policiesSelector.globalEntries',
+  'xpack.securitySolution.management.policiesSelector.globalEntries',
   {
     defaultMessage: 'Global entries',
   }
 );
 const UNASSIGNED_ENTRIES = i18n.translate(
-  'pack.securitySolution.management.policiesSelector.unassignedEntries',
+  'xpack.securitySolution.management.policiesSelector.unassignedEntries',
   {
     defaultMessage: 'Unassigned entries',
   }
