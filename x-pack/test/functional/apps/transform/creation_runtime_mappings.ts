@@ -20,6 +20,7 @@ import {
 } from './index';
 
 export default function ({ getService }: FtrProviderContext) {
+  const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
@@ -312,12 +313,17 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchExists();
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
 
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await canvasElement.disableAntiAliasing();
+
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
           await transform.wizard.enableIndexPreviewHistogramCharts(false);
           await transform.testExecution.logTestStep('displays the index preview histogram charts');
           await transform.wizard.assertIndexPreviewHistogramCharts(
             testData.expected.histogramCharts
           );
+
+          await canvasElement.resetAntiAliasing();
 
           if (isPivotTransformTestData(testData)) {
             await transform.testExecution.logTestStep('adds the group by entries');
