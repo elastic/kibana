@@ -18,7 +18,7 @@ export const getFilter = (filter: string | null | undefined) => {
 };
 
 export const findNotifications = async ({
-  alertsClient,
+  rulesClient,
   perPage,
   page,
   fields,
@@ -26,7 +26,7 @@ export const findNotifications = async ({
   sortField,
   sortOrder,
 }: FindNotificationParams): Promise<FindResult<AlertTypeParams>> =>
-  alertsClient.find({
+  rulesClient.find({
     options: {
       fields,
       page,
