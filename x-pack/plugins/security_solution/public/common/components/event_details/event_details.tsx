@@ -12,6 +12,8 @@ import {
   EuiLoadingContent,
   EuiLoadingSpinner,
   EuiNotificationBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -84,11 +86,6 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
-`;
-
-const StyledNotificationBadge = styled(EuiNotificationBadge)`
-  margin-top: -1px;
-  padding-top: 1px;
 `;
 
 const EventDetailsComponent: React.FC<Props> = ({
@@ -181,14 +178,25 @@ const EventDetailsComponent: React.FC<Props> = ({
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
             name: (
-              <span>
-                {`${i18n.THREAT_INTEL} `}
-                {enrichmentsLoading ? (
-                  <EuiLoadingSpinner />
-                ) : (
-                  <StyledNotificationBadge>{enrichmentCount}</StyledNotificationBadge>
-                )}
-              </span>
+              <EuiFlexGroup
+                direction="row"
+                alignItems={'center'}
+                justifyContent={'spaceAround'}
+                gutterSize="xs"
+              >
+                <EuiFlexItem>
+                  <span>{i18n.THREAT_INTEL}</span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {enrichmentsLoading ? (
+                    <EuiLoadingSpinner />
+                  ) : (
+                    <EuiNotificationBadge data-test-subj="enrichment-count-notification">
+                      {enrichmentCount}
+                    </EuiNotificationBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
             content: (
               <>

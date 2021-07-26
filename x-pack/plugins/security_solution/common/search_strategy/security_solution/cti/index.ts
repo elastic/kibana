@@ -18,7 +18,7 @@ export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {
   eventFields: Record<string, unknown>;
 }
 
-export type CtiEnrichment = Record<string, unknown[]> & { matched: { type: string } };
+export type CtiEnrichment = Record<string, unknown[]>;
 export type EventFields = Record<string, unknown>;
 
 export interface CtiEnrichmentIdentifiers {

@@ -22,7 +22,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
-import { FIRSTSEEN, EVENT_URL, EVENT_REFERENCE } from '../../../../../common/cti/constants';
+import {
+  FIRSTSEEN,
+  EVENT_URL,
+  EVENT_REFERENCE,
+  ENRICHMENT_TYPES,
+} from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
@@ -34,6 +39,7 @@ import {
 import * as i18n from './translations';
 import { QUERY_ID } from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
 import { InspectButton } from '../../inspect';
+import { EnrichmentButtonContent } from './enrichment_button_content';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
@@ -49,16 +55,6 @@ const StyledEuiAccordion = styled(EuiAccordion)`
     padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
     margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
   }
-`;
-
-const OverflowParent = styled.div`
-  display: inline-grid;
-`;
-
-const OverflowContainer = styled.div`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
@@ -107,34 +103,27 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
       };
     });
 
-const renderAccordion = (
-  enrichment: CtiEnrichment,
-  index: number,
-  enrichments: CtiEnrichment[]
-) => {
-  const { id, field, provider, type, value } = getEnrichmentIdentifiers(enrichment);
-  const accordionTitle = `${field} ${value} ${provider ? i18n.PROVIDER_PREPOSITION : ''} ${
-    provider ? provider : ''
-  }`;
-
+const EnrichmentAccordion: React.FC<{
+  enrichment: CtiEnrichment;
+  index: number;
+  enrichmentsLength: number;
+}> = ({ enrichment, index, enrichmentsLength }) => {
+  const { id = `threat-details-item`, field, provider, type, value } = getEnrichmentIdentifiers(
+    enrichment
+  );
+  const accordionId = `${id}-${index}`;
   return (
     <StyledEuiAccordion
-      id={id!}
-      key={id}
+      id={accordionId}
+      key={accordionId}
       initialIsOpen={true}
       arrowDisplay={'right'}
-      buttonContent={
-        <OverflowParent>
-          <OverflowContainer>{accordionTitle}</OverflowContainer>
-        </OverflowParent>
-      }
+      buttonContent={<EnrichmentButtonContent field={field} provider={provider} value={value} />}
       extraAction={
-        isInvestigationTimeEnrichment(type) ? (
+        isInvestigationTimeEnrichment(type) && (
           <EuiFlexItem grow={false}>
             <InspectButton queryId={QUERY_ID} title={i18n.INVESTIGATION_QUERY_TITLE} />
           </EuiFlexItem>
-        ) : (
-          <EuiFlexItem />
         )
       }
     >
@@ -144,34 +133,46 @@ const renderAccordion = (
         data-test-subj={`threat-details-view-${index}`}
         items={buildThreatDetailsItems(enrichment)}
       />
-      {index < enrichments.length - 1 && <EuiSpacer size="m" />}
+      {index < enrichmentsLength - 1 && <EuiSpacer size="m" />}
     </StyledEuiAccordion>
   );
 };
 
-const renderSortedEnrichments = (enrichments: CtiEnrichment[]) =>
-  enrichments.sort((a, b) => getFirstSeen(b) - getFirstSeen(a)).map(renderAccordion);
+const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[] }> = ({ enrichments }) => (
+  <>
+    {enrichments
+      .sort((a, b) => getFirstSeen(b) - getFirstSeen(a))
+      .map((enrichment, index) => (
+        <EnrichmentAccordion
+          enrichment={enrichment}
+          index={index}
+          enrichmentsLength={enrichments.length}
+        />
+      ))}
+  </>
+);
 
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
 }> = ({ enrichments }) => {
   const {
-    indicator_match_rule: indicatorMatches,
-    investigation_time: threatIntelEnrichments,
+    [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
+    [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
+    undefined: matchesWithNoType,
   } = groupBy(enrichments, 'matched.type');
 
   return (
     <>
       <EuiSpacer size="m" />
       {indicatorMatches && (
-        <div data-test-sub={'threat-match-detected'}>
+        <div data-test-subj={'threat-match-detected'}>
           <EuiTitle size="xxxs">
             <h5>{i18n.INDICATOR_TOOLTIP_TITLE}</h5>
           </EuiTitle>
           <EuiSpacer size="xs" />
-          <EuiText size="xxxs">
+          <EuiText size="xs">
             <FormattedMessage
-              id={'xpack.securitySolution.alertDetails.threatDetails.threatMatchSubtitle'}
+              id="xpack.securitySolution.alertDetails.threatDetails.threatMatchSubtitle"
               defaultMessage={
                 'We have found {totalCount, plural, one {# field value} other {# field values}} matched a threat intelligence indicator with a rule you created.'
               }
@@ -181,7 +182,7 @@ const ThreatDetailsViewComponent: React.FC<{
             />
           </EuiText>
           <EuiSpacer size="s" />
-          {renderSortedEnrichments(indicatorMatches)}
+          <EnrichmentSection enrichments={indicatorMatches} />
         </div>
       )}
       {threatIntelEnrichments && (
@@ -193,9 +194,9 @@ const ThreatDetailsViewComponent: React.FC<{
             </EuiTitle>
             <EuiSpacer size="xs" />
             {/* TODO: Date form */}
-            <EuiText size="xxxs">
+            <EuiText size="xs">
               <FormattedMessage
-                id={'xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle'}
+                id="xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle"
                 defaultMessage={
                   'We have found {totalCount, plural, one {# field value} other {# field values}} has additional information available from threat intelligence sources we searched in the past 30 days by default.'
                 }
@@ -205,8 +206,14 @@ const ThreatDetailsViewComponent: React.FC<{
               />
             </EuiText>
             <EuiSpacer size="s" />
-            {renderSortedEnrichments(threatIntelEnrichments)}
+            <EnrichmentSection enrichments={threatIntelEnrichments} />
           </>
+        </div>
+      )}
+      {matchesWithNoType && (
+        <div data-test-subj={'matches-with-no-type'}>
+          {indicatorMatches && <EuiSpacer size="l" />}
+          <EnrichmentSection enrichments={matchesWithNoType} />
         </div>
       )}
     </>
