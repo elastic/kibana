@@ -22330,7 +22330,6 @@
     "xpack.securitySolution.eventFilter.form.updateSuccessToastTitle": "“{name}”已成功更新。",
     "xpack.securitySolution.eventFilter.modal.actions.cancel": "取消",
     "xpack.securitySolution.eventFilter.modal.actions.confirm": "添加终端事件筛选",
-    "xpack.securitySolution.eventFilter.modal.description": "满足规则的条件时将筛选事件：",
     "xpack.securitySolution.eventFilter.modal.subtitle": "Endpoint Security",
     "xpack.securitySolution.eventFilter.modal.title": "添加终端事件筛选",
     "xpack.securitySolution.eventFilter.search.placeholder": "搜索下面的字段：name、comments、value",
