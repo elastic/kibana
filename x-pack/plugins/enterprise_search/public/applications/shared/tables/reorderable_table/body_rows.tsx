@@ -12,5 +12,6 @@ export interface BodyRowsProps<Item> {
   renderItem: (item: Item, itemIndex: number) => React.ReactNode;
 }
 
-export const BodyRows = <Item extends object>({ items, renderItem }: BodyRowsProps<Item>) =>
-  items.map(renderItem);
+export const BodyRows = <Item extends object>({ items, renderItem }: BodyRowsProps<Item>) => (
+  <>items.map(renderItem)</>
+);
