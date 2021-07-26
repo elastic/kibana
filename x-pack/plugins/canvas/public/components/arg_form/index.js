@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { getAssets } from '../../state/selectors/assets';
 import { getWorkpadInfo } from '../../state/selectors/workpad';
 import { ArgForm as Component } from './arg_form';
@@ -15,11 +15,13 @@ import { ArgForm as Component } from './arg_form';
 const getLabel = (label, argTypeInstance) =>
   label || argTypeInstance.displayName || argTypeInstance.name;
 
-const ArgFormComponent = (props) => {
+export const ArgForm = (props) => {
   const { argTypeInstance, label: labelFromProps, templateProps } = props;
   const [label, setLabel] = useState(getLabel(labelFromProps, argTypeInstance));
   const [resolvedArgValue, setResolvedArgValue] = useState(null);
   const [renderError, setRenderError] = useState(false);
+  const workpad = useSelector(getWorkpadInfo);
+  const assets = useSelector(getAssets);
 
   useEffect(() => {
     setRenderError(false);
@@ -29,6 +31,8 @@ const ArgFormComponent = (props) => {
   return (
     <Component
       {...props}
+      workpad={workpad}
+      assets={assets}
       label={label}
       setLabel={setLabel}
       resolvedArgValue={resolvedArgValue}
@@ -38,11 +42,6 @@ const ArgFormComponent = (props) => {
     />
   );
 };
-
-export const ArgForm = connect((state) => ({
-  workpad: getWorkpadInfo(state),
-  assets: getAssets(state),
-}))(ArgFormComponent);
 
 ArgForm.propTypes = {
   label: PropTypes.string,
