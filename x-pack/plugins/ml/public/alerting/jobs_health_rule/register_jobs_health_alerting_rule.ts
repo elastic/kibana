@@ -11,6 +11,7 @@ import { TriggersAndActionsUIPublicPluginSetup } from '../../../../triggers_acti
 import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 
 export function registerJobsHealthAlertingRule(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -42,10 +43,9 @@ export function registerJobsHealthAlertingRule(
         );
       }
 
-      if (
-        alertParams.testsConfig &&
-        Object.values(alertParams.testsConfig).every((v) => v?.enabled === false)
-      ) {
+      const resultTestConfig = getResultJobsHealthRuleConfig(alertParams.testsConfig);
+
+      if (Object.values(resultTestConfig).every((v) => v?.enabled === false)) {
         validationResult.errors.testsConfig.push(
           i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.errorMessage', {
             defaultMessage: 'At least one health check must be enabled.',
