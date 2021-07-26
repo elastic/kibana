@@ -22,27 +22,22 @@ import {
   LayoutDirection,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { calculateMinInterval, XYChart, XYChartRenderProps, xyChart } from './expression';
+import type { LensMultiTable } from '../../common';
 import {
-  calculateMinInterval,
-  xyChart,
-  XYChart,
+  layerConfig,
+  legendConfig,
+  tickLabelsConfig,
+  gridlinesConfig,
+  XYArgs,
+  LegendConfig,
+  LayerArgs,
+  AxesSettingsConfig,
   XYChartProps,
-  XYChartRenderProps,
-} from './expression';
-import { LensMultiTable } from '../types';
+} from '../../common/expressions';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
-import {
-  XYArgs,
-  LegendConfig,
-  legendConfig,
-  layerConfig,
-  LayerArgs,
-  AxesSettingsConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-} from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
