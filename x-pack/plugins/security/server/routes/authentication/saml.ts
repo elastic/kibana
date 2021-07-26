@@ -42,7 +42,7 @@ export function defineSAMLRoutes({
           const serverBasePath = basePath.serverBasePath;
           logger.warn(
             // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-            `The "${serverBasePath}${path}" URL is deprecated and might stop working in the next major version, please use "${serverBasePath}/api/security/saml/callback" URL instead.`
+            `The "${serverBasePath}${path}" URL is deprecated and might stop working in a future release. Please use "${serverBasePath}/api/security/saml/callback" URL instead.`
           );
         }
 
