@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import { IndexPattern, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
@@ -60,13 +60,19 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   >();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
+  const timeBounds = useMemo(() => services.timefilter.getBounds(), [services.timefilter]);
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
-      embeddable.updateInput({ indexPattern, savedSearch, query });
+      embeddable.updateInput({
+        indexPattern,
+        savedSearch,
+        query,
+        timeBounds,
+      });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query]);
+  }, [embeddable, indexPattern, savedSearch, query, timeBounds]);
 
   useEffect(() => {
     return () => {
@@ -86,8 +92,13 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
         >('data_visualizer_grid');
         if (factory) {
           // Initialize embeddable with information available at mount
-          const test = await factory.create({ id: 'test', indexPattern, savedSearch, query });
-          setEmbeddable(test);
+          const initializedEmbeddable = await factory.create({
+            id: 'test',
+            indexPattern,
+            savedSearch,
+            query,
+          });
+          setEmbeddable(initializedEmbeddable);
         }
       }
     };

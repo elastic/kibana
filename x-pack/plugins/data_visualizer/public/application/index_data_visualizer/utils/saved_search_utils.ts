@@ -7,32 +7,42 @@
 
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
-import { SavedSearchSavedObject } from '../../../../common/types';
+import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
+import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 
-export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
-  const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-  return JSON.parse(search.searchSourceJSON) as {
-    query: Query;
-    filter: any[];
-  };
+export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | SavedSearch) {
+  console.log('getQueryFromSavedSearch savedSearch', savedSearch);
+  // @todo: add type assertion for savedsearch or export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
+  const search = isSavedSearchSavedObject(savedSearch)
+    ? savedSearch?.attributes?.kibanaSavedObjectMeta
+    : // @ts-expect-error kibanaSavedObjectMeta does exist
+      savedSearch?.kibanaSavedObjectMeta;
+
+  return typeof search?.searchSourceJSON === 'string'
+    ? (JSON.parse(search.searchSourceJSON) as {
+        query: Query;
+        filter: any[];
+      })
+    : undefined;
 }
 
 /**
  * Extract query data from the saved search object.
  */
 export function extractSearchData(
-  savedSearch: SavedSearchSavedObject | null,
-  currentIndexPattern: IndexPattern,
+  savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined,
+  currentIndexPattern: IndexPattern | null | undefined,
   queryStringOptions: Record<string, any> | string
 ) {
-  if (!savedSearch) {
-    return undefined;
-  }
+  if (!savedSearch || !currentIndexPattern) return;
 
-  const { query: extractedQuery } = getQueryFromSavedSearch(savedSearch);
+  const query = getQueryFromSavedSearch(savedSearch);
+  if (!query) return;
+
+  const extractedQuery = query.query;
   const queryLanguage = extractedQuery.language as SearchQueryLanguage;
   const qryString = extractedQuery.query;
   let qry;

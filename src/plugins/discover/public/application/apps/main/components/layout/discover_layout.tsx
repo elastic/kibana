@@ -83,6 +83,7 @@ export function DiscoverLayout({
   state,
   stateContainer,
 }: DiscoverLayoutProps) {
+  console.log('state', services.timefilter.getBounds());
   const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager } = services;
 
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
@@ -362,51 +363,51 @@ export function DiscoverLayout({
                           query={state.query}
                           columns={columns}
                         />
-                        {isLegacy && rows && rows.length && (
-                          <DocTableLegacyMemoized
-                            columns={columns}
-                            indexPattern={indexPattern}
-                            rows={rows}
-                            sort={state.sort || []}
-                            searchDescription={savedSearch.description}
-                            searchTitle={savedSearch.lastSavedTitle}
-                            onAddColumn={onAddColumn}
-                            onBackToTop={onBackToTop}
-                            onFilter={onAddFilter}
-                            onMoveColumn={onMoveColumn}
-                            onRemoveColumn={onRemoveColumn}
-                            onSort={onSort}
-                            sampleSize={sampleSize}
-                            useNewFieldsApi={useNewFieldsApi}
-                          />
-                        )}
-                        {!isLegacy && rows && rows.length && (
-                          <div className="dscDiscoverGrid">
-                            <DataGridMemoized
-                              ariaLabelledBy="documentsAriaLabel"
-                              columns={columns}
-                              expandedDoc={expandedDoc}
-                              indexPattern={indexPattern}
-                              isLoading={fetchStatus === 'loading'}
-                              rows={rows}
-                              sort={(state.sort as SortPairArr[]) || []}
-                              sampleSize={sampleSize}
-                              searchDescription={savedSearch.description}
-                              searchTitle={savedSearch.lastSavedTitle}
-                              setExpandedDoc={setExpandedDoc}
-                              showTimeCol={showTimeCol}
-                              services={services}
-                              settings={state.grid}
-                              onAddColumn={onAddColumn}
-                              onFilter={onAddFilter as DocViewFilterFn}
-                              onRemoveColumn={onRemoveColumn}
-                              onSetColumns={onSetColumns}
-                              onSort={onSort}
-                              onResize={onResize}
-                              useNewFieldsApi={useNewFieldsApi}
-                            />
-                          </div>
-                        )}
+                        {/* {isLegacy && rows && rows.length && (*/}
+                        {/*  <DocTableLegacyMemoized*/}
+                        {/*    columns={columns}*/}
+                        {/*    indexPattern={indexPattern}*/}
+                        {/*    rows={rows}*/}
+                        {/*    sort={state.sort || []}*/}
+                        {/*    searchDescription={savedSearch.description}*/}
+                        {/*    searchTitle={savedSearch.lastSavedTitle}*/}
+                        {/*    onAddColumn={onAddColumn}*/}
+                        {/*    onBackToTop={onBackToTop}*/}
+                        {/*    onFilter={onAddFilter}*/}
+                        {/*    onMoveColumn={onMoveColumn}*/}
+                        {/*    onRemoveColumn={onRemoveColumn}*/}
+                        {/*    onSort={onSort}*/}
+                        {/*    sampleSize={sampleSize}*/}
+                        {/*    useNewFieldsApi={useNewFieldsApi}*/}
+                        {/*  />*/}
+                        {/* )}*/}
+                        {/* {!isLegacy && rows && rows.length && (*/}
+                        {/*  <div className="dscDiscoverGrid">*/}
+                        {/*    <DataGridMemoized*/}
+                        {/*      ariaLabelledBy="documentsAriaLabel"*/}
+                        {/*      columns={columns}*/}
+                        {/*      expandedDoc={expandedDoc}*/}
+                        {/*      indexPattern={indexPattern}*/}
+                        {/*      isLoading={fetchStatus === 'loading'}*/}
+                        {/*      rows={rows}*/}
+                        {/*      sort={(state.sort as SortPairArr[]) || []}*/}
+                        {/*      sampleSize={sampleSize}*/}
+                        {/*      searchDescription={savedSearch.description}*/}
+                        {/*      searchTitle={savedSearch.lastSavedTitle}*/}
+                        {/*      setExpandedDoc={setExpandedDoc}*/}
+                        {/*      showTimeCol={showTimeCol}*/}
+                        {/*      services={services}*/}
+                        {/*      settings={state.grid}*/}
+                        {/*      onAddColumn={onAddColumn}*/}
+                        {/*      onFilter={onAddFilter as DocViewFilterFn}*/}
+                        {/*      onRemoveColumn={onRemoveColumn}*/}
+                        {/*      onSetColumns={onSetColumns}*/}
+                        {/*      onSort={onSort}*/}
+                        {/*      onResize={onResize}*/}
+                        {/*      useNewFieldsApi={useNewFieldsApi}*/}
+                        {/*    />*/}
+                        {/*  </div>*/}
+                        {/* )}*/}
                       </section>
                     </EuiFlexItem>
                   </EuiFlexGroup>
