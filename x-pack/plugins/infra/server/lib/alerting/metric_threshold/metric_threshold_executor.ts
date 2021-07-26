@@ -8,7 +8,13 @@
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { RecoveredActionGroup } from '../../../../../alerting/common';
+import {
+  ActionGroupIdsOf,
+  RecoveredActionGroup,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../../alerting/common';
+import { AlertTypeState, AlertInstance } from '../../../../../alerting/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
@@ -20,18 +26,45 @@ import {
 import { createFormatter } from '../../../../common/formatters';
 import { AlertStates, Comparator } from './types';
 import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
-import {
-  MetricThresholdAlertExecutorOptions,
-  MetricThresholdAlertType,
-} from './register_metric_threshold_alert_type';
 
-export const createMetricThresholdExecutor = (
-  libs: InfraBackendLibs
-): MetricThresholdAlertType['executor'] =>
-  async function (options: MetricThresholdAlertExecutorOptions) {
+export type MetricThresholdAlertTypeParams = Record<string, any>;
+export type MetricThresholdAlertTypeState = AlertTypeState; // no specific state used
+export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
+export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
+
+type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+>;
+
+type MetricThresholdAlertInstance = AlertInstance<
+  MetricThresholdAlertInstanceState,
+  MetricThresholdAlertInstanceContext,
+  MetricThresholdAllowedActionGroups
+>;
+
+type MetricThresholdAlertInstanceFactory = (
+  id: string,
+  threshold?: number | undefined,
+  value?: number | undefined
+) => MetricThresholdAlertInstance;
+
+export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
+  libs.metricsRules.createLifecycleRuleExecutor<
+    MetricThresholdAlertTypeParams,
+    MetricThresholdAlertTypeState,
+    MetricThresholdAlertInstanceState,
+    MetricThresholdAlertInstanceContext,
+    MetricThresholdAllowedActionGroups
+  >(async function (options) {
     const { services, params } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+    const { alertWithLifecycle, savedObjectsClient } = services;
+    const alertInstanceFactory: MetricThresholdAlertInstanceFactory = (id) =>
+      alertWithLifecycle({
+        id,
+        fields: {},
+      });
 
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;
@@ -39,7 +72,7 @@ export const createMetricThresholdExecutor = (
     };
 
     const source = await libs.sources.getSourceConfiguration(
-      services.savedObjectsClient,
+      savedObjectsClient,
       sourceId || 'default'
     );
     const config = source.configuration;
@@ -114,8 +147,7 @@ export const createMetricThresholdExecutor = (
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alertInstance = services.alertInstanceFactory(`${group}`);
-
+        const alertInstance = alertInstanceFactory(`${group}`);
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -133,7 +165,7 @@ export const createMetricThresholdExecutor = (
         });
       }
     }
-  };
+  });
 
 export const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
