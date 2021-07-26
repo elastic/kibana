@@ -13,5 +13,5 @@ export interface BodyRowsProps<Item> {
 }
 
 export const BodyRows = <Item extends object>({ items, renderItem }: BodyRowsProps<Item>) => (
-  <>items.map(renderItem)</>
+  <>{items.map(renderItem)}</>
 );
