@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const { common } = getPageObjects(['common']);
 
   describe('Enterprise Search', () => {
@@ -23,6 +25,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('loads a landing page with product cards', async function () {
+        await retry.waitFor(
+          'AS product card visible',
+          async () => await testSubjects.exists('appSearchProductCard')
+        );
+        await retry.waitFor(
+          'WS product card visible',
+          async () => await testSubjects.exists('workplaceSearchProductCard')
+        );
         await a11y.testAppSnapshot();
       });
     });
