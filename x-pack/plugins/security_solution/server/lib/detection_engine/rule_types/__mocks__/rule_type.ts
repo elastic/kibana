@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import { v4 } from 'uuid';
 
 import { Logger } from 'kibana/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { RuleDataClient } from '../../../../../../rule_registry/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
@@ -37,6 +37,7 @@ export const createRuleTypeMocks = () => {
   const scheduleActions = jest.fn();
 
   const services = {
+    savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     findAlerts: jest.fn(), // TODO: does this stay?
