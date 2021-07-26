@@ -60,6 +60,10 @@ export interface DataProvider {
    * Returns a DataProviderType
    */
   type?: DataProviderType.default | DataProviderType.template;
+  /**
+   * Array of multiple values for a field
+   */
+  valueArray?: string[] | null;
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;
