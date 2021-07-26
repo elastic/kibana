@@ -147,7 +147,14 @@ export function DiscoverLayout({
     savedSearchRefetch$.next('reset');
   }, [savedSearchRefetch$]);
 
-  const contentCentered = resultState === 'uninitialized';
+  const onDisableFilters = useCallback(() => {
+    const disabledFilters = filterManager
+      .getFilters()
+      .map((filter) => ({ ...filter, meta: { ...filter.meta, disabled: true } }));
+    filterManager.setFilters(disabledFilters);
+  }, [filterManager]);
+
+  const contentCentered = resultState === 'uninitialized' || resultState === 'none';
 
   return (
     <I18nProvider>
@@ -215,14 +222,19 @@ export function DiscoverLayout({
                 hasShadow={false}
                 className={classNames('dscPageContent', {
                   'dscPageContent--centered': contentCentered,
+                  'dscPageContent--emptyPrompt': resultState === 'none',
                 })}
               >
                 {resultState === 'none' && (
                   <DiscoverNoResults
                     timeFieldName={timeField}
-                    queryLanguage={state.query?.language ?? ''}
                     data={data}
                     error={dataState.error}
+                    hasQuery={!!state.query?.query}
+                    hasFilters={
+                      state.filters && state.filters.filter((f) => !f.meta.disabled).length > 0
+                    }
+                    onDisableFilters={onDisableFilters}
                   />
                 )}
                 {resultState === 'uninitialized' && (

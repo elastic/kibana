@@ -7,10 +7,18 @@
 
 import { KibanaFeature } from '../../../../features/server';
 import { featuresPluginMock } from '../../../../features/server/mocks';
+import { licenseMock } from '../../../common/licensing/index.mock';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
 const actions = new Actions('1.0.0-zeta1');
+
+const mockLicenseServiceBasic = licenseMock.create({ allowSubFeaturePrivileges: false }, 'basic');
+const mockLicenseServiceGold = licenseMock.create({ allowSubFeaturePrivileges: true }, 'gold');
+const mockLicenseServicePlatinum = licenseMock.create(
+  { allowSubFeaturePrivileges: true },
+  'platinum'
+);
 
 describe('features', () => {
   test('actions defined at the feature do not cascade to the privileges', () => {
@@ -43,14 +51,10 @@ describe('features', () => {
       }),
     ];
 
-    const mockFeaturesService = featuresPluginMock.createSetup();
-    mockFeaturesService.getKibanaFeatures.mockReturnValue(features);
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
 
-    const mockLicenseService = {
-      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-      getType: jest.fn().mockReturnValue('basic'),
-    };
-    const privileges = privilegesFactory(actions, mockFeaturesService, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
@@ -87,11 +91,7 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const mockLicenseService = {
-      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-      getType: jest.fn().mockReturnValue('basic'),
-    };
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     const expectedAllPrivileges = [
       actions.login,
@@ -191,11 +191,7 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const mockLicenseService = {
-      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-      getType: jest.fn().mockReturnValue('basic'),
-    };
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('features.foo');
@@ -268,15 +264,7 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const mockLicenseService = {
-          getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-          getType: jest.fn().mockReturnValue('basic'),
-        };
-        const privileges = privilegesFactory(
-          actions,
-          mockFeaturesPlugin as any,
-          mockLicenseService
-        );
+        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -412,15 +400,7 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const mockLicenseService = {
-          getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-          getType: jest.fn().mockReturnValue('basic'),
-        };
-        const privileges = privilegesFactory(
-          actions,
-          mockFeaturesPlugin as any,
-          mockLicenseService
-        );
+        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.read`, [
@@ -500,15 +480,7 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const mockLicenseService = {
-          getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-          getType: jest.fn().mockReturnValue('basic'),
-        };
-        const privileges = privilegesFactory(
-          actions,
-          mockFeaturesPlugin as any,
-          mockLicenseService
-        );
+        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -574,15 +546,7 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const mockLicenseService = {
-          getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-          getType: jest.fn().mockReturnValue('basic'),
-        };
-        const privileges = privilegesFactory(
-          actions,
-          mockFeaturesPlugin as any,
-          mockLicenseService
-        );
+        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -649,15 +613,7 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const mockLicenseService = {
-          getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-          getType: jest.fn().mockReturnValue('basic'),
-        };
-        const privileges = privilegesFactory(
-          actions,
-          mockFeaturesPlugin as any,
-          mockLicenseService
-        );
+        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -718,11 +674,7 @@ describe('reserved', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const mockLicenseService = {
-      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-      getType: jest.fn().mockReturnValue('basic'),
-    };
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [actions.version]);
@@ -756,11 +708,7 @@ describe('reserved', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const mockLicenseService = {
-      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-      getType: jest.fn().mockReturnValue('basic'),
-    };
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [
@@ -830,11 +778,7 @@ describe('reserved', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const mockLicenseService = {
-      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-      getType: jest.fn().mockReturnValue('basic'),
-    };
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('reserved.foo');
@@ -893,11 +837,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-        getType: jest.fn().mockReturnValue('basic'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1027,11 +967,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-        getType: jest.fn().mockReturnValue('basic'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1264,11 +1200,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-        getType: jest.fn().mockReturnValue('basic'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1424,11 +1356,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-        getType: jest.fn().mockReturnValue('basic'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1610,11 +1538,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-        getType: jest.fn().mockReturnValue('basic'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1753,11 +1677,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: false }),
-        getType: jest.fn().mockReturnValue('basic'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
       const actual = privileges.get();
       expect(actual.features).not.toHaveProperty(`foo.subFeaturePriv1`);
@@ -1979,11 +1899,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-        getType: jest.fn().mockReturnValue('gold'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);
@@ -2214,11 +2130,7 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const mockLicenseService = {
-        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
-        getType: jest.fn().mockReturnValue('platinum'),
-      };
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServicePlatinum);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);

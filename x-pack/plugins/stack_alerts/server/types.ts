@@ -11,6 +11,7 @@ import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 export {
   PluginSetupContract as AlertingSetup,
   AlertType,
+  RuleParamsAndRefs,
   AlertExecutorOptions,
 } from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';

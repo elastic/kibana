@@ -172,22 +172,29 @@ export const useSavedSearch = ({
 
       if (refs.current.abortController) refs.current.abortController.abort();
       refs.current.abortController = new AbortController();
-      fetchAll(dataSubjects, searchSource, val === 'reset', {
-        abortController: refs.current.abortController,
-        appStateContainer: stateContainer.appStateContainer,
-        inspectorAdapters,
-        data,
-        initialFetchStatus,
-        searchSessionId: searchSessionManager.getNextSearchSessionId(),
-        services,
-        useNewFieldsApi,
-      }).subscribe({
-        complete: () => {
-          // if this function was set and is executed, another refresh fetch can be triggered
-          autoRefreshDoneCb?.();
-          autoRefreshDoneCb = undefined;
-        },
-      });
+      try {
+        fetchAll(dataSubjects, searchSource, val === 'reset', {
+          abortController: refs.current.abortController,
+          appStateContainer: stateContainer.appStateContainer,
+          inspectorAdapters,
+          data,
+          initialFetchStatus,
+          searchSessionId: searchSessionManager.getNextSearchSessionId(),
+          services,
+          useNewFieldsApi,
+        }).subscribe({
+          complete: () => {
+            // if this function was set and is executed, another refresh fetch can be triggered
+            autoRefreshDoneCb?.();
+            autoRefreshDoneCb = undefined;
+          },
+        });
+      } catch (error) {
+        main$.next({
+          fetchStatus: FetchStatus.ERROR,
+          error,
+        });
+      }
     });
 
     return () => subscription.unsubscribe();

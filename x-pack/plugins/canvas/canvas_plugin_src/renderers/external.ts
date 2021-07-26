@@ -5,7 +5,17 @@
  * 2.0.
  */
 
+import { errorRenderer, debugRenderer } from '../../../../../src/plugins/expression_error/public';
+import { repeatImageRenderer } from '../../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
+import { shapeRenderer } from '../../../../../src/plugins/expression_shape/public';
 
-export const renderFunctions = [revealImageRenderer];
+export const renderFunctions = [
+  revealImageRenderer,
+  debugRenderer,
+  errorRenderer,
+  shapeRenderer,
+  repeatImageRenderer,
+];
+
 export const renderFunctionFactories = [];

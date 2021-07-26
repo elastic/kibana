@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiPopover,
-  EuiButtonEmpty,
+  EuiHeaderLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -32,6 +32,13 @@ export const MetricsAlertDropdown = () => {
 
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
 
+  const closePopover = useCallback(() => {
+    setPopoverOpen(false);
+  }, [setPopoverOpen]);
+
+  const togglePopover = useCallback(() => {
+    setPopoverOpen(!popoverOpen);
+  }, [setPopoverOpen, popoverOpen]);
   const infrastructureAlertsPanel = useMemo(
     () => ({
       id: 1,
@@ -40,14 +47,18 @@ export const MetricsAlertDropdown = () => {
       }),
       items: [
         {
+          'data-test-subj': 'inventory-alerts-create-rule',
           name: i18n.translate('xpack.infra.alerting.createInventoryRuleButton', {
             defaultMessage: 'Create inventory rule',
           }),
-          onClick: () => setVisibleFlyoutType('inventory'),
+          onClick: () => {
+            closePopover();
+            setVisibleFlyoutType('inventory');
+          },
         },
       ],
     }),
-    [setVisibleFlyoutType]
+    [setVisibleFlyoutType, closePopover]
   );
 
   const metricsAlertsPanel = useMemo(
@@ -58,14 +69,18 @@ export const MetricsAlertDropdown = () => {
       }),
       items: [
         {
+          'data-test-subj': 'metrics-threshold-alerts-create-rule',
           name: i18n.translate('xpack.infra.alerting.createThresholdRuleButton', {
             defaultMessage: 'Create threshold rule',
           }),
-          onClick: () => setVisibleFlyoutType('threshold'),
+          onClick: () => {
+            closePopover();
+            setVisibleFlyoutType('threshold');
+          },
         },
       ],
     }),
-    [setVisibleFlyoutType]
+    [setVisibleFlyoutType, closePopover]
   );
 
   const manageAlertsLinkProps = useLinkProps({
@@ -89,12 +104,14 @@ export const MetricsAlertDropdown = () => {
       canCreateAlerts
         ? [
             {
+              'data-test-subj': 'inventory-alerts-menu-option',
               name: i18n.translate('xpack.infra.alerting.infrastructureDropdownMenu', {
                 defaultMessage: 'Infrastructure',
               }),
               panel: 1,
             },
             {
+              'data-test-subj': 'metrics-threshold-alerts-menu-option',
               name: i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
                 defaultMessage: 'Metrics',
               }),
@@ -120,37 +137,29 @@ export const MetricsAlertDropdown = () => {
     [infrastructureAlertsPanel, metricsAlertsPanel, firstPanelMenuItems, canCreateAlerts]
   );
 
-  const closePopover = useCallback(() => {
-    setPopoverOpen(false);
-  }, [setPopoverOpen]);
-
-  const openPopover = useCallback(() => {
-    setPopoverOpen(true);
-  }, [setPopoverOpen]);
-
   return (
     <>
       <EuiPopover
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={
-          <EuiButtonEmpty
-            size="xs"
+          <EuiHeaderLink
             color="text"
             iconSide={'right'}
             iconType={'arrowDown'}
-            onClick={openPopover}
+            onClick={togglePopover}
+            data-test-subj="infrastructure-alerts-and-rules"
           >
             <FormattedMessage
               id="xpack.infra.alerting.alertsButton"
               defaultMessage="Alerts and rules"
             />
-          </EuiButtonEmpty>
+          </EuiHeaderLink>
         }
         isOpen={popoverOpen}
         closePopover={closePopover}
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="metrics-alert-menu" />
       </EuiPopover>
       <AlertFlyout visibleFlyoutType={visibleFlyoutType} onClose={closeFlyout} />
     </>

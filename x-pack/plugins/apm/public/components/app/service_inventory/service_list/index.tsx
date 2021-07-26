@@ -84,7 +84,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
         defaultMessage: 'Health',
       }),
-      width: unit * 6,
+      width: `${unit * 6}px`,
       sortable: true,
       render: (_, { healthStatus }) => {
         return (
@@ -117,6 +117,7 @@ export function getServiceColumns({
               )}
               <EuiFlexItem className="apmServiceList__serviceNameContainer">
                 <AppLink
+                  data-test-subj="apmServiceListAppLink"
                   serviceName={serviceName}
                   transactionType={transactionType}
                   className="eui-textTruncate"
@@ -134,7 +135,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
         defaultMessage: 'Environment',
       }),
-      width: unit * 10,
+      width: `${unit * 10}px`,
       sortable: true,
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
@@ -148,7 +149,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
             ),
-            width: unit * 10,
+            width: `${unit * 10}px`,
             sortable: true,
           },
         ]
@@ -168,7 +169,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: unit * 10,
+      width: `${unit * 10}px`,
     },
     {
       field: 'transactionsPerMinute',
@@ -185,7 +186,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: unit * 10,
+      width: `${unit * 10}px`,
     },
     {
       field: 'transactionErrorRate',
@@ -208,7 +209,7 @@ export function getServiceColumns({
         );
       },
       align: 'left',
-      width: unit * 10,
+      width: `${unit * 10}px`,
     },
   ];
 }

@@ -1,5 +1,6 @@
 {
   "paths": {
+    "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "console": "src/plugins/console",
     "core": "src/core",
     "discover": "src/plugins/discover",
@@ -16,7 +17,10 @@
     "esUi": "src/plugins/es_ui_shared",
     "devTools": "src/plugins/dev_tools",
     "expressions": "src/plugins/expressions",
+    "expressionError": "src/plugins/expression_error",
+    "expressionRepeatImage": "src/plugins/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
+    "expressionShape": "src/plugins/expression_shape",
     "inputControl": "src/plugins/input_control_vis",
     "inspector": "src/plugins/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
@@ -27,6 +31,7 @@
     "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "maps_legacy": "src/plugins/maps_legacy",
     "monaco": "packages/kbn-monaco/src",
+    "esQuery": "packages/kbn-es-query/src",
     "presentationUtil": "src/plugins/presentation_util",
     "indexPatternFieldEditor": "src/plugins/index_pattern_field_editor",
     "indexPatternManagement": "src/plugins/index_pattern_management",
