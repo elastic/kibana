@@ -724,6 +724,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         },
       }),
       options: ['terms_enum', 'terms_agg'],
+      category: ['autocomplete'],
       schema: schema.string(),
     },
     [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
@@ -744,6 +745,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             '</a>',
         },
       }),
+      category: ['autocomplete'],
       schema: schema.boolean(),
     },
     [UI_SETTINGS.SEARCH_TIMEOUT]: {
