@@ -173,9 +173,7 @@ const ThreatDetailsViewComponent: React.FC<{
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.securitySolution.alertDetails.threatDetails.threatMatchSubtitle"
-              defaultMessage={
-                'We have found {totalCount, plural, one {# field value} other {# field values}} matched a threat intelligence indicator with a rule you created.'
-              }
+              defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} matched a threat intelligence indicator with a rule you created."
               values={{
                 totalCount: indicatorMatches.length,
               }}
@@ -197,9 +195,7 @@ const ThreatDetailsViewComponent: React.FC<{
             <EuiText size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle"
-                defaultMessage={
-                  'We have found {totalCount, plural, one {# field value} other {# field values}} has additional information available from threat intelligence sources we searched in the past 30 days by default.'
-                }
+                defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} has additional information available from threat intelligence sources we searched in the past 30 days by default."
                 values={{
                   totalCount: threatIntelEnrichments.length,
                 }}
