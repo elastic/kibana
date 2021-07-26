@@ -2,37 +2,32 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md)
 
-## SearchSourceFields interface
+## SearchSourceFields type
 
 search source fields
 
 <b>Signature:</b>
 
 ```typescript
-export interface SearchSourceFields 
+export declare type SearchSourceFields = {
+    type?: string;
+    query?: Query;
+    filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+    sort?: EsQuerySortValue | EsQuerySortValue[];
+    highlight?: any;
+    highlightAll?: boolean;
+    trackTotalHits?: boolean | number;
+    aggs?: object | IAggConfigs | (() => object);
+    from?: number;
+    size?: number;
+    source?: NameList;
+    version?: boolean;
+    fields?: SearchFieldValue[];
+    fieldsFromSource?: NameList;
+    index?: IndexPattern;
+    searchAfter?: EsQuerySearchAfter;
+    timeout?: string;
+    terminate_after?: number;
+    parent?: SearchSourceFields;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [aggs](./kibana-plugin-plugins-data-public.searchsourcefields.aggs.md) | <code>object &#124; IAggConfigs &#124; (() =&gt; object)</code> | [AggConfigs](./kibana-plugin-plugins-data-public.aggconfigs.md) |
-|  [fields](./kibana-plugin-plugins-data-public.searchsourcefields.fields.md) | <code>SearchFieldValue[]</code> | Retrieve fields via the search Fields API |
-|  [fieldsFromSource](./kibana-plugin-plugins-data-public.searchsourcefields.fieldsfromsource.md) | <code>NameList</code> | Retreive fields directly from \_source (legacy behavior) |
-|  [filter](./kibana-plugin-plugins-data-public.searchsourcefields.filter.md) | <code>Filter[] &#124; Filter &#124; (() =&gt; Filter[] &#124; Filter &#124; undefined)</code> | [Filter](./kibana-plugin-plugins-data-public.filter.md) |
-|  [from](./kibana-plugin-plugins-data-public.searchsourcefields.from.md) | <code>number</code> |  |
-|  [highlight](./kibana-plugin-plugins-data-public.searchsourcefields.highlight.md) | <code>any</code> |  |
-|  [highlightAll](./kibana-plugin-plugins-data-public.searchsourcefields.highlightall.md) | <code>boolean</code> |  |
-|  [index](./kibana-plugin-plugins-data-public.searchsourcefields.index.md) | <code>IndexPattern</code> |  |
-|  [parent](./kibana-plugin-plugins-data-public.searchsourcefields.parent.md) | <code>SearchSourceFields</code> |  |
-|  [query](./kibana-plugin-plugins-data-public.searchsourcefields.query.md) | <code>Query</code> |  |
-|  [searchAfter](./kibana-plugin-plugins-data-public.searchsourcefields.searchafter.md) | <code>EsQuerySearchAfter</code> |  |
-|  [size](./kibana-plugin-plugins-data-public.searchsourcefields.size.md) | <code>number</code> |  |
-|  [sort](./kibana-plugin-plugins-data-public.searchsourcefields.sort.md) | <code>EsQuerySortValue &#124; EsQuerySortValue[]</code> | [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |
-|  [source](./kibana-plugin-plugins-data-public.searchsourcefields.source.md) | <code>NameList</code> |  |
-|  [terminate\_after](./kibana-plugin-plugins-data-public.searchsourcefields.terminate_after.md) | <code>number</code> |  |
-|  [timeout](./kibana-plugin-plugins-data-public.searchsourcefields.timeout.md) | <code>string</code> |  |
-|  [trackTotalHits](./kibana-plugin-plugins-data-public.searchsourcefields.tracktotalhits.md) | <code>boolean &#124; number</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.searchsourcefields.type.md) | <code>string</code> |  |
-|  [version](./kibana-plugin-plugins-data-public.searchsourcefields.version.md) | <code>boolean</code> |  |
-

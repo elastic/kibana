@@ -6,13 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
+import {
+  createSearchSource,
+  extractReferences,
+  injectReferences,
+  SearchSource,
+  SearchSourceDependencies,
+  SearchSourceFields,
+} from './';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { PersistableStateService } from '../../../../kibana_utils/common';
+import { SavedObjectReference } from '../../../../../core/types';
+
+interface SearchSourceServiceStart extends PersistableStateService {
+  createEmpty: () => SearchSource;
+  create: (fields?: SearchSourceFields) => Promise<SearchSource>;
+}
 
 export class SearchSourceService {
   public setup() {}
 
-  public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
+  public start(
+    indexPatterns: IndexPatternsContract,
+    dependencies: SearchSourceDependencies
+  ): SearchSourceServiceStart {
     return {
       /**
        * creates searchsource based on serialized search source fields
@@ -23,6 +40,22 @@ export class SearchSourceService {
        */
       createEmpty: () => {
         return new SearchSource({}, dependencies);
+      },
+      // @ts-ignore
+      extract: (state: SearchSourceFields) => {
+        const results = extractReferences(state);
+        return { state: results[0] as SearchSourceFields, references: results[1] };
+      },
+      // @ts-ignore
+      inject: (state: SearchSourceFields, references: SavedObjectReference[]) => {
+        // @ts-ignore
+        return injectReferences(state, references);
+      },
+      getAllMigrations: () => {
+        return {};
+      },
+      migrateToLatest: ({ state }) => {
+        return state;
       },
     };
   }

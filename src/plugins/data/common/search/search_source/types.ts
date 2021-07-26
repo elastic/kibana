@@ -67,7 +67,8 @@ export type SearchFieldValue = string | SearchField;
 /**
  * search source fields
  */
-export interface SearchSourceFields {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SearchSourceFields = {
   type?: string;
   /**
    * {@link Query}
@@ -111,7 +112,7 @@ export interface SearchSourceFields {
   terminate_after?: number;
 
   parent?: SearchSourceFields;
-}
+};
 
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;

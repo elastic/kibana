@@ -2472,52 +2472,27 @@ export class SearchSource {
 // Warning: (ae-missing-release-tag) "SearchSourceFields" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface SearchSourceFields {
-    // (undocumented)
-    aggs?: object | IAggConfigs_2 | (() => object);
-    // Warning: (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
-    fields?: SearchFieldValue[];
-    // @deprecated
-    fieldsFromSource?: NameList;
-    // (undocumented)
-    filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
-    // (undocumented)
-    from?: number;
-    // (undocumented)
-    highlight?: any;
-    // (undocumented)
-    highlightAll?: boolean;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IndexPatternService"
-    //
-    // (undocumented)
-    index?: IndexPattern;
-    // (undocumented)
-    parent?: SearchSourceFields;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    //
-    // (undocumented)
-    query?: Query;
-    // Warning: (ae-forgotten-export) The symbol "EsQuerySearchAfter" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    searchAfter?: EsQuerySearchAfter;
-    // (undocumented)
-    size?: number;
-    // (undocumented)
-    sort?: EsQuerySortValue | EsQuerySortValue[];
-    // (undocumented)
-    source?: NameList;
-    // (undocumented)
-    terminate_after?: number;
-    // (undocumented)
-    timeout?: string;
-    // (undocumented)
-    trackTotalHits?: boolean | number;
-    // (undocumented)
+export type SearchSourceFields = {
     type?: string;
-    // (undocumented)
+    query?: Query;
+    filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+    sort?: EsQuerySortValue | EsQuerySortValue[];
+    highlight?: any;
+    highlightAll?: boolean;
+    trackTotalHits?: boolean | number;
+    aggs?: object | IAggConfigs_2 | (() => object);
+    from?: number;
+    size?: number;
+    source?: NameList;
     version?: boolean;
-}
+    fields?: SearchFieldValue[];
+    fieldsFromSource?: NameList;
+    index?: IndexPattern;
+    searchAfter?: EsQuerySearchAfter;
+    timeout?: string;
+    terminate_after?: number;
+    parent?: SearchSourceFields;
+};
 
 // Warning: (ae-forgotten-export) The symbol "KbnError" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "SearchTimeoutError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2688,6 +2663,10 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:129:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/search/search_source/types.ts:75:3 - (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+// src/plugins/data/common/search/search_source/types.ts:98:3 - (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/search/search_source/types.ts:108:3 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IndexPatternService"
+// src/plugins/data/common/search/search_source/types.ts:109:3 - (ae-forgotten-export) The symbol "EsQuerySearchAfter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:56:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:67:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:67:23 - (ae-forgotten-export) The symbol "generateFilters" needs to be exported by the entry point index.d.ts
