@@ -86,7 +86,7 @@ Array [
           size="m"
           title="The reporting job failed"
         >
-          An error has occurred
+          this is the failed report error
         </EuiCallOut>
         <EuiSpacer />
         <p>

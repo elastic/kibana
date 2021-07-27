@@ -61,11 +61,6 @@ export class ReportingAPIClient implements IReportingAPI {
 
   constructor(http: HttpSetup) {
     this.http = http;
-
-    // bind methods that are called via event handlers
-    this.verifyConfig = this.verifyConfig.bind(this);
-    this.verifyBrowser = this.verifyBrowser.bind(this);
-    this.verifyScreenCapture = this.verifyScreenCapture.bind(this);
   }
 
   public getReportURL(jobId: string) {

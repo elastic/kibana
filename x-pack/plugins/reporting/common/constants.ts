@@ -7,15 +7,6 @@
 
 export const PLUGIN_ID = 'reporting';
 
-// Statuses
-export enum JOB_STATUSES {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  WARNINGS = 'completed_with_warnings',
-}
-
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
@@ -106,6 +97,15 @@ export const ILM_POLICY_NAME = 'kibana-reporting';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+
+// Statuses
+export enum JOB_STATUSES {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  WARNINGS = 'completed_with_warnings',
+}
 
 // Test Subjects
 export const REPORT_TABLE_ID = 'reportJobListing';

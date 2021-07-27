@@ -30,7 +30,7 @@ const jobQueueClientMock = new ReportingAPIClient(coreMock.createSetup().http);
 jobQueueClientMock.findForJobIds = async () => mockJobsFound;
 jobQueueClientMock.getInfo = () =>
   Promise.resolve(({ content: 'this is the completed report data' } as unknown) as Job);
-jobQueueClientMock.getError = () => Promise.resolve('An error has occurred');
+jobQueueClientMock.getError = () => Promise.resolve('this is the failed report error');
 jobQueueClientMock.getManagementLink = () => '/#management';
 jobQueueClientMock.getDownloadLink = () => '/reporting/download/job-123';
 
