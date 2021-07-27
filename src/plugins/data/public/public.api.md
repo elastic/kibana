@@ -980,6 +980,7 @@ export abstract class FieldFormat {
     // Warning: (ae-forgotten-export) The symbol "FieldFormatConvertFunction" needs to be exported by the entry point index.d.ts
     getConverterFor(contentType?: FieldFormatsContentType): FieldFormatConvertFunction;
     getParamDefaults(): Record<string, any>;
+    static hidden: boolean;
     // Warning: (ae-forgotten-export) The symbol "HtmlContextTypeConvert" needs to be exported by the entry point index.d.ts
     htmlConvert: HtmlContextTypeConvert | undefined;
     static id: string;
@@ -1023,6 +1024,7 @@ export type FieldFormatId = FIELD_FORMAT_IDS | string;
 export type FieldFormatInstanceType = (new (params?: any, getConfig?: FieldFormatsGetConfigFn) => FieldFormat) & {
     id: FieldFormatId;
     title: string;
+    hidden?: boolean;
     fieldType: string | string[];
 };
 
@@ -2688,7 +2690,7 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:129:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/field_formats/field_formats_service.ts:56:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/field_formats/field_formats_service.ts:51:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:67:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:67:23 - (ae-forgotten-export) The symbol "generateFilters" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:67:23 - (ae-forgotten-export) The symbol "changeTimeFilter" needs to be exported by the entry point index.d.ts

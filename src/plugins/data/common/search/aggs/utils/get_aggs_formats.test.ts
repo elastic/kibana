@@ -10,10 +10,20 @@ import { identity } from 'lodash';
 
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 import { FieldFormat, IFieldFormat } from '../../../../common';
+import { getAggsFormats } from './get_aggs_formats';
 
-// import { getFormatWithAggs } from './get_format_with_aggs';
+const getAggFormat = (
+  mapping: SerializedFieldFormat,
+  getFormat: (mapping: SerializedFieldFormat) => IFieldFormat
+) => {
+  const aggsFormats = getAggsFormats(getFormat);
+  const AggFormat = aggsFormats.find((format) => format.id === mapping.id);
+  if (!AggFormat) throw new Error(`No agg format with id: ${mapping.id}`);
 
-describe.skip('getFormatWithAggs', () => {
+  return new AggFormat(mapping.params);
+};
+
+describe('getAggsFormats', () => {
   let getFormat: jest.MockedFunction<(mapping: SerializedFieldFormat) => IFieldFormat>;
 
   beforeEach(() => {
@@ -23,19 +33,9 @@ describe.skip('getFormatWithAggs', () => {
     });
   });
 
-  test('calls provided getFormat if no matching aggs exist', () => {
-    const mapping = { id: 'foo', params: {} };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    getFieldFormat(mapping);
-
-    expect(getFormat).toHaveBeenCalledTimes(1);
-    expect(getFormat).toHaveBeenCalledWith(mapping);
-  });
-
   test('creates custom format for date_range', () => {
     const mapping = { id: 'date_range', params: {} };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ from: '2020-05-01', to: '2020-06-01' })).toBe(
       '2020-05-01 to 2020-06-01'
@@ -47,8 +47,7 @@ describe.skip('getFormatWithAggs', () => {
 
   test('creates custom format for ip_range', () => {
     const mapping = { id: 'ip_range', params: {} };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ type: 'range', from: '10.0.0.1', to: '10.0.0.10' })).toBe(
       '10.0.0.1 to 10.0.0.10'
@@ -61,8 +60,7 @@ describe.skip('getFormatWithAggs', () => {
 
   test('creates custom format for range', () => {
     const mapping = { id: 'range', params: {} };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20 })).toBe('≥ 1 and < 20');
     expect(getFormat).toHaveBeenCalledTimes(1);
@@ -70,8 +68,7 @@ describe.skip('getFormatWithAggs', () => {
 
   test('creates alternative format for range using the template parameter', () => {
     const mapping = { id: 'range', params: { template: 'arrow_right' } };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20 })).toBe('1 → 20');
     expect(getFormat).toHaveBeenCalledTimes(1);
@@ -79,8 +76,7 @@ describe.skip('getFormatWithAggs', () => {
 
   test('handles Infinity values internally when no nestedFormatter is passed', () => {
     const mapping = { id: 'range', params: { replaceInfinity: true } };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: -Infinity, lt: Infinity })).toBe('≥ −∞ and < +∞');
     expect(getFormat).toHaveBeenCalledTimes(1);
@@ -88,8 +84,7 @@ describe.skip('getFormatWithAggs', () => {
 
   test('lets Infinity values handling to nestedFormatter even when flag is on', () => {
     const mapping = { id: 'range', params: { replaceInfinity: true, id: 'any' } };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: -Infinity, lt: Infinity })).toBe('≥ -Infinity and < Infinity');
     expect(getFormat).toHaveBeenCalledTimes(1);
@@ -97,8 +92,8 @@ describe.skip('getFormatWithAggs', () => {
 
   test('returns custom label for range if provided', () => {
     const mapping = { id: 'range', params: {} };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20, label: 'custom' })).toBe('custom');
     // underlying formatter is not called because custom label can be used directly
@@ -113,8 +108,8 @@ describe.skip('getFormatWithAggs', () => {
         missingBucketLabel: 'missing bucket',
       },
     };
-    const getFieldFormat = getFormatWithAggs(getFormat);
-    const format = getFieldFormat(mapping);
+
+    const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert('machine.os.keyword')).toBe('machine.os.keyword');
     expect(format.convert('__other__')).toBe(mapping.params.otherBucketLabel);
