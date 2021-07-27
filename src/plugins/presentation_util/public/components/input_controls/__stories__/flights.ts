@@ -16,11 +16,16 @@ export type FlightField = keyof Flight;
 
 export const getOptions = (field: string) => uniq(map(flights, field)).sort();
 
-export const getEuiSelectableOptions = (field: string): EuiSelectableOption[] =>
-  getOptions(field).map((option) => ({
-    label: option + '',
-    searchableLabel: option + '',
-  }));
+export const getEuiSelectableOptions = (field: string, search?: string): EuiSelectableOption[] => {
+  const options = getOptions(field)
+    .map((option) => ({
+      label: option + '',
+      searchableLabel: option + '',
+    }))
+    .filter((option) => !search || option.label.toLowerCase().includes(search.toLowerCase()));
+  if (options.length > 10) options.length = 10;
+  return options;
+};
 
 export const flightFieldLabels: Record<FlightField, string> = {
   AvgTicketPrice: 'Average Ticket Price',

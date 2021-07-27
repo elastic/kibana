@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import {
   EuiFieldSearch,
   EuiFilterSelectItem,
@@ -8,40 +8,38 @@ import {
   EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
-import { InputControlOutput } from '../../embeddable/types';
-import {
-  OptionsListDataFetcher,
-  OptionsListEmbeddable,
-  OptionsListEmbeddableInput,
-} from './options_list_embeddable';
-import { withEmbeddableSubscription } from '../../../../../../embeddable/public';
+
+import { Subject } from 'rxjs';
+import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverProps {
-  embeddable: OptionsListEmbeddable;
+  loading: boolean;
+  typeaheadSubject: Subject<string>;
+  searchString: string;
+  updateItem: (index: number) => void;
+  availableOptions: EuiSelectableOption[];
 }
 
-const OptionsListPopoverInner = ({ embeddable }: OptionsListPopoverProps) => {
-  const { availableOptions } = embeddable.getInput();
-
-  const updateItem = useCallback((index: number) => {
-    if (!availableOptions?.[index]) {
-      return;
-    }
-    const newItems = [...availableOptions];
-    newItems[index].checked = newItems[index].checked === 'on' ? undefined : 'on';
-    embeddable.updateInput({ availableOptions: newItems });
-  }, []);
-
+export const OptionsListPopover = ({
+  loading,
+  updateItem,
+  searchString,
+  typeaheadSubject,
+  availableOptions,
+}: OptionsListPopoverProps) => {
   return (
     <>
       <EuiPopoverTitle paddingSize="s">
         <EuiFieldSearch
           compressed
-          onChange={(event) => embeddable.updateInput({ search: event.target.value })}
+          onChange={(event) => {
+            typeaheadSubject.next(event.target.value);
+          }}
+          value={searchString}
         />
       </EuiPopoverTitle>
       <div className="optionsList--items">
-        {!embeddable.getOutput().loading &&
+        {!loading &&
           availableOptions &&
           availableOptions.map((item, index) => (
             <EuiFilterSelectItem
@@ -52,22 +50,22 @@ const OptionsListPopoverInner = ({ embeddable }: OptionsListPopoverProps) => {
               {item.label}
             </EuiFilterSelectItem>
           ))}
-        {embeddable.getOutput().loading && (
+        {loading && (
           <div className="euiFilterSelect__note">
             <div className="euiFilterSelect__noteContent">
               <EuiLoadingChart size="m" />
               <EuiSpacer size="xs" />
-              <p>Loading filters</p>
+              <p>{OptionsListStrings.popover.getLoadingMessage()}</p>
             </div>
           </div>
         )}
 
-        {(!availableOptions || availableOptions.length === 0) && (
+        {!loading && (!availableOptions || availableOptions.length === 0) && (
           <div className="euiFilterSelect__note">
             <div className="euiFilterSelect__noteContent">
               <EuiIcon type="minusInCircle" />
               <EuiSpacer size="xs" />
-              <p>No filters found</p>
+              <p>{OptionsListStrings.popover.getEmptyMessage()}</p>
             </div>
           </div>
         )}
@@ -75,9 +73,3 @@ const OptionsListPopoverInner = ({ embeddable }: OptionsListPopoverProps) => {
     </>
   );
 };
-
-export const OptionsListPopover = withEmbeddableSubscription<
-  OptionsListEmbeddableInput,
-  InputControlOutput,
-  OptionsListEmbeddable
->(OptionsListPopoverInner);

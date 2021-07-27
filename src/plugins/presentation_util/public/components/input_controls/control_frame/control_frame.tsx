@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiPopover,
+} from '@elastic/eui';
 
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
@@ -21,43 +27,31 @@ interface ControlFrameProps {
 }
 
 export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   useMount(() => {
     if (embeddableRoot.current && embeddable) embeddable.render(embeddableRoot.current);
   });
 
-  const button = (
-    <EuiButtonEmpty
-      color="text"
-      className="optionsList--buttonOverride"
-      textProps={{
-        className: classNames('optionsList', {
-          'optionsList--twoLine': twoLine,
-        }),
-      }}
-      onClick={() => setIsPopoverOpen((open) => !open)}
-      contentProps={{ className: 'optionsList--buttonContentOverride' }}
+  const form = (
+    <EuiFormControlLayout
+      className="controlFrame--formControlLayout"
+      fullWidth={true}
+      prepend={
+        twoLine ? undefined : (
+          <EuiFormLabel htmlFor={embeddable.id}>{embeddable.getInput().title}</EuiFormLabel>
+        )
+      }
     >
-      <span className="optionsList--title">{embeddable.getInput().title}</span>
-      <span className="optionsList--control" ref={embeddableRoot} />
-    </EuiButtonEmpty>
+      <div className="controlFrame--control" id={embeddable.id} ref={embeddableRoot} />
+    </EuiFormControlLayout>
   );
 
-  return (
-    <EuiPopover
-      id="popoverExampleMultiSelect"
-      button={button}
-      isOpen={isPopoverOpen}
-      anchorClassName="optionsList--anchorOverride"
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="upLeft"
-      ownFocus
-      repositionOnScroll
-    >
-      {embeddable.getPopover()}
-    </EuiPopover>
+  return twoLine ? (
+    <EuiFormRow fullWidth label={embeddable.getInput().title}>
+      {form}
+    </EuiFormRow>
+  ) : (
+    form
   );
 };

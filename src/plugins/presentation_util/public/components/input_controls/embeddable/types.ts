@@ -13,12 +13,11 @@ export type InputControlInput = EmbeddableInput & {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  twoLineLayout?: boolean;
 };
 
 export type InputControlOutput = EmbeddableOutput & {
   filters?: Filter[];
 };
 
-export interface InputControlEmbeddable extends IEmbeddable {
-  getPopover: () => JSX.Element;
-}
+export type InputControlEmbeddable = IEmbeddable<InputControlInput, InputControlOutput>;

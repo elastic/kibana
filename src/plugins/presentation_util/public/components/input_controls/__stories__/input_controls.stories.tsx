@@ -50,7 +50,8 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
   const optionsListEmbeddableFactory = useMemo(
     () =>
       new OptionsListEmbeddableFactory(
-        ({ field }) => new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field)), 1000))
+        ({ field, search }) =>
+          new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field, search)), 500))
       ),
     []
   );
@@ -59,14 +60,15 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
     const embeddableCreatePromises = fields.map((field) => {
       return optionsListEmbeddableFactory.create({
         field,
-        title: startCase(field),
-        indexPattern: '',
         id: '',
+        indexPattern: '',
         multiSelect: true,
+        twoLineLayout: twoLine,
+        title: startCase(field),
       });
     });
     Promise.all(embeddableCreatePromises).then((newEmbeddables) => setEmbeddables(newEmbeddables));
-  }, [fields, optionsListEmbeddableFactory]);
+  }, [fields, optionsListEmbeddableFactory, twoLine]);
 
   return (
     <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
