@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import styled from 'styled-components';
+import { EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 
 const OverflowParent = styled.div`
@@ -16,6 +17,7 @@ const OverflowContainer = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: bold;
 `;
 
 export const EnrichmentButtonContent: React.FC<{
@@ -25,10 +27,10 @@ export const EnrichmentButtonContent: React.FC<{
 }> = ({ field = '', provider = '', value = '' }) => {
   const title = `${field} ${value}${provider ? ` ${i18n.PROVIDER_PREPOSITION} ${provider}` : ''}`;
   return (
-    <OverflowParent data-test-subj={'enrichment-button-content'}>
-      <OverflowContainer>
-        <strong>{title}</strong>
-      </OverflowContainer>
-    </OverflowParent>
+    <EuiToolTip content={value}>
+      <OverflowParent data-test-subj={'enrichment-button-content'}>
+        <OverflowContainer>{title}</OverflowContainer>
+      </OverflowParent>
+    </EuiToolTip>
   );
 };
