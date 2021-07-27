@@ -55,8 +55,7 @@ export const PUSH_LOCKED_DESC = i18n.translate('xpack.cases.caseView.lockedIncid
 export const CONFIGURE_CONNECTOR = i18n.translate(
   'xpack.cases.caseView.pushToService.configureConnector',
   {
-    defaultMessage:
-      'To open and update cases in external systems, you must select an external incident management system for this case.',
+    defaultMessage: 'To create and update a case in an external system, select a connector.',
   }
 );
 

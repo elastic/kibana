@@ -11,7 +11,7 @@ import React from 'react';
 
 import * as i18n from './translations';
 import { ActionLicense } from '../../containers/types';
-import { ErrorMessage } from './callout/types';
+import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './callout/types';
 
 export const getLicenseError = () => ({
   id: 'license-error',
@@ -64,3 +64,39 @@ export const getActionLicenseError = (actionLicense: ActionLicense | null): Erro
   }
   return errors;
 };
+
+export const getConnectorMissingInfo = () => ({
+  id: 'connector-missing-error',
+  title: '',
+  description: i18n.CONFIGURE_CONNECTOR,
+});
+
+export const getDeletedConnectorError = () => ({
+  id: 'connector-deleted-error',
+  title: '',
+  description: (
+    <FormattedMessage
+      defaultMessage="The connector used to send updates to the external service has been deleted or you do not have the {appropriateLicense} to use it. To update cases in external systems, select a different connector or create a new one."
+      id="xpack.cases.configureCases.warningMessage"
+      values={{
+        appropriateLicense: (
+          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+            {i18n.LINK_APPROPRIATE_LICENSE}
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
+  errorType: 'danger',
+});
+
+export const getCaseClosedInfo = () => ({
+  id: CLOSED_CASE_PUSH_ERROR_ID,
+  title: '',
+  description: (
+    <FormattedMessage
+      defaultMessage="Closed cases cannot be sent to external systems. Reopen the case if you want to open or update it in an external system."
+      id="xpack.cases.caseView.pushToServiceDisableBecauseCaseClosedDescription"
+    />
+  ),
+});
