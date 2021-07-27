@@ -26,6 +26,7 @@ describe('getJourneyScreenshot', () => {
     expect(
       await getJourneyScreenshot({
         uptimeEsClient: mockSearchResult([], {
+          // @ts-expect-error incomplete object in test
           step: { image: { hits: { hits: [screenshotResult] } } },
         }),
         checkGroup: 'checkGroup',
@@ -85,6 +86,7 @@ describe('getJourneyScreenshot', () => {
     expect(
       await getJourneyScreenshot({
         uptimeEsClient: mockSearchResult([], {
+          // @ts-expect-error incomplete object in test
           step: { image: { hits: { hits: [screenshotRefResult] } } },
         }),
         checkGroup: 'checkGroup',

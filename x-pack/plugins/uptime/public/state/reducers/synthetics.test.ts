@@ -84,8 +84,8 @@ describe('syntheticsReducer', () => {
     });
 
     it('removes lowest common hits', () => {
-      const f = syntheticsReducer(state, pruneCacheAction(10));
-      expect(f).toMatchInlineSnapshot(`
+      // @ts-expect-error redux-actions doesn't handle types well
+      expect(syntheticsReducer(state, pruneCacheAction(10))).toMatchInlineSnapshot(`
         Object {
           "blocks": Object {
             "123": Object {
@@ -121,12 +121,14 @@ describe('syntheticsReducer', () => {
     it('skips pending blocks', () => {
       state.blocks = { ...state.blocks, '000': { status: 'pending' } };
       state.hitCount.push({ hash: '000', hitTime: 1 });
+      // @ts-expect-error redux-actions doesn't handle types well
       const newState = syntheticsReducer(state, pruneCacheAction(10));
       expect(newState.blocks['000']).toEqual({ status: 'pending' });
     });
 
     it('ignores a hash from `hitCount` that does not exist', () => {
       state.hitCount.push({ hash: 'not exist', hitTime: 1 });
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, pruneCacheAction(2))).toMatchInlineSnapshot(`
         Object {
           "blocks": Object {
@@ -177,6 +179,7 @@ describe('syntheticsReducer', () => {
         '000': { id: '000', synthetics: { blob: '', blob_mime: MIME } },
       };
       state.hitCount.push({ hash: '000', hitTime: 1 });
+      // @ts-expect-error redux-actions doesn't handle types well
       const newState = syntheticsReducer(state, pruneCacheAction(10));
       expect(Object.keys(newState.blocks)).not.toContain('000');
     });
@@ -186,6 +189,7 @@ describe('syntheticsReducer', () => {
     it('sets targeted blocks as pending', () => {
       const state: SyntheticsReducerState = { blocks: {}, cacheSize: 0, hitCount: [] };
       const action = fetchBlocksAction(['123', '234']);
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, action)).toMatchInlineSnapshot(`
         Object {
           "blocks": Object {
@@ -209,6 +213,7 @@ describe('syntheticsReducer', () => {
         hitCount: [{ hash: '123', hitTime: 1 }],
       };
       const action = fetchBlocksAction(['123']);
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, action)).toMatchInlineSnapshot(`
         Object {
           "blocks": Object {
@@ -269,6 +274,7 @@ describe('syntheticsReducer', () => {
     });
 
     it('increments hit count for selected hashes', () => {
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, updateHitCountsAction(['123', '234'])).hitCount).toEqual([
         {
           hash: '123',
@@ -279,6 +285,7 @@ describe('syntheticsReducer', () => {
     });
 
     it('adds new hit count for missing item', () => {
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, updateHitCountsAction(['345'])).hitCount).toEqual([
         { hash: '345', hitTime: 10 },
         { hash: '123', hitTime: 1 },
@@ -298,6 +305,7 @@ describe('syntheticsReducer', () => {
     });
 
     it('updates the cache size', () => {
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, putCacheSize(100))).toEqual({
         blocks: {},
         cacheSize: 100,
@@ -320,6 +328,7 @@ describe('syntheticsReducer', () => {
     });
 
     it('sets pending blocks to in-flight', () => {
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, setBlockLoadingAction(['123']))).toEqual({
         blocks: { '123': { status: 'loading' } },
         cacheSize: 1,
@@ -355,6 +364,7 @@ describe('syntheticsReducer', () => {
           },
         ],
       });
+      // @ts-expect-error redux-actions doesn't handle types well
       const result = syntheticsReducer(state, action);
       expect(result).toMatchInlineSnapshot(`
         Object {
@@ -390,6 +400,7 @@ describe('syntheticsReducer', () => {
           },
         ],
       });
+      // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, action)).toMatchInlineSnapshot(`
         Object {
           "blocks": Object {

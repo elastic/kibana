@@ -60,7 +60,10 @@ const initialState: SyntheticsReducerState = {
 // using `any` here because `handleActions` is not set up well to handle the multi-type
 // nature of all the actions it supports. redux-actions is looking for new maintainers https://github.com/redux-utilities/redux-actions#looking-for-maintainers
 // and seems that we should move to something else like Redux Toolkit.
-export const syntheticsReducer = handleActions<SyntheticsReducerState, any>(
+export const syntheticsReducer = handleActions<
+  SyntheticsReducerState,
+  string[] & PutBlocksPayload & number
+>(
   {
     /**
      * When removing blocks from the cache, we receive an action with a number.
