@@ -90,7 +90,6 @@ which lets you convert each grouping into a percent of total:
 ```
 sum(products.base_price) / overall_sum(sum(products.base_price))
 ```
-+
 TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
 
 . To accurately display the formula, select *Percent* from the *Value format* dropdown.
