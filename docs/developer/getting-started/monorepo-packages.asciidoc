@@ -91,6 +91,7 @@ yarn kbn watch-bazel
 - @kbn/optimizer
 - @kbn/plugin-helpers
 - @kbn/rule-data-utils
+- @kbn/securitysolution-autocomplete
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
 - @kbn/securitysolution-io-ts-alerting-types
