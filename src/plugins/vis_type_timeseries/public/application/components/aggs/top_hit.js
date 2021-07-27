@@ -120,7 +120,10 @@ const TopHitAggUi = (props) => {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
   const fieldsSelector = getIndexPatternKey(indexPattern);
-  const field = fields[fieldsSelector].find((f) => f.name === model.field);
+  const field =
+    fields && fields[fieldsSelector] && fields[fieldsSelector].length
+      ? fields[fieldsSelector].find((f) => f.name === model.field)
+      : {};
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
