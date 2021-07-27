@@ -94,10 +94,18 @@ export const getCreateMigration = (
         ? normalizeNamespace(encryptedDoc.namespaces[0]) // `namespaces` contains string values, but we need to normalize this to the namespace ID representation
         : encryptedDoc.namespace;
 
+    // This approximates the behavior of getDescriptorNamespace(); the intent is that if there is ever a case where a multi-namespace object
+    // has the `namespace` field, it will not be encrypted with that field in its descriptor. It would be preferable to rely on
+    // getDescriptorNamespace() here, but that requires the SO type registry which can only be retrieved from a promise, and this is not an
+    // async function
+    const encryptDescriptorNamespace = context.isSingleNamespaceType
+      ? encryptedDoc.namespace
+      : undefined;
+
     const { id, type } = encryptedDoc;
     // These descriptors might have a `namespace` that is undefined. That is expected for multi-namespace and namespace-agnostic types.
     const decryptDescriptor = { id, type, namespace: decryptDescriptorNamespace };
-    const encryptDescriptor = { id, type, namespace: encryptedDoc.namespace }; // It would be preferable to rely on getDescriptorNamespace() here, but that requires the SO type registry which can only be retrieved from a promise, and this is not an async function
+    const encryptDescriptor = { id, type, namespace: encryptDescriptorNamespace };
 
     // decrypt the attributes using the input type definition
     // then migrate the document

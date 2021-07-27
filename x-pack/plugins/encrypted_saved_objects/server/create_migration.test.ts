@@ -16,7 +16,7 @@ afterEach(() => {
 });
 
 describe('createMigration()', () => {
-  const migrationContext = migrationMocks.createContext();
+  const migrationContext = migrationMocks.createContext({ isSingleNamespaceType: true });
   const inputType = { type: 'known-type-1', attributesToEncrypt: new Set(['firstAttr']) };
   const migrationType = {
     type: 'known-type-1',
@@ -210,6 +210,7 @@ describe('createMigration()', () => {
             migrationMocks.createContext({
               migrationVersion, // test works with any version <= 8.0.0
               convertToMultiNamespaceTypeVersion: '8.0.0',
+              isSingleNamespaceType: false,
             })
           );
           expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenNthCalledWith(
@@ -237,7 +238,7 @@ describe('createMigration()', () => {
             objectNamespace,
             objectNamespaces: undefined,
             decryptDescriptorNamespace: objectNamespace,
-            encryptDescriptorNamespace: objectNamespace,
+            encryptDescriptorNamespace: undefined,
           });
         });
 
@@ -248,7 +249,7 @@ describe('createMigration()', () => {
             objectNamespace,
             objectNamespaces: [],
             decryptDescriptorNamespace: objectNamespace,
-            encryptDescriptorNamespace: objectNamespace,
+            encryptDescriptorNamespace: undefined,
           });
         });
 
@@ -257,7 +258,7 @@ describe('createMigration()', () => {
             objectNamespace,
             objectNamespaces: ['default', 'additional-spaces-are-ignored'],
             decryptDescriptorNamespace: undefined,
-            encryptDescriptorNamespace: objectNamespace,
+            encryptDescriptorNamespace: undefined,
           });
         });
 
@@ -266,7 +267,7 @@ describe('createMigration()', () => {
             objectNamespace,
             objectNamespaces: ['custom', 'additional-spaces-are-ignored'],
             decryptDescriptorNamespace: 'custom',
-            encryptDescriptorNamespace: objectNamespace,
+            encryptDescriptorNamespace: undefined,
           });
         });
       });
