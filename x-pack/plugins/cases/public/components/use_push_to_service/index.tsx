@@ -104,11 +104,11 @@ export const usePushToService = ({
       return [getKibanaConfigError()];
     }
 
-    if (
-      (connectors.length === 0 || connector.id === 'none') &&
-      !loadingLicense &&
-      !hasLicenseError
-    ) {
+    if (connectors.length === 0 && connector.id === 'none' && !loadingLicense && !hasLicenseError) {
+      return [getConnectorMissingInfo()];
+    }
+
+    if (connector.id === 'none' && !loadingLicense && !hasLicenseError) {
       return [getConnectorMissingInfo()];
     }
 

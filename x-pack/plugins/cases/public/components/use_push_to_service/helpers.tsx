@@ -15,7 +15,7 @@ import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './callout/types';
 
 export const getLicenseError = () => ({
   id: 'license-error',
-  title: i18n.PUSH_DISABLE_BY_LICENSE_TITLE,
+  title: '',
   description: (
     <FormattedMessage
       defaultMessage="Opening cases in external systems is available when you have the {appropriateLicense}, are using a {cloud}, or are testing out a Free Trial."
