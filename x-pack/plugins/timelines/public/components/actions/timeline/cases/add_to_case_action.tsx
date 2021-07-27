@@ -33,24 +33,7 @@ export interface AddToCaseActionProps {
     crud: boolean;
     read: boolean;
   } | null;
-}
-// FIXME: DEDUPE
-export const APP_ID = 'securitySolution';
-export enum SecurityPageName {
-  overview = 'overview',
-  detections = 'detections',
-  alerts = 'alerts',
-  rules = 'rules',
-  exceptions = 'exceptions',
-  hosts = 'hosts',
-  network = 'network',
-  timelines = 'timelines',
-  case = 'case',
-  administration = 'administration',
-  endpoints = 'endpoints',
-  policies = 'policies',
-  trustedApps = 'trusted_apps',
-  eventFilters = 'event_filters',
+  appId: string;
 }
 interface UseControlsReturn {
   isControlOpen: boolean;
@@ -58,15 +41,12 @@ interface UseControlsReturn {
   closeControl: () => void;
 }
 
-export const appendSearch = (search?: string) =>
+const appendSearch = (search?: string) =>
   isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
 
-export const getCaseUrl = (search?: string | null) => `${appendSearch(search ?? undefined)}`;
+const getCreateCaseUrl = (search?: string | null) => `/create${appendSearch(search ?? undefined)}`;
 
-export const getCreateCaseUrl = (search?: string | null) =>
-  `/create${appendSearch(search ?? undefined)}`;
-
-export const getCaseDetailsUrl = ({
+const getCaseDetailsUrl = ({
   id,
   search,
   subCaseId,
@@ -82,9 +62,6 @@ export const getCaseDetailsUrl = ({
   }
   return `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
 };
-
-// FIXME DEDUPE END
-
 interface PostCommentArg {
   caseId: string;
   data: {
@@ -103,6 +80,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ecsRowData,
   useInsertTimeline,
   casePermissions,
+  appId,
 }) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
@@ -135,12 +113,12 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const onViewCaseClick = useCallback(
     (id) => {
-      navigateToApp(APP_ID, {
-        deepLinkId: SecurityPageName.case,
+      navigateToApp(appId, {
+        deepLinkId: 'case',
         path: getCaseDetailsUrl({ id }),
       });
     },
-    [navigateToApp]
+    [navigateToApp, appId]
   );
   const currentSearch = window.location.search;
   const urlSearch = useMemo(() => currentSearch, [currentSearch]);
@@ -193,7 +171,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     async (ev) => {
       ev.preventDefault();
       return navigateToApp('securitySolution', {
-        deepLinkId: SecurityPageName.case,
+        deepLinkId: 'case',
         path: getCreateCaseUrl(urlSearch),
       });
     },
@@ -274,7 +252,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           id: rule?.id != null ? rule.id[0] : null,
           name: rule?.name != null ? rule.name[0] : null,
         },
-        owner: APP_ID,
+        owner: appId,
       },
       createCaseNavigation: {
         href: createCaseUrl,
@@ -284,7 +262,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       onRowClick: onCaseClicked,
       updateCase: onCaseSuccess,
       userCanCrud: casePermissions?.crud ?? false,
-      owner: [APP_ID],
+      owner: [appId],
     };
   }, [
     casePermissions?.crud,
@@ -296,6 +274,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     eventIndex,
     rule?.id,
     rule?.name,
+    appId,
   ]);
 
   return (

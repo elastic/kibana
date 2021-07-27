@@ -24,6 +24,7 @@ describe('AddToCaseAction', () => {
       crud: true,
       read: true,
     },
+    appId: 'securitySolution',
   };
 
   beforeEach(() => {

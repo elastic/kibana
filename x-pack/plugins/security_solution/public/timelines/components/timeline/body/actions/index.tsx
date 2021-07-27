@@ -23,6 +23,7 @@ import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { EventsTdContent } from '../../styles';
 import { useKibana, useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../../common/constants';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -107,6 +108,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       ecsRowData: ecsData,
       useInsertTimeline: insertTimelineHook,
       casePermissions,
+      appId: APP_ID,
     };
   }, [ariaRowindex, ecsData, casePermissions, insertTimelineHook, columnValues]);
   return (
@@ -181,19 +183,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
           TimelineId.active,
         ].includes(timelineId as TimelineId) &&
           timelinesUi.getAddToCaseAction(addToCaseActionProps)}
-        {/* {[
-          TimelineId.detectionsPage,
-          TimelineId.detectionsRulesDetailsPage,
-          TimelineId.active,
-        ].includes(timelineId as TimelineId) && (
-          <div style={{ display: 'none' }}>
-            <AddToCaseAction
-              ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
-              key="attach-to-case"
-              ecsRowData={ecsData}
-            />
-          </div>
-        )} */}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
           key="alert-context-menu"
