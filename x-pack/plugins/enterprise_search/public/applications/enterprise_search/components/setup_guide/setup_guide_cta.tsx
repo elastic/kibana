@@ -17,7 +17,12 @@ import CtaImage from './assets/getting_started.png';
 import './setup_guide_cta.scss';
 
 export const SetupGuideCta: React.FC = () => (
-  <EuiPanelTo to="/setup_guide" paddingSize="l" className="enterpriseSearchSetupCta">
+  <EuiPanelTo
+    to="/setup_guide"
+    paddingSize="l"
+    className="enterpriseSearchSetupCta"
+    data-test-subj="setupGuideLink"
+  >
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem className="enterpriseSearchSetupCta__text">
         <EuiTitle size="s">
