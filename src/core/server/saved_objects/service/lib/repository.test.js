@@ -3814,6 +3814,25 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
+
+      it('does not increment counter when incrementBy is 0', async () => {
+        await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 0 }]);
+
+        expect(client.update).toBeCalledTimes(1);
+        expect(client.update).toBeCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: expect.objectContaining({
+                  counterFieldNames: [counterFields[0]],
+                  counts: [0],
+                }),
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
     });
   });
 
