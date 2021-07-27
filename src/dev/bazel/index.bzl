@@ -10,6 +10,6 @@
 Please do not import from any other files when looking to use a custom rule
 """
 
-load("//src/dev/bazel:js_ts_transpiler.bzl", _js_ts_transpiler = "js_ts_transpiler")
+load("//src/dev/bazel:jsts_transpiler.bzl", _jsts_transpiler = "jsts_transpiler")
 
 jsts_transpiler = _jsts_transpiler
