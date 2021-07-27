@@ -27,18 +27,13 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md"
 ]
 
-SRC_DEPS = [
-  "@npm//brace",
-  "@npm//lodash",
-  "@npm//raw-loader",
-]
-
 TYPES_DEPS = [
+  "@npm//brace",
   "@npm//@types/lodash",
   "@npm//@types/node",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+DEPS = TYPES_DEPS
 
 jsts_transpiler(
   name = "target_node",
@@ -72,7 +67,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":target_node", ":tsc_types"],
+  deps = [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
