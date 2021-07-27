@@ -87,7 +87,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
       fetchMessages();
     }, []);
 
-    const disabled = messages.length > 0 && messages[0].clearable === false;
+    const disabled = notificationIndices.length === 0;
 
     const clearButton = (
       <EuiButton

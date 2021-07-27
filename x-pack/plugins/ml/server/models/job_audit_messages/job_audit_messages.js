@@ -136,14 +136,12 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
     if (body.hits.total.value > 0) {
       let notificationIndex;
       messages = body.hits.hits.map((hit) => {
-        if (notificationIndex !== hit._index) {
+        if (notificationIndex !== hit._index && isClearable(hit._index)) {
           notificationIndices.push(hit._index);
           notificationIndex = hit._index;
         }
-        return {
-          clearable: isClearable(hit._index),
-          ...hit._source,
-        };
+
+        return hit._source;
       });
     }
     messages = await jobSavedObjectService.filterJobsForSpace(
