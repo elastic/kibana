@@ -9,7 +9,10 @@
 import { ParentNodeParams, ViewBoxParams } from '../types';
 
 export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
-  if (!viewBox) return;
+  if (!viewBox) {
+    return;
+  }
+
   return `${viewBox?.minX} ${viewBox?.minY} ${viewBox?.width} ${viewBox?.height}`;
 }
 

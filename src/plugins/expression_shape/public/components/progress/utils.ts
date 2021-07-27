@@ -22,28 +22,40 @@ type GetViewBoxParam = (...args: GetViewBoxArguments) => number;
 
 const getMinX: GetViewBoxParam = (shapeType, viewBox, offset = 0) => {
   let { minX } = viewBox;
-  if (shapeType !== Progress.HORIZONTAL_BAR) minX -= offset / 2;
+
+  if (shapeType !== Progress.HORIZONTAL_BAR) {
+    minX -= offset / 2;
+  }
+
   return minX;
 };
 
 const getMinY: GetViewBoxParam = (shapeType, viewBox, offset = 0, labelWidth, labelHeight = 0) => {
   let { minY } = viewBox;
-  if (shapeType === Progress.SEMICIRCLE) minY -= offset / 2;
+
+  if (shapeType === Progress.SEMICIRCLE) {
+    minY -= offset / 2;
+  }
   if (shapeType !== Progress.SEMICIRCLE && shapeType !== Progress.VERTICAL_BAR) {
     minY -= offset / 2;
   }
   if (shapeType === Progress.VERTICAL_BAR || shapeType === Progress.VERTICAL_PILL) {
     minY -= labelHeight;
   }
+
   return minY;
 };
 
 const getWidth: GetViewBoxParam = (shapeType, viewBox, offset = 0, labelWidth = 0) => {
   let { width } = viewBox;
-  if (shapeType !== Progress.HORIZONTAL_BAR) width += offset;
+
+  if (shapeType !== Progress.HORIZONTAL_BAR) {
+    width += offset;
+  }
   if (shapeType === Progress.HORIZONTAL_BAR || shapeType === Progress.HORIZONTAL_PILL) {
     width += labelWidth;
   }
+
   return width;
 };
 
@@ -55,13 +67,17 @@ const getHeight: GetViewBoxParam = (
   labelHeight = 0
 ) => {
   let { height } = viewBox;
-  if (shapeType === Progress.SEMICIRCLE) height += offset / 2;
+
+  if (shapeType === Progress.SEMICIRCLE) {
+    height += offset / 2;
+  }
   if (shapeType !== Progress.SEMICIRCLE && shapeType !== Progress.VERTICAL_BAR) {
     height += offset;
   }
   if (shapeType === Progress.VERTICAL_BAR || shapeType === Progress.VERTICAL_PILL) {
     height += labelHeight;
   }
+
   return height;
 };
 
@@ -108,7 +124,9 @@ export function getTextAttributes(
   offset: number = 0,
   label: string | boolean = ''
 ) {
-  if (!label) return textAttributes;
+  if (!label) {
+    return textAttributes;
+  }
 
   let { x, y, textContent } = textAttributes;
 
