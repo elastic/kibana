@@ -37,6 +37,7 @@ type ValueToggleFields = {
   [K in keyof ValueToggleTypes]: FieldHook<ValueToggleTypes[K]>;
 };
 
+// Optional fields config
 const fieldsConfig: FieldsConfig = {
   mediaType: {
     type: FIELD_TYPES.SELECT,
@@ -95,6 +96,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
+// Required fields config
 const getValueConfig: (
   toggleCustom: () => void
 ) => Record<
@@ -120,7 +122,7 @@ const getValueConfig: (
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
-          defaultMessage="Value for the field"
+          defaultMessage="Value for the field."
         />
       ),
       fieldsToValidateOnChange: ['fields.value', 'fields.copy_from'],
@@ -130,8 +132,8 @@ const getValueConfig: (
             if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
               return {
                 path,
-                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredField', {
-                  defaultMessage: 'A field value is required.',
+                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredValue', {
+                  defaultMessage: 'A value is required.',
                 }),
               };
             }
@@ -163,8 +165,8 @@ const getValueConfig: (
             if (isEmpty(value) && isEmpty(formData['fields.value'])) {
               return {
                 path,
-                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredField', {
-                  defaultMessage: 'A field value is required.',
+                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredCopyFrom', {
+                  defaultMessage: 'A copy from value is required.',
                 }),
               };
             }
@@ -203,15 +205,18 @@ export const SetProcessor: FunctionComponent = () => {
   const [{ fields }] = useFormData({ watch: ['fields.value', 'fields.copy_from'] });
 
   const isCopyFromDefined = getFieldDefaultValue('fields.copy_from') !== undefined;
-  const [isCustom, setIsCustom] = useState<boolean>(isCopyFromDefined);
+  const [isCopyFromEnabled, setIsCopyFrom] = useState<boolean>(isCopyFromDefined);
 
   const toggleCustom = useCallback(() => {
-    setIsCustom((prev) => !prev);
+    setIsCopyFrom((prev) => !prev);
   }, []);
 
   const valueFieldProps = useMemo(
-    () => (isCustom ? getValueConfig(toggleCustom).copy_from : getValueConfig(toggleCustom).value),
-    [isCustom, toggleCustom]
+    () =>
+      isCopyFromEnabled
+        ? getValueConfig(toggleCustom).copy_from
+        : getValueConfig(toggleCustom).value,
+    [isCopyFromEnabled, toggleCustom]
   );
 
   return (
@@ -222,7 +227,7 @@ export const SetProcessor: FunctionComponent = () => {
         })}
       />
 
-      <UseField {...valueFieldProps} component={Field} data-test-subj="valueField" />
+      <UseField {...valueFieldProps} component={Field} />
 
       {hasTemplateSnippet(fields?.value) && (
         <UseField

@@ -55,7 +55,7 @@ describe('Processor: Set', () => {
     // Expect form error as "field" is required parameter
     expect(form.getErrorsMessages()).toEqual([
       'A field value is required.',
-      'A field value is required.',
+      'A value is required.',
     ]);
   });
 
@@ -78,7 +78,7 @@ describe('Processor: Set', () => {
     });
   });
 
-  test('allows to set just value or copy_from', async () => {
+  test('allows to save the the copy_from value', async () => {
     const {
       actions: { saveNewProcessor },
       form,
