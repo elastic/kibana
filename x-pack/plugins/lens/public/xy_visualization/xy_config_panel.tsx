@@ -20,6 +20,8 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiComboBox,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
@@ -35,6 +37,7 @@ import type {
   YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
+  YConfig,
 } from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -524,6 +527,10 @@ export function DimensionEditor(
     );
   }
 
+  if (layer.layerType === 'threshold') {
+    return <ThresholdPanel {...props} />;
+  }
+
   return (
     <>
       <ColorPicker {...props} />
@@ -734,5 +741,204 @@ const ColorPicker = ({
         colorPicker
       )}
     </EuiFormRow>
+  );
+};
+
+const icons = [
+  { value: 'none', label: 'None' },
+  { value: 'asterisk', label: 'Asterisk' },
+  { value: 'bell', label: 'Bell' },
+  { value: 'bolt', label: 'Bolt' },
+  { value: 'bug', label: 'Bug' },
+  { value: 'editorComment', label: 'Comment' },
+  { value: 'alert', label: 'Alert' },
+  { value: 'flag', label: 'Flag' },
+  { value: 'tag', label: 'Tag' },
+];
+
+const IconView = (props: { value?: string; label: string }) => {
+  if (!props.value) return null;
+  return (
+    <span>
+      <EuiIcon type={props.value} />
+      {` ${props.label}`}
+    </span>
+  );
+};
+
+const IconSelect = ({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (newIcon: string) => void;
+}) => {
+  const selectedIcon = icons.find((option) => value === option.value) || icons[0];
+
+  return (
+    <EuiComboBox
+      isClearable={false}
+      options={icons}
+      selectedOptions={[selectedIcon]}
+      onChange={(selection) => {
+        onChange(selection[0].value!);
+      }}
+      singleSelection={{ asPlainText: true }}
+      renderOption={IconView}
+    />
+  );
+};
+
+const ThresholdPanel = (
+  props: VisualizationDimensionEditorProps<State> & {
+    formatFactory: FormatFactory;
+    paletteService: PaletteRegistry;
+  }
+) => {
+  const { state, setState, layerId, accessor } = props;
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+  const isHorizontal = isHorizontalChart(state.layers);
+  const axisMode =
+    (layer.yConfig &&
+      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
+    'left';
+  function setYConfig(yConfig: Partial<YConfig>) {
+    const newYConfigs = [...(layer.yConfig || [])];
+    const existingIndex = newYConfigs.findIndex(
+      (yAxisConfig) => yAxisConfig.forAccessor === accessor
+    );
+    if (existingIndex !== -1) {
+      newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+    } else {
+      newYConfigs.push({
+        forAccessor: accessor,
+        ...yConfig,
+      });
+    }
+    setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+  }
+
+  const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+  return (
+    <>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          defaultMessage: 'Axis side',
+        })}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+            defaultMessage: 'Axis side',
+          })}
+          data-test-subj="lnsXY_axisSide_groups"
+          name="axisSide"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `${idPrefix}left`,
+              label: isHorizontal
+                ? i18n.translate('xpack.lens.xyChart.axisSide.bottom', {
+                    defaultMessage: 'Bottom',
+                  })
+                : i18n.translate('xpack.lens.xyChart.axisSide.left', {
+                    defaultMessage: 'Left',
+                  }),
+              'data-test-subj': 'lnsXY_axisSide_groups_left',
+            },
+            {
+              id: `${idPrefix}right`,
+              label: isHorizontal
+                ? i18n.translate('xpack.lens.xyChart.axisSide.top', {
+                    defaultMessage: 'Top',
+                  })
+                : i18n.translate('xpack.lens.xyChart.axisSide.right', {
+                    defaultMessage: 'Right',
+                  }),
+              'data-test-subj': 'lnsXY_axisSide_groups_right',
+            },
+          ]}
+          idSelected={`${idPrefix}${axisMode}`}
+          onChange={(id) => {
+            const newMode = id.replace(idPrefix, '') as 'left' | 'right';
+            setYConfig({ axisMode: newMode });
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          defaultMessage: 'Line width',
+        })}
+      >
+        <EuiFieldNumber
+          fullWidth
+          data-test-subj="lnsXY_lineWidth"
+          value={currentYConfig?.lineWidth || 1}
+          onChange={(e) => {
+            // TODO proper number input handling
+            setYConfig({ lineWidth: Number(e.target.value) });
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          defaultMessage: 'Line style',
+        })}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+            defaultMessage: 'Line style',
+          })}
+          data-test-subj="lnsXY_line_style"
+          name="axisSide"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `${idPrefix}solid`,
+              label: 'Solid',
+              'data-test-subj': 'lnsXY_line_style_solid',
+            },
+            {
+              id: `${idPrefix}dashed`,
+              label: 'Dashed',
+              'data-test-subj': 'lnsXY_line_style_dashed',
+            },
+            {
+              id: `${idPrefix}dotted`,
+              label: 'Dotted',
+              'data-test-subj': 'lnsXY_line_style_dotted',
+            },
+          ]}
+          idSelected={`${idPrefix}${currentYConfig?.lineStyle || 'solid'}`}
+          onChange={(id) => {
+            const newMode = id.replace(idPrefix, '') as 'solid' | 'dashed' | 'dotted';
+            setYConfig({ lineStyle: newMode });
+          }}
+        />
+      </EuiFormRow>
+      <ColorPicker {...props} />
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          defaultMessage: 'Icon',
+        })}
+      >
+        <IconSelect
+          value={currentYConfig?.icon}
+          onChange={(newIcon) => {
+            setYConfig({ icon: newIcon });
+          }}
+        />
+      </EuiFormRow>
+    </>
   );
 };

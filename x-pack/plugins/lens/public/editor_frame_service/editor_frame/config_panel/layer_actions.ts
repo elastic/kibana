@@ -24,6 +24,7 @@ interface AppendLayerOptions {
   generateId: () => string;
   activeDatasource: Pick<Datasource, 'insertLayer' | 'id'>;
   activeVisualization: Pick<Visualization, 'appendLayer'>;
+  layerType: string;
 }
 
 export function removeLayer(opts: RemoveLayerOptions): LensAppState {
@@ -62,6 +63,7 @@ export function appendLayer({
   state,
   generateId,
   activeDatasource,
+  layerType,
 }: AppendLayerOptions): LensAppState {
   trackUiEvent('layer_added');
 
@@ -85,7 +87,7 @@ export function appendLayer({
     },
     visualization: {
       ...state.visualization,
-      state: activeVisualization.appendLayer(state.visualization.state, layerId),
+      state: activeVisualization.appendLayer(state.visualization.state, layerId, layerType),
     },
     stagedPreview: undefined,
   };

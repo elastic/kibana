@@ -23,7 +23,7 @@ import type {
   DatasourcePublicAPI,
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
-import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { SeriesType, XYLayerConfig, LayerType, layerTypes } from '../../common/expressions';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -31,10 +31,12 @@ import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
+import { LensIconChartBarThreshold } from '../assets/chart_bar_threshold';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isNotNumericMetric = (op: OperationMetadata) => !isNumericMetric(op);
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
@@ -111,7 +113,7 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId) {
+  appendLayer(state, layerId, layerType) {
     const usedSeriesTypes = uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
@@ -119,7 +121,8 @@ export const getXyVisualization = ({
         ...state.layers,
         newLayerState(
           usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-          layerId
+          layerId,
+          layerType as LayerType
         ),
       ],
     };
@@ -167,16 +170,36 @@ export const getXyVisualization = ({
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
+            layerType: layerTypes.DATA,
           },
         ],
       }
     );
   },
 
+  getLayerTypes(state) {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
+          defaultMessage: 'Add chart layer',
+        }),
+        icon: LensIconChartMixedXy,
+      },
+      {
+        type: layerTypes.THRESHOLD,
+        label: i18n.translate('xpack.lens.xyChart.addThresholdLayerLabel', {
+          defaultMessage: 'Add threshold layer',
+        }),
+        icon: LensIconChartBarThreshold,
+      },
+    ];
+  },
+
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
-      return { groups: [] };
+      return { groups: [], supportStaticValue: true };
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -204,6 +227,49 @@ export const getXyVisualization = ({
     }
 
     const isHorizontal = isHorizontalChart(state.layers);
+    const isDataLayer = !layer.layerType || layer.layerType === layerTypes.DATA;
+
+    if (!isDataLayer) {
+      return {
+        supportStaticValue: true,
+        // Each thresholds layer panel will have sections for each available axis
+        // (horizontal axis, vertical axis left, vertical axis right).
+        // Only axes that support numeric thresholds should be shown?
+        groups: [
+          {
+            groupId: 'xThreshold',
+            groupLabel: getAxisName('x', { isHorizontal }),
+            accessors: layer.xAccessor
+              ? [
+                  {
+                    columnId: layer.xAccessor,
+                    color: layer.yConfig?.find((yConfig) => yConfig.forAccessor === layer.xAccessor)
+                      ?.color,
+                    triggerIcon: 'color',
+                  },
+                ]
+              : [],
+            filterOperations: isNumericMetric,
+            isDisabled: isNotNumericMetric,
+            supportsMoreColumns: true,
+            required: false,
+            enableDimensionEditor: true,
+            dataTestSubj: 'lnsXY_xThresholdPanel',
+          },
+          {
+            groupId: 'yThreshold',
+            groupLabel: getAxisName('y', { isHorizontal }),
+            accessors: mappedAccessors,
+            filterOperations: isNumericMetric,
+            supportsMoreColumns: true,
+            required: false,
+            enableDimensionEditor: true,
+            dataTestSubj: 'lnsXY_yThresholdPanel',
+          },
+        ],
+      };
+    }
+
     return {
       groups: [
         {
@@ -261,7 +327,6 @@ export const getXyVisualization = ({
       return prevState;
     }
     const newLayer = { ...foundLayer };
-
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
@@ -270,6 +335,28 @@ export const getXyVisualization = ({
     }
     if (groupId === 'breakdown') {
       newLayer.splitAccessor = columnId;
+    }
+
+    if (groupId === 'xThreshold') {
+      newLayer.xAccessor = columnId;
+      const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
+      if (!hasYConfig) {
+        newLayer.yConfig = [
+          ...(newLayer.yConfig || []),
+          // TODO: move this
+          // add a default config if none is available
+          {
+            forAccessor: columnId,
+            axisMode: 'auto',
+            icon: undefined,
+            lineStyle: 'solid',
+            lineWidth: 1,
+          },
+        ];
+      }
+    }
+    if (groupId === 'yThreshold') {
+      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
     }
 
     return {
@@ -370,8 +457,9 @@ export const getXyVisualization = ({
 
       // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        ({ accessors, xAccessor, splitAccessor }: XYLayerConfig) =>
-          accessors.length > 0 || xAccessor != null || splitAccessor != null
+        ({ accessors, xAccessor, splitAccessor, layerType }: XYLayerConfig) =>
+          layerType === layerTypes.DATA &&
+          (accessors.length > 0 || xAccessor != null || splitAccessor != null)
       );
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
@@ -526,11 +614,16 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
+function newLayerState(
+  seriesType: SeriesType,
+  layerId: string,
+  layerType: LayerType = layerTypes.DATA
+): XYLayerConfig {
   return {
     layerId,
     seriesType,
     accessors: [],
+    layerType,
   };
 }
 

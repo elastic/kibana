@@ -8,8 +8,7 @@
 import './config_panel.scss';
 
 import React, { useMemo, memo } from 'react';
-import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiForm } from '@elastic/eui';
 import { mapValues } from 'lodash';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -25,6 +24,7 @@ import {
   updateVisualizationState,
   setToggleFullscreen,
 } from '../../../state_management';
+import { AddLayerButton } from './add_layer';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
@@ -190,51 +190,28 @@ export function LayerPanels(
           />
         ) : null
       )}
-      {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
-          <EuiToolTip
-            className="eui-fullWidth"
-            title={i18n.translate('xpack.lens.xyChart.addLayer', {
-              defaultMessage: 'Add a layer',
-            })}
-            content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-              defaultMessage:
-                'Use multiple layers to combine chart types or visualize different index patterns.',
-            })}
-            position="bottom"
-          >
-            <EuiButton
-              className="lnsConfigPanel__addLayerBtn"
-              fullWidth
-              size="s"
-              data-test-subj="lnsLayerAddButton"
-              aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              fill
-              color="text"
-              onClick={() => {
-                const id = generateId();
-                dispatchLens(
-                  updateState({
-                    subType: 'ADD_LAYER',
-                    updater: (state) =>
-                      appendLayer({
-                        activeVisualization,
-                        generateId: () => id,
-                        trackUiEvent,
-                        activeDatasource: datasourceMap[activeDatasourceId],
-                        state,
-                      }),
-                  })
-                );
-                setNextFocusedLayerId(id);
-              }}
-              iconType="plusInCircleFilled"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <AddLayerButton
+        visualization={activeVisualization}
+        visualizationState={visualizationState}
+        onAddLayerClick={(layerType) => {
+          const id = generateId();
+          dispatchLens(
+            updateState({
+              subType: 'ADD_LAYER',
+              updater: (state) =>
+                appendLayer({
+                  activeVisualization,
+                  generateId: () => id,
+                  trackUiEvent,
+                  activeDatasource: datasourceMap[activeDatasourceId],
+                  state,
+                  layerType,
+                }),
+            })
+          );
+          setNextFocusedLayerId(id);
+        }}
+      />
     </EuiForm>
   );
 }

@@ -172,6 +172,14 @@ export interface Datasource<T = unknown, P = unknown> {
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
   removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
+  initializeDimension?: (
+    state: T,
+    columnId: string,
+    layerId: string,
+    label: string,
+    dataType: string,
+    staticValue?: unknown
+  ) => T;
 
   renderDataPanel: (
     domElement: Element,
@@ -592,14 +600,28 @@ export interface Visualization<T = unknown> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string) => T;
+  appendLayer?: (state: T, layerId: string, type: string) => T;
+  getLayerTypes: (
+    state: T
+  ) => Array<{
+    type: string;
+    label: string;
+    icon?: IconType;
+    initialDimensions?: Array<{
+      groupId: string;
+      columnId: string;
+      dataType: string;
+      label: string;
+      staticValue: unknown;
+    }>;
+  }>;
 
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
   getConfiguration: (
     props: VisualizationConfigProps<T>
-  ) => { groups: VisualizationDimensionGroupConfig[] };
+  ) => { groups: VisualizationDimensionGroupConfig[]; supportStaticValue?: boolean };
 
   /**
    * Popover contents that open when the user clicks the contextMenuIcon. This can be used

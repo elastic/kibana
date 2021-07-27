@@ -10,6 +10,9 @@ import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins
 import { axisConfig, YConfig } from './axis_config';
 import type { SeriesType } from './series_type';
 
+export type LayerType = 'data' | 'threshold';
+export const layerTypes: Record<string, LayerType> = { DATA: 'data', THRESHOLD: 'threshold' };
+
 export interface XYLayerConfig {
   hide?: boolean;
   layerId: string;
@@ -19,6 +22,7 @@ export interface XYLayerConfig {
   seriesType: SeriesType;
   splitAccessor?: string;
   palette?: PaletteOutput;
+  layerType: LayerType;
 }
 
 export interface ValidLayer extends XYLayerConfig {
@@ -57,6 +61,7 @@ export const layerConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: '',
     },
+    layerType: { types: ['string'], options: Object.values(layerTypes), help: '' },
     seriesType: {
       types: ['string'],
       options: [

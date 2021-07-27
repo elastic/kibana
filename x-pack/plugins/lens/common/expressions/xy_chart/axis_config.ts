@@ -33,6 +33,9 @@ export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
   color?: string;
+  icon?: string;
+  lineWidth?: number;
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
 }
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
