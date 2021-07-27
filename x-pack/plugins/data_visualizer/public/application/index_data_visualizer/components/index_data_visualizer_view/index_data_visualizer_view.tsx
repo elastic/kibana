@@ -65,7 +65,7 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
-import { extractSearchData } from '../../utils/saved_search_utils';
+import { createSearchItems, extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
@@ -224,11 +224,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const defaults = getDefaultPageState();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData(
-      currentSavedSearch,
-      currentIndexPattern,
-      uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS)
-    );
+    const searchData = extractSearchData(currentSavedSearch, currentIndexPattern, uiSettings);
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       return {
