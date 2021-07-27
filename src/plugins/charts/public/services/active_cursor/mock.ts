@@ -9,8 +9,8 @@
 import type { ActiveCursor } from './active_cursor';
 
 export const activeCursorMock: ActiveCursor = {
-  activeCursor$: jest.fn(() => ({
+  activeCursor$: {
     subscribe: jest.fn(),
-  })),
+  },
   setup: jest.fn(),
 } as any;
