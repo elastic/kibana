@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from 'kibana/server';
 /**
  * Returns the timestamp of the oldest action task that may still be executed.
  * Useful for cleaning up related objects that may no longer be needed.
+ * @internal
  */
 export const getOldestIdleActionTask = async (
   client: Pick<ElasticsearchClient, 'search'>,

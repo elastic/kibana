@@ -249,10 +249,6 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  */
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
-export type SavedObjectTypeExcludeFromUpgradeFilterHook = (
-  esClient: Pick<ElasticsearchClient, 'search'>
-) => Promise<estypes.QueryDslQueryContainer>; // TODO: this should only support KQL filters with field re-writing rather than arbitrary query clauses that could affect any type
-
 /**
  * @remarks This is only internal for now, and will only be public when we expose the registerType API
  *
@@ -283,12 +279,8 @@ export interface SavedObjectsType<Attributes = any> {
    */
   convertToAliasScript?: string;
   /**
-   * If defined, allows a type to run a search query and return a query filter that may match any documents which may
-   * be excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which
-   * are no longer needed and may slow the migration process.
-   *
-   * If this hook fails, the migration will proceed without these documents having been filtered out, so this
-   * should not be used as a guarantee that these documents have been deleted.
+   * If defined, allows a type to exclude unneeded documents from the migration process and effectively be deleted.
+   * See {@link SavedObjectTypeExcludeFromUpgradeFilterHook} for more details.
    */
   excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
   /**
@@ -501,3 +493,18 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
 export type SavedObjectsExportablePredicate<Attributes = unknown> = (
   obj: SavedObject<Attributes>
 ) => boolean;
+
+/**
+ * If defined, allows a type to run a search query and return a query filter that may match any documents which may
+ * be excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which
+ * are no longer needed and may slow the migration process.
+ *
+ * If this hook fails, the migration will proceed without these documents having been filtered out, so this
+ * should not be used as a guarantee that these documents have been deleted.
+ *
+ * @public
+ * @alpha Experimental and subject to change
+ */
+ export type SavedObjectTypeExcludeFromUpgradeFilterHook = (
+  esClient: Pick<ElasticsearchClient, 'search'>
+) => Promise<estypes.QueryDslQueryContainer>;
