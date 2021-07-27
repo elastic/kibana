@@ -13,39 +13,28 @@ import {
   buildQueryFromFilters,
   buildEsQuery,
   Query,
+  Filter,
 } from '@kbn/es-query';
 import { SavedSearchSavedObject } from '../../../../common/types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { SEARCH_QUERY_LANGUAGE } from '../types/combined_query';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
 export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
   const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
   return JSON.parse(search.searchSourceJSON) as {
     query: Query;
-    filter: any[];
+    filter: Filter[];
   };
 }
 
-/**
- * Extract query data from the saved search object.
- */
-export function extractSearchData(
-  savedSearch: SavedSearchSavedObject | null,
-  indexPattern: IndexPattern,
-  uiSettings: IUiSettingsClient
+export function createCombinedQuery(
+  query: Query,
+  filters: Filter[],
+  indexPattern?: IndexPattern,
+  uiSettings?: IUiSettingsClient
 ) {
-  if (!savedSearch) {
-    return undefined;
-  }
-
-  const data = getQueryFromSavedSearch(savedSearch);
   let combinedQuery: any = getDefaultDatafeedQuery();
-
-  const query = data.query;
-  const filter = data.filter;
-
-  const filters = Array.isArray(filter) ? filter : [];
 
   if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
@@ -67,14 +56,40 @@ export function extractSearchData(
     combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
     combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
   } else {
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
-    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    combinedQuery = buildEsQuery(
+      indexPattern,
+      [query],
+      filters,
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
+    );
   }
+  return combinedQuery;
+}
+
+/**
+ * Extract query data from the saved search object.
+ */
+export function extractSearchData(
+  savedSearch: SavedSearchSavedObject | null,
+  indexPattern: IndexPattern,
+  uiSettings: IUiSettingsClient
+) {
+  if (!savedSearch) {
+    return undefined;
+  }
+
+  const data = getQueryFromSavedSearch(savedSearch);
+  const combinedQuery = createCombinedQuery(
+    data.query,
+    Array.isArray(data.filter) ? data.filter : [],
+    indexPattern,
+    uiSettings
+  );
 
   return {
     searchQuery: combinedQuery,
     searchString: data.query.query,
-    queryLanguage: data.query.language,
+    queryLanguage: data.query.language as SearchQueryLanguage,
   };
 }
 

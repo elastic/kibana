@@ -5,20 +5,11 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  luceneStringToDsl,
-  decorateQuery,
-} from '@kbn/es-query';
-import {
-  RefreshInterval,
-  SerializableState,
-  UI_SETTINGS,
-} from '../../../../../../../src/plugins/data/common';
+import { RefreshInterval, SerializableState } from '../../../../../../../src/plugins/data/common';
 import { IndexDataVisualizerLocator } from '../locator';
 import { isPopulatedObject } from '../../../../common/utils/object_utils';
-import { DiscoverSetup } from '../../../../../../../src/plugins/discover/public';
+import type { DiscoverSetup } from '../../../../../../../src/plugins/discover/public';
+import { createCombinedQuery } from '../utils/saved_search_utils';
 
 export const DISCOVER_DV_TOP_NAV_LINK_ID = 'indexDataVisualizer';
 
@@ -51,7 +42,9 @@ export class DiscoverNavLinkRegistrar {
       testId: 'dataVisualizerTopNavButton',
       run: async () => {
         const { stateContainer, services, indexPattern, savedSearch, columns } = args;
-        const extractedQuery = stateContainer.appStateContainer.getState().query;
+        const state = stateContainer.appStateContainer.getState();
+        const { query: extractedQuery, filters } = state;
+
         const timeRange = services.timefilter.getTime();
         const refreshInterval = services.timefilter.getRefreshInterval() as RefreshInterval &
           SerializableState;
@@ -65,9 +58,11 @@ export class DiscoverNavLinkRegistrar {
         if (columns) {
           params.visibleFieldNames = columns;
         }
+
         if (extractedQuery) {
           const queryLanguage = extractedQuery.language;
           const qryString = extractedQuery.query;
+          const combinedQuery = createCombinedQuery(extractedQuery, filters ?? []);
           let qry;
           if (queryLanguage === 'kuery') {
             const ast = fromKueryExpression(qryString);
@@ -78,7 +73,7 @@ export class DiscoverNavLinkRegistrar {
           }
 
           params.query = {
-            searchQuery: qry as SerializableState,
+            searchQuery: combinedQuery as SerializableState,
             searchString: qryString,
             searchQueryLanguage: queryLanguage,
           };
