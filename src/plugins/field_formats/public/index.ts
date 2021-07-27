@@ -5,4 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from '@kbn/field-types';
+
+import { FieldFormatsPlugin } from './plugin';
+
+export function plugin() {
+  return new FieldFormatsPlugin();
+}
+export { FieldFormatsSetup, FieldFormatsStart } from './plugin';

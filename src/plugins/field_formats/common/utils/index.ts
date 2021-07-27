@@ -5,4 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from '@kbn/field-types';
+
+import { IFieldFormat, SerializedFieldFormat } from '../index';
+
+export { asPrettyString } from './as_pretty_string';
+export { getHighlightHtml, getHighlightRequest } from './highlight';
+export { shortenDottedString } from './shorten_dotted_string';
+
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

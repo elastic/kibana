@@ -5,4 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from '@kbn/field-types';
+
+const DOT_PREFIX_RE = /(.).+?\./g;
+
+/**
+ * Convert a dot.notated.string into a short
+ * version (d.n.string)
+ *
+ * @return {any}
+ */
+export function shortenDottedString(input: any) {
+  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
+}

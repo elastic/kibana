@@ -1,0 +1,14 @@
+{
+  "id": "fieldFormats",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": [],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Index pattern fields and ambiguous values formatters"
+}
