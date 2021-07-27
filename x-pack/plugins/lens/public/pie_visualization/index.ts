@@ -11,6 +11,7 @@ import type { EditorFrameSetup } from '../types';
 import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import type { FormatFactory } from '../../common';
+import type { LensPluginStartDependencies } from '../plugin';
 
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
@@ -27,11 +28,12 @@ export class PieVisualization {
   constructor() {}
 
   setup(
-    core: CoreSetup,
-    { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
+    core: CoreSetup<LensPluginStartDependencies, void>,
+    { expressions, formatFactory, editorFrame }: PieVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
       const { getPieVisualization, pie, getPieRenderer } = await import('../async_services');
+      const [, { charts }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
 
       expressions.registerFunction(() => pie);
@@ -40,6 +42,7 @@ export class PieVisualization {
         getPieRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
         })
       );

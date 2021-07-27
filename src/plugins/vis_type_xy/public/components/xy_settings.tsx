@@ -11,6 +11,7 @@ import React, { FC } from 'react';
 import {
   Direction,
   Settings,
+  SettingsSpecProps,
   DomainRange,
   Position,
   PartialTheme,
@@ -49,6 +50,7 @@ type XYSettingsProps = Pick<
   | 'xAxis'
   | 'orderBucketsBySum'
 > & {
+  onPointerUpdate: SettingsSpecProps['onPointerUpdate'];
   xDomain?: DomainRange;
   adjustedXDomain?: DomainRange;
   showLegend: boolean;
@@ -85,6 +87,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   adjustedXDomain,
   showLegend,
   onElementClick,
+  onPointerUpdate,
   onBrushEnd,
   onRenderChange,
   legendAction,
@@ -152,6 +155,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   return (
     <Settings
       debugState={window._echDebugStateFlag ?? false}
+      onPointerUpdate={onPointerUpdate}
       xDomain={adjustedXDomain}
       rotation={rotation}
       theme={[themeOverrides, theme]}

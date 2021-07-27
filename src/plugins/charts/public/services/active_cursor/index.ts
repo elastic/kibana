@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { PointerEvent } from '@elastic/charts';
-
-export const activeCursor$ = new Subject<PointerEvent>();
+export { ActiveCursor } from './active_cursor';
+export { useActiveCursor } from './use_active_cursor';

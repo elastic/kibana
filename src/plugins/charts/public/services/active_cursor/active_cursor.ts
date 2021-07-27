@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { LegacyColorsService } from './legacy_colors';
-export { ThemeService } from './theme';
-export { ActiveCursor, useActiveCursor } from './active_cursor';
+import { Subject } from 'rxjs';
+import type { PointerEvent } from '@elastic/charts';
+
+export class ActiveCursor {
+  public activeCursor$?: Subject<PointerEvent>;
+
+  setup() {
+    this.activeCursor$ = new Subject<PointerEvent>();
+  }
+}

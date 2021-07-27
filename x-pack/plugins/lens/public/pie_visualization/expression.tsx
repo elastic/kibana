@@ -17,13 +17,18 @@ import type { LensFilterEvent } from '../types';
 import { PieComponent } from './render_function';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
-import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type {
+  ChartsPluginSetup,
+  ChartsPluginStart,
+  PaletteRegistry,
+} from '../../../../../src/plugins/charts/public';
 
 export { pie } from '../../common/expressions';
 
 export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
+  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
@@ -48,6 +53,7 @@ export const getPieRenderer = (dependencies: {
           {...config}
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          chartsActiveCursorService={dependencies.chartsActiveCursorService}
           paletteService={dependencies.paletteService}
           onClickValue={onClickValue}
           renderMode={handlers.getRenderMode()}

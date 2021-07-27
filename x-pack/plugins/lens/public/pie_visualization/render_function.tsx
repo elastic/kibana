@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import {
@@ -23,7 +23,7 @@ import {
   Settings,
   ElementClickListener,
 } from '@elastic/charts';
-import { RenderMode } from 'src/plugins/expressions';
+import type { RenderMode } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
@@ -34,8 +34,10 @@ import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import {
   ChartsPluginSetup,
+  ChartsPluginStart,
   PaletteRegistry,
   SeriesLayer,
+  useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
 import { getLegendAction } from './get_legend_action';
@@ -55,6 +57,7 @@ export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
+    chartsActiveCursorService: ChartsPluginStart['activeCursor'];
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
     renderMode: RenderMode;
@@ -64,7 +67,13 @@ export function PieComponent(
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartsThemeService, paletteService, syncColors, onClickValue } = props;
+  const {
+    chartsThemeService,
+    chartsActiveCursorService,
+    paletteService,
+    syncColors,
+    onClickValue,
+  } = props;
   const {
     shape,
     groups,
@@ -81,6 +90,9 @@ export function PieComponent(
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const isDarkMode = chartsThemeService.useDarkMode();
+
+  const chartRef = useRef<Chart>(null);
+  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef);
 
   if (!hideLabels) {
     firstTable.columns.forEach((column) => {
@@ -272,8 +284,9 @@ export function PieComponent(
       className="lnsPieExpression__container"
       isReady={state.isReady}
     >
-      <Chart>
+      <Chart ref={chartRef}>
         <Settings
+          onPointerUpdate={handleCursorUpdate}
           tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}
           debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
