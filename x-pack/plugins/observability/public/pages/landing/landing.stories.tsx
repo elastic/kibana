@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -21,6 +22,7 @@ export default {
         application: { getUrlForApp: () => '', navigateToUrl: () => {} },
         chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
         uiSettings: { get: () => true },
+        observability: { ObservabilityPageTemplate: EuiPageTemplate },
       } as unknown) as Partial<CoreStart>);
 
       const pluginContextValue = ({
@@ -32,6 +34,7 @@ export default {
             },
           },
         },
+        ObservabilityPageTemplate: EuiPageTemplate,
       } as unknown) as PluginContextValue;
 
       return (
