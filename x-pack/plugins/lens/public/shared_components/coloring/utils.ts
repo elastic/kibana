@@ -9,7 +9,7 @@ import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
 import { isColorDark } from '@elastic/eui';
-import { Datatable } from 'src/plugins/expressions/public';
+import type { Datatable } from 'src/plugins/expressions/public';
 import {
   CUSTOM_PALETTE,
   defaultPaletteParams,
@@ -17,7 +17,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from './constants';
-import { CustomPaletteParams, ColorStop } from './types';
+import type { CustomPaletteParams, ColorStop } from '../../../common';
 
 /**
  * Some name conventions here:
