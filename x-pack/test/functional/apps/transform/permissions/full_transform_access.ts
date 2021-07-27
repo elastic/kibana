@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should display controls in the edit flyout correctly', async () => {
         await transform.testExecution.logTestStep('should show the edit flyout');
-        await transform.table.clickTransformRowActionWithRetry(transformConfigWithPivot.id, 'Edit');
+        await transform.table.clickTransformRowAction(transformConfigWithPivot.id, 'Edit');
         await transform.editFlyout.assertTransformEditFlyoutExists();
 
         await transform.testExecution.logTestStep('should have the description input enabled');

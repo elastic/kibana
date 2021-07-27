@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 type TransformRowActionName = 'Clone' | 'Delete' | 'Edit' | 'Start' | 'Stop' | 'Discover';
 
 export function TransformTableProvider({ getService }: FtrProviderContext) {
+  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -235,6 +236,30 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
+    public async ensureTransformActionsMenuOpen(transformId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.ensureTransformActionsMenuClosed();
+
+        if (!(await find.existsByCssSelector('.euiContextMenuPanel', 1000))) {
+          await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
+          expect(await find.existsByCssSelector('.euiContextMenuPanel', 1000)).to.eql(
+            true,
+            'Actions popover should exist'
+          );
+        }
+      });
+    }
+
+    public async ensureTransformActionsMenuClosed() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        expect(await find.existsByCssSelector('.euiContextMenuPanel', 1000)).to.eql(
+          false,
+          'Actions popover should not exist'
+        );
+      });
+    }
+
     public async assertTransformRowActionsButtonEnabled(
       transformId: string,
       expectedValue: boolean
@@ -251,7 +276,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async assertTransformRowActions(transformId: string, isTransformRunning = false) {
-      await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
+      await this.ensureTransformActionsMenuOpen(transformId);
 
       await testSubjects.existOrFail('transformActionClone');
       await testSubjects.existOrFail('transformActionDelete');
@@ -265,6 +290,8 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         await testSubjects.existOrFail('transformActionStart');
         await testSubjects.missingOrFail('transformActionStop');
       }
+
+      await this.ensureTransformActionsMenuClosed();
     }
 
     public async assertTransformRowActionEnabled(
@@ -276,8 +303,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await retry.tryForTime(60 * 1000, async () => {
         await this.refreshTransformList();
 
-        await browser.pressKeys(browser.keys.ESCAPE);
-        await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
+        await this.ensureTransformActionsMenuOpen(transformId);
 
         await testSubjects.existOrFail(selector, { timeout: 1000 });
         const isEnabled = await testSubjects.isEnabled(selector);
@@ -288,26 +314,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           }')`
         );
 
-        // Close the actions menu
-        await browser.pressKeys(browser.keys.ESCAPE);
+        await this.ensureTransformActionsMenuClosed();
       });
     }
 
-    public async clickTransformRowActionWithRetry(
-      transformId: string,
-      action: TransformRowActionName
-    ) {
-      await retry.tryForTime(30 * 1000, async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
-        await testSubjects.click(this.rowSelector(transformId, 'euiCollapsedItemActionsButton'));
-        await testSubjects.existOrFail(`transformAction${action}`, { timeout: 1000 });
-        await testSubjects.click(`transformAction${action}`);
-        await testSubjects.missingOrFail(`transformAction${action}`, { timeout: 1000 });
-      });
-    }
-
-    public async clickTransformRowAction(action: TransformRowActionName) {
+    public async clickTransformRowAction(transformId: string, action: TransformRowActionName) {
+      await this.ensureTransformActionsMenuOpen(transformId);
       await testSubjects.click(`transformAction${action}`);
+      await testSubjects.missingOrFail(`transformAction${action}`);
     }
 
     public async waitForTransformsExpandedRowPreviewTabToLoad() {
