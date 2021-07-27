@@ -5,6 +5,25 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { Column } from '../reorderable_table/types';
+
 export interface ItemWithAnID {
   id: number;
+  [key: string]: unknown; // TODO could this be string instead of unknown?
+}
+
+export interface EditingRenderFlags {
+  isInvalid: boolean;
+  isLoading: boolean;
+}
+
+export interface InlineEditableTableColumn<Item extends ItemWithAnID> extends Column<Item> {
+  field: string; // TODO Is this even necessary?
+  editingRender: (
+    item: Item,
+    onChange: (value: string) => void,
+    flags: EditingRenderFlags
+  ) => React.ReactNode;
 }
