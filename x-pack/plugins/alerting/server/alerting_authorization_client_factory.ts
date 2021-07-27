@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { ALERTS_FEATURE_ID } from '../common';
-import { AlertTypeRegistry } from './types';
+import { RuleTypeRegistry } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
@@ -15,7 +15,7 @@ import { AlertingAuthorizationAuditLogger } from './authorization/audit_logger';
 import { Space } from '../../spaces/server';
 
 export interface AlertingAuthorizationClientFactoryOpts {
-  alertTypeRegistry: AlertTypeRegistry;
+  ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
@@ -25,7 +25,7 @@ export interface AlertingAuthorizationClientFactoryOpts {
 
 export class AlertingAuthorizationClientFactory {
   private isInitialized = false;
-  private alertTypeRegistry!: AlertTypeRegistry;
+  private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginStart?: SecurityPluginStart;
   private securityPluginSetup?: SecurityPluginSetup;
   private features!: FeaturesPluginStart;
@@ -38,7 +38,7 @@ export class AlertingAuthorizationClientFactory {
     }
     this.isInitialized = true;
     this.getSpace = options.getSpace;
-    this.alertTypeRegistry = options.alertTypeRegistry;
+    this.ruleTypeRegistry = options.ruleTypeRegistry;
     this.securityPluginSetup = options.securityPluginSetup;
     this.securityPluginStart = options.securityPluginStart;
     this.features = options.features;
@@ -52,7 +52,7 @@ export class AlertingAuthorizationClientFactory {
       request,
       getSpace: this.getSpace,
       getSpaceId: this.getSpaceId,
-      alertTypeRegistry: this.alertTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
       features: features!,
       auditLogger: new AlertingAuthorizationAuditLogger(
         securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
