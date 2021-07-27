@@ -11,6 +11,11 @@ import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
 
+jest.mock('react-router-dom', () => ({
+  useLocation: () => ({
+    search: '',
+  }),
+}));
 jest.mock('./helpers');
 
 describe('AddToCaseAction', () => {
