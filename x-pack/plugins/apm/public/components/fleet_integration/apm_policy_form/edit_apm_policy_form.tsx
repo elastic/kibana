@@ -12,6 +12,7 @@ import {
   PackagePolicyEditExtensionComponentProps,
   PackagePolicyVars,
 } from './typings';
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../../common/fleet';
 
 interface Props {
   policy: PackagePolicy;
@@ -35,7 +36,7 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
     <APMPolicyForm
       vars={vars}
       onChange={handleChange}
-      isCloudPolicy={newPolicy.policy_id === 'policy-elastic-agent-on-cloud'}
+      isCloudPolicy={newPolicy.policy_id === POLICY_ELASTIC_AGENT_ON_CLOUD}
     />
   );
 }

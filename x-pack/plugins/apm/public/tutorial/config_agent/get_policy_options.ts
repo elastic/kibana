@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import { APIResponseType } from './';
-
-const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
 
 const DEFAULT_STANDALONE_CONFIG_LABEL = i18n.translate(
   'xpack.apm.tutorial.agent_config.defaultStandaloneConfig',
