@@ -171,10 +171,10 @@ describe('JobsHealthService', () => {
       'test_job_02',
     ]);
     expect(mlClient.getJobStats).toHaveBeenCalledWith({ job_id: 'test_job_01,test_job_02' });
-    expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
     expect(mlClient.getDatafeedStats).toHaveBeenCalledWith({
       datafeed_id: 'test_datafeed_01,test_datafeed_02',
     });
+    expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
     expect(executionResult).toEqual([
       {
         name: 'Datafeed is not started',
