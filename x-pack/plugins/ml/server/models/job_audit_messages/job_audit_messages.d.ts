@@ -8,6 +8,7 @@
 import { IScopedClusterClient } from 'kibana/server';
 import type { MlClient } from '../../lib/ml_client';
 import type { JobSavedObjectService } from '../../saved_objects';
+import { JobMessage } from '../../../common/types/audit_message';
 
 export function jobAuditMessagesProvider(
   client: IScopedClusterClient,
@@ -21,7 +22,7 @@ export function jobAuditMessagesProvider(
       start?: string;
       end?: string;
     }
-  ) => any;
+  ) => { messages: JobMessage[]; notificationIndices: string[] };
   getAuditMessagesSummary: (jobIds?: string[]) => any;
-  clearJobAuditMessages: (jobId: string) => any;
+  clearJobAuditMessages: (jobId: string, notificationIndices: string[]) => any;
 };
