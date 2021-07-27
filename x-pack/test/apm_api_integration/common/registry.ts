@@ -156,7 +156,6 @@ export const registry = {
 
           const runAfter = async () => {
             const log = logWithTimer();
-
             for (const archiveName of condition.archives) {
               log(`Unloading ${archiveName}`);
               await esArchiver.unload(

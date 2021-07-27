@@ -164,10 +164,6 @@ async function run() {
     .concat('.kibana')
     .join(',');
 
-  console.log({
-    indicesToArchive,
-  });
-
   // create the archive
   const tmpDir = path.join(__dirname, 'tmp/');
   execSync(
