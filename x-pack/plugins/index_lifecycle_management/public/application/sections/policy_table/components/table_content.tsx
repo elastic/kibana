@@ -41,14 +41,11 @@ import { sortTable } from '../../../services';
 import { trackUiMetric } from '../../../services/ui_metric';
 
 import { UIM_EDIT_CLICK } from '../../../constants';
+import { TableColumn } from '../index';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
 import { ConfirmDelete } from './confirm_delete';
 
-type PolicyProperty = Extract<
-  keyof PolicyFromES,
-  'version' | 'name' | 'linkedIndices' | 'modified_date'
->;
-const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
+const COLUMNS: Array<[TableColumn, { label: string; width: number }]> = [
   [
     'name',
     {
@@ -59,7 +56,7 @@ const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
     },
   ],
   [
-    'linkedIndices',
+    'indices',
     {
       label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader', {
         defaultMessage: 'Linked indices',
@@ -77,7 +74,7 @@ const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
     },
   ],
   [
-    'modified_date',
+    'modifiedDate',
     {
       label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader', {
         defaultMessage: 'Modified date',
@@ -104,7 +101,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const [popoverPolicy, setPopoverPolicy] = useState<string>();
-  const [sort, setSort] = useState<{ sortField: PolicyProperty; isSortAscending: boolean }>({
+  const [sort, setSort] = useState<{ sortField: TableColumn; isSortAscending: boolean }>({
     sortField: 'name',
     isSortAscending: true,
   });
@@ -131,7 +128,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
     }
   };
 
-  const onSort = (column: PolicyProperty) => {
+  const onSort = (column: TableColumn) => {
     const newIsSortAscending = sort.sortField === column ? !sort.isSortAscending : true;
     setSort({ sortField: column, isSortAscending: newIsSortAscending });
   };
@@ -162,7 +159,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
   );
 
   const buildActionPanelTree = (policy: PolicyFromES): EuiContextMenuPanelDescriptor[] => {
-    const hasLinkedIndices = Boolean(policy.linkedIndices && policy.linkedIndices.length);
+    const hasLinkedIndices = Boolean(policy.indices && policy.indices.length);
 
     const viewIndicesLabel = i18n.translate(
       'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
@@ -239,13 +236,13 @@ export const TableContent: React.FunctionComponent<Props> = ({
           {value}
         </EuiLink>
       );
-    } else if (fieldName === 'linkedIndices') {
+    } else if (fieldName === 'indices') {
       return (
         <EuiText>
           <b>{value ? (value as string[]).length : '0'}</b>
         </EuiText>
       );
-    } else if (fieldName === 'modified_date' && value) {
+    } else if (fieldName === 'modifiedDate' && value) {
       return moment(value).format('YYYY-MM-DD HH:mm:ss');
     }
     return value;

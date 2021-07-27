@@ -32,12 +32,16 @@ initHttp(
 );
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
+// use a date far in the past to check the sorting
+const testDate = '2020-07-21T14:16:58.666Z';
+const testDateFormatted = moment(testDate).format('YYYY-MM-DD HH:mm:ss');
+
 const policies: PolicyFromES[] = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment().subtract(i, 'days').toISOString(),
-    linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
+    modifiedDate: i === 0 ? testDate : moment().subtract(i, 'days').toISOString(),
+    indices: i % 2 === 0 ? [`index${i}`] : [],
     name: `testy${i}`,
     policy: {
       name: `testy${i}`,
@@ -138,10 +142,10 @@ describe('policy table', () => {
     testSort('version');
   });
   test('should sort when modified date header is clicked', () => {
-    testSort('modified_date');
+    testSort('modifiedDate');
   });
   test('should sort when linked indices header is clicked', () => {
-    testSort('linkedIndices');
+    testSort('indices');
   });
   test('should have proper actions in context menu when there are linked indices', () => {
     const rendered = openContextMenu(0);
@@ -173,5 +177,12 @@ describe('policy table', () => {
     deleteButton.simulate('click');
     rendered.update();
     expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
+  });
+  test('displays policy properties', () => {
+    const rendered = mountWithIntl(component);
+    const firstRow = findTestSubject(rendered, 'policyTableRow').at(0).text();
+    const version = 0;
+    const numberOfIndices = 1;
+    expect(firstRow).toBe(`testy0${numberOfIndices}${version}${testDateFormatted}Actions`);
   });
 });

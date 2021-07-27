@@ -44,7 +44,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   const {
     services: { breadcrumbService, license },
   } = useKibana();
-  const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList(false);
+  const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('editPolicy');

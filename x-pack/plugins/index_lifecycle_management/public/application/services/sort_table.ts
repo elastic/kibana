@@ -7,14 +7,15 @@
 
 import { sortBy } from 'lodash';
 import { PolicyFromES } from '../../../common/types';
+import { TableColumn } from '../sections/policy_table';
 
 export const sortTable = (
   array: PolicyFromES[] = [],
-  sortField: Extract<keyof PolicyFromES, 'version' | 'name' | 'linkedIndices' | 'modified_date'>,
+  sortField: TableColumn,
   isSortAscending: boolean
 ): PolicyFromES[] => {
   let sorter;
-  if (sortField === 'linkedIndices') {
+  if (sortField === 'indices') {
     sorter = (item: PolicyFromES) => (item[sortField] || []).length;
   } else {
     sorter = (item: PolicyFromES) => item[sortField];

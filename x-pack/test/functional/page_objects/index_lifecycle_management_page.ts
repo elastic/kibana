@@ -88,11 +88,11 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       return mapAsync(policies, async (policy) => {
         const policyNameElement = await policy.findByTestSubject('policyTableCell-name');
         const policyLinkedIndicesElement = await policy.findByTestSubject(
-          'policyTableCell-linkedIndices'
+          'policyTableCell-indices'
         );
         const policyVersionElement = await policy.findByTestSubject('policyTableCell-version');
         const policyModifiedDateElement = await policy.findByTestSubject(
-          'policyTableCell-modified_date'
+          'policyTableCell-modifiedDate'
         );
         const policyActionsButtonElement = await policy.findByTestSubject(
           'policyActionsContextMenuButton'
@@ -100,7 +100,7 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
 
         return {
           name: await policyNameElement.getVisibleText(),
-          linkedIndices: await policyLinkedIndicesElement.getVisibleText(),
+          indices: await policyLinkedIndicesElement.getVisibleText(),
           version: await policyVersionElement.getVisibleText(),
           modifiedDate: await policyModifiedDateElement.getVisibleText(),
           actionsButton: policyActionsButtonElement,
