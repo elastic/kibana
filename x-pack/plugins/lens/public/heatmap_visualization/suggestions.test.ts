@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getSuggestions } from './suggestions';
-import { HeatmapVisualizationState } from './types';
-import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 import { Position } from '@elastic/charts';
+import { getSuggestions } from './suggestions';
+import type { HeatmapVisualizationState } from './types';
+import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 
 describe('heatmap suggestions', () => {
   describe('rejects suggestions', () => {
