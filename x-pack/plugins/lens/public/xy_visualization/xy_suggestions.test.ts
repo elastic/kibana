@@ -633,6 +633,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -675,6 +676,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -790,6 +792,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -833,6 +836,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price'],
@@ -877,6 +881,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price', 'quantity'],
