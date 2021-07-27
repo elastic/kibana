@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useEffect, useCallback } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
@@ -55,7 +55,7 @@ export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (
     return null;
   }
 
-  return ReactDOM.createPortal(
+  return createPortal(
     <Component {...props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
     el
   );
