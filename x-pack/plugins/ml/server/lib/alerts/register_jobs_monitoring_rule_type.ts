@@ -85,11 +85,11 @@ export function registerJobsMonitoringRuleType({
     actionVariables: {
       context: [
         {
-          name: 'jobIds',
+          name: 'results',
           description: i18n.translate(
-            'xpack.ml.alertTypes.jobsHealthAlertingRule.alertContext.jobIdsDescription',
+            'xpack.ml.alertTypes.jobsHealthAlertingRule.alertContext.resultsDescription',
             {
-              defaultMessage: 'List of job IDs that triggered the alert',
+              defaultMessage: 'Results of the rule execution',
             }
           ),
         },
