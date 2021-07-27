@@ -22,7 +22,7 @@ import { TelemetryEndpointTask } from './endpoint_task';
 import { TelemetryTrustedAppsTask } from './trusted_apps_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { ExceptionListClient } from '../../../lists/server';
+import { ExceptionListClient } from '../../../../lists/server';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 
 type BaseSearchTypes = string | number | boolean | object;
@@ -64,7 +64,7 @@ export class TelemetryEventsSender {
   private agentService?: AgentService;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
-  private savedObjectClient?: SavedObjectsClientContract;
+  private savedObjectsClient?: SavedObjectsClientContract;
   private exceptionListClient?: ExceptionListClient;
 
   constructor(logger: Logger) {
@@ -92,7 +92,7 @@ export class TelemetryEventsSender {
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
-    this.savedObjectClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
     this.exceptionListClient = exceptionListClient;
 
     if (taskManager && this.diagTask && this.epMetricsTask) {
@@ -148,7 +148,7 @@ export class TelemetryEventsSender {
   }
 
   public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined) {
+    if (this.esClient === undefined || this.esClient === null) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
@@ -195,7 +195,7 @@ export class TelemetryEventsSender {
   }
 
   public async fetchFleetAgents() {
-    if (this.esClient === undefined) {
+    if (this.esClient === undefined || this.esClient === null) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
@@ -208,15 +208,15 @@ export class TelemetryEventsSender {
   }
 
   public async fetchPolicyConfigs(id: string) {
-    if (this.savedObjectClient === undefined) {
+    if (this.savedObjectsClient === undefined || this.savedObjectsClient === null) {
       throw Error('could not fetch endpoint policy configs. saved object client is not available');
     }
 
-    return this.agentPolicyService?.get(this.savedObjectClient, id);
+    return this.agentPolicyService?.get(this.savedObjectsClient, id);
   }
 
   public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined) {
+    if (this.esClient === undefined || this.esClient === null) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
@@ -266,21 +266,6 @@ export class TelemetryEventsSender {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
       throw Error('could not fetch trusted applications. exception list client not available.');
     }
-
-    /*
-    // Ensure list is created if it does not exist
-    await this.exceptionListClient.createTrustedAppsList();
-
-    return this.exceptionListClient.findExceptionListItem({
-      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-      page: 1,
-      perPage: 10_000,
-      filter: undefined, // @pjhampton - kuery?
-      namespaceType: 'agnostic',
-      sortField: 'name',
-      sortOrder: 'asc',
-    });
-    */
 
     return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
   }
