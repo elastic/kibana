@@ -24,7 +24,11 @@ import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
-const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const chartSetupContract = chartPluginMock.createSetupContract();
+const chartStartContract = chartPluginMock.createStartContract();
+
+const chartsThemeService = chartSetupContract.theme;
+const chartsActiveCursorService = chartStartContract.activeCursor;
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
@@ -74,6 +78,7 @@ describe('PieVisualization component', () => {
         formatFactory: getFormatSpy,
         onClickValue: jest.fn(),
         chartsThemeService,
+        chartsActiveCursorService,
         paletteService: chartPluginMock.createPaletteRegistry(),
         renderMode: 'display' as const,
         syncColors: false,
