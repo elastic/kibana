@@ -44,7 +44,9 @@ function ProgressComponent({
   });
   const [shapeData, setShapeData] = useState<SvgConfig>(getDefaultShapeData());
   const shapeRef = useCallback<RefCallback<ShapeRef>>((node) => {
-    if (node !== null) setShapeData(node.getData());
+    if (node !== null) {
+      setShapeData(node.getData());
+    }
   }, []);
 
   const [totalLength, setTotalLength] = useState<number>(0);
