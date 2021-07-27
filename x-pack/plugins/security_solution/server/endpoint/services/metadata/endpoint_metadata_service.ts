@@ -7,7 +7,6 @@
 
 import {
   ElasticsearchClient,
-  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -29,6 +28,7 @@ import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders
 import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
 import { DEFAULT_ENDPOINT_HOST_STATUS, fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import { EndpointError } from '../../errors';
+import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -71,18 +71,7 @@ export class EndpointMetadataService {
     // instance initialization (in `constructor(){}`) causes the SO Client to be invalid (perhaps because this
     // instantiation is happening during the plugin's the start phase)
     if (!this.__DANGEROUS_INTERNAL_SO_CLIENT) {
-      const fakeRequest = ({
-        headers: {},
-        getBasePath: () => '',
-        path: '/',
-        route: { settings: {} },
-        url: { href: {} },
-        raw: { req: { url: '/' } },
-      } as unknown) as KibanaRequest;
-
-      this.__DANGEROUS_INTERNAL_SO_CLIENT = this.savedObjectsStart.getScopedClient(fakeRequest, {
-        excludedWrappers: ['security'],
-      });
+      this.__DANGEROUS_INTERNAL_SO_CLIENT = createInternalReadonlySoClient(this.savedObjectsStart);
     }
 
     return this.__DANGEROUS_INTERNAL_SO_CLIENT;
