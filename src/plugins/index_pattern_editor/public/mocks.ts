@@ -25,7 +25,7 @@ const createStartContract = (): Start => {
   };
 };
 
-export const indexPatternFieldEditorPluginMock = {
+export const indexPatternEditorPluginMock = {
   createSetupContract,
   createStartContract,
 };
