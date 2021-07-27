@@ -33,6 +33,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async setAlertName(name: string) {
+      await testSubjects.exists('alertNameInput');
       await testSubjects.setValue('alertNameInput', name);
     },
     async setAlertInterval(value: string) {
