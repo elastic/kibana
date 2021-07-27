@@ -1,4 +1,4 @@
-# The `infra` plugin
+DO NOT MERGE THIS PR # The `infra` plugin
 
 This is the home of the `infra` plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
