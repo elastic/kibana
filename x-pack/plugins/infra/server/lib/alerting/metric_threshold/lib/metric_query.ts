@@ -57,7 +57,7 @@ export const getElasticsearchMetricQuery = (
         };
 
   const baseAggs =
-    aggType === Aggregators.RATE
+    [Aggregators.AVERAGE, Aggregators.P95, Aggregators.P99].indexOf(aggType) > -1
       ? {
           aggregatedIntervals: {
             date_histogram: {
