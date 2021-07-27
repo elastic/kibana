@@ -8,7 +8,7 @@
 import { RequestHandler, RouteMethod } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../security/server';
 import { ReportingCore } from '../../core';
-import { getUserFactory } from './get_user';
+import { getUser } from './get_user';
 import type { ReportingRequestHandlerContext } from '../../types';
 
 const superuserRole = 'superuser';
@@ -29,14 +29,13 @@ export const authorizedUserPreRouting = <P, Q, B>(
   handler: RequestHandlerUser<P, Q, B>
 ): RequestHandler<P, Q, B, ReportingRequestHandlerContext, RouteMethod> => {
   const { logger, security } = reporting.getPluginSetupDeps();
-  const getUser = getUserFactory(security);
 
   return (context, req, res) => {
     try {
       let user: ReportingRequestUser = false;
       if (security && security.license.isEnabled()) {
         // find the authenticated user, or null if security is not enabled
-        user = getUser(req);
+        user = getUser(req, security);
         if (!user) {
           // security is enabled but the user is null
           return res.unauthorized({ body: `Sorry, you aren't authenticated` });
