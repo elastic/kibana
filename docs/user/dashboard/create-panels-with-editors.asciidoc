@@ -56,7 +56,7 @@
 
 | Heatmap
 | &check;
-| &check;
+|
 | &check;
 | &check;
 |
