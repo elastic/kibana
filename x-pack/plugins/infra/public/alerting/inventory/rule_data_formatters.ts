@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ALERT_ID } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
-  const groupName = fields[ALERT_ID];
-  const reason = i18n.translate('xpack.infra.metrics.alerting.inventory.alertReasonDescription', {
-    defaultMessage: 'Inventory alert for {groupName}.', // TEMP reason message, will be deleted once we index the reason field
-    values: {
-      groupName,
-    },
-  });
-
-  const link = '/app/metrics/inventory';
+  const reason = fields[ALERT_REASON] ?? '';
+  const link = '/app/metrics/inventory'; // FIXME? Not sure if we need to do something with this link
 
   return {
     reason,
