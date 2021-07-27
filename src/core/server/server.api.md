@@ -3170,7 +3170,9 @@ export class SavedObjectsUtils {
 // Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
 //
 // @public
-export type SavedObjectTypeExcludeFromUpgradeFilterHook = (esClient: Pick<ElasticsearchClient, 'search'>) => Promise<estypes.QueryDslQueryContainer>;
+export type SavedObjectTypeExcludeFromUpgradeFilterHook = (toolkit: {
+    readonlyEsClient: Pick<ElasticsearchClient, 'search'>;
+}) => estypes.QueryDslQueryContainer | Promise<estypes.QueryDslQueryContainer>;
 
 // @public
 export class SavedObjectTypeRegistry {

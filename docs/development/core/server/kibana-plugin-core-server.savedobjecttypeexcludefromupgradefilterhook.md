@@ -13,5 +13,7 @@ Experimental and subject to change
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectTypeExcludeFromUpgradeFilterHook = (esClient: Pick<ElasticsearchClient, 'search'>) => Promise<estypes.QueryDslQueryContainer>;
+export declare type SavedObjectTypeExcludeFromUpgradeFilterHook = (toolkit: {
+    readonlyEsClient: Pick<ElasticsearchClient, 'search'>;
+}) => estypes.QueryDslQueryContainer | Promise<estypes.QueryDslQueryContainer>;
 ```
