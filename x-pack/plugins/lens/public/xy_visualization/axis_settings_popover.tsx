@@ -58,6 +58,14 @@ export interface AxisSettingsPopoverProps {
    */
   areTickLabelsVisible: boolean;
   /**
+   * Determines the axis labels orientation
+   */
+  orientation: number;
+  /**
+   * Callback on orientation option change
+   */
+  setOrientation: (axis: AxesSettingsConfigKeys, orientation: number) => void;
+  /**
    * Toggles the axis tickLabels visibility
    */
   toggleTickLabelsVisibility: (axis: AxesSettingsConfigKeys) => void;
@@ -151,6 +159,33 @@ const popoverConfig = (
       };
   }
 };
+const axisOrientationOptions: Array<{
+  id: string;
+  value: 0 | -90 | -45;
+  label: string;
+}> = [
+  {
+    id: 'xy_axis_orientation_horizontal',
+    value: 0,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.horizontal', {
+      defaultMessage: 'Horizontal',
+    }),
+  },
+  {
+    id: 'xy_axis_orientation_vertical',
+    value: -90,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.vertical', {
+      defaultMessage: 'Vertical',
+    }),
+  },
+  {
+    id: 'xy_axis_orientation_angled',
+    value: -45,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.angled', {
+      defaultMessage: 'Angled',
+    }),
+  },
+];
 
 const noop = () => {};
 const idPrefix = htmlIdGenerator()();
@@ -165,6 +200,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   areTickLabelsVisible,
   areGridlinesVisible,
   isAxisTitleVisible,
+  orientation,
+  setOrientation,
   toggleAxisTitleVisibility,
   setEndzoneVisibility,
   endzonesVisible,
@@ -259,16 +296,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        data-test-subj={`lnsshow${axis}AxisTickLabels`}
-        label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-          defaultMessage: 'Tick labels',
-        })}
-        onChange={() => toggleTickLabelsVisibility(axis)}
-        checked={areTickLabelsVisible}
-      />
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
         data-test-subj={`lnsshow${axis}AxisGridlines`}
         label={i18n.translate('xpack.lens.xyChart.Gridlines', {
           defaultMessage: 'Gridlines',
@@ -276,6 +303,41 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         onChange={() => toggleGridlinesVisibility(axis)}
         checked={areGridlinesVisible}
       />
+      <EuiSpacer size="m" />
+      <EuiSwitch
+        compressed
+        data-test-subj={`lnsshow${axis}AxisTickLabels`}
+        label={i18n.translate('xpack.lens.xyChart.tickLabels', {
+          defaultMessage: 'Tick labels',
+        })}
+        onChange={() => toggleTickLabelsVisibility(axis)}
+        checked={areTickLabelsVisible}
+      />
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        display="rowCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+          defaultMessage: 'Orientation',
+        })}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+            defaultMessage: 'Orientation',
+          })}
+          data-test-subj="lnsXY_axisOrientation_groups"
+          name="axisOrientation"
+          isDisabled={!areTickLabelsVisible}
+          buttonSize="compressed"
+          options={axisOrientationOptions}
+          idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
+          onChange={(optionId) => {
+            const newOrientation = axisOrientationOptions.find(({ id }) => id === optionId)!.value;
+            setOrientation(axis, newOrientation);
+          }}
+        />
+      </EuiFormRow>
       {setEndzoneVisibility && (
         <>
           <EuiSpacer size="m" />
