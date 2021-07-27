@@ -629,6 +629,113 @@ export const getPrepopulatedMemoryShellcodeException = ({
     ]),
   };
 };
+
+export const getPrepopulatedBehaviorException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  const entries = [
+    {
+      field: 'rule.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.rule?.id ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.hash.sha256',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.hash?.sha256 ?? '',
+    },
+    {
+      field: 'process.pe.original_file_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.pe?.original_file_name ?? '',
+    },
+    {
+      field: 'file.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.path ?? '',
+    },
+    {
+      field: 'file.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.name ?? '',
+    },
+    {
+      field: 'source.address',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.source?.address ?? '',
+    },
+    {
+      field: 'source.port',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: String(alertEcsData.source?.port ?? ''),
+    },
+    {
+      field: 'destination.address',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.destination?.address ?? '',
+    },
+    {
+      field: 'destination.port',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: String(alertEcsData.destination?.port ?? ''),
+    },
+    {
+      field: 'network.type',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.network?.type ?? '',
+    },
+    {
+      field: 'registry.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.path ?? '',
+    },
+    {
+      field: 'registry.value',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.value ?? '',
+    },
+    {
+      field: 'registry.strings',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.strings ?? '',
+    },
+  ];
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries(entries),
+  };
+};
+
 /**
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
@@ -671,6 +778,15 @@ export const defaultEndpointExceptionItems = (
   const eventCode = alertEvent?.code ?? '';
 
   switch (eventCode) {
+    case 'behavior':
+      return [
+        getPrepopulatedBehaviorException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
     case 'memory_signature':
       return [
         getPrepopulatedMemorySignatureException({

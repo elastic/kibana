@@ -21,6 +21,14 @@ export interface ProcessEcs {
   title?: string[];
   thread?: Thread;
   working_directory?: string[];
+  pe?: ProcessPe;
+}
+
+export interface ProcessPe {
+  original_file_name?: string;
+  company?: string;
+  description?: string;
+  file_version?: string;
 }
 
 export interface ProcessHashData {
