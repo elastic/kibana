@@ -68,6 +68,8 @@ interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
   rows: ElasticSearchHit[];
 }
 
+let storageViewPreference = 'discoverViewOptionDocument';
+
 export function DiscoverLayout({
   indexPattern,
   indexPatternList,
@@ -89,7 +91,13 @@ export function DiscoverLayout({
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   // remember in storage
-  const [viewId, setViewId] = useState(`discoverViewOptionDocument`);
+  const [viewId, setViewId] = useState(storageViewPreference);
+
+  const changeViewId = (option: string) => {
+    // @todo: temp hack to replace storage
+    storageViewPreference = option;
+    setViewId(option);
+  };
 
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -340,7 +348,7 @@ export function DiscoverLayout({
                         stateContainer={stateContainer}
                         timefield={timeField}
                         viewId={viewId}
-                        setViewId={setViewId}
+                        setViewId={changeViewId}
                       />
                     </EuiFlexItem>
                     <EuiHorizontalRule margin="none" />
