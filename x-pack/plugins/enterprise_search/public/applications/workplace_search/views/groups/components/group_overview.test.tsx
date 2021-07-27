@@ -21,7 +21,6 @@ import { GroupOverview } from './group_overview';
 
 const deleteGroup = jest.fn();
 const showSharedSourcesModal = jest.fn();
-const showManageUsersModal = jest.fn();
 const showConfirmDeleteModal = jest.fn();
 const hideConfirmDeleteModal = jest.fn();
 const updateGroupName = jest.fn();
@@ -39,7 +38,6 @@ describe('GroupOverview', () => {
     setMockActions({
       deleteGroup,
       showSharedSourcesModal,
-      showManageUsersModal,
       showConfirmDeleteModal,
       hideConfirmDeleteModal,
       updateGroupName,

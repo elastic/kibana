@@ -154,12 +154,14 @@ export const expectResponses = {
         // bulk request error
         expect(object.type).to.eql(type);
         expect(object.id).to.eql(id);
-        expect(object.error).to.eql(error.output.payload);
+        expect(object.error.error).to.eql(error.output.payload.error);
+        expect(object.error.statusCode).to.eql(error.output.payload.statusCode);
+        // ignore the error.message, because it can vary for decorated errors
       } else {
         // non-bulk request error
         expect(object.error).to.eql(error.output.payload.error);
         expect(object.statusCode).to.eql(error.output.payload.statusCode);
-        // ignore the error.message, because it can vary for decorated non-bulk errors (e.g., conflict)
+        // ignore the error.message, because it can vary for decorated errors
       }
     } else {
       // fall back to default behavior of testing the success outcome

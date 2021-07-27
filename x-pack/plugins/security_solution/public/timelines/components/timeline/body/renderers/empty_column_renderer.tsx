@@ -8,9 +8,8 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-
+import { ColumnHeaderOptions } from '../../../../../../common';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import {
   DraggableWrapper,
   DragEffects,
@@ -32,43 +31,48 @@ export const emptyColumnRenderer: ColumnRenderer = {
     columnName,
     eventId,
     field,
+    isDraggable = true,
     timelineId,
     truncate,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
-  }) => (
-    <DraggableWrapper
-      dataProvider={{
-        enabled: true,
-        id: escapeDataProviderId(
-          `empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`
-        ),
-        name: `${columnName}: ${parseQueryValue(null)}`,
-        queryMatch: {
-          field: field.id,
-          value: parseQueryValue(null),
-          displayValue: getEmptyValue(),
-          operator: EXISTS_OPERATOR,
-        },
-        excluded: true,
-        kqlQuery: '',
-        and: [],
-      }}
-      key={`empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`}
-      render={(dataProvider, _, snapshot) =>
-        snapshot.isDragging ? (
-          <DragEffects>
-            <Provider dataProvider={dataProvider} />
-          </DragEffects>
-        ) : (
-          <span>{getEmptyValue()}</span>
-        )
-      }
-      truncate={truncate}
-    />
-  ),
+  }) =>
+    isDraggable ? (
+      <DraggableWrapper
+        dataProvider={{
+          enabled: true,
+          id: escapeDataProviderId(
+            `empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`
+          ),
+          name: `${columnName}: ${parseQueryValue(null)}`,
+          queryMatch: {
+            field: field.id,
+            value: parseQueryValue(null),
+            displayValue: getEmptyValue(),
+            operator: EXISTS_OPERATOR,
+          },
+          excluded: true,
+          kqlQuery: '',
+          and: [],
+        }}
+        key={`empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`}
+        render={(dataProvider, _, snapshot) =>
+          snapshot.isDragging ? (
+            <DragEffects>
+              <Provider dataProvider={dataProvider} />
+            </DragEffects>
+          ) : (
+            <span>{getEmptyValue()}</span>
+          )
+        }
+        truncate={truncate}
+      />
+    ) : (
+      <span>{getEmptyValue()}</span>
+    ),
 };

@@ -30,6 +30,7 @@ import {
   RenderingServiceConstructor,
   IntegrationsServiceConstructor,
   MockIntegrationsService,
+  MockExecutionContextService,
   CoreAppConstructor,
   MockCoreApp,
 } from './core_system.test.mocks';
@@ -46,6 +47,7 @@ const defaultCoreSystemParams = {
     csp: {
       warnLegacyBrowsers: true,
     },
+    version: 'version',
   } as any,
 };
 
@@ -91,12 +93,12 @@ describe('constructor', () => {
     });
   });
 
-  it('passes browserSupportsCsp to ChromeService', () => {
+  it('passes browserSupportsCsp and coreContext to ChromeService', () => {
     createCoreSystem();
-
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledWith({
-      browserSupportsCsp: expect.any(Boolean),
+      browserSupportsCsp: true,
+      kibanaVersion: 'version',
     });
   });
 
@@ -180,6 +182,11 @@ describe('#setup()', () => {
   it('calls coreApp#setup()', async () => {
     await setupCore();
     expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls executionContext.setup()', async () => {
+    await setupCore();
+    expect(MockExecutionContextService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -268,6 +275,11 @@ describe('#start()', () => {
     await startCore();
     expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
   });
+
+  it('calls executionContext.start()', async () => {
+    await startCore();
+    expect(MockExecutionContextService.start).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#stop()', () => {
@@ -324,6 +336,14 @@ describe('#stop()', () => {
     expect(MockCoreApp.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockCoreApp.stop).toHaveBeenCalled();
+  });
+
+  it('calls executionContext.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockExecutionContextService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockExecutionContextService.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', async () => {

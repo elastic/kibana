@@ -84,8 +84,8 @@ export async function getLogTypes(
   const params = {
     index: filebeatIndexPattern,
     size: 0,
-    filterPath: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
-    ignoreUnavailable: true,
+    filter_path: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
+    ignore_unavailable: true,
     body: {
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {

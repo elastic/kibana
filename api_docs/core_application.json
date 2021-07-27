@@ -1372,7 +1372,7 @@
               "\nReturns the absolute path (or URL) to a given app, including the global base path.\n\nBy default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).\nUse the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`)\n\nNote that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.\n"
             ],
             "signature": [
-              "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; } | undefined) => string"
+              "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
@@ -1392,7 +1392,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 783
+                  "lineNumber": 784
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1406,7 +1406,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 783
+                  "lineNumber": 785
                 },
                 "deprecated": false,
                 "children": [
@@ -1422,7 +1422,7 @@
                     ],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 783
+                      "lineNumber": 785
                     },
                     "deprecated": false
                   },
@@ -1438,7 +1438,23 @@
                     ],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 783
+                      "lineNumber": 785
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.deepLinkId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "deepLinkId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "src/core/public/application/types.ts",
+                      "lineNumber": 785
                     },
                     "deprecated": false
                   }
@@ -1462,7 +1478,7 @@
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 788
+              "lineNumber": 791
             },
             "deprecated": false
           }
@@ -1570,7 +1586,7 @@
                 "plugin": "fleet",
                 "link": {
                   "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx",
-                  "lineNumber": 67
+                  "lineNumber": 69
                 }
               },
               {
@@ -1677,7 +1693,7 @@
                 "plugin": "dashboard",
                 "link": {
                   "path": "src/plugins/dashboard/public/plugin.tsx",
-                  "lineNumber": 299
+                  "lineNumber": 315
                 }
               },
               {
@@ -1705,35 +1721,35 @@
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 44
+                  "lineNumber": 47
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 72
+                  "lineNumber": 74
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx",
-                  "lineNumber": 219
+                  "lineNumber": 209
                 }
               },
               {
                 "plugin": "ml",
                 "link": {
                   "path": "x-pack/plugins/ml/public/application/app.tsx",
-                  "lineNumber": 131
+                  "lineNumber": 135
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/public/app/index.tsx",
-                  "lineNumber": 17
+                  "lineNumber": 20
                 }
               },
               {
@@ -2267,28 +2283,56 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
-              "lineNumber": 14
+              "lineNumber": 13
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
-              "lineNumber": 30
+              "lineNumber": 23
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx",
+              "lineNumber": 13
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx",
+              "lineNumber": 25
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx",
+              "lineNumber": 12
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx",
+              "lineNumber": 66
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
-              "lineNumber": 27
+              "lineNumber": 12
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
-              "lineNumber": 44
+              "lineNumber": 26
             }
           },
           {
@@ -2316,14 +2360,14 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 33
+              "lineNumber": 32
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 73
+              "lineNumber": 81
             }
           }
         ],

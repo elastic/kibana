@@ -58,16 +58,16 @@ exports[`policy table should show empty state when there are not any policies 1`
       data-euiicon-type="managementApp"
     />
     <div
-      class="euiSpacer euiSpacer--s"
+      class="euiSpacer euiSpacer--m"
     />
+    <h1
+      class="euiTitle euiTitle--medium"
+    >
+      Create your first index lifecycle policy
+    </h1>
     <span
       class="euiTextColor euiTextColor--subdued"
     >
-      <h1
-        class="euiTitle euiTitle--medium"
-      >
-        Create your first index lifecycle policy
-      </h1>
       <div
         class="euiSpacer euiSpacer--m"
       />
@@ -81,9 +81,6 @@ exports[`policy table should show empty state when there are not any policies 1`
     </span>
     <div
       class="euiSpacer euiSpacer--l"
-    />
-    <div
-      class="euiSpacer euiSpacer--s"
     />
     <button
       class="euiButton euiButton--primary euiButton--fill"
@@ -141,6 +138,7 @@ Array [
 
 exports[`policy table should sort when modified date header is clicked 1`] = `
 Array [
+  "testy0",
   "testy104",
   "testy103",
   "testy102",
@@ -150,13 +148,11 @@ Array [
   "testy98",
   "testy97",
   "testy96",
-  "testy95",
 ]
 `;
 
 exports[`policy table should sort when modified date header is clicked 2`] = `
 Array [
-  "testy0",
   "testy1",
   "testy2",
   "testy3",
@@ -166,6 +162,7 @@ Array [
   "testy7",
   "testy8",
   "testy9",
+  "testy10",
 ]
 `;
 

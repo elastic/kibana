@@ -140,6 +140,7 @@ export interface GeoContainmentInstanceContext extends AlertInstanceContext {
 
 export type GeoContainmentAlertType = AlertType<
   GeoContainmentParams,
+  never, // Only use if defining useSavedObjectReferences hook
   GeoContainmentState,
   GeoContainmentInstanceState,
   GeoContainmentInstanceContext,
@@ -177,5 +178,6 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     },
     actionVariables,
     minimumLicenseRequired: 'gold',
+    isExportable: true,
   };
 }

@@ -6,11 +6,11 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useRuleWithFallback } from './use_rule_with_fallback';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { SecurityAppError } from '../../../../common/utils/api';
 
 jest.mock('./api');
 jest.mock('../alerts/api');
@@ -62,6 +62,7 @@ describe('useRuleWithFallback', () => {
             "immutable": false,
             "index": Array [
               "apm-*-transaction*",
+              "traces-apm*",
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",
@@ -125,6 +126,7 @@ describe('useRuleWithFallback', () => {
             "immutable": false,
             "index": Array [
               "apm-*-transaction*",
+              "traces-apm*",
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",

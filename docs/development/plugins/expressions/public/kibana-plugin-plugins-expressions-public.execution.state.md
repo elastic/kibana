@@ -9,5 +9,5 @@ Dynamic state of the execution.
 <b>Signature:</b>
 
 ```typescript
-readonly state: ExecutionContainer<Output | ExpressionValueError>;
+readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 ```

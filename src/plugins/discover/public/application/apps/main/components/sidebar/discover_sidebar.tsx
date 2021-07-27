@@ -82,7 +82,6 @@ export function DiscoverSidebar({
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
-  unmappedFieldsConfig,
   onEditRuntimeField,
   onChangeIndexPattern,
   setFieldEditorRef,
@@ -129,25 +128,8 @@ export function DiscoverSidebar({
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () =>
-      groupFields(
-        fields,
-        columns,
-        popularLimit,
-        fieldCounts,
-        fieldFilter,
-        useNewFieldsApi,
-        !!unmappedFieldsConfig?.showUnmappedFields
-      ),
-    [
-      fields,
-      columns,
-      popularLimit,
-      fieldCounts,
-      fieldFilter,
-      useNewFieldsApi,
-      unmappedFieldsConfig?.showUnmappedFields,
-    ]
+    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
+    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
   );
 
   const paginate = useCallback(() => {

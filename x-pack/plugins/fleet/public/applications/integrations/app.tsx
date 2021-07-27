@@ -7,9 +7,8 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { createHashHistory } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -26,20 +25,23 @@ import {
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
-import { AgentPolicyContextProvider } from './hooks';
+import { AgentPolicyContextProvider, useUrlModal } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from './constants';
 
-import { Error, Loading } from './components';
+import { Error, Loading, SettingFlyout } from './components';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { PackageInstallProvider } from './hooks';
-import { useBreadcrumbs, IntraAppStateProvider, UIExtensionsContext } from './hooks';
+import { useBreadcrumbs, UIExtensionsContext } from './hooks';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
@@ -185,25 +187,12 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   /** For testing purposes only */
-  routerHistory?: History<any>;
-}> = memo(
-  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-    const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
+  routerHistory?: History<any>; // TODO remove
+}> = memo(({ children, startServices, config, history, kibanaVersion, extensions }) => {
+  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
-    // Sync our hash history with Kibana scoped history
-    useEffect(() => {
-      const unlistenParentHistory = history.listen(() => {
-        const newHash = createHashHistory();
-        if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
-          routerHistoryInstance.replace(newHash.location.pathname);
-        }
-      });
-
-      return unlistenParentHistory;
-    }, [history, routerHistoryInstance]);
-
-    return (
+  return (
+    <RedirectAppLinks application={startServices.application}>
       <startServices.i18n.Context>
         <KibanaContextProvider services={{ ...startServices }}>
           <EuiErrorBoundary>
@@ -212,15 +201,13 @@ export const IntegrationsAppContext: React.FC<{
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <UIExtensionsContext.Provider value={extensions}>
                     <FleetStatusProvider>
-                      <IntraAppStateProvider kibanaScopedHistory={history}>
-                        <Router history={routerHistoryInstance}>
-                          <AgentPolicyContextProvider>
-                            <PackageInstallProvider notifications={startServices.notifications}>
-                              {children}
-                            </PackageInstallProvider>
-                          </AgentPolicyContextProvider>
-                        </Router>
-                      </IntraAppStateProvider>
+                      <Router history={history}>
+                        <AgentPolicyContextProvider>
+                          <PackageInstallProvider notifications={startServices.notifications}>
+                            {children}
+                          </PackageInstallProvider>
+                        </AgentPolicyContextProvider>
+                      </Router>
                     </FleetStatusProvider>
                   </UIExtensionsContext.Provider>
                 </EuiThemeProvider>
@@ -229,17 +216,48 @@ export const IntegrationsAppContext: React.FC<{
           </EuiErrorBoundary>
         </KibanaContextProvider>
       </startServices.i18n.Context>
-    );
-  }
-);
+    </RedirectAppLinks>
+  );
+});
 
 export const AppRoutes = memo(() => {
+  const { modal, setModal } = useUrlModal();
   return (
-    <Switch>
-      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
-        <EPMApp />
-      </Route>
-      <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />
-    </Switch>
+    <>
+      {modal === 'settings' && (
+        <EuiPortal>
+          <SettingFlyout
+            onClose={() => {
+              setModal(null);
+            }}
+          />
+        </EuiPortal>
+      )}
+      <Switch>
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
+          <EPMApp />
+        </Route>
+        <Route
+          render={({ location }) => {
+            // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+            const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+            if (!shouldRedirectHash) {
+              return <Redirect to={INTEGRATIONS_ROUTING_PATHS.integrations_all} />;
+            }
+            const pathname = location.hash.replace(/^#/, '');
+
+            return (
+              <Redirect
+                to={{
+                  ...location,
+                  pathname,
+                  hash: undefined,
+                }}
+              />
+            );
+          }}
+        />
+      </Switch>
+    </>
   );
 });

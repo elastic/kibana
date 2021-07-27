@@ -7,14 +7,13 @@
 
 import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Loading } from '../../../shared/loading';
-import { rerender } from '../../../test_helpers';
-
+import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
 
@@ -46,15 +45,8 @@ describe('CrawlerOverview', () => {
 
     // TODO test for CrawlRequestsTable after it is built in a future PR
 
-    // TODO test for AddDomainForm after it is built in a future PR
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
 
     // TODO test for empty state after it is built in a future PR
-  });
-
-  it('shows a loading state when data is loading', () => {
-    setMockValues({ dataLoading: true });
-    rerender(wrapper);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 });

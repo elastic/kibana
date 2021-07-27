@@ -43,9 +43,10 @@ describe('when using the EndpointHostIsolationStatus component', () => {
     expect(getByTestId('test').textContent).toBe('Isolated');
   });
 
-  it.each([
-    ['Isolating pending', { pendingIsolate: 2 }],
-    ['Unisolating pending', { pendingUnIsolate: 2 }],
+  // FIXME: un-skip when we bring back the pending isolation statuses
+  it.skip.each([
+    ['Isolating', { pendingIsolate: 2 }],
+    ['Releasing', { pendingUnIsolate: 2 }],
     ['4 actions pending', { isIsolated: true, pendingUnIsolate: 2, pendingIsolate: 2 }],
   ])('should show %s}', (expectedLabel, componentProps) => {
     const { getByTestId } = render(componentProps);

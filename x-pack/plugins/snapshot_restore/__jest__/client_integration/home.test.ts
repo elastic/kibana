@@ -13,7 +13,6 @@ import {
   setupEnvironment,
   pageHelpers,
   nextTick,
-  delay,
   getRandomString,
   findTestSubject,
 } from './helpers';
@@ -30,6 +29,16 @@ jest.mock('@kbn/i18n/react', () => {
     ...original,
     FormattedDate: () => '',
     FormattedTime: () => '',
+  };
+});
+
+jest.mock('../../common/constants', () => {
+  const original = jest.requireActual('../../common/constants');
+
+  return {
+    ...original,
+    // Mocking this value to a lower number in order to more easily trigger the max snapshots warning in the tests
+    SNAPSHOT_LIST_MAX_SIZE: 2,
   };
 });
 
@@ -121,7 +130,7 @@ describe('<SnapshotRestoreHome />', () => {
         });
 
         expect(exists('repositoryList')).toBe(false);
-        expect(exists('snapshotList')).toBe(true);
+        expect(exists('snapshotListEmpty')).toBe(true);
       });
     });
   });
@@ -399,9 +408,9 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(100);
-          testBed.component.update();
         });
+
+        testBed.component.update();
       });
 
       test('should display an empty prompt', () => {
@@ -428,9 +437,8 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(2000);
-          testBed.component.update();
         });
+        testBed.component.update();
       });
 
       test('should display an empty prompt', () => {
@@ -461,16 +469,15 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
           repositories: [REPOSITORY_NAME],
-          errors: {},
         });
 
         testBed = await setup();
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(2000);
-          testBed.component.update();
         });
+
+        testBed.component.update();
       });
 
       test('should list them in the table', async () => {
@@ -492,6 +499,69 @@ describe('<SnapshotRestoreHome />', () => {
             '',
           ]);
         });
+      });
+
+      test('should show a warning if the number of snapshots exceeded the limit', () => {
+        // We have mocked the SNAPSHOT_LIST_MAX_SIZE to 2, so the warning should display
+        const { find, exists } = testBed;
+        expect(exists('maxSnapshotsWarning')).toBe(true);
+        expect(find('maxSnapshotsWarning').text()).toContain(
+          'Cannot show the full list of snapshots'
+        );
+      });
+
+      test('should show a warning if one repository contains errors', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({
+          snapshots,
+          repositories: [REPOSITORY_NAME],
+          errors: {
+            repository_with_errors: {
+              type: 'repository_exception',
+              reason:
+                '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
+            },
+          },
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { find, exists } = testBed;
+        expect(exists('repositoryErrorsWarning')).toBe(true);
+        expect(find('repositoryErrorsWarning').text()).toContain(
+          'Some repositories contain errors'
+        );
+      });
+
+      test('should show a prompt if a repository contains errors and there are no other repositories', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({
+          snapshots,
+          repositories: [],
+          errors: {
+            repository_with_errors: {
+              type: 'repository_exception',
+              reason:
+                '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
+            },
+          },
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { find, exists } = testBed;
+        expect(exists('repositoryErrorsPrompt')).toBe(true);
+        expect(find('repositoryErrorsPrompt').text()).toContain('Some repositories contain errors');
       });
 
       test('each row should have a link to the repository', async () => {

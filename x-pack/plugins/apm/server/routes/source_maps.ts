@@ -7,15 +7,18 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { SavedObjectsClientContract } from 'kibana/server';
+import { jsonRt } from '@kbn/io-ts-utils';
 import {
   createApmArtifact,
   deleteApmArtifact,
   listArtifacts,
   updateSourceMapsOnFleetPolicies,
+  getCleanedBundleFilePath,
 } from '../lib/fleet/source_maps';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { stringFromBufferRt } from '../utils/string_from_buffer_rt';
 
 export const sourceMapRt = t.intersection([
   t.type({
@@ -31,10 +34,12 @@ export const sourceMapRt = t.intersection([
   }),
 ]);
 
+export type SourceMap = t.TypeOf<typeof sourceMapRt>;
+
 const listSourceMapRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/sourcemaps',
   options: { tags: ['access:apm'] },
-  handler: async ({ plugins, logger }) => {
+  handler: async ({ plugins }) => {
     try {
       const fleetPluginStart = await plugins.fleet?.start();
       if (fleetPluginStart) {
@@ -51,21 +56,30 @@ const listSourceMapRoute = createApmServerRoute({
 });
 
 const uploadSourceMapRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/sourcemaps/{serviceName}/{serviceVersion}',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  endpoint: 'POST /api/apm/sourcemaps',
+  options: {
+    tags: ['access:apm', 'access:apm_write'],
+    body: { accepts: ['multipart/form-data'] },
+  },
   params: t.type({
-    path: t.type({
-      serviceName: t.string,
-      serviceVersion: t.string,
-    }),
     body: t.type({
-      bundleFilepath: t.string,
-      sourceMap: sourceMapRt,
+      service_name: t.string,
+      service_version: t.string,
+      bundle_filepath: t.string,
+      sourcemap: t
+        .union([t.string, stringFromBufferRt])
+        .pipe(jsonRt)
+        .pipe(sourceMapRt),
     }),
   }),
   handler: async ({ params, plugins, core }) => {
-    const { serviceName, serviceVersion } = params.path;
-    const { bundleFilepath, sourceMap } = params.body;
+    const {
+      service_name: serviceName,
+      service_version: serviceVersion,
+      bundle_filepath: bundleFilepath,
+      sourcemap: sourceMap,
+    } = params.body;
+    const cleanedBundleFilepath = getCleanedBundleFilePath(bundleFilepath);
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -77,7 +91,7 @@ const uploadSourceMapRoute = createApmServerRoute({
           apmArtifactBody: {
             serviceName,
             serviceVersion,
-            bundleFilepath,
+            bundleFilepath: cleanedBundleFilepath,
             sourceMap,
           },
         });
@@ -107,7 +121,7 @@ const deleteSourceMapRoute = createApmServerRoute({
       id: t.string,
     }),
   }),
-  handler: async ({ context, params, plugins, core }) => {
+  handler: async ({ params, plugins, core }) => {
     const fleetPluginStart = await plugins.fleet?.start();
     const { id } = params.path;
     const coreStart = await core.start();

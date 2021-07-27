@@ -11,38 +11,29 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { metadataQueryStrategyV2 } from './support/query_strategies';
 import { get } from 'lodash';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
     it('queries the correct index', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
-      const query = await kibanaRequestToMetadataListESQuery(
-        mockRequest,
-        {
-          logFactory: loggingSystemMock.create(),
-          service: new EndpointAppContextService(),
-          config: () => Promise.resolve(createMockConfig()),
-          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        },
-        metadataQueryStrategyV2()
-      );
+      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
+        logFactory: loggingSystemMock.create(),
+        service: new EndpointAppContextService(),
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      });
       expect(query.index).toEqual(metadataCurrentIndexPattern);
     });
 
     it('sorts using *event.created', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
-      const query = await kibanaRequestToMetadataListESQuery(
-        mockRequest,
-        {
-          logFactory: loggingSystemMock.create(),
-          service: new EndpointAppContextService(),
-          config: () => Promise.resolve(createMockConfig()),
-          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        },
-        metadataQueryStrategyV2()
-      );
+      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
+        logFactory: loggingSystemMock.create(),
+        service: new EndpointAppContextService(),
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      });
       expect(query.body.sort).toContainEqual({
         'event.created': {
           order: 'desc',
@@ -61,16 +52,12 @@ describe('query builder', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {},
       });
-      const query = await kibanaRequestToMetadataListESQuery(
-        mockRequest,
-        {
-          logFactory: loggingSystemMock.create(),
-          service: new EndpointAppContextService(),
-          config: () => Promise.resolve(createMockConfig()),
-          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        },
-        metadataQueryStrategyV2()
-      );
+      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
+        logFactory: loggingSystemMock.create(),
+        service: new EndpointAppContextService(),
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      });
       expect(query.body.query).toHaveProperty('match_all');
     });
 
@@ -87,7 +74,6 @@ describe('query builder', () => {
           config: () => Promise.resolve(createMockConfig()),
           experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
-        metadataQueryStrategyV2(),
         {
           unenrolledAgentIds: [unenrolledElasticAgentId],
         }
@@ -111,16 +97,12 @@ describe('query builder', () => {
           filters: { kql: 'not host.ip:10.140.73.246' },
         },
       });
-      const query = await kibanaRequestToMetadataListESQuery(
-        mockRequest,
-        {
-          logFactory: loggingSystemMock.create(),
-          service: new EndpointAppContextService(),
-          config: () => Promise.resolve(createMockConfig()),
-          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        },
-        metadataQueryStrategyV2()
-      );
+      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
+        logFactory: loggingSystemMock.create(),
+        service: new EndpointAppContextService(),
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      });
 
       expect(query.body.query.bool.must).toContainEqual({
         bool: {
@@ -160,7 +142,6 @@ describe('query builder', () => {
               createMockConfig().enableExperimental
             ),
           },
-          metadataQueryStrategyV2(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
@@ -197,13 +178,13 @@ describe('query builder', () => {
 
   describe('MetadataGetQuery', () => {
     it('searches the correct index', () => {
-      const query = getESQueryHostMetadataByID('nonsense-id', metadataQueryStrategyV2());
+      const query = getESQueryHostMetadataByID('nonsense-id');
       expect(query.index).toEqual(metadataCurrentIndexPattern);
     });
 
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
+      const query = getESQueryHostMetadataByID(mockID);
 
       expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'agent.id': mockID },
@@ -212,7 +193,7 @@ describe('query builder', () => {
 
     it('supports HostDetails in schema for backwards compat', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
+      const query = getESQueryHostMetadataByID(mockID);
 
       expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },

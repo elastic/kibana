@@ -112,7 +112,7 @@ export const ItemDetailsCard = memo<ItemDetailsCardProps>(
     );
 
     return (
-      <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} className={className}>
+      <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} className={className} hasBorder>
         <EuiFlexGroup direction="row">
           <SummarySection grow={2}>
             <EuiDescriptionList compressed type="column">

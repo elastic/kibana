@@ -12,6 +12,7 @@ import {
   FLEET_SYSTEM_PACKAGE,
   FLEET_SERVER_PACKAGE,
   autoUpdatePackages,
+  monitoringTypes,
 } from './epm';
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
@@ -40,7 +41,7 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   ],
   is_default: true,
   is_managed: false,
-  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
+  monitoring_enabled: monitoringTypes,
 };
 
 export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
@@ -58,7 +59,7 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
   is_default: false,
   is_default_fleet_server: true,
   is_managed: false,
-  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
+  monitoring_enabled: monitoringTypes,
 };
 
 export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({

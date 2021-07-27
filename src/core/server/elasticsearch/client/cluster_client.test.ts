@@ -55,14 +55,19 @@ describe('ClusterClient', () => {
 
   it('creates a single internal and scoped client during initialization', () => {
     const config = createConfig();
-
-    new ClusterClient(config, logger, 'custom-type', getAuthHeaders);
+    const getExecutionContextMock = jest.fn();
+    new ClusterClient(config, logger, 'custom-type', getAuthHeaders, getExecutionContextMock);
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
-    expect(configureClientMock).toHaveBeenCalledWith(config, { logger, type: 'custom-type' });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+    });
+    expect(configureClientMock).toHaveBeenCalledWith(config, {
+      logger,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
       scoped: true,
     });
   });

@@ -10,9 +10,9 @@ import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { KueryFilterQuery } from '../../../../common/store';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import { KueryFilterQuery } from '../../../../../common/types/timeline';
 import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 

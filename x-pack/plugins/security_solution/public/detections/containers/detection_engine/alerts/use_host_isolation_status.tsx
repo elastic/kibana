@@ -7,16 +7,17 @@
 
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getHostMetadata } from './api';
-import { ISOLATION_STATUS_FAILURE } from './translations';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface HostIsolationStatusResponse {
   loading: boolean;
   isIsolated: boolean;
-  agentStatus: HostStatus;
+  agentStatus: HostStatus | undefined;
+  pendingIsolation: number;
+  pendingUnisolation: number;
 }
 
 /*
@@ -27,24 +28,46 @@ export const useHostIsolationStatus = ({
   agentId: string;
 }): HostIsolationStatusResponse => {
   const [isIsolated, setIsIsolated] = useState<boolean>(false);
-  const [agentStatus, setAgentStatus] = useState<HostStatus>(HostStatus.UNHEALTHY);
+  const [agentStatus, setAgentStatus] = useState<HostStatus>();
+  const [pendingIsolation, setPendingIsolation] = useState(0);
+  const [pendingUnisolation, setPendingUnisolation] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const { addError } = useAppToasts();
-
   useEffect(() => {
+    const abortCtrl = new AbortController();
     // isMounted tracks if a component is mounted before changing state
     let isMounted = true;
+    let fleetAgentId: string;
     const fetchData = async () => {
       try {
-        const metadataResponse = await getHostMetadata({ agentId });
+        const metadataResponse = await getHostMetadata({ agentId, signal: abortCtrl.signal });
         if (isMounted) {
           setIsIsolated(isEndpointHostIsolated(metadataResponse.metadata));
           setAgentStatus(metadataResponse.host_status);
+          fleetAgentId = metadataResponse.metadata.elastic.agent.id;
         }
       } catch (error) {
-        addError(error.message, { title: ISOLATION_STATUS_FAILURE });
+        // don't show self-aborted requests errors to the user
+        if (error.name === 'AbortError') {
+          return;
+        }
+
+        if (isMounted && error.body.statusCode === 404) {
+          setAgentStatus(HostStatus.UNENROLLED);
+        }
       }
+
+      try {
+        const { data } = await fetchPendingActionsByAgentId(fleetAgentId);
+        if (isMounted) {
+          setPendingIsolation(data[0].pending_actions?.isolate ?? 0);
+          setPendingUnisolation(data[0].pending_actions?.unisolate ?? 0);
+        }
+      } catch (error) {
+        // silently catch non-user initiated error
+        return;
+      }
+
       if (isMounted) {
         setLoading(false);
       }
@@ -62,7 +85,8 @@ export const useHostIsolationStatus = ({
     return () => {
       // updates to show component is unmounted
       isMounted = false;
+      abortCtrl.abort();
     };
-  }, [addError, agentId]);
-  return { loading, isIsolated, agentStatus };
+  }, [agentId]);
+  return { loading, isIsolated, agentStatus, pendingIsolation, pendingUnisolation };
 };

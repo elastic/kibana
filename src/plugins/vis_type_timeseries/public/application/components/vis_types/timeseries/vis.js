@@ -51,7 +51,9 @@ class TimeseriesVisualization extends Component {
   };
 
   applyDocTo = (template) => (doc) => {
-    const vars = replaceVars(template, null, doc);
+    const vars = replaceVars(template, null, doc, {
+      noEscape: true,
+    });
 
     if (vars instanceof Error) {
       this.showToastNotification = vars.error.caused_by;

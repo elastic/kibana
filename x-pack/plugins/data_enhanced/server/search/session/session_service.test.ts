@@ -79,7 +79,9 @@ describe('SearchSessionService', () => {
             maxUpdateRetries: MAX_UPDATE_RETRIES,
             defaultExpiration: moment.duration(7, 'd'),
             monitoringTaskTimeout: moment.duration(5, 'm'),
+            cleanupInterval: moment.duration(10, 's'),
             trackingInterval: moment.duration(10, 's'),
+            expireInterval: moment.duration(10, 'm'),
             management: {} as any,
           },
         },
@@ -89,7 +91,7 @@ describe('SearchSessionService', () => {
         warn: jest.fn(),
         error: jest.fn(),
       };
-      service = new SearchSessionService(mockLogger, config);
+      service = new SearchSessionService(mockLogger, config, '8.0.0');
       const coreStart = coreMock.createStart();
       mockTaskManager = taskManagerMock.createStart();
       await flushPromises();
@@ -157,7 +159,9 @@ describe('SearchSessionService', () => {
             maxUpdateRetries: MAX_UPDATE_RETRIES,
             defaultExpiration: moment.duration(7, 'd'),
             trackingInterval: moment.duration(10, 's'),
+            expireInterval: moment.duration(10, 'm'),
             monitoringTaskTimeout: moment.duration(5, 'm'),
+            cleanupInterval: moment.duration(10, 's'),
             management: {} as any,
           },
         },
@@ -167,7 +171,7 @@ describe('SearchSessionService', () => {
         warn: jest.fn(),
         error: jest.fn(),
       };
-      service = new SearchSessionService(mockLogger, config);
+      service = new SearchSessionService(mockLogger, config, '8.0.0');
       const coreStart = coreMock.createStart();
       mockTaskManager = taskManagerMock.createStart();
       await flushPromises();

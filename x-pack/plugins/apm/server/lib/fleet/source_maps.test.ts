@@ -8,6 +8,7 @@
 import {
   ArtifactSourceMap,
   getPackagePolicyWithSourceMap,
+  getCleanedBundleFilePath,
 } from './source_maps';
 
 const packagePolicy = {
@@ -103,12 +104,51 @@ const artifacts = [
 
 describe('Source maps', () => {
   describe('getPackagePolicyWithSourceMap', () => {
-    it('returns unchanged package policy when artifacts is empty', () => {
+    it('removes source map from package policy', () => {
+      const packagePolicyWithSourceMaps = {
+        ...packagePolicy,
+        inputs: [
+          {
+            ...packagePolicy.inputs[0],
+            compiled_input: {
+              'apm-server': {
+                ...packagePolicy.inputs[0].compiled_input['apm-server'],
+                value: {
+                  rum: {
+                    source_mapping: {
+                      metadata: [
+                        {
+                          'service.name': 'service_name',
+                          'service.version': '1.0.0',
+                          'bundle.filepath':
+                            'http://localhost:3000/static/js/main.chunk.js',
+                          'sourcemap.url':
+                            '/api/fleet/artifacts/service_name-1.0.0/my-id-1',
+                        },
+                        {
+                          'service.name': 'service_name',
+                          'service.version': '2.0.0',
+                          'bundle.filepath':
+                            'http://localhost:3000/static/js/main.chunk.js',
+                          'sourcemap.url':
+                            '/api/fleet/artifacts/service_name-2.0.0/my-id-2',
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
       const updatedPackagePolicy = getPackagePolicyWithSourceMap({
-        packagePolicy,
+        packagePolicy: packagePolicyWithSourceMaps,
         artifacts: [],
       });
-      expect(updatedPackagePolicy).toEqual(packagePolicy);
+      expect(updatedPackagePolicy.inputs[0].config).toEqual({
+        'apm-server': { value: { rum: { source_mapping: { metadata: [] } } } },
+      });
     });
     it('adds source maps into the package policy', () => {
       const updatedPackagePolicy = getPackagePolicyWithSourceMap({
@@ -143,6 +183,21 @@ describe('Source maps', () => {
           },
         },
       });
+    });
+  });
+  describe('getCleanedBundleFilePath', () => {
+    it('cleans url', () => {
+      expect(
+        getCleanedBundleFilePath(
+          'http://localhost:8000/test/e2e/../e2e/general-usecase/bundle.js.map'
+        )
+      ).toEqual('http://localhost:8000/test/e2e/general-usecase/bundle.js.map');
+    });
+
+    it('returns same path when it is not a valid url', () => {
+      expect(
+        getCleanedBundleFilePath('/general-usecase/bundle.js.map')
+      ).toEqual('/general-usecase/bundle.js.map');
     });
   });
 });

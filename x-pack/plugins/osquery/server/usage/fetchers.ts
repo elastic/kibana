@@ -45,6 +45,11 @@ export async function getPolicyLevelUsage(
   const agentResponse = await esClient.search({
     body: {
       size: 0,
+      query: {
+        match: {
+          active: true,
+        },
+      },
       aggs: {
         policied: {
           filter: {
@@ -56,6 +61,7 @@ export async function getPolicyLevelUsage(
       },
     },
     index: '.fleet-agents',
+    ignore_unavailable: true,
   });
   const policied = agentResponse.body.aggregations?.policied as AggregationsSingleBucketAggregate;
   if (policied && typeof policied.doc_count === 'number') {
@@ -86,7 +92,8 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
   return packagePolicies.items.reduce(
     (acc, item) => {
       ++acc.queryGroups.total;
-      if (item.inputs.length === 0) {
+      const policyAgents = item.inputs.reduce((sum, input) => sum + input.streams.length, 0);
+      if (policyAgents === 0) {
         ++acc.queryGroups.empty;
       }
       return acc;
@@ -118,6 +125,7 @@ export async function getLiveQueryUsage(
       },
     },
     index: '.fleet-actions',
+    ignore_unavailable: true,
   });
   const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
@@ -226,6 +234,7 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
       },
     },
     index: METRICS_INDICES,
+    ignore_unavailable: true,
   });
 
   return extractBeatUsageMetrics(metricResponse);

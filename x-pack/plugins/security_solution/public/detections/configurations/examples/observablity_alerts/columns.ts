@@ -6,10 +6,9 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-
+import { ColumnHeaderOptions } from '../../../../../common';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 
 import * as i18n from '../../../components/alerts_table/translations';
 
@@ -48,6 +47,5 @@ export const columns: Array<
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
     id: 'signal.reason',
-    initialWidth: 644,
   },
 ];

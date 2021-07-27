@@ -13,88 +13,76 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiGlobalToastList } from '@elastic/eui';
 
-import { FlashMessages, Callouts, Toasts } from './flash_messages';
+import { FlashMessages, Toasts } from './flash_messages';
 
 describe('FlashMessages', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  it('renders an array of callouts', () => {
+    const mockMessages = [
+      { type: 'success', message: 'Hello world!!' },
+      {
+        type: 'error',
+        message: 'Whoa nelly!',
+        description: <div data-test-subj="error">Something went wrong</div>,
+      },
+      { type: 'info', message: 'Everything is fine, nothing is ruined' },
+      { type: 'warning', message: 'Uh oh' },
+      { type: 'info', message: 'Testing multiples of same type' },
+    ];
+    setMockValues({ messages: mockMessages });
 
-  it('renders callout and toast flash messages', () => {
     const wrapper = shallow(<FlashMessages />);
-    expect(wrapper.find(Callouts)).toHaveLength(1);
-    expect(wrapper.find(Toasts)).toHaveLength(1);
+
+    expect(wrapper.find(EuiCallOut)).toHaveLength(5);
+    expect(wrapper.find(EuiCallOut).first().prop('color')).toEqual('success');
+    expect(wrapper.find('[data-test-subj="error"]')).toHaveLength(1);
+    expect(wrapper.find(EuiCallOut).last().prop('iconType')).toEqual('iInCircle');
   });
 
-  describe('callouts', () => {
-    it('renders an array of flash messages & types', () => {
-      const mockMessages = [
-        { type: 'success', message: 'Hello world!!' },
-        {
-          type: 'error',
-          message: 'Whoa nelly!',
-          description: <div data-test-subj="error">Something went wrong</div>,
-        },
-        { type: 'info', message: 'Everything is fine, nothing is ruined' },
-        { type: 'warning', message: 'Uh oh' },
-        { type: 'info', message: 'Testing multiples of same type' },
-      ];
-      setMockValues({ messages: mockMessages });
+  it('renders any children', () => {
+    setMockValues({ messages: [{ type: 'success' }] });
 
-      const wrapper = shallow(<Callouts />);
+    const wrapper = shallow(
+      <FlashMessages>
+        <button data-test-subj="testing">
+          Some action - you could even clear flash messages here
+        </button>
+      </FlashMessages>
+    );
 
-      expect(wrapper.find(EuiCallOut)).toHaveLength(5);
-      expect(wrapper.find(EuiCallOut).first().prop('color')).toEqual('success');
-      expect(wrapper.find('[data-test-subj="error"]')).toHaveLength(1);
-      expect(wrapper.find(EuiCallOut).last().prop('iconType')).toEqual('iInCircle');
-    });
-
-    it('renders any children', () => {
-      setMockValues({ messages: [{ type: 'success' }] });
-
-      const wrapper = shallow(
-        <Callouts>
-          <button data-test-subj="testing">
-            Some action - you could even clear flash messages here
-          </button>
-        </Callouts>
-      );
-
-      expect(wrapper.find('[data-test-subj="testing"]').text()).toContain('Some action');
-    });
+    expect(wrapper.find('[data-test-subj="testing"]').text()).toContain('Some action');
   });
+});
 
-  describe('toasts', () => {
-    const actions = { dismissToastMessage: jest.fn() };
-    beforeAll(() => setMockActions(actions));
+describe('Toasts', () => {
+  const actions = { dismissToastMessage: jest.fn() };
+  beforeAll(() => setMockActions(actions));
 
-    it('renders an EUI toast list', () => {
-      const mockToasts = [
-        { id: 'test', title: 'Hello world!!' },
-        {
-          color: 'success',
-          iconType: 'check',
-          title: 'Success!',
-          toastLifeTimeMs: 500,
-          id: 'successToastId',
-        },
-        {
-          color: 'danger',
-          iconType: 'alert',
-          title: 'Oh no!',
-          text: <div data-test-subj="error">Something went wrong</div>,
-          id: 'errorToastId',
-        },
-      ];
-      setMockValues({ toastMessages: mockToasts });
+  it('renders an EUI toast list', () => {
+    const mockToasts = [
+      { id: 'test', title: 'Hello world!!' },
+      {
+        color: 'success',
+        iconType: 'check',
+        title: 'Success!',
+        toastLifeTimeMs: 500,
+        id: 'successToastId',
+      },
+      {
+        color: 'danger',
+        iconType: 'alert',
+        title: 'Oh no!',
+        text: <div data-test-subj="error">Something went wrong</div>,
+        id: 'errorToastId',
+      },
+    ];
+    setMockValues({ toastMessages: mockToasts });
 
-      const wrapper = shallow(<Toasts />);
-      const euiToastList = wrapper.find(EuiGlobalToastList);
+    const wrapper = shallow(<Toasts />);
+    const euiToastList = wrapper.find(EuiGlobalToastList);
 
-      expect(euiToastList).toHaveLength(1);
-      expect(euiToastList.prop('toasts')).toEqual(mockToasts);
-      expect(euiToastList.prop('dismissToast')).toEqual(actions.dismissToastMessage);
-      expect(euiToastList.prop('toastLifeTimeMs')).toEqual(5000);
-    });
+    expect(euiToastList).toHaveLength(1);
+    expect(euiToastList.prop('toasts')).toEqual(mockToasts);
+    expect(euiToastList.prop('dismissToast')).toEqual(actions.dismissToastMessage);
+    expect(euiToastList.prop('toastLifeTimeMs')).toEqual(5000);
   });
 });

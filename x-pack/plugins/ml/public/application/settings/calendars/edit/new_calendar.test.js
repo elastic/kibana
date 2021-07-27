@@ -132,24 +132,22 @@ describe('NewCalendar', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('Import modal shown on Import Events button click', () => {
+  test('Import modal button is disabled', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
     const importButton = wrapper.find('[data-test-subj="mlCalendarImportEventsButton"]');
     const button = importButton.find('EuiButton');
-    button.simulate('click');
-
-    expect(wrapper.state('isImportModalVisible')).toBe(true);
+    expect(button.prop('isDisabled')).toBe(true);
   });
 
-  test('New event modal shown on New event button click', () => {
+  test('New event modal button is disabled', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
     const importButton = wrapper.find('[data-test-subj="mlCalendarNewEventButton"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 
-    expect(wrapper.state('isNewEventModalVisible')).toBe(true);
+    expect(button.prop('isDisabled')).toBe(true);
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', () => {

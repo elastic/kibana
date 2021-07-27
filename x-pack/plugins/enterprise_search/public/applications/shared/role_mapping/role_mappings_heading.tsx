@@ -28,13 +28,11 @@ import {
 
 interface Props {
   productName: ProductName;
+  docsLink: string;
   onClick(): void;
 }
 
-// TODO: Replace EuiLink href with acutal docs link when available
-const ROLE_MAPPINGS_DOCS_HREF = '#TODO';
-
-export const RoleMappingsHeading: React.FC<Props> = ({ productName, onClick }) => (
+export const RoleMappingsHeading: React.FC<Props> = ({ productName, docsLink, onClick }) => (
   <header>
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem>
@@ -45,7 +43,7 @@ export const RoleMappingsHeading: React.FC<Props> = ({ productName, onClick }) =
         <EuiText color="subdued">
           <p>
             {ROLE_MAPPINGS_HEADING_DESCRIPTION(productName)}{' '}
-            <EuiLink external href={ROLE_MAPPINGS_DOCS_HREF} target="_blank">
+            <EuiLink external href={docsLink} target="_blank">
               {ROLE_MAPPINGS_HEADING_DOCS_LINK}
             </EuiLink>
           </p>

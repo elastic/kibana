@@ -13,7 +13,7 @@ import { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;
-  error: Error;
+  error?: Error;
   actions?: JSX.Element;
   isCentered?: boolean;
 }
@@ -32,30 +32,34 @@ export const PageError: React.FunctionComponent<Props> = ({
   isCentered,
   ...rest
 }) => {
-  const {
-    error: errorString,
-    cause, // wrapEsError() on the server adds a "cause" array
-    message,
-  } = error;
+  const errorString = error?.error;
+  const cause = error?.cause; // wrapEsError() on the server adds a "cause" array
+  const message = error?.message;
 
   const errorContent = (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
       <EuiEmptyPrompt
         title={<h2>{title}</h2>}
         body={
-          <>
-            {cause ? message || errorString : <p>{message || errorString}</p>}
-            {cause && (
-              <>
-                <EuiSpacer size="s" />
-                <ul>
-                  {cause.map((causeMsg, i) => (
-                    <li key={i}>{causeMsg}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </>
+          error && (
+            <>
+              {cause ? (
+                message || errorString
+              ) : (
+                <p className="eui-textBreakWord">{message || errorString}</p>
+              )}
+              {cause && (
+                <>
+                  <EuiSpacer size="s" />
+                  <ul>
+                    {cause.map((causeMsg, i) => (
+                      <li key={i}>{causeMsg}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </>
+          )
         }
         iconType="alert"
         actions={actions}

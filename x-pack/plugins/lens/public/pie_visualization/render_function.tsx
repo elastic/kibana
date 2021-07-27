@@ -24,14 +24,14 @@ import {
   ElementClickListener,
 } from '@elastic/charts';
 import { RenderMode } from 'src/plugins/expressions';
-import { FormatFactory, LensFilterEvent } from '../types';
+import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieExpressionProps } from './types';
+import type { FormatFactory } from '../../common';
+import type { PieExpressionProps } from '../../common/expressions';
 import { getSliceValue, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
-import { desanitizeFilterContext } from '../utils';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
@@ -234,7 +234,15 @@ export function PieComponent(
     isMetricEmpty;
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon={LensIconChartDonut} />;
+    return (
+      <VisualizationContainer
+        reportTitle={props.args.title}
+        reportDescription={props.args.description}
+        className="lnsPieExpression__container"
+      >
+        <EmptyPlaceholder icon={LensIconChartDonut} />;
+      </VisualizationContainer>
+    );
   }
 
   if (hasNegative) {
@@ -254,7 +262,7 @@ export function PieComponent(
   const onElementClickHandler: ElementClickListener = (args) => {
     const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
 
-    onClickValue(desanitizeFilterContext(context));
+    onClickValue(context);
   };
 
   return (

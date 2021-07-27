@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useTestIdGenerator } from '../../../../management/components/hooks/use_test_id_generator';
+// import { useTestIdGenerator } from '../../../../management/components/hooks/use_test_id_generator';
 
 export interface EndpointHostIsolationStatusProps {
   isIsolated: boolean;
@@ -25,94 +25,114 @@ export interface EndpointHostIsolationStatusProps {
  * (`null` is returned)
  */
 export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps>(
-  ({ isIsolated, pendingIsolate = 0, pendingUnIsolate = 0, 'data-test-subj': dataTestSubj }) => {
-    const getTestId = useTestIdGenerator(dataTestSubj);
+  ({
+    isIsolated,
+    /* pendingIsolate = 0, pendingUnIsolate = 0,*/ 'data-test-subj': dataTestSubj,
+  }) => {
+    // const getTestId = useTestIdGenerator(dataTestSubj);
 
     return useMemo(() => {
       // If nothing is pending and host is not currently isolated, then render nothing
-      if (!isIsolated && !pendingIsolate && !pendingUnIsolate) {
+      if (!isIsolated) {
         return null;
       }
+      // if (!isIsolated && !pendingIsolate && !pendingUnIsolate) {
+      //   return null;
+      // }
 
-      // If nothing is pending, but host is isolated, then show isolation badge
-      if (!pendingIsolate && !pendingUnIsolate) {
-        return (
-          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
-              defaultMessage="Isolated"
-            />
-          </EuiBadge>
-        );
-      }
-
-      // If there are multiple types of pending isolation actions, then show count of actions with tooltip that displays breakdown
-      if (pendingIsolate && pendingUnIsolate) {
-        return (
-          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-            <EuiToolTip
-              display="block"
-              anchorClassName="eui-textTruncate"
-              content={
-                <div data-test-subj={getTestId('tooltipContent')}>
-                  <div>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingActions"
-                      defaultMessage="Pending actions:"
-                    />
-                  </div>
-                  <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                    <EuiFlexItem grow>
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingIsolate"
-                        defaultMessage="Isolate"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{pendingIsolate}</EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiFlexItem grow>
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate"
-                        defaultMessage="Unisolate"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{pendingUnIsolate}</EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              }
-            >
-              <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
-                  defaultMessage="{count} actions pending"
-                  values={{ count: pendingIsolate + pendingUnIsolate }}
-                />
-              </EuiTextColor>
-            </EuiToolTip>
-          </EuiBadge>
-        );
-      }
-
-      // Show 'pending [un]isolate' depending on what's pending
       return (
         <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-          <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
-            {pendingIsolate ? (
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
-                defaultMessage="Isolating pending"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
-                defaultMessage="Unisolating pending"
-              />
-            )}
-          </EuiTextColor>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
+            defaultMessage="Isolated"
+          />
         </EuiBadge>
       );
-    }, [dataTestSubj, getTestId, isIsolated, pendingIsolate, pendingUnIsolate]);
+
+      // If nothing is pending and host is not currently isolated, then render nothing
+      // if (!isIsolated && !pendingIsolate && !pendingUnIsolate) {
+      //   return null;
+      // }
+      //
+      // // If nothing is pending, but host is isolated, then show isolation badge
+      // if (!pendingIsolate && !pendingUnIsolate) {
+      //   return (
+      //     <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+      //       <FormattedMessage
+      //         id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
+      //         defaultMessage="Isolated"
+      //       />
+      //     </EuiBadge>
+      //   );
+      // }
+      //
+      // // If there are multiple types of pending isolation actions, then show count of actions with tooltip that displays breakdown
+      // if (pendingIsolate && pendingUnIsolate) {
+      //   return (
+      //     <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+      //       <EuiToolTip
+      //         display="block"
+      //         anchorClassName="eui-textTruncate"
+      //         content={
+      //           <div data-test-subj={getTestId('tooltipContent')}>
+      //             <div>
+      //               <FormattedMessage
+      //                 id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingActions"
+      //                 defaultMessage="Pending actions:"
+      //               />
+      //             </div>
+      //             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+      //               <EuiFlexItem grow>
+      //                 <FormattedMessage
+      //                   id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingIsolate"
+      //                   defaultMessage="Isolate"
+      //                 />
+      //               </EuiFlexItem>
+      //               <EuiFlexItem grow={false}>{pendingIsolate}</EuiFlexItem>
+      //             </EuiFlexGroup>
+      //             <EuiFlexGroup gutterSize="none">
+      //               <EuiFlexItem grow>
+      //                 <FormattedMessage
+      //                   id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate"
+      //                   defaultMessage="Release"
+      //                 />
+      //               </EuiFlexItem>
+      //               <EuiFlexItem grow={false}>{pendingUnIsolate}</EuiFlexItem>
+      //             </EuiFlexGroup>
+      //           </div>
+      //         }
+      //       >
+      //         <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
+      //           <FormattedMessage
+      //             id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
+      //             defaultMessage="{count} actions pending"
+      //             values={{ count: pendingIsolate + pendingUnIsolate }}
+      //           />
+      //         </EuiTextColor>
+      //       </EuiToolTip>
+      //     </EuiBadge>
+      //   );
+      // }
+      //
+      // // Show 'pending [un]isolate' depending on what's pending
+      // return (
+      //   <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+      //     <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
+      //       {pendingIsolate ? (
+      //         <FormattedMessage
+      //           id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
+      //           defaultMessage="Isolating"
+      //         />
+      //       ) : (
+      //         <FormattedMessage
+      //           id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
+      //           defaultMessage="Releasing"
+      //         />
+      //       )}
+      //     </EuiTextColor>
+      //   </EuiBadge>
+      // );
+    }, [dataTestSubj, isIsolated /* , getTestId , pendingIsolate, pendingUnIsolate*/]);
   }
 );
 

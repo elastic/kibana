@@ -15,7 +15,6 @@ import { getDataHandler } from '../../../../data_handler';
 
 export interface IIndexPatternContext {
   loading: boolean;
-  selectedApp: AppDataType;
   indexPatterns: IndexPatternState;
   hasAppData: HasAppDataState;
   loadIndexPattern: (params: { dataType: AppDataType }) => void;
@@ -28,11 +27,11 @@ interface ProviderProps {
 }
 
 type HasAppDataState = Record<AppDataType, boolean | null>;
-type IndexPatternState = Record<AppDataType, IndexPattern>;
+export type IndexPatternState = Record<AppDataType, IndexPattern>;
+type LoadingState = Record<AppDataType, boolean>;
 
 export function IndexPatternContextProvider({ children }: ProviderProps) {
-  const [loading, setLoading] = useState(false);
-  const [selectedApp, setSelectedApp] = useState<AppDataType>();
+  const [loading, setLoading] = useState<LoadingState>({} as LoadingState);
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
   const [hasAppData, setHasAppData] = useState<HasAppDataState>({
     infra_metrics: null,
@@ -49,10 +48,9 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
 
   const loadIndexPattern: IIndexPatternContext['loadIndexPattern'] = useCallback(
     async ({ dataType }) => {
-      setSelectedApp(dataType);
+      if (hasAppData[dataType] === null && !loading[dataType]) {
+        setLoading((prevState) => ({ ...prevState, [dataType]: true }));
 
-      if (hasAppData[dataType] === null) {
-        setLoading(true);
         try {
           let hasDataT = false;
           let indices: string | undefined = '';
@@ -78,23 +76,22 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
           }
-          setLoading(false);
+          setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         } catch (e) {
-          setLoading(false);
+          setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         }
       }
     },
-    [data, hasAppData]
+    [data, hasAppData, loading]
   );
 
   return (
     <IndexPatternContext.Provider
       value={{
-        loading,
         hasAppData,
-        selectedApp,
         indexPatterns,
         loadIndexPattern,
+        loading: !!Object.values(loading).find((loadingT) => loadingT),
       }}
     >
       {children}
@@ -102,19 +99,23 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   );
 }
 
-export const useAppIndexPatternContext = () => {
-  const { selectedApp, loading, hasAppData, loadIndexPattern, indexPatterns } = useContext(
+export const useAppIndexPatternContext = (dataType?: AppDataType) => {
+  const { loading, hasAppData, loadIndexPattern, indexPatterns } = useContext(
     (IndexPatternContext as unknown) as Context<IIndexPatternContext>
   );
+
+  if (dataType && !indexPatterns?.[dataType] && !loading) {
+    loadIndexPattern({ dataType });
+  }
 
   return useMemo(() => {
     return {
       hasAppData,
-      selectedApp,
       loading,
-      indexPattern: indexPatterns?.[selectedApp],
-      hasData: hasAppData?.[selectedApp],
+      indexPatterns,
+      indexPattern: dataType ? indexPatterns?.[dataType] : undefined,
+      hasData: dataType ? hasAppData?.[dataType] : undefined,
       loadIndexPattern,
     };
-  }, [hasAppData, indexPatterns, loadIndexPattern, loading, selectedApp]);
+  }, [dataType, hasAppData, indexPatterns, loadIndexPattern, loading]);
 };

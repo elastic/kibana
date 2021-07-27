@@ -26,6 +26,7 @@ import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
+  ActionsCommentRequestRt,
   AlertCommentRequestRt,
   Case,
   CaseUserActions,
@@ -45,6 +46,8 @@ import {
   getAlertAttachment,
   getGeneratedAlertsAttachment,
   RuleDetailsNavigation,
+  ActionsNavigation,
+  getActionAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -61,12 +64,14 @@ export interface UserActionTreeProps {
   fetchUserActions: () => void;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
+  statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
@@ -102,12 +107,20 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: 10px;
+      padding: ${theme.eui.paddingSizes.s};
       border-radius: ${theme.eui.paddingSizes.xs};
     }
 
     & .comment-alert .euiCommentEvent__headerData {
       flex-grow: 1;
+    }
+
+    & .comment-action.empty-comment .euiCommentEvent--regular {
+      box-shadow: none;
+      .euiCommentEvent__header {
+        padding: ${theme.eui.euiSizeM} ${theme.eui.paddingSizes.s};
+        border-bottom: 0;
+      }
     }
   `}
 `;
@@ -124,12 +137,14 @@ export const UserActionTree = React.memo(
     fetchUserActions,
     getCaseDetailHrefWithCommentId,
     getRuleDetailsHref,
+    actionsNavigation,
     isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
     onShowAlertDetails,
     onUpdateField,
     renderInvestigateInTimelineActionComponent,
+    statusActionButton,
     updateCase,
     useFetchAlertData,
     userCanCrud,
@@ -241,15 +256,16 @@ export const UserActionTree = React.memo(
       () => (
         <AddComment
           caseId={caseId}
-          disabled={!userCanCrud}
+          userCanCrud={userCanCrud}
           ref={addCommentRef}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
+          statusActionButton={statusActionButton}
           subCaseId={subCaseId}
         />
       ),
-      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, subCaseId]
+      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, statusActionButton, subCaseId]
     );
 
     useEffect(() => {
@@ -288,10 +304,10 @@ export const UserActionTree = React.memo(
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
             quoteLabel={i18n.QUOTE}
-            disabled={!userCanCrud}
             isLoading={isLoadingDescription}
             onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
             onQuote={handleManageQuote.bind(null, caseData.description)}
+            userCanCrud={userCanCrud}
           />
         ),
       }),
@@ -363,10 +379,10 @@ export const UserActionTree = React.memo(
                         id={comment.id}
                         editLabel={i18n.EDIT_COMMENT}
                         quoteLabel={i18n.QUOTE}
-                        disabled={!userCanCrud}
                         isLoading={isLoadingIds.includes(comment.id)}
                         onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                         onQuote={handleManageQuote.bind(null, comment.comment)}
+                        userCanCrud={userCanCrud}
                       />
                     ),
                   },
@@ -440,6 +456,26 @@ export const UserActionTree = React.memo(
                           renderInvestigateInTimelineActionComponent,
                           ruleId: comment.rule?.id ?? '',
                           ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
+                        }),
+                      ]
+                    : []),
+                ];
+              } else if (
+                comment != null &&
+                isRight(ActionsCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.actions
+              ) {
+                return [
+                  ...comments,
+                  ...(comment.actions !== null
+                    ? [
+                        getActionAttachment({
+                          comment,
+                          userCanCrud,
+                          isLoadingIds,
+                          getCaseDetailHrefWithCommentId,
+                          actionsNavigation,
+                          action,
                         }),
                       ]
                     : []),
@@ -556,6 +592,7 @@ export const UserActionTree = React.memo(
         handleManageMarkdownEditId,
         handleSaveComment,
         getCaseDetailHrefWithCommentId,
+        actionsNavigation,
         userCanCrud,
         isLoadingIds,
         handleManageQuote,
@@ -571,19 +608,24 @@ export const UserActionTree = React.memo(
       ]
     );
 
-    const bottomActions = [
-      {
-        username: (
-          <UserActionUsername username={currentUser?.username} fullName={currentUser?.fullName} />
-        ),
-        'data-test-subj': 'add-comment',
-        timelineIcon: (
-          <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
-        ),
-        className: 'isEdit',
-        children: MarkdownNewComment,
-      },
-    ];
+    const bottomActions = userCanCrud
+      ? [
+          {
+            username: (
+              <UserActionUsername
+                username={currentUser?.username}
+                fullName={currentUser?.fullName}
+              />
+            ),
+            'data-test-subj': 'add-comment',
+            timelineIcon: (
+              <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
+            ),
+            className: 'isEdit',
+            children: MarkdownNewComment,
+          },
+        ]
+      : [];
 
     const comments = [...userActions, ...bottomActions];
 

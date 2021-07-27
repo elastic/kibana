@@ -5,12 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+/* eslint-disable @typescript-eslint/naming-convention */
 import './page_template.scss';
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import classNames from 'classnames';
 
-import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPageTemplate,
+  EuiPageTemplateProps,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 
 import {
   KibanaPageTemplateSolutionNav,
@@ -40,33 +47,52 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   children,
   isEmptyState,
   restrictWidth = true,
-  bottomBar,
-  bottomBarProps,
   pageSideBar,
+  pageSideBarProps,
   solutionNav,
   ...rest
 }) => {
-  // Needed for differentiating between union types
-  let localBottomBarProps = {};
-  if (template === 'default') {
-    localBottomBarProps = {
-      bottomBar,
-      bottomBarProps,
-    };
-  }
+  /**
+   * Only default to open in large+ breakpoints
+   */
+  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
 
   /**
    * Create the solution nav component
    */
+  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
+    JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed'))) ? false : true
+  );
+  const toggleOpenOnDesktop = () => {
+    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
+    // Have to store it as the opposite of the default we want
+    localStorage.setItem('solutionNavIsCollapsed', JSON.stringify(isSideNavOpenOnDesktop));
+  };
+  let sideBarClasses = 'kbnPageTemplate__pageSideBar';
   if (solutionNav) {
-    pageSideBar = <KibanaPageTemplateSolutionNav {...solutionNav} />;
+    // Only apply shrinking classes if collapsibility is available through `solutionNav`
+    sideBarClasses = classNames(sideBarClasses, {
+      'kbnPageTemplate__pageSideBar--shrink':
+        isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
+    });
+
+    pageSideBar = (
+      <KibanaPageTemplateSolutionNav
+        isOpenOnDesktop={isSideNavOpenOnDesktop}
+        onCollapse={toggleOpenOnDesktop}
+        {...solutionNav}
+      />
+    );
   }
+
+  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
 
   /**
    * An easy way to create the right content for empty pages
    */
   if (isEmptyState && pageHeader && !children) {
-    template = template ?? 'centeredBody';
+    template = template ?? emptyStateDefaultTemplate;
     const { iconType, pageTitle, description, rightSideItems } = pageHeader;
     pageHeader = undefined;
     children = (
@@ -81,21 +107,20 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   } else if (isEmptyState && pageHeader && children) {
     template = template ?? 'centeredContent';
   } else if (isEmptyState && !pageHeader) {
-    template = template ?? 'centeredBody';
+    template = template ?? emptyStateDefaultTemplate;
   }
 
   return (
     <EuiPageTemplate
       template={template}
       restrictWidth={restrictWidth}
-      paddingSize={template === 'centeredBody' ? 'none' : 'l'}
       pageHeader={pageHeader}
       pageSideBar={pageSideBar}
       pageSideBarProps={{
-        ...rest.pageSideBarProps,
-        className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
+        paddingSize: solutionNav ? 'none' : 'l',
+        ...pageSideBarProps,
+        className: classNames(sideBarClasses, pageSideBarProps?.className),
       }}
-      {...localBottomBarProps}
       {...rest}
     >
       {children}

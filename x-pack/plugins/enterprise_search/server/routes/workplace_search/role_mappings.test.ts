@@ -7,9 +7,37 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerOrgRoleMappingsRoute, registerOrgRoleMappingRoute } from './role_mappings';
+import {
+  registerOrgEnableRoleMappingsRoute,
+  registerOrgRoleMappingsRoute,
+  registerOrgRoleMappingRoute,
+  registerOrgUserRoute,
+} from './role_mappings';
 
 describe('role mappings routes', () => {
+  describe('POST /api/workplace_search/org/role_mappings/enable_role_based_access', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/role_mappings/enable_role_based_access',
+      });
+
+      registerOrgEnableRoleMappingsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/role_mappings/enable_role_based_access',
+      });
+    });
+  });
+
   describe('GET /api/workplace_search/org/role_mappings', () => {
     let mockRouter: MockRouter;
 
@@ -98,6 +126,54 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/role_mappings/:id',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/org/single_user_role_mapping', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/single_user_role_mapping',
+      });
+
+      registerOrgUserRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            roleMapping: {
+              groups: ['foo', 'bar'],
+              roleType: 'admin',
+              allGroups: true,
+              id: '123asf',
+            },
+            elasticsearchUser: {
+              username: 'user2@elastic.co',
+              email: 'user2',
+            },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing required fields', () => {
+        const request = { body: {} };
+        mockRouter.shouldThrow(request);
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/role_mappings/upsert_single_user_role_mapping',
       });
     });
   });

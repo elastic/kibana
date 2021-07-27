@@ -30,6 +30,7 @@ interface Params {
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+const ZIP_CONTENT = /^(application\/zip)(;.*)?$/;
 
 const removedUndefined = (obj: Record<string, any> | undefined) => {
   return omitBy(obj, (v) => v === undefined);
@@ -123,6 +124,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
+        ...options.context?.toHeader(),
       }),
     };
 
@@ -153,7 +155,7 @@ export class Fetch {
     const contentType = response.headers.get('Content-Type') || '';
 
     try {
-      if (NDJSON_CONTENT.test(contentType)) {
+      if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
         body = await response.json();

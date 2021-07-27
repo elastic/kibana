@@ -34,6 +34,8 @@ export const getPackagePolicyCreateCallback = (
   manifestManager: ManifestManager,
   appClientFactory: AppClientFactory,
   maxTimelineImportExportSize: number,
+  prebuiltRulesFromFileSystem: boolean,
+  prebuiltRulesFromSavedObjects: boolean,
   securityStart: SecurityPluginStart,
   alerts: AlertsStartContract,
   licenseService: LicenseService,
@@ -61,6 +63,8 @@ export const getPackagePolicyCreateCallback = (
           securityStart,
           alerts,
           maxTimelineImportExportSize,
+          prebuiltRulesFromFileSystem,
+          prebuiltRulesFromSavedObjects,
           exceptionsClient,
         }),
 

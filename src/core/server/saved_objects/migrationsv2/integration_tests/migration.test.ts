@@ -95,6 +95,12 @@ describe('migration v2', () => {
             },
           ],
         },
+        // reporting loads headless browser, that prevents nodejs process from exiting.
+        xpack: {
+          reporting: {
+            enabled: false,
+          },
+        },
       },
       {
         oss,
@@ -103,7 +109,8 @@ describe('migration v2', () => {
 
     const startEsPromise = startES().then((es) => (esServer = es));
     const startKibanaPromise = root
-      .setup()
+      .preboot()
+      .then(() => root.setup())
       .then(() => root.start())
       .then((start) => {
         coreStart = start;

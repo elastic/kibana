@@ -8,36 +8,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiTextColor,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiInMemoryTable,
-  EuiCodeBlock,
-  EuiProgress,
-} from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PLUGIN_ID } from '../../../fleet/common';
-import { pagePathGetters } from '../../../fleet/public';
+import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
-import { useKibana } from '../common/lib/kibana';
-
-const StyledEuiCard = styled(EuiCard)`
-  position: relative;
-`;
 
 interface ActionResultsSummaryProps {
   actionId: string;
+  expirationDate?: string;
   agentIds?: string[];
-  isLive?: boolean;
 }
 
 const renderErrorMessage = (error: string) => (
@@ -48,14 +30,17 @@ const renderErrorMessage = (error: string) => (
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
+  expirationDate,
   agentIds,
-  isLive,
 }) => {
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
   // @ts-expect-error update types
   const [pageIndex, setPageIndex] = useState(0);
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
+  const expired = useMemo(() => (!expirationDate ? false : new Date(expirationDate) < new Date()), [
+    expirationDate,
+  ]);
+  const [isLive, setIsLive] = useState(true);
   const {
     // @ts-expect-error update types
     data: { aggregations, edges },
@@ -68,6 +53,18 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     sortField: '@timestamp',
     isLive,
   });
+  if (expired) {
+    // @ts-expect-error update types
+    edges.forEach((edge) => {
+      if (!edge.fields.completed_at) {
+        edge.fields['error.keyword'] = edge.fields.error = [
+          i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
+            defaultMessage: 'The action request timed out.',
+          }),
+        ];
+      }
+    });
+  }
 
   const { data: logsResults } = useAllResults({
     actionId,
@@ -82,65 +79,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     isLive,
   });
 
-  const notRespondedCount = useMemo(() => {
-    if (!agentIds || !aggregations.totalResponded) {
-      return '-';
-    }
-
-    return agentIds.length - aggregations.totalResponded;
-  }, [aggregations.totalResponded, agentIds]);
-
-  const listItems = useMemo(
-    () => [
-      {
-        title: i18n.translate(
-          'xpack.osquery.liveQueryActionResults.summary.agentsQueriedLabelText',
-          {
-            defaultMessage: 'Agents queried',
-          }
-        ),
-        description: agentIds?.length,
-      },
-      {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.successfulLabelText', {
-          defaultMessage: 'Successful',
-        }),
-        description: aggregations.successful,
-      },
-      {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.pendingLabelText', {
-          defaultMessage: 'Not yet responded',
-        }),
-        description: notRespondedCount,
-      },
-      {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.failedLabelText', {
-          defaultMessage: 'Failed',
-        }),
-        description: (
-          <EuiTextColor color={aggregations.failed ? 'danger' : 'default'}>
-            {aggregations.failed}
-          </EuiTextColor>
-        ),
-      },
-    ],
-    [agentIds, aggregations.failed, aggregations.successful, notRespondedCount]
-  );
-
-  const renderAgentIdColumn = useCallback(
-    (agentId) => (
-      <EuiLink
-        className="eui-textTruncate"
-        href={getUrlForApp(PLUGIN_ID, {
-          path: `#` + pagePathGetters.agent_details({ agentId }),
-        })}
-        target="_blank"
-      >
-        {agentId}
-      </EuiLink>
-    ),
-    [getUrlForApp]
-  );
+  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
 
   const renderRowsColumn = useCallback(
     (_, item) => {
@@ -158,23 +97,30 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [logsResults]
   );
 
-  const renderStatusColumn = useCallback((_, item) => {
-    if (!item.fields.completed_at) {
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
-        defaultMessage: 'pending',
-      });
-    }
+  const renderStatusColumn = useCallback(
+    (_, item) => {
+      if (!item.fields.completed_at) {
+        return expired
+          ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
+              defaultMessage: 'expired',
+            })
+          : i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
+              defaultMessage: 'pending',
+            });
+      }
 
-    if (item.fields['error.keyword']) {
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
-        defaultMessage: 'error',
-      });
-    }
+      if (item.fields['error.keyword']) {
+        return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
+          defaultMessage: 'error',
+        });
+      }
 
-    return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
-      defaultMessage: 'success',
-    });
-  }, []);
+      return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
+        defaultMessage: 'success',
+      });
+    },
+    [expired]
+  );
 
   const columns = useMemo(
     () => [
@@ -222,30 +168,26 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     []
   );
 
-  return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <StyledEuiCard title="" description="" textAlign="left">
-            {notRespondedCount ? <EuiProgress size="xs" position="absolute" /> : null}
-            <EuiDescriptionList
-              compressed
-              textStyle="reverse"
-              type="responsiveColumn"
-              listItems={listItems}
-            />
-          </StyledEuiCard>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  useEffect(() => {
+    setIsLive(() => {
+      if (!agentIds?.length || expired) return false;
 
-      {edges.length ? (
-        <>
-          <EuiSpacer />
-          <EuiInMemoryTable items={edges} columns={columns} pagination={pagination} />
-        </>
-      ) : null}
-    </>
-  );
+      const uniqueAgentsRepliedCount =
+        // @ts-expect-error update types
+        logsResults?.rawResponse.aggregations?.unique_agents.value ?? 0;
+
+      return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+    });
+  }, [
+    agentIds?.length,
+    aggregations.failed,
+    expired,
+    logsResults?.rawResponse.aggregations?.unique_agents,
+  ]);
+
+  return edges.length ? (
+    <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />
+  ) : null;
 };
 
 export const ActionResultsSummary = React.memo(ActionResultsSummaryComponent);

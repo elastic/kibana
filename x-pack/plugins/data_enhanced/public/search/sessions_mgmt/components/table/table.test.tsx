@@ -70,6 +70,7 @@ describe('Background Search Session Management Table', () => {
               status: SearchSessionStatus.IN_PROGRESS,
               created: '2020-12-02T00:19:32Z',
               expires: '2020-12-07T00:19:32Z',
+              idMapping: {},
             },
           },
         ],
@@ -90,15 +91,18 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
       });
 
-      expect(table.find('thead th').map((node) => node.text())).toMatchInlineSnapshot(`
+      expect(table.find('thead th .euiTableCellContent__text').map((node) => node.text()))
+        .toMatchInlineSnapshot(`
         Array [
           "App",
           "Name",
+          "# Searches",
           "Status",
           "Created",
           "Expiration",
@@ -120,6 +124,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -129,7 +134,8 @@ describe('Background Search Session Management Table', () => {
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
-          "Namevery background search ",
+          "Namevery background search  ",
+          "# Searches0",
           "StatusExpired",
           "Created2 Dec, 2020, 00:19:32",
           "Expiration--",
@@ -162,6 +168,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -195,6 +202,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );

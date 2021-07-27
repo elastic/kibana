@@ -26,6 +26,16 @@ export const addFeatureToIndex = async (
   });
 };
 
+export const deleteFeatureFromIndex = async (indexName: string, featureId: string) => {
+  return await getHttp().fetch({
+    path: `${INDEX_FEATURE_PATH}/${featureId}`,
+    method: 'DELETE',
+    body: JSON.stringify({
+      index: indexName,
+    }),
+  });
+};
+
 export const getMatchingIndexes = async (indexPattern: string) => {
   return await getHttp().fetch({
     path: `${GET_MATCHING_INDEXES_PATH}/${indexPattern}`,

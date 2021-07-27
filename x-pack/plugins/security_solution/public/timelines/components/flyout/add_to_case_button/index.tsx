@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { Case, SubCase } from '../../../../../../cases/common';
-import { APP_ID, CASES_APP_ID } from '../../../../../common/constants';
+import { APP_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -55,7 +55,8 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const onRowClick = useCallback(
     async (theCase?: Case | SubCase) => {
       openCaseModal(false);
-      await navigateToApp(CASES_APP_ID, {
+      await navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
       });
       dispatch(
@@ -88,7 +89,9 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const handleNewCaseClick = useCallback(() => {
     handlePopoverClose();
-    navigateToApp(CASES_APP_ID, {
+
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.case,
       path: getCreateCaseUrl(),
     }).then(() => {
       dispatch(

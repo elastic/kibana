@@ -75,8 +75,10 @@ export function getServices() {
 
 export async function stopServers() {
   services = null!;
-  if (servers) {
+  if (esServer) {
     await esServer.stop();
+  }
+  if (kbn) {
     await kbn.stop();
   }
 }

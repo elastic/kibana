@@ -8,17 +8,20 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { CellValueElementProps } from '../../cell_rendering';
-import { ControlColumnProps, RowCellRender } from '../control_columns';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  ActionProps,
+  ControlColumnProps,
+  TimelineTabs,
+  RowCellRender,
+} from '../../../../../../common/types/timeline';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
-import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
-import { ActionProps } from '../actions';
+import { OnRowSelected } from '../../events';
 import { inputsModel } from '../../../../../common/store';
 import {
   EventsTd,
@@ -60,9 +63,7 @@ interface DataDrivenColumnProps {
   loadingEventIds: Readonly<string[]>;
   notesCount: number;
   onEventDetailsPanelOpened: () => void;
-  onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
-  onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
   hasRowRenderers: boolean;
@@ -137,9 +138,7 @@ const TgridActionTdCell = ({
   loadingEventIds,
   notesCount,
   onEventDetailsPanelOpened,
-  onPinEvent,
   onRowSelected,
-  onUnPinEvent,
   refetch,
   rowIndex,
   hasRowRenderers,
@@ -193,9 +192,7 @@ const TgridActionTdCell = ({
                 isEventViewer={isEventViewer}
                 loadingEventIds={loadingEventIds}
                 onEventDetailsPanelOpened={onEventDetailsPanelOpened}
-                onPinEvent={onPinEvent}
                 onRowSelected={onRowSelected}
-                onUnPinEvent={onUnPinEvent}
                 refetch={refetch}
                 rowIndex={rowIndex}
                 onRuleChange={onRuleChange}
@@ -292,9 +289,7 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
     loadingEventIds,
     notesCount,
     onEventDetailsPanelOpened,
-    onPinEvent,
     onRowSelected,
-    onUnPinEvent,
     refetch,
     hasRowRenderers,
     onRuleChange,
@@ -345,8 +340,6 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
                 isEventPinned={isEventPinned}
                 isEventViewer={isEventViewer}
                 notesCount={notesCount}
-                onPinEvent={onPinEvent}
-                onUnPinEvent={onUnPinEvent}
                 refetch={refetch}
                 hasRowRenderers={hasRowRenderers}
                 onRuleChange={onRuleChange}
@@ -365,7 +358,6 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
         data,
         ecsData,
         onRowSelected,
-        onPinEvent,
         isEventPinned,
         isEventViewer,
         actionsColumnWidth,
@@ -378,7 +370,6 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
         notesCount,
         onEventDetailsPanelOpened,
         onRuleChange,
-        onUnPinEvent,
         refetch,
         selectedEventIds,
         showCheckboxes,
