@@ -12,10 +12,7 @@ import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from './lib/jobs_query';
-import {
-  deleteJobResponseHandlerFactory,
-  downloadJobResponseHandlerFactory,
-} from './lib/job_response_handler';
+import { deleteJobResponseHandler, downloadJobResponseHandler } from './lib/job_response_handler';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -179,8 +176,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   );
 
   // trigger a download of the output from a job
-  const downloadResponseHandler = downloadJobResponseHandlerFactory(reporting);
-
   router.get(
     {
       path: `${MAIN_ENTRY}/download/{docId}`,
@@ -202,12 +197,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      return downloadResponseHandler(res, jobTypes, user, { docId });
+      return downloadJobResponseHandler(reporting, res, jobTypes, user, { docId });
     })
   );
 
   // allow a report to be deleted
-  const deleteResponseHandler = deleteJobResponseHandlerFactory(reporting);
   router.delete(
     {
       path: `${MAIN_ENTRY}/delete/{docId}`,
@@ -228,7 +222,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      return deleteResponseHandler(res, jobTypes, user, { docId });
+      return deleteJobResponseHandler(reporting, res, jobTypes, user, { docId });
     })
   );
 }
