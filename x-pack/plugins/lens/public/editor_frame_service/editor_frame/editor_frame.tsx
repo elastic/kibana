@@ -125,11 +125,12 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           allLoaded && (
             <ConfigPanelWrapper
+              activeVisualization={
+                visualization.activeId ? props.visualizationMap[visualization.activeId] : null
+              }
               activeDatasourceId={activeDatasourceId!}
               datasourceMap={props.datasourceMap}
               datasourceStates={datasourceStates}
-              visualizationMap={props.visualizationMap}
-              activeVisualizationId={visualization.activeId}
               visualizationState={visualization.state}
               framePublicAPI={framePublicAPI}
               core={props.core}

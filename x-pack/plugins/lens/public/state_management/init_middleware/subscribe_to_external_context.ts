@@ -7,34 +7,15 @@
 
 import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import { debounce, isEqual } from 'lodash';
-import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
-import { trackUiEvent } from '../lens_ui_telemetry';
-
+import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
   waitUntilNextSessionCompletes$,
   DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
-import { setState, LensGetState, LensDispatch } from '.';
-import { LensAppState } from './types';
-import { getResolvedDateRange } from '../utils';
+} from '../../../../../../src/plugins/data/public';
+import { setState, LensGetState, LensDispatch } from '..';
+import { getResolvedDateRange } from '../../utils';
 
-export const externalContextMiddleware = (data: DataPublicPluginStart) => (
-  store: MiddlewareAPI
-) => {
-  const unsubscribeFromExternalContext = subscribeToExternalContext(
-    data,
-    store.getState,
-    store.dispatch
-  );
-  return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (action.type === 'lens/navigateAway') {
-      unsubscribeFromExternalContext();
-    }
-    next(action);
-  };
-};
-
-function subscribeToExternalContext(
+export function subscribeToExternalContext(
   data: DataPublicPluginStart,
   getState: LensGetState,
   dispatch: LensDispatch

@@ -15,8 +15,7 @@ import {
 export interface ConfigPanelWrapperProps {
   activeDatasourceId: string;
   visualizationState: unknown;
-  visualizationMap: Record<string, Visualization>;
-  activeVisualizationId: string | null;
+  activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<

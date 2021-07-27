@@ -6,6 +6,7 @@
  */
 
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { LensAppState } from './types';
 
@@ -254,6 +255,13 @@ export const lensSlice = createSlice({
       };
     },
     navigateAway: (state) => state,
+    loadInitial: (
+      state,
+      payload: PayloadAction<{
+        initialInput?: LensEmbeddableInput;
+        redirectCallback: (savedObjectId?: string) => void;
+      }>
+    ) => state,
   },
 });
 

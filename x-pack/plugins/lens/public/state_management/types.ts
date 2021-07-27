@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
 import { Filter, Query, SavedQuery } from '../../../../../src/plugins/data/public';
 import { Document } from '../persistence';
 
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { DateRange } from '../../common';
+import { LensAppServices } from '../app_plugin/types';
+import { Datasource, Visualization } from '../types';
 
 export interface PreviewState {
   visualization: {
@@ -48,4 +52,12 @@ export type DispatchSetState = (
 
 export interface LensState {
   lens: LensAppState;
+}
+
+export interface StoreDeps {
+  lensServices: LensAppServices;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
+  initialContext?: VisualizeFieldContext;
+  embeddableEditorIncomingState?: EmbeddableEditorState;
 }

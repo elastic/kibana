@@ -401,16 +401,18 @@ export function makeLensStore({
     data = mockDataPlugin();
   }
   const lensStore = makeConfigureStore(
-    getPreloadedState({
+    {
+      lensServices: { ...makeDefaultServices(), data },
+      datasourceMap:
+      visualizationMap: 
+    },
+    {
       ...defaultState,
       searchSessionId: data.search.session.start(),
       query: data.query.queryString.getQuery(),
       filters: data.query.filterManager.getGlobalFilters(),
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
-    }),
-    {
-      data,
     }
   );
 
