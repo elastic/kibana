@@ -79,6 +79,8 @@ export function extractSearchData(
   }
 
   const data = getQueryFromSavedSearch(savedSearch);
+
+  if (!data) return;
   const combinedQuery = createCombinedQuery(
     data.query,
     Array.isArray(data.filter) ? data.filter : [],
