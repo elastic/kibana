@@ -6,6 +6,7 @@
  */
 
 import {
+  CaseAttributes,
   CaseConnector,
   CaseFullExternalService,
   CasesConfigureAttributes,
@@ -30,7 +31,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { getNoneCaseConnector } from '../../common';
 import { CasesService, ESCaseAttributes } from '.';
-import { createESConnector } from '../test_utils';
+import { createESConnector, createJiraConnector } from '../test_utils';
 
 const basicCaseFields = {
   closed_at: null,
@@ -153,6 +154,15 @@ const createSOFindResponse = (savedObjects: Array<SavedObjectsFindResult<ESCaseA
   page: 1,
 });
 
+const createCasePostParams = (
+  connector: CaseConnector,
+  externalService?: CaseFullExternalService
+): CaseAttributes => ({
+  ...basicCaseFields,
+  connector,
+  ...(externalService ? { external_service: externalService } : { external_service: null }),
+});
+
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
@@ -165,6 +175,417 @@ describe('CasesService', () => {
   });
 
   describe('transform between external model and Elasticsearch model', () => {
+    describe('patch', () => {
+      describe('formats the update attributes', () => {
+        it('formats the update saved object', async () => {
+          unsecuredSavedObjectsClient.update.mockReturnValue(
+            Promise.resolve({} as SavedObjectsUpdateResponse<ESCaseAttributes>)
+          );
+
+          await service.patchCase({
+            caseId: '1',
+            unsecuredSavedObjectsClient,
+            updatedAttributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          });
+
+          expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+            Object {
+              "closure_type": "close-by-pushing",
+              "connector": Object {
+                "fields": Array [
+                  Object {
+                    "key": "issueType",
+                    "value": "bug",
+                  },
+                  Object {
+                    "key": "priority",
+                    "value": "high",
+                  },
+                  Object {
+                    "key": "parent",
+                    "value": "2",
+                  },
+                ],
+                "name": ".jira",
+                "type": ".jira",
+              },
+              "created_at": "2020-04-09T09:43:51.778Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "owner": "securitySolution",
+              "updated_at": "2020-04-09T09:43:51.778Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+            }
+          `);
+        });
+
+        it('transforms the update connector schema to ES schema', async () => {
+          unsecuredSavedObjectsClient.update.mockReturnValue(
+            Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          );
+
+          await service.patch({
+            configurationId: '1',
+            unsecuredSavedObjectsClient,
+            updatedAttributes: createConfigPostParams(createJiraConnector()),
+          });
+
+          const updateAttributes = unsecuredSavedObjectsClient.update.mock
+            .calls[0][2] as Partial<CasesConfigureAttributes>;
+          expect(updateAttributes.connector).toMatchInlineSnapshot(`
+            Object {
+              "fields": Array [
+                Object {
+                  "key": "issueType",
+                  "value": "bug",
+                },
+                Object {
+                  "key": "priority",
+                  "value": "high",
+                },
+                Object {
+                  "key": "parent",
+                  "value": "2",
+                },
+              ],
+              "name": ".jira",
+              "type": ".jira",
+            }
+          `);
+          expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+            Object {
+              "references": Array [
+                Object {
+                  "id": "1",
+                  "name": "connectorID",
+                  "type": "action",
+                },
+              ],
+            }
+          `);
+        });
+
+        it('formats the saved object without a connector', async () => {
+          unsecuredSavedObjectsClient.update.mockReturnValue(
+            Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          );
+
+          await service.patch({
+            configurationId: '1',
+            unsecuredSavedObjectsClient,
+            updatedAttributes: createConfigUpdateParams(),
+          });
+
+          expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
+            `Object {}`
+          );
+          expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+            Object {
+              "references": undefined,
+            }
+          `);
+        });
+
+        it('returns the none connector after update', async () => {
+          unsecuredSavedObjectsClient.update.mockReturnValue(
+            Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          );
+
+          await service.patch({
+            configurationId: '1',
+            unsecuredSavedObjectsClient,
+            updatedAttributes: createConfigUpdateParams(getNoneCaseConnector()),
+          });
+
+          expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+            Object {
+              "connector": Object {
+                "fields": Array [],
+                "name": "none",
+                "type": ".none",
+              },
+            }
+          `);
+        });
+      });
+    });
+
+    describe('post', () => {
+      it('transforms the creation attributes to the ES acceptable form', async () => {
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve({} as SavedObject<ESCaseAttributes>)
+        );
+
+        await service.postNewCase({
+          unsecuredSavedObjectsClient,
+          attributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          id: '1',
+        });
+
+        expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+          Object {
+            "closed_at": null,
+            "closed_by": null,
+            "connector": Object {
+              "fields": Array [
+                Object {
+                  "key": "issueType",
+                  "value": "bug",
+                },
+                Object {
+                  "key": "priority",
+                  "value": "high",
+                },
+                Object {
+                  "key": "parent",
+                  "value": "2",
+                },
+              ],
+              "name": ".jira",
+              "type": ".jira",
+            },
+            "created_at": "2019-11-25T21:54:48.952Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "description": "This is a brand new case of a bad meanie defacing data",
+            "external_service": Object {
+              "connector_name": ".jira",
+              "external_id": "100",
+              "external_title": "awesome",
+              "external_url": "http://www.google.com",
+              "pushed_at": "2019-11-25T21:54:48.952Z",
+              "pushed_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+            },
+            "owner": "securitySolution",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "status": "open",
+            "tags": Array [
+              "defacement",
+            ],
+            "title": "Super Bad Security Issue",
+            "type": "individual",
+            "updated_at": "2019-11-25T21:54:48.952Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+          }
+        `);
+        expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "connectorID",
+                "type": "action",
+              },
+              Object {
+                "id": "100",
+                "name": "pushConnectorID",
+                "type": "action",
+              },
+            ],
+          }
+        `);
+      });
+
+      it('transforms the connector in the ES schema', async () => {
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve({} as SavedObject<ESCaseAttributes>)
+        );
+
+        await service.postNewCase({
+          unsecuredSavedObjectsClient,
+          attributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          id: '1',
+        });
+
+        const postAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as CaseAttributes;
+        expect(postAttributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": Array [
+              Object {
+                "key": "issueType",
+                "value": "bug",
+              },
+              Object {
+                "key": "priority",
+                "value": "high",
+              },
+              Object {
+                "key": "parent",
+                "value": "2",
+              },
+            ],
+            "name": ".jira",
+            "type": ".jira",
+          }
+        `);
+        expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "connectorID",
+                "type": "action",
+              },
+              Object {
+                "id": "100",
+                "name": "pushConnectorID",
+                "type": "action",
+              },
+            ],
+          }
+        `);
+      });
+
+      it('transforms the external service in the ES schema so that it does not have connector_id', async () => {
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve({} as SavedObject<ESCaseAttributes>)
+        );
+
+        await service.postNewCase({
+          unsecuredSavedObjectsClient,
+          attributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          id: '1',
+        });
+
+        const postAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as CaseAttributes;
+        expect(postAttributes.external_service).toMatchInlineSnapshot(`
+          Object {
+            "connector_name": ".jira",
+            "external_id": "100",
+            "external_title": "awesome",
+            "external_url": "http://www.google.com",
+            "pushed_at": "2019-11-25T21:54:48.952Z",
+            "pushed_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+          }
+        `);
+      });
+
+      it('sets fields to an empty array when it is not included', async () => {
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve({} as SavedObject<ESCaseAttributes>)
+        );
+
+        await service.postNewCase({
+          unsecuredSavedObjectsClient,
+          attributes: createCasePostParams(createJiraConnector(true), createExternalService()),
+          id: '1',
+        });
+
+        const postAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as CaseAttributes;
+        expect(postAttributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": Array [],
+            "name": ".jira",
+            "type": ".jira",
+          }
+        `);
+      });
+
+      it('does not create a reference for a none connector', async () => {
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve({} as SavedObject<ESCaseAttributes>)
+        );
+
+        await service.postNewCase({
+          unsecuredSavedObjectsClient,
+          attributes: createCasePostParams(getNoneCaseConnector(), createExternalService()),
+          id: '1',
+        });
+
+        expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "100",
+                "name": "pushConnectorID",
+                "type": "action",
+              },
+            ],
+          }
+        `);
+      });
+
+      it('does not create a reference for an external service field that is null', async () => {
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve({} as SavedObject<ESCaseAttributes>)
+        );
+
+        await service.postNewCase({
+          unsecuredSavedObjectsClient,
+          attributes: createCasePostParams(getNoneCaseConnector()),
+          id: '1',
+        });
+
+        expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "id": "1",
+            "references": undefined,
+          }
+        `);
+      });
+
+      it('includes the id and connector_id fields in the response', async () => {
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve(
+            createSOResponse({
+              connector: createESConnector(),
+              externalService: createExternalService(),
+            })
+          )
+        );
+
+        const res = await service.postNewCase({
+          unsecuredSavedObjectsClient,
+          attributes: createCasePostParams(getNoneCaseConnector()),
+          id: '1',
+        });
+
+        expect(res.attributes.connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": Object {
+              "issueType": "bug",
+              "parent": "2",
+              "priority": "high",
+            },
+            "id": "1",
+            "name": ".jira",
+            "type": ".jira",
+          }
+        `);
+        expect(res.attributes.external_service?.connector_id).toMatchInlineSnapshot(`"100"`);
+      });
+    });
+
     describe('find', () => {
       it('includes the id field in the response', async () => {
         const findMockReturn = createSOFindResponse([

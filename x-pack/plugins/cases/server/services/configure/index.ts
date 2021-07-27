@@ -18,14 +18,17 @@ import { SavedObjectFindOptionsKueryNode } from '../../common';
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CasesConfigureAttributes,
-  CaseConnector,
   CasesConfigurePatch,
-  ESConnectorFields,
   ESCaseConnectorNoID,
+  noneConnectorId,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { connectorIDReferenceName } from '..';
-import { transformStoredConnector, transformStoredConnectorOrUseDefault } from '../transform';
+import {
+  transformFieldsToESModel,
+  transformESConnector,
+  transformESConnectorOrUseDefault,
+} from '../transform';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -46,137 +49,6 @@ interface PostCaseConfigureArgs extends ClientArgs {
 interface PatchCaseConfigureArgs extends ClientArgs {
   configurationId: string;
   updatedAttributes: Partial<CasesConfigureAttributes>;
-}
-
-function transformUpdateResponseToExternalModel(
-  updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributes>
-): SavedObjectsUpdateResponse<CasesConfigurePatch> {
-  const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
-
-  const transformedConnector = transformStoredConnector(
-    connector,
-    updatedConfiguration.references,
-    connectorIDReferenceName
-  );
-
-  return {
-    ...updatedConfiguration,
-    attributes: {
-      ...restUpdatedAttributes,
-      // this will avoid setting connector to undefined, it won't include to field at all
-      ...(transformedConnector && { connector: transformedConnector }),
-    },
-  };
-}
-
-function transformToExternalModel(
-  configuration: SavedObject<ESCasesConfigureAttributes>
-): SavedObject<CasesConfigureAttributes> {
-  const connector = transformStoredConnectorOrUseDefault(
-    // if the saved object had an error the attributes field will not exist
-    configuration.attributes?.connector,
-    configuration.references,
-    connectorIDReferenceName
-  );
-
-  return {
-    ...configuration,
-    attributes: {
-      ...configuration.attributes,
-      connector,
-    },
-  };
-}
-
-function transformFindResponseToExternalModel(
-  configurations: SavedObjectsFindResponse<ESCasesConfigureAttributes>
-): SavedObjectsFindResponse<CasesConfigureAttributes> {
-  return {
-    ...configurations,
-    saved_objects: configurations.saved_objects.map((so) => ({
-      ...so,
-      ...transformToExternalModel(so),
-    })),
-  };
-}
-
-function transformFieldsToESModel(connector: CaseConnector): ESConnectorFields {
-  if (!connector.fields) {
-    return [];
-  }
-
-  return Object.entries(connector.fields).reduce<ESConnectorFields>(
-    (acc, [key, value]) => [
-      ...acc,
-      {
-        key,
-        value,
-      },
-    ],
-    []
-  );
-}
-
-function buildReferences(id: string): SavedObjectReference[] | undefined {
-  return id !== 'none'
-    ? [
-        {
-          id,
-          name: connectorIDReferenceName,
-          type: ACTION_SAVED_OBJECT_TYPE,
-        },
-      ]
-    : undefined;
-}
-
-// TODO: figure out if we can use a conditional type here
-function transformCreateAttributesToESModel(
-  configuration: CasesConfigureAttributes
-): {
-  attributes: ESCasesConfigureAttributes;
-  references?: SavedObjectReference[];
-} {
-  const { connector, ...restWithoutConnector } = configuration;
-
-  return {
-    attributes: {
-      ...restWithoutConnector,
-      connector: {
-        name: connector.name,
-        type: connector.type,
-        fields: transformFieldsToESModel(connector),
-      },
-    },
-    references: buildReferences(connector.id),
-  };
-}
-
-function transformUpdateAttributesToESModel(
-  configuration: Partial<CasesConfigureAttributes>
-): {
-  attributes: Partial<ESCasesConfigureAttributes>;
-  references?: SavedObjectReference[];
-} {
-  const { connector, ...restWithoutConnector } = configuration;
-  if (!connector) {
-    return {
-      attributes: {
-        ...restWithoutConnector,
-      },
-    };
-  }
-
-  return {
-    attributes: {
-      ...restWithoutConnector,
-      connector: {
-        name: connector.name,
-        type: connector.type,
-        fields: transformFieldsToESModel(connector),
-      },
-    },
-    references: buildReferences(connector.id),
-  };
 }
 
 // TODO: add comment
@@ -244,12 +116,10 @@ export class CaseConfigureService {
   }: PostCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
-      const esConfigInfo = transformCreateAttributesToESModel(attributes);
+      const esConfigInfo = transformAttributesToESModel(attributes);
       const createdConfig = await unsecuredSavedObjectsClient.create<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
-        {
-          ...esConfigInfo.attributes,
-        },
+        esConfigInfo.attributes,
         { id, references: esConfigInfo.references }
       );
 
@@ -267,7 +137,7 @@ export class CaseConfigureService {
   }: PatchCaseConfigureArgs): Promise<SavedObjectsUpdateResponse<CasesConfigurePatch>> {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
-      const esUpdateInfo = transformUpdateAttributesToESModel(updatedAttributes);
+      const esUpdateInfo = transformAttributesToESModel(updatedAttributes);
 
       const updatedConfiguration = await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
@@ -286,4 +156,103 @@ export class CaseConfigureService {
       throw error;
     }
   }
+}
+
+function transformUpdateResponseToExternalModel(
+  updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributes>
+): SavedObjectsUpdateResponse<CasesConfigurePatch> {
+  const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
+
+  const transformedConnector = transformESConnector(
+    connector,
+    updatedConfiguration.references,
+    connectorIDReferenceName
+  );
+
+  return {
+    ...updatedConfiguration,
+    attributes: {
+      ...restUpdatedAttributes,
+      // this will avoid setting connector to undefined, it won't include to field at all
+      ...(transformedConnector && { connector: transformedConnector }),
+    },
+  };
+}
+
+function transformToExternalModel(
+  configuration: SavedObject<ESCasesConfigureAttributes>
+): SavedObject<CasesConfigureAttributes> {
+  const connector = transformESConnectorOrUseDefault(
+    // if the saved object had an error the attributes field will not exist
+    configuration.attributes?.connector,
+    configuration.references,
+    connectorIDReferenceName
+  );
+
+  return {
+    ...configuration,
+    attributes: {
+      ...configuration.attributes,
+      connector,
+    },
+  };
+}
+
+function transformFindResponseToExternalModel(
+  configurations: SavedObjectsFindResponse<ESCasesConfigureAttributes>
+): SavedObjectsFindResponse<CasesConfigureAttributes> {
+  return {
+    ...configurations,
+    saved_objects: configurations.saved_objects.map((so) => ({
+      ...so,
+      ...transformToExternalModel(so),
+    })),
+  };
+}
+
+function transformAttributesToESModel(
+  configuration: CasesConfigureAttributes
+): {
+  attributes: ESCasesConfigureAttributes;
+  references?: SavedObjectReference[];
+};
+function transformAttributesToESModel(
+  configuration: Partial<CasesConfigureAttributes>
+): {
+  attributes: Partial<ESCasesConfigureAttributes>;
+  references?: SavedObjectReference[];
+};
+function transformAttributesToESModel(
+  configuration: Partial<CasesConfigureAttributes>
+): {
+  attributes: Partial<ESCasesConfigureAttributes>;
+  references?: SavedObjectReference[];
+} {
+  const { connector, ...restWithoutConnector } = configuration;
+
+  const transformedConnector = connector && {
+    name: connector.name,
+    type: connector.type,
+    fields: transformFieldsToESModel(connector),
+  };
+
+  return {
+    attributes: {
+      ...restWithoutConnector,
+      ...(transformedConnector && { connector: transformedConnector }),
+    },
+    references: buildReferences(connector?.id),
+  };
+}
+
+function buildReferences(id?: string): SavedObjectReference[] | undefined {
+  return id && id !== noneConnectorId
+    ? [
+        {
+          id,
+          name: connectorIDReferenceName,
+          type: ACTION_SAVED_OBJECT_TYPE,
+        },
+      ]
+    : undefined;
 }

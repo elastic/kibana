@@ -61,6 +61,8 @@ import { EnsureSOAuthCallback } from '../../authorization';
 import {
   transformCaseArrayResponseToExternalModel,
   transformCaseSavedObjectToExternalModel,
+  transformCreateAttributesToESModel,
+  transformUpdateResponseToExternalModel,
 } from './transform';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
@@ -119,7 +121,7 @@ interface FindSubCasesStatusStats {
 }
 
 interface PostCaseArgs extends ClientArgs {
-  attributes: ESCaseAttributes;
+  attributes: CaseAttributes;
   id: string;
 }
 
@@ -131,7 +133,7 @@ interface CreateSubCaseArgs extends ClientArgs {
 
 interface PatchCase {
   caseId: string;
-  updatedAttributes: Partial<ESCaseAttributes & PushedArgs>;
+  updatedAttributes: Partial<CaseAttributes & PushedArgs>;
   version?: string;
 }
 type PatchCaseArgs = PatchCase & ClientArgs;
@@ -1069,11 +1071,13 @@ export class CasesService {
   public async postNewCase({ unsecuredSavedObjectsClient, attributes, id }: PostCaseArgs) {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      return await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
+      const transformedAttributes = transformCreateAttributesToESModel(attributes);
+      const createdCase = await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
-        attributes,
-        { id }
+        transformedAttributes.attributes,
+        { id, references: transformedAttributes.references }
       );
+      return transformCaseSavedObjectToExternalModel(createdCase);
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);
       throw error;
@@ -1088,12 +1092,14 @@ export class CasesService {
   }: PatchCaseArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      return await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
+      const transformedAttributes = transformCreateAttributesToESModel(updatedAttributes);
+      const updatedCase = await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
-        { ...updatedAttributes },
-        { version }
+        transformedAttributes.attributes,
+        { version, references: transformedAttributes.references }
       );
+      return transformUpdateResponseToExternalModel(updatedCase);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${caseId}: ${error}`);
       throw error;

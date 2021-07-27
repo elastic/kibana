@@ -327,9 +327,11 @@ export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt
 // export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & {
 //   connector: ESCaseConnectorNoID;
 // };
-export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
-  connector?: ESCaseConnector;
-};
+
+// TODO: should not need this anymore since we can just pass the external model through to the service layer
+// export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
+//   connector?: ESCaseConnector;
+// };
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;

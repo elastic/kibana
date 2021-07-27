@@ -73,6 +73,8 @@ const ConnectorNoneTypeFieldsRt = rt.type({
   fields: rt.null,
 });
 
+export const noneConnectorId: string = 'none';
+
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
   ConnectorNoneTypeFieldsRt,

@@ -6,9 +6,30 @@
  */
 
 import { SavedObjectReference } from 'kibana/server';
-import { CaseConnector, ConnectorTypeFields, ESCaseConnectorNoID } from '../../common';
+import {
+  CaseConnector,
+  ConnectorTypeFields,
+  ESCaseConnectorNoID,
+  ESConnectorFields,
+} from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 import { getNoneCaseConnector } from '../common';
+
+export function findConnectorIDReference(
+  name: string,
+  references?: SavedObjectReference[]
+): SavedObjectReference | undefined {
+  return references?.find((ref) => ref.type === ACTION_SAVED_OBJECT_TYPE && ref.name === name);
+}
+
+export function transformESConnector(
+  connector: ESCaseConnectorNoID | undefined,
+  references: SavedObjectReference[] | undefined,
+  referenceName: string
+): CaseConnector | undefined {
+  const connectorIDRef = findConnectorIDReference(referenceName, references);
+  return formatStoredConnectorFields(connector, connectorIDRef?.id);
+}
 
 function formatStoredConnectorFields(
   connector?: ESCaseConnectorNoID,
@@ -46,27 +67,27 @@ function formatStoredConnectorFields(
   };
 }
 
-// TODO: add comments
-export function findConnectorIDReference(
-  name: string,
-  references?: SavedObjectReference[]
-): SavedObjectReference | undefined {
-  return references?.find((ref) => ref.type === ACTION_SAVED_OBJECT_TYPE && ref.name === name);
-}
-
-export function transformStoredConnector(
-  connector: ESCaseConnectorNoID | undefined,
-  references: SavedObjectReference[] | undefined,
-  referenceName: string
-): CaseConnector | undefined {
-  const connectorIDRef = findConnectorIDReference(referenceName, references);
-  return formatStoredConnectorFields(connector, connectorIDRef?.id);
-}
-
-export function transformStoredConnectorOrUseDefault(
+export function transformESConnectorOrUseDefault(
   connector: ESCaseConnectorNoID | undefined,
   references: SavedObjectReference[] | undefined,
   referenceName: string
 ): CaseConnector {
-  return transformStoredConnector(connector, references, referenceName) ?? getNoneCaseConnector();
+  return transformESConnector(connector, references, referenceName) ?? getNoneCaseConnector();
+}
+
+export function transformFieldsToESModel(connector: CaseConnector): ESConnectorFields {
+  if (!connector.fields) {
+    return [];
+  }
+
+  return Object.entries(connector.fields).reduce<ESConnectorFields>(
+    (acc, [key, value]) => [
+      ...acc,
+      {
+        key,
+        value,
+      },
+    ],
+    []
+  );
 }
