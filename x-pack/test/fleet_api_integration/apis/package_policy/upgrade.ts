@@ -12,7 +12,6 @@ import {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../../plugins/fleet/common';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -28,8 +27,6 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
-
-    setupFleetAndAgents(providerContext);
 
     describe('when package is installed', function () {
       before(async function () {
