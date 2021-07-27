@@ -16,7 +16,7 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 [cols="2"]
 |===
 
-| <<create-panels-with-editors,Editors>>
+| <<aggregation-reference,Editors>>
 | Use the *Lens*, *TSVB*, *Vega*, and *Timelion* editors to create visualizations of your data, or create *Aggregation based* visualizations using {es} aggregations. 
 *Lens* is the recommended editor.
 
@@ -335,5 +335,3 @@ include::lens-advanced.asciidoc[]
 include::create-panels-with-editors.asciidoc[]
 
 include::make-dashboards-interactive.asciidoc[]
-
-include::aggregation-reference.asciidoc[]
