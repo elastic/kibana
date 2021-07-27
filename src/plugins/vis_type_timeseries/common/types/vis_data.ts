@@ -40,12 +40,14 @@ export interface PanelData {
   id: string;
   label: string;
   labelFormatted?: string;
-  data: Array<[number, number]>;
+  data: PanelDataArray[];
   seriesId: string;
   splitByLabel: string;
   isSplitByTerms: boolean;
   error?: string;
 }
+
+export type PanelDataArray = [number | undefined | string, number | string | null];
 
 export interface Annotation {
   key: number;

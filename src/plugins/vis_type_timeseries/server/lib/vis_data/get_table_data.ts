@@ -9,11 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-// not typed yet
-// @ts-expect-error
-import { buildRequestBody } from './table/build_request_body';
+import { buildTableRequest } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
-// @ts-expect-error
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
@@ -31,17 +28,16 @@ export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
   panel: Panel,
-  services: VisTypeTimeseriesRequestServices
-) {
-  const {
-    cachedIndexPatternFetcher,
-    searchStrategyRegistry,
-    indexPatternsService,
+  {
     esQueryConfig,
     uiSettings,
+    indexPatternsService,
+    searchStrategyRegistry,
+    cachedIndexPatternFetcher,
     fieldFormatService,
-  } = services;
-
+    buildSeriesMetaParams,
+  }: VisTypeTimeseriesRequestServices
+) {
   const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
 
   const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
@@ -80,15 +76,16 @@ export async function getTableData(
   const handleError = handleErrorResponse(panel);
 
   try {
-    const body = await buildRequestBody(
+    const body = await buildTableRequest({
       req,
       panel,
       esQueryConfig,
-      panelIndex,
+      seriesIndex: panelIndex,
       capabilities,
       uiSettings,
-      () => services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes))
-    );
+      buildSeriesMetaParams: () =>
+        buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
+    });
 
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
@@ -112,9 +109,7 @@ export async function getTableData(
     );
 
     const series = await Promise.all(
-      buckets.map(
-        processBucket(panel, req, searchStrategy, capabilities, extractFields, getFieldFormatByName)
-      )
+      buckets.map(processBucket({ panel, extractFields, getFieldFormatByName }))
     );
 
     return {
