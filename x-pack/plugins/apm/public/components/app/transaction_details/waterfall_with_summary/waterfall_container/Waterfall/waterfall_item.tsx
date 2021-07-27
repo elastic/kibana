@@ -16,7 +16,7 @@ import { Margins } from '../../../../../shared/charts/Timeline';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { ErrorCount } from '../../ErrorCount';
 import { SyncBadge } from './sync_badge';
-import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import { IWaterfallSpanOrTransaction, IWaterfallSpan } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -147,7 +147,12 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
-      return <EuiText size="s">{item.doc.span.name}</EuiText>;
+      var name = item.doc.span.name;
+      if(item.doc.span.composite !== undefined){
+        const compositePrefix = item.doc.span.composite.compression_strategy === 'exact_match' ? 'x' : '';
+        name = item.doc.span.composite.count + compositePrefix + ' ' + name;
+      } 
+      return <EuiText size="s">{name}</EuiText>;
     case 'transaction':
       return (
         <EuiTitle size="xxs">
@@ -182,6 +187,9 @@ export function WaterfallItem({
     }
   );
 
+  const isCompositeSpan = item.docType === 'span' && (item as IWaterfallSpan).doc.span.composite !== undefined;
+  const itemBarStyle = getItemBarStyle(item, color, width, left);
+
   return (
     <Container
       type={item.docType}
@@ -193,8 +201,8 @@ export function WaterfallItem({
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
-        style={{ left: `${left}%`, width: `${width}%` }}
-        color={color}
+        style={itemBarStyle}
+        color={isCompositeSpan ? 'transparent' : color}
         type={item.docType}
       />
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
@@ -226,4 +234,30 @@ export function WaterfallItem({
       </ItemText>
     </Container>
   );
+}
+
+function getItemBarStyle(item: IWaterfallSpanOrTransaction, color: string, width: number, left: number): React.CSSProperties {
+  var itemBarStyle = { left: `${left}%`, width: `${width}%` };
+  
+  if(item.docType === 'span'){
+    const spanItem = item as IWaterfallSpan;
+
+    if(spanItem.doc.span.composite !== undefined){
+      const composite = spanItem.doc.span.composite;
+      const percNumItems = 100.0 / composite.count;
+      const percDuration = percNumItems * (composite.sum.us / spanItem.doc.span.duration.us);
+
+      itemBarStyle = {
+        ...itemBarStyle,
+        ...{
+          backgroundImage: `repeating-linear-gradient(90deg, ${color},`+
+            ` ${color} max(${percDuration}%,3px),` +
+            ` transparent max(${percDuration}%,3px),` +
+            ` transparent max(${percNumItems}%,max(${percDuration}%,3px) + 3px))`
+        }
+      };
+    }
+  }
+
+  return itemBarStyle;
 }
