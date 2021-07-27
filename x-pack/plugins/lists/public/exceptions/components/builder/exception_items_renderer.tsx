@@ -30,8 +30,9 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
+import { IndexPatternBase } from '@kbn/es-query';
 
-import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -75,7 +76,7 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: IIndexPattern;
+  indexPatterns: IndexPatternBase;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
@@ -83,9 +84,9 @@ export interface ExceptionBuilderProps {
   listNamespaceType: NamespaceType;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IIndexPattern,
+    pattern: IndexPatternBase,
     type: ExceptionListType
-  ) => IIndexPattern;
+  ) => IndexPatternBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
   isDisabled?: boolean;
