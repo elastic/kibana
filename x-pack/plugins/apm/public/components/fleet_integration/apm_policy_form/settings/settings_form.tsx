@@ -26,66 +26,61 @@ import { validateSettingValue } from './utils';
 export type FormRowOnChange = (key: string, value: any) => void;
 
 function FormRow({
-  setting,
+  initialSetting,
   vars,
   onChange,
 }: {
-  setting: SettingDefinition;
+  initialSetting: SettingDefinition;
   vars?: PackagePolicyVars;
   onChange: FormRowOnChange;
 }) {
-  if (setting.type === 'advanced_option') {
-    return (
-      <AdvancedOptions>
-        {setting.settings.map((advancedSetting) =>
-          FormRow({
-            setting: advancedSetting,
-            vars,
-            onChange,
-          })
-        )}
-      </AdvancedOptions>
-    );
-  } else {
-    const { key } = setting;
-    const value = vars?.[key]?.value;
-    const { isValid, message } = validateSettingValue(setting, value);
-    return (
-      <React.Fragment key={key}>
-        <EuiDescribedFormGroup
-          title={<h3>{setting.rowTitle}</h3>}
-          description={setting.rowDescription}
-        >
-          <EuiFormRow
-            label={setting.label}
-            isInvalid={!isValid}
-            error={isValid ? undefined : message}
-            helpText={<EuiText size="xs">{setting.helpText}</EuiText>}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                {setting.labelAppend}
-              </EuiText>
-            }
-          >
-            <FormRowSetting
-              setting={setting}
-              onChange={onChange}
-              value={value}
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-        {setting.settings &&
-          value &&
-          setting.settings.map((childSettings) =>
-            FormRow({
-              setting: childSettings,
-              vars,
-              onChange,
-            })
+  function getSettingFormRow(setting: SettingDefinition) {
+    if (setting.type === 'advanced_option') {
+      return (
+        <AdvancedOptions>
+          {setting.settings.map((advancedSetting) =>
+            getSettingFormRow(advancedSetting)
           )}
-      </React.Fragment>
-    );
+        </AdvancedOptions>
+      );
+    } else {
+      const { key } = setting;
+      const value = vars?.[key]?.value;
+      const { isValid, message } = validateSettingValue(setting, value);
+      return (
+        <React.Fragment key={key}>
+          <EuiDescribedFormGroup
+            title={<h3>{setting.rowTitle}</h3>}
+            description={setting.rowDescription}
+          >
+            <EuiFormRow
+              label={setting.label}
+              isInvalid={!isValid}
+              error={isValid ? undefined : message}
+              helpText={<EuiText size="xs">{setting.helpText}</EuiText>}
+              labelAppend={
+                <EuiText size="xs" color="subdued">
+                  {setting.labelAppend}
+                </EuiText>
+              }
+            >
+              <FormRowSetting
+                setting={setting}
+                onChange={onChange}
+                value={value}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+          {setting.settings &&
+            value &&
+            setting.settings.map((childSettings) =>
+              getSettingFormRow(childSettings)
+            )}
+        </React.Fragment>
+      );
+    }
   }
+  return getSettingFormRow(initialSetting);
 }
 interface Props {
   title: string;
@@ -120,7 +115,7 @@ export function SettingsForm({
 
       {settings.map((setting) => {
         return FormRow({
-          setting,
+          initialSetting: setting,
           vars,
           onChange,
         });
