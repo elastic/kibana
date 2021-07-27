@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('users');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('x-pack/test/functional/es_archives/security/discover');
+      await kibanaServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/security/discover');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
@@ -87,6 +87,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await PageObjects.security.forceLogout();
+      await kibanaServer.importExport.unload('x-pack/test/functional/fixtures/kbn_archiver/security/discover');
     });
   });
 }
