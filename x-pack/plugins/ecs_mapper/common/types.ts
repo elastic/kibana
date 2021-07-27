@@ -11,7 +11,7 @@ export interface LicenseStatus {
   message?: string;
 }
 
-export enum FieldRenameAction {
+export enum FieldCopyAction {
   Copy = 'copy',
   Rename = 'rename',
 }

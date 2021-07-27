@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 
 import { AboutPanel, LoadingPanel, ResultsPanel } from './upload_panel';
 import { readFile } from '../util/utils';
-import { FieldRenameAction } from '../../../../common';
+import { FieldCopyAction } from '../../../../common';
 
 export class EcsMapperUploadView extends Component {
   constructor(props) {
@@ -23,6 +23,7 @@ export class EcsMapperUploadView extends Component {
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
+      results: []
     };
 
     this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
@@ -72,10 +73,12 @@ export class EcsMapperUploadView extends Component {
           fileSize: file.size,
           loading: true,
         });
-        this.props.mapper.fetchPipelineFromMapping(fileContents, FieldRenameAction.Copy);
+        const results = this.props.mapper.fetchPipelineFromMapping(fileContents, FieldCopyAction.Copy);
+        console.log(results);
         this.setState({
           loading: false,
           loaded: true,
+          results: result
         });
       } catch (error) {
         this.setState({

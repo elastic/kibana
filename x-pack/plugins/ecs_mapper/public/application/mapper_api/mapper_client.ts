@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import { FieldRenameAction } from '../../../common';
+import { FieldCopyAction } from '../../../common';
 
 interface MapperClientConstructor {
   http: CoreStart['http'];
@@ -23,18 +23,15 @@ export class MapperClient {
     this.notifications = notifications;
   }
 
-  /**
-   * Discards the notice about usage collection and stores it so we don't bother any other users.
-   */
   public fetchPipelineFromMapping = async (
     file: string,
-    renameAction: FieldRenameAction
+    copyAction: FieldCopyAction
   ): Promise<void> => {
     try {
       return this.http.post('/api/ecs_mapper/map/ingest_pipeline', {
         body: JSON.stringify({
           file,
-          renameAction,
+          copyAction,
         }),
       });
     } catch (error) {

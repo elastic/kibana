@@ -13,7 +13,7 @@ import { Plugin, CoreSetup, CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDevTool, registerHomeFeatureCatalogue } from './registration';
 import { setStartServices } from './kibana_services';
-import { FieldRenameAction } from '../common';
+import { FieldCopyAction } from '../common';
 import { MapperClient } from './application/mapper_api';
 
 /**
@@ -21,7 +21,7 @@ import { MapperClient } from './application/mapper_api';
  */
 export interface MapperServicePublicApis {
   /** description todo */
-  mapToIngestPipeline: (file: string, renanmeAction: FieldRenameAction) => object;
+  mapToIngestPipeline: (file: string, renanmeAction: FieldCopyAction) => object;
 }
 
 export interface EcsMapperSetupDependencies {
@@ -78,8 +78,8 @@ export class EcsMapperPlugin
   private getMapperServicePublicApis(): MapperServicePublicApis {
     const mapperClient = this.mapper!;
     return {
-      mapToIngestPipeline: (file: string, renameAction: FieldRenameAction) =>
-        mapperClient.fetchPipelineFromMapping(file, renameAction),
+      mapToIngestPipeline: (file: string, copyAction: FieldCopyAction) =>
+        mapperClient.fetchPipelineFromMapping(file, copyAction),
     };
   }
 }

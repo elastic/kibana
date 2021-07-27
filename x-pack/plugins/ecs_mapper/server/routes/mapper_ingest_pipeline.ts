@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { FieldRenameAction } from '../../common';
+import { FieldCopyAction } from '../../common';
 import { mapToIngestPipeline } from '../services/mapper';
 
 export function registerMapToIndexPipelineRoute(router: IRouter) {
@@ -17,14 +17,14 @@ export function registerMapToIndexPipelineRoute(router: IRouter) {
       validate: {
         body: schema.object({
           file: schema.string(),
-          renameAction: schema.string(),
+          copyAction: schema.string(),
         }),
       },
     },
     async (context, req, res) => {
-      const { file, renameAction } = req.body;
-      const result = mapToIngestPipeline(file, renameAction as FieldRenameAction);
-      return res.ok({ body: result });
+      const { file, copyAction } = req.body;
+      const result = mapToIngestPipeline(file, copyAction as FieldCopyAction);
+      return res.ok({ body: JSON.stringify(result) });
     }
   );
 }
