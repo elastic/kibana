@@ -23,7 +23,7 @@ import {
   initializeBrowserDriverFactory,
 } from '../browsers';
 import { ReportingConfigType } from '../config';
-import { ReportingPluginSetupDeps, ReportingPluginStartDeps } from '../core';
+import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
@@ -34,7 +34,7 @@ import { createMockLevelLogger } from './create_mock_levellogger';
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
-export const createMockPluginSetup = (setupMock?: any): ReportingPluginSetupDeps => {
+export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },
@@ -54,7 +54,7 @@ const createMockReportingStore = () => ({} as ReportingStore);
 export const createMockPluginStart = (
   mockReportingCore: ReportingCore | undefined,
   startMock?: any
-): ReportingPluginStartDeps => {
+): ReportingInternalStart => {
   const store = mockReportingCore
     ? new ReportingStore(mockReportingCore, logger)
     : createMockReportingStore();
@@ -138,8 +138,8 @@ export const createMockConfig = (
 
 export const createMockReportingCore = async (
   config: ReportingConfigType,
-  setupDepsMock: ReportingPluginSetupDeps | undefined = undefined,
-  startDepsMock: ReportingPluginStartDeps | undefined = undefined
+  setupDepsMock: ReportingInternalSetup | undefined = undefined,
+  startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
   const mockReportingCore = ({
     getConfig: () => createMockConfig(config),

@@ -8,7 +8,7 @@
 import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
-import { ReportingPluginSetupDeps } from '../../core';
+import { ReportingInternalSetup } from '../../core';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../types';
 import { authorizedUserPreRouting } from './authorized_user_pre_routing';
@@ -45,7 +45,7 @@ describe('authorized_user_pre_routing', function () {
         // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: undefined, // disable security
-      } as unknown) as ReportingPluginSetupDeps);
+      } as unknown) as ReportingInternalSetup);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
@@ -68,7 +68,7 @@ describe('authorized_user_pre_routing', function () {
             isEnabled: () => false,
           },
         }, // disable security
-      } as unknown) as ReportingPluginSetupDeps);
+      } as unknown) as ReportingInternalSetup);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
@@ -90,7 +90,7 @@ describe('authorized_user_pre_routing', function () {
           license: { isEnabled: () => true },
           authc: { getCurrentUser: () => null },
         },
-      } as unknown) as ReportingPluginSetupDeps);
+      } as unknown) as ReportingInternalSetup);
     const mockHandler = () => {
       throw new Error('Handler callback should not be called');
     };
@@ -122,7 +122,7 @@ describe('authorized_user_pre_routing', function () {
             license: { isEnabled: () => true },
             authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
           },
-        } as unknown) as ReportingPluginSetupDeps);
+        } as unknown) as ReportingInternalSetup);
       const mockResponseFactory = getMockResponseFactory();
 
       const mockHandler = () => {
@@ -148,7 +148,7 @@ describe('authorized_user_pre_routing', function () {
               getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
             },
           },
-        } as unknown) as ReportingPluginSetupDeps);
+        } as unknown) as ReportingInternalSetup);
       const mockResponseFactory = getMockResponseFactory();
 
       authorizedUserPreRouting(mockCore, (user) => {

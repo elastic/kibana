@@ -12,7 +12,7 @@ import { ElasticsearchClient } from 'kibana/server';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
-import { ReportingPluginSetupDeps } from '../core';
+import { ReportingInternalSetup } from '../core';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import {
   createMockConfigSchema,
@@ -30,7 +30,7 @@ describe('GET /api/reporting/jobs/download', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
-  let mockSetupDeps: ReportingPluginSetupDeps;
+  let mockSetupDeps: ReportingInternalSetup;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
   const getHits = (...sources: any) => {
@@ -128,7 +128,7 @@ describe('GET /api/reporting/jobs/download', () => {
           getCurrentUser: () => undefined,
         },
       },
-    } as unknown) as ReportingPluginSetupDeps;
+    } as unknown) as ReportingInternalSetup;
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -328,7 +328,7 @@ describe('GET /api/reporting/jobs/download', () => {
             }),
           },
         },
-      } as unknown) as ReportingPluginSetupDeps;
+      } as unknown) as ReportingInternalSetup;
       registerJobInfoRoutes(core);
 
       await server.start();
