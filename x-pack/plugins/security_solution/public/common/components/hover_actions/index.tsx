@@ -10,12 +10,13 @@ import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react'
 import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 
 import { useKibana } from '../../lib/kibana';
 import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from './utils';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, TimelineId } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -38,43 +39,51 @@ export const AdditionalContent = styled.div`
 
 AdditionalContent.displayName = 'AdditionalContent';
 
-const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
+const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean; $showOwnFocus: boolean }>`
   padding: ${(props) => (props.$showTopN ? 'none' : `0 ${props.theme.eui.paddingSizes.s}`)};
   display: flex;
 
-  &:focus-within {
+  ${(props) =>
+    props.$showOwnFocus
+      ? `
+    &:focus-within {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+
+    &:hover {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+
     .timelines__hoverActionButton,
     .securitySolution__hoverActionButton {
-      opacity: 1;
-    }
-  }
+      opacity: 0;
 
-  &:hover {
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      opacity: 1;
+      &:focus {
+        opacity: 1;
+      }
     }
-  }
-
-  .timelines__hoverActionButton,
-  .securitySolution__hoverActionButton {
-    opacity: 0;
-
-    &:focus {
-      opacity: 1;
-    }
-  }
+  `
+      : ''}
 `;
 
 interface Props {
   additionalContent?: React.ReactNode;
+  closePopOver?: () => void;
+  dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
-  draggableIds?: DraggableId[];
+  draggableId?: DraggableId;
   field: string;
   goGetTimelineId?: (args: boolean) => void;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
   ownFocus: boolean;
+  showOwnFocus?: boolean;
   showTopN: boolean;
   timelineId?: string | null;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
@@ -100,13 +109,15 @@ const isFocusTrapDisabled = ({
 export const HoverActions: React.FC<Props> = React.memo(
   ({
     additionalContent = null,
+    dataProvider,
     dataType,
-    draggableIds,
+    draggableId,
     field,
     goGetTimelineId,
     isObjectArray,
     onFilterAdded,
     ownFocus,
+    showOwnFocus = true,
     showTopN,
     timelineId,
     toggleColumn,
@@ -203,7 +214,11 @@ export const HoverActions: React.FC<Props> = React.memo(
           showTopN,
         })}
       >
-        <StyledHoverActionsContainer onKeyDown={onKeyDown} $showTopN={showTopN}>
+        <StyledHoverActionsContainer
+          onKeyDown={onKeyDown}
+          $showTopN={showTopN}
+          $showOwnFocus={showOwnFocus}
+        >
           <EuiScreenReaderOnly>
             <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(field)}</p>
           </EuiScreenReaderOnly>
@@ -252,9 +267,11 @@ export const HoverActions: React.FC<Props> = React.memo(
             </div>
           )}
 
-          {showFilters && draggableIds != null && (
+          {showFilters && (draggableId != null || !isEmpty(dataProvider)) && (
             <div data-test-subj="hover-actions-add-timeline">
               {getAddToTimelineButton({
+                dataProvider,
+                draggableId,
                 field,
                 keyboardEvent: stKeyboardEvent,
                 ownFocus,

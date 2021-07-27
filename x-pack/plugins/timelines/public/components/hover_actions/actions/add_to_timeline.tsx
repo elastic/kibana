@@ -7,18 +7,18 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DraggableId } from 'react-beautiful-dnd';
+import { useDispatch } from 'react-redux';
 
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import { isEmpty } from 'lodash';
+import { DataProvider, stopPropagationAndPreventDefault, TimelineId } from '../../../../common';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 import { HoverActionComponentProps } from './types';
-
-const ADD_TO_TIMELINE = i18n.translate('xpack.timelines.hoverActions.addToTimeline', {
-  defaultMessage: 'Add to timeline investigation',
-});
+import { tGridActions } from '../../..';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import * as i18n from './translations';
 
 export const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';
 
@@ -44,26 +44,47 @@ const useGetHandleStartDragToTimeline = ({
 };
 
 export interface AddToTimelineButtonProps extends HoverActionComponentProps {
-  draggableIds?: DraggableId[];
+  draggableId?: DraggableId;
+  dataProvider?: DataProvider[] | DataProvider;
 }
 
 const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
   ({
+    closePopOver,
+    dataProvider,
     defaultFocusedButtonRef,
-    draggableIds,
+    draggableId,
     field,
     keyboardEvent,
     ownFocus,
     showTooltip = false,
     value,
   }) => {
-    const handleStartDragToTimeline = (() => {
-      const handleStartDragToTimelineFns = draggableIds?.map((draggableId) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        return useGetHandleStartDragToTimeline({ draggableId, field });
-      });
-      return () => handleStartDragToTimelineFns?.forEach((dragFn) => dragFn());
-    })();
+    const dispatch = useDispatch();
+    const { addSuccess } = useAppToasts();
+    const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
+    const handleStartDragToTimeline = useCallback(() => {
+      if (draggableId != null) {
+        startDragToTimeline();
+      } else if (!isEmpty(dataProvider)) {
+        const addDataProvider = Array.isArray(dataProvider) ? dataProvider : [dataProvider];
+        addDataProvider.forEach((provider) => {
+          if (provider) {
+            dispatch(
+              tGridActions.addProviderToTimeline({
+                id: TimelineId.active,
+                dataProvider: provider,
+              })
+            );
+            addSuccess(i18n.ADDED_TO_TIMELINE_MESSAGE(provider.name));
+          }
+        });
+      }
+
+      if (closePopOver != null) {
+        closePopOver();
+      }
+    }, [addSuccess, closePopOver, dataProvider, dispatch, draggableId, startDragToTimeline]);
 
     useEffect(() => {
       if (!ownFocus) {
@@ -83,14 +104,14 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
               field,
               value,
             })}
-            content={ADD_TO_TIMELINE}
+            content={i18n.ADD_TO_TIMELINE}
             shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
             showShortcut={ownFocus}
           />
         }
       >
         <EuiButtonIcon
-          aria-label={ADD_TO_TIMELINE}
+          aria-label={i18n.ADD_TO_TIMELINE}
           buttonRef={defaultFocusedButtonRef}
           className="timelines__hoverActionButton"
           data-test-subj="add-to-timeline"
@@ -101,7 +122,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       </EuiToolTip>
     ) : (
       <EuiButtonIcon
-        aria-label={ADD_TO_TIMELINE}
+        aria-label={i18n.ADD_TO_TIMELINE}
         buttonRef={defaultFocusedButtonRef}
         className="timelines__hoverActionButton"
         data-test-subj="add-to-timeline"

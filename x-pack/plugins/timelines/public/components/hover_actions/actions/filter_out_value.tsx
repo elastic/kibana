@@ -22,6 +22,7 @@ export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
 
 const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnArgs> = React.memo(
   ({
+    closePopOver,
     defaultFocusedButtonRef,
     field,
     filterManager,
@@ -48,7 +49,10 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
           onFilterAdded();
         }
       }
-    }, [field, filterManager, onFilterAdded, value]);
+      if (closePopOver != null) {
+        closePopOver();
+      }
+    }, [closePopOver, field, filterManager, onFilterAdded, value]);
 
     useEffect(() => {
       if (!ownFocus) {

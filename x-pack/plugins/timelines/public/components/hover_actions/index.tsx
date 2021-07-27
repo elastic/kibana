@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import React, { ReactElement } from 'react';
+import { Provider } from 'react-redux';
+import { Store } from 'redux';
 import type { AddToTimelineButtonProps } from './actions/add_to_timeline';
 import type { ColumnToggleProps } from './actions/column_toggle';
 import type { CopyProps } from './actions/copy';
@@ -26,10 +29,14 @@ export interface HoverActionsConfig {
 }
 
 const AddToTimelineButtonLazy = React.lazy(() => import('./actions/add_to_timeline'));
-const getAddToTimelineButtonLazy = (props: AddToTimelineButtonProps) => {
+const getAddToTimelineButtonLazy = (store: Store, props: AddToTimelineButtonProps) => {
   return (
     <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <AddToTimelineButtonLazy {...props} />
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToTimelineButtonLazy {...props} />
+        </I18nProvider>
+      </Provider>
     </React.Suspense>
   );
 };
@@ -44,7 +51,7 @@ const getColumnToggleButtonLazy = (props: ColumnToggleProps) => {
 };
 
 const CopyButtonLazy = React.lazy(() => import('./actions/copy'));
-const getCopyButtonLazy = (props: AddToTimelineButtonProps) => {
+const getCopyButtonLazy = (props: CopyProps) => {
   return (
     <React.Suspense fallback={<EuiLoadingSpinner />}>
       <CopyButtonLazy {...props} />
@@ -70,8 +77,8 @@ const getFilterOutValueButtonLazy = (props: HoverActionComponentProps & FilterVa
   );
 };
 
-export const getHoverActions = (): HoverActionsConfig => ({
-  getAddToTimelineButton: getAddToTimelineButtonLazy,
+export const getHoverActions = (store?: Store): HoverActionsConfig => ({
+  getAddToTimelineButton: getAddToTimelineButtonLazy.bind(null, store!),
   getColumnToggleButton: getColumnToggleButtonLazy,
   getCopyButton: getCopyButtonLazy,
   getFilterForValueButton: getFilterForValueButtonLazy,

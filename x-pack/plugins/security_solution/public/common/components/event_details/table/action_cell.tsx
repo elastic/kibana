@@ -64,11 +64,10 @@ export const ActionCell: React.FC<Props> = React.memo(
       });
     }, []);
 
-    const draggableIds = actionCellConfig?.idList.map((id) => getDraggableId(id));
     return (
       <HoverActions
         dataType={data.type}
-        draggableIds={draggableIds?.length ? draggableIds : undefined}
+        dataProvider={actionCellConfig?.dataProvider}
         field={data.field}
         goGetTimelineId={setGoGetTimelineId}
         isObjectArray={data.isObjectArray}

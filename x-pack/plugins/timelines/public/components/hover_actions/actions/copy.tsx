@@ -23,7 +23,7 @@ export interface CopyProps extends HoverActionComponentProps {
 }
 
 const CopyButton: React.FC<CopyProps> = React.memo(
-  ({ field, isHoverAction, keyboardEvent, ownFocus, value }) => {
+  ({ closePopOver, field, isHoverAction, keyboardEvent, ownFocus, value }) => {
     const panelRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
       if (!ownFocus) {
@@ -37,8 +37,11 @@ const CopyButton: React.FC<CopyProps> = React.memo(
         if (copyToClipboardButton != null) {
           copyToClipboardButton.click();
         }
+        if (closePopOver != null) {
+          closePopOver();
+        }
       }
-    }, [keyboardEvent, ownFocus]);
+    }, [closePopOver, keyboardEvent, ownFocus]);
     return (
       <div ref={panelRef}>
         <WithCopyToClipboard

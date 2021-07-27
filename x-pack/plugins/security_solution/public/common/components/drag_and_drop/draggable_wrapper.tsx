@@ -31,6 +31,7 @@ import { ProviderContainer } from './provider_container';
 
 import * as i18n from './translations';
 import { useKibana } from '../../lib/kibana';
+import { HoverActions } from '../hover_actions';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
@@ -127,7 +128,13 @@ const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   return links.length > 0;
 };
 
-const useHoverActions = ({ dataProvider, onFilterAdded, render, timelineId }: Props) => {
+const useHoverActions = ({
+  dataProvider,
+  isDraggable,
+  onFilterAdded,
+  render,
+  timelineId,
+}: Props) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
@@ -175,18 +182,21 @@ const useHoverActions = ({ dataProvider, onFilterAdded, render, timelineId }: Pr
       ) : null;
 
     return (
-      <DraggableWrapperHoverContent
+      <HoverActions
         additionalContent={additionalContent}
         closePopOver={handleClosePopOverTrigger}
-        draggableId={getDraggableId(dataProvider.id)}
+        dataProvider={dataProvider}
+        draggableId={isDraggable ? getDraggableId(dataProvider.id) : undefined}
         field={dataProvider.queryMatch.field}
+        isObjectArray={false}
         goGetTimelineId={setGoGetTimelineId}
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
+        showOwnFocus={false}
         showTopN={showTopN}
         timelineId={timelineId ?? timelineIdFind}
         toggleTopN={toggleTopN}
-        value={
+        values={
           typeof dataProvider.queryMatch.value !== 'number'
             ? dataProvider.queryMatch.value
             : `${dataProvider.queryMatch.value}`
@@ -197,6 +207,7 @@ const useHoverActions = ({ dataProvider, onFilterAdded, render, timelineId }: Pr
     dataProvider,
     handleClosePopOverTrigger,
     hoverActionsOwnFocus,
+    isDraggable,
     onFilterAdded,
     render,
     showTopN,
@@ -454,6 +465,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     showTopN,
   } = useHoverActions({
     dataProvider,
+    isDraggable,
     onFilterAdded,
     render,
     timelineId,
@@ -466,7 +478,6 @@ const DraggableWrapperComponent: React.FC<Props> = ({
           setContainerRef(e);
         }}
         tabIndex={-1}
-        data-rbd-draggable-id={getDraggableId(dataProvider.id)}
       >
         {truncate ? (
           <TruncatableText data-test-subj="render-truncatable-content">

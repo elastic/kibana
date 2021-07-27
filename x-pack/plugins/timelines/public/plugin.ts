@@ -41,7 +41,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
     }
     return {
       getHoverActions: () => {
-        return getHoverActions();
+        return getHoverActions(this._store!);
       },
       getTGrid: (props: TGridProps) => {
         return getTGridLazy(props, {
