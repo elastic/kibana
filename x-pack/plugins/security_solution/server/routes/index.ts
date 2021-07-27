@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { StartServicesAccessor } from 'kibana/server';
 import { RuleDataClient } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
@@ -57,8 +58,7 @@ import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { createSourcererIndexPatternRoute } from '../lib/sourcerer/routes';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsServiceStart } from '../../../../../src/plugins/data/server/index_patterns';
+import { PluginStart } from '../../../../../src/plugins/data/server';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -67,7 +67,7 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataClient: RuleDataClient | null,
-  indexPatternService: IndexPatternsServiceStart
+  getStartServices: StartServicesAccessor<{}, PluginStart>
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -132,5 +132,5 @@ export const initRoutes = (
   readPrivilegesRoute(router, hasEncryptionKey);
 
   // Sourcerer API to generate default pattern
-  createSourcererIndexPatternRoute(router, indexPatternService);
+  createSourcererIndexPatternRoute(router, getStartServices);
 };

@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { StartServicesAccessor } from 'kibana/server';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
   DEFAULT_INDEX_PATTERN_ID,
@@ -13,11 +14,10 @@ import {
   SOURCERER_API_URL,
 } from '../../../../common/constants';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsServiceStart } from '../../../../../../../src/plugins/data/server/index_patterns';
 import { IndexPattern, IndexPatternsService } from '../../../../../../../src/plugins/data/common';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { sourcererSchema } from './schema';
+import { PluginStart } from '../../../../../../../src/plugins/data/server';
 
 const getKibanaIndexPattern = async (
   indexPatternsService: IndexPatternsService,
@@ -38,7 +38,7 @@ const getKibanaIndexPattern = async (
 
 export const createSourcererIndexPatternRoute = (
   router: SecuritySolutionPluginRouter,
-  indexPatterns: IndexPatternsServiceStart
+  getStartServices: StartServicesAccessor<{}, PluginStart>
 ) => {
   router.post(
     {
@@ -53,6 +53,7 @@ export const createSourcererIndexPatternRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
+        const [, , { indexPatterns }] = await getStartServices();
         const indexPatternService = await indexPatterns.indexPatternsServiceFactory(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asInternalUser
