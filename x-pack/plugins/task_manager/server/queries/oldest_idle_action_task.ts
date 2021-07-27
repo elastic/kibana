@@ -7,15 +7,17 @@
 import type { ElasticsearchClient } from 'kibana/server';
 
 /**
- * Returns the timestamp of the oldest action task that may still be executed.
+ * Returns the millisecond timestamp of the oldest action task that may still be executed (with a 24 hour delay).
  * Useful for cleaning up related objects that may no longer be needed.
  * @internal
  */
 export const getOldestIdleActionTask = async (
   client: Pick<ElasticsearchClient, 'search'>,
   taskManagerIndex: string
-): Promise<number | string> => {
-  let oldestAlertAction: number | string = Date.now();
+): Promise<string> => {
+  // Default is now - 24h
+  const oneDayAgo = `now-24h`;
+
   const response = await client.search<{ task: { runAt: string } }>(
     {
       size: 1,
@@ -61,14 +63,17 @@ export const getOldestIdleActionTask = async (
     { ignore: [404] }
   );
 
-  // If the index doesn't exist, fallback to default
   if ((response.body as { error?: { status: number } }).error?.status === 404) {
-    return oldestAlertAction;
+    // If the index doesn't exist, fallback to default
+    return oneDayAgo;
+  } else if (response.body?.hits?.hits?.length > 0) {
+    // If there is a search result, return it's task.runAt field
+    // If there is a search result but it has no task.runAt, assume something has gone very wrong and return 0 as a safe value
+    // 0 should be safest since no docs should get filtered out
+    const runAt = response.body.hits.hits[0]._source?.task?.runAt;
+    return runAt ? `${runAt}||-24h` : `0`;
+  } else {
+    // If no results, fallback to default
+    return oneDayAgo;
   }
-
-  if (response.body?.hits?.hits?.length > 0) {
-    oldestAlertAction = response.body.hits.hits[0]._source?.task.runAt ?? oldestAlertAction;
-  }
-
-  return oldestAlertAction;
 };

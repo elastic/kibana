@@ -9,14 +9,6 @@ import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getOldestIdleActionTask } from './oldest_idle_action_task';
 
 describe('getOldestIdleActionTask', () => {
-  beforeAll(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(112233);
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
   it('calls client.search with provided index name', async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient();
     await getOldestIdleActionTask(client, '.index-name');
@@ -24,7 +16,7 @@ describe('getOldestIdleActionTask', () => {
     expect(client.search.mock.calls[0][0]?.index).toEqual('.index-name');
   });
 
-  it('returns a default of Date.now when no results', async () => {
+  it('returns a default of now-24h when no results', async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient(
       elasticsearchServiceMock.createSuccessTransportRequestPromise({
         body: { hits: { hits: [], total: 0 } },
@@ -32,10 +24,10 @@ describe('getOldestIdleActionTask', () => {
     );
 
     const ts = await getOldestIdleActionTask(client, '.index-name');
-    expect(ts).toEqual(112233);
+    expect(ts).toEqual('now-24h');
   });
 
-  it('returns a default of Date.now when a 404 is returned', async () => {
+  it('returns a default of Date.now-24h when a 404 is returned', async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient(
       elasticsearchServiceMock.createSuccessTransportRequestPromise({
         error: { status: 404 },
@@ -43,10 +35,10 @@ describe('getOldestIdleActionTask', () => {
     );
 
     const ts = await getOldestIdleActionTask(client, '.index-name');
-    expect(ts).toEqual(112233);
+    expect(ts).toEqual('now-24h');
   });
 
-  it("returns the search result's task.runAt field if it exists", async () => {
+  it("returns the search result's task.runAt-24h field if it exists", async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient(
       elasticsearchServiceMock.createSuccessTransportRequestPromise({
         hits: { hits: [{ _source: { task: { runAt: '2015-01-01T12:10:30Z' } } }], total: 1 },
@@ -54,17 +46,26 @@ describe('getOldestIdleActionTask', () => {
     );
 
     const ts = await getOldestIdleActionTask(client, '.index-name');
-    expect(ts).toEqual('2015-01-01T12:10:30Z');
+    expect(ts).toEqual('2015-01-01T12:10:30Z||-24h');
   });
 
-  it("fallsback to Date.now if the search result's task.runAt field does not exist", async () => {
-    const client = elasticsearchServiceMock.createElasticsearchClient(
+  it("fallsback to 0 if the search result's task.runAt field does not exist", async () => {
+    const client1 = elasticsearchServiceMock.createElasticsearchClient(
       elasticsearchServiceMock.createSuccessTransportRequestPromise({
         hits: { hits: [{ _source: { task: { runAt: undefined } } }], total: 1 },
       })
     );
 
-    const ts = await getOldestIdleActionTask(client, '.index-name');
-    expect(ts).toEqual(112233);
+    const ts1 = await getOldestIdleActionTask(client1, '.index-name');
+    expect(ts1).toEqual('0');
+
+    const client2 = elasticsearchServiceMock.createElasticsearchClient(
+      elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        hits: { hits: [{ _source: { task: undefined } }], total: 1 },
+      })
+    );
+
+    const ts2 = await getOldestIdleActionTask(client2, '.index-name');
+    expect(ts2).toEqual('0');
   });
 });
