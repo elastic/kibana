@@ -7,7 +7,15 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiCallOut,
+} from '@elastic/eui';
 
 import {
   IndexPatternSpec,
@@ -297,19 +305,48 @@ const IndexPatternEditorFlyoutContentComponent = ({
     getRollupIndices(rollupIndicesCapabilities).length;
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <TypeField
-          onChange={(newType) => {
-            form.setFieldValue('title', '');
-            form.setFieldValue('timestampField', '');
-            if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
-              form.setFieldValue('allowHidden', false);
-            }
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <TypeField
+            onChange={(newType) => {
+              form.setFieldValue('title', '');
+              form.setFieldValue('timestampField', '');
+              if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
+                form.setFieldValue('allowHidden', false);
+              }
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {type === INDEX_PATTERN_TYPE.ROLLUP ? (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiCallOut title={i18nTexts.rollupBetaWarningTitle} color="warning" iconType="help">
+              <p>
+                <FormattedMessage
+                  id="indexPatternEditor.rollupIndexPattern.warning.textParagraphOne"
+                  defaultMessage="Kibana's support for rollup index patterns is in beta. You might encounter
+          issues using these patterns in saved searches, visualizations, and dashboards. They
+          are not supported in some advanced features, such as Timelion, and Machine Learning."
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="indexPatternEditor.rollupIndexPattern.warning.textParagraphTwo"
+                  defaultMessage="You can match a rollup index pattern against one rollup index and zero or more
+          regular indices. A rollup index pattern has limited metrics, fields, intervals, and
+          aggregations. A rollup index is limited to indices that have one job configuration,
+          or multiple jobs with compatible configurations."
+                />
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <></>
+      )}
+    </>
   ) : (
     <></>
   );
