@@ -168,18 +168,26 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, []);
 
   const needToUpdatePreview = useMemo(() => {
+    const isCurrentDocIdDefined = currentDocId !== '';
+
+    if (!isCurrentDocIdDefined) {
+      return false;
+    }
+
     const allParamsDefined = (['type', 'script', 'index', 'document'] as Array<
       keyof Params
     >).every((key) => Boolean(params[key]));
 
-    const isCurrentDocIdDefined = currentDocId !== '';
+    if (!allParamsDefined) {
+      return false;
+    }
 
     const hasSomeParamsChanged =
       lastExecutePainlessRequestParams.type !== type ||
       lastExecutePainlessRequestParams.script !== script?.source ||
       lastExecutePainlessRequestParams.documentId !== currentDocId;
 
-    return allParamsDefined && isCurrentDocIdDefined && hasSomeParamsChanged;
+    return hasSomeParamsChanged;
   }, [type, script?.source, currentDocId, params, lastExecutePainlessRequestParams]);
 
   const valueFormatter = useCallback(
@@ -199,7 +207,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const fetchSampleDocuments = useCallback(
     async (limit: number = 50) => {
       if (typeof limit !== 'number') {
-        // We guard ourself from passing an <input /> event handler accidentally
+        // We guard ourself from passing an <input /> event accidentally
         throw new Error('The "limit" option must be a number');
       }
 
@@ -231,7 +239,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         currentIdx: 0,
       });
 
-      setPreviewResponse((prev) => ({ ...prev, error: error ?? null }));
+      setPreviewResponse((prev) => ({ ...prev, error }));
     },
     [indexPattern, search]
   );
@@ -244,7 +252,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       setIsFetchingDocument(true);
 
-      const [response, error] = await search
+      const [response, searchError] = await search
         .search({
           params: {
             index: indexPattern.title,
@@ -266,11 +274,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       const isDocumentFound = response?.rawResponse.hits.total > 0;
       const loadedDocuments: EsDocument[] = isDocumentFound ? response.rawResponse.hits.hits : [];
-      const errorToDisplay: Context['error'] = Boolean(error)
+      const error: Context['error'] = Boolean(searchError)
         ? {
             code: 'ERR_FETCHING_DOC',
             error: {
-              message: error.toString(),
+              message: searchError.toString(),
             },
           }
         : isDocumentFound === false
@@ -288,17 +296,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
           }
         : null;
 
-      setPreviewResponse((prev) => ({
-        ...prev,
-        error: errorToDisplay,
-      }));
+      setPreviewResponse((prev) => ({ ...prev, error }));
 
       setClusterData({
         documents: loadedDocuments,
         currentIdx: 0,
       });
 
-      if (errorToDisplay !== null) {
+      if (error !== null) {
         // Make sure we disable the "Updating..." indicator as we have an error
         // and we won't fetch the preview
         setIsLoadingPreview(false);
@@ -347,8 +352,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return;
     }
 
-    const data = response.data ?? { values: [], error: {} };
-    const { values, error } = data;
+    const { values, error } = response.data ?? { values: [], error: {} };
 
     if (error) {
       const fallBackError = {
@@ -473,7 +477,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   /**
    * In order to immediately display the "Updating..." state indicator and not have to wait
-   * the 500ms of the debounce, we set the loading state in this effect
+   * the 500ms of the debounce, we set the isLoadingPreview state in this effect
    */
   useEffect(() => {
     if (needToUpdatePreview) {
@@ -481,6 +485,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     }
   }, [needToUpdatePreview, customDocIdToLoad]);
 
+  /**
+   * Whenever we enter manually a document ID to load we'll clear the
+   * documents and the preview value.
+   */
   useEffect(() => {
     if (customDocIdToLoad !== null) {
       setIsFetchingDocument(true);
@@ -505,9 +513,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [customDocIdToLoad]);
 
   /**
-   * When the component mounts, if we are creating/editing a runtime field
-   * we fetch sample documents from the cluster to be able to preview the runtime
-   * field along with other document fields
+   * Whenever we show the preview panel we will update the documents from the cluster
    */
   useEffect(() => {
     if (isPanelVisible) {
@@ -517,7 +523,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   /**
    * Each time the current document changes we update the parameters
-   * for the Painless _execute API call.
+   * that will be sent in the _execute HTTP request.
    */
   useEffect(() => {
     updateParams({
@@ -526,8 +532,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     });
   }, [currentDocument, updateParams]);
 
+  /**
+   * Whenever the name or the format changes we immediately update the preview
+   */
   useEffect(() => {
-    // Whenever the name or the format changes we immediately update the preview
     setPreviewResponse((prev) => {
       const {
         fields: { 0: field },
