@@ -45,6 +45,13 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
+      after(async () => {
+        await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+        await getService('esArchiver').unload(
+          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        );
+      });
+
       beforeEach(async function () {
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
