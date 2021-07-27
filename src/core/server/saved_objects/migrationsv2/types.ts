@@ -120,9 +120,12 @@ export interface BaseState extends ControlState {
    */
   readonly knownTypes: string[];
   /**
-   * All exclude filter hooks registered for types on this index
+   * All exclude filter hooks registered for types on this index. Keyed by type name.
    */
-  readonly excludeFromUpgradeFilterHooks: SavedObjectTypeExcludeFromUpgradeFilterHook[];
+  readonly excludeFromUpgradeFilterHooks: Record<
+    string,
+    SavedObjectTypeExcludeFromUpgradeFilterHook
+  >;
 }
 
 export interface InitState extends BaseState {

@@ -389,9 +389,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         unusedTypesQuery,
         logs: [
           ...stateP.logs,
-          ...res.right.errors.map((e) => ({
+          ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
             level: 'warning' as const,
-            message: `Ignoring excludeOnUpgrade hook that failed with error: "${e.toString()}"`,
+            message: `Ignoring excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
           })),
         ],
       };

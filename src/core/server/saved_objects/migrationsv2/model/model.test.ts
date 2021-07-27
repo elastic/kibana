@@ -92,7 +92,7 @@ describe('migrations v2 model', () => {
       },
     },
     knownTypes: ['dashboard', 'config'],
-    excludeFromUpgradeFilterHooks: [],
+    excludeFromUpgradeFilterHooks: {},
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -872,7 +872,7 @@ describe('migrations v2 model', () => {
       test('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
         const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
           excludeFilter: { bool: { must: { term: { fieldA: 'abc' } } } },
-          errors: [new Error('an error!')],
+          errorsByType: { type1: new Error('an error!') },
         });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
@@ -901,7 +901,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs).toEqual([
           {
             level: 'warning',
-            message: `Ignoring excludeOnUpgrade hook that failed with error: "Error: an error!"`,
+            message: `Ignoring excludeOnUpgrade hook on type [type1] that failed with error: "Error: an error!"`,
           },
         ]);
       });

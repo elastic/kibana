@@ -18,7 +18,10 @@ describe('calculateExcludeFilters', () => {
     const hook1 = jest.fn().mockReturnValue({ bool: { must: { term: { fieldA: '123' } } } });
     const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
-    const task = calculateExcludeFilters({ client, excludeFromUpgradeFilterHooks: [hook1, hook2] });
+    const task = calculateExcludeFilters({
+      client,
+      excludeFromUpgradeFilterHooks: { type1: hook1, type2: hook2 },
+    });
     const result = await task();
 
     expect(hook1).toHaveBeenCalledWith({ readonlyEsClient: { search: expect.any(Function) } });
@@ -33,7 +36,7 @@ describe('calculateExcludeFilters', () => {
           ],
         },
       },
-      errors: [],
+      errorsByType: {},
     });
   });
 
@@ -42,7 +45,10 @@ describe('calculateExcludeFilters', () => {
     const hook1 = jest.fn().mockRejectedValue(error);
     const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
-    const task = calculateExcludeFilters({ client, excludeFromUpgradeFilterHooks: [hook1, hook2] });
+    const task = calculateExcludeFilters({
+      client,
+      excludeFromUpgradeFilterHooks: { type1: hook1, type2: hook2 },
+    });
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
@@ -52,7 +58,7 @@ describe('calculateExcludeFilters', () => {
           must_not: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
         },
       },
-      errors: [error],
+      errorsByType: { type1: error },
     });
   });
 
@@ -64,7 +70,10 @@ describe('calculateExcludeFilters', () => {
     const hook1 = jest.fn().mockRejectedValue(error);
     const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
-    const task = calculateExcludeFilters({ client, excludeFromUpgradeFilterHooks: [hook1, hook2] });
+    const task = calculateExcludeFilters({
+      client,
+      excludeFromUpgradeFilterHooks: { type1: hook1, type2: hook2 },
+    });
     const result = await task();
 
     expect(Either.isLeft(result)).toBe(true);
@@ -81,7 +90,7 @@ describe('calculateExcludeFilters', () => {
 
     const task = calculateExcludeFilters({
       client,
-      excludeFromUpgradeFilterHooks: [hook1, hook2],
+      excludeFromUpgradeFilterHooks: { type1: hook1, type2: hook2 },
       hookTimeoutMs: 100,
     });
     const resultPromise = task();
@@ -95,9 +104,9 @@ describe('calculateExcludeFilters', () => {
           must_not: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
         },
       },
-      errors: expect.any(Array),
+      errorsByType: expect.any(Object),
     });
-    expect((result as Either.Right<any>).right.errors[0].toString()).toMatchInlineSnapshot(
+    expect((result as Either.Right<any>).right.errorsByType.type1.toString()).toMatchInlineSnapshot(
       `"Error: excludeFromUpgrade hook timed out after 0.1 seconds."`
     );
   });

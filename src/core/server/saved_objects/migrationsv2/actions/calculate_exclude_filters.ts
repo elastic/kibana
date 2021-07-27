@@ -17,15 +17,15 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 
 export interface CalculateExcludeFiltersParams {
   client: ElasticsearchClient;
-  excludeFromUpgradeFilterHooks: SavedObjectTypeExcludeFromUpgradeFilterHook[];
+  excludeFromUpgradeFilterHooks: Record<string, SavedObjectTypeExcludeFromUpgradeFilterHook>;
   hookTimeoutMs?: number;
 }
 
 export interface CalculatedExcludeFilter {
   /** Composite filter of all calculated filters */
   excludeFilter: estypes.QueryDslQueryContainer;
-  /** Any errors that were encountered during filter calculation */
-  errors: Error[];
+  /** Any errors that were encountered during filter calculation, keyed by the type name */
+  errorsByType: Record<string, Error>;
 }
 
 export const calculateExcludeFilters = ({
@@ -36,8 +36,11 @@ export const calculateExcludeFilters = ({
   RetryableEsClientError,
   CalculatedExcludeFilter
 > => () => {
-  return Promise.all(
-    excludeFromUpgradeFilterHooks.map((hook) =>
+  return Promise.all<
+    | Either.Right<estypes.QueryDslQueryContainer>
+    | Either.Left<{ soType: string; error: Error | RetryableEsClientError }>
+  >(
+    Object.entries(excludeFromUpgradeFilterHooks).map(([soType, hook]) =>
       withTimeout({
         promise: Promise.resolve(
           hook({ readonlyEsClient: { search: client.search.bind(client) } })
@@ -46,30 +49,49 @@ export const calculateExcludeFilters = ({
       })
         .then((result) =>
           result.timedout
-            ? Either.left(
-                new Error(
+            ? Either.left({
+                soType,
+                error: new Error(
                   `excludeFromUpgrade hook timed out after ${hookTimeoutMs / 1000} seconds.`
-                )
-              )
+                ),
+              })
             : Either.right(result.value)
         )
-        .catch(catchRetryableEsClientErrors)
-        .catch((error) => Either.left(error))
+        .catch((error) => {
+          const retryableError = catchRetryableEsClientErrors(error);
+          if (Either.isLeft(retryableError)) {
+            return Either.left({ soType, error: retryableError.left });
+          } else {
+            // Really should never happen, only here to satisfy TypeScript
+            return Either.left({
+              soType,
+              error: new Error(
+                `Unexpected return value from catchRetryableEsClientErrors: "${retryableError.toString()}"`
+              ),
+            });
+          }
+        })
+        .catch((error: Error) => Either.left({ soType, error }))
     )
   ).then((results) => {
     const retryableError = results.find(
-      (r) => Either.isLeft(r) && r.left.type === 'retryable_es_client_error'
-    ) as Either.Left<RetryableEsClientError> | undefined;
+      (r) =>
+        Either.isLeft(r) &&
+        !(r.left.error instanceof Error) &&
+        r.left.error.type === 'retryable_es_client_error'
+    ) as Either.Left<{ soType: string; error: RetryableEsClientError }> | undefined;
     if (retryableError) {
-      return retryableError;
+      return Either.left(retryableError.left.error);
     }
 
-    const errors: Error[] = [];
+    const errorsByType: Array<[string, Error]> = [];
     const filters: estypes.QueryDslQueryContainer[] = [];
 
     // Loop through all results and collect successes and errors
     results.forEach((r) =>
-      Either.isRight(r) ? filters.push(r.right) : Either.isLeft(r) && errors.push(r.left)
+      Either.isRight(r)
+        ? filters.push(r.right)
+        : Either.isLeft(r) && errorsByType.push([r.left.soType, r.left.error as Error])
     );
 
     // Composite filter from all calculated filters that successfully executed
@@ -79,7 +101,7 @@ export const calculateExcludeFilters = ({
 
     return Either.right({
       excludeFilter,
-      errors,
+      errorsByType: Object.fromEntries(errorsByType),
     });
   });
 };

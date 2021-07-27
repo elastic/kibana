@@ -39,7 +39,7 @@ describe('createInitialState', () => {
       batchSize: 1000,
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
-      excludeFromUpgradeFilterHooks: [],
+      excludeFromUpgradeFilterHooks: {},
       indexPrefix: '.kibana_task_manager',
       kibanaVersion: '8.1.0',
       knownTypes: [],
@@ -159,7 +159,7 @@ describe('createInitialState', () => {
       typeRegistry,
     });
 
-    expect(initialState.excludeFromUpgradeFilterHooks).toEqual([fooExcludeOnUpgradeHook]);
+    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
   });
 
   it('returns state with a preMigration script', () => {
