@@ -205,6 +205,7 @@ const ConfigureCasesComponent: React.FC<Omit<ConfigureCasesProps, 'owner'>> = ({
       </SectionWrapper>
       <SectionWrapper>
         <Connectors
+          actionTypes={actionTypes}
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}

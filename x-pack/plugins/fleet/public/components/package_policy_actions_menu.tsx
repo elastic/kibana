@@ -23,7 +23,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
   viewDataStep?: EuiStepProps;
-}> = ({ agentPolicy, packagePolicy, viewDataStep }) => {
+  showAddAgent?: boolean;
+}> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
@@ -47,19 +48,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="plusInCircle"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        setIsEnrollmentFlyoutOpen(true);
-      }}
-      key="addAgent"
-    >
-      <FormattedMessage
-        id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-        defaultMessage="Add Agent"
-      />
-    </EuiContextMenuItem>,
+    ...(showAddAgent
+      ? [
+          <EuiContextMenuItem
+            icon="plusInCircle"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              setIsEnrollmentFlyoutOpen(true);
+            }}
+            key="addAgent"
+          >
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
+              defaultMessage="Add Agent"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"

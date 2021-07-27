@@ -159,6 +159,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesChartTypeComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -261,6 +262,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesChartTypeComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -544,6 +546,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               value={model.override_index_pattern}
               name="override_index_pattern"
               onChange={props.onChange}
+              data-test-subj="seriesOverrideIndexPattern"
             />
           </EuiFormRow>
         </EuiFlexItem>
