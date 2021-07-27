@@ -85,7 +85,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
   const rule = ecsRowData.signal?.rule;
-  console.log(appId);
   const {
     application: { navigateToApp, getUrlForApp },
     cases,
@@ -102,8 +101,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  //const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
-  const isEventSupported = true;
+  const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
   const userCanCrud = casePermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
   const tooltipContext = userCanCrud
@@ -115,7 +113,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const onViewCaseClick = useCallback(
     (id) => {
       navigateToApp(appId, {
-        deepLinkId: 'case',
+        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
         path: getCaseDetailsUrl({ id }),
       });
     },
@@ -171,12 +169,12 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp('securitySolution', {
-        deepLinkId: 'case',
+      return navigateToApp(appId, {
+        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
         path: getCreateCaseUrl(urlSearch),
       });
     },
-    [navigateToApp, urlSearch]
+    [navigateToApp, urlSearch, appId]
   );
   const [isAllCaseModalOpen, openAllCaseModal] = useState(false);
 

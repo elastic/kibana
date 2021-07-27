@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useMemo } from 'react';
 import styled, { StyledComponent } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
@@ -59,6 +59,15 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   appId,
 }) => {
   const { cases } = useKibana<TimelinesStartServices>().services;
+  const createCaseProps = useMemo(() => {
+    return {
+      afterCaseCreated,
+      onCancel: onCloseFlyout,
+      onSuccess,
+      withSteps: false,
+      owner: [appId],
+    };
+  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId]);
   return (
     <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
       <EuiFlyoutHeader hasBorder>
@@ -67,15 +76,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        <FormWrapper>
-          {cases.getCreateCase({
-            afterCaseCreated,
-            onCancel: onCloseFlyout,
-            onSuccess,
-            withSteps: false,
-            owner: [appId],
-          })}
-        </FormWrapper>
+        <FormWrapper>{cases.getCreateCase(createCaseProps)}</FormWrapper>
       </StyledEuiFlyoutBody>
     </StyledFlyout>
   );
