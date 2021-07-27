@@ -26,13 +26,13 @@ import {
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
-import { AlertsClient } from '../alerts_client';
+import { RulesClient } from '../rules_client';
 import { NormalizedAlertType } from '../alert_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
   getServices: GetServicesFunction;
-  getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -41,6 +41,8 @@ export interface TaskRunnerContext {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   alertTypeRegistry: AlertTypeRegistry;
   kibanaBaseUrl: string | undefined;
+  supportsEphemeralTasks: boolean;
+  maxEphemeralActionsPerAlert: Promise<number>;
 }
 
 export class TaskRunnerFactory {
@@ -57,6 +59,7 @@ export class TaskRunnerFactory {
 
   public create<
     Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams,
     State extends AlertTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
@@ -65,6 +68,7 @@ export class TaskRunnerFactory {
   >(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -79,6 +83,7 @@ export class TaskRunnerFactory {
 
     return new TaskRunner<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
