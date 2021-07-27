@@ -18,6 +18,7 @@ import { GetStateReturn } from '../../services/discover_state';
 import { IndexPattern, ISearchSource } from '../../../../../kibana_services';
 import { openOptionsPopover } from './open_options_popover';
 import type { TopNavMenuData } from '../../../../../../../navigation/public';
+import { showDataVisualizerPanel } from './show_data_visualizer_panel';
 
 /**
  * Helper function to build the top nav links
@@ -150,6 +151,26 @@ export const getTopNavLinks = ({
     },
   };
 
+  const openDataVisualizerFlyout = {
+    id: 'inspect',
+    label: i18n.translate('discover.localMenu.openDataVisualizerFlyoutTitle', {
+      defaultMessage: 'Open Data visualizer flyout',
+    }),
+    description: i18n.translate('discover.localMenu.openDataVisualizerFlyoutDescription', {
+      defaultMessage: 'Open Data visualizer flyout',
+    }),
+    testId: 'openDataVisualizerFlyout',
+    run: () => {
+      showDataVisualizerPanel({
+        I18nContext: services.core.i18n.Context,
+        indexPattern,
+        savedSearch,
+        services,
+        state,
+      });
+    },
+  };
+
   return [
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
@@ -157,5 +178,6 @@ export const getTopNavLinks = ({
     openSearch,
     shareSearch,
     inspectSearch,
+    openDataVisualizerFlyout,
   ];
 };
