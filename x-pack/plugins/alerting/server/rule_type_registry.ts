@@ -36,7 +36,7 @@ export interface ConstructorOptions {
   licensing: LicensingPluginSetup;
 }
 
-export interface RegistryAlertType
+export interface RegistryRuleType
   extends Pick<
     UntypedNormalizedAlertType,
     | 'name'
@@ -119,9 +119,9 @@ export type UntypedNormalizedAlertType = NormalizedAlertType<
   string
 >;
 
-export class AlertTypeRegistry {
+export class RuleTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
-  private readonly alertTypes: Map<string, UntypedNormalizedAlertType> = new Map();
+  private readonly ruleTypes: Map<string, UntypedNormalizedAlertType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
   private readonly licensing: LicensingPluginSetup;
@@ -134,10 +134,10 @@ export class AlertTypeRegistry {
   }
 
   public has(id: string) {
-    return this.alertTypes.has(id);
+    return this.ruleTypes.has(id);
   }
 
-  public ensureAlertTypeEnabled(id: string) {
+  public ensureRuleTypeEnabled(id: string) {
     this.licenseState.ensureLicenseForAlertType(this.get(id));
   }
 
@@ -162,8 +162,8 @@ export class AlertTypeRegistry {
   ) {
     if (this.has(alertType.id)) {
       throw new Error(
-        i18n.translate('xpack.alerting.alertTypeRegistry.register.duplicateAlertTypeError', {
-          defaultMessage: 'Alert type "{id}" is already registered.',
+        i18n.translate('xpack.alerting.ruleTypeRegistry.register.duplicateAlertTypeError', {
+          defaultMessage: 'Rule type "{id}" is already registered.',
           values: {
             id: alertType.id,
           },
@@ -182,7 +182,7 @@ export class AlertTypeRegistry {
       RecoveryActionGroupId
     >(alertType);
 
-    this.alertTypes.set(
+    this.ruleTypes.set(
       alertIdSchema.validate(alertType.id),
       /** stripping the typing is required in order to store the AlertTypes in a Map */
       (normalizedAlertType as unknown) as UntypedNormalizedAlertType
@@ -232,8 +232,8 @@ export class AlertTypeRegistry {
   > {
     if (!this.has(id)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.alertTypeRegistry.get.missingAlertTypeError', {
-          defaultMessage: 'Alert type "{id}" is not registered.',
+        i18n.translate('xpack.alerting.ruleTypeRegistry.get.missingAlertTypeError', {
+          defaultMessage: 'Rule type "{id}" is not registered.',
           values: {
             id,
           },
@@ -245,7 +245,7 @@ export class AlertTypeRegistry {
      * This means that returning a typed AlertType in `get` is an inherently
      * unsafe operation. Down casting to `unknown` is the only way to achieve this.
      */
-    return (this.alertTypes.get(id)! as unknown) as NormalizedAlertType<
+    return (this.ruleTypes.get(id)! as unknown) as NormalizedAlertType<
       Params,
       ExtractedParams,
       State,
@@ -256,9 +256,9 @@ export class AlertTypeRegistry {
     >;
   }
 
-  public list(): Set<RegistryAlertType> {
+  public list(): Set<RegistryRuleType> {
     return new Set(
-      Array.from(this.alertTypes).map(
+      Array.from(this.ruleTypes).map(
         ([
           id,
           {
@@ -338,10 +338,10 @@ function augmentActionGroupsWithReserved<
   if (recoveryActionGroup && activeActionGroups.has(recoveryActionGroup.id)) {
     throw new Error(
       i18n.translate(
-        'xpack.alerting.alertTypeRegistry.register.customRecoveryActionGroupUsageError',
+        'xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError',
         {
           defaultMessage:
-            'Alert type [id="{id}"] cannot be registered. Action group [{actionGroup}] cannot be used as both a recovery and an active action group.',
+            'Rule type [id="{id}"] cannot be registered. Action group [{actionGroup}] cannot be used as both a recovery and an active action group.',
           values: {
             actionGroup: recoveryActionGroup.id,
             id,
@@ -351,9 +351,9 @@ function augmentActionGroupsWithReserved<
     );
   } else if (intersectingReservedActionGroups.length > 0) {
     throw new Error(
-      i18n.translate('xpack.alerting.alertTypeRegistry.register.reservedActionGroupUsageError', {
+      i18n.translate('xpack.alerting.ruleTypeRegistry.register.reservedActionGroupUsageError', {
         defaultMessage:
-          'Alert type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
+          'Rule type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {
           actionGroups: intersectingReservedActionGroups.join(', '),
           id,
