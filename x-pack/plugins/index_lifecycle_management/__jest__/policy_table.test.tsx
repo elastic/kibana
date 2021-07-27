@@ -65,10 +65,6 @@ const namesText = (rendered: ReactWrapper): string[] => {
   return (names(rendered) as ReactWrapper).map((button) => button.text());
 };
 
-const rowText = (rendered: ReactWrapper, rowIndex: number): string => {
-  return findTestSubject(rendered, 'policyTableRow').at(rowIndex).text();
-};
-
 const testSort = (headerName: string) => {
   const rendered = mountWithIntl(component);
   const nameHeader = findTestSubject(rendered, `policyTableHeaderCell-${headerName}`).find(
@@ -184,7 +180,7 @@ describe('policy table', () => {
   });
   test('displays policy properties', () => {
     const rendered = mountWithIntl(component);
-    const firstRow = rowText(rendered, 0);
+    const firstRow = findTestSubject(rendered, 'policyTableRow').at(0).text();
     const version = 0;
     const numberOfIndices = 1;
     expect(firstRow).toBe(`testy0${numberOfIndices}${version}${testDateFormatted}Actions`);
