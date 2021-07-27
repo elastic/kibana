@@ -85,7 +85,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
   const rule = ecsRowData.signal?.rule;
-
+  console.log(appId);
   const {
     application: { navigateToApp, getUrlForApp },
     cases,
@@ -102,7 +102,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
+  //const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
+  const isEventSupported = true;
   const userCanCrud = casePermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
   const tooltipContext = userCanCrud
@@ -151,13 +152,13 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
-            owner: 'securitySolution',
+            owner: appId,
           },
           updateCase,
         });
       }
     },
-    [closeCaseFlyoutOpen, eventId, eventIndex, rule]
+    [closeCaseFlyoutOpen, eventId, eventIndex, rule, appId]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
@@ -300,6 +301,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           onCloseFlyout={closeCaseFlyoutOpen}
           onSuccess={onCaseSuccess}
           useInsertTimeline={useInsertTimeline}
+          appId={appId}
         />
       )}
       {isAllCaseModalOpen && cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}

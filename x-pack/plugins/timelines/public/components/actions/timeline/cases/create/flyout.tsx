@@ -13,13 +13,13 @@ import * as i18n from '../translations';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { Case } from '../../../../../../../cases/common';
 import type { TimelinesStartServices } from '../../../../../types';
-import { APP_ID } from '../add_to_case_action';
 
 export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   useInsertTimeline?: Function;
+  appId: string;
 }
 
 // TODO: EUI team follow up on complex types and styled-components `styled`
@@ -56,6 +56,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   afterCaseCreated,
   onCloseFlyout,
   onSuccess,
+  appId,
 }) => {
   const { cases } = useKibana<TimelinesStartServices>().services;
   return (
@@ -72,7 +73,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
             onCancel: onCloseFlyout,
             onSuccess,
             withSteps: false,
-            owner: [APP_ID],
+            owner: [appId],
           })}
         </FormWrapper>
       </StyledEuiFlyoutBody>
