@@ -31,6 +31,7 @@ import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient, useInternalApiClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
 import type { SharePluginSetup } from '../shared_imports';
+import { useKibana } from '../shared_imports';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { IlmPolicyLink } from './ilm_policy_link';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
@@ -39,6 +40,7 @@ import { ReportDiagnostic } from './report_diagnostic';
 export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
+  capabilities: ApplicationStart['capabilities'];
   license$: LicensingPluginSetup['license$'];
   pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
@@ -122,7 +124,7 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue, urlService, navigateToUrl } = this.props;
+    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
@@ -145,19 +147,21 @@ class ReportListingUi extends Component<Props, State> {
         <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
 
         <EuiSpacer size={'l'} />
-        {this.renderTable()}
+        <div>{this.renderTable()}</div>
 
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {ilmPolicyContextValue.isLoading ? (
-              <EuiLoadingSpinner />
-            ) : (
-              showIlmPolicyLink && (
-                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
-              )
-            )}
-          </EuiFlexItem>
+          {capabilities?.management?.data?.index_lifecycle_management && (
+            <EuiFlexItem grow={false}>
+              {ilmPolicyContextValue.isLoading ? (
+                <EuiLoadingSpinner />
+              ) : (
+                showIlmPolicyLink && (
+                  <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
+                )
+              )}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
@@ -485,6 +489,14 @@ class ReportListingUi extends Component<Props, State> {
 
     return (
       <Fragment>
+        {this.state.selectedJobs.length > 0 && (
+          <Fragment>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
+              <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
             defaultMessage: 'Reports generated in Kibana applications',
@@ -510,7 +522,6 @@ class ReportListingUi extends Component<Props, State> {
           onChange={this.onTableChange}
           data-test-subj="reportJobListing"
         />
-        {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>
     );
   }
@@ -519,14 +530,20 @@ class ReportListingUi extends Component<Props, State> {
 const PrivateReportListing = injectI18n(ReportListingUi);
 
 export const ReportListing = (
-  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient'>
+  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities'>
 ) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();
+  const {
+    services: {
+      application: { capabilities },
+    },
+  } = useKibana();
   return (
     <PrivateReportListing
       {...props}
       apiClient={apiClient}
+      capabilities={capabilities}
       ilmPolicyContextValue={ilmPolicyStatusValue}
     />
   );
