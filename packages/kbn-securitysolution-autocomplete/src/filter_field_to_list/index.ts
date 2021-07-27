@@ -15,7 +15,7 @@ import { typeMatch } from '../type_match';
  * the lists that match against the field based on the types from the field
  *
  * NOTE: That we support one additional property from "FieldSpec" located here:
- *
+ * src/plugins/data/common/index_patterns/fields/types.ts
  * This type property is esTypes. If it exists and is on there we will read off the esTypes.
  * @param lists The lists to match against the field
  * @param field The field to check against the list to see if they are compatible
