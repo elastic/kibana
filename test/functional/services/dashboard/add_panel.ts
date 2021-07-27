@@ -127,13 +127,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    try {
-      const addPanel = await this.testSubjects.find('dashboardAddPanel');
-      await addPanel.focus();
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return await this.testSubjects.exists('dashboardAddPanel');
   }
 
   async ensureAddPanelIsShowing() {
