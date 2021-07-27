@@ -21,7 +21,8 @@ type JobParamsPDF = BaseParams & { relativeUrls: string[] };
 
 export function getPdfJobParams(
   { workpad: { id, name: title, width, height }, pageCount }: CanvasWorkpadSharingData,
-  basePath: IBasePath
+  basePath: IBasePath,
+  kibanaVersion: string
 ): JobParamsPDF {
   const urlPrefix = basePath.get().replace(basePath.serverBasePath, ''); // for Spaces prefix, which is included in basePath.get()
   const canvasEntry = `${urlPrefix}/app/canvas#`;
@@ -51,7 +52,6 @@ export function getPdfJobParams(
     objectType: 'canvas workpad',
     relativeUrls: workpadUrls,
     title,
-    // @ts-ignore kibana version is not available from any canvas service
-    version: undefined,
+    version: kibanaVersion,
   };
 }

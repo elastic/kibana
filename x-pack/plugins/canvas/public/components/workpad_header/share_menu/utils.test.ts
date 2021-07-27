@@ -16,10 +16,11 @@ const basePath = ({
   get: () => 'basepath/s/spacey',
   serverBasePath: `basepath`,
 } as unknown) as IBasePath;
+const kibanaVersion = '7.15,0';
 const workpadSharingData = { workpad: workpads[0], pageCount: 12 };
 
 test('getPdfJobParams returns the correct job params for canvas layout', () => {
-  const jobParams = getPdfJobParams(workpadSharingData, basePath);
+  const jobParams = getPdfJobParams(workpadSharingData, basePath, kibanaVersion);
   expect(jobParams).toMatchInlineSnapshot(`
     Object {
       "browserTimezone": "America/New_York",
