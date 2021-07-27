@@ -3080,7 +3080,6 @@ export interface SavedObjectStatusMeta {
 export interface SavedObjectsType<Attributes = any> {
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectTypeExcludeFromUpgradeFilterHook" needs to be exported by the entry point index.d.ts
     excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
     hidden: boolean;
     indexPattern?: string;
@@ -3167,6 +3166,11 @@ export class SavedObjectsUtils {
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
+
+// Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
+//
+// @public
+export type SavedObjectTypeExcludeFromUpgradeFilterHook = (esClient: Pick<ElasticsearchClient, 'search'>) => Promise<estypes.QueryDslQueryContainer>;
 
 // @public
 export class SavedObjectTypeRegistry {
