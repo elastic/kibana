@@ -73,11 +73,20 @@ export function getMigrations(
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
+  // This empty migration is necessary to ensure that the saved object is decrypted with its old descriptor/ and re-encrypted with its new
+  // descriptor, if necessary. This is included because the saved object is being converted to `namespaceType: 'multiple-isolated'` in 8.0
+  // (see the `convertToMultiNamespaceTypeVersion` field in the saved object type registration process).
+  const migrationActions800 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    (doc) => doc // no-op
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
+    '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
 

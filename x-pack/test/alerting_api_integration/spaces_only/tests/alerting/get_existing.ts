@@ -14,7 +14,8 @@ export default function createGetExistingTests({ getService }: FtrProviderContex
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  async function registerWithTaskManager(spaceId: string, id: string) {
+  /** Disables and enables the alerting rule (effectively asserting that decryption works properly at runtime). */
+  async function registerWithTaskManager(id: string, spaceId: string = '') {
     await supertest
       .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${id}/_disable`)
       .set('kbn-xsrf', 'foo')
@@ -23,6 +24,11 @@ export default function createGetExistingTests({ getService }: FtrProviderContex
       .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${id}/_enable`)
       .set('kbn-xsrf', 'foo')
       .expect(204);
+  }
+
+  /** Resolves the alerting rule with a given ID in a given space. */
+  async function resolveAlertingRule(id: string, spaceId: string = '') {
+    return supertest.get(`${getUrlPrefix(spaceId)}/api/alerting/rule/${id}`);
   }
 
   describe('get existing', () => {
@@ -34,21 +40,24 @@ export default function createGetExistingTests({ getService }: FtrProviderContex
       await esArchiver.unload('x-pack/test/functional/es_archives/alerts_in_multiple_spaces');
     });
 
-    it('should show the alias resolve match for the non default space rule', async () => {
-      const id = '100ff690-eaf9-11eb-9cd0-ed3f761f7f83';
-      await registerWithTaskManager('chrisspace', id);
-      const response = await supertest.get(`${getUrlPrefix(`chrisspace`)}/api/alerting/rule/${id}`);
+    it('should resolve to an alias match for the non default space rule', async () => {
+      const oldObjectId = '8855c6f7-8a73-52a1-bd36-3c929ce3ecb6';
+      const newObjectId = '80827100-ee87-11eb-8dcd-cb59df51587b'; // This ID is not found in the test data archive; it is deterministically generated when the alerting rule is migrated to 8.0
+      const spaceId = 'customspace';
+
+      await registerWithTaskManager(oldObjectId, spaceId);
+      const response = await resolveAlertingRule(newObjectId, spaceId);
       expect(response.body.resolveResponse).to.eql({
         outcome: 'aliasMatch',
-        aliasTargetId: 'fdc84d89-1f92-5511-b4a4-65034392a07a',
+        aliasTargetId: oldObjectId,
       });
     });
 
-    it('should show the absolute resolve match for the default space rule', async () => {
-      const response = await supertest.get(
-        `${getUrlPrefix(``)}/api/alerting/rule/efb7a0f0-eaf8-11eb-9cd0-ed3f761f7f83`
-      );
+    it('should resolve to an exact match for the default space rule', async () => {
+      const objectId = '4c23c3a0-ee87-11eb-8dcd-cb59df51587b';
 
+      await registerWithTaskManager(objectId);
+      const response = await resolveAlertingRule(objectId);
       expect(response.body.resolveResponse).to.eql({
         outcome: 'exactMatch',
       });

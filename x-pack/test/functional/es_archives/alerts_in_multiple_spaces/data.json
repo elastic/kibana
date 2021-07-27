@@ -1,25 +1,20 @@
 {
   "type": "doc",
   "value": {
-    "id": "space:default",
+    "id": "space:customspace",
     "index": ".kibana_1",
     "source": {
-      "coreMigrationVersion": "7.14.0",
-      "migrationVersion": {
-        "space": "6.6.0"
+      "space" : {
+        "name" : "CustomSpace",
+        "disabledFeatures" : [ ]
       },
-      "references": [
-      ],
-      "space": {
-        "_reserved": true,
-        "color": "#00bfb3",
-        "description": "This is your default space!",
-        "disabledFeatures": [
-        ],
-        "name": "Default"
+      "type" : "space",
+      "references" : [ ],
+      "migrationVersion" : {
+        "space" : "6.6.0"
       },
-      "type": "space",
-      "updated_at": "2021-07-22T14:20:59.665Z"
+      "coreMigrationVersion" : "7.14.0",
+      "updated_at" : "2021-07-27T03:04:22.349Z"
     },
     "type": "_doc"
   }
@@ -28,25 +23,23 @@
 {
   "type": "doc",
   "value": {
-    "id": "action:ec9133a0-eaf8-11eb-9cd0-ed3f761f7f83",
+    "id": "action:3fd484e0-ee87-11eb-8dcd-cb59df51587b",
     "index": ".kibana_1",
     "source": {
-      "action": {
-        "actionTypeId": ".server-log",
-        "config": {
-        },
-        "isMissingSecrets": false,
-        "name": "DefaultSpace_ServerLog",
-        "secrets": "2y7vVcU13UhyENUmeVaWsIdwqook820YW0BBcOte9zULmkbHWroz6MHykVrmu4T56ue7Mh8EvR/rvkfZnDiv9es0VoIfYSHrfG4YpCse2GB9z6RJfoZ9q0kPqkuB9w=="
+      "action" : {
+        "actionTypeId" : ".server-log",
+        "name" : "DefaultSpace_Connector",
+        "isMissingSecrets" : false,
+        "config" : { },
+        "secrets" : "AEN6aQfiii4lJPfABP3lWh0wk2DITczt6hUqeK90mzMIJlEy8FVkRT2vHP4UIdVggLB3HWcKKgENmOk2fSQG2HRbQw6rpluhhSL+lxdlIYv9Sc3VsBUlAC7MqvEeNA=="
       },
-      "coreMigrationVersion": "7.14.0",
-      "migrationVersion": {
-        "action": "7.14.0"
+      "type" : "action",
+      "references" : [ ],
+      "migrationVersion" : {
+        "action" : "7.14.0"
       },
-      "references": [
-      ],
-      "type": "action",
-      "updated_at": "2021-07-22T14:27:20.686Z"
+      "coreMigrationVersion" : "7.14.0",
+      "updated_at" : "2021-07-27T03:03:42.396Z"
     },
     "type": "_doc"
   }
@@ -55,22 +48,24 @@
 {
   "type": "doc",
   "value": {
-    "id": "space:chrisspace",
+    "id": "customspace:action:7c6fcef0-ee87-11eb-8dcd-cb59df51587b",
     "index": ".kibana_1",
     "source": {
-      "coreMigrationVersion": "7.14.0",
-      "migrationVersion": {
-        "space": "6.6.0"
+      "action" : {
+        "actionTypeId" : ".server-log",
+        "name" : "CustomSpace_Connector",
+        "isMissingSecrets" : false,
+        "config" : { },
+        "secrets" : "Iwyym3VrXIBW4CxA/RdJUDjXjC4G498PqyjqdaMNFo5GlbnZX0Ynp1rpM95eG9WclGBnXTc4viwDs3QZPquU8Smv7Izvx53tt7npIyJ9qtGaAaQZ681f5gNtJJA/bg=="
       },
-      "references": [
-      ],
-      "space": {
-        "disabledFeatures": [
-        ],
-        "name": "ChrisSpace"
+      "type" : "action",
+      "references" : [ ],
+      "namespace" : "customspace",
+      "migrationVersion" : {
+        "action" : "7.14.0"
       },
-      "type": "space",
-      "updated_at": "2021-07-22T14:27:34.992Z"
+      "coreMigrationVersion" : "7.14.0",
+      "updated_at" : "2021-07-27T03:05:24.072Z"
     },
     "type": "_doc"
   }
@@ -79,107 +74,76 @@
 {
   "type": "doc",
   "value": {
-    "id": "chrisspace:action:0a646500-eaf9-11eb-9cd0-ed3f761f7f83",
+    "id": "alert:4c23c3a0-ee87-11eb-8dcd-cb59df51587b",
     "index": ".kibana_1",
     "source": {
-      "action": {
-        "actionTypeId": ".server-log",
-        "config": {
-        },
-        "isMissingSecrets": false,
-        "name": "ChrisSpace_ServerLog",
-        "secrets": "U7D3F+4QjUSrM5N4UtgNiYdHsaJUm6rgST/ZnltX2XBvuMyYAe2qf3fYeR92LBS3T5DYR0Y/Y/3Zid75uBye5SgDqYj5vqDrxeAWl0dbk+aCT3O/UvamsUw6CCOLCg=="
-      },
-      "coreMigrationVersion": "7.14.0",
-      "migrationVersion": {
-        "action": "7.14.0"
-      },
-      "namespace": "chrisspace",
-      "references": [
-      ],
-      "type": "action",
-      "updated_at": "2021-07-22T14:28:10.719Z"
-    },
-    "type": "_doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "chrisspace:alert:100ff690-eaf9-11eb-9cd0-ed3f761f7f83",
-    "index": ".kibana_1",
-    "source": {
-      "alert": {
-        "actions": [
-          {
-            "actionRef": "action_0",
-            "actionTypeId": ".server-log",
-            "group": "query matched",
-            "params": {
-              "level": "info",
-              "message": "ChrisSpace"
-            }
-          }
-        ],
-        "alertTypeId": ".es-query",
-        "apiKey": "0t7cWMukFZQmePAkaHO6OdvopEeqrp+f7dOUbzRBjh0celnBAf9akf7qjaNHH6v4mbU122BNQQgDH+6Lbs3Z6P8lhLjtHE6vtzd4rbQ4OpBcDeODeRxfLGEzP7fja1VYXSFKiwE2RBBPOAvYVgBL8TjD7yleperxearq+pyYCbtH9Fot9MqW9WbIdZVBnmAuYFlgQsn5WTCWug==",
-        "apiKeyOwner": "elastic",
-        "consumer": "alerts",
-        "createdAt": "2021-07-22T14:28:20.925Z",
-        "createdBy": "elastic",
-        "enabled": true,
-        "executionStatus": {
-          "error": null,
-          "lastExecutionDate": "2021-07-26T17:09:15.394Z",
-          "status": "active"
-        },
-        "meta": {
-          "versionApiKeyLastmodified": "7.14.0"
-        },
-        "muteAll": false,
-        "mutedInstanceIds": [
-        ],
-        "name": "ChrisSpaceRule",
-        "notifyWhen": "onActiveAlert",
-        "params": {
-          "esQuery": "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}",
-          "index": [
-            ".kibana-event-log-*"
-          ],
-          "size": 100,
-          "threshold": [
+      "alert" : {
+        "params" : {
+          "esQuery" : "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}",
+          "size" : 100,
+          "timeWindowSize" : 5,
+          "timeWindowUnit" : "m",
+          "threshold" : [
             0
           ],
-          "thresholdComparator": ">",
-          "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m"
+          "thresholdComparator" : ">",
+          "index" : [
+            ".kibana-event-log-*"
+          ],
+          "timeField" : "@timestamp"
         },
-        "schedule": {
-          "interval": "1s"
+        "consumer" : "alerts",
+        "schedule" : {
+          "interval" : "1m"
         },
-        "scheduledTaskId": "10ced9c0-eaf9-11eb-9cd0-ed3f761f7f83",
-        "tags": [
+        "tags" : [ ],
+        "name" : "DefaultSpace_Rule",
+        "throttle" : null,
+        "actions" : [
+          {
+            "group" : "query matched",
+            "params" : {
+              "level" : "info",
+              "message" : "DefaultSpace_Message"
+            },
+            "actionRef" : "action_0",
+            "actionTypeId" : ".server-log"
+          }
         ],
-        "throttle": null,
-        "updatedAt": "2021-07-22T14:28:20.925Z",
-        "updatedBy": "elastic"
+        "enabled" : true,
+        "alertTypeId" : ".es-query",
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : "elastic",
+        "apiKey" : "SQxINbeYowvAYUoULov4NCv3ff5xfbP0m7tmGbjwwzqLmzVswUctuFX3MzJI5knrFjXF4+xQbXwbwcu7ZmO/VW1IRli2klXlx/GfczHraMD5wmN+OQlvJfrubgZ9Pfm0iSyoHYMyM6MsYqVuE/cQvTNB0LPzmjFAC71gQlBNV52GiMGxSq82BJMn/ogPoX4Vy1UZBoTTh0AK5Q==",
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T03:04:03.758Z",
+        "updatedAt" : "2021-07-27T03:04:03.758Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "active",
+          "lastExecutionDate" : "2021-07-27T03:07:16.475Z",
+          "error" : null
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.14.0"
+        },
+        "scheduledTaskId" : "4d350c90-ee87-11eb-8dcd-cb59df51587b"
       },
-      "coreMigrationVersion": "7.14.0",
-      "migrationVersion": {
-        "alert": "7.13.0"
-      },
-      "namespace": "chrisspace",
-      "references": [
+      "type" : "alert",
+      "references" : [
         {
-          "id": "0a646500-eaf9-11eb-9cd0-ed3f761f7f83",
-          "name": "action_0",
-          "type": "action"
+          "id" : "3fd484e0-ee87-11eb-8dcd-cb59df51587b",
+          "name" : "action_0",
+          "type" : "action"
         }
       ],
-      "type": "alert",
-      "updated_at": "2021-07-26T17:09:15.702Z"
+      "migrationVersion" : {
+        "alert" : "7.13.0"
+      },
+      "coreMigrationVersion" : "7.14.0",
+      "updated_at" : "2021-07-27T03:07:17.288Z"
     },
     "type": "_doc"
   }
@@ -188,78 +152,77 @@
 {
   "type": "doc",
   "value": {
-    "id": "alert:efb7a0f0-eaf8-11eb-9cd0-ed3f761f7f83",
+    "id": "customspace:alert:80827100-ee87-11eb-8dcd-cb59df51587b",
     "index": ".kibana_1",
     "source": {
-      "alert": {
-        "actions": [
-          {
-            "actionRef": "action_0",
-            "actionTypeId": ".server-log",
-            "group": "query matched",
-            "params": {
-              "level": "info",
-              "message": "DefaultSpace"
-            }
-          }
-        ],
-        "alertTypeId": ".es-query",
-        "apiKey": "VyZxQS+SspjAevrG2aitJ8haSBK4gOauShFddb+UoqEY1RllwP/wxtV58gOxIRg9VzNnQZlNiAM/RnHK6Uoho2PYndqf5tyCc/JrRhJGTEvKZA9UsSvUxTlwShAYaSDWLxB0w7ADUwbVAnYGRqKthLA7Qjz4rTLWjjVPfy0rNtFwPyGRVujIvb4W08h7NLrEy83+F4vB5kAhFQ==",
-        "apiKeyOwner": "elastic",
-        "consumer": "alerts",
-        "createdAt": "2021-07-22T14:27:26.734Z",
-        "createdBy": "elastic",
-        "enabled": true,
-        "executionStatus": {
-          "error": null,
-          "lastExecutionDate": "2021-07-26T17:09:15.393Z",
-          "status": "active"
-        },
-        "meta": {
-          "versionApiKeyLastmodified": "7.14.0"
-        },
-        "muteAll": false,
-        "mutedInstanceIds": [
-        ],
-        "name": "DefaultSpaceRule",
-        "notifyWhen": "onActiveAlert",
-        "params": {
-          "esQuery": "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}",
-          "index": [
-            ".kibana-event-log-*"
-          ],
-          "size": 100,
-          "threshold": [
+      "alert" : {
+        "params" : {
+          "esQuery" : "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}",
+          "size" : 100,
+          "timeWindowSize" : 5,
+          "timeWindowUnit" : "m",
+          "threshold" : [
             0
           ],
-          "thresholdComparator": ">",
-          "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m"
+          "thresholdComparator" : ">",
+          "index" : [
+            ".kibana-event-log-*"
+          ],
+          "timeField" : "@timestamp"
         },
-        "schedule": {
-          "interval": "1s"
+        "consumer" : "alerts",
+        "schedule" : {
+          "interval" : "1m"
         },
-        "scheduledTaskId": "f05c9380-eaf8-11eb-9cd0-ed3f761f7f83",
-        "tags": [
+        "tags" : [ ],
+        "name" : "CustomSpace_Rule",
+        "throttle" : null,
+        "actions" : [
+          {
+            "group" : "query matched",
+            "params" : {
+              "level" : "info",
+              "message" : "CustomSpace_Message"
+            },
+            "actionRef" : "action_0",
+            "actionTypeId" : ".server-log"
+          }
         ],
-        "throttle": null,
-        "updatedAt": "2021-07-22T14:27:26.734Z",
-        "updatedBy": "elastic"
+        "enabled" : true,
+        "alertTypeId" : ".es-query",
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : "elastic",
+        "apiKey" : "cMYA0GuObN+7rwAAJn+/gKpj5GeVTxeXq9CcrueMvyIS2vplmvDyMaZflnnsp8t8L5BnVsAQak6TYl3T7PI5AVbmYROa+2zqam7CffJ3x9gDZ+Kd8+wY++wcIuZymVppom94iRhxhYQvy+6yHeNullBdcCl8kvOJPEWEbwAPiiofLDwW/rY1AdbZxyJ5DNr5Ay7GnnAZQBW+eg==",
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T03:05:30.977Z",
+        "updatedAt" : "2021-07-27T03:05:30.977Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "active",
+          "lastExecutionDate" : "2021-07-27T03:07:40.462Z",
+          "error" : null
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.14.0"
+        },
+        "scheduledTaskId" : "80c8c8d0-ee87-11eb-8dcd-cb59df51587b"
       },
-      "coreMigrationVersion": "7.14.0",
-      "migrationVersion": {
-        "alert": "7.13.0"
-      },
-      "references": [
+      "type" : "alert",
+      "references" : [
         {
-          "id": "ec9133a0-eaf8-11eb-9cd0-ed3f761f7f83",
-          "name": "action_0",
-          "type": "action"
+          "id" : "7c6fcef0-ee87-11eb-8dcd-cb59df51587b",
+          "name" : "action_0",
+          "type" : "action"
         }
       ],
-      "type": "alert",
-      "updated_at": "2021-07-26T17:09:15.746Z"
+      "namespace" : "customspace",
+      "migrationVersion" : {
+        "alert" : "7.13.0"
+      },
+      "coreMigrationVersion" : "7.14.0",
+      "updated_at" : "2021-07-27T03:07:41.410Z"
     },
     "type": "_doc"
   }
