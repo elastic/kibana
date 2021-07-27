@@ -5,5 +5,10 @@
   "ui": true,
   "requiredPlugins": ["data"],
   "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaReact", "esUiShared", "usageCollection"]
+  "requiredBundles": ["kibanaReact", "esUiShared", "usageCollection"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Reusable index pattern field editor across Kibana"
 }
