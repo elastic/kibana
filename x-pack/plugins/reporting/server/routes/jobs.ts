@@ -23,6 +23,7 @@ const handleUnavailable = (res: any) => {
 export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
+  const jobsQuery = jobsQueryFactory(reporting);
 
   // list jobs in the queue, paginated
   router.get(
@@ -49,7 +50,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
-      const jobsQuery = jobsQueryFactory(reporting);
       const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
 
       return res.ok({
@@ -77,7 +77,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const jobsQuery = jobsQueryFactory(reporting);
       const count = await jobsQuery.count(jobTypes, user);
 
       return res.ok({
@@ -110,7 +109,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const jobsQuery = jobsQueryFactory(reporting);
       const result = await jobsQuery.getContent(user, docId);
 
       if (!result) {
@@ -153,7 +151,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const jobsQuery = jobsQueryFactory(reporting);
       const result = await jobsQuery.get(user, docId);
 
       if (!result) {
