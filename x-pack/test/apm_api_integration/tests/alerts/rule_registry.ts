@@ -338,12 +338,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        const exclude = [
-          '@timestamp',
-          'kibana.rac.alert.start',
-          'kibana.rac.alert.uuid',
-          'rule.uuid',
-        ];
+        const exclude = ['@timestamp', 'kibana.alert.start', 'kibana.alert.uuid', 'rule.uuid'];
 
         const toCompare = omit(alertEvent, exclude);
 
@@ -355,25 +350,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "kibana.rac.alert.duration.us": Array [
+            "kibana.alert.duration.us": Array [
               0,
             ],
-            "kibana.rac.alert.evaluation.threshold": Array [
+            "kibana.alert.evaluation.threshold": Array [
               30,
             ],
-            "kibana.rac.alert.evaluation.value": Array [
+            "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.rac.alert.id": Array [
+            "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "kibana.rac.alert.owner": Array [
+            "kibana.alert.owner": Array [
               "apm",
             ],
-            "kibana.rac.alert.producer": Array [
+            "kibana.alert.producer": Array [
               "apm",
             ],
-            "kibana.rac.alert.status": Array [
+            "kibana.alert.status": Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -431,25 +426,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "kibana.rac.alert.duration.us": Array [
+            "kibana.alert.duration.us": Array [
               0,
             ],
-            "kibana.rac.alert.evaluation.threshold": Array [
+            "kibana.alert.evaluation.threshold": Array [
               30,
             ],
-            "kibana.rac.alert.evaluation.value": Array [
+            "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.rac.alert.id": Array [
+            "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "kibana.rac.alert.owner": Array [
+            "kibana.alert.owner": Array [
               "apm",
             ],
-            "kibana.rac.alert.producer": Array [
+            "kibana.alert.producer": Array [
               "apm",
             ],
-            "kibana.rac.alert.status": Array [
+            "kibana.alert.status": Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -525,16 +520,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        expect(recoveredAlertEvent['kibana.rac.alert.status']?.[0]).to.eql('closed');
-        expect(recoveredAlertEvent['kibana.rac.alert.duration.us']?.[0]).to.be.greaterThan(0);
-        expect(
-          new Date(recoveredAlertEvent['kibana.rac.alert.end']?.[0]).getTime()
-        ).to.be.greaterThan(0);
+        expect(recoveredAlertEvent['kibana.alert.status']?.[0]).to.eql('closed');
+        expect(recoveredAlertEvent['kibana.alert.duration.us']?.[0]).to.be.greaterThan(0);
+        expect(new Date(recoveredAlertEvent['kibana.alert.end']?.[0]).getTime()).to.be.greaterThan(
+          0
+        );
 
         expectSnapshot(
           omit(
             recoveredAlertEvent,
-            exclude.concat(['kibana.rac.alert.duration.us', 'kibana.rac.alert.end'])
+            exclude.concat(['kibana.alert.duration.us', 'kibana.alert.end'])
           )
         ).toMatchInline(`
           Object {
@@ -544,22 +539,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "kibana.rac.alert.evaluation.threshold": Array [
+            "kibana.alert.evaluation.threshold": Array [
               30,
             ],
-            "kibana.rac.alert.evaluation.value": Array [
+            "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.rac.alert.id": Array [
+            "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "kibana.rac.alert.owner": Array [
+            "kibana.alert.owner": Array [
               "apm",
             ],
-            "kibana.rac.alert.producer": Array [
+            "kibana.alert.producer": Array [
               "apm",
             ],
-            "kibana.rac.alert.status": Array [
+            "kibana.alert.status": Array [
               "closed",
             ],
             "kibana.space_ids": Array [
@@ -610,7 +605,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(topAlertsAfterRecovery.length).to.be(1);
 
-        expect(topAlertsAfterRecovery[0]['kibana.rac.alert.status']?.[0]).to.be('closed');
+        expect(topAlertsAfterRecovery[0]['kibana.alert.status']?.[0]).to.be('closed');
       });
     });
   });

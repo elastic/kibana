@@ -23,7 +23,7 @@ export const wrapHitsFactory = ({
 }): WrapHits => (events) => {
   const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
     {
-      _index: signalsIndex,
+      _index: signalsIndex, // TODO: this isn't needed in rule_registry
       _id: generateId(
         doc._index,
         doc._id,

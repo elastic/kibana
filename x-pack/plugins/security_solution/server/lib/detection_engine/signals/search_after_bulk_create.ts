@@ -167,7 +167,7 @@ export const searchAfterAndBulkCreate = async ({
           }),
         ]);
         signalsCreatedCount += createdCount;
-        logger.debug(buildRuleMessage(`created ${createdItems.length} signals`));
+        logger.debug(buildRuleMessage(`created ${createdCount} signals`));
         logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
         logger.debug(
           buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)

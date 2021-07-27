@@ -37,6 +37,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                   },
                 ]),
               });
+              // TODO: return single alert instance
               return {
                 instances: alerts.map((alert) => alertInstanceFactory(alert.id)),
                 response,

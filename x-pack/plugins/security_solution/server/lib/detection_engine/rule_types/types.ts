@@ -117,6 +117,7 @@ export type RACAlertSignalWithRule = RACAlertSignal &
     [key: string]: SearchTypes;
   };
 
+// TODO: remove signal, see if we can inherit from field maps
 export interface RACAlert {
   '@timestamp': string;
   event: object;

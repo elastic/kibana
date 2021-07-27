@@ -13,7 +13,7 @@
             }
           }
         },
-        "kibana.rac.alert.owner": {
+        "kibana.alert.owner": {
           "type": "keyword",
           "ignore_above": 256
         }
@@ -37,7 +37,7 @@
             }
           }
         },
-        "kibana.rac.alert.owner": {
+        "kibana.alert.owner": {
           "type": "keyword",
           "ignore_above": 256
         }
