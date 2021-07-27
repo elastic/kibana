@@ -155,7 +155,7 @@ describe('CTI Enrichment', () => {
     });
   });
 
-  describe('with additional indicators', () => {
+  describe.skip('with additional indicators', () => {
     before(() => {
       esArchiverLoad('threat_indicator2');
     });
