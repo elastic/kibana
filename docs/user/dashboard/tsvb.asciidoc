@@ -13,7 +13,7 @@ With *TSVB*, you can:
 * Customize the data with labels and colors.
 
 [role="screenshot"]
-image::visualize/images/tsvb-screenshot.png[TSVB overview]
+image::images/tsvb-screenshot.png[TSVB overview]
 
 [float]
 [[tsvb-required-choices]]
