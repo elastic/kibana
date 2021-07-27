@@ -82,27 +82,99 @@ class ReportInfoButtonUi extends Component<Props, State> {
     const timeout = info.timeout ? info.timeout.toString() : NA;
 
     const jobInfo = [
-      { title: 'Title', description: info.title || NA },
-      { title: 'Created At', description: info.getCreatedAtLabel() },
-      { title: 'Status', description: info.getStatus() },
-      { title: 'Timezone', description: info.browserTimezone || NA },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.titleInfo',
+          defaultMessage: 'Title',
+        }),
+        description: info.title || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.createdAtInfo',
+          defaultMessage: 'Created At',
+        }),
+        description: info.getCreatedAtLabel(),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.statusInfo',
+          defaultMessage: 'Status',
+        }),
+        description: info.getStatus(),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.tzInfo',
+          defaultMessage: 'Timezone',
+        }),
+        description: info.browserTimezone || NA,
+      },
     ];
 
     const processingInfo = [
-      { title: 'Started At', description: info.started_at || NA },
-      { title: 'Completed At', description: info.completed_at || NA },
       {
-        title: 'Processed By',
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.startedAtInfo',
+          defaultMessage: 'Started At',
+        }),
+        description: info.started_at || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.completedAtInfo',
+          defaultMessage: 'Completed At',
+        }),
+        description: info.completed_at || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.processedByInfo',
+          defaultMessage: 'Processed By',
+        }),
         description:
           info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
       },
-      { title: 'Content Type', description: info.content_type || NA },
-      { title: 'Size in Bytes', description: info.size?.toString() || NA },
-      { title: 'Attempts', description: info.attempts.toString() },
-      { title: 'Max Attempts', description: info.max_attempts?.toString() || NA },
-      { title: 'Timeout', description: timeout },
       {
-        title: 'Export Type',
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.contentTypeInfo',
+          defaultMessage: 'Content Type',
+        }),
+        description: info.content_type || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.sizeInfo',
+          defaultMessage: 'Size in Bytes',
+        }),
+        description: info.size?.toString() || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.attemptsInfo',
+          defaultMessage: 'Attempts',
+        }),
+        description: info.attempts.toString(),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.maxAttemptsInfo',
+          defaultMessage: 'Max Attempts',
+        }),
+        description: info.max_attempts?.toString() || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.timeoutInfo',
+          defaultMessage: 'Timeout',
+        }),
+        description: timeout,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.exportTypeInfo',
+          defaultMessage: 'Export Type',
+        }),
         description: info.isDeprecated
           ? this.props.intl.formatMessage(
               {
@@ -118,9 +190,27 @@ class ReportInfoButtonUi extends Component<Props, State> {
     ];
 
     const jobScreenshot = [
-      { title: 'Dimensions', description: getDimensions(info) },
-      { title: 'Layout', description: info.layout?.id || UNKNOWN },
-      { title: 'Browser Type', description: info.browser_type || NA },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.dimensionsInfo',
+          defaultMessage: 'Dimensions',
+        }),
+        description: getDimensions(info),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.layoutInfo',
+          defaultMessage: 'Layout',
+        }),
+        description: info.layout?.id || UNKNOWN,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.browserTypeInfo',
+          defaultMessage: 'Browser Type',
+        }),
+        description: info.browser_type || NA,
+      },
     ];
 
     const warnings = info.getWarnings();
