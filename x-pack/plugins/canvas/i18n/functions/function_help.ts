@@ -46,7 +46,6 @@ import { help as lt } from './dict/lt';
 import { help as lte } from './dict/lte';
 import { help as mapCenter } from './dict/map_center';
 import { help as markdown } from './dict/markdown';
-import { help as metric } from './dict/metric';
 import { help as neq } from './dict/neq';
 import { help as pie } from './dict/pie';
 import { help as plot } from './dict/plot';
@@ -203,7 +202,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   lte,
   mapCenter,
   markdown,
-  metric,
   neq,
   pie,
   plot,

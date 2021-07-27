@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+export { functionSpecs } from './function_specs';
 export { imageFunction } from '../common/expression_functions';
