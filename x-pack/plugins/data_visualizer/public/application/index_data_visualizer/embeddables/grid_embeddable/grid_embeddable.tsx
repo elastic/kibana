@@ -22,12 +22,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  luceneStringToDsl,
-  decorateQuery,
-} from '@kbn/es-query';
-import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
@@ -84,8 +78,7 @@ const defaults = getDefaultPageState();
 
 const useDataVisualizerGridData = (
   input: DataVisualizerGridEmbeddableInput,
-  dataVisualizerListState: DataVisualizerIndexBasedAppState,
-  setDataVisualizerListState: Dispatch<SetStateAction<DataVisualizerIndexBasedAppState>>
+  dataVisualizerListState: DataVisualizerIndexBasedAppState
 ) => {
   const { services } = useDataVisualizerKibana();
   const { notifications, uiSettings } = services;
@@ -106,33 +99,7 @@ const useDataVisualizerGridData = (
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    // Prioritize current query in the search bar first
-    // because a saved search could have been previously loaded
-    // but the input has been changed
-    if (currentQuery) {
-      const queryLanguage = currentQuery.language;
-      const qryString = currentQuery.query;
-      let qry;
-      if (queryLanguage === 'kuery') {
-        const ast = fromKueryExpression(qryString);
-        qry = toElasticsearchQuery(ast, currentIndexPattern);
-      } else {
-        qry = luceneStringToDsl(qryString);
-        decorateQuery(qry, services.uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
-      }
-      return {
-        searchQuery: qry,
-        searchString: qryString,
-        searchQueryLanguage: queryLanguage,
-      };
-    }
-
-    // Then process query from saved search
-    const searchData = extractSearchData(
-      currentSavedSearch,
-      currentIndexPattern,
-      uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS)
-    );
+    const searchData = extractSearchData(currentSavedSearch, currentIndexPattern, uiSettings);
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       return {
@@ -140,15 +107,15 @@ const useDataVisualizerGridData = (
         searchString: dataVisualizerListState.searchString,
         searchQueryLanguage: dataVisualizerListState.searchQueryLanguage,
       };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
     }
-    return {
-      searchQuery: searchData.searchQuery,
-      searchString: searchData.searchString,
-      searchQueryLanguage: searchData.queryLanguage,
-    };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState, currentQuery]);
+  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState]);
 
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
@@ -645,8 +612,7 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
 
   const { configs, searchQueryLanguage, searchString, extendedColumns } = useDataVisualizerGridData(
     input,
-    dataVisualizerListState,
-    setDataVisualizerListState
+    dataVisualizerListState
   );
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
