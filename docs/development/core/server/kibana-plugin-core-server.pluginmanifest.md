@@ -31,6 +31,7 @@ Should never be used in code outside of Core but is exported for documentation p
 |  [requiredPlugins](./kibana-plugin-core-server.pluginmanifest.requiredplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that \*\*must be\*\* installed and enabled for this plugin to function properly. |
 |  [server](./kibana-plugin-core-server.pluginmanifest.server.md) | <code>boolean</code> | Specifies whether plugin includes some server-side specific functionality. |
 |  [serviceFolders](./kibana-plugin-core-server.pluginmanifest.servicefolders.md) | <code>readonly string[]</code> | Only used for the automatically generated API documentation. Specifying service folders will cause your plugin API reference to be broken up into sub sections. |
+|  [type](./kibana-plugin-core-server.pluginmanifest.type.md) | <code>PluginType</code> | Type of the plugin, defaults to <code>standard</code>. |
 |  [ui](./kibana-plugin-core-server.pluginmanifest.ui.md) | <code>boolean</code> | Specifies whether plugin includes some client/browser specific functionality that should be included into client bundle via <code>public/ui_plugin.js</code> file. |
 |  [version](./kibana-plugin-core-server.pluginmanifest.version.md) | <code>string</code> | Version of the plugin. |
 

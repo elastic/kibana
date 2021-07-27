@@ -29,6 +29,7 @@ export type ReportProcessingFields = Required<{
   browser_type: Report['browser_type'];
   attempts: Report['attempts'];
   started_at: Report['started_at'];
+  max_attempts: Report['max_attempts'];
   timeout: Report['timeout'];
   process_expiration: Report['process_expiration'];
 }>;

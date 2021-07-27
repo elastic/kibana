@@ -30,6 +30,14 @@ import { LegacyObjectToConfigAdapter } from './legacy';
 export type IConfigService = PublicMethodsOf<ConfigService>;
 
 /** @internal */
+export interface ConfigValidateParameters {
+  /**
+   * Indicates whether config deprecations should be logged during validation.
+   */
+  logDeprecations: boolean;
+}
+
+/** @internal */
 export class ConfigService {
   private readonly log: Logger;
   private readonly deprecationLog: Logger;
@@ -111,13 +119,16 @@ export class ConfigService {
    *
    * This must be done after every schemas and deprecation providers have been registered.
    */
-  public async validate() {
+  public async validate(params: ConfigValidateParameters = { logDeprecations: true }) {
     const namespaces = [...this.schemas.keys()];
     for (let i = 0; i < namespaces.length; i++) {
       await this.getValidatedConfigAtPath$(namespaces[i]).pipe(first()).toPromise();
     }
 
-    await this.logDeprecation();
+    if (params.logDeprecations) {
+      await this.logDeprecation();
+    }
+
     this.validated = true;
   }
 

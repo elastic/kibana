@@ -79,7 +79,7 @@ image::images/lens_advanced_1_2.png[Orders per day]
 
 [discrete]
 [[add-a-data-layer-advanced]]
-=== Monitor multiple series with a date histogram
+=== Monitor multiple series
 
 It is often required to monitor multiple series within a time interval. These series can have similar configurations with minor differences.
 *Lens* copies a function when you drag it to the *Drop a field or click to add* field within the same group.

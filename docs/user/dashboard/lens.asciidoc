@@ -90,7 +90,6 @@ which lets you convert each grouping into a percent of total:
 ```
 sum(products.base_price) / overall_sum(sum(products.base_price))
 ```
-+
 TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
 
 . To accurately display the formula, select *Percent* from the *Value format* dropdown.
@@ -313,31 +312,22 @@ Multiple column sorting is unsupported, but is supported in *Discover*. For info
 refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 ====
 
-[discrete]
-[[is-it-possible-to-use-saved-serches-in-lens]]
-.*How do I visualize saved searches?*
+[float]
+[[why-my-field-is-missing-from-the-fields-list]]
+.*Why is my field missing from the fields list?*
 [%collapsible]
 ====
-Visualizing saved searches in unsupported.
+Fields do not appear in the *Available fields* in the following scenarios:
+
+* The field is a full-text field.
+* The field is a `geo_point` field
+* The field is a `flattened` field.
+* The field is a `object` field.
+
+Verify if the field appears in the *Empty fields* list. *Lens* uses heuristics to determine if the fields contain values. For sparse data sets, the heuristics are less precise.
 ====
 
-[discrete]
-[[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
-.*How do I change the number of suggestions?*
-[%collapsible]
-====
-Configuring the *Suggestions* is unsupported.
-====
-
-[discrete]
-[[why-my-field-x-is-missing-from-the-fields-list]]
-.*Why is my field missing from the list?*
-[%collapsible]
-====
-Full-text fields are unsupported and do not appear in data summaries.
-====
-
-[discrete]
+[float]
 [[how-to-handle-gaps-in-time-series-visualizations]]
 .*What do I do with gaps in time series visualizations?*
 [%collapsible]
@@ -353,6 +343,30 @@ When you create *Area* and *Line* charts with sparse time series data, open *Vis
 You can set the scale, or _bounds_, for area, bar, and line charts. You can configure the bounds for all functions, except *Percentile*. Logarithmic scales are unsupported.
 
 To configure the bounds, use the menus in the editor toolbar. Bar and area charts required 0 in the scale between *Lower bound* and *Upper bound*. 
+====
+
+[discrete]
+[[is-it-possible-to-show-icons-in-datatable]]
+.*Is it possible to display icons in data tables?*
+[%collapsible]
+====
+You can display icons with <<managing-index-patterns, field formatter>> in data tables.
+====
+
+[discrete]
+[[is-it-possible-to-use-saved-serches-in-lens]]
+.*How do I visualize saved searches?*
+[%collapsible]
+====
+Visualizing saved searches in unsupported.
+====
+
+[discrete]
+[[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
+.*How do I change the number of suggestions?*
+[%collapsible]
+====
+Configuring the *Suggestions* is unsupported.
 ====
 
 [discrete]
@@ -378,7 +392,3 @@ Specifying the color for a single data point, such as a single bar or line, is u
 //====
 //
 //====
-
-
-
-

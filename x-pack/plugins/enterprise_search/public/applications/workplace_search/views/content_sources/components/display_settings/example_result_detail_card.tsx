@@ -62,7 +62,7 @@ export const ExampleResultDetailCard: React.FC = () => {
       <div className="example-result-detail-card__content">
         {detailFields.length > 0 ? (
           detailFields.map(({ fieldName, label }, index) => {
-            const value = result[fieldName] as string;
+            const value = result[fieldName];
             const dateValue = getAsLocalDateTimeString(value);
 
             return (

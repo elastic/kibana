@@ -18,6 +18,7 @@ interface Args {
   onPrem: boolean;
   hasFleetPoliciesWithApmIntegration: boolean;
   hasCloudPolicyWithApmIntegration: boolean;
+  isFleetEnabled: boolean;
 }
 
 const policyElasticAgentOnCloudAgent: APIResponseType['fleetAgents'][0] = {
@@ -47,6 +48,7 @@ function Wrapper({
   apmAgent,
   onPrem,
   hasCloudPolicyWithApmIntegration,
+  isFleetEnabled,
 }: Args) {
   const http = ({
     get: () => ({
@@ -56,6 +58,7 @@ function Wrapper({
           ? [policyElasticAgentOnCloudAgent]
           : []),
       ],
+      isFleetEnabled,
       cloudStandaloneSetup: {
         apmServerUrl: 'cloud_url',
         secretToken: 'foo',
@@ -80,6 +83,7 @@ Integration.args = {
   onPrem: true,
   hasFleetPoliciesWithApmIntegration: false,
   hasCloudPolicyWithApmIntegration: false,
+  isFleetEnabled: true,
 };
 
 export default {
@@ -112,6 +116,9 @@ export default {
     },
     hasCloudPolicyWithApmIntegration: {
       control: { type: 'boolean', options: [true, false] },
+    },
+    isFleetEnabled: {
+      control: { type: 'boolean', options: [true, false], defaultValue: true },
     },
   },
 };

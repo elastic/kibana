@@ -192,4 +192,3 @@ image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
 
 
 
-

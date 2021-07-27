@@ -13,6 +13,7 @@ import $ from 'jquery';
 
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
+import { initAngularBootstrap } from '../../../kibana_legacy/public/angular_bootstrap';
 import { tableVisLegacyTypeDefinition } from './table_vis_legacy_type';
 import { Vis } from '../../../visualizations/public';
 import { stubFields } from '../../../data/public/stubs';
@@ -76,6 +77,9 @@ describe('Table Vis - Controller', () => {
     initTableVisLegacyModule(tableVisModule);
   };
 
+  beforeAll(async () => {
+    await initAngularBootstrap();
+  });
   beforeEach(initLocalAngular);
   beforeEach(angular.mock.module('kibana/table_vis'));
 

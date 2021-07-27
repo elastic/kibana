@@ -20,6 +20,7 @@ describe('http resources service', () => {
         },
         plugins: { initialize: false },
       });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {

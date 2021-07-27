@@ -1,0 +1,10 @@
+{
+  "id": "expressionError",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["expressions", "presentationUtil"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}
