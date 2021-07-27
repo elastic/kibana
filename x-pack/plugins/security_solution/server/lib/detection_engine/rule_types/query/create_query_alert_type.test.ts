@@ -14,6 +14,23 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
+import { bulkCreateFactory } from '../factories';
+
+jest.mock('../utils/get_list_client', () => ({
+  getListClient: jest.fn().mockReturnValue({
+    listClient: jest.fn(),
+    exceptionsClient: jest.fn(),
+  }),
+}));
+
+jest.mock('../../signals/rule_status_service', () => ({
+  ruleStatusServiceFactory: () => ({
+    goingToRun: jest.fn(),
+    success: jest.fn(),
+    partialFailure: jest.fn(),
+    error: jest.fn(),
+  }),
+}));
 
 describe('Custom query alerts', () => {
   it('does not send an alert when no events found', async () => {
@@ -29,8 +46,18 @@ describe('Custom query alerts', () => {
     dependencies.alerting.registerType(queryAlertType);
 
     const params = {
-      customQuery: 'dne:42',
-      indexPatterns: ['*'],
+      query: 'dne:42',
+      index: ['*'],
+      from: 'now-1m',
+      to: 'now',
+      runOpts: {
+        bulkCreate: bulkCreateFactory(
+          dependencies.logger,
+          services.alertWithPersistence,
+          dependencies.buildRuleMessage,
+          'wait_for'
+        ),
+      },
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
@@ -72,8 +99,10 @@ describe('Custom query alerts', () => {
     dependencies.alerting.registerType(queryAlertType);
 
     const params = {
-      customQuery: '*:*',
-      indexPatterns: ['*'],
+      query: '*:*',
+      index: ['*'],
+      from: 'now-1m',
+      to: 'now',
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
