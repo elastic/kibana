@@ -33,7 +33,7 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   indexPatternManagement: 28222
-  indexPatternEditor: 90000
+  indexPatternEditor: 99999
   infra: 184320
   fleet: 465774
   ingestPipelines: 58003

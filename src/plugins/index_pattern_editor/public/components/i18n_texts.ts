@@ -22,8 +22,5 @@ export const geti18nTexts = () => {
     rollupLabel: i18n.translate('indexPatternEditor.rollupIndexPattern.createIndex.indexLabel', {
       defaultMessage: 'Rollup',
     }),
-    rollupBetaWarningTitle: i18n.translate('indexPatternEditor.rollupIndexPattern.warning.title', {
-      defaultMessage: 'Beta feature',
-    }),
   };
 };
