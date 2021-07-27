@@ -11,6 +11,7 @@ import {
   mergeNewVars,
   isSettingsFormValid,
   validateSettingValue,
+  getFlattenedSettings,
 } from './utils';
 
 describe('settings utils', () => {
@@ -112,6 +113,97 @@ describe('settings utils', () => {
         baz: { value: '1ms', type: 'text' },
         qux: { value: 'qux', type: 'text' },
       });
+    });
+  });
+
+  describe('getFlattenedSettings', () => {
+    it('returns all settings in the same level', () => {
+      const settings: SettingDefinition[] = [
+        {
+          key: 'foo',
+          type: 'text',
+          required: true,
+          settings: [
+            {
+              key: 'foo_1',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          key: 'bar',
+          type: 'text',
+          settings: [
+            { key: 'bar_1', type: 'text' },
+            {
+              key: 'bar_2',
+              type: 'text',
+              settings: [{ key: 'bar_2_1', type: 'text' }],
+            },
+          ],
+        },
+        { key: 'baz', type: 'text' },
+      ];
+
+      expect(getFlattenedSettings(settings)).toEqual([
+        {
+          key: 'foo',
+          type: 'text',
+          required: true,
+          settings: [
+            {
+              key: 'foo_1',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          key: 'foo_1',
+          type: 'text',
+        },
+        {
+          key: 'bar',
+          type: 'text',
+          settings: [
+            {
+              key: 'bar_1',
+              type: 'text',
+            },
+            {
+              key: 'bar_2',
+              type: 'text',
+              settings: [
+                {
+                  key: 'bar_2_1',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          key: 'bar_1',
+          type: 'text',
+        },
+        {
+          key: 'bar_2',
+          type: 'text',
+          settings: [
+            {
+              key: 'bar_2_1',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          key: 'bar_2_1',
+          type: 'text',
+        },
+        {
+          key: 'baz',
+          type: 'text',
+        },
+      ]);
     });
   });
 });

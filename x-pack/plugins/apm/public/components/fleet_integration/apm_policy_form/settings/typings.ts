@@ -15,11 +15,11 @@ interface BaseSetting {
   label?: string;
   helpText?: string;
   placeholder?: string;
-  prependIcon?: string;
   labelAppend?: string;
   settings?: SettingDefinition[];
   validation?: SettingValidation;
   required?: boolean;
+  readOnly?: boolean;
 }
 
 interface TextSetting extends BaseSetting {

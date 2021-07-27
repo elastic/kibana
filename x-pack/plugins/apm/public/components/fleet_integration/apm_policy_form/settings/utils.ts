@@ -61,3 +61,17 @@ export function validateSettingValue(setting: SettingDefinition, value?: any) {
   }
   return { isValid: true, message: '' };
 }
+
+export function getFlattenedSettings(apmSettings: SettingDefinition[]) {
+  function getSettings(settings: SettingDefinition[]): SettingDefinition[] {
+    return settings
+      .map((setting) => {
+        return [
+          setting,
+          ...(setting.settings ? getSettings(setting.settings) : []),
+        ];
+      })
+      .flat();
+  }
+  return getSettings(apmSettings);
+}

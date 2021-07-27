@@ -14,12 +14,17 @@ import { TLSSettingsForm } from './settings/tls_settings';
 interface Props {
   onChange: OnFormChangeFn;
   vars?: PackagePolicyVars;
+  isCloudPolicy: boolean;
 }
 
-export function APMPolicyForm({ vars = {}, onChange }: Props) {
+export function APMPolicyForm({ vars = {}, isCloudPolicy, onChange }: Props) {
   return (
     <>
-      <APMSettingsForm vars={vars} onChange={onChange} />
+      <APMSettingsForm
+        vars={vars}
+        onChange={onChange}
+        isCloudPolicy={isCloudPolicy}
+      />
       <EuiSpacer />
       <RUMSettingsForm vars={vars} onChange={onChange} />
       <EuiSpacer />

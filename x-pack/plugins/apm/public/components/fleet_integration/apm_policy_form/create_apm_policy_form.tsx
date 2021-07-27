@@ -30,5 +30,7 @@ export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
       },
     });
   }
-  return <APMPolicyForm vars={vars} onChange={handleChange} />;
+  return (
+    <APMPolicyForm vars={vars} onChange={handleChange} isCloudPolicy={false} />
+  );
 }

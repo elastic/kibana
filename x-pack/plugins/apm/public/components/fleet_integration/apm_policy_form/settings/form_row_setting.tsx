@@ -52,10 +52,9 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
     case 'text': {
       return (
         <EuiFieldText
+          readOnly={setting.readOnly}
           value={value}
-          prepend={
-            setting.prependIcon && <EuiIcon type={setting.prependIcon} />
-          }
+          prepend={setting.readOnly ? <EuiIcon type="lock" /> : undefined}
           onChange={(e) => {
             onChange(setting.key, e.target.value);
           }}
@@ -84,7 +83,9 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
       );
     }
     case 'combo': {
-      const comboOptions = (value as any[]).map((label) => ({ label }));
+      const comboOptions = Array.isArray(value)
+        ? value.map((label) => ({ label }))
+        : [];
       return (
         <EuiComboBox
           placeholder={i18n.translate(
