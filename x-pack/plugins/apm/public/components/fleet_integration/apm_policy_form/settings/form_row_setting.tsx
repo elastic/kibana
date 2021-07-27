@@ -13,6 +13,7 @@ import {
   EuiTextArea,
   EuiComboBox,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormRowOnChange } from './settings_form';
 import { SettingDefinition } from './typings';
@@ -23,12 +24,23 @@ interface Props {
   onChange: FormRowOnChange;
 }
 
+const ENABLED_LABEL = i18n.translate(
+  'xpack.apm.fleet_integration.settings.enabledLabel',
+  { defaultMessage: 'Enabled' }
+);
+const DISABLED_LABEL = i18n.translate(
+  'xpack.apm.fleet_integration.settings.disabledLabel',
+  { defaultMessage: 'Disabled' }
+);
+
 export function FormRowSetting({ setting, value, onChange }: Props) {
   switch (setting.type) {
     case 'boolean': {
       return (
         <EuiSwitch
-          label={setting.placeholder || (value ? 'Enabled' : 'Disabled')}
+          label={
+            setting.placeholder || (value ? ENABLED_LABEL : DISABLED_LABEL)
+          }
           checked={value}
           onChange={(e) => {
             onChange(setting.key, e.target.checked);
@@ -75,7 +87,10 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
       const comboOptions = (value as any[]).map((label) => ({ label }));
       return (
         <EuiComboBox
-          placeholder="Select or create options"
+          placeholder={i18n.translate(
+            'xpack.apm.fleet_integration.settings.selectOrCreateOptions',
+            { defaultMessage: 'Select or create options' }
+          )}
           options={comboOptions}
           selectedOptions={comboOptions}
           onChange={(option) => {

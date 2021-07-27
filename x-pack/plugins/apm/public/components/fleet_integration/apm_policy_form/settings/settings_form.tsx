@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { PackagePolicyVars } from '../typings';
 import { FormRowSetting } from './form_row_setting';
@@ -145,7 +146,12 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
                 <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText>Advanced options</EuiText>
+                <EuiText>
+                  {i18n.translate(
+                    'xpack.apm.fleet_integration.settings.advancedOptionsLavel',
+                    { defaultMessage: 'Advanced options' }
+                  )}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiLink>

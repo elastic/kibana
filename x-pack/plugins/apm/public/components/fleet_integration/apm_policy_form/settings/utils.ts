@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty } from 'lodash';
 import { PackagePolicyVars } from '../typings';
 import { SettingDefinition } from './typings';
 
-export const REQUIRED_LABEL = 'Required';
-export const OPTIONAL_LABEL = 'Optional';
+export const REQUIRED_LABEL = i18n.translate(
+  'xpack.apm.fleet_integration.settings.requiredLabel',
+  { defaultMessage: 'Required' }
+);
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.apm.fleet_integration.settings.optionalLabel',
+  { defaultMessage: 'Optional' }
+);
+const REQUIRED_FIELD = i18n.translate(
+  'xpack.apm.fleet_integration.settings.requiredFieldLabel',
+  { defaultMessage: 'Required field' }
+);
 
 function mergeNewVars(
   oldVars: PackagePolicyVars,
@@ -54,7 +65,7 @@ export function validateSettingValue(setting: SettingDefinition, value?: any) {
   if (isEmpty(value)) {
     return {
       isValid: !setting.required,
-      message: setting.required ? 'Required field' : '',
+      message: setting.required ? REQUIRED_FIELD : '',
     };
   }
 

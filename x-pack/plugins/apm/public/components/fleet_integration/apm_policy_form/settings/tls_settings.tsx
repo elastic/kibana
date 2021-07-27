@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
@@ -19,35 +20,56 @@ const basicsettings: SettingDefinition[] = [
   {
     key: 'tls_certificate',
     type: 'text',
-    rowTitle: 'TLS certificate',
-    label: 'File path to server certificate',
+    label: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsCertificateLabel',
+      { defaultMessage: 'File path to server certificate' }
+    ),
+    rowTitle: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsCertificateTitle',
+      { defaultMessage: 'TLS certificate' }
+    ),
     labelAppend: REQUIRED_LABEL,
     required: true,
   },
   {
     key: 'tls_key',
     type: 'text',
-    label: 'File path to server certificate key',
+    label: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsKeyLabel',
+      { defaultMessage: 'File path to server certificate key' }
+    ),
     labelAppend: REQUIRED_LABEL,
     required: true,
   },
   {
     key: 'tls_supported_protocols',
     type: 'combo',
-    label: 'Supported protocol versions',
+    label: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsSupportedProtocolsLabel',
+      { defaultMessage: 'Supported protocol versions' }
+    ),
     labelAppend: OPTIONAL_LABEL,
   },
   {
     key: 'tls_cipher_suites',
     type: 'combo',
-    label: 'Cipher suites for TLS connections',
-    helpText: 'Not configurable for TLS 1.3.',
+    label: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsCipherSuitesLabel',
+      { defaultMessage: 'Cipher suites for TLS connections' }
+    ),
+    helpText: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsCipherSuitesHelpText',
+      { defaultMessage: 'Not configurable for TLS 1.3.' }
+    ),
     labelAppend: OPTIONAL_LABEL,
   },
   {
     key: 'tls_curve_types',
     type: 'combo',
-    label: 'Curve types for ECDHE based cipher suites',
+    label: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsCurveTypesLabel',
+      { defaultMessage: 'Curve types for ECDHE based cipher suites' }
+    ),
     labelAppend: OPTIONAL_LABEL,
   },
 ];
@@ -56,7 +78,10 @@ const TLS_ENABLED_KEY = 'tls_enabled';
 const tlsSettings: SettingDefinition[] = [
   {
     key: TLS_ENABLED_KEY,
-    rowTitle: 'Enable TLS',
+    rowTitle: i18n.translate(
+      'xpack.apm.fleet_integration.settings.tls.tlsEnabledTitle',
+      { defaultMessage: 'Enable TLS' }
+    ),
     type: 'boolean',
     settings: basicsettings,
   },
@@ -76,8 +101,14 @@ interface Props {
 export function TLSSettingsForm({ vars, onChange }: Props) {
   return (
     <SettingsForm
-      title="TLS Settings"
-      subtitle="Settings for TLS certification."
+      title={i18n.translate(
+        'xpack.apm.fleet_integration.settings.tls.settings.title',
+        { defaultMessage: 'TLS Settings' }
+      )}
+      subtitle={i18n.translate(
+        'xpack.apm.fleet_integration.settings.tls.settings.subtitle',
+        { defaultMessage: 'Settings for TLS certification.' }
+      )}
       settings={tlsSettings}
       vars={vars}
       onChange={(key, value) => {
