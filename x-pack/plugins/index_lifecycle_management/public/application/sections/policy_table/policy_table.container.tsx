@@ -25,7 +25,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
   const {
     services: { breadcrumbService },
   } = useKibana();
-  const { data: policies, isLoading, error, resendRequest } = useLoadPoliciesList(true);
+  const { data: policies, isLoading, error, resendRequest } = useLoadPoliciesList();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('policies');
