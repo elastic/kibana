@@ -18,11 +18,12 @@ const RESTRICTED_METHODS: readonly SavedObjectsClientContractKeys[] = [
   'delete',
   'removeReferencesTo',
   'openPointInTimeForType',
+  'closePointInTime',
   'update',
   'updateObjectsSpaces',
 ];
 
-class InternalReadonlySoClientMethodNotAllowedError extends EndpointError {}
+export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError {}
 
 /**
  * Creates an internal (system user) Saved Objects client (permissions turned off) that can only perform READ
