@@ -57,14 +57,14 @@ function ProgressComponent({
     onLoaded();
   }, [onLoaded, parentNode, parentNodeDimensions]);
 
-  const barProgressRef = useRef<
+  const progressRef = useRef<
     SVGCircleElement & SVGPathElement & SVGPolygonElement & SVGRectElement
   >(null);
   const textRef = useRef<SVGTextElement>(null);
 
   useEffect(() => {
-    setTotalLength(barProgressRef.current ? barProgressRef.current.getTotalLength() : 0);
-  }, [shapeType, shapeData, barProgressRef]);
+    setTotalLength(progressRef.current ? progressRef.current.getTotalLength() : 0);
+  }, [shapeType, shapeData, progressRef]);
 
   const BarProgress = shapeData.shapeType ? getShapeContentElement(shapeData.shapeType) : null;
 
@@ -73,7 +73,7 @@ function ProgressComponent({
     fill: 'none',
     stroke: barColor,
     strokeWidth: `${barWeight}px`,
-    ref: barProgressRef,
+    ref: progressRef,
   };
 
   const percent = value / max;
@@ -122,7 +122,7 @@ function ProgressComponent({
         textAttributes={{ ...textAttributes, ref: textRef }}
         ref={shapeRef}
       >
-        {BarProgress && <BarProgress {...barProgressAttributes} ref={null} />}
+        {BarProgress && <BarProgress {...barProgressAttributes} />}
       </ProgressDrawer>
     </div>
   );
