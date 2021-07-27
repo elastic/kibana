@@ -14,7 +14,6 @@ import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import {
   fatalErrorsServiceMock,
   injectedMetadataServiceMock,
-  scopedHistoryMock,
 } from '../../../../src/core/public/mocks';
 import { HttpService } from '../../../../src/core/public/http';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
@@ -35,13 +34,27 @@ initUiMetric(usageCollectionPluginMock.createSetupContract());
 // use a date far in the past to check the sorting
 const testDate = '2020-07-21T14:16:58.666Z';
 const testDateFormatted = moment(testDate).format('YYYY-MM-DD HH:mm:ss');
+const testVersion = 0;
 
-const policies: PolicyFromES[] = [];
-for (let i = 0; i < 105; i++) {
+const policies: PolicyFromES[] = [
+  {
+    version: testVersion,
+    modifiedDate: testDate,
+    indices: [`index1`],
+    indexTemplates: [`indexTemplate1`, `indexTemplate2`, `indexTemplate3`, `indexTemplate4`],
+    name: `testy0`,
+    policy: {
+      name: `testy0`,
+      phases: {},
+    },
+  },
+];
+for (let i = 1; i < 105; i++) {
   policies.push({
     version: i,
-    modifiedDate: i === 0 ? testDate : moment().subtract(i, 'days').toISOString(),
+    modifiedDate: moment().subtract(i, 'days').toISOString(),
     indices: i % 2 === 0 ? [`index${i}`] : [],
+    indexTemplates: i % 2 === 0 ? [`indexTemplate${i}`] : [],
     name: `testy${i}`,
     policy: {
       name: `testy${i}`,
@@ -49,7 +62,14 @@ for (let i = 0; i < 105; i++) {
     },
   });
 }
-jest.mock('');
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    createHref: jest.fn(),
+  }),
+}));
+
 let component: ReactElement;
 
 const snapshot = (rendered: string[]) => {
@@ -87,25 +107,11 @@ const openContextMenu = (buttonIndex: number) => {
 
 describe('policy table', () => {
   beforeEach(() => {
-    component = (
-      <PolicyTable
-        policies={policies}
-        history={scopedHistoryMock.create()}
-        navigateToApp={jest.fn()}
-        updatePolicies={jest.fn()}
-      />
-    );
+    component = <PolicyTable policies={policies} updatePolicies={jest.fn()} />;
   });
 
   test('should show empty state when there are not any policies', () => {
-    component = (
-      <PolicyTable
-        policies={[]}
-        history={scopedHistoryMock.create()}
-        navigateToApp={jest.fn()}
-        updatePolicies={jest.fn()}
-      />
-    );
+    component = <PolicyTable policies={[]} updatePolicies={jest.fn()} />;
     const rendered = mountWithIntl(component);
     mountedSnapshot(rendered);
   });
@@ -147,6 +153,9 @@ describe('policy table', () => {
   test('should sort when linked indices header is clicked', () => {
     testSort('indices');
   });
+  test('should sort when linked index templates header is clicked', () => {
+    testSort('indexTemplates');
+  });
   test('should have proper actions in context menu when there are linked indices', () => {
     const rendered = openContextMenu(0);
     const buttons = rendered.find('button.euiContextMenuItem');
@@ -181,8 +190,10 @@ describe('policy table', () => {
   test('displays policy properties', () => {
     const rendered = mountWithIntl(component);
     const firstRow = findTestSubject(rendered, 'policyTableRow').at(0).text();
-    const version = 0;
     const numberOfIndices = 1;
-    expect(firstRow).toBe(`testy0${numberOfIndices}${version}${testDateFormatted}Actions`);
+    const numberOfIndexTemplates = 4;
+    expect(firstRow).toBe(
+      `testy0${numberOfIndices}${numberOfIndexTemplates}${testVersion}${testDateFormatted}Actions`
+    );
   });
 });
