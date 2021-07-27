@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormRowOnChange } from './settings_form';
-import { SettingDefinition } from './types';
+import { SettingDefinition } from './typings';
 
 interface Props {
   setting: SettingDefinition;

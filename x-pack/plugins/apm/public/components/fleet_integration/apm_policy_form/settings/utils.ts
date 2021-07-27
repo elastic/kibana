@@ -9,7 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty } from 'lodash';
 import { PackagePolicyVars } from '../typings';
-import { SettingDefinition } from './types';
+import { SettingDefinition } from './typings';
 
 export const REQUIRED_LABEL = 'Required';
 export const OPTIONAL_LABEL = 'Optional';

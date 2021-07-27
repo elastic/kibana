@@ -19,7 +19,7 @@ import {
 import React, { useState } from 'react';
 import { PackagePolicyVars } from '../typings';
 import { FormRowSetting } from './form_row_setting';
-import { SettingDefinition } from './types';
+import { SettingDefinition } from './typings';
 import { validateSettingValue } from './utils';
 
 export type FormRowOnChange = (key: string, value: any) => void;

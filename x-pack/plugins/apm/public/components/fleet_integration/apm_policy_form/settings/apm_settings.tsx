@@ -9,7 +9,7 @@ import { getDurationRt } from '../../../../../common/agent_configuration/runtime
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
-import { SettingDefinition } from './types';
+import { SettingDefinition } from './typings';
 import {
   handleFormChange,
   isSettingsFormValid,

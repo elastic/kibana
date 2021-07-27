@@ -7,7 +7,7 @@
 import React from 'react';
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
-import { SettingDefinition } from './types';
+import { SettingDefinition } from './typings';
 import {
   handleFormChange,
   isSettingsFormValid,
