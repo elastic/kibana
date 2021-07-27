@@ -15,6 +15,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 import { KqlMode, TimelineModel } from './model';
+import { InsertTimeline } from './types';
 import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
@@ -42,8 +43,6 @@ export const {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
-  setInsertTimeline,
-  showTimeline,
 } = tGridActions;
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
@@ -55,6 +54,10 @@ export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE')
 export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
   'ADD_NOTE_TO_EVENT'
 );
+
+export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
+
+export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 

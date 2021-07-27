@@ -10,17 +10,17 @@ import { mount } from 'enzyme';
 
 import { CreateCaseFlyout } from './flyout';
 import { TestProviders } from '../../../../../mock';
-import { TimelinesStartServices } from '../../../../../types';
 
-jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
-  useKibana: () => ({
-    services: {
-      cases: {
-        getCreateCase: () => {},
-      },
-    },
-  }),
-}));
+// jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+//   useKibana: () => ({
+//     services: {
+//       cases: {
+//         getCreateCase: () => {},
+//       },
+//     },
+//   }),
+// }));
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public');
 const onCloseFlyout = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {

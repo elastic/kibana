@@ -23,7 +23,6 @@ import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { EventsTdContent } from '../../styles';
 import { useKibana, useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -102,7 +101,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
     () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
     [ecsData.event?.kind, ecsData.agent?.type]
   );
-
+  const addToCaseActionProps = useMemo(() => {
+    return {
+      ariaLabel: i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+      ecsRowData: ecsData,
+      useInsertTimeline: insertTimelineHook,
+      casePermissions,
+    };
+  }, [ariaRowindex, ecsData, casePermissions, insertTimelineHook, columnValues]);
   return (
     <ActionsContainer>
       {showCheckboxes && (
@@ -174,12 +180,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           TimelineId.detectionsRulesDetailsPage,
           TimelineId.active,
         ].includes(timelineId as TimelineId) &&
-          timelinesUi.getAddToCaseAction({
-            ariaLabel: i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-            ecsRowData: ecsData,
-            useInsertTimeline: insertTimelineHook,
-            casePermissions,
-          })}
+          timelinesUi.getAddToCaseAction(addToCaseActionProps)}
         {/* {[
           TimelineId.detectionsPage,
           TimelineId.detectionsRulesDetailsPage,

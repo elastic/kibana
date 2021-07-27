@@ -19,6 +19,7 @@ export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
+  useInsertTimeline?: Function;
 }
 
 // TODO: EUI team follow up on complex types and styled-components `styled`

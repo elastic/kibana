@@ -11,6 +11,7 @@ import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';
 import { TimelineType } from '../../../../common/types/timeline';
 import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../common/types/timeline';
+import * as i18n from './translations';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>

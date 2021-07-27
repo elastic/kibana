@@ -1549,6 +1549,8 @@ export const mockTgridModel: TGridModel = {
       initialWidth: 180,
     },
   ],
+  defaultColumns: [],
+  queryFields: [],
   dateRange: {
     end: '2020-03-18T13:52:38.929Z',
     start: '2020-03-18T13:46:38.929Z',
@@ -1556,22 +1558,8 @@ export const mockTgridModel: TGridModel = {
   deletedEventIds: [],
   excludedRowRendererIds: [],
   expandedDetail: {},
-  filters: [
-    {
-      $state: {
-        store: 'appState',
-      },
-      meta: {
-        alias: null,
-        disabled: true,
-        key: 'host.name',
-        negate: false,
-        params: '"{"query":"placeholder"}"',
-        type: 'phrase',
-      },
-      query: '"{"match_phrase":{"host.name":"placeholder"}}"',
-    },
-  ],
+  documentType: '',
+  selectAll: false,
   id: 'ef579e40-jibber-jabber',
   indexNames: [],
   isLoading: false,
@@ -1594,7 +1582,5 @@ export const mockTgridModel: TGridModel = {
     },
   ],
   title: 'Test rule',
-  templateTimelineId: null,
-  templateTimelineVersion: null,
   version: '1',
 };

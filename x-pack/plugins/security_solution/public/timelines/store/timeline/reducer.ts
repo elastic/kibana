@@ -22,8 +22,10 @@ import {
   setActiveTabTimeline,
   setExcludedRowRendererIds,
   setFilters,
+  setInsertTimeline,
   setSavedQueryId,
   showCallOutUnauthorizedMsg,
+  showTimeline,
   startTimelineSaving,
   unPinEvent,
   updateAutoSaveMsg,
@@ -68,6 +70,7 @@ import {
   updateTimelineProviderType,
   updateTimelineProviders,
   updateTimelineRange,
+  updateTimelineShowTimeline,
   updateTimelineTitleAndDescription,
   updateSavedQuery,
   updateGraphEventId,
@@ -128,6 +131,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       filterQuery,
       timelineById: state.timelineById,
     }),
+  }))
+  .case(showTimeline, (state, { id, show }) => ({
+    ...state,
+    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
   .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
@@ -309,6 +316,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
+  .case(setInsertTimeline, (state, insertTimeline) => ({
+    ...state,
+    insertTimeline,
+  }))
   .case(updateIndexNames, (state, { id, indexNames }) => ({
     ...state,
     timelineById: {
@@ -352,5 +363,13 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         },
       },
     },
+  }))
+  .case(setInsertTimeline, (state, insertTimeline) => ({
+    ...state,
+    insertTimeline,
+  }))
+  .case(showTimeline, (state, { id, show }) => ({
+    ...state,
+    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
   .build();

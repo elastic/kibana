@@ -184,7 +184,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
       closeCaseFlyoutOpen();
-      return createUpdateSuccessToaster(toasts, theCase, onViewCaseClick);
+      createUpdateSuccessToaster(toasts, theCase, onViewCaseClick);
     },
     [closeCaseFlyoutOpen, onViewCaseClick, toasts]
   );
@@ -265,6 +265,39 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     [ariaLabel, isDisabled, openPopover, tooltipContext]
   );
 
+  const getAllCasesSelectorModalProps = useMemo(() => {
+    return {
+      alertData: {
+        alertId: eventId,
+        index: eventIndex ?? '',
+        rule: {
+          id: rule?.id != null ? rule.id[0] : null,
+          name: rule?.name != null ? rule.name[0] : null,
+        },
+        owner: APP_ID,
+      },
+      createCaseNavigation: {
+        href: createCaseUrl,
+        onClick: goToCreateCase,
+      },
+      hiddenStatuses: [CaseStatuses.closed, StatusAll],
+      onRowClick: onCaseClicked,
+      updateCase: onCaseSuccess,
+      userCanCrud: casePermissions?.crud ?? false,
+      owner: [APP_ID],
+    };
+  }, [
+    casePermissions?.crud,
+    onCaseSuccess,
+    onCaseClicked,
+    createCaseUrl,
+    goToCreateCase,
+    eventId,
+    eventIndex,
+    rule?.id,
+    rule?.name,
+  ]);
+
   return (
     <>
       {userCanCrud && (
@@ -290,27 +323,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           useInsertTimeline={useInsertTimeline}
         />
       )}
-      {isAllCaseModalOpen &&
-        cases.getAllCasesSelectorModal({
-          alertData: {
-            alertId: eventId,
-            index: eventIndex ?? '',
-            rule: {
-              id: rule?.id != null ? rule.id[0] : null,
-              name: rule?.name != null ? rule.name[0] : null,
-            },
-            owner: APP_ID,
-          },
-          createCaseNavigation: {
-            href: createCaseUrl,
-            onClick: goToCreateCase,
-          },
-          hiddenStatuses: [CaseStatuses.closed, StatusAll],
-          onRowClick: onCaseClicked,
-          updateCase: onCaseSuccess,
-          userCanCrud: casePermissions?.crud ?? false,
-          owner: [APP_ID],
-        })}
+      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 };

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
 import styled from 'styled-components';
 import { ToasterContent } from './toaster_content';
 import * as i18n from './translations';
 import { Case } from '../../../../../../cases/common';
 import type { ToastsStart, Toast } from '../../../../../../../../src/core/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const LINE_CLAMP = 3;
 
@@ -29,11 +29,10 @@ export const createUpdateSuccessToaster = (
   onViewCaseClick: (id: string) => void
 ): Toast => {
   return toasts.addSuccess({
-    id: uuid.v4(),
     color: 'success',
     iconType: 'check',
-    title: <Title>{i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title)}</Title>,
-    text: (
+    title: toMountPoint(<Title>{i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title)}</Title>),
+    text: toMountPoint(
       <ToasterContent
         caseId={theCase.id}
         syncAlerts={theCase.settings.syncAlerts}

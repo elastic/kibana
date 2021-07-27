@@ -8,8 +8,26 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import 'jest-styled-components';
+import type { MockedKeys } from '@kbn/utility-types/jest';
+import { CoreStart } from 'kibana/public';
+import { coreMock } from 'src/core/public/mocks';
+
 import { createUpdateSuccessToaster } from './helpers';
 import { Case } from '../../../../../../cases/common';
+
+// const mockToasts = jest.fn();
+// jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+//   useKibana: () => ({
+//     services: {
+//       notifications: {
+//         toasts: mockToasts,
+//       },
+//     },
+//   }),
+//   toMountPoint: jest.fn(),
+// }));
+
+let mockCoreStart: MockedKeys<CoreStart>;
 
 const theCase = {
   id: 'case-id',
@@ -20,19 +38,15 @@ const theCase = {
 } as Case;
 
 describe('helpers', () => {
+  beforeEach(() => {
+    mockCoreStart = coreMock.createStart();
+  });
   const onViewCaseClick = jest.fn();
 
   describe('createUpdateSuccessToaster', () => {
     it('creates the correct toast when the sync alerts is on', () => {
-      // We remove the id as is randomly generated and the text as it is a React component
-      // which is being test on toaster_content.test.tsx
-      const toasts = jest.fn().mockReturnValue({
-        addError: jest.fn(),
-        addSuccess: jest.fn(),
-        addWarning: jest.fn(),
-      });
       const { id, text, title, ...toast } = createUpdateSuccessToaster(
-        toasts,
+        mockCoreStart.notifications.toasts,
         theCase,
         onViewCaseClick
       );

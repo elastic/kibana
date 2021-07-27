@@ -12,9 +12,8 @@ import type {
   SortColumnTimeline,
   TimelineExpandedDetailType,
 } from '../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import { TimelineTabs } from '../../../common/types/timeline';
-import { InitialyzeTGridSettings, TGridPersistInput, InsertTimeline } from './types';
+import { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 
@@ -36,10 +35,6 @@ export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
   timelineId: string;
 };
-
-export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
-
-export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 

@@ -23,7 +23,7 @@ import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeli
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-
+jest.mock('../')
 jest.mock('../../../../../common/hooks/use_selector');
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -38,6 +38,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
   }),
+  useGetUserCasesPermissions: jest.fn(),
 }));
 
 jest.mock('../../../../../cases/components/timeline_actions/add_to_case_action', () => {
