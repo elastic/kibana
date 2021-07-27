@@ -348,7 +348,9 @@ describe('test endpoint route', () => {
           params: { id: response.hits.hits[0]._id },
         });
 
-        mockAgentService.getAgent = jest.fn().mockReturnValue(agentGenerator.generate());
+        mockAgentService.getAgent = jest
+          .fn()
+          .mockReturnValue(agentGenerator.generate({ status: 'online' }));
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
@@ -418,7 +420,7 @@ describe('test endpoint route', () => {
 
         mockAgentService.getAgent = jest.fn().mockReturnValue(
           agentGenerator.generate({
-            last_checkin_status: 'error',
+            status: 'error',
           })
         );
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>

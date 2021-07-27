@@ -171,7 +171,7 @@ export class EndpointMetadataService {
       return {
         metadata: endpointMetadata,
         host_status: fleetAgent
-          ? fleetAgentStatusToEndpointHostStatus(this.agentService.getStatusForAgent(fleetAgent))
+          ? fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
           : DEFAULT_ENDPOINT_HOST_STATUS,
         policy_info: {
           agent: {
