@@ -820,53 +820,163 @@ describe('#decryptAttributes', () => {
     );
   });
 
-  it('retries decryption without namespace if incorrect namespace is provided and convertToMultiNamespaceType option is enabled', async () => {
-    const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+  describe('with convertToMultiNamespaceType option', () => {
+    it('retries decryption without namespace', async () => {
+      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-    service.registerType({
-      type: 'known-type-1',
-      attributesToEncrypt: new Set(['attrThree']),
-    });
+      service.registerType({
+        type: 'known-type-1',
+        attributesToEncrypt: new Set(['attrThree']),
+      });
 
-    const encryptedAttributes = service.encryptAttributesSync(
-      { type: 'known-type-1', id: 'object-id' }, // namespace was not included in descriptor during encryption
-      attributes
-    );
-    expect(encryptedAttributes).toEqual({
-      attrOne: 'one',
-      attrTwo: 'two',
-      attrThree: expect.not.stringMatching(/^three$/),
-    });
+      const encryptedAttributes = service.encryptAttributesSync(
+        { type: 'known-type-1', id: 'object-id' }, // namespace was not included in descriptor during encryption
+        attributes
+      );
+      expect(encryptedAttributes).toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: expect.not.stringMatching(/^three$/),
+      });
 
-    const mockUser = mockAuthenticatedUser();
-    await expect(
-      service.decryptAttributes(
+      const mockUser = mockAuthenticatedUser();
+      await expect(
+        service.decryptAttributes(
+          { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+          encryptedAttributes,
+          { user: mockUser, convertToMultiNamespaceType: true }
+        )
+      ).resolves.toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: 'three',
+      });
+      expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        1, // first attempted to decrypt with the namespace in the descriptor (fail)
+        expect.anything(),
+        `["object-ns","known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        2, // then attempted to decrypt without the namespace in the descriptor (success)
+        expect.anything(),
+        `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+        ['attrThree'],
         { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
-        encryptedAttributes,
-        { user: mockUser, convertToMultiNamespaceType: true }
-      )
-    ).resolves.toEqual({
-      attrOne: 'one',
-      attrTwo: 'two',
-      attrThree: 'three',
+        mockUser
+      );
     });
-    expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
-    expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
-      1, // first attempted to decrypt with the namespace in the descriptor (fail)
-      expect.anything(),
-      `["object-ns","known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
-    );
-    expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
-      2, // then attempted to decrypt without the namespace in the descriptor (success)
-      expect.anything(),
-      `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
-    );
-    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
-      ['attrThree'],
-      { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
-      mockUser
-    );
+
+    it('retries decryption without originId (old object ID)', async () => {
+      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+
+      service.registerType({
+        type: 'known-type-1',
+        attributesToEncrypt: new Set(['attrThree']),
+      });
+
+      const encryptedAttributes = service.encryptAttributesSync(
+        { type: 'known-type-1', id: 'object-id' }, // old object ID was not used in descriptor during encryption
+        attributes
+      );
+      expect(encryptedAttributes).toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: expect.not.stringMatching(/^three$/),
+      });
+
+      const mockUser = mockAuthenticatedUser();
+      await expect(
+        service.decryptAttributes(
+          { type: 'known-type-1', id: 'object-id', namespace: undefined },
+          encryptedAttributes,
+          { user: mockUser, convertToMultiNamespaceType: true, originId: 'old-object-id' }
+        )
+      ).resolves.toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: 'three',
+      });
+      expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        1, // first attempted to decrypt with the old object ID in the descriptor (fail)
+        expect.anything(),
+        `["known-type-1","old-object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        2, // then attempted to decrypt with the current object ID in the descriptor (success)
+        expect.anything(),
+        `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+        ['attrThree'],
+        { type: 'known-type-1', id: 'object-id', namespace: undefined },
+        mockUser
+      );
+    });
+
+    it('retries decryption without namespace *and* without originId (old object ID)', async () => {
+      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+
+      service.registerType({
+        type: 'known-type-1',
+        attributesToEncrypt: new Set(['attrThree']),
+      });
+
+      const encryptedAttributes = service.encryptAttributesSync(
+        { type: 'known-type-1', id: 'object-id' }, // namespace and old object ID were not used in descriptor during encryption
+        attributes
+      );
+      expect(encryptedAttributes).toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: expect.not.stringMatching(/^three$/),
+      });
+
+      const mockUser = mockAuthenticatedUser();
+      await expect(
+        service.decryptAttributes(
+          { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+          encryptedAttributes,
+          { user: mockUser, convertToMultiNamespaceType: true, originId: 'old-object-id' }
+        )
+      ).resolves.toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: 'three',
+      });
+      expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(4);
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        1, // first attempted to decrypt with the old object ID and namespace in the descriptor (fail)
+        expect.anything(),
+        `["object-ns","known-type-1","old-object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        2, // then attempted to decrypt with the old object ID and no namespace in the descriptor (fail)
+        expect.anything(),
+        `["known-type-1","old-object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        3, // first attempted to decrypt with the current object ID and namespace in the descriptor (fail)
+        expect.anything(),
+        `["object-ns","known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        4, // then attempted to decrypt with the current object ID and no namespace in the descriptor (success)
+        expect.anything(),
+        `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+        ['attrThree'],
+        { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+        mockUser
+      );
+    });
   });
 
   it('decrypts even if no attributes are included into AAD', async () => {
