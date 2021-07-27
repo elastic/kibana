@@ -165,5 +165,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await a11y.testAppSnapshot();
     });
+
+    it('Index templates flyout', async () => {
+      const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+      const actionsButton = await policyRow.findByTestSubject('viewIndexTemplates');
+
+      await actionsButton.click();
+
+      const flyoutTitleSelector = 'indexTemplatesFlyoutHeader';
+      await retry.waitFor('Index templates flyout', async () => {
+        return testSubjects.isDisplayed(flyoutTitleSelector);
+      });
+
+      await a11y.testAppSnapshot();
+    });
   });
 }

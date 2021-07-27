@@ -345,7 +345,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
   const rows = sortedPolicies.map((policy) => {
     const { name } = policy;
     return (
-      <EuiTableRow data-test-subj="policyTableRow" key={`${name}-row`}>
+      <EuiTableRow data-test-subj={`policyTableRow-${name}`} key={`${name}-row`}>
         {renderRowCells(policy)}
       </EuiTableRow>
     );
