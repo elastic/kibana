@@ -22,7 +22,7 @@ export class QueryBarService extends FtrService {
     return await this.testSubjects.getAttribute('queryInput', 'value');
   }
 
-  public async setQuery(query: string, dismissFtuePopover = true): Promise<void> {
+  public async setQuery(query: string): Promise<void> {
     this.log.debug(`QueryBar.setQuery(${query})`);
     // Extra caution used because of flaky test here: https://github.com/elastic/kibana/issues/16978 doesn't seem
     // to be actually setting the query in the query input based off
@@ -38,7 +38,6 @@ export class QueryBarService extends FtrService {
       if (currentQuery !== query) {
         throw new Error(`Failed to set query input to ${query}, instead query is ${currentQuery}`);
       }
-      if (dismissFtuePopover) await this.dismissFtuePopover();
     });
   }
 
@@ -80,14 +79,5 @@ export class QueryBarService extends FtrService {
   public async getSuggestions() {
     const suggestions = await this.testSubjects.findAll('autoCompleteSuggestionText');
     return Promise.all(suggestions.map((suggestion) => suggestion.getVisibleText()));
-  }
-
-  public async dismissFtuePopover() {
-    try {
-      const dismissButton = await this.testSubjects.find('autocompleteFtuePopoverDismissButton');
-      await dismissButton.click();
-    } catch (e) {
-      // The popover has already been dismissed
-    }
   }
 }
