@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
-import { ConfigSchema, configSchema } from '../config';
-import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
-
 import {
   buildQueryFilter,
   buildCustomFilter,
@@ -20,12 +16,20 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
   isFilterDisabled,
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  buildQueryFromFilters,
 } from '../common';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { ConfigSchema, configSchema } from '../config';
+import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 /*
+ * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
  * Filter helper namespace:
  */
-
 export const esFilters = {
   buildQueryFilter,
   buildCustomFilter,
@@ -52,28 +56,29 @@ export const exporters = {
  * esQuery and esKuery:
  */
 
-import {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
-  buildQueryFromFilters,
-  getEsQueryConfig,
-} from '../common';
+import { getEsQueryConfig } from '../common';
 
+/*
+ * Filter helper namespace
+ * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
+ */
 export const esKuery = {
   nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };
 
+/*
+ * Filter helper namespace
+ * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
+ */
 export const esQuery = {
   buildQueryFromFilters,
   getEsQueryConfig,
   buildEsQuery,
 };
 
-export { EsQueryConfig, KueryNode } from '../common';
+export type { EsQueryConfig, KueryNode, IFieldSubType } from '../common';
 
 /*
  * Field Formats:
@@ -146,7 +151,6 @@ export {
 
 export {
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,

@@ -11,6 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
+  ALERT_REASON,
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
   ALERT_START,
@@ -55,6 +56,7 @@ export const technicalRuleFieldMap = {
   [ALERT_STATUS]: { type: 'keyword' },
   [ALERT_EVALUATION_THRESHOLD]: { type: 'scaled_float', scaling_factor: 100 },
   [ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100 },
+  [ALERT_REASON]: { type: 'keyword' },
 } as const;
 
 export type TechnicalRuleFieldMaps = typeof technicalRuleFieldMap;
