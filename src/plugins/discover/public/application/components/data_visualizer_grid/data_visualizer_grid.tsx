@@ -52,7 +52,7 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 });
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
-  const { services, indexPattern, savedSearch, query } = props;
+  const { services, indexPattern, savedSearch, query, columns } = props;
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -63,10 +63,15 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
-      embeddable.updateInput({ indexPattern, savedSearch, query });
+      embeddable.updateInput({
+        indexPattern,
+        savedSearch,
+        query,
+        visibleFieldNames: columns,
+      });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query]);
+  }, [embeddable, indexPattern, savedSearch, query, columns]);
 
   useEffect(() => {
     return () => {
@@ -86,8 +91,13 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
         >('data_visualizer_grid');
         if (factory) {
           // Initialize embeddable with information available at mount
-          const test = await factory.create({ id: 'test', indexPattern, savedSearch, query });
-          setEmbeddable(test);
+          const initializedEmbeddable = await factory.create({
+            id: 'discover_data_visualizer_grid',
+            indexPattern,
+            savedSearch,
+            query,
+          });
+          setEmbeddable(initializedEmbeddable);
         }
       }
     };
@@ -102,9 +112,5 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     }
   }, [embeddable, embeddableRoot]);
 
-  return (
-    <>
-      <div data-test-subj="dataVisualizerEmbeddedContent" ref={embeddableRoot} />
-    </>
-  );
+  return <div data-test-subj="dataVisualizerEmbeddedContent" ref={embeddableRoot} />;
 };
