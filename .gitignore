@@ -78,4 +78,5 @@ report.asciidoc
 # Bazel
 bazel
 bazel-*
+!/src/dev/bazel
 .bazelrc.user
