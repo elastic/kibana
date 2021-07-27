@@ -23,17 +23,26 @@ import {
   AlertTypeState,
 } from '../../../../alerting/common';
 
-export interface AnomalyDetectionJobHealthResult {
+type ModelSizeStats = MlJobStats['model_size_stats'];
+
+export interface MmlTestResponse {
   job_id: string;
-  job_state?: MlJobState;
-  // Datafeed check
-  datafeed_id?: string;
-  datafeed_state?: MlDatafeedState;
-  // MML check
-  memory_status?: MlJobStats['model_size_stats']['memory_status'];
-  log_time?: string | number;
-  failed_category_count?: number;
+  memory_status: ModelSizeStats['memory_status'];
+  log_time: ModelSizeStats['log_time'];
+  failed_category_count: ModelSizeStats['failed_category_count'];
+  model_bytes_memory_limit: ModelSizeStats['model_bytes_memory_limit'];
+  peak_model_bytes: ModelSizeStats['peak_model_bytes'];
+  model_bytes_exceeded: ModelSizeStats['model_bytes_exceeded'];
 }
+
+export interface NotStartedDatafeedResponse {
+  datafeed_id: string;
+  datafeed_state: MlDatafeedState;
+  job_id: string;
+  job_state: MlJobState;
+}
+
+export type AnomalyDetectionJobHealthResult = MmlTestResponse | NotStartedDatafeedResponse;
 
 export type AnomalyDetectionJobsHealthAlertContext = {
   results: AnomalyDetectionJobHealthResult[];

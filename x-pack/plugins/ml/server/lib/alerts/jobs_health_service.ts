@@ -8,7 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
-import { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
+import { MlJobStats } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
 import {
   AnomalyDetectionJobsHealthRuleParams,
@@ -18,7 +18,11 @@ import { datafeedsProvider, DatafeedsService } from '../../models/job_service/da
 import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../../shared_services/shared_services';
-import { AnomalyDetectionJobsHealthAlertContext } from './register_jobs_monitoring_rule_type';
+import {
+  AnomalyDetectionJobsHealthAlertContext,
+  MmlTestResponse,
+  NotStartedDatafeedResponse,
+} from './register_jobs_monitoring_rule_type';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 
 interface TestResult {
@@ -27,20 +31,6 @@ interface TestResult {
 }
 
 type TestsResults = TestResult[];
-
-type NotStartedDatafeedResponse = Array<{
-  datafeed_id: string;
-  datafeed_state: MlDatafeedState;
-  job_id: string;
-  job_state: MlJobState;
-}>;
-
-interface MmlTestResponse {
-  job_id: string;
-  memory_status: MlJobStats['model_size_stats']['memory_status'];
-  log_time: string | number;
-  failed_category_count: number;
-}
 
 export function jobsHealthServiceProvider(
   mlClient: MlClient,
@@ -112,7 +102,7 @@ export function jobsHealthServiceProvider(
      * Gets not started datafeeds for opened jobs.
      * @param jobIds
      */
-    async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse | void> {
+    async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse[] | void> {
       const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
       if (datafeeds) {
@@ -158,6 +148,9 @@ export function jobsHealthServiceProvider(
             memory_status: modelSizeStats.memory_status,
             log_time: modelSizeStats.log_time,
             failed_category_count: modelSizeStats.failed_category_count,
+            model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit,
+            peak_model_bytes: modelSizeStats.peak_model_bytes,
+            model_bytes_exceeded: modelSizeStats.model_bytes_exceeded,
           };
         });
     },
