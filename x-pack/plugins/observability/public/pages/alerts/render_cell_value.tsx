@@ -60,11 +60,10 @@ export const getRenderCellValue = ({
     })?.reduce((x) => x[0]);
 
     useEffect(() => {
-      if (columnId === ALERT_DURATION) {
+      if (columnId === ALERT_STATUS) {
         setCellProps({
           style: {
-            textAlign: 'right',
-            paddingRight: '15px',
+            textAlign: 'center',
           },
         });
       }
@@ -103,7 +102,17 @@ export const getRenderCellValue = ({
         const alert = decoratedAlerts[0];
 
         return (
-          <EuiLink onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>{alert.reason}</EuiLink>
+          // NOTE: EuiLink automatically renders links using a <button>
+          // instead of an <a> when an `onClick` prop is provided, but this
+          // breaks text-truncation in `EuiDataGrid`, because (per the HTML
+          // spec), buttons are *always* rendered as `inline-block`, even if
+          // `display` is overridden. Passing an empty `href` prop forces
+          // `EuiLink` to render the link as an (inline) <a>, which enables
+          // text truncation, but requires overriding the linter warning below:
+          // eslint-disable-next-line @elastic/eui/href-or-on-click
+          <EuiLink href="" onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>
+            {alert.reason}
+          </EuiLink>
         );
       default:
         return <>{value}</>;
