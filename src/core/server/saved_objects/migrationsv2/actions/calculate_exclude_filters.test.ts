@@ -15,14 +15,14 @@ describe('calculateExcludeFilters', () => {
   const client = elasticsearchClientMock.createInternalClient();
 
   it('calls each provided hook and returns combined filter', async () => {
-    const hook1 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldA: '123' } } } });
+    const hook1 = jest.fn().mockReturnValue({ bool: { must: { term: { fieldA: '123' } } } });
     const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
     const task = calculateExcludeFilters({ client, excludeFromUpgradeFilterHooks: [hook1, hook2] });
     const result = await task();
 
-    expect(hook1).toHaveBeenCalledWith(client);
-    expect(hook2).toHaveBeenCalledWith(client);
+    expect(hook1).toHaveBeenCalledWith({ readonlyEsClient: { search: expect.any(Function) } });
+    expect(hook2).toHaveBeenCalledWith({ readonlyEsClient: { search: expect.any(Function) } });
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
       excludeFilter: {
@@ -73,5 +73,32 @@ describe('calculateExcludeFilters', () => {
       message: 'reason',
       error,
     });
+  });
+
+  it('ignores and returns errors for hooks that take longer than timeout', async () => {
+    const hook1 = jest.fn().mockReturnValue(new Promise((r) => setTimeout(r, 40_000)));
+    const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
+
+    const task = calculateExcludeFilters({
+      client,
+      excludeFromUpgradeFilterHooks: [hook1, hook2],
+      hookTimeoutMs: 100,
+    });
+    const resultPromise = task();
+    await new Promise((r) => setTimeout(r, 110));
+    const result = await resultPromise;
+
+    expect(Either.isRight(result)).toBe(true);
+    expect((result as Either.Right<any>).right).toEqual({
+      excludeFilter: {
+        bool: {
+          must_not: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
+        },
+      },
+      errors: expect.any(Array),
+    });
+    expect((result as Either.Right<any>).right.errors[0].toString()).toMatchInlineSnapshot(
+      `"Error: excludeFromUpgrade hook timed out after 0.1 seconds."`
+    );
   });
 });

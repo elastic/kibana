@@ -7,6 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { withTimeout } from '@kbn/std';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { RetryableEsClientError } from '.';
@@ -17,49 +18,59 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 export interface CalculateExcludeFiltersParams {
   client: ElasticsearchClient;
   excludeFromUpgradeFilterHooks: SavedObjectTypeExcludeFromUpgradeFilterHook[];
+  hookTimeoutMs?: number;
 }
 
 export interface CalculatedExcludeFilter {
   /** Composite filter of all calculated filters */
   excludeFilter: estypes.QueryDslQueryContainer;
   /** Any errors that were encountered during filter calculation */
-  errors: any[];
+  errors: Error[];
 }
 
 export const calculateExcludeFilters = ({
   client,
   excludeFromUpgradeFilterHooks,
+  hookTimeoutMs = 30_000, // default to 30s, exposed for testing
 }: CalculateExcludeFiltersParams): TaskEither.TaskEither<
   RetryableEsClientError,
   CalculatedExcludeFilter
 > => () => {
   return Promise.all(
     excludeFromUpgradeFilterHooks.map((hook) =>
-      hook(client)
-        // .then((filter) => ({ filter, error: null }))
-        .then((filter) => Either.right(filter))
+      withTimeout({
+        promise: Promise.resolve(
+          hook({ readonlyEsClient: { search: client.search.bind(client) } })
+        ),
+        timeoutMs: hookTimeoutMs,
+      })
+        .then((result) =>
+          result.timedout
+            ? Either.left(
+                new Error(
+                  `excludeFromUpgrade hook timed out after ${hookTimeoutMs / 1000} seconds.`
+                )
+              )
+            : Either.right(result.value)
+        )
         .catch(catchRetryableEsClientErrors)
-        // .catch((error) => ({ filter: null, error }))
         .catch((error) => Either.left(error))
     )
   ).then((results) => {
-    const errors: any[] = [];
+    const retryableError = results.find(
+      (r) => Either.isLeft(r) && r.left.type === 'retryable_es_client_error'
+    ) as Either.Left<RetryableEsClientError> | undefined;
+    if (retryableError) {
+      return retryableError;
+    }
+
+    const errors: Error[] = [];
     const filters: estypes.QueryDslQueryContainer[] = [];
 
     // Loop through all results and collect successes and errors
-    for (const r of results) {
-      if (Either.isRight(r)) {
-        filters.push(r.right);
-      } else if (Either.isLeft(r)) {
-        // If any errors are retryable, return immediately so this whole action
-        // can be retried.
-        if (r.left.type === 'retryable_es_client_error') {
-          return r;
-        } else {
-          errors.push(r.left);
-        }
-      }
-    }
+    results.forEach((r) =>
+      Either.isRight(r) ? filters.push(r.right) : Either.isLeft(r) && errors.push(r.left)
+    );
 
     // Composite filter from all calculated filters that successfully executed
     const excludeFilter: estypes.QueryDslQueryContainer = {

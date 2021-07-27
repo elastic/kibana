@@ -24,8 +24,11 @@ export function setupSavedObjects(
     mappings: mappings.task as SavedObjectsTypeMappingDefinition,
     migrations,
     indexPattern: config.index,
-    excludeOnUpgrade: async (client) => {
-      const oldestNeededActionParams = await getOldestIdleActionTask(client, config.index);
+    excludeOnUpgrade: async ({ readonlyEsClient }) => {
+      const oldestNeededActionParams = await getOldestIdleActionTask(
+        readonlyEsClient,
+        config.index
+      );
 
       // Delete all action tasks that have failed and are no longer needed
       return {

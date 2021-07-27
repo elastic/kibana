@@ -71,8 +71,11 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
-    excludeOnUpgrade: async (client) => {
-      const oldestIdleActionTask = await getOldestIdleActionTask(client, taskManagerIndex);
+    excludeOnUpgrade: async ({ readonlyEsClient }) => {
+      const oldestIdleActionTask = await getOldestIdleActionTask(
+        readonlyEsClient,
+        taskManagerIndex
+      );
       return {
         bool: {
           must: [

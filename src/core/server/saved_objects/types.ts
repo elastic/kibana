@@ -505,6 +505,6 @@ export type SavedObjectsExportablePredicate<Attributes = unknown> = (
  * @public
  * @alpha Experimental and subject to change
  */
-export type SavedObjectTypeExcludeFromUpgradeFilterHook = (
-  esClient: Pick<ElasticsearchClient, 'search'>
-) => Promise<estypes.QueryDslQueryContainer>;
+export type SavedObjectTypeExcludeFromUpgradeFilterHook = (toolkit: {
+  readonlyEsClient: Pick<ElasticsearchClient, 'search'>;
+}) => estypes.QueryDslQueryContainer | Promise<estypes.QueryDslQueryContainer>;
