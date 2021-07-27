@@ -170,10 +170,14 @@ describe('createMigration()', () => {
     describe('uses the object `namespaces` field to populate the descriptor when the migration context indicates this type is being converted', () => {
       const doTest = ({
         objectNamespace,
+        objectNamespaces,
         decryptDescriptorNamespace,
+        encryptDescriptorNamespace,
       }: {
         objectNamespace: string | undefined;
+        objectNamespaces: string[] | undefined;
         decryptDescriptorNamespace: string | undefined;
+        encryptDescriptorNamespace: string | undefined;
       }) => {
         const instantiateServiceWithLegacyType = jest.fn(() =>
           encryptedSavedObjectsServiceMock.create()
@@ -189,56 +193,82 @@ describe('createMigration()', () => {
           },
           (doc) => doc
         );
+        const attributes = { firstAttr: 'first_attr' };
 
-        const attributes = {
-          firstAttr: 'first_attr',
-        };
-
-        encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
-        encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
-
-        noopMigration(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespaces: objectNamespace ? [objectNamespace] : [],
+        ['7.99.99', '8.0.0'].forEach((migrationVersion, i) => {
+          encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+          encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
+          noopMigration(
+            {
+              id: '123',
+              originId: 'some-origin-id',
+              type: 'known-type-1',
+              namespace: objectNamespace,
+              namespaces: objectNamespaces,
+              attributes,
+            },
+            migrationMocks.createContext({
+              migrationVersion, // test works with any version <= 8.0.0
+              convertToMultiNamespaceTypeVersion: '8.0.0',
+            })
+          );
+          expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenNthCalledWith(
+            i + 1,
+            { id: '123', type: 'known-type-1', namespace: decryptDescriptorNamespace },
             attributes,
-          },
-          migrationMocks.createContext({
-            migrationVersion: '8.0.0',
-            convertToMultiNamespaceTypeVersion: '8.0.0',
-          })
-        );
-
-        expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespace: decryptDescriptorNamespace,
-          },
-          attributes,
-          { convertToMultiNamespaceType: true }
-        );
-
-        expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
-          {
-            id: '123',
-            type: 'known-type-1',
-          },
-          attributes
-        );
+            { convertToMultiNamespaceType: true, originId: 'some-origin-id' }
+          );
+          expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenNthCalledWith(
+            i + 1,
+            { id: '123', type: 'known-type-1', namespace: encryptDescriptorNamespace },
+            attributes
+          );
+        });
       };
 
-      it('when namespaces is an empty array', () => {
-        doTest({ objectNamespace: undefined, decryptDescriptorNamespace: undefined });
-      });
+      [undefined, 'foo'].forEach((objectNamespace) => {
+        // In the test cases below, we test what will happen if an object has both `namespace` and `namespaces` fields. This will not happen
+        // in normal operation, as when Kibana converts an object from a single- to a multi-namespace type, it removes the `namespace` field
+        // and adds the `namespaces` field. The tests below are for completeness.
+        const namespaceDescription = objectNamespace ? 'defined' : undefined;
 
-      it('when the first namespace element is "default"', () => {
-        doTest({ objectNamespace: 'default', decryptDescriptorNamespace: undefined });
-      });
+        it(`when namespaces is undefined and namespace is ${namespaceDescription}`, () => {
+          doTest({
+            objectNamespace,
+            objectNamespaces: undefined,
+            decryptDescriptorNamespace: objectNamespace,
+            encryptDescriptorNamespace: objectNamespace,
+          });
+        });
 
-      it('when the first namespace element is another string', () => {
-        doTest({ objectNamespace: 'foo', decryptDescriptorNamespace: 'foo' });
+        it(`when namespaces is an empty array and namespace is ${namespaceDescription}`, () => {
+          // The `namespaces` field should never be an empty array, but we test for it anyway. In this case, we fall back to attempting to
+          // decrypt with the `namespace` field; if that doesn't work, the ESO service will try again without it.
+          doTest({
+            objectNamespace,
+            objectNamespaces: [],
+            decryptDescriptorNamespace: objectNamespace,
+            encryptDescriptorNamespace: objectNamespace,
+          });
+        });
+
+        it(`when namespaces is a non-empty array (default space) and namespace is ${namespaceDescription}`, () => {
+          doTest({
+            objectNamespace,
+            objectNamespaces: ['default', 'additional-spaces-are-ignored'],
+            decryptDescriptorNamespace: undefined,
+            encryptDescriptorNamespace: objectNamespace,
+          });
+        });
+
+        it(`when namespaces is a non-empty array (custom space) and namespace is ${namespaceDescription}`, () => {
+          doTest({
+            objectNamespace,
+            objectNamespaces: ['custom', 'additional-spaces-are-ignored'],
+            decryptDescriptorNamespace: 'custom',
+            encryptDescriptorNamespace: objectNamespace,
+          });
+        });
       });
     });
   });
