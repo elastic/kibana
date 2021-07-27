@@ -18,7 +18,27 @@ import { esIndicesStateCheck } from './es_indices_state_check';
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient
 ): Promise<UpgradeAssistantStatus> {
-  const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
+  // const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
+
+  const deprecations = {
+    cluster_settings: [],
+    node_settings: [],
+    index_settings: {},
+    ml_settings: [
+      {
+        level: 'critical',
+        message: 'model snapshot [1627343998] for job [my_job] needs to be deleted or upgraded',
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-upgrade-job-model-snapshot.html',
+        details:
+          "model snapshot [1627343998] for job [my_job] supports minimum version [6.3.0] and needs to be at least [7.0.0]. The model snapshot's latest record timestamp is [2021-07-23T03:48:47.000Z]",
+        _meta: {
+          snapshot_id: '1627392073', // ID of an older snapshot associated with the job ID defined (cannot be snapshot currently in use)
+          job_id: 'my_job', // ID of your ML job
+        },
+      },
+    ],
+  };
 
   const cluster = getClusterDeprecations(deprecations);
   const indices = await getCombinedIndexInfos(deprecations, dataClient);
