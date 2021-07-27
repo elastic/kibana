@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useState } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import React, { useEffect } from 'react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiPageHeader,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiToolTip,
-  EuiNotificationBadge,
   EuiSpacer,
+  EuiPageContent,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
-import { UpgradeAssistantTabProps, EsTabs, TelemetryState } from '../types';
-import { DeprecationTabContent } from './deprecation_tab_content';
+import { EsDeprecationsTable } from './es_deprecations_table';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
-    defaultMessage: 'Elasticsearch',
+    defaultMessage: 'Elasticsearch deprecation issues',
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'Review the deprecated cluster and index settings. You must resolve any critical issues before upgrading.',
+      'Review your deprecation issues. Reindex indices or follow step-by-step instructions for any issues in need of manual configuration.',
   }),
   docLinkText: i18n.translate('xpack.upgradeAssistant.esDeprecations.docLinkText', {
     defaultMessage: 'Documentation',
+  }),
+  isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
+    defaultMessage: 'Loading deprecations…',
   }),
   backupDataButton: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel', {
@@ -43,166 +45,101 @@ const i18nTexts = {
       defaultMessage: 'Take a snapshot before you make any changes.',
     }),
   },
-  clusterTab: {
-    tabName: i18n.translate('xpack.upgradeAssistant.esDeprecations.clusterTabLabel', {
-      defaultMessage: 'Cluster',
-    }),
-    deprecationType: i18n.translate('xpack.upgradeAssistant.esDeprecations.clusterLabel', {
-      defaultMessage: 'cluster',
-    }),
-  },
-  indicesTab: {
-    tabName: i18n.translate('xpack.upgradeAssistant.esDeprecations.indicesTabLabel', {
-      defaultMessage: 'Indices',
-    }),
-    deprecationType: i18n.translate('xpack.upgradeAssistant.esDeprecations.indexLabel', {
-      defaultMessage: 'index',
+  deprecationIssuesButton: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.deprecationIssuesButtonLabel', {
+      defaultMessage: 'Learn more about deprecation issues',
     }),
   },
 };
 
-interface MatchParams {
-  tabName: EsTabs;
-}
+export const EsDeprecationsContent = () => {
+  // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-export const EsDeprecationsContent = withRouter(
-  ({
-    match: {
-      params: { tabName },
-    },
-    history,
-  }: RouteComponentProps<MatchParams>) => {
-    const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
+  const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
 
-    const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
+  const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
 
-    const { data: checkupData, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
+  useEffect(() => {
+    breadcrumbs.setBreadcrumbs('esDeprecations');
+  }, [breadcrumbs]);
 
-    const onTabClick = (selectedTab: EuiTabbedContentTab) => {
-      history.push(`/es_deprecations/${selectedTab.id}`);
-    };
+  // TODO: refactor telemetry as we no longer need to keep track of tabs
+  // useEffect(() => {
+  //   if (isLoading === false) {
+  //     setTelemetryState(TelemetryState.Running);
 
-    const tabs = useMemo(() => {
-      const commonTabProps: UpgradeAssistantTabProps = {
-        error,
-        isLoading,
-        refreshCheckupData: resendRequest,
-        navigateToOverviewPage: () => history.push('/overview'),
-      };
+  //     async function sendTelemetryData() {
+  //       await api.sendTelemetryData({
+  //         [tabName]: true,
+  //       });
+  //       setTelemetryState(TelemetryState.Complete);
+  //     }
 
-      return [
-        {
-          id: 'cluster',
-          'data-test-subj': 'upgradeAssistantClusterTab',
-          name: (
-            <span>
-              {i18nTexts.clusterTab.tabName}
-              {checkupData && checkupData.cluster.length > 0 && (
-                <>
-                  {' '}
-                  <EuiNotificationBadge>{checkupData.cluster.length}</EuiNotificationBadge>
-                </>
-              )}
-            </span>
-          ),
-          content: (
-            <DeprecationTabContent
-              key="cluster"
-              deprecations={checkupData ? checkupData.cluster : undefined}
-              checkupLabel={i18nTexts.clusterTab.deprecationType}
-              {...commonTabProps}
-            />
-          ),
-        },
-        {
-          id: 'indices',
-          'data-test-subj': 'upgradeAssistantIndicesTab',
-          name: (
-            <span>
-              {i18nTexts.indicesTab.tabName}
-              {checkupData && checkupData.indices.length > 0 && (
-                <>
-                  {' '}
-                  <EuiNotificationBadge>{checkupData.indices.length}</EuiNotificationBadge>
-                </>
-              )}
-            </span>
-          ),
-          content: (
-            <DeprecationTabContent
-              key="indices"
-              deprecations={checkupData ? checkupData.indices : undefined}
-              checkupLabel={i18nTexts.indicesTab.deprecationType}
-              {...commonTabProps}
-            />
-          ),
-        },
-      ];
-    }, [checkupData, error, history, isLoading, resendRequest]);
+  //     sendTelemetryData();
+  //   }
+  // }, [api, tabName, isLoading]);
 
-    useEffect(() => {
-      breadcrumbs.setBreadcrumbs('esDeprecations');
-    }, [breadcrumbs]);
+  if (error) {
+    // TODO handle error
+    return null;
+  }
 
-    useEffect(() => {
-      if (isLoading === false) {
-        setTelemetryState(TelemetryState.Running);
-
-        async function sendTelemetryData() {
-          await api.sendTelemetryData({
-            [tabName]: true,
-          });
-          setTelemetryState(TelemetryState.Complete);
-        }
-
-        sendTelemetryData();
-      }
-    }, [api, tabName, isLoading]);
-
+  if (isLoading) {
     return (
-      <>
-        <EuiPageHeader
-          pageTitle={i18nTexts.pageTitle}
-          description={i18nTexts.pageDescription}
-          rightSideItems={[
-            <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
-              {i18nTexts.docLinkText}
-            </EuiButtonEmpty>,
-          ]}
-        >
-          <EuiToolTip position="bottom" content={i18nTexts.backupDataButton.tooltipText}>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
+      </EuiPageContent>
+    );
+  }
+
+  return (
+    <div data-test-subj="esDeprecationsContent">
+      <EuiPageHeader
+        pageTitle={i18nTexts.pageTitle}
+        description={i18nTexts.pageDescription}
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={docLinks.links.upgradeAssistant}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            {i18nTexts.docLinkText}
+          </EuiButtonEmpty>,
+        ]}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="bottom" content={i18nTexts.backupDataButton.tooltipText}>
+              <EuiButton
+                fill
+                href={getUrlForApp('management', {
+                  path: 'data/snapshot_restore',
+                })}
+                iconType="popout"
+                iconSide="right"
+                target="_blank"
+              >
+                {i18nTexts.backupDataButton.label}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton
-              fill
-              href={getUrlForApp('management', {
-                path: 'data/snapshot_restore',
-              })}
+              href={docLinks.links.deprecationInfo}
               iconType="popout"
               iconSide="right"
               target="_blank"
             >
-              {i18nTexts.backupDataButton.label}
+              {i18nTexts.deprecationIssuesButton.label}
             </EuiButton>
-          </EuiToolTip>
-        </EuiPageHeader>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageHeader>
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
 
-        <EuiTabbedContent
-          data-test-subj={
-            telemetryState === TelemetryState.Running
-              ? 'upgradeAssistantTelemetryRunning'
-              : undefined
-          }
-          tabs={tabs}
-          onTabClick={onTabClick}
-          selectedTab={tabs.find((tab) => tab.id === tabName)}
-        />
-      </>
-    );
-  }
-);
+      <EsDeprecationsTable deprecations={esDeprecations?.deprecations} reload={resendRequest} />
+    </div>
+  );
+};

@@ -44,5 +44,3 @@ export enum TelemetryState {
   Running,
   Complete,
 }
-
-export type EsTabs = 'cluster' | 'indices';

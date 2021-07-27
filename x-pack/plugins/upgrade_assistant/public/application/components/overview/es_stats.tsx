@@ -57,13 +57,11 @@ const i18nTexts = {
         criticalDeprecations,
       },
     }),
-  getTotalDeprecationsTooltip: (clusterCount: number, indexCount: number) =>
+  getTotalDeprecationsTooltip: (totalDeprecations: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip', {
-      defaultMessage:
-        'This cluster is using {clusterCount} deprecated cluster settings and {indexCount} deprecated index settings',
+      defaultMessage: 'This cluster has {totalDeprecations} critical deprecations',
       values: {
-        clusterCount,
-        indexCount,
+        totalDeprecations,
       },
     }),
 };
@@ -77,9 +75,9 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
 
   const { data: esDeprecations, isLoading, error } = api.useLoadUpgradeStatus();
 
-  const allDeprecations = esDeprecations?.cluster?.concat(esDeprecations?.indices) ?? [];
+  const allDeprecations = esDeprecations?.deprecations ?? [];
   const criticalDeprecations = allDeprecations.filter(
-    (deprecation) => deprecation.level === 'critical'
+    (deprecation) => deprecation.isCritical === true
   );
 
   return (
@@ -92,7 +90,7 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            {...reactRouterNavigate(history, '/es_deprecations/cluster')}
+            {...reactRouterNavigate(history, '/es_deprecations')}
             data-test-subj="esDeprecationsLink"
           >
             {i18nTexts.viewDeprecationsLink}
@@ -111,10 +109,7 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
               <>
                 <span>{i18nTexts.totalDeprecationsTitle}</span>{' '}
                 <EuiIconTip
-                  content={i18nTexts.getTotalDeprecationsTooltip(
-                    esDeprecations?.cluster.length ?? 0,
-                    esDeprecations?.indices.length ?? 0
-                  )}
+                  content={i18nTexts.getTotalDeprecationsTooltip(allDeprecations.length)}
                   position="right"
                   iconProps={{
                     tabIndex: -1,
@@ -129,10 +124,7 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
                 <p>
                   {isLoading
                     ? i18nTexts.loadingText
-                    : i18nTexts.getTotalDeprecationsTooltip(
-                        esDeprecations?.cluster.length ?? 0,
-                        esDeprecations?.indices.length ?? 0
-                      )}
+                    : i18nTexts.getTotalDeprecationsTooltip(allDeprecations.length)}
                 </p>
               </EuiScreenReaderOnly>
             )}

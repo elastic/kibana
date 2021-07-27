@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  MigrationDeprecationInfoDeprecation,
+  MigrationDeprecationInfoResponse,
+} from '@elastic/elasticsearch/api/types';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export enum ReindexStep {
@@ -183,13 +187,6 @@ export interface DeprecationInfo {
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
-export interface DeprecationAPIResponse {
-  cluster_settings: DeprecationInfo[];
-  ml_settings: DeprecationInfo[];
-  node_settings: DeprecationInfo[];
-  index_settings: IndexSettingsDeprecationInfo;
-}
-
 export interface ReindexAction {
   type: 'reindex';
   /**
@@ -212,15 +209,17 @@ export interface IndexSettingAction {
   type: 'indexSetting';
   deprecatedSettings: string[];
 }
-export interface EnrichedDeprecationInfo extends DeprecationInfo {
+export interface EnrichedDeprecationInfo
+  extends Omit<MigrationDeprecationInfoDeprecation, 'level'> {
+  type: keyof MigrationDeprecationInfoResponse;
+  isCritical: boolean;
   index?: string;
   correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
 }
 
 export interface UpgradeAssistantStatus {
   readyForUpgrade: boolean;
-  cluster: EnrichedDeprecationInfo[];
-  indices: EnrichedDeprecationInfo[];
+  deprecations: EnrichedDeprecationInfo[];
 }
 
 export interface ResolveIndexResponseFromES {

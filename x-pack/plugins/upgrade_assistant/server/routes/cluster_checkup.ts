@@ -11,6 +11,7 @@ import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
+import { handleEsError } from '../shared_imports';
 
 export function registerClusterCheckupRoutes({ router, licensing, log }: RouteDependencies) {
   router.get(
@@ -40,7 +41,7 @@ export function registerClusterCheckupRoutes({ router, licensing, log }: RouteDe
             log,
             licensing
           );
-          const indexNames = status.indices
+          const indexNames = status.deprecations
             .filter(({ index }) => typeof index !== 'undefined')
             .map(({ index }) => index as string);
 
@@ -50,11 +51,7 @@ export function registerClusterCheckupRoutes({ router, licensing, log }: RouteDe
             body: status,
           });
         } catch (e) {
-          if (e.statusCode === 403) {
-            return response.forbidden(e.message);
-          }
-
-          throw e;
+          return handleEsError({ error: e, response });
         }
       }
     )

@@ -30,7 +30,7 @@ const App: React.FunctionComponent = () => {
   return (
     <Switch>
       <Route exact path="/overview" component={DeprecationsOverview} />
-      <Route exact path="/es_deprecations/:tabName" component={EsDeprecationsContent} />
+      <Route exact path="/es_deprecations" component={EsDeprecationsContent} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
       <Redirect from="/" to="/overview" />
     </Switch>
