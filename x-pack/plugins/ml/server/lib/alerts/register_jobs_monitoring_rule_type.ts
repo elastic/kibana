@@ -29,7 +29,7 @@ export interface MmlTestResponse {
   job_id: string;
   memory_status: ModelSizeStats['memory_status'];
   log_time: ModelSizeStats['log_time'];
-  failed_category_count: ModelSizeStats['failed_category_count'];
+  model_bytes: ModelSizeStats['model_bytes'];
   model_bytes_memory_limit: ModelSizeStats['model_bytes_memory_limit'];
   peak_model_bytes: ModelSizeStats['peak_model_bytes'];
   model_bytes_exceeded: ModelSizeStats['model_bytes_exceeded'];

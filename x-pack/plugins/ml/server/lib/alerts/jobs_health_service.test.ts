@@ -55,7 +55,6 @@ describe('JobsHealthService', () => {
               model_size_stats: {
                 memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
                 log_time: 1626935914540,
-                failed_category_count: 0,
               },
             };
           }) as MlJobStats,
@@ -198,7 +197,6 @@ describe('JobsHealthService', () => {
               job_id: 'test_job_01',
               log_time: 1626935914540,
               memory_status: 'hard_limit',
-              failed_category_count: 0,
             },
           ],
           message: '1 job reached the hard model memory limit.',

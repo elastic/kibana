@@ -147,7 +147,7 @@ export function jobsHealthServiceProvider(
             job_id: jobId,
             memory_status: modelSizeStats.memory_status,
             log_time: modelSizeStats.log_time,
-            failed_category_count: modelSizeStats.failed_category_count,
+            model_bytes: modelSizeStats.model_bytes,
             model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit,
             peak_model_bytes: modelSizeStats.peak_model_bytes,
             model_bytes_exceeded: modelSizeStats.model_bytes_exceeded,
