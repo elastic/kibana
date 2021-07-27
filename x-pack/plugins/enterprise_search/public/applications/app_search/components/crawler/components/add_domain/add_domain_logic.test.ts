@@ -21,12 +21,18 @@ jest.mock('../../crawler_overview_logic', () => ({
   },
 }));
 
+jest.mock('./utils', () => ({
+  ...(jest.requireActual('./utils') as object),
+  getDomainWithProtocol: jest.fn().mockImplementation((domain) => domain),
+}));
+
 import { nextTick } from '@kbn/test/jest';
 
 import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
 import { CrawlerDomain } from '../../types';
 
 import { AddDomainLogic, AddDomainLogicValues } from './add_domain_logic';
+import { getDomainWithProtocol } from './utils';
 
 const DEFAULT_VALUES: AddDomainLogicValues = {
   addDomainFormInputValue: 'https://',
@@ -272,16 +278,18 @@ describe('AddDomainLogic', () => {
     });
 
     describe('validateDomain', () => {
-      it('extracts the domain and entrypoint and passes them to the callback ', () => {
+      it('extracts the domain and entrypoint and passes them to the callback ', async () => {
         mount({ addDomainFormInputValue: 'https://swiftype.com/site-search' });
         jest.spyOn(AddDomainLogic.actions, 'onValidateDomain');
 
         AddDomainLogic.actions.validateDomain();
+        await nextTick();
 
         expect(AddDomainLogic.actions.onValidateDomain).toHaveBeenCalledWith(
           'https://swiftype.com',
           '/site-search'
         );
+        expect(getDomainWithProtocol).toHaveBeenCalledWith('https://swiftype.com');
       });
     });
   });

@@ -28,6 +28,7 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentPolicyRefresh,
+  useBreadcrumbs,
 } from '../../../../../hooks';
 import {
   AgentPolicyForm,
@@ -43,6 +44,7 @@ const FormWrapper = styled.div`
 
 export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
+    useBreadcrumbs('policy_details', { policyName: originalAgentPolicy.name });
     const { notifications } = useStartServices();
     const {
       agents: { enabled: isFleetEnabled },
