@@ -301,6 +301,26 @@ export type AlertEvent = Partial<{
     feature: ECSField<string>;
     self_injection: ECSField<boolean>;
   }>;
+  destination: Partial<{
+    address: ECSField<string>;
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  source: Partial<{
+    address: ECSField<string>;
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
+    direction: ECSField<string>;
+  }>;
+  registry: Partial<{
+    path: ECSField<string>;
+    value: ECSField<string>;
+    strings: ECSField<string>;
+  }>;
   Target: Partial<{
     process: Partial<{
       thread: Partial<{
@@ -358,6 +378,9 @@ export type AlertEvent = Partial<{
         identifier: ECSField<string>;
       }>;
     }>;
+  }>;
+  rule: Partial<{
+    id: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
