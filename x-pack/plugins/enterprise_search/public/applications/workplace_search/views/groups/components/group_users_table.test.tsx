@@ -23,17 +23,10 @@ const group = groups[0];
 
 describe('GroupUsersTable', () => {
   it('renders', () => {
-    setMockValues({ isFederatedAuth: true, group });
+    setMockValues({ group });
     const wrapper = shallow(<GroupUsersTable />);
 
     expect(wrapper.find(EuiTable)).toHaveLength(1);
-    expect(wrapper.find(TableHeader).prop('headerItems')).toHaveLength(1);
-  });
-
-  it('adds header item for non-federated auth', () => {
-    setMockValues({ isFederatedAuth: false, group });
-    const wrapper = shallow(<GroupUsersTable />);
-
     expect(wrapper.find(TableHeader).prop('headerItems')).toHaveLength(2);
   });
 
@@ -48,7 +41,7 @@ describe('GroupUsersTable', () => {
       });
     });
 
-    setMockValues({ isFederatedAuth: true, group: { users } });
+    setMockValues({ group: { users } });
     const wrapper = shallow(<GroupUsersTable />);
     const pagination = wrapper.find(EuiTablePagination);
 

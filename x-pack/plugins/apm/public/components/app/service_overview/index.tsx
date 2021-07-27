@@ -7,8 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
-import { isRumAgentName } from '../../../../common/agent_name';
+import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -28,28 +27,22 @@ import { ServiceOverviewTransactionsTable } from './service_overview_transaction
  */
 export const chartHeight = 288;
 
-interface ServiceOverviewProps {
-  serviceName: string;
-}
-
-export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
-  const { agentName } = useApmServiceContext();
-
-  useTrackPageview({ app: 'apm', path: 'service_overview' });
-  useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
+export function ServiceOverview() {
+  const { agentName, serviceName } = useApmServiceContext();
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly
   const { isMedium } = useBreakPoints();
   const rowDirection = isMedium ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
+  const isIosAgent = isIosAgentName(agentName);
 
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiPanel>
+            <EuiPanel hasBorder={true}>
               <LatencyChart height={200} />
             </EuiPanel>
           </EuiFlexItem>
@@ -63,8 +56,8 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
                 <ServiceOverviewThroughputChart height={chartHeight} />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
-                <EuiPanel>
-                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
+                <EuiPanel hasBorder={true}>
+                  <ServiceOverviewTransactionsTable />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -84,7 +77,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={7}>
-                <EuiPanel>
+                <EuiPanel hasBorder={true}>
                   <ServiceOverviewErrorsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
@@ -101,7 +94,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               </EuiFlexItem>
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
-                  <EuiPanel>
+                  <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
                       serviceName={serviceName}
                     />
@@ -110,7 +103,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!isRumAgent && (
+          {!isRumAgent && !isIosAgent && (
             <EuiFlexItem>
               <EuiFlexGroup
                 direction="column"

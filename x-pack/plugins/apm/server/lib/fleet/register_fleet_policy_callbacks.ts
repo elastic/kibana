@@ -6,12 +6,12 @@
  */
 
 import { APMPlugin, APMRouteHandlerResources } from '../..';
-import { listConfigurations } from '../settings/agent_configuration/list_configurations';
-import { setupRequest } from '../helpers/setup_request';
-import { APMPluginStartDependencies } from '../../types';
 import { ExternalCallback } from '../../../../fleet/server';
-import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
+import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
+import { APMPluginStartDependencies } from '../../types';
+import { setupRequest } from '../helpers/setup_request';
+import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
 
 export async function registerFleetPolicyCallbacks({
   plugins,
@@ -31,7 +31,7 @@ export async function registerFleetPolicyCallbacks({
 
   // Registers a callback invoked when a policy is created to populate the APM
   // integration policy with pre-existing agent configurations
-  registerAgentConfigExternalCallback({
+  registerPackagePolicyExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyCreate',
     plugins,
@@ -42,7 +42,7 @@ export async function registerFleetPolicyCallbacks({
 
   // Registers a callback invoked when a policy is updated to populate the APM
   // integration policy with existing agent configurations
-  registerAgentConfigExternalCallback({
+  registerPackagePolicyExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyUpdate',
     plugins,
@@ -53,11 +53,11 @@ export async function registerFleetPolicyCallbacks({
 }
 
 type ExternalCallbackParams = Parameters<ExternalCallback[1]>;
-type PackagePolicy = ExternalCallbackParams[0];
+export type PackagePolicy = ExternalCallbackParams[0];
 type Context = ExternalCallbackParams[1];
 type Request = ExternalCallbackParams[2];
 
-function registerAgentConfigExternalCallback({
+function registerPackagePolicyExternalCallback({
   fleetPluginStart,
   callbackName,
   plugins,
@@ -90,17 +90,17 @@ function registerAgentConfigExternalCallback({
       logger,
       ruleDataClient,
     });
-    const agentConfigurations = await listConfigurations({ setup });
-    return getPackagePolicyWithAgentConfigurations(
+    return await mergePackagePolicyWithApm({
+      setup,
+      fleetPluginStart,
       packagePolicy,
-      agentConfigurations
-    );
+    });
   };
 
   fleetPluginStart.registerExternalCallback(callbackName, callbackFn);
 }
 
-const APM_SERVER = 'apm-server';
+export const APM_SERVER = 'apm-server';
 
 // Immutable function applies the given package policy with a set of agent configurations
 export function getPackagePolicyWithAgentConfigurations(

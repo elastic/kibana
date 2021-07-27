@@ -10,13 +10,16 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../../../../reducers/store';
 import {
-  fitToLayerExtent,
-  toggleLayerVisible,
   cloneLayer,
+  fitToLayerExtent,
   removeLayer,
+  setDrawMode,
+  toggleLayerVisible,
+  updateEditLayer,
 } from '../../../../../../actions';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
+import { DRAW_MODE } from '../../../../../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -37,6 +40,14 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     toggleVisible: (layerId: string) => {
       dispatch(toggleLayerVisible(layerId));
+    },
+    enableShapeEditing: (layerId: string) => {
+      dispatch(updateEditLayer(layerId));
+      dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
+    },
+    enablePointEditing: (layerId: string) => {
+      dispatch(updateEditLayer(layerId));
+      dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS));
     },
   };
 }

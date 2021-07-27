@@ -9,68 +9,60 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { DataViewLabels } from '../configurations/constants';
 import { useSeriesStorage } from '../hooks/use_series_storage';
+import { LastUpdated } from './last_updated';
+import { combineTimeRanges } from '../lens_embeddable';
+import { ExpViewActionMenu } from '../components/action_menu';
 
 interface Props {
-  seriesId: string;
+  seriesId?: number;
+  lastUpdated?: number;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
-export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
-  const {
-    services: { lens },
-  } = useKibana<ObservabilityPublicPluginsStart>();
+export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }: Props) {
+  const { getSeries, allSeries, setLastRefresh, reportType } = useSeriesStorage();
 
-  const { getSeries } = useSeriesStorage();
+  const series = seriesId ? getSeries(seriesId) : undefined;
 
-  const series = getSeries(seriesId);
+  const timeRange = combineTimeRanges(reportType, allSeries, series);
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>
-        <EuiText>
-          <h2>
-            {DataViewLabels[series.reportType] ??
-              i18n.translate('xpack.observability.expView.heading.label', {
-                defaultMessage: 'Analyze data',
-              })}{' '}
-            <EuiBetaBadge
-              style={{
-                verticalAlign: `middle`,
-              }}
-              label={i18n.translate('xpack.observability.expView.heading.experimental', {
-                defaultMessage: 'Experimental',
-              })}
-            />
-          </h2>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          iconType="lensApp"
-          fullWidth={false}
-          isDisabled={!lens.canUseEditor() || lensAttributes === null}
-          onClick={() => {
-            if (lensAttributes) {
-              lens.navigateToPrefilledEditor(
-                {
-                  id: '',
-                  timeRange: series.time,
-                  attributes: lensAttributes,
-                },
-                true
-              );
-            }
-          }}
-        >
-          {i18n.translate('xpack.observability.expView.heading.openInLens', {
-            defaultMessage: 'Open in Lens',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <ExpViewActionMenu timeRange={timeRange} lensAttributes={lensAttributes} />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem>
+          <EuiText>
+            <h2>
+              {DataViewLabels[reportType] ??
+                i18n.translate('xpack.observability.expView.heading.label', {
+                  defaultMessage: 'Analyze data',
+                })}{' '}
+              <EuiBetaBadge
+                style={{
+                  verticalAlign: `middle`,
+                }}
+                label={i18n.translate('xpack.observability.expView.heading.experimental', {
+                  defaultMessage: 'Experimental',
+                })}
+              />
+            </h2>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LastUpdated lastUpdated={lastUpdated} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
+            {REFRESH_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
+
+const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
+  defaultMessage: 'Refresh',
+});

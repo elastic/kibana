@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { SearchResponse } from 'elasticsearch';
 import { isEmpty } from 'lodash';
 
@@ -20,8 +19,7 @@ import {
   useFormatUrl,
 } from '../../../common/components/link_to';
 import { Ecs } from '../../../../common/ecs';
-import { Case } from '../../../../../cases/common';
-import { TimelineNonEcsData } from '../../../../common/search_strategy';
+import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
@@ -36,6 +34,8 @@ import { SEND_ALERT_TO_TIMELINE } from './translations';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
+import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { getEndpointDetailsPath } from '../../../management/common/routing';
 
 interface Props {
   caseId: string;
@@ -70,7 +70,6 @@ const TimelineDetailsPanel = () => {
 };
 
 const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
-  const EMPTY_ARRAY: TimelineNonEcsData[] = [];
   const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
     if (isEmpty(fetchAlertIds)) {
       return [];
@@ -104,7 +103,7 @@ const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
       key="investigate-in-timeline"
       ecsRowData={null}
       fetchEcsAlertsData={fetchEcsAlertsData}
-      nonEcsRowData={EMPTY_ARRAY}
+      nonEcsRowData={[]}
     />
   );
 };
@@ -127,51 +126,24 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     cases: casesUi,
     application: { navigateToApp },
   } = useKibana().services;
-  const history = useHistory();
   const dispatch = useDispatch();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
-    SecurityPageName.detections
+    SecurityPageName.rules
   );
 
   const allCasesLink = getCaseUrl(search);
   const formattedAllCasesLink = formatUrl(allCasesLink);
-  const backToAllCasesOnClick = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      history.push(allCasesLink);
-    },
-    [allCasesLink, history]
-  );
+  const configureCasesHref = formatUrl(getConfigureCasesUrl());
+
   const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
-  const getCaseDetailHrefWithCommentId = (commentId: string) => {
-    return formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
+  const getCaseDetailHrefWithCommentId = (commentId: string) =>
+    formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
       absolute: true,
     });
-  };
-
-  const configureCasesHref = formatUrl(getConfigureCasesUrl());
-  const onConfigureCasesNavClick = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      history.push(getConfigureCasesUrl(search));
-    },
-    [history, search]
-  );
-
-  const onDetectionsRuleDetailsClick = useCallback(
-    (ruleId: string | null | undefined) => {
-      navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
-        path: getRuleDetailsUrl(ruleId ?? ''),
-      });
-    },
-    [navigateToApp]
-  );
 
   const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => {
-      return detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch));
-    },
+    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 
@@ -191,6 +163,14 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     [dispatch]
   );
 
+  const endpointDetailsHref = (endpointId: string) =>
+    formatUrl(
+      getEndpointDetailsPath({
+        name: 'endpointActivityLog',
+        selected_endpoint: endpointId,
+      })
+    );
+
   const onComponentInitialized = useCallback(() => {
     dispatch(
       timelineActions.createTimeline({
@@ -202,17 +182,33 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       })
     );
   }, [dispatch]);
+
+  const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+
   return (
-    <>
+    <CaseDetailsRefreshContext.Provider value={refreshRef}>
       {casesUi.getCaseView({
+        refreshRef,
         allCasesNavigation: {
           href: formattedAllCasesLink,
-          onClick: backToAllCasesOnClick,
+          onClick: async (e) => {
+            if (e) {
+              e.preventDefault();
+            }
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
+              path: allCasesLink,
+            });
+          },
         },
         caseDetailsNavigation: {
           href: caseDetailsLink,
-          onClick: () => {
-            navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          onClick: async (e) => {
+            if (e) {
+              e.preventDefault();
+            }
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
               path: getCaseDetailsUrl({ id: caseId }),
             });
           },
@@ -220,14 +216,44 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         caseId,
         configureCasesNavigation: {
           href: configureCasesHref,
-          onClick: onConfigureCasesNavClick,
+          onClick: async (e) => {
+            if (e) {
+              e.preventDefault();
+            }
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
+              path: getConfigureCasesUrl(search),
+            });
+          },
         },
         getCaseDetailHrefWithCommentId,
         onCaseDataSuccess,
         onComponentInitialized,
+        actionsNavigation: {
+          href: endpointDetailsHref,
+          onClick: (endpointId: string, e) => {
+            if (e) {
+              e.preventDefault();
+            }
+            return navigateToApp(APP_ID, {
+              path: getEndpointDetailsPath({
+                name: 'endpointActivityLog',
+                selected_endpoint: endpointId,
+              }),
+            });
+          },
+        },
         ruleDetailsNavigation: {
           href: getDetectionsRuleDetailsHref,
-          onClick: onDetectionsRuleDetailsClick,
+          onClick: async (ruleId: string | null | undefined, e) => {
+            if (e) {
+              e.preventDefault();
+            }
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.rules,
+              path: getRuleDetailsUrl(ruleId ?? ''),
+            });
+          },
         },
         showAlertDetails,
         subCaseId,
@@ -249,7 +275,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         userCanCrud,
       })}
       <SpyRoute state={spyState} pageName={SecurityPageName.case} />
-    </>
+    </CaseDetailsRefreshContext.Provider>
   );
 });
 

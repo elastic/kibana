@@ -11,9 +11,9 @@ A visible type is a type that doesn't explicitly define `hidden=true` during reg
 <b>Signature:</b>
 
 ```typescript
-getVisibleTypes(): SavedObjectsType[];
+getVisibleTypes(): SavedObjectsType<any>[];
 ```
 <b>Returns:</b>
 
-`SavedObjectsType[]`
+`SavedObjectsType<any>[]`
 

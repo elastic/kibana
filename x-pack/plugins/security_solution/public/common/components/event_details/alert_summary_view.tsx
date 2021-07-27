@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiSpacer,
-} from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
+import { EuiBasicTableColumn, EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
+import { get, getOr, find, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   ALERTS_HEADERS_RISK_SCORE,
@@ -27,24 +19,39 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
+  SIGNAL_STATUS,
+  TIMESTAMP,
 } from '../../../detections/components/alerts_table/translations';
 import {
+  AGENT_STATUS_FIELD_NAME,
   IP_FIELD_TYPE,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
-import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
+import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
+import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
+import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { getEmptyValue } from '../empty_value';
+import { ActionCell } from './table/action_cell';
+import { FieldValueCell } from './table/field_value_cell';
+import { TimelineEventsDetailsItem } from '../../../../common';
+import { EventFieldsData } from './types';
 
-const StyledEuiDescriptionList = styled(EuiDescriptionList)`
-  padding: 24px 4px 4px;
+export const Indent = styled.div`
+  padding: 0 8px;
+  word-break: break-word;
+`;
+
+const StyledEmptyComponent = styled.div`
+  padding: ${(props) => `${props.theme.eui.paddingSizes.xs} 0`};
 `;
 
 const fields = [
-  { id: 'signal.status' },
-  { id: '@timestamp' },
+  { id: 'signal.status', label: SIGNAL_STATUS },
+  { id: '@timestamp', label: TIMESTAMP },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,
     linkField: 'signal.rule.id',
@@ -53,6 +60,7 @@ const fields = [
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
   { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
+  { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
@@ -61,23 +69,58 @@ const fields = [
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
+const processFields = [
+  ...fields,
+  { id: 'process.name' },
+  { id: 'process.parent.name' },
+  { id: 'process.args' },
+];
+
+const networkFields = [
+  ...fields,
+  { id: 'destination.address' },
+  { id: 'destination.port' },
+  { id: 'process.name' },
+];
+
 const getDescription = ({
-  contextId,
+  data,
   eventId,
-  fieldName,
-  value,
-  fieldType = '',
+  fieldFromBrowserField,
   linkValue,
-}: AlertSummaryRow['description']) => (
-  <FormattedFieldValue
-    contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
-    eventId={eventId}
-    fieldName={fieldName}
-    fieldType={fieldType}
-    value={value}
-    linkValue={linkValue}
-  />
-);
+  timelineId,
+  values,
+}: AlertSummaryRow['description']) => {
+  if (isEmpty(values)) {
+    return <StyledEmptyComponent>{getEmptyValue()}</StyledEmptyComponent>;
+  }
+
+  const eventFieldsData = {
+    ...data,
+    ...(fieldFromBrowserField ? fieldFromBrowserField : {}),
+  } as EventFieldsData;
+  return (
+    <>
+      <FieldValueCell
+        contextId={timelineId}
+        data={eventFieldsData}
+        eventId={eventId}
+        fieldFromBrowserField={fieldFromBrowserField}
+        linkValue={linkValue}
+        values={values}
+      />
+      <ActionCell
+        contextId={timelineId}
+        data={eventFieldsData}
+        eventId={eventId}
+        fieldFromBrowserField={fieldFromBrowserField}
+        linkValue={linkValue}
+        timelineId={timelineId}
+        values={values}
+      />
+    </>
+  );
+};
 
 const getSummaryRows = ({
   data,
@@ -90,26 +133,60 @@ const getSummaryRows = ({
   timelineId: string;
   eventId: string;
 }) => {
+  const categoryField = find({ category: 'event', field: 'event.category' }, data) as
+    | TimelineEventsDetailsItem
+    | undefined;
+  const eventCategory = Array.isArray(categoryField?.originalValue)
+    ? categoryField?.originalValue[0]
+    : categoryField?.originalValue;
+
+  const tableFields =
+    eventCategory === 'network'
+      ? networkFields
+      : eventCategory === 'process'
+      ? processFields
+      : fields;
+
   return data != null
-    ? fields.reduce<SummaryRow[]>((acc, item) => {
+    ? tableFields.reduce<SummaryRow[]>((acc, item) => {
+        const initialDescription = {
+          contextId: timelineId,
+          eventId,
+          value: null,
+          fieldType: 'string',
+          linkValue: undefined,
+          timelineId,
+        };
         const field = data.find((d) => d.field === item.id);
         if (!field) {
-          return acc;
+          return [
+            ...acc,
+            {
+              title: item.label ?? item.id,
+              description: initialDescription,
+            },
+          ];
         }
+
         const linkValueField =
           item.linkField != null && data.find((d) => d.field === item.linkField);
         const linkValue = getOr(null, 'originalValue.0', linkValueField);
         const value = getOr(null, 'originalValue.0', field);
-        const category = field.category;
-        const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
+        const category = field.category ?? '';
+        const fieldName = field.field ?? '';
+
+        const browserField = get([category, 'fields', fieldName], browserFields);
         const description = {
-          contextId: timelineId,
-          eventId,
-          fieldName: item.id,
-          value,
-          fieldType: item.fieldType ?? fieldType,
+          ...initialDescription,
+          data: { ...field, ...(item.overrideField ? { field: item.overrideField } : {}) },
+          values: field.values,
           linkValue: linkValue ?? undefined,
+          fieldFromBrowserField: browserField,
         };
+
+        if (item.id === 'agent.id' && !endpointAlertCheck({ data })) {
+          return acc;
+        }
 
         if (item.id === 'signal.threshold_result.terms') {
           try {
@@ -121,14 +198,14 @@ const getSummaryRows = ({
                   title: `${entry.field} [threshold]`,
                   description: {
                     ...description,
-                    value: entry.value,
+                    values: [entry.value],
                   },
                 };
               }
             );
             return [...acc, ...thresholdTerms];
           } catch (err) {
-            return acc;
+            return [...acc];
           }
         }
 
@@ -141,7 +218,7 @@ const getSummaryRows = ({
                 title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
                 description: {
                   ...description,
-                  value: `count(${parsedValue.field}) == ${parsedValue.value}`,
+                  values: [`count(${parsedValue.field}) == ${parsedValue.value}`],
                 },
               },
             ];
@@ -183,19 +260,27 @@ const AlertSummaryViewComponent: React.FC<{
       ? item?.originalValue[0]
       : item?.originalValue ?? null;
   }, [data]);
-  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
   return (
     <>
       <EuiSpacer size="l" />
       <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
       {maybeRule?.note && (
-        <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
-          <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <LineClamp content={maybeRule?.note} />
-          </EuiDescriptionListDescription>
-        </StyledEuiDescriptionList>
+        <>
+          <EuiHorizontalRule />
+          <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
+            <h5>{i18n.INVESTIGATION_GUIDE}</h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <Indent>
+            <EuiText size="xs">
+              <LineClamp lineClampHeight={4.5}>
+                <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+              </LineClamp>
+            </EuiText>
+          </Indent>
+        </>
       )}
     </>
   );

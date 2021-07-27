@@ -40,7 +40,7 @@ export const NAV = {
     defaultMessage: 'Content',
   }),
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
-    defaultMessage: 'Users & roles',
+    defaultMessage: 'Users and roles',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
@@ -568,23 +568,23 @@ export const REDIRECT_INSECURE_ERROR_TEXT = i18n.translate(
   }
 );
 
-export const LICENSE_MODAL_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.licenseModal.title',
+export const NON_PLATINUM_OAUTH_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthTitle',
   {
     defaultMessage: 'Configuring OAuth for Custom Search Applications',
   }
 );
 
-export const LICENSE_MODAL_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.licenseModal.description',
+export const NON_PLATINUM_OAUTH_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthDescription',
   {
     defaultMessage:
       'Configure an OAuth application for secure use of the Workplace Search Search API. Upgrade to a Platinum license to enable the Search API and create your OAuth application.',
   }
 );
 
-export const LICENSE_MODAL_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.licenseModal.link',
+export const NON_PLATINUM_OAUTH_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthLinkLabel',
   {
     defaultMessage: 'Explore Platinum features',
   }
@@ -659,6 +659,49 @@ export const PRIVATE_SOURCES = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.privateSources.text',
   {
     defaultMessage: 'Private Sources',
+  }
+);
+
+export const PRIVATE_CAN_CREATE_PAGE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.title',
+  {
+    defaultMessage: 'Manage private content sources',
+  }
+);
+
+export const PRIVATE_VIEW_ONLY_PAGE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.title',
+  {
+    defaultMessage: 'Review Group Sources',
+  }
+);
+
+export const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.description',
+  {
+    defaultMessage: 'Review the status of all sources shared with your Group.',
+  }
+);
+
+export const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.description',
+  {
+    defaultMessage:
+      'Review the status of all connected private sources, and manage private sources for your account.',
+  }
+);
+
+export const ACCOUNT_SETTINGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.accountSettings.title',
+  {
+    defaultMessage: 'Account Settings',
+  }
+);
+
+export const ACCOUNT_SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.accountSettings.description',
+  {
+    defaultMessage: 'Manage access, passwords, and other account settings.',
   }
 );
 

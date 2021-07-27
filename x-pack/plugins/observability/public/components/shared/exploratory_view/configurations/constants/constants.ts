@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import { ReportViewTypeId } from '../../types';
-import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
+import { ReportViewType } from '../../types';
+import {
+  CLS_FIELD,
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
+  TBT_FIELD,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+} from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
   BROWSER_FAMILY_LABEL,
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
   CORE_WEB_VITALS_LABEL,
+  DEVICE_DISTRIBUTION_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
   FCP_LABEL,
   FID_LABEL,
   HOST_NAME_LABEL,
-  KIP_OVER_TIME_LABEL,
+  KPI_OVER_TIME_LABEL,
   KPI_LABEL,
   LCP_LABEL,
   LOCATION_LABEL,
@@ -31,15 +39,18 @@ import {
   OS_LABEL,
   PERF_DIST_LABEL,
   PORT_LABEL,
+  REQUEST_METHOD,
   SERVICE_NAME_LABEL,
   TAGS_LABEL,
   TBT_LABEL,
   URL_LABEL,
+  BACKEND_TIME_LABEL,
 } from './labels';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
 export const RECORDS_FIELD = 'Records';
+export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': BROWSER_FAMILY_LABEL,
@@ -56,6 +67,7 @@ export const FieldLabels: Record<string, string> = {
   [TBT_FIELD]: TBT_LABEL,
   [FID_FIELD]: FID_LABEL,
   [CLS_FIELD]: CLS_LABEL,
+  [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
@@ -72,14 +84,32 @@ export const FieldLabels: Record<string, string> = {
 
   'performance.metric': METRIC_LABEL,
   'Business.KPI': KPI_LABEL,
+  'http.request.method': REQUEST_METHOD,
 };
 
-export const DataViewLabels: Record<ReportViewTypeId, string> = {
-  dist: PERF_DIST_LABEL,
-  kpi: KIP_OVER_TIME_LABEL,
-  cwv: CORE_WEB_VITALS_LABEL,
+export const DataViewLabels: Record<ReportViewType, string> = {
+  'data-distribution': PERF_DIST_LABEL,
+  'kpi-over-time': KPI_OVER_TIME_LABEL,
+  'core-web-vitals': CORE_WEB_VITALS_LABEL,
+  'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
 };
+
+export enum ReportTypes {
+  KPI = 'kpi-over-time',
+  DISTRIBUTION = 'data-distribution',
+  CORE_WEB_VITAL = 'core-web-vitals',
+  DEVICE_DISTRIBUTION = 'device-data-distribution',
+}
+
+export enum DataTypes {
+  SYNTHETICS = 'synthetics',
+  UX = 'ux',
+  MOBILE = 'mobile',
+}
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';
+export const TERMS_COLUMN = 'TERMS_COLUMN';
 export const OPERATION_COLUMN = 'operation';
+
+export const REPORT_METRIC_FIELD = 'REPORT_METRIC_FIELD';

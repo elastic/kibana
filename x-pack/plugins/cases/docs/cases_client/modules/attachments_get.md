@@ -7,5 +7,6 @@
 ### Interfaces
 
 - [FindArgs](../interfaces/attachments_get.findargs.md)
+- [GetAllAlertsAttachToCase](../interfaces/attachments_get.getallalertsattachtocase.md)
 - [GetAllArgs](../interfaces/attachments_get.getallargs.md)
 - [GetArgs](../interfaces/attachments_get.getargs.md)

@@ -7,9 +7,8 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-import { buildEsQuery } from '../../../../../src/plugins/data/common/es_query/es_query';
-import type { DslQuery } from '../../../../../src/plugins/data/common/es_query/kuery';
-import type { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
+import { buildEsQuery, DslQuery } from '@kbn/es-query';
 
 import { isPopulatedObject } from '../util/object_utils';
 

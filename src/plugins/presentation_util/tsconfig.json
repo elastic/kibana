@@ -7,6 +7,9 @@
     "declaration": true,
     "declarationMap": true
   },
+  "extraPublicDirs": [
+    "common"
+  ],
   "include": [
     "common/**/*",
     "public/**/*",

@@ -25,6 +25,7 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypeFields,
+  ENABLE_CASE_CONNECTOR,
   ESCaseAttributes,
   ESCaseConnector,
   ESConnectorFields,
@@ -32,9 +33,8 @@ import {
   SubCaseResponse,
   SubCasesFindResponse,
   User,
-} from '../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
-import { UpdateAlertRequest } from '../client/alerts/client';
+} from '../../common';
+import { UpdateAlertRequest } from '../client/alerts/types';
 
 /**
  * Default sort field for querying saved objects.
@@ -271,17 +271,12 @@ const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertInfoFromComments = (comments: CommentRequest[] | undefined): AlertInfo[] => {
-  if (comments === undefined) {
-    return [];
-  }
-
-  return comments.reduce((acc: AlertInfo[], comment) => {
+export const getAlertInfoFromComments = (comments: CommentRequest[] = []): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
     const alertInfo = getAndValidateAlertInfoFromComment(comment);
     acc.push(...alertInfo);
     return acc;
   }, []);
-};
 
 type NewCommentArgs = CommentRequest & {
   associationType: AssociationType;
@@ -320,6 +315,15 @@ export const isCommentRequestTypeUser = (
   context: CommentRequest
 ): context is CommentRequestUserType => {
   return context.type === CommentType.user;
+};
+
+/**
+ * A type narrowing function for actions comments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeActions = (
+  context: CommentRequest
+): context is CommentRequestUserType => {
+  return context.type === CommentType.actions;
 };
 
 /**

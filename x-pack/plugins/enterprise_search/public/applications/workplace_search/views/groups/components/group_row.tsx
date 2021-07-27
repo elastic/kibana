@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
 import moment from 'moment';
 
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
@@ -15,13 +14,11 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { TruncatedContent } from '../../../../shared/truncate';
-import { AppLogic } from '../../../app_logic';
 import { getGroupPath } from '../../../routes';
 import { Group } from '../../../types';
 import { MAX_NAME_LENGTH } from '../group_logic';
 
 import { GroupSources } from './group_sources';
-import { GroupUsers } from './group_users';
 
 const DAYS_CUTOFF = 8;
 export const NO_SOURCES_MESSAGE = i18n.translate(
@@ -42,16 +39,7 @@ const dateDisplay = (date: string) =>
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
 
-export const GroupRow: React.FC<Group> = ({
-  id,
-  name,
-  updatedAt,
-  contentSources,
-  users,
-  usersCount,
-}) => {
-  const { isFederatedAuth } = useValues(AppLogic);
-
+export const GroupRow: React.FC<Group> = ({ id, name, updatedAt, contentSources }) => {
   const GROUP_UPDATED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText',
     {
@@ -80,17 +68,6 @@ export const GroupRow: React.FC<Group> = ({
           )}
         </div>
       </EuiTableRowCell>
-      {!isFederatedAuth && (
-        <EuiTableRowCell>
-          <div className="user-group__accounts">
-            {usersCount > 0 ? (
-              <GroupUsers groupUsers={users} usersCount={usersCount} groupId={id} />
-            ) : (
-              NO_USERS_MESSAGE
-            )}
-          </div>
-        </EuiTableRowCell>
-      )}
       <EuiTableRowCell align="right">
         <strong>
           <EuiLinkTo to={getGroupPath(id)}>

@@ -21,11 +21,13 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getEqlRuleForSignalTesting,
   getOpenSignals,
   getRuleForSignalTesting,
   getSignalsByIds,
   getSignalsByRuleIds,
   getSimpleRule,
+  getThresholdRuleForSignalTesting,
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
@@ -227,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
           parents: [
             {
               rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: 'acf538fc082adf970012be166527c4d9fc120f0015f145e0a466a3ceb32db606',
+              id: '82421e2f4e96058baaa2ed87abbe565403b45edf36348c2b79a4f0e8cc1cd055',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -242,7 +244,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
-              id: 'acf538fc082adf970012be166527c4d9fc120f0015f145e0a466a3ceb32db606',
+              id: '82421e2f4e96058baaa2ed87abbe565403b45edf36348c2b79a4f0e8cc1cd055',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -252,7 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: 'acf538fc082adf970012be166527c4d9fc120f0015f145e0a466a3ceb32db606',
+            id: '82421e2f4e96058baaa2ed87abbe565403b45edf36348c2b79a4f0e8cc1cd055',
             type: 'signal',
             index: '.siem-signals-default-000001',
             depth: 1,
@@ -273,16 +275,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('EQL Rules', () => {
         it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
           const rule: EqlCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'eql-rule',
-            type: 'eql',
-            language: 'eql',
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
+          const signals = await getSignalsByIds(supertest, [id]);
           expect(signals.hits.hits.length).eql(1);
           const fullSignal = signals.hits.hits[0]._source;
 
@@ -393,13 +392,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates up to max_signals for non-sequence EQL queries', async () => {
-          const rule: EqlCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'eql-rule',
-            type: 'eql',
-            language: 'eql',
-            query: 'any where true',
-          };
+          const rule: EqlCreateSchema = getEqlRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 100, [id]);
@@ -412,17 +405,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('uses the provided event_category_override', async () => {
           const rule: EqlCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'eql-rule',
-            type: 'eql',
-            language: 'eql',
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'config_change where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
             event_category_override: 'auditd.message_type',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
+          const signals = await getSignalsByIds(supertest, [id]);
           expect(signals.hits.hits.length).eql(1);
           const fullSignal = signals.hits.hits[0]._source;
 
@@ -534,16 +524,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('generates building block signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'eql-rule',
-            type: 'eql',
-            language: 'eql',
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [anomoly where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
+          const signals = await getSignalsByIds(supertest, [id]);
           const buildingBlock = signals.hits.hits.find(
             (signal) =>
               signal._source.signal.depth === 1 &&
@@ -699,16 +686,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('generates shell signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'eql-rule',
-            type: 'eql',
-            language: 'eql',
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [anomoly where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsByRuleIds(supertest, ['eql-rule']);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
           const sequenceSignal = signalsOpen.hits.hits.find(
             (signal) => signal._source.signal.depth === 2
           );
@@ -802,10 +786,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('generates up to max_signals with an EQL rule', async () => {
           const rule: EqlCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'eql-rule',
-            type: 'eql',
-            language: 'eql',
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [any where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
@@ -829,13 +810,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('Threshold Rules', () => {
         it('generates 1 signal from Threshold rules when threshold is met', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
               value: 700,
@@ -844,7 +820,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
           expect(signalsOpen.hits.hits.length).eql(1);
           const fullSignal = signalsOpen.hits.hits[0]._source;
           const eventIds = fullSignal.signal.parents.map((event) => event.id);
@@ -895,13 +871,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates 2 signals from Threshold rules when threshold is met', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
               value: 100,
@@ -910,17 +881,13 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
           expect(signalsOpen.hits.hits.length).eql(2);
         });
 
         it('applies the provided query before bucketing ', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             query: 'host.id:"2ab45fc1c41e4c84bbd02202a7e5761f"',
             threshold: {
               field: 'process.name',
@@ -930,18 +897,13 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
           expect(signalsOpen.hits.hits.length).eql(1);
         });
 
         it('generates no signals from Threshold rules when threshold is met and cardinality is not met', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
               value: 100,
@@ -959,13 +921,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates no signals from Threshold rules when cardinality is met and threshold is not met', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
               value: 1000,
@@ -983,13 +940,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates signals from Threshold rules when threshold and cardinality are both met', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
               value: 100,
@@ -1059,13 +1011,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not generate signals if only one field meets the threshold requirement', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: ['host.id', 'process.name'],
               value: 22,
@@ -1077,13 +1024,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates signals from Threshold rules when bucketing by multiple fields', async () => {
-          const ruleId = 'threshold-rule';
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: ruleId,
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: ['host.id', 'process.name', 'event.module'],
               value: 21,
@@ -1265,7 +1207,7 @@ export default ({ getService }: FtrProviderContext) => {
           parents: [
             {
               rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: 'b63bcc90b9393f94899991397a3c2df2f3f5c6ebf56440434500f1e1419df7c9',
+              id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1280,7 +1222,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
-              id: 'b63bcc90b9393f94899991397a3c2df2f3f5c6ebf56440434500f1e1419df7c9',
+              id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1290,7 +1232,7 @@ export default ({ getService }: FtrProviderContext) => {
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: 'b63bcc90b9393f94899991397a3c2df2f3f5c6ebf56440434500f1e1419df7c9',
+            id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
             type: 'signal',
             index: '.siem-signals-default-000001',
             depth: 1,
@@ -1423,7 +1365,7 @@ export default ({ getService }: FtrProviderContext) => {
           parents: [
             {
               rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: 'd2114ed6553816f87d6707b5bc50b88751db73b0f4930433d0890474804aa179',
+              id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1438,7 +1380,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
-              id: 'd2114ed6553816f87d6707b5bc50b88751db73b0f4930433d0890474804aa179',
+              id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
@@ -1448,7 +1390,7 @@ export default ({ getService }: FtrProviderContext) => {
           depth: 2,
           parent: {
             rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: 'd2114ed6553816f87d6707b5bc50b88751db73b0f4930433d0890474804aa179',
+            id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
             type: 'signal',
             index: '.siem-signals-default-000001',
             depth: 1,

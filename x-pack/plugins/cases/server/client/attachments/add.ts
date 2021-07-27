@@ -19,16 +19,19 @@ import {
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
-  throwErrors,
-  CommentRequestRt,
-  CommentType,
+  AlertCommentRequestRt,
+  CASE_COMMENT_SAVED_OBJECT,
+  CaseResponse,
   CaseStatuses,
   CaseType,
-  SubCaseAttributes,
-  CaseResponse,
-  User,
-  AlertCommentRequestRt,
   CommentRequest,
+  CommentRequestRt,
+  CommentType,
+  ENABLE_CASE_CONNECTOR,
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+  SubCaseAttributes,
+  throwErrors,
+  User,
 } from '../../../common';
 import {
   buildCaseUserActionItem,
@@ -37,17 +40,12 @@ import {
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
 import {
+  createCaseError,
   CommentableCase,
   createAlertUpdateRequest,
   isCommentRequestTypeGenAlert,
 } from '../../common';
 import { CasesClientArgs, CasesClientInternal } from '..';
-import { createCaseError } from '../../common/error';
-import {
-  ENABLE_CASE_CONNECTOR,
-  MAX_GENERATED_ALERTS_PER_SUB_CASE,
-  CASE_COMMENT_SAVED_OBJECT,
-} from '../../../common';
 
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';

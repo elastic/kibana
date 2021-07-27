@@ -8,6 +8,7 @@
 
 import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { UI_SETTINGS } from '../../../../../../data/common';
 
 describe('dateHistogram(req, panel, series)', () => {
@@ -18,6 +19,7 @@ describe('dateHistogram(req, panel, series)', () => {
   let config;
   let indexPattern;
   let uiSettings;
+  let buildSeriesMetaParams;
 
   beforeEach(() => {
     req = {
@@ -44,14 +46,33 @@ describe('dateHistogram(req, panel, series)', () => {
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
+    buildSeriesMetaParams = jest.fn(async () => {
+      return getIntervalAndTimefield(
+        panel,
+        indexPattern,
+        {
+          min: '2017-01-01T00:00:00Z',
+          max: '2017-01-01T01:00:00Z',
+          maxBuckets: 1000,
+        },
+        series
+      );
+    });
   });
 
   test('calls next when finished', async () => {
     const next = jest.fn();
 
-    await dateHistogram(req, panel, series, config, indexPattern, capabilities, uiSettings)(next)(
-      {}
-    );
+    await dateHistogram(
+      req,
+      panel,
+      series,
+      config,
+      indexPattern,
+      capabilities,
+      uiSettings,
+      buildSeriesMetaParams
+    )(next)({});
 
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -65,7 +86,8 @@ describe('dateHistogram(req, panel, series)', () => {
       config,
       indexPattern,
       capabilities,
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(doc).toEqual({
@@ -106,7 +128,8 @@ describe('dateHistogram(req, panel, series)', () => {
       config,
       indexPattern,
       capabilities,
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(doc).toEqual({
@@ -150,7 +173,8 @@ describe('dateHistogram(req, panel, series)', () => {
       config,
       indexPattern,
       capabilities,
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(doc).toEqual({
@@ -197,7 +221,8 @@ describe('dateHistogram(req, panel, series)', () => {
         config,
         indexPattern,
         capabilities,
-        uiSettings
+        uiSettings,
+        buildSeriesMetaParams
       )(next)({});
 
       expect(doc.aggs.test.aggs.timeseries.auto_date_histogram).toBeUndefined();
@@ -219,7 +244,8 @@ describe('dateHistogram(req, panel, series)', () => {
         config,
         indexPattern,
         capabilities,
-        uiSettings
+        uiSettings,
+        buildSeriesMetaParams
       )(next)({});
 
       expect(doc.aggs.test.meta).toMatchInlineSnapshot(`
@@ -242,7 +268,8 @@ describe('dateHistogram(req, panel, series)', () => {
         config,
         indexPattern,
         capabilities,
-        uiSettings
+        uiSettings,
+        buildSeriesMetaParams
       )(next)({});
 
       expect(doc).toEqual({

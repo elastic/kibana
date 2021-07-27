@@ -6,7 +6,6 @@
  */
 
 import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { LandingPage } from './';
 
@@ -27,9 +26,7 @@ export default {
       } as unknown) as PluginContextValue;
       return (
         <PluginContext.Provider value={pluginContextValue}>
-          <EuiThemeProvider>
-            <Story />
-          </EuiThemeProvider>
+          <Story />
         </PluginContext.Provider>
       );
     },

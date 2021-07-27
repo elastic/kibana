@@ -17,7 +17,7 @@ import {
 
 import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -62,24 +62,30 @@ export const App = (deps: AppDeps) => {
 
   if (!valid) {
     return (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.watcher.app.licenseErrorTitle"
-            defaultMessage="License error"
-          />
-        }
-        color="danger"
-        iconType="help"
-      >
-        {message}{' '}
-        <EuiLink href={deps.getUrlForApp('management', { path: 'stack/license_management/home' })}>
-          <FormattedMessage
-            id="xpack.watcher.app.licenseErrorLinkText"
-            defaultMessage="Manage your license."
-          />
-        </EuiLink>
-      </EuiCallOut>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.watcher.app.licenseErrorTitle"
+                defaultMessage="License error"
+              />
+            </h1>
+          }
+          body={<p>{message}</p>}
+          actions={[
+            <EuiLink
+              href={deps.getUrlForApp('management', { path: 'stack/license_management/home' })}
+            >
+              <FormattedMessage
+                id="xpack.watcher.app.licenseErrorLinkText"
+                defaultMessage="Manage your license"
+              />
+            </EuiLink>,
+          ]}
+        />
+      </EuiPageContent>
     );
   }
   return (

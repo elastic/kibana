@@ -43,6 +43,7 @@ import {
   PainlessError,
   SearchTimeoutError,
   TimeoutErrorMode,
+  SearchSessionIncompleteWarning,
 } from '../errors';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { AbortError, KibanaServerError } from '../../../../kibana_utils/public';
@@ -82,6 +83,7 @@ export class SearchInterceptor {
    * @internal
    */
   private application!: CoreStart['application'];
+  private docLinks!: CoreStart['docLinks'];
   private batchedFetch!: BatchedFunc<
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
@@ -95,6 +97,7 @@ export class SearchInterceptor {
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
+      this.docLinks = coreStart.docLinks;
     });
 
     this.batchedFetch = deps.bfetch.batchedFunction({
@@ -185,6 +188,9 @@ export class SearchInterceptor {
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
     if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
+    if (combined.executionContext !== undefined) {
+      serializableOptions.executionContext = combined.executionContext;
+    }
 
     return serializableOptions;
   }
@@ -345,6 +351,11 @@ export class SearchInterceptor {
               this.handleSearchError(e, searchOptions, searchAbortController.isTimeout())
             );
           }),
+          tap((response) => {
+            if (this.deps.session.isRestore() && response.isRestored === false) {
+              this.showRestoreWarning(this.deps.session.getSessionId());
+            }
+          }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);
             if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
@@ -366,6 +377,25 @@ export class SearchInterceptor {
 
   private showTimeoutErrorMemoized = memoize(
     this.showTimeoutErrorToast,
+    (_: SearchTimeoutError, sessionId: string) => {
+      return sessionId;
+    }
+  );
+
+  private showRestoreWarningToast = (sessionId?: string) => {
+    this.deps.toasts.addWarning(
+      {
+        title: 'Your search session is still running',
+        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks)),
+      },
+      {
+        toastLifeTimeMs: 60000,
+      }
+    );
+  };
+
+  private showRestoreWarning = memoize(
+    this.showRestoreWarningToast,
     (_: SearchTimeoutError, sessionId: string) => {
       return sessionId;
     }

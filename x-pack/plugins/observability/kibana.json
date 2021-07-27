@@ -8,6 +8,7 @@
   ],
   "optionalPlugins": [
     "home",
+    "discover",
     "lens",
     "licensing",
     "usageCollection"
@@ -18,6 +19,7 @@
     "data",
     "features",
     "ruleRegistry",
+    "timelines",
     "triggersActionsUi"
   ],
   "ui": true,

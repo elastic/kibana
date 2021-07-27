@@ -65,7 +65,10 @@ export class ReportingPlugin
     });
 
     registerUiSettings(core);
-    registerDeprecations(reportingCore, core);
+    registerDeprecations({
+      core,
+      reportingCore,
+    });
     registerReportingUsageCollector(reportingCore, plugins);
     registerRoutes(reportingCore, this.logger);
 
@@ -107,6 +110,9 @@ export class ReportingPlugin
         taskManager: plugins.taskManager,
         logger: this.logger,
       });
+
+      // Note: this must be called after ReportingCore.pluginStart
+      await store.start();
 
       this.logger.debug('Start complete');
     })().catch((e) => {

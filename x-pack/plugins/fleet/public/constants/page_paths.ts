@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { stringify } from 'query-string';
+
 export type StaticPage =
   | 'base'
   | 'overview'
@@ -13,13 +15,13 @@ export type StaticPage =
   | 'integrations_installed'
   | 'policies'
   | 'policies_list'
-  | 'fleet'
-  | 'fleet_enrollment_tokens'
+  | 'enrollment_tokens'
   | 'data_streams';
 
 export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
+  | 'integration_details_assets'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_policy_edit'
@@ -27,8 +29,9 @@ export type DynamicPage =
   | 'add_integration_from_policy'
   | 'add_integration_to_policy'
   | 'edit_integration'
-  | 'fleet_agent_list'
-  | 'fleet_agent_details';
+  | 'agent_list'
+  | 'agent_details'
+  | 'agent_details_logs';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -42,20 +45,22 @@ export const INTEGRATIONS_BASE_PATH = '/app/integrations';
 // If routing paths are changed here, please also check to see if
 // `pagePathGetters()`, below, needs any modifications
 export const FLEET_ROUTING_PATHS = {
-  overview: '/',
+  fleet: '/:tabId',
+  agents: '/agents',
+  agent_details: '/agents/:agentId/:tabId?',
+  agent_details_logs: '/agents/:agentId/logs',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
-  add_integration_from_policy: '/policies/:policyId/add-integration',
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
-  fleet: '/fleet',
-  fleet_agent_list: '/fleet/agents',
-  fleet_agent_details: '/fleet/agents/:agentId/:tabId?',
-  fleet_agent_details_logs: '/fleet/agents/:agentId/logs',
-  fleet_enrollment_tokens: '/fleet/enrollment-tokens',
+  // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
+  add_integration_from_policy: '/policies/:policyId/add-integration',
+  enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
+
+  // TODO: Move this to the integrations app
+  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const INTEGRATIONS_ROUTING_PATHS = {
@@ -65,6 +70,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
+  integration_details_assets: '/detail/:pkgkey/assets',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
@@ -85,9 +91,13 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
   ],
-  integration_details_policies: ({ pkgkey, integration }) => [
+  integration_details_policies: ({ pkgkey, integration, addAgentToPolicyId }) => {
+    const qs = stringify({ integration, addAgentToPolicyId });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_assets: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/policies${integration ? `?integration=${integration}` : ''}`,
+    `/detail/${pkgkey}/assets${integration ? `?integration=${integration}` : ''}`,
   ],
   integration_details_settings: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
@@ -107,6 +117,7 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
+  // TODO: This might need to be removed because we do not have a way to pick an integration in line anymore
   add_integration_from_policy: ({ policyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/add-integration`,
@@ -120,15 +131,12 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
   ],
-  fleet: () => [FLEET_BASE_PATH, '/fleet'],
-  fleet_agent_list: ({ kuery }) => [
+  agent_list: ({ kuery }) => [FLEET_BASE_PATH, `/agents${kuery ? `?kuery=${kuery}` : ''}`],
+  agent_details: ({ agentId, tabId, logQuery }) => [
     FLEET_BASE_PATH,
-    `/fleet/agents${kuery ? `?kuery=${kuery}` : ''}`,
+    `/agents/${agentId}${tabId ? `/${tabId}` : ''}${logQuery ? `?_q=${logQuery}` : ''}`,
   ],
-  fleet_agent_details: ({ agentId, tabId, logQuery }) => [
-    FLEET_BASE_PATH,
-    `/fleet/agents/${agentId}${tabId ? `/${tabId}` : ''}${logQuery ? `?_q=${logQuery}` : ''}`,
-  ],
-  fleet_enrollment_tokens: () => [FLEET_BASE_PATH, '/fleet/enrollment-tokens'],
+  agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
+  enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
 };

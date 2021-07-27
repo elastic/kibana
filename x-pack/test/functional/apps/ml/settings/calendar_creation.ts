@@ -46,6 +46,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
       await ml.settingsCalendar.navigateToCalendarCreationPage();
 
+      await ml.settingsCalendar.waitForFormEnabled();
+
       await ml.testExecution.logTestStep('calendar creation sets calendar to apply to all jobs');
       await ml.settingsCalendar.toggleApplyToAllJobsSwitch(true);
       await ml.settingsCalendar.assertJobSelectionNotExists();
@@ -78,6 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
       await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
       await ml.settingsCalendar.navigateToCalendarCreationPage();
+
+      await ml.settingsCalendar.waitForFormEnabled();
 
       await ml.testExecution.logTestStep(
         'calendar creation verifies the job selection and job group section are displayed'

@@ -30,7 +30,7 @@ export async function getTimeOfLastEvent({
   const params = {
     index: apmIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: ['beats_stats.timestamp', '@timestamp'],
       sort: [

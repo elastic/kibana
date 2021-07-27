@@ -371,35 +371,6 @@ export const PRIVATE_LINK_TITLE = i18n.translate(
   }
 );
 
-export const PRIVATE_CAN_CREATE_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.title',
-  {
-    defaultMessage: 'Manage private content sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.title',
-  {
-    defaultMessage: 'Review Group Sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.description',
-  {
-    defaultMessage: 'Review the status of all sources shared with your Group.',
-  }
-);
-
-export const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.description',
-  {
-    defaultMessage:
-      'Review the status of all connected private sources, and manage private sources for your account.',
-  }
-);
-
 export const PRIVATE_HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.private.header.title',
   {
@@ -499,3 +470,10 @@ export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
       'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
   }
 );
+
+export const PERSONAL_DASHBOARD_SOURCE_ERROR = (error: string) =>
+  i18n.translate('xpack.enterpriseSearch.workplaceSearch.personalDashboardSourceError', {
+    defaultMessage:
+      'Could not connect the source, reach out to your admin for help. Error message: {error}',
+    values: { error },
+  });

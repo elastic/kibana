@@ -18,18 +18,17 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
-import { FormatFactory, LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import type { FormatFactory } from '../../../common';
+import { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder } from '../../shared_components';
+import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
-import { ColumnState } from '../visualization';
-import {
+import type {
   DataContextType,
   DatatableRenderProps,
   LensSortAction,
   LensResizeAction,
-  LensGridDirection,
   LensToggleAction,
 } from './types';
 import { createGridColumns } from './columns';
@@ -41,9 +40,8 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { findMinMaxByColumnId } from './shared_utils';
 import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
-import { getFinalSummaryConfiguration } from '../summary';
+import { getOriginalId, getFinalSummaryConfiguration } from '../../../common/expressions';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -51,17 +49,6 @@ const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
   header: 'underline',
 };
-
-export interface ColumnConfig {
-  columns: Array<
-    Omit<ColumnState, 'palette'> & {
-      type: 'lens_datatable_column';
-      palette?: PaletteOutput<CustomPaletteState>;
-    }
-  >;
-  sortingColumnId: string | undefined;
-  sortingDirection: LensGridDirection;
-}
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const [firstTable] = Object.values(props.data.tables);
@@ -205,7 +192,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter(({ columnId }) => isNumericMap[columnId])
         .map(({ columnId }) => columnId),
-      firstTable
+      firstTable,
+      getOriginalId
     );
   }, [firstTable, isNumericMap, columnConfig]);
 
@@ -328,7 +316,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [columnConfig.columns, alignments, firstTable, columns]);
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
+    return (
+      <VisualizationContainer
+        className="lnsDataTableContainer"
+        reportTitle={props.args.title}
+        reportDescription={props.args.description}
+      >
+        <EmptyPlaceholder icon={LensIconChartDatatable} />
+      </VisualizationContainer>
+    );
   }
 
   const dataGridAriaLabel =

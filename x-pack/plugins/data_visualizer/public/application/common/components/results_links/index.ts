@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ResultsLinks } from './results_links';
+export { ResultsLinks, ResultLink } from './results_links';

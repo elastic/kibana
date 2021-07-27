@@ -9,10 +9,10 @@ import { AxiosPromise } from 'axios';
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { CustomElement } from '../../types';
-import { platformService } from '../services';
+import { pluginServices } from '../services';
 
 const getApiPath = function () {
-  const basePath = platformService.getService().getBasePath();
+  const basePath = pluginServices.getServices().platform.getBasePath();
   return `${basePath}${API_ROUTE_CUSTOM_ELEMENT}`;
 };
 

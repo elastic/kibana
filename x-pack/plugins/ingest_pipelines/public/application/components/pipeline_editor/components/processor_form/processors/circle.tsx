@@ -13,6 +13,7 @@ import { EuiCode } from '@elastic/eui';
 import {
   FIELD_TYPES,
   fieldValidators,
+  fieldFormatters,
   UseField,
   SelectField,
   NumericField,
@@ -24,13 +25,13 @@ import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 
 const { emptyField } = fieldValidators;
+const { toInt } = fieldFormatters;
 
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
   error_distance: {
     type: FIELD_TYPES.NUMBER,
-    deserializer: (v) => (typeof v === 'number' && !isNaN(v) ? v : 1.0),
-    serializer: Number,
+    formatters: [toInt],
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceFieldLabel',
       {
@@ -49,18 +50,11 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: ({ value }) => {
-          return isNaN(Number(value))
-            ? {
-                message: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceError',
-                  {
-                    defaultMessage: 'An error distance value is required.',
-                  }
-                ),
-              }
-            : undefined;
-        },
+        validator: emptyField(
+          i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceError', {
+            defaultMessage: 'An error distance value is required.',
+          })
+        ),
       },
     ],
   },
@@ -97,6 +91,7 @@ export const Circle: FunctionComponent = () => {
       />
 
       <UseField
+        data-test-subj="errorDistanceField"
         config={fieldsConfig.error_distance}
         component={NumericField}
         path="fields.error_distance"
@@ -105,17 +100,18 @@ export const Circle: FunctionComponent = () => {
       <UseField
         componentProps={{
           euiFieldProps: {
+            'data-test-subj': 'shapeSelectorField',
             options: [
               {
                 value: 'shape',
-                label: i18n.translate(
+                text: i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeShape',
                   { defaultMessage: 'Shape' }
                 ),
               },
               {
                 value: 'geo_shape',
-                label: i18n.translate(
+                text: i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeGeoShape',
                   { defaultMessage: 'Geo-shape' }
                 ),

@@ -10,6 +10,8 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { i18n } from '@kbn/i18n';
+import { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
 import { TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
@@ -20,9 +22,11 @@ export interface Props {
   setTimeslice: (timeslice: Timeslice) => void;
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
+  waitForTimesliceToLoad$: Observable<void>;
 }
 
 interface State {
+  isPaused: boolean;
   max: number;
   min: number;
   range: number;
@@ -44,6 +48,8 @@ export function Timeslider(props: Props) {
 
 class KeyedTimeslider extends Component<Props, State> {
   private _isMounted: boolean = false;
+  private _timeoutId: number | undefined;
+  private _subscription: Subscription | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -59,6 +65,7 @@ class KeyedTimeslider extends Component<Props, State> {
     const timeslice: [number, number] = [min, max];
 
     this.state = {
+      isPaused: true,
       max,
       min,
       range: interval,
@@ -68,6 +75,7 @@ class KeyedTimeslider extends Component<Props, State> {
   }
 
   componentWillUnmount() {
+    this._onPause();
     this._isMounted = false;
   }
 
@@ -118,9 +126,47 @@ class KeyedTimeslider extends Component<Props, State> {
     }
   }, 300);
 
+  _onPlay = () => {
+    this.setState({ isPaused: false });
+    this._playNextFrame();
+  };
+
+  _onPause = () => {
+    this.setState({ isPaused: true });
+    if (this._subscription) {
+      this._subscription.unsubscribe();
+      this._subscription = undefined;
+    }
+    if (this._timeoutId) {
+      clearTimeout(this._timeoutId);
+      this._timeoutId = undefined;
+    }
+  };
+
+  _playNextFrame() {
+    // advance to next frame
+    this._onNext();
+
+    // use waitForTimesliceToLoad$ observable to wait until next frame loaded
+    // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
+    this._subscription = this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
+      if (this.state.isPaused) {
+        return;
+      }
+
+      // use timeout to display frame for small time period before moving to next frame
+      this._timeoutId = window.setTimeout(() => {
+        if (this.state.isPaused) {
+          return;
+        }
+        this._playNextFrame();
+      }, 1750);
+    });
+  }
+
   render() {
     return (
-      <div className="mapTimeslider">
+      <div className="mapTimeslider mapTimeslider--animation">
         <div className="mapTimeslider__row">
           <EuiButtonIcon
             onClick={this.props.closeTimeslider}
@@ -140,15 +186,31 @@ class KeyedTimeslider extends Component<Props, State> {
             <div className="mapTimeslider__controls">
               <EuiButtonIcon
                 onClick={this._onPrevious}
-                iconType="arrowLeft"
+                iconType="framePrevious"
                 color="text"
                 aria-label={i18n.translate('xpack.maps.timeslider.previousTimeWindowLabel', {
                   defaultMessage: 'Previous time window',
                 })}
               />
               <EuiButtonIcon
+                className="mapTimeslider__playButton"
+                onClick={this.state.isPaused ? this._onPlay : this._onPause}
+                iconType={this.state.isPaused ? 'playFilled' : 'pause'}
+                size="s"
+                display="fill"
+                aria-label={
+                  this.state.isPaused
+                    ? i18n.translate('xpack.maps.timeslider.playLabel', {
+                        defaultMessage: 'Play',
+                      })
+                    : i18n.translate('xpack.maps.timeslider.pauseLabel', {
+                        defaultMessage: 'Pause',
+                      })
+                }
+              />
+              <EuiButtonIcon
                 onClick={this._onNext}
-                iconType="arrowRight"
+                iconType="frameNext"
                 color="text"
                 aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
                   defaultMessage: 'Next time window',
@@ -168,6 +230,7 @@ class KeyedTimeslider extends Component<Props, State> {
             max={this.state.max}
             step={1}
             ticks={this.state.ticks}
+            isDraggable
           />
         </div>
       </div>

@@ -17,7 +17,7 @@ const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.
 const savedObjectIndex = `.kibana_${kibanaVersion}_001`;
 
 describe('uiSettings/routes', function () {
-  jest.setTimeout(10000);
+  jest.setTimeout(120_000);
 
   beforeAll(startServers);
   /* eslint-disable jest/valid-describe */

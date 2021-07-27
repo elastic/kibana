@@ -40,7 +40,7 @@ import { ThreatRuleParams } from '../../schemas/rule_schemas';
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   threatMapping: ThreatMapping;
   query: string;
   inputIndex: string[];
@@ -70,7 +70,7 @@ export interface CreateThreatSignalsOptions {
 }
 
 export interface CreateThreatSignalOptions {
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   threatMapping: ThreatMapping;
   threatEnrichment: SignalsEnrichment;
   query: string;

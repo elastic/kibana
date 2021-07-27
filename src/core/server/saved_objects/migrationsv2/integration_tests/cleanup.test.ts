@@ -17,6 +17,7 @@ const logFilePath = Path.join(__dirname, 'cleanup_test.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 const asyncReadFile = Util.promisify(Fs.readFile);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -97,11 +98,25 @@ describe('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
-    await root.setup();
+    await root.preboot();
+    const coreSetup = await root.setup();
 
-    await expect(root.start()).rejects.toThrow(
-      'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: index-pattern:test_index*. To allow migrations to proceed, please delete these documents.'
-    );
+    coreSetup.savedObjects.registerType({
+      name: 'foo',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'agnostic',
+      migrations: {
+        '7.14.0': (doc) => doc,
+      },
+    });
+
+    await expect(root.start()).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 1 corrupt saved object documents were found: index-pattern:test_index*
+      To allow migrations to proceed, please delete or fix these documents."
+    `);
 
     const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
     const records = logFileContent

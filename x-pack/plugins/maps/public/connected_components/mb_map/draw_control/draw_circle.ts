@@ -11,7 +11,11 @@
 import turfDistance from '@turf/distance';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { Position } from 'geojson';
+import { Feature, GeoJSON, Position } from 'geojson';
+
+const DRAW_CIRCLE_RADIUS = 'draw-circle-radius';
+
+export const DRAW_CIRCLE_RADIUS_MB_FILTER = ['==', 'meta', DRAW_CIRCLE_RADIUS];
 
 export interface DrawCircleProperties {
   center: Position;
@@ -22,10 +26,12 @@ type DrawCircleState = {
   circle: {
     properties: Omit<DrawCircleProperties, 'center'> & {
       center: Position | null;
+      edge: Position | null;
+      radiusKm: number;
     };
     id: string | number;
     incomingCoords: (coords: unknown[]) => void;
-    toGeoJSON: () => unknown;
+    toGeoJSON: () => GeoJSON;
   };
 };
 
@@ -43,6 +49,7 @@ export const DrawCircle = {
       type: 'Feature',
       properties: {
         center: null,
+        edge: null,
         radiusKm: 0,
       },
       geometry: {
@@ -96,6 +103,7 @@ export const DrawCircle = {
     }
 
     const mouseLocation = [e.lngLat.lng, e.lngLat.lat];
+    state.circle.properties.edge = mouseLocation;
     state.circle.properties.radiusKm = turfDistance(state.circle.properties.center, mouseLocation);
     const newCircleFeature = turfCircle(
       state.circle.properties.center,
@@ -124,15 +132,53 @@ export const DrawCircle = {
       this.changeMode('simple_select', {}, { silent: true });
     }
   },
-  toDisplayFeatures(
-    state: DrawCircleState,
-    geojson: { properties: { active: string } },
-    display: (geojson: unknown) => unknown
-  ) {
-    if (state.circle.properties.center) {
-      geojson.properties.active = 'true';
-      return display(geojson);
+  toDisplayFeatures(state: DrawCircleState, geojson: Feature, display: (geojson: Feature) => void) {
+    if (!state.circle.properties.center || !state.circle.properties.edge) {
+      return null;
     }
+
+    geojson.properties!.active = 'true';
+
+    let radiusLabel = '';
+    if (state.circle.properties.radiusKm <= 1) {
+      radiusLabel = `${Math.round(state.circle.properties.radiusKm * 1000)} m`;
+    } else if (state.circle.properties.radiusKm <= 10) {
+      radiusLabel = `${state.circle.properties.radiusKm.toFixed(1)} km`;
+    } else {
+      radiusLabel = `${Math.round(state.circle.properties.radiusKm)} km`;
+    }
+
+    // display radius label, requires custom 'symbol' style with DRAW_CIRCLE_RADIUS_MB_FILTER filter
+    display({
+      type: 'Feature',
+      properties: {
+        meta: DRAW_CIRCLE_RADIUS,
+        parent: state.circle.id,
+        radiusLabel,
+        active: 'false',
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: state.circle.properties.edge,
+      },
+    });
+
+    // display line from center vertex to edge
+    display({
+      type: 'Feature',
+      properties: {
+        meta: 'draw-circle-radius-line',
+        parent: state.circle.id,
+        active: 'true',
+      },
+      geometry: {
+        type: 'LineString',
+        coordinates: [state.circle.properties.center, state.circle.properties.edge],
+      },
+    });
+
+    // display circle
+    display(geojson);
   },
   onTrash(state: DrawCircleState) {
     // @ts-ignore

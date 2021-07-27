@@ -15,9 +15,9 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
-  MetadataQueryStrategyVersions,
   HostStatus,
   ActivityLog,
+  HostMetadata,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -32,10 +32,13 @@ import {
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
+  isUninitialisedResourceState,
 } from '../../../state';
 
 import { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
+import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -67,6 +70,11 @@ export const policyItemsLoading = (state: Immutable<EndpointState>) => state.pol
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
+export const getIsEndpointPackageInfoUninitialized: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
+  isUninitialisedResourceState(packageInfo)
+);
 
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
@@ -82,16 +90,9 @@ export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =
   state.agentsWithEndpointsTotalError;
 
 export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
-const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
 
-export const endpointPackageVersion = createSelector(
-  endpointPackageInfo,
-  (info) => info?.version ?? undefined
-);
-
-export const isTransformEnabled = createSelector(
-  queryStrategyVersion,
-  (version) => version !== MetadataQueryStrategyVersions.VERSION_1
+export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
+  isLoadedResourceState(info) ? info.data.version : undefined
 );
 
 /**
@@ -362,13 +363,16 @@ export const getIsolationRequestError: (
   }
 });
 
+export const getIsOnEndpointDetailsActivityLog: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show === EndpointDetailsTabsTypes.activityLog;
+});
+
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>
-): Immutable<Omit<EndpointState['endpointDetails']['activityLog'], 'logData'>> => {
-  return {
-    page: state.endpointDetails.activityLog.page,
-    pageSize: state.endpointDetails.activityLog.pageSize,
-  };
+): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {
+  return state.endpointDetails.activityLog.paging;
 };
 
 export const getActivityLogData = (
@@ -412,3 +416,40 @@ export const getActivityLogError: (
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;
 });
+
+export const getEndpointPendingActionsState = (
+  state: Immutable<EndpointState>
+): Immutable<EndpointState['endpointPendingActions']> => {
+  return state.endpointPendingActions;
+};
+
+/**
+ * Returns a function (callback) that can be used to retrieve the props for the `EndpointHostIsolationStatus`
+ * component for a given Endpoint
+ */
+export const getEndpointHostIsolationStatusPropsCallback: (
+  state: Immutable<EndpointState>
+) => (endpoint: HostMetadata) => EndpointHostIsolationStatusProps = createSelector(
+  getEndpointPendingActionsState,
+  (pendingActionsState) => {
+    return (endpoint: HostMetadata) => {
+      let pendingIsolate = 0;
+      let pendingUnIsolate = 0;
+
+      if (isLoadedResourceState(pendingActionsState)) {
+        const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
+
+        if (endpointPendingActions) {
+          pendingIsolate = endpointPendingActions?.isolate ?? 0;
+          pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
+        }
+      }
+
+      return {
+        isIsolated: isEndpointHostIsolated(endpoint),
+        pendingIsolate,
+        pendingUnIsolate,
+      };
+    };
+  }
+);

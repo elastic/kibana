@@ -72,6 +72,8 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
+export const RULES_MONIROTING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
+
 export const SEVENTH_RULE = 6;
 
 export const SEVERITY = '[data-test-subj="severity"]';
@@ -101,3 +103,5 @@ export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
 export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteConfirmationModal"]';
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
+export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';

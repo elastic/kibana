@@ -12,8 +12,6 @@ import { KIBANA_ROOT } from './paths';
 import type { Config } from '../../functional_test_runner/';
 import { createTestEsCluster } from '../../es';
 
-import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
-
 interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom: string;
@@ -34,9 +32,7 @@ export async function runElasticsearch({
 
   const cluster = createTestEsCluster({
     port: config.get('servers.elasticsearch.port'),
-    password: isSecurityEnabled
-      ? DEFAULT_SUPERUSER_PASS
-      : config.get('servers.elasticsearch.password'),
+    password: isSecurityEnabled ? 'changeme' : config.get('servers.elasticsearch.password'),
     license,
     log,
     basePath: resolve(KIBANA_ROOT, '.es'),
@@ -49,22 +45,5 @@ export async function runElasticsearch({
 
   await cluster.start();
 
-  if (isSecurityEnabled) {
-    await setupUsers({
-      log,
-      esPort: config.get('servers.elasticsearch.port'),
-      updates: [config.get('servers.elasticsearch'), config.get('servers.kibana')],
-      protocol: config.get('servers.elasticsearch').protocol,
-      caPath: getRelativeCertificateAuthorityPath(config.get('kbnTestServer.serverArgs')),
-    });
-  }
-
   return cluster;
-}
-
-function getRelativeCertificateAuthorityPath(esConfig: string[] = []) {
-  const caConfig = esConfig.find(
-    (config) => config.indexOf('--elasticsearch.ssl.certificateAuthorities') === 0
-  );
-  return caConfig ? caConfig.split('=')[1] : undefined;
 }

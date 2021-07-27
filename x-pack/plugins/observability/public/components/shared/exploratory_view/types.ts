@@ -6,6 +6,7 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -16,13 +17,13 @@ import {
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
   kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
+  mdd: 'device-data-distribution',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -36,41 +37,39 @@ export interface ColumnFilter {
   query: string;
 }
 
-export interface ReportDefinition {
-  field: string;
-  required?: boolean;
-  custom?: boolean;
-  options?: Array<{
-    id: string;
-    field?: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS';
-    columnFilters?: ColumnFilter[];
-  }>;
+export interface MetricOption {
+  id: string;
+  field?: string;
+  label: string;
+  description?: string;
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
+  columnFilters?: ColumnFilter[];
+  timeScale?: string;
 }
 
-export interface DataSeries {
+export interface SeriesConfig {
   reportType: ReportViewType;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
-
-  breakdowns: string[];
+  breakdownFields: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
+  filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[] | ExistsFilter[];
-  reportDefinitions: ReportDefinition[];
+  baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+  definitionFields: string[];
+  metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
   yConfig?: YConfig[];
+  query?: { query: string; language: 'kuery' };
 }
 
 export type URLReportDefinition = Record<string, string[]>;
 
 export interface SeriesUrl {
+  name: string;
   time: {
     to: string;
     from: string;
@@ -78,10 +77,12 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
-  reportType: ReportViewTypeId;
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  selectedMetricField?: string;
+  hidden?: boolean;
+  color?: string;
 }
 
 export interface UrlFilter {
@@ -92,17 +93,18 @@ export interface UrlFilter {
 
 export interface ConfigProps {
   indexPattern: IIndexPattern;
+  series?: SeriesUrl;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
-type FormatType = 'duration' | 'number';
+type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
 export interface FieldFormatParams {
-  inputFormat: InputFormat;
-  outputFormat: OutputFormat;
+  inputFormat?: InputFormat;
+  outputFormat?: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
   useShortSuffix?: boolean;

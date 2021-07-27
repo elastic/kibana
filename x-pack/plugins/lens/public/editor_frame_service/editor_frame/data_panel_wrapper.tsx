@@ -7,54 +7,94 @@
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useState } from 'react';
+import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { createSelector } from '@reduxjs/toolkit';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from './state_management';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
-import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
-import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { StateSetter, DatasourceDataPanelProps, Datasource } from '../../types';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  switchDatasource,
+  useLensDispatch,
+  updateDatasourceState,
+  LensState,
+  useLensSelector,
+  setState,
+} from '../../state_management';
+import { initializeDatasources } from './state_helpers';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
   datasourceMap: Record<string, Datasource>;
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
-  dispatch: (action: Action) => void;
   showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
-  query: Query;
-  dateRange: FramePublicAPI['dateRange'];
-  filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
   plugins: { uiActions: UiActionsStart };
 }
 
+const getExternals = createSelector(
+  (state: LensState) => state.lens,
+  ({ resolvedDateRange, query, filters, datasourceStates, activeDatasourceId }) => ({
+    dateRange: resolvedDateRange,
+    query,
+    filters,
+    datasourceStates,
+    activeDatasourceId,
+  })
+);
+
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
-  const { dispatch, activeDatasource } = props;
-  const setDatasourceState: StateSetter<unknown> = useMemo(
-    () => (updater) => {
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater,
-        datasourceId: activeDatasource!,
-        clearStagedPreview: true,
-      });
-    },
-    [dispatch, activeDatasource]
+  const { activeDatasource } = props;
+
+  const { filters, query, dateRange, datasourceStates, activeDatasourceId } = useLensSelector(
+    getExternals
   );
+  const dispatchLens = useLensDispatch();
+  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
+    return (updater) => {
+      dispatchLens(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasource!,
+          clearStagedPreview: true,
+        })
+      );
+    };
+  }, [activeDatasource, dispatchLens]);
+
+  useEffect(() => {
+    if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
+      initializeDatasources(props.datasourceMap, datasourceStates, undefined, undefined, {
+        isFullEditor: true,
+      }).then((result) => {
+        const newDatasourceStates = Object.entries(result).reduce(
+          (state, [datasourceId, datasourceState]) => ({
+            ...state,
+            [datasourceId]: {
+              ...datasourceState,
+              isLoading: false,
+            },
+          }),
+          {}
+        );
+        dispatchLens(setState({ datasourceStates: newDatasourceStates }));
+      });
+    }
+  }, [datasourceStates, activeDatasourceId, props.datasourceMap, dispatchLens]);
 
   const datasourceProps: DatasourceDataPanelProps = {
     dragDropContext: useContext(DragContext),
     state: props.datasourceState,
     setState: setDatasourceState,
     core: props.core,
-    query: props.query,
-    dateRange: props.dateRange,
-    filters: props.filters,
+    filters,
+    query,
+    dateRange,
     showNoDataPopover: props.showNoDataPopover,
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,
@@ -98,10 +138,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
                 icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
                 onClick={() => {
                   setDatasourceSwitcher(false);
-                  props.dispatch({
-                    type: 'SWITCH_DATASOURCE',
-                    newDatasourceId: datasourceId,
-                  });
+                  dispatchLens(switchDatasource({ newDatasourceId: datasourceId }));
                 }}
               >
                 {datasourceId}

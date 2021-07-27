@@ -6,7 +6,7 @@
  */
 
 import { Overwrite, Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
 import { getMetricsProjection } from '../../projections/metrics';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
@@ -44,6 +44,9 @@ interface Filter {
   };
   term?: {
     [key: string]: string;
+  };
+  terms?: {
+    [key: string]: string[];
   };
 }
 
@@ -88,11 +91,11 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
       },
       aggs: {
         timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams(
+          date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            config['xpack.apm.metricsInterval']
-          ),
+            metricsInterval: config['xpack.apm.metricsInterval'],
+          }),
           aggs,
         },
         ...aggs,

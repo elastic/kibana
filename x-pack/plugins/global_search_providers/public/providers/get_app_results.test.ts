@@ -120,6 +120,11 @@ describe('getAppResults', () => {
         ],
         keywords: [],
       }),
+      createApp({
+        id: 'AppNotSearchable',
+        title: 'App 1 not searchable',
+        searchable: false,
+      }),
     ];
 
     expect(getAppResults('', apps).length).toBe(1);

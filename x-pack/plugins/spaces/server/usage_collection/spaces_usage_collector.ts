@@ -425,6 +425,12 @@ export function getSpacesUsageCollector(
             'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to false.',
         },
       },
+      'apiCalls.disableLegacyUrlAliases.total': {
+        type: 'long',
+        _meta: {
+          description: 'The number of times the "Disable Legacy URL Aliases" API has been called.',
+        },
+      },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
       const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;

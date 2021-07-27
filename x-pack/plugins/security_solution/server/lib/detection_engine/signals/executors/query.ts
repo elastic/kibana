@@ -21,12 +21,14 @@ import { AlertAttributes, RuleRangeTuple, BulkCreate, WrapHits } from '../types'
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const queryExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
+  experimentalFeatures,
   services,
   version,
   searchAfterSize,
@@ -37,9 +39,10 @@ export const queryExecutor = async ({
   wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
+  experimentalFeatures: ExperimentalFeatures;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
@@ -50,7 +53,12 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
   const esFilter = await getFilter({
     type: ruleParams.type,
     filters: ruleParams.filters,
@@ -63,7 +71,7 @@ export const queryExecutor = async ({
   });
 
   return searchAfterAndBulkCreate({
-    tuples,
+    tuple,
     listClient,
     exceptionsList: exceptionItems,
     ruleSO: rule,

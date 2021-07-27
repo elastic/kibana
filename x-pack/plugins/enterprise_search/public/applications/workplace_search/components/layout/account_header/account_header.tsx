@@ -47,7 +47,9 @@ export const AccountHeader: React.FC = () => {
       <EuiButtonEmptyTo to={PERSONAL_SETTINGS_PATH}>{ACCOUNT_NAV.SETTINGS}</EuiButtonEmptyTo>
     </EuiContextMenuItem>,
     <EuiContextMenuItem key="logout">
-      <EuiButtonEmpty href={LOGOUT_ROUTE}>{ACCOUNT_NAV.LOGOUT}</EuiButtonEmpty>
+      <EuiButtonEmptyTo to={LOGOUT_ROUTE} shouldNotCreateHref>
+        {ACCOUNT_NAV.LOGOUT}
+      </EuiButtonEmptyTo>
     </EuiContextMenuItem>,
   ];
 
@@ -66,11 +68,11 @@ export const AccountHeader: React.FC = () => {
   return (
     <EuiHeader>
       <EuiHeaderSection grow={false}>
-        <EuiHeaderSectionItem>
+        <EuiHeaderSectionItem border="none">
           <EuiHeaderLogo iconType="logoWorkplaceSearch" />
           <EuiText>{WORKPLACE_SEARCH_TITLE}</EuiText>
         </EuiHeaderSectionItem>
-        <EuiHeaderSectionItem>
+        <EuiHeaderSectionItem border="none">
           <EuiHeaderLinks>
             <EuiButtonEmptyTo to={PERSONAL_SOURCES_PATH}>{ACCOUNT_NAV.SOURCES}</EuiButtonEmptyTo>
           </EuiHeaderLinks>

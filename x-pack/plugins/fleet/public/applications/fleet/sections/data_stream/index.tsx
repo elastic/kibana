@@ -6,18 +6,23 @@
  */
 
 import React from 'react';
-import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+import { Router, Route, Switch, useHistory } from 'react-router-dom';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
+import { DefaultLayout } from '../../layouts';
 
 import { DataStreamListPage } from './list_page';
 
 export const DataStreamApp: React.FunctionComponent = () => {
+  const history = useHistory();
+
   return (
-    <Router>
+    <Router history={history}>
       <Switch>
         <Route path={FLEET_ROUTING_PATHS.data_streams}>
-          <DataStreamListPage />
+          <DefaultLayout section="data_streams">
+            <DataStreamListPage />
+          </DefaultLayout>
         </Route>
       </Switch>
     </Router>

@@ -8,16 +8,16 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { getAlertingCapabilities } from '../../alerting/get_alerting_capabilities';
 import { getAPMHref } from '../Links/apm/APMLink';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
@@ -40,16 +40,13 @@ export function ApmHeaderActionMenu() {
   }
 
   return (
-    <EuiHeaderLinks>
-      <EuiHeaderLink
-        color="primary"
-        href={apmHref('/settings')}
-        iconType="gear"
-      >
+    <EuiHeaderLinks gutterSize="xs">
+      <EuiHeaderLink color="text" href={apmHref('/settings')}>
         {i18n.translate('xpack.apm.settingsLinkLabel', {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
+      {canAccessML && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
           basePath={basePath}
@@ -59,7 +56,6 @@ export function ApmHeaderActionMenu() {
           includeTransactionDuration={serviceName !== undefined}
         />
       )}
-      {canAccessML && <AnomalyDetectionSetupLink />}
       <EuiHeaderLink
         color="primary"
         href={kibanaHref('/app/home#/tutorial/apm')}

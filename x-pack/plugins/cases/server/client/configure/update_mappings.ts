@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ConnectorMappingsAttributes } from '../../../common/api';
+import { ConnectorMappingsAttributes } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { createCaseError } from '../../common/error';
+import { createCaseError } from '../../common';
 import { CasesClientArgs } from '..';
 import { UpdateMappingsArgs } from './types';
 import { casesConnectors } from '../../connectors';

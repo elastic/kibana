@@ -9,6 +9,8 @@
 import type { IndexPatternSavedObjectAttrs } from './index_patterns';
 import type { SavedObjectsClientCommon } from '../types';
 
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../constants';
+
 /**
  * Returns an object matching a given title
  *
@@ -19,7 +21,7 @@ import type { SavedObjectsClientCommon } from '../types';
 export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
   if (title) {
     const savedObjects = await client.find<IndexPatternSavedObjectAttrs>({
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       perPage: 10,
       search: `"${title}"`,
       searchFields: ['title'],

@@ -16,9 +16,7 @@
       "scroll": "",
       "search_type": [
         "query_then_fetch",
-        "query_and_fetch",
-        "dfs_query_then_fetch",
-        "dfs_query_and_fetch"
+        "dfs_query_then_fetch"
       ],
       "explain": "__flag__",
       "profile": "__flag__",

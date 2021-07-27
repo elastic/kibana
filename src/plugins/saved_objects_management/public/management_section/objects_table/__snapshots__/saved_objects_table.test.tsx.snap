@@ -62,9 +62,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 `;
 
 exports[`SavedObjectsTable should render normally 1`] = `
-<EuiPageContent
-  horizontalPosition="center"
->
+<div>
   <Header
     filteredCount={4}
     onExportAll={[Function]}
@@ -72,7 +70,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
     onRefresh={[Function]}
   />
   <EuiSpacer
-    size="xs"
+    size="l"
   />
   <RedirectAppLinks
     application={
@@ -249,5 +247,5 @@ exports[`SavedObjectsTable should render normally 1`] = `
       totalItemCount={4}
     />
   </RedirectAppLinks>
-</EuiPageContent>
+</div>
 `;

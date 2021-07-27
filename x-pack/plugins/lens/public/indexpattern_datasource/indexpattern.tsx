@@ -43,7 +43,7 @@ import {
 
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
+import { IndexPatternColumn, getErrorMessages } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -55,7 +55,7 @@ import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
-import { getTimeShiftWarningMessages } from './dimension_panel/time_shift';
+import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -69,11 +69,15 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
-export * from './rename_columns';
-export * from './format_column';
-export * from './time_scale';
-export * from './counter_rate';
-export * from './suffix_formatter';
+export {
+  CounterRateArgs,
+  ExpressionFunctionCounterRate,
+  counterRate,
+} from '../../common/expressions';
+export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
+export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
+export { timeScale, TimeScaleArgs } from '../../common/expressions';
+export { renameColumns } from '../../common/expressions';
 
 export function getIndexPatternDatasource({
   core,
@@ -362,17 +366,14 @@ export function getIndexPatternDatasource({
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId, columnId }) => {
-      const layer = { ...state.layers[layerId] };
-      const current = state.layers[layerId].incompleteColumns || {};
-      if (!Object.values(current).length) {
+      const layer = state.layers[layerId];
+      if (!Object.values(layer.incompleteColumns || {}).length) {
         return;
       }
-      const newIncomplete: Record<string, IncompleteColumn> = { ...current };
-      delete newIncomplete[columnId];
       return mergeLayer({
         state,
         layerId,
-        newLayer: { ...layer, incompleteColumns: newIncomplete },
+        newLayer: { ...layer, incompleteColumns: undefined },
       });
     },
 
@@ -462,7 +463,7 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
-    getWarningMessages: getTimeShiftWarningMessages,
+    getWarningMessages: getStateTimeShiftWarningMessages,
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);

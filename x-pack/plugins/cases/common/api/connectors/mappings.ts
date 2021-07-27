@@ -48,9 +48,6 @@ const ConnectorFieldRt = rt.type({
 
 export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
 
-const GetFieldsResponseRt = rt.type({
-  defaultMappings: rt.array(ConnectorMappingsAttributesRT),
-  fields: rt.array(ConnectorFieldRt),
-});
+const GetDefaultMappingsResponseRt = rt.array(ConnectorMappingsAttributesRT);
 
-export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;
+export type GetDefaultMappingsResponse = rt.TypeOf<typeof GetDefaultMappingsResponseRt>;

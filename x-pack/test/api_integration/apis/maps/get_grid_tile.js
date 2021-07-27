@@ -33,13 +33,37 @@ export default function ({ getService }) {
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
-      expect(layer.length).to.be(1);
+      expect(layer.length).to.be(2);
+
+      // Cluster feature
       const clusterFeature = layer.feature(0);
       expect(clusterFeature.type).to.be(1);
       expect(clusterFeature.extent).to.be(4096);
       expect(clusterFeature.id).to.be(undefined);
       expect(clusterFeature.properties).to.eql({ doc_count: 1, avg_of_bytes: 9252 });
       expect(clusterFeature.loadGeometry()).to.eql([[{ x: 87, y: 667 }]]);
+
+      // Metadata feature
+      const metadataFeature = layer.feature(1);
+      expect(metadataFeature.type).to.be(3);
+      expect(metadataFeature.extent).to.be(4096);
+      expect(metadataFeature.properties).to.eql({
+        __kbn_metadata_feature__: true,
+        __kbn_feature_count__: 1,
+        __kbn_is_tile_complete__: true,
+        __kbn_vector_shape_type_counts__: '{"POINT":1,"LINE":0,"POLYGON":0}',
+        fieldMeta:
+          '{"doc_count":{"range":{"min":1,"max":1,"delta":0},"categories":{"categories":[{"key":1,"count":1}]}},"avg_of_bytes":{"range":{"min":9252,"max":9252,"delta":0},"categories":{"categories":[{"key":9252,"count":1}]}}}',
+      });
+      expect(metadataFeature.loadGeometry()).to.eql([
+        [
+          { x: 0, y: 0 },
+          { x: 4096, y: 0 },
+          { x: 4096, y: 4096 },
+          { x: 0, y: 4096 },
+          { x: 0, y: 0 },
+        ],
+      ]);
     });
 
     it('should return vector tile containing grid features', async () => {
@@ -58,7 +82,7 @@ export default function ({ getService }) {
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
-      expect(layer.length).to.be(2);
+      expect(layer.length).to.be(3);
 
       const gridFeature = layer.feature(0);
       expect(gridFeature.type).to.be(3);
@@ -75,7 +99,29 @@ export default function ({ getService }) {
         ],
       ]);
 
-      const clusterFeature = layer.feature(1);
+      // Metadata feature
+      const metadataFeature = layer.feature(1);
+      expect(metadataFeature.type).to.be(3);
+      expect(metadataFeature.extent).to.be(4096);
+      expect(metadataFeature.properties).to.eql({
+        __kbn_metadata_feature__: true,
+        __kbn_feature_count__: 1,
+        __kbn_is_tile_complete__: true,
+        __kbn_vector_shape_type_counts__: '{"POINT":0,"LINE":0,"POLYGON":1}',
+        fieldMeta:
+          '{"doc_count":{"range":{"min":1,"max":1,"delta":0},"categories":{"categories":[{"key":1,"count":1}]}},"avg_of_bytes":{"range":{"min":9252,"max":9252,"delta":0},"categories":{"categories":[{"key":9252,"count":1}]}}}',
+      });
+      expect(metadataFeature.loadGeometry()).to.eql([
+        [
+          { x: 0, y: 0 },
+          { x: 4096, y: 0 },
+          { x: 4096, y: 4096 },
+          { x: 0, y: 4096 },
+          { x: 0, y: 0 },
+        ],
+      ]);
+
+      const clusterFeature = layer.feature(2);
       expect(clusterFeature.type).to.be(1);
       expect(clusterFeature.extent).to.be(4096);
       expect(clusterFeature.id).to.be(undefined);

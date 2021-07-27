@@ -15,16 +15,16 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
-  EuiTextArea,
 } from '@elastic/eui';
 import _ from 'lodash';
-import type { ChangeEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { monaco } from '@kbn/monaco';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { CodeEditorField } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { RoleIndexPrivilege } from '../../../../../../common/model';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';
@@ -52,6 +52,7 @@ interface State {
   grantedFields: string[];
   exceptedFields: string[];
   documentQuery?: string;
+  documentQueryEditorHeight: string;
   isFieldListLoading: boolean;
   flsOptions: string[];
 }
@@ -73,6 +74,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       grantedFields: grant,
       exceptedFields: except,
       documentQuery: props.indexPrivilege.query,
+      documentQueryEditorHeight: '100px',
       isFieldListLoading: false,
       flsOptions: [],
     };
@@ -302,21 +304,19 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       <EuiFlexGroup direction="column">
         {!this.props.isRoleReadOnly && (
           <EuiFlexItem>
-            {
-              <EuiSwitch
-                data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-                label={
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
-                    defaultMessage="Grant read privileges to specific documents"
-                  />
-                }
-                compressed={true}
-                checked={this.state.queryExpanded}
-                onChange={this.toggleDocumentQuery}
-                disabled={isRoleReadOnly}
-              />
-            }
+            <EuiSwitch
+              data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
+                  defaultMessage="Grant read privileges to specific documents"
+                />
+              }
+              compressed={true}
+              checked={this.state.queryExpanded}
+              onChange={this.toggleDocumentQuery}
+              disabled={isRoleReadOnly}
+            />
           </EuiFlexItem>
         )}
         {this.state.queryExpanded && (
@@ -329,20 +329,54 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 />
               }
               fullWidth={true}
+              data-test-subj={`queryInput${this.props.formIndex}`}
             >
-              <EuiTextArea
-                data-test-subj={`queryInput${this.props.formIndex}`}
-                style={{ resize: 'none' }}
+              <CodeEditorField
+                languageId="xjson"
+                width="100%"
                 fullWidth={true}
-                value={indexPrivilege.query}
+                height={this.state.documentQueryEditorHeight}
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',
+                  {
+                    defaultMessage: 'Granted documents query editor',
+                  }
+                )}
+                value={indexPrivilege.query ?? ''}
                 onChange={this.onQueryChange}
-                readOnly={this.props.isRoleReadOnly}
+                options={{
+                  readOnly: this.props.isRoleReadOnly,
+                  minimap: {
+                    enabled: false,
+                  },
+                  // Prevent an empty form from showing an error
+                  renderValidationDecorations: indexPrivilege.query ? 'editable' : 'off',
+                }}
+                editorDidMount={this.editorDidMount}
               />
             </EuiFormRow>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
     );
+  };
+
+  private editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    /**
+     * Resize the editor based on the contents of the editor itself.
+     * Adapted from https://github.com/microsoft/monaco-editor/issues/794#issuecomment-688959283
+     */
+
+    const minHeight = 100;
+    const maxHeight = 1000;
+
+    const updateHeight = () => {
+      const contentHeight = Math.min(maxHeight, Math.max(minHeight, editor.getContentHeight()));
+      this.setState({ documentQueryEditorHeight: `${contentHeight}px` });
+    };
+
+    editor.onDidContentSizeChange(updateHeight);
+    updateHeight();
   };
 
   private toggleDocumentQuery = () => {
@@ -457,10 +491,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onQueryChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+  private onQueryChange = (query: string) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
-      query: e.target.value,
+      query,
     });
   };
 

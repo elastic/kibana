@@ -67,9 +67,9 @@ interface Props {
   loading: boolean;
   onInputChange: (e: FormEvent<HTMLInputElement>) => void;
   onTermChange: () => void;
+  onApply: () => void;
   onChange: (updatedOptions: UrlOption[]) => void;
   searchValue: string;
-  onClose: () => void;
   popoverIsOpen: boolean;
   initialValue?: string;
   setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
@@ -81,8 +81,8 @@ export function SelectableUrlList({
   onInputChange,
   onTermChange,
   onChange,
+  onApply,
   searchValue,
-  onClose,
   popoverIsOpen,
   setPopoverIsOpen,
   initialValue,
@@ -93,9 +93,12 @@ export function SelectableUrlList({
 
   const titleRef = useRef<HTMLDivElement>(null);
 
+  const formattedOptions = formatOptions(data.items ?? []);
+
   const onEnterKey = (evt: KeyboardEvent<HTMLInputElement>) => {
     if (evt.key.toLowerCase() === 'enter') {
       onTermChange();
+      onApply();
       setPopoverIsOpen(false);
       if (searchRef) {
         searchRef.blur();
@@ -103,11 +106,11 @@ export function SelectableUrlList({
     }
   };
 
-  // @ts-ignore - not sure, why it's not working
-  useEvent('keydown', onEnterKey, searchRef);
-
   const onInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
     setPopoverIsOpen(true);
+    if (searchRef) {
+      searchRef.focus();
+    }
   };
 
   const onSearchInput = (e: React.FormEvent<HTMLInputElement>) => {
@@ -115,15 +118,17 @@ export function SelectableUrlList({
     setPopoverIsOpen(true);
   };
 
-  const formattedOptions = formatOptions(data.items ?? []);
-
   const closePopover = () => {
     setPopoverIsOpen(false);
-    onClose();
     if (searchRef) {
       searchRef.blur();
     }
   };
+
+  // @ts-ignore - not sure, why it's not working
+  useEvent('keydown', onEnterKey, searchRef);
+  useEvent('escape', () => setPopoverIsOpen(false), searchRef);
+  useEvent('blur', () => setPopoverIsOpen(false), searchRef);
 
   useEffect(() => {
     if (searchRef && initialValue) {
@@ -188,7 +193,8 @@ export function SelectableUrlList({
         onClick: onInputClick,
         onInput: onSearchInput,
         inputRef: setSearchRef,
-        placeholder: I18LABELS.searchByUrl,
+        placeholder: I18LABELS.filterByUrl,
+        'aria-label': I18LABELS.filterByUrl,
       }}
       listProps={{
         rowHeight: 68,
@@ -198,6 +204,7 @@ export function SelectableUrlList({
       loadingMessage={loadingMessage}
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}
+      allowExclusions={true}
     >
       {(list, search) => (
         <EuiOutsideClickDetector onOutsideClick={() => closePopover()}>
@@ -207,9 +214,16 @@ export function SelectableUrlList({
             display={'block'}
             button={search}
             closePopover={closePopover}
-            style={{ minWidth: 200 }}
+            style={{ minWidth: 400 }}
+            anchorPosition="downLeft"
+            ownFocus={false}
           >
-            <div style={{ width: 600, maxWidth: '100%' }}>
+            <div
+              style={{
+                width: searchRef?.getBoundingClientRect().width ?? 600,
+                maxWidth: '100%',
+              }}
+            >
               <PopOverTitle />
               {searchValue && (
                 <StyledRow darkMode={darkMode}>
@@ -238,6 +252,7 @@ export function SelectableUrlList({
                       size="s"
                       onClick={() => {
                         onTermChange();
+                        onApply();
                         closePopover();
                       }}
                     >

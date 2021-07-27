@@ -1,18 +1,31 @@
 {
-  "configPath": ["xpack", "cases"],
-  "id": "cases",
-  "kibanaVersion": "kibana",
-  "extraPublicDirs": ["common"],
-  "requiredPlugins": [
-    "actions",
-    "esUiShared",
-    "features",
-    "kibanaReact",
-    "kibanaUtils",
-    "triggersActionsUi"
+  "configPath":[
+     "cases",
+     "xpack"
   ],
-  "optionalPlugins": ["spaces", "security"],
-  "server": true,
-  "ui": true,
-  "version": "8.0.0"
+  "description":"The Case management system in Kibana",
+  "extraPublicDirs":[
+     "common"
+  ],
+  "id":"cases",
+  "kibanaVersion":"kibana",
+  "optionalPlugins":[
+     "security",
+     "spaces"
+  ],
+  "owner":{
+     "githubTeam":"security-threat-hunting",
+     "name":"Security Solution Threat Hunting"
+  },
+  "requiredPlugins":[
+     "actions",
+     "esUiShared",
+     "features",
+     "kibanaReact",
+     "kibanaUtils",
+     "triggersActionsUi"
+  ],
+  "server":true,
+  "ui":true,
+  "version":"8.0.0"
 }

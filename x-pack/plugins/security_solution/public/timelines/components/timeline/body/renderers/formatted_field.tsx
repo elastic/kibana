@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -30,11 +32,13 @@ import {
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
+  AGENT_STATUS_FIELD_NAME,
   GEO_FIELD_TYPE,
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
+import { AgentStatuses } from './agent_statuses';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -46,6 +50,7 @@ const FormattedFieldValueComponent: React.FC<{
   fieldFormat?: string;
   fieldName: string;
   fieldType?: string;
+  isDraggable?: boolean;
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
@@ -56,6 +61,7 @@ const FormattedFieldValueComponent: React.FC<{
   fieldName,
   fieldType,
   isObjectArray = false,
+  isDraggable = true,
   truncate,
   value,
   linkValue,
@@ -68,6 +74,7 @@ const FormattedFieldValueComponent: React.FC<{
         eventId={eventId}
         contextId={contextId}
         fieldName={fieldName}
+        isDraggable={isDraggable}
         value={!isNumber(value) ? value : String(value)}
         truncate={truncate}
       />
@@ -75,7 +82,7 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldType === GEO_FIELD_TYPE) {
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
-    return (
+    return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
@@ -84,20 +91,48 @@ const FormattedFieldValueComponent: React.FC<{
       >
         <FormattedDate fieldName={fieldName} value={value} />
       </DefaultDraggable>
+    ) : (
+      <FormattedDate fieldName={fieldName} value={value} />
     );
   } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (
-      <Port contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+      <Port
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={`${value}`}
+      />
     );
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return (
-      <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+      <Duration
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={`${value}`}
+      />
     );
   } else if (fieldName === HOST_NAME_FIELD_NAME) {
-    return <HostName contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />;
+    return (
+      <HostName
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={value}
+      />
+    );
   } else if (fieldFormat === BYTES_FORMAT) {
     return (
-      <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+      <Bytes
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={`${value}`}
+      />
     );
   } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
     return (
@@ -105,16 +140,41 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        isDraggable={isDraggable}
         linkValue={linkValue}
         truncate={truncate}
         value={value}
       />
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
-    return renderEventModule({ contextId, eventId, fieldName, linkValue, truncate, value });
+    return renderEventModule({
+      contextId,
+      eventId,
+      fieldName,
+      isDraggable,
+      linkValue,
+      truncate,
+      value,
+    });
   } else if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
     return (
-      <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
+      <RuleStatus
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={value}
+      />
+    );
+  } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
+    return (
+      <AgentStatuses
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        value={typeof value === 'string' ? value : ''}
+      />
     );
   } else if (
     [
@@ -124,8 +184,8 @@ const FormattedFieldValueComponent: React.FC<{
       INDICATOR_REFERENCE,
     ].includes(fieldName)
   ) {
-    return renderUrl({ contextId, eventId, fieldName, linkValue, truncate, value });
-  } else if (columnNamesNotDraggable.includes(fieldName)) {
+    return renderUrl({ contextId, eventId, fieldName, linkValue, isDraggable, truncate, value });
+  } else if (columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip

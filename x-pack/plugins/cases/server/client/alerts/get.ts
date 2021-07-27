@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { AlertInfo } from '../../common';
-import { CasesClientGetAlertsResponse } from './types';
+import { CasesClientGetAlertsResponse, AlertGet } from './types';
 import { CasesClientArgs } from '..';
 
-interface GetParams {
-  alertsInfo: AlertInfo[];
-}
-
 export const get = async (
-  { alertsInfo }: GetParams,
+  { alertsInfo }: AlertGet,
   clientArgs: CasesClientArgs
 ): Promise<CasesClientGetAlertsResponse> => {
   const { alertsService, scopedClusterClient, logger } = clientArgs;

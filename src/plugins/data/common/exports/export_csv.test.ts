@@ -17,6 +17,7 @@ function getDefaultOptions() {
     csvSeparator: ',',
     quoteValues: true,
     formatFactory,
+    escapeFormulaValues: false,
   };
 }
 
@@ -70,5 +71,17 @@ describe('CSV exporter', () => {
     expect(datatableToCSV(datatable, getDefaultOptions())).toMatch(
       'columnOne\r\n"Formatted_""value"""\r\n'
     );
+  });
+
+  test('should escape formulas', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = '=1';
+    expect(
+      datatableToCSV(datatable, {
+        ...getDefaultOptions(),
+        escapeFormulaValues: true,
+        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+      })
+    ).toMatch('columnOne\r\n"\'=1"\r\n');
   });
 });

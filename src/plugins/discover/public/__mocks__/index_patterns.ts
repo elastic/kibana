@@ -18,4 +18,5 @@ export const indexPatternsMock = ({
       return indexPatternMock;
     }
   },
-} as unknown) as IndexPatternsService;
+  updateSavedObject: jest.fn(),
+} as unknown) as jest.Mocked<IndexPatternsService>;

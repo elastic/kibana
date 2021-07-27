@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/visualize_embedding');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
@@ -30,6 +30,12 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await PageObjects.common.navigateToApp('settings');
       await appsMenu.clickLink('Run Pipeline');
       await testSubjects.find('pluginContent');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/visualize.json'
+      );
     });
 
     loadTestFile(require.resolve('./basic'));

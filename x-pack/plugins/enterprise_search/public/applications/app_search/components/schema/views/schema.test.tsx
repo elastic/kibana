@@ -7,17 +7,18 @@
 
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/shallow_useeffect.mock';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageHeader, EuiButton } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../shared/schema';
+import { getPageHeaderActions } from '../../../../test_helpers';
 
-import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
+import { SchemaCallouts, SchemaTable } from '../components';
 
 import { Schema } from './';
 
@@ -56,27 +57,8 @@ describe('Schema', () => {
     expect(actions.loadSchema).toHaveBeenCalled();
   });
 
-  it('renders a loading state', () => {
-    setMockValues({ ...values, dataLoading: true });
-    const wrapper = shallow(<Schema />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('renders an empty state', () => {
-    setMockValues({ ...values, hasSchema: false });
-    const wrapper = shallow(<Schema />);
-
-    expect(wrapper.find(EmptyState)).toHaveLength(1);
-  });
-
   describe('page action buttons', () => {
-    const subject = () =>
-      shallow(<Schema />)
-        .find(EuiPageHeader)
-        .dive()
-        .children()
-        .dive();
+    const subject = () => getPageHeaderActions(shallow(<Schema />));
 
     it('renders', () => {
       const wrapper = subject();

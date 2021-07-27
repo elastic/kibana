@@ -34,9 +34,11 @@ export interface UISession {
   created: string;
   expires: string | null;
   status: UISearchSessionState;
+  numSearches: number;
   actions?: ACTION[];
   reloadUrl: string;
   restoreUrl: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
+  version: string;
 }

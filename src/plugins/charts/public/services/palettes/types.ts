@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Ast } from '@kbn/interpreter/common';
+import { ExpressionAstExpression } from '../../../../expressions/common/ast';
 
 /**
  * Information about a series in a chart used to determine its color.
@@ -78,7 +78,7 @@ export interface PaletteDefinition<T = unknown> {
    * This function should be used to pass the palette to the expression function applying color and other styles
    * @param state The internal state of the palette
    */
-  toExpression: (state?: T) => Ast;
+  toExpression: (state?: T) => ExpressionAstExpression;
   /**
    * Color a series according to the internal rules of the palette.
    * @param series The current series along with its ancestors.

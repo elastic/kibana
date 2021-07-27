@@ -28,9 +28,8 @@ import {
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
-import { AnnotationsEditor } from '../annotations_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
+import { AnnotationsEditor } from '../annotations_editor';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
@@ -162,7 +161,6 @@ export class TimeseriesPanelConfig extends Component<
         <AnnotationsEditor
           fields={this.props.fields}
           model={this.props.model}
-          name="annotations"
           onChange={this.props.onChange}
         />
       );
@@ -210,6 +208,7 @@ export class TimeseriesPanelConfig extends Component<
                       this.props.onChange({ filter });
                     }}
                     indexPatterns={[model.index_pattern]}
+                    data-test-subj="panelFilterQueryBar"
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -444,6 +443,7 @@ export class TimeseriesPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.ANNOTATIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.ANNOTATIONS)}
+            data-test-subj="timeSeriesEditorAnnotationsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.timeseries.annotationsTab.annotationsButtonLabel"

@@ -6,7 +6,11 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { LogicMounter } from '../__mocks__/kea_logic';
+import { LogicMounter } from '../__mocks__/kea_logic/logic_mounter.test_helper';
+
+jest.mock('../shared/licensing', () => ({
+  LicensingLogic: { selectors: { hasPlatinumLicense: () => false } },
+}));
 
 import { AppLogic } from './app_logic';
 

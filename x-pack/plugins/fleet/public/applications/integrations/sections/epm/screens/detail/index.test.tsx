@@ -45,22 +45,22 @@ describe('when on integration detail', () => {
       </Route>
     ));
 
-  beforeEach(() => {
+  beforeEach(async () => {
     testRenderer = createIntegrationsTestRendererMock();
     mockedApi = mockApiCalls(testRenderer.startServices.http);
-    testRenderer.history.push(detailPageUrlPath);
+    act(() => testRenderer.mountHistory.push(detailPageUrlPath));
   });
 
   afterEach(() => {
     cleanup();
-    window.location.hash = '#/';
   });
 
   describe('and the package is installed', () => {
     beforeEach(() => render());
 
     it('should display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
+      await act(() => mockedApi.waitForApi());
+
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
@@ -105,15 +105,15 @@ describe('when on integration detail', () => {
 
     it('should redirect if custom url is accessed', () => {
       act(() => {
-        testRenderer.history.push(
+        testRenderer.mountHistory.push(
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
-      expect(testRenderer.history.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
+      expect(testRenderer.mountHistory.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
     });
   });
 
-  describe('and a custom UI extension is registered', () => {
+  describe('and a custom tab UI extension is registered', () => {
     // Because React Lazy components are loaded async (Promise), we setup this "watcher" Promise
     // that is `resolved` once the lazy components actually renders.
     let lazyComponentWasRendered: Promise<void>;
@@ -136,7 +136,7 @@ describe('when on integration detail', () => {
       testRenderer.startInterface.registerExtension({
         package: 'nginx',
         view: 'package-detail-custom',
-        component: CustomComponent,
+        Component: CustomComponent,
       });
 
       render();
@@ -153,8 +153,55 @@ describe('when on integration detail', () => {
 
     it('should display custom content when tab is clicked', async () => {
       act(() => {
-        testRenderer.history.push(
+        testRenderer.mountHistory.push(
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
+        );
+      });
+      await lazyComponentWasRendered;
+      expect(renderResult.getByTestId('custom-hello'));
+    });
+  });
+
+  describe('and a custom assets UI extension is registered', () => {
+    let lazyComponentWasRendered: Promise<void>;
+
+    beforeEach(() => {
+      let setWasRendered: () => void;
+      lazyComponentWasRendered = new Promise((resolve) => {
+        setWasRendered = resolve;
+      });
+
+      const CustomComponent = lazy(async () => {
+        return {
+          default: memo(() => {
+            setWasRendered();
+            return <div data-test-subj="custom-hello">hello</div>;
+          }),
+        };
+      });
+
+      testRenderer.startInterface.registerExtension({
+        package: 'nginx',
+        view: 'package-detail-assets',
+        Component: CustomComponent,
+      });
+
+      render();
+    });
+
+    afterEach(() => {
+      // @ts-ignore
+      lazyComponentWasRendered = undefined;
+    });
+
+    it('should display "assets" tab in navigation', () => {
+      expect(renderResult.getByTestId('tab-assets'));
+    });
+
+    it('should display custom assets when tab is clicked', async () => {
+      act(() => {
+        testRenderer.mountHistory.push(
+          pagePathGetters.integration_details_assets({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
       await lazyComponentWasRendered;
@@ -168,7 +215,7 @@ describe('when on integration detail', () => {
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
       expect(addButton.href).toEqual(
-        'http://localhost/mock/app/fleet#/integrations/nginx-0.3.7/add-integration'
+        'http://localhost/mock/app/fleet/integrations/nginx-0.3.7/add-integration'
       );
     });
   });
@@ -176,7 +223,7 @@ describe('when on integration detail', () => {
   describe('and on the Policies Tab', () => {
     const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey })[1];
     beforeEach(() => {
-      testRenderer.history.push(policiesTabURLPath);
+      testRenderer.mountHistory.push(policiesTabURLPath);
       render();
     });
 
@@ -191,7 +238,7 @@ describe('when on integration detail', () => {
         'integrationNameLink'
       )[0] as HTMLAnchorElement;
       expect(firstPolicy.href).toEqual(
-        'http://localhost/mock/app/integrations#/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+        'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
       );
     });
 

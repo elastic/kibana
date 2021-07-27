@@ -25,7 +25,7 @@ interface Props {
 export function SectionContainer({ title, appLink, children, hasError }: Props) {
   const { core } = usePluginContext();
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiAccordion
         initialIsOpen
         id={title}
@@ -37,7 +37,9 @@ export function SectionContainer({ title, appLink, children, hasError }: Props) 
         }
         extraAction={
           appLink?.href && (
-            <EuiButton href={core.http.basePath.prepend(appLink.href)}>{appLink.label}</EuiButton>
+            <EuiButton size="s" href={core.http.basePath.prepend(appLink.href)}>
+              {appLink.label}
+            </EuiButton>
           )
         }
       >

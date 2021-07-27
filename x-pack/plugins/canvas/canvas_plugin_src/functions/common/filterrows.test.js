@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { testTable } from './__fixtures__/test_tables';
 import { filterrows } from './filterrows';
 
@@ -15,8 +15,8 @@ const inStock = (datatable) => of(datatable.rows[0].in_stock);
 const returnFalse = () => of(false);
 
 describe('filterrows', () => {
-  const fn = functionWrapper(filterrows);
   let testScheduler;
+  const fn = functionWrapper(filterrows);
 
   beforeEach(() => {
     testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));

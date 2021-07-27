@@ -18,12 +18,12 @@ import {
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
-const ActionGroupId = 'threshold met';
+export const ActionGroupId = 'threshold met';
 
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, {}, {}, ActionContext, typeof ActionGroupId> {
+): AlertType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -125,6 +125,7 @@ export function getAlertType(
       ],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
   };
@@ -179,7 +180,7 @@ export function getAlertType(
         groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
       const value = metric && metric.length === 2 ? metric[1] : null;
 
-      if (!value) {
+      if (value === null || value === undefined) {
         logger.debug(
           `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
             groupResult

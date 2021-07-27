@@ -21,7 +21,7 @@ export const testLocator: LocatorDefinition<TestLocatorState> = {
   getLocation: async ({ savedObjectId, pageNumber, showFlyout }) => {
     return {
       app: 'test_app',
-      route: `/my-object/${savedObjectId}?page=${pageNumber}`,
+      path: `/my-object/${savedObjectId}?page=${pageNumber}`,
       state: {
         isFlyoutOpen: showFlyout,
       },
@@ -32,6 +32,9 @@ export const testLocator: LocatorDefinition<TestLocatorState> = {
 export const urlServiceTestSetup = (partialDeps: Partial<UrlServiceDependencies> = {}) => {
   const deps: UrlServiceDependencies = {
     navigate: async () => {
+      throw new Error('not implemented');
+    },
+    getUrl: async () => {
       throw new Error('not implemented');
     },
     ...partialDeps,

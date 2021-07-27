@@ -24,6 +24,7 @@ import {
   EuiCard,
   EuiLink,
   EuiText,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../plugins/kibana_react/public';
@@ -143,8 +144,8 @@ export const EmptyState = ({
           </EuiFlexGrid>
           <EuiSpacer size="xxl" />
           <div className="inpEmptyState__footer">
-            <EuiFlexGrid columns={3}>
-              <EuiFlexItem className="inpEmptyState__footerFlexItem">
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1} className="inpEmptyState__footerFlexItem">
                 <EuiDescriptionList
                   listItems={[
                     {
@@ -166,7 +167,7 @@ export const EmptyState = ({
                   ]}
                 />
               </EuiFlexItem>
-              <EuiFlexItem className="inpEmptyState__footerFlexItem">
+              <EuiFlexItem grow={2} className="inpEmptyState__footerFlexItem">
                 <EuiDescriptionList
                   listItems={[
                     {
@@ -189,7 +190,7 @@ export const EmptyState = ({
                   ]}
                 />
               </EuiFlexItem>
-            </EuiFlexGrid>
+            </EuiFlexGroup>
           </div>
         </EuiPageContentBody>
       </EuiPageContent>

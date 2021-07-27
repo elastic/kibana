@@ -72,10 +72,6 @@ export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
     defaultMessage: 'Successfully sent to { serviceName }',
   });
 
-export const ERROR_GET_FIELDS = i18n.translate('xpack.cases.configure.errorGetFields', {
-  defaultMessage: 'Error getting fields from service',
-});
-
 export const SYNC_CASE = (caseTitle: string) =>
   i18n.translate('xpack.cases.containers.syncCase', {
     values: { caseTitle },

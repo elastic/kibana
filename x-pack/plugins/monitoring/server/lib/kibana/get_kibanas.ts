@@ -71,7 +71,7 @@ export async function getKibanas(
   const params = {
     index: kbnIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         types: ['kibana_stats', 'stats'],

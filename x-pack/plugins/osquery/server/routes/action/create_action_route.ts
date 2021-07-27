@@ -18,6 +18,8 @@ import {
   CreateActionRequestBodySchema,
 } from '../../../common/schemas/routes/action/create_action_request_body_schema';
 
+import { incrementCount } from '../usage';
+
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
@@ -39,34 +41,45 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         osqueryContext,
         agentSelection
       );
-
+      incrementCount(soClient, 'live_query');
       if (!selectedAgents.length) {
+        incrementCount(soClient, 'live_query', 'errors');
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
 
-      const action = {
-        action_id: uuid.v4(),
-        '@timestamp': moment().toISOString(),
-        expiration: moment().add(1, 'days').toISOString(),
-        type: 'INPUT_ACTION',
-        input_type: 'osquery',
-        agents: selectedAgents,
-        data: {
-          id: uuid.v4(),
-          query: request.body.query,
-        },
-      };
-      const actionResponse = await esClient.index<{}, {}>({
-        index: '.fleet-actions',
-        body: action,
-      });
+      try {
+        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const action = {
+          action_id: uuid.v4(),
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(5, 'minutes').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'osquery',
+          agents: selectedAgents,
+          user_id: currentUser,
+          data: {
+            id: uuid.v4(),
+            query: request.body.query,
+          },
+        };
+        const actionResponse = await esClient.index<{}, {}>({
+          index: '.fleet-actions',
+          body: action,
+        });
 
-      return response.ok({
-        body: {
-          response: actionResponse,
-          actions: [action],
-        },
-      });
+        return response.ok({
+          body: {
+            response: actionResponse,
+            actions: [action],
+          },
+        });
+      } catch (error) {
+        incrementCount(soClient, 'live_query', 'errors');
+        return response.customError({
+          statusCode: 500,
+          body: new Error(`Error occurred while processing ${error}`),
+        });
+      }
     }
   );
 };

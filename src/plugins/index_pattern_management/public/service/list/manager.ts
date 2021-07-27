@@ -6,33 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
-import { SimpleSavedObject } from 'src/core/public';
+import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import { once } from 'lodash';
+import { CoreStart } from '../../../../../core/public';
 import { IndexPatternListConfig, IndexPatternTag } from './config';
+import { CONFIG_ROLLUPS } from '../../constants';
+import { RollupIndexPatternListConfig } from './rollup_list_config';
+
+interface IndexPatternListManagerStart {
+  uiSettings: CoreStart['uiSettings'];
+}
 
 export class IndexPatternListManager {
-  private configs: IndexPatternListConfig[] = [];
+  start({ uiSettings }: IndexPatternListManagerStart) {
+    const getConfigs = once(() => {
+      const configs: IndexPatternListConfig[] = [];
+      configs.push(new IndexPatternListConfig());
 
-  setup() {
+      if (uiSettings.isDeclared(CONFIG_ROLLUPS) && uiSettings.get(CONFIG_ROLLUPS)) {
+        configs.push(new RollupIndexPatternListConfig());
+      }
+
+      return configs;
+    });
     return {
-      addListConfig: (Config: typeof IndexPatternListConfig) => {
-        const config = new Config();
-
-        if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
-          throw new Error(`${config.key} exists in IndexPatternListManager.`);
-        }
-        this.configs.push(config);
-      },
-    };
-  }
-
-  start() {
-    return {
-      getIndexPatternTags: (
-        indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
-        isDefault: boolean
-      ) =>
-        this.configs.reduce(
+      getIndexPatternTags: (indexPattern: IndexPattern, isDefault: boolean) =>
+        getConfigs().reduce(
           (tags: IndexPatternTag[], config) =>
             config.getIndexPatternTags
               ? tags.concat(config.getIndexPatternTags(indexPattern, isDefault))
@@ -40,15 +39,15 @@ export class IndexPatternListManager {
           []
         ),
 
-      getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType): string[] =>
-        this.configs.reduce(
+      getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField): string[] =>
+        getConfigs().reduce(
           (info: string[], config) =>
             config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info,
           []
         ),
 
-      areScriptedFieldsEnabled: (indexPattern: IIndexPattern): boolean =>
-        this.configs.every((config) =>
+      areScriptedFieldsEnabled: (indexPattern: IndexPattern): boolean =>
+        getConfigs().every((config) =>
           config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true
         ),
     };

@@ -6,10 +6,11 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import { ConfigKeys, Config, DataStream, Validation } from './types';
+import { ConfigKeys, PolicyConfig, DataStream, Validation, ICustomFields } from './types';
 
 interface Props {
-  defaultConfig: Config;
+  monitorType: DataStream;
+  defaultConfig: PolicyConfig;
   newPolicy: NewPackagePolicy;
   onChange: (opts: {
     /** is current form state is valid */
@@ -20,22 +21,27 @@ interface Props {
   validate: Record<DataStream, Validation>;
 }
 
-export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }: Props) => {
+export const useUpdatePolicy = ({
+  monitorType,
+  defaultConfig,
+  newPolicy,
+  onChange,
+  validate,
+}: Props) => {
   const [updatedPolicy, setUpdatedPolicy] = useState<NewPackagePolicy>(newPolicy);
   // Update the integration policy with our custom fields
-  const [config, setConfig] = useState<Config>(defaultConfig);
-  const currentConfig = useRef<Config>(defaultConfig);
+  const [config, setConfig] = useState<Partial<ICustomFields>>(defaultConfig[monitorType]);
+  const currentConfig = useRef<Partial<ICustomFields>>(defaultConfig[monitorType]);
 
   useEffect(() => {
-    const { type } = config;
     const configKeys = Object.keys(config) as ConfigKeys[];
-    const validationKeys = Object.keys(validate[type]) as ConfigKeys[];
+    const validationKeys = Object.keys(validate[monitorType]) as ConfigKeys[];
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     const isValid =
-      !!newPolicy.name && !validationKeys.find((key) => validate[type][key]?.(config[key]));
+      !!newPolicy.name && !validationKeys.find((key) => validate[monitorType][key]?.(config[key]));
     const formattedPolicy = { ...newPolicy };
     const currentInput = formattedPolicy.inputs.find(
-      (input) => input.type === `synthetics/${type}`
+      (input) => input.type === `synthetics/${monitorType}`
     );
     const dataStream = currentInput?.streams[0];
 
@@ -51,17 +57,19 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
         if (configItem) {
           switch (key) {
             case ConfigKeys.SCHEDULE:
-              configItem.value = JSON.stringify(`@every ${config[key].number}${config[key].unit}`); // convert to cron
+              configItem.value = JSON.stringify(
+                `@every ${config[key]?.number}${config[key]?.unit}`
+              ); // convert to cron
               break;
             case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
             case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
             case ConfigKeys.RESPONSE_STATUS_CHECK:
             case ConfigKeys.TAGS:
-              configItem.value = config[key].length ? JSON.stringify(config[key]) : null;
+              configItem.value = config[key]?.length ? JSON.stringify(config[key]) : null;
               break;
             case ConfigKeys.RESPONSE_HEADERS_CHECK:
             case ConfigKeys.REQUEST_HEADERS_CHECK:
-              configItem.value = Object.keys(config[key]).length
+              configItem.value = Object.keys(config?.[key] || []).length
                 ? JSON.stringify(config[key])
                 : null;
               break;
@@ -70,26 +78,26 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
               configItem.value = config[key] ? `${config[key]}s` : null; // convert to cron
               break;
             case ConfigKeys.REQUEST_BODY_CHECK:
-              configItem.value = config[key].value ? JSON.stringify(config[key].value) : null; // only need value of REQUEST_BODY_CHECK for outputted policy
+              configItem.value = config[key]?.value ? JSON.stringify(config[key]?.value) : null; // only need value of REQUEST_BODY_CHECK for outputted policy
               break;
             case ConfigKeys.TLS_CERTIFICATE:
             case ConfigKeys.TLS_CERTIFICATE_AUTHORITIES:
             case ConfigKeys.TLS_KEY:
               configItem.value =
-                config[key].isEnabled && config[key].value
-                  ? JSON.stringify(config[key].value)
+                config[key]?.isEnabled && config[key]?.value
+                  ? JSON.stringify(config[key]?.value)
                   : null; // only add tls settings if they are enabled by the user
               break;
             case ConfigKeys.TLS_VERSION:
               configItem.value =
-                config[key].isEnabled && config[key].value.length
-                  ? JSON.stringify(config[key].value)
+                config[key]?.isEnabled && config[key]?.value.length
+                  ? JSON.stringify(config[key]?.value)
                   : null; // only add tls settings if they are enabled by the user
               break;
             case ConfigKeys.TLS_KEY_PASSPHRASE:
             case ConfigKeys.TLS_VERIFICATION_MODE:
               configItem.value =
-                config[key].isEnabled && config[key].value ? config[key].value : null; // only add tls settings if they are enabled by the user
+                config[key]?.isEnabled && config[key]?.value ? config[key]?.value : null; // only add tls settings if they are enabled by the user
               break;
             default:
               configItem.value =
@@ -104,7 +112,7 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
         updatedPolicy: formattedPolicy,
       });
     }
-  }, [config, currentConfig, newPolicy, onChange, validate]);
+  }, [config, currentConfig, newPolicy, onChange, validate, monitorType]);
 
   // update our local config state ever time name, which is managed by fleet, changes
   useEffect(() => {

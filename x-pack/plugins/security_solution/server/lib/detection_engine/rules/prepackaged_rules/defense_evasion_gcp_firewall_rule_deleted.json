@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "GCP Firewall Rule Deletion",
   "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:v*.compute.firewalls.delete",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:v*.compute.firewalls.delete\n",
   "references": [
     "https://cloud.google.com/vpc/docs/firewalls"
   ],

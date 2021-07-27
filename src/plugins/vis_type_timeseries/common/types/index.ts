@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, Query } from '../../../data/common';
+import { Filter, IndexPattern, Query } from '../../../data/common';
 import { Panel } from './panel_model';
 
 export { Metric, Series, Panel } from './panel_model';
@@ -40,7 +40,7 @@ export interface Annotation {
 }
 
 export interface VisPayload {
-  filters: unknown[];
+  filters: Filter[];
   panels: Panel[];
   // general
   query: Query[];

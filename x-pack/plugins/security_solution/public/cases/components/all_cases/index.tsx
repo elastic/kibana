@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import {
   getCaseDetailsUrl,
@@ -32,13 +31,13 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     cases: casesUi,
     application: { navigateToApp },
   } = useKibana().services;
-  const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
 
   const goToCreateCase = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: getCreateCaseUrl(urlSearch),
       });
     },
@@ -46,11 +45,14 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   );
 
   const goToCaseConfigure = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      history.push(getConfigureCasesUrl(urlSearch));
+      return navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
+        path: getConfigureCasesUrl(urlSearch),
+      });
     },
-    [history, urlSearch]
+    [navigateToApp, urlSearch]
   );
 
   return casesUi.getAllCases({
@@ -58,8 +60,9 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       href: ({ detailName, subCaseId }: AllCasesNavProps) => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
-      onClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      onClick: async ({ detailName, subCaseId, search }: AllCasesNavProps) => {
+        return navigateToApp(APP_ID, {
+          deepLinkId: SecurityPageName.case,
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
       },

@@ -29,14 +29,14 @@ export const EventFiltersListEmptyState = memo<{
         <h2>
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.listEmpty.title"
-            defaultMessage="Add your first Endpoint Event Filter"
+            defaultMessage="Add your first event filter"
           />
         </h2>
       }
       body={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.listEmpty.message"
-          defaultMessage="There are currently no Endpoint Event Filters on your endpoint."
+          defaultMessage="There are currently no event filters on your endpoint."
         />
       }
       actions={
@@ -48,7 +48,7 @@ export const EventFiltersListEmptyState = memo<{
         >
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.listEmpty.addButton"
-            defaultMessage="Add Endpoint Event Filter"
+            defaultMessage="Add Event Filter"
           />
         </EuiButton>
       }

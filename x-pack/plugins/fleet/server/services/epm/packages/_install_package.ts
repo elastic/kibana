@@ -10,10 +10,10 @@ import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } fro
 import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ElasticsearchAssetType } from '../../../types';
 import type { AssetReference, Installation, InstallType } from '../../../types';
 import { installTemplates } from '../elasticsearch/template/install';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
+import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
@@ -170,10 +170,7 @@ export async function _installPackage({
         installedPkg.attributes.install_version
       );
     }
-    const installedTemplateRefs = installedTemplates.map((template) => ({
-      id: template.templateName,
-      type: ElasticsearchAssetType.indexTemplate,
-    }));
+    const installedTemplateRefs = getAllTemplateRefs(installedTemplates);
 
     // make sure the assets are installed (or didn't error)
     if (installKibanaAssetsError) throw installKibanaAssetsError;

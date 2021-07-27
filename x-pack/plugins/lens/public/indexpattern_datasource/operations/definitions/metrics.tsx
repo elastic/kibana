@@ -110,7 +110,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
-        timeShift: previousColumn?.timeShift,
+        timeShift: columnParams?.shift || previousColumn?.timeShift,
         params: getFormatFromPreviousColumn(previousColumn),
       } as T;
     },
@@ -139,7 +139,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
         defaultMessage: 'field: string',
       }),
-      description: i18n.translate('xpack.lens.indexPattern.metric.documentation', {
+      description: i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
         defaultMessage: `
 Returns the {metric} of a field. This function only works for number fields.
 

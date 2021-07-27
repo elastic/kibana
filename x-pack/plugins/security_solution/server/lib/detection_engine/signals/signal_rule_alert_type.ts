@@ -67,19 +67,26 @@ import {
 } from '../schemas/rule_schemas';
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
+import { wrapSequencesFactory } from './wrap_sequences_factory';
+import { ConfigType } from '../../../config';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export const signalRulesAlertType = ({
   logger,
   eventsTelemetry,
+  experimentalFeatures,
   version,
   ml,
   lists,
+  mergeStrategy,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -102,6 +109,7 @@ export const signalRulesAlertType = ({
     },
     producer: SERVER_APP_ID,
     minimumLicenseRequired: 'basic',
+    isExportable: false,
     async executor({
       previousStartedAt,
       startedAt,
@@ -148,7 +156,12 @@ export const signalRulesAlertType = ({
         if (!isMachineLearningParams(params)) {
           const index = params.index;
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
-          const inputIndices = await getInputIndex(services, version, index);
+          const inputIndices = await getInputIndex({
+            services,
+            version,
+            index,
+            experimentalFeatures,
+          });
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivileges(services, inputIndices),
             services.scopedClusterClient.asCurrentUser.fieldCaps({
@@ -231,78 +244,103 @@ export const signalRulesAlertType = ({
         const wrapHits = wrapHitsFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
+          mergeStrategy,
+        });
+
+        const wrapSequences = wrapSequencesFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+          mergeStrategy,
         });
 
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
-          result = await mlExecutor({
-            rule: mlRuleSO,
-            ml,
-            listClient,
-            exceptionItems,
-            services,
-            logger,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await mlExecutor({
+              rule: mlRuleSO,
+              tuple,
+              ml,
+              listClient,
+              exceptionItems,
+              services,
+              logger,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
-          result = await thresholdExecutor({
-            rule: thresholdRuleSO,
-            tuples,
-            exceptionItems,
-            services,
-            version,
-            logger,
-            buildRuleMessage,
-            startedAt,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await thresholdExecutor({
+              rule: thresholdRuleSO,
+              tuple,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              logger,
+              buildRuleMessage,
+              startedAt,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
-          result = await threatMatchExecutor({
-            rule: threatRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            eventsTelemetry,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await threatMatchExecutor({
+              rule: threatRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
-          result = await queryExecutor({
-            rule: queryRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            eventsTelemetry,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await queryExecutor({
+              rule: queryRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
-          result = await eqlExecutor({
-            rule: eqlRuleSO,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            bulkCreate,
-            logger,
-          });
+          for (const tuple of tuples) {
+            result = await eqlExecutor({
+              rule: eqlRuleSO,
+              tuple,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              searchAfterSize,
+              bulkCreate,
+              logger,
+              wrapHits,
+              wrapSequences,
+            });
+          }
         } else {
           throw new Error(`unknown rule type ${type}`);
         }

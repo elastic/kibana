@@ -18,7 +18,7 @@ import { AlertsResult } from '../../../../state/actions/types';
 
 describe('EnableAlertComponent', () => {
   it('it displays define connectors when there is none', () => {
-    const { getByTestId, getByLabelText, getByText } = render(
+    const { getByTestId, getByLabelText, getByText, getByRole } = render(
       <EnableMonitorAlert
         monitorId={'testMonitor'}
         selectedMonitor={makePing({ name: 'My website' })}
@@ -29,13 +29,12 @@ describe('EnableAlertComponent', () => {
 
     fireEvent.click(getByTestId('uptimeDisplayDefineConnector'));
 
-    expect(getByTestId('uptimeSettingsLink')).toHaveAttribute(
+    expect(getByRole('link', { name: 'Define a default connector' })).toHaveAttribute(
       'href',
       '/settings?focusConnectorField=true'
     );
-    expect(
-      getByText('To start enabling alerts, please define a default alert action connector in')
-    );
+    expect(getByText(/Define a default connector/));
+    expect(getByText(/to receive status alerts./));
   });
 
   it('does not displays define connectors when there is connector', () => {

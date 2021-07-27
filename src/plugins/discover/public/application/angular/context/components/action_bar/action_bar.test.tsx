@@ -10,10 +10,14 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ActionBar, ActionBarProps } from './action_bar';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query_parameters/constants';
+import {
+  MAX_CONTEXT_SIZE,
+  MIN_CONTEXT_SIZE,
+} from '../../../../components/context_app/utils/constants';
+import { SurrDocType } from '../../api/context';
 
 describe('Test Discover Context ActionBar for successor | predecessor records', () => {
-  ['successors', 'predecessors'].forEach((type) => {
+  [SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS].forEach((type) => {
     const onChangeCount = jest.fn();
     const props = {
       defaultStepSize: 5,
@@ -31,7 +35,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
 
     test(`${type}: Load button click`, () => {
       btn.simulate('click');
-      expect(onChangeCount).toHaveBeenCalledWith(25);
+      expect(onChangeCount).toHaveBeenCalledWith(type, 25);
     });
 
     test(`${type}: Load button click doesnt submit when MAX_CONTEXT_SIZE was reached`, () => {
@@ -44,13 +48,13 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
     test(`${type}: Count input change submits on blur`, () => {
       input.simulate('change', { target: { valueAsNumber: 123 } });
       input.simulate('blur');
-      expect(onChangeCount).toHaveBeenCalledWith(123);
+      expect(onChangeCount).toHaveBeenCalledWith(type, 123);
     });
 
     test(`${type}: Count input change submits on return`, () => {
       input.simulate('change', { target: { valueAsNumber: 124 } });
       input.simulate('submit');
-      expect(onChangeCount).toHaveBeenCalledWith(124);
+      expect(onChangeCount).toHaveBeenCalledWith(type, 124);
     });
 
     test(`${type}: Count input doesnt submits values higher than MAX_CONTEXT_SIZE `, () => {
@@ -68,7 +72,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
     });
 
     test(`${type}: Warning about limitation of additional records`, () => {
-      if (type === 'predecessors') {
+      if (type === SurrDocType.PREDECESSORS) {
         expect(findTestSubject(wrapper, 'predecessorsWarningMsg').text()).toBe(
           'No documents newer than the anchor could be found.'
         );

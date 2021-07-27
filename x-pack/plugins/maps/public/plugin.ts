@@ -36,11 +36,6 @@ import type {
 } from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import {
-  createMapsUrlGenerator,
-  createRegionMapUrlGenerator,
-  createTileMapUrlGenerator,
-} from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
@@ -71,6 +66,11 @@ import {
 import { EMSSettings } from '../common/ems_settings';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import {
+  MapsAppLocatorDefinition,
+  MapsAppRegionMapLocatorDefinition,
+  MapsAppTileMapLocatorDefinition,
+} from './locators';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -133,17 +133,21 @@ export class MapsPlugin
     const emsSettings = new EMSSettings(plugins.mapsEms.config, getIsEnterprisePlus);
     setEMSSettings(emsSettings);
 
-    // register url generators
-    const getStartServices = async () => {
-      const [coreStart] = await core.getStartServices();
-      return {
-        appBasePath: coreStart.application.getUrlForApp('maps'),
-        useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-      };
-    };
-    plugins.share.urlGenerators.registerUrlGenerator(createMapsUrlGenerator(getStartServices));
-    plugins.share.urlGenerators.registerUrlGenerator(createTileMapUrlGenerator(getStartServices));
-    plugins.share.urlGenerators.registerUrlGenerator(createRegionMapUrlGenerator(getStartServices));
+    const locator = plugins.share.url.locators.create(
+      new MapsAppLocatorDefinition({
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppTileMapLocatorDefinition({
+        locator,
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppRegionMapLocatorDefinition({
+        locator,
+      })
+    );
 
     plugins.inspector.registerView(MapView);
     if (plugins.home) {

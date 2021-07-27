@@ -6,9 +6,8 @@
  */
 
 import { remove } from 'lodash';
-import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
-import { nodeBuilder, EsQueryConfig } from '../../../../../src/plugins/data/common';
-import { toElasticsearchQuery } from '../../../../../src/plugins/data/common/es_query';
+import { JsonObject } from '@kbn/common-utils';
+import { EsQueryConfig, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 

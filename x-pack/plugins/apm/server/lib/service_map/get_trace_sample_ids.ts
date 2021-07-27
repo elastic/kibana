@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -17,7 +17,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { environmentQuery, rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;

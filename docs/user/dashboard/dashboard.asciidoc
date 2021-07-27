@@ -27,12 +27,12 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | Display the results from machine learning anomaly detection jobs.
 
 | <<xpack-ml-anomalies,Anomaly chart>>
-| Display an anomaly chart from the *Anomaly Explorer.
+| Display an anomaly chart from the *Anomaly Explorer*.
 
 | <<logs-app,Log stream>>
 | Display a table of live streaming logs.
 
-| <<enhance-dashboards,Tools>>
+| <<add-controls,Tools>>
 | Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
 
 |===
@@ -130,6 +130,38 @@ If you change your mind and want to add the panel to the *Visualize Library*:
 . Open the panel menu, then select *More > Save to library*.
 
 . Enter the panel title, then click *Save*.
+
+[float]
+[[add-text]]
+== Add context to panels
+
+To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more.
+
+You create *Text* panels using GitHub-flavored Markdown text. For information about GitHub-flavored Markdown text, click *Help*.
+
+. From the dashboard, click *All types*, then select *Text*.
+
+. In the *Markdown* field, enter the text, then click *Update*.
+
+For example, when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_1.png[]
+
+The following instructions are displayed:
+
+[role="screenshot"]
+image::images/markdown_example_2.png[]
+
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[]
 
 [float]
 [[edit-panels]]
@@ -233,33 +265,19 @@ Copy panels from one dashboard to another dashboard.
 [[explore-the-underlying-documents]]
 == Explore the underlying documents
 
-To gain insight to the data, open the underlying panel or data series documents in *Discover*. The panel documents that you open in *Discover* have the same time range and filters as the source panel.
+You can add additional interactions that allow you to open *Discover* from dashboard panels. To use the interactions, the panel must use only one index pattern.
 
-[float]
-[[explore-underlying-panel-documents]]
-=== Explore the underlying panel documents
-
-When your visualization panel contains a single index pattern, you can open the panel documents in *Discover*.
-
-. Open the panel menu.
-
-. Click *Explore underlying data*.
+Panel interaction:: Opens the data in *Discover* with the current dashboard filters, but does not take the filters
+saved with the panel.
 +
-[role="screenshot"]
-image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+To enable panel interactions, refere to  <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>.
 
-[float]
-[[explore-underlying-data-series-documents]]
-=== Explore the underlying data series documents
-
-To gain insight to a data series, open the documents in *Discover*. 
-
-. Click the data series in the panel that you want to view. 
-
-. Select *Explore underlying data*.
+Series interaction::
+Opens the series data in *Discover* from inside the panel.
 +
-[role="screenshot"]
-image::images/explore_data_in_chart.png[Explore underlying data from chart]
+To enable series interactions, refer to <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>>.
+
+NOTE: In {kib} 7.13 and earlier, the panel interaction was enabled by default.
 
 [float]
 [[download-csv]]
@@ -301,7 +319,7 @@ image:images/Dashboard_inspect.png[Inspect in dashboard]
 [[share-the-dashboard]]
 == Share dashboards
 
-To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information, refer to <<reporting-getting-started,Reporting>>.
+To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
 [[import-dashboards]]
@@ -316,8 +334,6 @@ include::lens-advanced.asciidoc[]
 
 include::create-panels-with-editors.asciidoc[]
 
-include::enhance-dashboards.asciidoc[]
-
-include::drilldowns.asciidoc[]
+include::make-dashboards-interactive.asciidoc[]
 
 include::aggregation-reference.asciidoc[]

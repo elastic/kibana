@@ -10,6 +10,7 @@
   "kibanaVersion": "kibana",
   "optionalPlugins": [
     "home",
+    "usageCollection",
     "lens"
   ],
   "requiredBundles": [
@@ -25,7 +26,8 @@
     "features",
     "fleet",
     "navigation",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "security"
   ],
   "server": true,
   "ui": true,

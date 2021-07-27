@@ -25,6 +25,7 @@ import {
   SectionSubtitle,
   SectionLinks,
   SectionLink,
+  ActionMenuDivider,
 } from '../../../../../../../observability/public';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 
@@ -137,8 +138,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     };
 
     const createAlertMenuItem: SectionLinkProps = {
-      label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
-        defaultMessage: 'Create alert',
+      label: i18n.translate('xpack.infra.nodeContextMenu.createRuleLink', {
+        defaultMessage: 'Create inventory rule',
       }),
       onClick: () => {
         setFlyoutVisible(true);
@@ -173,7 +174,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
               <SectionLink {...nodeDetailMenuItem} />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} />
-              <SectionLink {...createAlertMenuItem} />
+            </SectionLinks>
+            <ActionMenuDivider />
+            <SectionLinks>
+              <SectionLink iconType={'bell'} color={'primary'} {...createAlertMenuItem} />
             </SectionLinks>
           </Section>
         </div>
