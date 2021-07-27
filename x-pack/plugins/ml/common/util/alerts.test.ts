@@ -90,15 +90,6 @@ describe('getResultJobsHealthRuleConfig', () => {
       mml: {
         enabled: true,
       },
-      delayedData: {
-        enabled: true,
-      },
-      behindRealtime: {
-        enabled: true,
-      },
-      errorMessages: {
-        enabled: true,
-      },
     });
   });
   test('returns config with overridden values based on provided configuration', () => {
@@ -113,15 +104,6 @@ describe('getResultJobsHealthRuleConfig', () => {
       },
       mml: {
         enabled: false,
-      },
-      delayedData: {
-        enabled: true,
-      },
-      behindRealtime: {
-        enabled: true,
-      },
-      errorMessages: {
-        enabled: true,
       },
     });
   });
