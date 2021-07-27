@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import React, { memo, useState, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -119,7 +120,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     },
     [navigateToApp, appId]
   );
-  const currentSearch = window.location.search;
+  const currentSearch = useLocation().search;
   const urlSearch = useMemo(() => currentSearch, [currentSearch]);
   const createCaseUrl = useMemo(() => getUrlForApp('cases') + getCreateCaseUrl(urlSearch), [
     getUrlForApp,
