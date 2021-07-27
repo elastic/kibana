@@ -20,6 +20,7 @@ import {
   EuiHorizontalRule,
   EuiButtonEmpty,
   EuiTextAlign,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import './open_options_popover.scss';
 import { DOC_TABLE_LEGACY } from '../../../../../../common';
@@ -33,6 +34,28 @@ interface OptionsPopoverProps {
   anchorElement: HTMLElement;
 }
 
+const toggleButtons = [
+  {
+    id: `discoverViewOptionDocument`,
+    label: 'Document view',
+  },
+  {
+    id: `discoverViewOptionAggregated`,
+    label: 'Aggregated view',
+  },
+];
+
+export const DocumentViewOption = ({ viewId, setViewId }) => {
+  return (
+    <EuiButtonGroup
+      buttonSize={'s'}
+      legend="This is a basic group"
+      options={toggleButtons}
+      idSelected={viewId}
+      onChange={(id) => setViewId(id)}
+    />
+  );
+};
 export function OptionsPopover(props: OptionsPopoverProps) {
   const {
     core: { uiSettings },

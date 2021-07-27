@@ -112,5 +112,12 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     }
   }, [embeddable, embeddableRoot]);
 
-  return <div data-test-subj="dataVisualizerEmbeddedContent" ref={embeddableRoot} />;
+  return (
+    <div
+      data-test-subj="dataVisualizerEmbeddedContent"
+      // @todo: not hardcode this width
+      // style={{ maxWidth: '95%' }}
+      ref={embeddableRoot}
+    />
+  );
 };
