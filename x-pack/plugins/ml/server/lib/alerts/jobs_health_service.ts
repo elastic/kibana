@@ -209,7 +209,7 @@ export function jobsHealthServiceProvider(
                       'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlHardLimitMessage',
                       {
                         defaultMessage:
-                          '{jobsCount, plural, one {# job} other {# jobs}} reached the hard model memory limit.',
+                          '{jobsCount, plural, one {# job} other {# jobs}} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
                         values: { jobsCount: hardLimitJobsCount },
                       }
                     )
@@ -217,7 +217,7 @@ export function jobsHealthServiceProvider(
                       'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
                       {
                         defaultMessage:
-                          '{jobsCount, plural, one {# job} other {# jobs}} reached the soft model memory limit.',
+                          '{jobsCount, plural, one {# job} other {# jobs}} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
                         values: { jobsCount: response.length },
                       }
                     ),
