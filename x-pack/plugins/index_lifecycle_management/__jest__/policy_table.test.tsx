@@ -35,6 +35,7 @@ initUiMetric(usageCollectionPluginMock.createSetupContract());
 // use a date far in the past to check the sorting
 const testDate = '2020-07-21T14:16:58.666Z';
 const testDateFormatted = moment(testDate).format('YYYY-MM-DD HH:mm:ss');
+
 const testPolicy = {
   version: 0,
   modifiedDate: testDate,
