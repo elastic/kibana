@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
+import { State } from '../../../types';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -31,49 +31,9 @@ const allowedEmbeddables = {
   },*/
 };
 
-interface StateProps {
-  pageId: string;
-}
-
-interface DispatchProps {
-  addEmbeddable: (pageId: string, partialElement: { expression: string }) => void;
-}
+type AddEmbeddable = (pageId: string, partialElement: { expression: string }) => void;
 
 type FlyoutProps = Pick<ComponentProps, 'onClose'> & Partial<Omit<ComponentProps, 'onClose'>>;
-
-// FIX: Missing state type
-const mapStateToProps = (state: any) => ({ pageId: getSelectedPage(state) });
-
-const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
-  addEmbeddable: (pageId, partialElement): DispatchProps['addEmbeddable'] =>
-    dispatch(addElement(pageId, partialElement)),
-});
-
-const mergeProps = (
-  stateProps: StateProps,
-  dispatchProps: DispatchProps,
-  ownProps: FlyoutProps
-): ComponentProps => {
-  const { pageId, ...remainingStateProps } = stateProps;
-  const { addEmbeddable } = dispatchProps;
-  const { availableEmbeddables } = ownProps;
-  return {
-    ...remainingStateProps,
-    ...ownProps,
-    availableEmbeddables: availableEmbeddables || [],
-    onSelect: (id: string, type: string): void => {
-      const partialElement = {
-        expression: `markdown "Could not find embeddable for type ${type}" | render`,
-      };
-      if (allowedEmbeddables[type]) {
-        partialElement.expression = allowedEmbeddables[type](id);
-      }
-
-      addEmbeddable(pageId, partialElement);
-      ownProps.onClose();
-    },
-  };
-};
 
 export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (props) => {
   const el: HTMLElement = useMemo(() => document.createElement('div'), []);
@@ -101,8 +61,40 @@ export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (
   );
 };
 
-export const AddEmbeddablePanel = connect<StateProps, DispatchProps, FlyoutProps, ComponentProps>(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(EmbeddableFlyoutPortal);
+export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
+  availableEmbeddables,
+  ...restProps
+}) => {
+  const dispatch = useDispatch();
+  const state: State = useSelector<State, State>((stateProps) => stateProps);
+  const pageId = useSelector<State, string>((stateProps) => getSelectedPage(stateProps));
+
+  const addEmbeddable: AddEmbeddable = useCallback(
+    (selectedPageId, partialElement) => dispatch(addElement(selectedPageId, partialElement)),
+    [dispatch]
+  );
+
+  const onSelect = useCallback(
+    (id: string, type: string) => {
+      const partialElement = {
+        expression: `markdown "Could not find embeddable for type ${type}" | render`,
+      };
+      if (allowedEmbeddables[type]) {
+        partialElement.expression = allowedEmbeddables[type](id);
+      }
+
+      addEmbeddable(pageId, partialElement);
+      restProps.onClose();
+    },
+    [addEmbeddable, pageId, restProps]
+  );
+
+  return (
+    <EmbeddableFlyoutPortal
+      {...restProps}
+      {...state}
+      availableEmbeddables={availableEmbeddables || []}
+      onSelect={onSelect}
+    />
+  );
+};
