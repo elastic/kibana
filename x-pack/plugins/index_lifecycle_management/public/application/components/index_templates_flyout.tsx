@@ -38,7 +38,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({ policy, close }
   return (
     <EuiFlyout onClose={close}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="indexTemplatesFlyoutHeader">
           <h2>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText"
@@ -60,7 +60,11 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({ policy, close }
               ),
               render: (value: string) => {
                 return (
-                  <EuiLink className="eui-textBreakAll" href={getUrlForIndexTemplate(value)}>
+                  <EuiLink
+                    data-test-subj="indexTemplateLink"
+                    className="eui-textBreakAll"
+                    href={getUrlForIndexTemplate(value)}
+                  >
                     {value}
                   </EuiLink>
                 );

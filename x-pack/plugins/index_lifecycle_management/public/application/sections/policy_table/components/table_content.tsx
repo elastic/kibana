@@ -261,7 +261,10 @@ export const TableContent: React.FunctionComponent<Props> = ({
       );
     } else if (fieldName === 'indexTemplates' && policy) {
       return (
-        <EuiButtonEmpty onClick={() => setConfirmModal(renderIndexTemplatesFlyout(policy))}>
+        <EuiButtonEmpty
+          data-test-subj="viewIndexTemplates"
+          onClick={() => setConfirmModal(renderIndexTemplatesFlyout(policy))}
+        >
           {value ? (value as string[]).length : '0'}
         </EuiButtonEmpty>
       );
