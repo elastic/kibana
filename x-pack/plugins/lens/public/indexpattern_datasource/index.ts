@@ -49,7 +49,7 @@ export class IndexPatternDatasource {
       return core
         .getStartServices()
         .then(([coreStart, { indexPatternFieldEditor, uiActions, data }]) => {
-          const suffixFormatter = getSuffixFormatter(() => data.fieldFormats.deserialize);
+          const suffixFormatter = getSuffixFormatter(data.fieldFormats.deserialize);
           if (!dataSetup.fieldFormats.has(suffixFormatter.id)) {
             dataSetup.fieldFormats.register([suffixFormatter]);
           }
