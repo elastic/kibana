@@ -543,6 +543,11 @@ function buildSuggestion({
       yLeft: true,
       yRight: true,
     },
+    labelsOrientation: currentState?.labelsOrientation || {
+      x: 0,
+      yLeft: 0,
+      yRight: 0,
+    },
     gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
       x: true,
       yLeft: true,
