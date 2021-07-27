@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { AlertTypeRegistryContract } from '../types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { RuleTypeRegistry } from './rule_type_registry';
 
-const createAlertTypeRegistryMock = () => {
-  const mocked: jest.Mocked<AlertTypeRegistryContract> = {
+type Schema = PublicMethodsOf<RuleTypeRegistry>;
+
+const createRuleTypeRegistryMock = () => {
+  const mocked: jest.Mocked<Schema> = {
     has: jest.fn(),
     register: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+    ensureRuleTypeEnabled: jest.fn(),
   };
   return mocked;
 };
 
-export const alertTypeRegistryMock = {
-  create: createAlertTypeRegistryMock,
+export const ruleTypeRegistryMock = {
+  create: createRuleTypeRegistryMock,
 };

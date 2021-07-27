@@ -2187,10 +2187,10 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.TriggersAndActionsUiServices.alertTypeRegistry",
+            "id": "def-public.TriggersAndActionsUiServices.ruleTypeRegistry",
             "type": "Object",
             "tags": [],
-            "label": "alertTypeRegistry",
+            "label": "ruleTypeRegistry",
             "description": [],
             "signature": [
               "{ get: (id: string) => ",
@@ -2535,10 +2535,10 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertTypeRegistryContract",
+        "id": "def-public.RuleTypeRegistryContract",
         "type": "Type",
         "tags": [],
-        "label": "AlertTypeRegistryContract",
+        "label": "RuleTypeRegistryContract",
         "description": [],
         "signature": [
           "{ get: (id: string) => ",
@@ -3623,10 +3623,10 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginSetup.alertTypeRegistry",
+          "id": "def-public.TriggersAndActionsUIPublicPluginSetup.ruleTypeRegistry",
           "type": "Object",
           "tags": [],
-          "label": "alertTypeRegistry",
+          "label": "ruleTypeRegistry",
           "description": [],
           "signature": [
             "TypeRegistry",
@@ -3684,10 +3684,10 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.alertTypeRegistry",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.ruleTypeRegistry",
           "type": "Object",
           "tags": [],
-          "label": "alertTypeRegistry",
+          "label": "ruleTypeRegistry",
           "description": [],
           "signature": [
             "TypeRegistry",
