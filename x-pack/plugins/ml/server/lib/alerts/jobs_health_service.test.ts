@@ -199,7 +199,8 @@ describe('JobsHealthService', () => {
               memory_status: 'hard_limit',
             },
           ],
-          message: '1 job reached the hard model memory limit.',
+          message:
+            '1 job reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
         },
       },
     ]);
