@@ -43,7 +43,7 @@ interface Props {
 }
 
 type ServiceDependencyItem = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/dependencies'>['serviceItems']
+  APIReturnType<'GET /api/apm/services/{serviceName}/dependencies'>['serviceDependencies']
 >;
 
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
@@ -248,7 +248,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
 
   // need top-level sortable fields for the managed table
   const items =
-    data?.serviceItems.map((item) => ({
+    data?.serviceDependencies.map((item) => ({
       ...item,
       errorRateValue: item.currentMetrics.errorRate.value,
       latencyValue: item.currentMetrics.latency.value,

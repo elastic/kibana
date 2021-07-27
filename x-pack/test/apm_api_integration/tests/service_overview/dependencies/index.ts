@@ -8,9 +8,13 @@
 import expect from '@kbn/expect';
 import { last, omit, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
+import { Node, NodeType } from '../../../../../plugins/apm/common/connections';
 import { createApmApiSupertest } from '../../../common/apm_api_supertest';
 import { roundNumber } from '../../../utils';
-import { ENVIRONMENT_ALL } from '../../../../../plugins/apm/common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../../../plugins/apm/common/environment_filter_values';
 import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -23,6 +27,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
+
+  function getName(node: Node) {
+    return node.type === NodeType.service ? node.serviceName : node.backendName;
+  }
 
   registry.when(
     'Service overview dependencies when data is not loaded',
@@ -228,16 +236,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns opbeans-node as a dependency', () => {
         const opbeansNode = response.body.serviceDependencies.find(
-          (item) => item.type === 'service' && item.serviceName === 'opbeans-node'
+          (item) => getName(item.to) === 'opbeans-node'
         );
 
         expect(opbeansNode !== undefined).to.be(true);
 
         const values = {
-          latency: roundNumber(opbeansNode?.latency.value),
-          throughput: roundNumber(opbeansNode?.throughput.value),
-          errorRate: roundNumber(opbeansNode?.errorRate.value),
-          ...pick(opbeansNode, 'serviceName', 'type', 'agentName', 'environment', 'impact'),
+          latency: roundNumber(opbeansNode?.currentMetrics.latency.value),
+          throughput: roundNumber(opbeansNode?.currentMetrics.throughput.value),
+          errorRate: roundNumber(opbeansNode?.currentMetrics.errorRate.value),
+          impact: opbeansNode?.currentMetrics.impact,
+          ...pick(opbeansNode?.to, 'serviceName', 'type', 'agentName', 'environment'),
         };
 
         const count = 4;
@@ -246,7 +255,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(values).to.eql({
           agentName: 'nodejs',
-          environment: '',
+          environment: ENVIRONMENT_NOT_DEFINED.value,
           serviceName: 'opbeans-node',
           type: 'service',
           errorRate: roundNumber(errors / count),
@@ -255,8 +264,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           impact: 100,
         });
 
-        const firstValue = roundNumber(opbeansNode?.latency.timeseries[0].y);
-        const lastValue = roundNumber(last(opbeansNode?.latency.timeseries)?.y);
+        const firstValue = roundNumber(opbeansNode?.currentMetrics.latency.timeseries[0].y);
+        const lastValue = roundNumber(last(opbeansNode?.currentMetrics.latency.timeseries)?.y);
 
         expect(firstValue).to.be(roundNumber(20 / 3));
         expect(lastValue).to.be('1.000');
@@ -264,16 +273,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns postgres as an external dependency', () => {
         const postgres = response.body.serviceDependencies.find(
-          (item) => item.type === 'external' && item.name === 'postgres'
+          (item) => getName(item.to) === 'postgres'
         );
 
         expect(postgres !== undefined).to.be(true);
 
         const values = {
-          latency: roundNumber(postgres?.latency.value),
-          throughput: roundNumber(postgres?.throughput.value),
-          errorRate: roundNumber(postgres?.errorRate.value),
-          ...pick(postgres, 'spanType', 'spanSubtype', 'name', 'impact', 'type'),
+          latency: roundNumber(postgres?.currentMetrics.latency.value),
+          throughput: roundNumber(postgres?.currentMetrics.throughput.value),
+          errorRate: roundNumber(postgres?.currentMetrics.errorRate.value),
+          impact: postgres?.currentMetrics.impact,
+          ...pick(postgres?.to, 'spanType', 'spanSubtype', 'backendName', 'type'),
         };
 
         const count = 1;
@@ -283,8 +293,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(values).to.eql({
           spanType: 'external',
           spanSubtype: 'http',
-          name: 'postgres',
-          type: 'external',
+          backendName: 'postgres',
+          type: 'backend',
           errorRate: roundNumber(errors / count),
           latency: roundNumber(sum / count),
           throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
@@ -325,8 +335,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns at least one item', () => {
         expect(response.body.serviceDependencies.length).to.be.greaterThan(0);
 
+        expectSnapshot(response.body.serviceDependencies.length).toMatchInline(`4`);
+
+        const { currentMetrics, ...firstItem } = sortBy(
+          response.body.serviceDependencies,
+          'currentMetrics.impact'
+        ).reverse()[0];
+
+        expectSnapshot(firstItem.to).toMatchInline(`
+          Object {
+            "backendName": "postgresql",
+            "id": "d4e2a4d33829d41c096c26f8037921cfc7e566b2",
+            "spanSubtype": "postgresql",
+            "spanType": "db",
+            "type": "backend",
+          }
+        `);
+
         expectSnapshot(
-          omit(response.body.serviceDependencies[0], [
+          omit(currentMetrics, [
             'errorRate.timeseries',
             'throughput.timeseries',
             'latency.timeseries',
@@ -340,19 +367,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "latency": Object {
               "value": 30177.8418777023,
             },
-            "name": "postgresql",
-            "spanSubtype": "postgresql",
-            "spanType": "db",
             "throughput": Object {
               "value": 53.9666666666667,
             },
-            "type": "external",
           }
         `);
       });
 
       it('returns the right names', () => {
-        const names = response.body.serviceDependencies.map((item) => item.name);
+        const names = response.body.serviceDependencies.map((item) => getName(item.to));
         expectSnapshot(names.sort()).toMatchInline(`
           Array [
             "elasticsearch",
@@ -365,7 +388,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the right service names', () => {
         const serviceNames = response.body.serviceDependencies
-          .map((item) => (item.type === 'service' ? item.serviceName : undefined))
+          .map((item) => (item.to.type === NodeType.service ? getName(item.to) : undefined))
           .filter(Boolean);
 
         expectSnapshot(serviceNames.sort()).toMatchInline(`
@@ -378,8 +401,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the right latency values', () => {
         const latencyValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
-            name: item.name,
-            latency: item.latency.value,
+            name: getName(item.to),
+            latency: item.currentMetrics.latency.value,
           })),
           'name'
         );
@@ -409,8 +432,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the right throughput values', () => {
         const throughputValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
-            name: item.name,
-            throughput: item.throughput.value,
+            name: getName(item.to),
+            throughput: item.currentMetrics.throughput.value,
           })),
           'name'
         );
@@ -440,10 +463,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the right impact values', () => {
         const impactValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
-            name: item.name,
-            impact: item.impact,
-            latency: item.latency.value,
-            throughput: item.throughput.value,
+            name: getName(item.to),
+            impact: item.currentMetrics.impact,
+            latency: item.currentMetrics.latency.value,
+            throughput: item.currentMetrics.throughput.value,
           })),
           'name'
         );

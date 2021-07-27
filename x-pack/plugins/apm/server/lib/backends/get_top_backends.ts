@@ -8,7 +8,7 @@
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionMetrics } from '../connections/get_connection_metrics';
 import { getConnectionMetricItemsWithRelativeImpact } from '../connections/get_connection_metrics/get_connection_metric_items_with_relative_impact';
-import { NodeType } from '../connections/types';
+import { NodeType } from '../../../common/connections';
 import { Setup } from '../helpers/setup_request';
 
 export async function getTopBackends({

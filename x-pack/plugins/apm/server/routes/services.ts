@@ -635,11 +635,11 @@ export const serviceDependenciesRoute = createApmServerRoute({
 
     const [currentPeriod, previousPeriod] = await Promise.all([
       getServiceDependencies(opts),
-      ...(offset ? [getServiceDependencies({ ...opts, offset })] : []),
+      ...(offset ? [getServiceDependencies({ ...opts, offset })] : [[]]),
     ]);
 
     return {
-      serviceItems: currentPeriod.map((item) => {
+      serviceDependencies: currentPeriod.map((item) => {
         const { metrics, ...rest } = item;
         const previousPeriodItem = previousPeriod.find(
           (prevItem) => item.to.id === prevItem.to.id
