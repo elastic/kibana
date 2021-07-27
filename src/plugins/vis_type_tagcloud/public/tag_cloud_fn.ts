@@ -7,8 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PaletteRegistry } from '../../charts/public';
 
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { TagCloudVisDependencies } from './plugin';
 import { TagCloudVisParams, TagCloudVisConfig } from './types';
 
 const name = 'tagcloud';
@@ -22,16 +24,19 @@ export interface TagCloudVisRenderValue {
   visData: Datatable;
   visParams: TagCloudVisParams;
   syncColors: boolean;
+  paletteRegistry: PaletteRegistry;
 }
 
 export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
   Datatable,
   Arguments,
-  Render<TagCloudVisRenderValue>
+  Promise<Render<TagCloudVisRenderValue>>
 >;
 
-export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
+export const createTagCloudFnFactory = (
+  palettes: TagCloudVisDependencies['palettes']
+) => (): TagcloudExpressionFunctionDefinition => ({
   name,
   type: 'render',
   inputTypes: ['datatable'],
@@ -91,7 +96,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
       }),
     },
   },
-  fn(input, args, handlers) {
+  fn: async (input, args, handlers) => {
     const visParams = {
       scale: args.scale,
       orientation: args.orientation,
@@ -111,6 +116,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.logDatatable('default', input);
     }
+    const paletteRegistry = await palettes.getPalettes();
     return {
       type: 'render',
       as: 'tagloud_vis',
@@ -119,6 +125,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
         visType: name,
         visParams,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+        paletteRegistry,
       },
     };
   },

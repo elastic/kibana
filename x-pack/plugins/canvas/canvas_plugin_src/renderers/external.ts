@@ -11,6 +11,7 @@ import { errorRenderer, debugRenderer } from '../../../../../src/plugins/express
 import { repeatImageRenderer } from '../../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
 import { shapeRenderer } from '../../../../../src/plugins/expression_shape/public';
+import { tagCloudVisRenderer as tagCloudRenderer } from '../../../../../src/plugins/vis_type_tagcloud/public';
 
 export const renderFunctions = [
   debugRenderer,
@@ -20,6 +21,7 @@ export const renderFunctions = [
   revealImageRenderer,
   shapeRenderer,
   repeatImageRenderer,
+  tagCloudRenderer,
 ];
 
 export const renderFunctionFactories = [];

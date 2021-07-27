@@ -23,7 +23,7 @@ const MAX_TAG_COUNT = 200;
 export type TagCloudChartProps = TagCloudVisRenderValue & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
-  palettesRegistry: PaletteRegistry;
+  paletteRegistry: PaletteRegistry;
 };
 
 const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: number) =>
@@ -71,7 +71,7 @@ const ORIENTATIONS = {
 export const TagCloudChart = ({
   visData,
   visParams,
-  palettesRegistry,
+  paletteRegistry,
   fireEvent,
   renderComplete,
   syncColors,
@@ -97,7 +97,7 @@ export const TagCloudChart = ({
           tag === 'all' || visData.rows.length <= 1
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
-        color: getColor(palettesRegistry, palette.name, tag, values, syncColors) || 'rgba(0,0,0,0)',
+        color: getColor(paletteRegistry, palette.name, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
   }, [
@@ -105,7 +105,7 @@ export const TagCloudChart = ({
     bucketFormatter,
     metric.accessor,
     palette.name,
-    palettesRegistry,
+    paletteRegistry,
     syncColors,
     visData.columns,
     visData.rows,

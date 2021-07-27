@@ -20,7 +20,8 @@
       "features",
       "inspector",
       "presentationUtil",
-      "uiActions"
+      "uiActions",
+      "visTypeTagcloud"
     ],
     "optionalPlugins": [
       "home",

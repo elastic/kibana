@@ -12,3 +12,5 @@ import { TagCloudPlugin as Plugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
+
+export { tagCloudVisRenderer } from './tag_cloud_vis_renderer';
