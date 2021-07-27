@@ -72,7 +72,7 @@ const EndpointListNavLink = memo<{
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
       data-test-subj={dataTestSubj}
-      className="eui-textTruncate"
+      className="eui-displayInline eui-textTruncate"
       href={href}
       onClick={clickHandler}
     >
@@ -302,6 +302,7 @@ export const EndpointList = () => {
                   color="subdued"
                   size="xs"
                   style={{ whiteSpace: 'nowrap', ...PAD_LEFT }}
+                  className="eui-textTruncate"
                   data-test-subj="policyListRevNo"
                 >
                   <FormattedMessage
@@ -332,18 +333,23 @@ export const EndpointList = () => {
           });
           const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
-            <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
-              className="eui-textTruncate"
-              data-test-subj="rowPolicyStatus"
+            <EuiToolTip
+              content={POLICY_STATUS_TO_TEXT[policy.status]}
+              anchorClassName="eui-textTruncate"
             >
-              <EndpointListNavLink
-                name={POLICY_STATUS_TO_TEXT[policy.status]}
-                href={toRouteUrl}
-                route={toRoutePath}
-                dataTestSubj="policyStatusCellLink"
-              />
-            </EuiHealth>
+              <EuiHealth
+                color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+                className="eui-textTruncate eui-fullWidth"
+                data-test-subj="rowPolicyStatus"
+              >
+                <EndpointListNavLink
+                  name={POLICY_STATUS_TO_TEXT[policy.status]}
+                  href={toRouteUrl}
+                  route={toRoutePath}
+                  dataTestSubj="policyStatusCellLink"
+                />
+              </EuiHealth>
+            </EuiToolTip>
           );
         },
       },
@@ -353,7 +359,16 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'OS',
         }),
-        truncateText: true,
+        // eslint-disable-next-line react/display-name
+        render: (os: string) => {
+          return (
+            <EuiToolTip content={os} anchorClassName="eui-textTruncate">
+              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+                <p className="eui-displayInline eui-TextTruncate">{os}</p>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'metadata.host.ip',
@@ -364,11 +379,14 @@ export const EndpointList = () => {
         // eslint-disable-next-line react/display-name
         render: (ip: string[]) => {
           return (
-            <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-fullWidth">
-              <EuiText size="s" className="eui-fullWidth">
-                <span className="eui-textTruncate eui-fullWidth">
+            <EuiToolTip
+              content={ip.toString().replace(',', ', ')}
+              anchorClassName="eui-textTruncate"
+            >
+              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+                <p className="eui-displayInline eui-textTruncate">
                   {ip.toString().replace(',', ', ')}
-                </span>
+                </p>
               </EuiText>
             </EuiToolTip>
           );
@@ -380,7 +398,16 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Sensor',
         }),
-        truncateText: true,
+        // eslint-disable-next-line react/display-name
+        render: (version: string) => {
+          return (
+            <EuiToolTip content={version} anchorClassName="eui-textTruncate">
+              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+                <p className="eui-displayInline eui-TextTruncate">{version}</p>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'metadata.@timestamp',
