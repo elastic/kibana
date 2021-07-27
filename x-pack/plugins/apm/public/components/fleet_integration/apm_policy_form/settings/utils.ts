@@ -25,28 +25,12 @@ const REQUIRED_FIELD = i18n.translate(
   { defaultMessage: 'Required field' }
 );
 
-function mergeNewVars(
+export function mergeNewVars(
   oldVars: PackagePolicyVars,
   key: string,
   value?: any
 ): PackagePolicyVars {
   return { ...oldVars, [key]: { ...oldVars[key], value } };
-}
-
-export function handleFormChange({
-  vars,
-  key,
-  value,
-  validateForm,
-}: {
-  vars: PackagePolicyVars;
-  key: string;
-  value?: any;
-  validateForm: (vars: PackagePolicyVars) => boolean;
-}) {
-  const newVars = mergeNewVars(vars, key, value);
-  const isValid = validateForm(newVars);
-  return { newVars, isValid };
 }
 
 export function isSettingsFormValid(

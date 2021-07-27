@@ -10,7 +10,7 @@ import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
 import { SettingDefinition } from './typings';
-import { handleFormChange, isSettingsFormValid, OPTIONAL_LABEL } from './utils';
+import { isSettingsFormValid, mergeNewVars, OPTIONAL_LABEL } from './utils';
 
 const advancedSettings: SettingDefinition[] = [
   {
@@ -167,7 +167,7 @@ const rumSettings: SettingDefinition[] = [
 
 const rumFields = [...basicSettings, ...advancedSettings];
 
-function validateRUMForm(vars: PackagePolicyVars) {
+function isRUMFormValid(vars: PackagePolicyVars) {
   // only validates RUM when its flag is enabled
   return !vars[ENABLE_RUM_KEY].value || isSettingsFormValid(rumFields, vars);
 }
@@ -191,13 +191,8 @@ export function RUMSettingsForm({ vars, onChange }: Props) {
       settings={rumSettings}
       vars={vars}
       onChange={(key, value) => {
-        const { newVars, isValid } = handleFormChange({
-          vars,
-          key,
-          value,
-          validateForm: validateRUMForm,
-        });
-        onChange(newVars, isValid);
+        const newVars = mergeNewVars(vars, key, value);
+        onChange(newVars, isRUMFormValid(newVars));
       }}
     />
   );

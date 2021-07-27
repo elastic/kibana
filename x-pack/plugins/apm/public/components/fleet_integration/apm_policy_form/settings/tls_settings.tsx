@@ -10,10 +10,10 @@ import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
 import { SettingDefinition } from './typings';
 import {
-  handleFormChange,
   isSettingsFormValid,
-  REQUIRED_LABEL,
+  mergeNewVars,
   OPTIONAL_LABEL,
+  REQUIRED_LABEL,
 } from './utils';
 
 const basicsettings: SettingDefinition[] = [
@@ -88,7 +88,7 @@ const tlsSettings: SettingDefinition[] = [
 ];
 
 const tlsFields = basicsettings;
-function validateTLSForm(vars: PackagePolicyVars) {
+function isTLSFormValid(vars: PackagePolicyVars) {
   // only validates TLS when its flag is enabled
   return !vars[TLS_ENABLED_KEY].value || isSettingsFormValid(tlsFields, vars);
 }
@@ -112,13 +112,8 @@ export function TLSSettingsForm({ vars, onChange }: Props) {
       settings={tlsSettings}
       vars={vars}
       onChange={(key, value) => {
-        const { newVars, isValid } = handleFormChange({
-          vars,
-          key,
-          value,
-          validateForm: validateTLSForm,
-        });
-        onChange(newVars, isValid);
+        const newVars = mergeNewVars(vars, key, value);
+        onChange(newVars, isTLSFormValid(newVars));
       }}
     />
   );

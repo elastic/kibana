@@ -12,8 +12,8 @@ import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
 import { SettingDefinition } from './typings';
 import {
-  handleFormChange,
   isSettingsFormValid,
+  mergeNewVars,
   OPTIONAL_LABEL,
   REQUIRED_LABEL,
 } from './utils';
@@ -259,7 +259,7 @@ const advancedSettings: SettingDefinition[] = [
 ];
 
 const apmFields = [...basicSettings, ...advancedSettings];
-function validateAPMForm(vars: PackagePolicyVars) {
+function isAPMFormValid(vars: PackagePolicyVars) {
   return isSettingsFormValid(apmFields, vars);
 }
 
@@ -288,13 +288,8 @@ export function APMSettingsForm({ vars, onChange }: Props) {
       settings={apmSettings}
       vars={vars}
       onChange={(key, value) => {
-        const { newVars, isValid } = handleFormChange({
-          vars,
-          key,
-          value,
-          validateForm: validateAPMForm,
-        });
-        onChange(newVars, isValid);
+        const newVars = mergeNewVars(vars, key, value);
+        onChange(newVars, isAPMFormValid(newVars));
       }}
     />
   );
