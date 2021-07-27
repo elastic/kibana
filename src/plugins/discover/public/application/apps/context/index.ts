@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-// required for i18nIdDirective
-import 'angular-sanitize';
-
-import './discover';
-import './doc';
-import './context';
-import './doc_viewer';
-import './redirect';
+export { ContextMainApp } from './context_main_app';

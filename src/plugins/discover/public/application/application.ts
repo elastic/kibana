@@ -9,6 +9,8 @@
 import './index.scss';
 import angular from 'angular';
 import { getServices } from '../kibana_services';
+import { renderApp as renderReactApp } from './index';
+import { DiscoverServices } from '../build_services';
 
 /**
  * Here's where Discover's inner angular is mounted and rendered
@@ -26,6 +28,8 @@ function mountDiscoverApp(moduleName: string, element: HTMLElement) {
   const appWrapper = document.createElement('div');
   appWrapper.setAttribute('ng-view', '');
   mountpoint.appendChild(appWrapper);
+  const app = renderReactApp({ element: appWrapper});
+
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);

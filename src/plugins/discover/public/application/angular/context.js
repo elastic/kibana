@@ -22,7 +22,9 @@ const k7Breadcrumbs = () => {
   ];
 };
 
-getAngularModule().config(($routeProvider) => {
+console.log('Bla');
+
+/*getAngularModule().config(($routeProvider) => {
   $routeProvider.when('/context/:indexPatternId/:id*', {
     controller: function ($routeParams, $scope, $route) {
       this.indexPattern = $route.current.locals.indexPattern.ip;
@@ -34,10 +36,11 @@ getAngularModule().config(($routeProvider) => {
     reloadOnSearch: false,
     resolve: {
       indexPattern: ($route, Promise) => {
-        const indexPattern = getServices().indexPatterns.get($route.current.params.indexPatternId);
-        return Promise.props({ ip: indexPattern });
+       // const indexPattern = getServices().indexPatterns.get($route.current.params.indexPatternId);
+       // return Promise.props({ ip: indexPattern });
       },
     },
     template: contextAppRouteTemplate,
   });
 });
+*/

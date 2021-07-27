@@ -32,7 +32,7 @@ app.directive('discoverDoc', function (reactDirective: any) {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-app.config(($routeProvider: any) => {
+/*app.config(($routeProvider: any) => {
   $routeProvider
     .when('/doc/:indexPattern/:index/:type', {
       redirectTo: '/doc/:indexPattern/:index',
@@ -59,3 +59,4 @@ app.config(($routeProvider: any) => {
       ],
     });
 });
+ */

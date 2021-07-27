@@ -9,7 +9,7 @@
 import { getAngularModule, getServices, getUrlTracker } from '../../kibana_services';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-getAngularModule().config(($routeProvider: any) => {
+/*getAngularModule().config(($routeProvider: any) => {
   $routeProvider.otherwise({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolveRedirectTo: ($rootScope: any) => {
@@ -27,3 +27,4 @@ getAngularModule().config(($routeProvider: any) => {
     },
   });
 });
+*/

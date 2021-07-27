@@ -108,7 +108,6 @@ export function initializeInnerAngularModule(
   return angular
     .module(name, [
       'ngSanitize',
-      'ngRoute',
       'react',
       'ui.bootstrap',
       'discoverI18n',
