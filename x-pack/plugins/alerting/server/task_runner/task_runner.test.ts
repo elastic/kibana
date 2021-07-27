@@ -2257,7 +2257,13 @@ describe('Task Runner', () => {
           }),
         },
       },
-      mockedTaskInstance,
+      {
+        ...mockedTaskInstance,
+        params: {
+          ...mockedTaskInstance.params,
+          spaceId: 'foo',
+        }
+      },
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
@@ -2278,7 +2284,7 @@ describe('Task Runner', () => {
       }
     `);
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      `Executing Alert test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
+      `Executing Alert foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
     );
   });
 
@@ -3054,7 +3060,13 @@ describe('Task Runner', () => {
 
     const taskRunner = new TaskRunner(
       alertType,
-      mockedTaskInstance,
+      {
+        ...mockedTaskInstance,
+        params: {
+          ...mockedTaskInstance.params,
+          spaceId: 'foo',
+        },
+      },
       taskRunnerFactoryInitializerParams
     );
 
@@ -3071,12 +3083,12 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert test:1 has resulted in Error: Saved object [alert/1] not found`
+        `Executing Alert foo:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
-        `Unable to execute rule "1" because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+        `Unable to execute rule "1" in the "foo" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
       );
       expect(isUnrecoverableError(ex)).toBeTruthy();
     });
@@ -3112,7 +3124,7 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert test:1 has resulted in Error: Saved object [alert/1] not found`
+        `Executing Alert test space:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
