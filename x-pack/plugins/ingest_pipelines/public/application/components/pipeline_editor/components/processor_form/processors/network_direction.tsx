@@ -9,7 +9,7 @@ import React, { FunctionComponent, useState, useCallback, useMemo } from 'react'
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiCode } from '@elastic/eui';
+import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
@@ -131,11 +131,14 @@ const getInternalNetworkConfig: (
       ),
     },
     labelAppend: (
-      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
-        {i18n.translate('xpack.ingestPipelines.pipelineEditor.internalNetworkCustomLabel', {
-          defaultMessage: 'Use custom field',
-        })}
-      </EuiButtonEmpty>
+      <EuiText size="xs">
+        <EuiLink onClick={toggleCustom} data-test-subj="toggleCustomField">
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.internalNetworkCustomLabel"
+            defaultMessage="Use custom field"
+          />
+        </EuiLink>
+      </EuiText>
     ),
     key: 'preset',
   },
@@ -171,11 +174,14 @@ const getInternalNetworkConfig: (
       ),
     },
     labelAppend: (
-      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
-        {i18n.translate('xpack.ingestPipelines.pipelineEditor.internalNetworkPredefinedLabel', {
-          defaultMessage: 'Use preset field',
-        })}
-      </EuiButtonEmpty>
+      <EuiText size="xs">
+        <EuiLink onClick={toggleCustom} data-test-subj="toggleCustomField">
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.internalNetworkPredefinedLabel"
+            defaultMessage="Use preset field"
+          />
+        </EuiLink>
+      </EuiText>
     ),
     key: 'custom',
   },
