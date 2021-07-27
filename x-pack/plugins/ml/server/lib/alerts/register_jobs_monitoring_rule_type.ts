@@ -118,7 +118,9 @@ export function registerJobsMonitoringRuleType({
 
       if (executionResult.length > 0) {
         logger.info(
-          `Scheduling actions for tests: ${executionResult.map((v) => v.name).join(', ')}`
+          `"${name}" rule is scheduling actions for tests: ${executionResult
+            .map((v) => v.name)
+            .join(', ')}`
         );
 
         executionResult.forEach(({ name: alertInstanceName, context }) => {
