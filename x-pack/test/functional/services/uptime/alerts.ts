@@ -21,6 +21,8 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       } else if (alertType === 'tls') {
         await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
       }
+      // ensure the flyout has opened
+      await testSubjects.exists('alertNameInput');
     },
     async openMonitorStatusAlertType(alertType: string) {
       await testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`);
@@ -33,7 +35,6 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async setAlertName(name: string) {
-      await testSubjects.exists('alertNameInput');
       await testSubjects.setValue('alertNameInput', name);
     },
     async setAlertInterval(value: string) {
