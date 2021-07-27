@@ -357,38 +357,39 @@ describe('Screenshot Observable Pipeline', () => {
         layout: mockLayout,
         browserTimezone: 'UTC',
       }).toPromise();
-      await expect(screenshots).resolves.toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "elementsPositionAndAttributes": Array [
-                    Object {
-                      "attributes": Object {},
-                      "position": Object {
-                        "boundingClientRect": Object {
-                          "height": 1200,
-                          "left": 0,
-                          "top": 0,
-                          "width": 1800,
-                        },
-                        "scroll": Object {
-                          "x": 0,
-                          "y": 0,
-                        },
-                      },
-                    },
-                  ],
-                  "error": undefined,
-                  "screenshots": Array [
-                    Object {
-                      "base64EncodedData": "allyourBase64",
-                      "description": undefined,
-                      "title": undefined,
-                    },
-                  ],
-                  "timeRange": undefined,
+
+      expect(screenshots).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "elementsPositionAndAttributes": Array [
+              Object {
+                "attributes": Object {},
+                "position": Object {
+                  "boundingClientRect": Object {
+                    "height": 1200,
+                    "left": 0,
+                    "top": 0,
+                    "width": 1800,
+                  },
+                  "scroll": Object {
+                    "x": 0,
+                    "y": 0,
+                  },
                 },
-              ]
-            `);
+              },
+            ],
+            "error": undefined,
+            "screenshots": Array [
+              Object {
+                "base64EncodedData": "allyourBase64",
+                "description": undefined,
+                "title": undefined,
+              },
+            ],
+            "timeRange": undefined,
+          },
+        ]
+      `);
     });
   });
 });
