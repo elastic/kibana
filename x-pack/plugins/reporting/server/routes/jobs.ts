@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../security/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from './lib/jobs_query';
 import {
   deleteJobResponseHandlerFactory,
@@ -25,7 +25,6 @@ const handleUnavailable = (res: any) => {
 
 export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
   // list jobs in the queue, paginated
@@ -40,7 +39,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -71,7 +70,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       path: `${MAIN_ENTRY}/count`,
       validate: false,
     },
-    userHandler(async (user, context, _req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, _req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -103,7 +102,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -146,7 +145,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return res.custom({ statusCode: 503 });
@@ -192,7 +191,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       },
       options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -218,7 +217,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
