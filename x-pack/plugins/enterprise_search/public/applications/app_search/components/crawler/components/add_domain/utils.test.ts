@@ -45,7 +45,7 @@ describe('getDomainWithProtocol', () => {
     expect(http.post).toHaveBeenCalledTimes(0);
   });
 
-  it('returns domain with https protocol if back-end valdates https', async () => {
+  it('returns domain with https protocol if the back-end validates https', async () => {
     http.post.mockReturnValueOnce(Promise.resolve({ valid: true }));
     const result = await getDomainWithProtocol('elastic.co');
 
@@ -56,9 +56,10 @@ describe('getDomainWithProtocol', () => {
     });
   });
 
-  it('returns domain with http protocol if back-end valdates http', async () => {
-    http.post.mockReturnValueOnce(Promise.resolve({ valid: false }));
-    http.post.mockReturnValueOnce(Promise.resolve({ valid: true }));
+  it('returns domain with http protocol if the back-end validates http', async () => {
+    http.post
+      .mockReturnValueOnce(Promise.resolve({ valid: false }))
+      .mockReturnValueOnce(Promise.resolve({ valid: true }));
     const result = await getDomainWithProtocol('elastic.co');
 
     expect(result).toEqual('http://elastic.co');
