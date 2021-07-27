@@ -16,7 +16,7 @@ import {
 } from '../test_helpers';
 import { BasePayload, ReportingRequestHandlerContext } from '../types';
 import { ExportTypesRegistry, ReportingStore } from './';
-import { enqueueJobFactory } from './enqueue_job';
+import { enqueueJob } from './enqueue_job';
 import { Report } from './store';
 import { TaskRunResult } from './tasks';
 
@@ -63,16 +63,17 @@ describe('Enqueue Job', () => {
   });
 
   it('returns a Report object', async () => {
-    const enqueueJob = enqueueJobFactory(mockReporting, logger);
     const report = await enqueueJob(
+      mockReporting,
+      ({} as unknown) as KibanaRequest,
+      ({} as unknown) as ReportingRequestHandlerContext,
+      false,
       'printablePdf',
       {
         objectType: 'visualization',
         title: 'cool-viz',
       },
-      false,
-      ({} as unknown) as ReportingRequestHandlerContext,
-      ({} as unknown) as KibanaRequest
+      logger
     );
 
     expect(report).toMatchObject({
