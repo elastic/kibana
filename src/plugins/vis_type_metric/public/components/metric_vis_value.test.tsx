@@ -14,16 +14,16 @@ import { MetricVisValue } from './metric_vis_value';
 const baseMetric = { label: 'Foo', value: 'foo' } as any;
 
 describe('MetricVisValue', () => {
-  it('should be wrapped in EuiKeyboardAccessible if having a click listener', () => {
+  it('should be wrapped in button if having a click listener', () => {
     const component = shallow(
       <MetricVisValue fontSize={12} metric={baseMetric} onFilter={() => {}} />
     );
-    expect(component.find('EuiKeyboardAccessible').exists()).toBe(true);
+    expect(component.find('button').exists()).toBe(true);
   });
 
-  it('should not be wrapped in EuiKeyboardAccessible without having a click listener', () => {
+  it('should not be wrapped in button without having a click listener', () => {
     const component = shallow(<MetricVisValue fontSize={12} metric={baseMetric} />);
-    expect(component.find('EuiKeyboardAccessible').exists()).toBe(false);
+    expect(component.find('button').exists()).toBe(false);
   });
 
   it('should add -isfilterable class if onFilter is provided', () => {
