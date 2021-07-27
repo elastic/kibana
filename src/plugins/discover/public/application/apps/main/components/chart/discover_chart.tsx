@@ -10,11 +10,10 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
-import { IndexPattern, search } from '../../../../../../../data/public';
+import { search } from '../../../../../../../data/public';
 import { TimechartHeader } from '../timechart_header';
 import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { Chart as IChart } from './point_series';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
@@ -32,8 +31,6 @@ export function DiscoverChart({
   stateContainer,
   timefield,
 }: {
-  chartData?: IChart;
-  indexPattern: IndexPattern;
   isLegacy: boolean;
   resetQuery: () => void;
   savedSearch: SavedSearch;

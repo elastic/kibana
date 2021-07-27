@@ -26,6 +26,41 @@ function getDataSubjects() {
 }
 
 describe('test fetchCharts', () => {
+  test('updateSearchSource helper function', () => {
+    const chartAggConfigs = updateSearchSource(
+      savedSearchMockWithTimeField.searchSource,
+      'auto',
+      discoverServiceMock.data
+    );
+    expect(chartAggConfigs.aggs).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "enabled": true,
+          "id": "1",
+          "params": Object {},
+          "schema": "metric",
+          "type": "count",
+        },
+        Object {
+          "enabled": true,
+          "id": "2",
+          "params": Object {
+            "drop_partials": false,
+            "extended_bounds": Object {},
+            "field": "timestamp",
+            "interval": "auto",
+            "min_doc_count": 1,
+            "scaleMetricValues": false,
+            "useNormalizedEsInterval": true,
+            "used_interval": "0ms",
+          },
+          "schema": "segment",
+          "type": "date_histogram",
+        },
+      ]
+    `);
+  });
+
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async (done) => {
     const subjects = getDataSubjects();
     const deps = {
@@ -135,40 +170,5 @@ describe('test fetchCharts', () => {
         done();
       },
     });
-  });
-
-  test('updateSearchSource helper function', () => {
-    const chartAggConfigs = updateSearchSource(
-      savedSearchMockWithTimeField.searchSource,
-      'auto',
-      discoverServiceMock.data
-    );
-    expect(chartAggConfigs.aggs).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "enabled": true,
-          "id": "1",
-          "params": Object {},
-          "schema": "metric",
-          "type": "count",
-        },
-        Object {
-          "enabled": true,
-          "id": "2",
-          "params": Object {
-            "drop_partials": false,
-            "extended_bounds": Object {},
-            "field": "timestamp",
-            "interval": "auto",
-            "min_doc_count": 1,
-            "scaleMetricValues": false,
-            "useNormalizedEsInterval": true,
-            "used_interval": "0ms",
-          },
-          "schema": "segment",
-          "type": "date_histogram",
-        },
-      ]
-    `);
   });
 });

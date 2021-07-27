@@ -7,7 +7,6 @@
  */
 
 import './hits_counter.scss';
-
 import React from 'react';
 import {
   EuiButtonEmpty,
@@ -31,7 +30,9 @@ export interface HitsCounterProps {
    * resets the query
    */
   onResetQuery: () => void;
-
+  /**
+   * saved search data observable
+   */
   savedSearchData$: DataTotalHits$;
 }
 

@@ -20,39 +20,27 @@ import {
   Position,
   ScaleType,
   Settings,
-  Theme,
   TooltipType,
   XYChartElementEvent,
 } from '@elastic/charts';
 
 import { IUiSettingsClient } from 'kibana/public';
-import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { combineLatest } from 'rxjs';
-import { Chart as IChart } from './point_series';
 import {
   CurrentTime,
   Endzones,
   getAdjustedInterval,
   renderEndzoneTooltip,
 } from '../../../../../../../charts/public';
-import { DataCharts$ } from '../../services/use_saved_search';
+import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
-import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 import { DiscoverServices } from '../../../../../build_services';
+import { useDataState } from '../../utils/use_data_state';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   services: DiscoverServices;
-}
-
-interface DiscoverHistogramState {
-  chartsTheme: EuiChartThemeType['theme'];
-  chartsBaseTheme: Theme;
-  chartData?: IChart;
-  fetchStatus: FetchStatus;
-  error?: Error;
-  bucketInterval?: TimechartBucketInterval;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -74,12 +62,6 @@ export function DiscoverHistogram({
     chartsTheme: services.theme.chartsDefaultTheme,
     chartsBaseTheme: services.theme.chartsDefaultBaseTheme,
   });
-  const [state, setState] = useState<DiscoverHistogramState>({
-    chartsTheme: services.theme.chartsDefaultTheme,
-    chartsBaseTheme: services.theme.chartsDefaultBaseTheme,
-    chartData: undefined,
-    fetchStatus: FetchStatus.LOADING,
-  });
 
   useEffect(() => {
     const themeSubscription = combineLatest([
@@ -99,22 +81,11 @@ export function DiscoverHistogram({
     theme.chartsTheme,
   ]);
 
-  useEffect(() => {
-    const dataSubscription = savedSearchData$.subscribe((res) => {
-      if (res.fetchStatus !== state.fetchStatus) {
-        const nextState = { ...state, ...res };
-        setState(nextState);
-      }
-    });
-
-    return () => {
-      dataSubscription.unsubscribe();
-    };
-  }, [savedSearchData$, state]);
+  const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
   const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
-  const { chartData, fetchStatus } = state;
+  const { chartData, fetchStatus } = dataState;
 
   const onBrushEnd: BrushEndListener = useCallback(
     ({ x }) => {

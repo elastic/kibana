@@ -251,7 +251,6 @@ export function DiscoverLayout({
                   >
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
-                        indexPattern={indexPattern}
                         isLegacy={isLegacy}
                         state={state}
                         resetQuery={resetQuery}
