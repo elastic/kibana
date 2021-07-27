@@ -70,25 +70,25 @@ import {
 } from './query';
 
 /**
- * @deprecated  This import will be deprecated in v8.0.0.
+ * @deprecated  This import will be removed in v8.0.0.
  */
 const changeTimeFilter = oldChangeTimeFilter;
 /**
- * @deprecated  This import will be deprecated in v8.0.0.
+ * @deprecated  This import will be removed in v8.0.0.
  */
 const mapAndFlattenFilters = oldMapAndFlattenFilters;
 /**
- * @deprecated  This import will be deprecated in v8.0.0.
+ * @deprecated  This import will be removed in v8.0.0.
  */
 const extractTimeFilter = oldExtractTimeFilter;
 /**
- * @deprecated  This import will be deprecated in v8.0.0.
+ * @deprecated  This import will be removed in v8.0.0.
  */
 const convertRangeFilterToTimeRangeString = oldConvertRangeFilterToTimeRangeString;
 
 /**
  * Filter helpers namespace:
- * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be removed in v8.0.0.
  */
 export const esFilters = {
   FilterLabel,
@@ -151,7 +151,7 @@ export {
 };
 
 /**
- * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be removed in v8.0.0.
  */
 export const esKuery = {
   nodeTypes,
@@ -160,7 +160,7 @@ export const esKuery = {
 };
 
 /**
- * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+ * @deprecated Please import helpers from the package kbn/es-query directly. This import will be removed in v8.0.0.
  */
 export const esQuery = {
   buildEsQuery,

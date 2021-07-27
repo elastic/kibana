@@ -25,5 +25,5 @@ export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
     results = union(results, dedupFilters(results, [filter]), comparatorOptions);
   });
 
-  return results;  
+  return results;
 };
