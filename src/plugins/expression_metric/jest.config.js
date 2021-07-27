@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/expression_metric'],
+};

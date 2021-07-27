@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+import { metricFunction } from '../common/expression_functions';
+import { ExpressionFunction } from '../../../../src/plugins/expressions';
+
+export const functionSpecs = [metricFunction].map((fn) => new ExpressionFunction(fn()));

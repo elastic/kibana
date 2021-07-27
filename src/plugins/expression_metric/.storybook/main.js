@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+// eslint-disable-next-line import/no-commonjs
+module.exports = require('@kbn/storybook').defaultConfig;

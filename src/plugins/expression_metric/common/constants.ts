@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+export const PLUGIN_ID = 'expressionMetric';
+export const PLUGIN_NAME = 'expressionMetric';
+
+export const FONT_FAMILY = '`font-family`';
+export const FONT_WEIGHT = '`font-weight`';
+export const CSS = 'CSS';
+export const NUMERALJS = 'Numeral pattern';

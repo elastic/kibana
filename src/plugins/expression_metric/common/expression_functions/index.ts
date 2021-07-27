@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+import { metricFunction } from './metric_function';
+
+export const functions = [metricFunction];
+
+export { metricFunction };

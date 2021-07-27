@@ -5,6 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export * from './function_wrapper';
-export * from './test_styles';
+export * from './expression_functions';
+export * from './expression_renderers';
