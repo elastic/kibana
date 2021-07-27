@@ -35,7 +35,7 @@ export interface UseActionCellDataProvider {
   eventId?: string;
   field: string;
   fieldFormat?: string;
-  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
   fieldType?: string;
   isObjectArray?: boolean;
   linkValue?: string | null;
@@ -67,7 +67,6 @@ export const useActionCellDataProvider = ({
   linkValue,
   values,
 }: UseActionCellDataProvider): {
-  idList: string[];
   stringValues: string[];
   dataProvider: DataProvider[];
 } | null => {
@@ -75,7 +74,6 @@ export const useActionCellDataProvider = ({
     if (values === null || values === undefined) return null;
     const arrayValues = Array.isArray(values) ? values : [values];
     return arrayValues.reduce<{
-      idList: string[];
       stringValues: string[];
       dataProvider: DataProvider[];
     }>(
@@ -104,7 +102,6 @@ export const useActionCellDataProvider = ({
               // Default to keeping the existing string value
             }
             memo.stringValues.push(valueAsString);
-            memo.idList.push(escapeDataProviderId(id));
             return memo;
           }
         } else if (PORT_NAMES.some((portName) => field === portName)) {
@@ -138,11 +135,10 @@ export const useActionCellDataProvider = ({
           id = `event-details-value-default-draggable-${appendedUniqueId}`;
         }
         memo.stringValues.push(valueAsString);
-        memo.idList.push(escapeDataProviderId(id));
         memo.dataProvider.push(getDataProvider(field, id, value));
         return memo;
       },
-      { idList: [], stringValues: [], dataProvider: [] }
+      { stringValues: [], dataProvider: [] }
     );
   }, [
     contextId,

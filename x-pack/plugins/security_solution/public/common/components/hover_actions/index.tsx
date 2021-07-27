@@ -40,7 +40,7 @@ export const AdditionalContent = styled.div`
 AdditionalContent.displayName = 'AdditionalContent';
 
 const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean; $showOwnFocus: boolean }>`
-  padding: ${(props) => (props.$showTopN ? 'none' : `0 ${props.theme.eui.paddingSizes.s}`)};
+  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
 
   ${(props) =>
@@ -60,9 +60,9 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean; $showOwnFoc
       }
     }
 
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      opacity: 0;
+  .timelines__hoverActionButton,
+  .securitySolution__hoverActionButton {
+    opacity: ${props.$showTopN ? 1 : 0};
 
       &:focus {
         opacity: 1;
@@ -205,7 +205,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       [ownFocus, toggleTopN]
     );
 
-    const showFilters = !showTopN && values != null;
+    const showFilters = values != null;
 
     return (
       <EuiFocusTrap
@@ -295,7 +295,7 @@ export const HoverActions: React.FC<Props> = React.memo(
               value={values}
             />
           )}
-          {!showTopN && (
+          {showFilters && (
             <div data-test-subj="hover-actions-copy-button">
               {getCopyButton({
                 field,

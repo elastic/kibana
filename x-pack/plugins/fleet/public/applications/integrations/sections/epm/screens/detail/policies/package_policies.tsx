@@ -273,6 +273,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
               viewDataStep={viewDataStep}
+              showAddAgent={true}
             />
           );
         },

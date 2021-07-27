@@ -44,7 +44,7 @@ type LifecycleAlertService<
   ActionGroupIds extends string = never
 > = (alert: {
   id: string;
-  fields: Record<string, unknown>;
+  fields: Record<string, unknown> & Partial<Omit<ParsedTechnicalFields, typeof ALERT_ID>>;
 }) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
@@ -141,7 +141,7 @@ export const createLifecycleExecutor = (
     })
   )(wrappedStateRt<State>().decode(previousState));
 
-  const currentAlerts: Record<string, { [ALERT_ID]: string }> = {};
+  const currentAlerts: Record<string, Partial<ParsedTechnicalFields>> = {};
 
   const timestamp = options.startedAt.toISOString();
 
@@ -182,12 +182,7 @@ export const createLifecycleExecutor = (
     `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
   );
 
-  const alertsDataMap: Record<
-    string,
-    {
-      [ALERT_ID]: string;
-    }
-  > = {
+  const alertsDataMap: Record<string, Partial<ParsedTechnicalFields>> = {
     ...currentAlerts,
   };
 
@@ -297,27 +292,12 @@ export const createLifecycleExecutor = (
     return event;
   });
 
-  if (eventsToIndex.length) {
-    const alertEvents: Map<string, ParsedTechnicalFields> = new Map();
-
-    for (const event of eventsToIndex) {
-      const uuid = event[ALERT_UUID]!;
-      let storedEvent = alertEvents.get(uuid);
-      if (!storedEvent) {
-        storedEvent = event;
-      }
-      alertEvents.set(uuid, {
-        ...storedEvent,
-        [EVENT_KIND]: 'signal',
-      });
-    }
+  if (eventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
     logger.debug(`Preparing to index ${eventsToIndex.length} alerts.`);
 
-    if (ruleDataClient.isWriteEnabled()) {
-      await ruleDataClient.getWriter().bulk({
-        body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
-      });
-    }
+    await ruleDataClient.getWriter().bulk({
+      body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
+    });
   }
 
   const nextTrackedAlerts = Object.fromEntries(

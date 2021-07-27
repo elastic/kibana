@@ -11,11 +11,12 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-const allowedExperimentalValues = Object.freeze({
-  trustedAppsByPolicyEnabled: false,
+export const allowedExperimentalValues = Object.freeze({
   metricsEntitiesEnabled: false,
   ruleRegistryEnabled: false,
-  tGridEnabled: true,
+  tGridEnabled: false,
+  trustedAppsByPolicyEnabled: false,
+  uebaEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
