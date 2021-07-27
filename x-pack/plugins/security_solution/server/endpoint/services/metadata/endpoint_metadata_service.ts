@@ -58,8 +58,9 @@ export class EndpointMetadataService {
   ) {}
 
   /**
-   * A Saved Object client that can access any saved object. Used primarly to retrieve fleet data
-   * for endpoint enrichment (so that users are not required to have superuser role)
+   * An INTERNAL Saved Object client that is effectively the system user and has all privileges and permissions and
+   * can access any saved object. Used primarly to retrieve fleet data for endpoint enrichment (so that users are
+   * not required to have superuser role)
    *
    * **IMPORTANT: SHOULD BE USED ONLY FOR READ-ONLY ACCESS AND WITH DISCRETION**
    *
