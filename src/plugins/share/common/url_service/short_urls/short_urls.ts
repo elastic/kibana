@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { SerializableState, VersionedState } from 'src/plugins/kibana_utils/common';
+import { LocatorPublic } from '../locators';
+
+/**
+ * CRUD-like API for short URLs.
+ */
+export interface IShortUrlClient {
+  /**
+   * Create a new short URL.
+   *
+   * @param locator The locator for the URL.
+   * @param param The parameters for the URL.
+   * @returns The created short URL.
+   */
+  create<P extends SerializableState>(locator: LocatorPublic<P>, params: P): Promise<ShortUrl<P>>;
+
+  /**
+   * Delete a short URL.
+   *
+   * @param slug The slug (ID) of the short URL.
+   * @returns Returns true if deletion was successful.
+   */
+  delete(slug: string): Promise<boolean>;
+
+  /**
+   * Fetch a short URL.
+   *
+   * @param slug The slug (ID) of the short URL.
+   */
+  get(slug: string): Promise<ShortUrl>;
+}
+
+/**
+ * A representation of a short URL.
+ */
+export interface ShortUrl<LocatorParams extends SerializableState = SerializableState> {
+  /**
+   * Serializable state of the short URL, which is stored in Kibana.
+   */
+  readonly data: ShortUrlData<LocatorParams>;
+}
+
+/**
+ * A representation of a short URL's data.
+ */
+export interface ShortUrlData<LocatorParams extends SerializableState = SerializableState> {
+  /**
+   * Unique ID of the short URL.
+   */
+  readonly id: string;
+
+  /**
+   * The slug of the short URL, the part after the `/` in the URL.
+   */
+  readonly slug: string;
+
+  /**
+   * Number of times the short URL has been resolved.
+   */
+  readonly accessCount: number;
+
+  /**
+   * The timestamp of the last time the short URL was resolved.
+   */
+  readonly accessDate: number;
+
+  /**
+   * The timestamp when the short URL was created.
+   */
+  readonly createDate: number;
+
+  /**
+   * The timestamp when the short URL was last modified.
+   */
+  readonly locator: LocatorData<LocatorParams>;
+
+  /**
+   * Legacy field - was used in old short URL versions. This field will
+   * be removed in a future by a migration.
+   *
+   * @deprecated
+   */
+  readonly url: string;
+}
+
+/**
+ * Represents a serializable state of a locator. Includes locator ID, version
+ * and its params.
+ */
+export interface LocatorData<LocatorParams extends SerializableState = SerializableState>
+  extends VersionedState<LocatorParams> {
+  /**
+   * Locator ID.
+   */
+  id: string;
+}
