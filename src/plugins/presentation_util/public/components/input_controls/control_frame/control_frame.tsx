@@ -6,17 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiPopover,
-} from '@elastic/eui';
-
-import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { EuiFormControlLayout, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+
 import { InputControlEmbeddable } from '../embeddable/types';
 
 import './control_frame.scss';
