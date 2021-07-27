@@ -50,19 +50,10 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
   const start = Date.now();
   const retryDelay = 502;
+  const maxAttempts = 1000; // this is a reasonable ceiling to prevent infinite loops
   let lastError;
 
-  while (true) {
-    if (lastError && Date.now() - start > timeout) {
-      await onFailure(lastError);
-      throw new Error('expected onFailure() option to throw an error');
-    } else if (lastError && onFailureBlock) {
-      const before = await runAttempt(onFailureBlock);
-      if ('error' in before) {
-        log.debug(`--- onRetryBlock error: ${before.error.message}`);
-      }
-    }
-
+  for (let i = 1; i < maxAttempts; i++) {
     const attempt = await runAttempt(block);
 
     if ('result' in attempt && accept(attempt.result)) {
@@ -79,8 +70,27 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
       lastError = attempt.error;
     }
 
+    if (lastError && onFailureBlock) {
+      const before = await runAttempt(onFailureBlock);
+      if ('error' in before) {
+        log.debug(`--- onRetryBlock error: ${before.error.message}`);
+      }
+    }
+
     if (Date.now() - start + retryDelay < timeout) {
       await delay(retryDelay);
+    } else {
+      // Another delay would put us over the timeout, so we should stop here
+      if (lastError) {
+        await onFailure(lastError);
+        throw new Error('expected onFailure() option to throw an error');
+      } else {
+        throw new Error(`${methodName} timeout`);
+      }
     }
   }
+
+  throw new Error(
+    `${methodName} used all ${maxAttempts} attempts - possible infinite loop reached`
+  );
 }
