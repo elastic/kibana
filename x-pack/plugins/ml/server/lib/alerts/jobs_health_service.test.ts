@@ -52,6 +52,11 @@ describe('JobsHealthService', () => {
             return {
               job_id: j,
               state: j === 'test_job_02' ? 'opened' : 'closed',
+              model_size_stats: {
+                memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
+                log_time: 1626935914540,
+                failed_category_count: 0,
+              },
             };
           }) as MlJobStats,
         },
@@ -129,7 +134,9 @@ describe('JobsHealthService', () => {
         behindRealtime: null,
         delayedData: null,
         errorMessages: null,
-        mml: null,
+        mml: {
+          enabled: false,
+        },
       },
       includeJobs: {
         jobIds: ['test_job_01'],
@@ -171,8 +178,29 @@ describe('JobsHealthService', () => {
       {
         name: 'Datafeed is not started',
         context: {
-          jobIds: ['test_job_02'],
+          results: [
+            {
+              job_id: 'test_job_02',
+              job_state: 'opened',
+              datafeed_id: 'test_datafeed_02',
+              datafeed_state: 'stopped',
+            },
+          ],
           message: 'Datafeed is not started for the following jobs:',
+        },
+      },
+      {
+        name: 'Model memory limit',
+        context: {
+          results: [
+            {
+              job_id: 'test_job_01',
+              log_time: 1626935914540,
+              memory_status: 'hard_limit',
+              failed_category_count: 0,
+            },
+          ],
+          message: '1 job reached the hard model memory limit',
         },
       },
     ]);

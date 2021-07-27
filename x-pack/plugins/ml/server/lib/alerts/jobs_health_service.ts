@@ -203,24 +203,31 @@ export function jobsHealthServiceProvider(
         const response = await this.getMmlReport(jobIds);
         if (response && response.length > 0) {
           const hardLimitJobsCount = response.reduce((acc, curr) => {
-            return acc + curr.memory_status === 'hard_limit' ? 1 : 0;
+            return acc + (curr.memory_status === 'hard_limit' ? 1 : 0);
           }, 0);
 
           results.push({
             name: HEALTH_CHECK_NAMES.mml,
             context: {
               results: response,
-              message: response.some((j) => j.memory_status === 'hard_limit')
-                ? i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlHardLimitMessage', {
-                    defaultMessage:
-                      '{jobsCount, plural, one {# job} other {# jobs}} reached the hard model memory limit',
-                    values: { jobsCount: hardLimitJobsCount },
-                  })
-                : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage', {
-                    defaultMessage:
-                      '{jobsCount, plural, one {# job} other {# jobs}} reached the soft model memory limit',
-                    values: { jobsCount: response.length },
-                  }),
+              message:
+                hardLimitJobsCount > 0
+                  ? i18n.translate(
+                      'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlHardLimitMessage',
+                      {
+                        defaultMessage:
+                          '{jobsCount, plural, one {# job} other {# jobs}} reached the hard model memory limit',
+                        values: { jobsCount: hardLimitJobsCount },
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
+                      {
+                        defaultMessage:
+                          '{jobsCount, plural, one {# job} other {# jobs}} reached the soft model memory limit',
+                        values: { jobsCount: response.length },
+                      }
+                    ),
             },
           });
         }
