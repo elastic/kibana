@@ -43,8 +43,6 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
   APP_ICON_SOLUTION,
-  DEFAULT_INDEX_PATTERN_ID,
-  DEFAULT_TIME_FIELD,
   SOURCERER_API_URL,
 } from '../common/constants';
 
@@ -63,8 +61,6 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { IndexPatternsContract } from '../../../../src/plugins/data/common';
-import { KibanaIndexPattern } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -339,28 +335,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       management: subPlugins.management.start(core, plugins),
     };
   }
-
-  private async getKibanaIndexPattern(
-    indexPatternsService: IndexPatternsContract,
-    defaultIndicesName: string[]
-  ): Promise<KibanaIndexPattern> {
-    let indexPattern: KibanaIndexPattern;
-    console.log('getKibanaIndexPattern');
-    try {
-      indexPattern = (await indexPatternsService.get(
-        DEFAULT_INDEX_PATTERN_ID
-      )) as KibanaIndexPattern; // types are messy here, this is cleanest see property on IndexPatternsService.savedObjectsCache
-    } catch (e) {
-      console.log('ERR', e);
-      indexPattern = (await indexPatternsService.createAndSave({
-        id: DEFAULT_INDEX_PATTERN_ID,
-        title: defaultIndicesName.join(','),
-        timeFieldName: DEFAULT_TIME_FIELD,
-      })) as KibanaIndexPattern; // types are messy here ^^
-    }
-    return indexPattern;
-  }
-
   /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */
@@ -370,23 +344,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
-      const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
+      const patternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
         { createStore, createInitialState },
         defaultIndexPattern,
         kibanaIndexPatterns,
       ] = await Promise.all([
         this.lazyApplicationDependencies(),
-        this.getKibanaIndexPattern(startPlugins.data.indexPatterns, defaultIndicesName),
+        await coreStart.http.fetch(SOURCERER_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ patternList }),
+        }),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
       ]);
-      const heyo = await coreStart.http.fetch(
-        `${SOURCERER_API_URL}?patterns=${defaultIndicesName}`,
-        {
-          method: 'GET',
-        }
-      );
-      debugger;
 
       let signal: { name: string | null } = { name: null };
       try {

@@ -57,6 +57,7 @@ import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { createSourcererIndexPatternRoute } from '../lib/sourcerer/routes';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsServiceStart } from '../../../../../src/plugins/data/server/index_patterns';
 
 export const initRoutes = (
