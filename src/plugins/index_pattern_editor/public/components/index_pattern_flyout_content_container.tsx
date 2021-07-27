@@ -13,7 +13,7 @@ import { IndexPattern, IndexPatternSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
 import { IndexPatternEditorContext } from '../types';
 
-export interface Props {
+export interface IndexPatternFlyoutContentContainerProps {
   /**
    * Handler for the "save" footer button
    */
@@ -38,7 +38,7 @@ export const IndexPatternFlyoutContentContainer = ({
   onCancel,
   defaultTypeIsRollup,
   requireTimestampField = false,
-}: Props) => {
+}: IndexPatternFlyoutContentContainerProps) => {
   const {
     services: { indexPatternService, notifications },
   } = useKibana<IndexPatternEditorContext>();

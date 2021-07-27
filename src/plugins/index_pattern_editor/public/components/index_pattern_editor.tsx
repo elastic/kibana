@@ -8,23 +8,24 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { IndexPatternFlyoutContentContainer } from './index_pattern_flyout_content_container';
+import {
+  IndexPatternFlyoutContentContainer,
+  IndexPatternFlyoutContentContainerProps,
+} from './index_pattern_flyout_content_container';
 import { IndexPatternEditorContext } from '../types';
-import { createKibanaReactContext, IndexPattern } from '../shared_imports';
+import { createKibanaReactContext } from '../shared_imports';
 import './index_pattern_editor.scss';
 
-export interface IndexPatternEditorProps {
-  onSave: (indexPattern: IndexPattern) => void;
-  closeEditor: () => void;
+export interface IndexPatternEditorProps extends IndexPatternFlyoutContentContainerProps {
   services: IndexPatternEditorContext;
-  defaultTypeIsRollup?: boolean;
 }
 
 export const IndexPatternEditor = ({
   onSave,
-  closeEditor,
+  onCancel = () => {},
   services,
-  defaultTypeIsRollup,
+  defaultTypeIsRollup = false,
+  requireTimestampField = false,
 }: IndexPatternEditorProps) => {
   const {
     Provider: KibanaReactContextProvider,
@@ -32,11 +33,12 @@ export const IndexPatternEditor = ({
 
   return (
     <KibanaReactContextProvider>
-      <EuiFlyout onClose={closeEditor} hideCloseButton={true} size="l">
+      <EuiFlyout onClose={() => {}} hideCloseButton={true} size="l">
         <IndexPatternFlyoutContentContainer
           onSave={onSave}
-          onCancel={closeEditor}
+          onCancel={onCancel}
           defaultTypeIsRollup={defaultTypeIsRollup}
+          requireTimestampField={requireTimestampField}
         />
       </EuiFlyout>
     </KibanaReactContextProvider>

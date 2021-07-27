@@ -6,79 +6,45 @@ Create index patterns from within Kibana apps.
 
 You first need to add in your kibana.json the "`indexPatternEditor`" plugin as a required dependency of your plugin.
 
-You will then receive in the start contract of the indexPatternFieldEditor plugin the following API:
+You can use the `<IndexPatternEditor />` component or the API available on the start contract of the indexPatternEditor plugin:
 
 ### `userPermissions.editIndexPattern(): boolean`
 
 Convenience method that uses the `core.application.capabilities` api to determine whether the user can edit the index pattern. 
 
-### `openEditor(options: OpenFieldEditorOptions): CloseEditor`
+### `openEditor(options: OpenEditorOptions): CloseEditor`
 
-Use this method to open the index pattern field editor to either create (runtime) or edit (concrete | runtime) a field.  
-
-#### `options`
-
-`ctx: FieldEditorContext` (**required**)
-
-This is the only required option. You need to provide the context in which the editor is being consumed. This object has the following properties:
-
-- `indexPattern: IndexPattern`: the index pattern you want to create/edit the field into.
-
-`onSave(field: IndexPatternField): void` (optional)
-
-You can provide an optional `onSave` handler to be notified when the field has being created/updated. This handler is called after the field has been persisted to the saved object.
-
-`fieldName: string` (optional)
-
-You can optionally pass the name of a field to edit. Leave empty to create a new runtime field based field.
-
-### `openDeleteModal(options: OpenFieldDeleteModalOptions): CloseEditor`
-
-Use this method to open a confirmation modal to delete runtime fields from an index pattern.  
+Use this method to display the index pattern editor to create an index pattern.  
 
 #### `options`
 
-`ctx: FieldEditorContext` (**required**)
+`onSave: (indexPattern: IndexPattern) => void` (**required**)
 
-You need to provide the context in which the deletion modal is being consumed. This object has the following properties:
+You must provide an `onSave` handler to be notified when an index pattern has been created/updated. This handler is called after the index pattern has been persisted as a saved object.
 
-- `indexPattern: IndexPattern`: the index pattern you want to delete fields from.
+`onCancel: () => void;` (optional)
 
-`onDelete(fieldNames: string[]): void` (optional)
+You can optionally pass an `onCancel` handler which is called when the index pattern creation flyout is closed wihtout creating an index pattern.
 
-You can provide an optional `onDelete` handler to be notified when the fields have been deleted. This handler is called after the deletion has been persisted to the saved object.
+`defaultTypeIsRollup: boolean` (optional, default false)
 
-`fieldName: string | string[]` (**required**)
+The default index pattern type can be optionally specified as `rollup`.
 
-You have to pass the field or fields to delete.
+`requireTimestampField: boolean` (optional, default false)
 
-### `<DeleteRuntimeFieldProvider />`
+The editor can require a timestamp field on the index pattern.
 
-This children func React component provides a handler to delete one or multiple runtime fields. It can be used as an alternative to `openDeleteModal` in a react context.
+### `<IndexPatternEditor />`
 
-#### Props
+This the React component interface equivalent to `openEditor`. It takes the same arguments but also requires a `services` object argument of type `IndexPatternEditorContext` -
 
-* `indexPattern: IndexPattern`: the current index pattern. (**required**)
-
-```js
-
-const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
-
-// Single field
-<DeleteRuntimeFieldProvider indexPattern={indexPattern}>
-  {(deleteField) => (
-    <EuiButton fill color="danger" onClick={() => deleteField('myField')}>
-      Delete
-    </EuiButton>
-  )}
-</DeleteRuntimeFieldProvider>
-
-// Multiple fields
-<DeleteRuntimeFieldProvider indexPattern={indexPattern}>
-  {(deleteFields) => (
-    <EuiButton fill color="danger" onClick={() => deleteFields(['field1', 'field2', 'field3'])}>
-      Delete
-    </EuiButton>
-  )}
-</DeleteRuntimeFieldProvider>
+```ts
+export interface IndexPatternEditorContext {
+  uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
+  http: HttpSetup;
+  notifications: NotificationsStart;
+  application: ApplicationStart;
+  indexPatternService: DataPublicPluginStart['indexPatterns'];
+}
 ```

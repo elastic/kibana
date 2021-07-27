@@ -22,6 +22,9 @@ import { IndexPatternFlyoutContentContainer } from './components/index_pattern_f
 
 export interface OpenEditorOptions {
   onSave: (indexPattern: IndexPattern) => void;
+  onCancel?: () => void;
+  defaultTypeIsRollup?: boolean;
+  requireTimestampField?: boolean;
 }
 
 interface Dependencies {
@@ -46,7 +49,12 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
 
   let overlayRef: OverlayRef | null = null;
 
-  const openEditor = ({ onSave }: OpenEditorOptions): CloseEditor => {
+  const openEditor = ({
+    onSave,
+    onCancel = () => {},
+    defaultTypeIsRollup = false,
+    requireTimestampField = false,
+  }: OpenEditorOptions): CloseEditor => {
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -54,7 +62,7 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
       }
     };
 
-    const onSaveField = (indexPattern: IndexPattern) => {
+    const onSaveIndexPattern = (indexPattern: IndexPattern) => {
       closeEditor();
 
       if (onSave) {
@@ -66,7 +74,15 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
       toMountPoint(
         <KibanaReactContextProvider>
           <I18nProvider>
-            <IndexPatternFlyoutContentContainer onSave={onSaveField} onCancel={closeEditor} />
+            <IndexPatternFlyoutContentContainer
+              onSave={onSaveIndexPattern}
+              onCancel={() => {
+                closeEditor();
+                onCancel();
+              }}
+              defaultTypeIsRollup={defaultTypeIsRollup}
+              requireTimestampField={requireTimestampField}
+            />
           </I18nProvider>
         </KibanaReactContextProvider>
       ),

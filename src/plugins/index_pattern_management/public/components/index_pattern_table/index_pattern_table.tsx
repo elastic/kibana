@@ -152,7 +152,7 @@ export const IndexPatternTable = ({
       onSave={(indexPattern) => {
         history.push(`patterns/${indexPattern.id}`);
       }}
-      closeEditor={() => setShowCreateDialog(false)}
+      onCancel={() => setShowCreateDialog(false)}
       services={{
         uiSettings,
         docLinks,
