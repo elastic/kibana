@@ -22,30 +22,10 @@ import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_ac
 import { AddExceptionModalWrapper } from '../alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersModal } from '../../../management/pages/event_filters/view/components/modal';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-import {
-  ACTION_ADD_ENDPOINT_EXCEPTION,
-  ACTION_ADD_EVENT_FILTER,
-  ACTION_ADD_EXCEPTION,
-  ACTION_INVESTIGATE_IN_TIMELINE,
-  ACTION_ADD_TO_CASE,
-} from '../alerts_table/translations';
+import { ACTION_INVESTIGATE_IN_TIMELINE, ACTION_ADD_TO_CASE } from '../alerts_table/translations';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
-
-function flattenPanelTree(tree, array = []) {
-  array.push(tree);
-
-  if (tree.items) {
-    tree.items.forEach((item) => {
-      if (item.panel) {
-        flattenPanelTree(item.panel, array);
-        item.panel = item.panel.id;
-      }
-    });
-  }
-
-  return array;
-}
+import { addToCaseActionItem } from './helpers';
 
 export const TakeActionDropdown = React.memo(
   ({
@@ -133,15 +113,7 @@ export const TakeActionDropdown = React.memo(
       timelineId,
     });
 
-    const {
-      disabledAddException,
-      disabledAddEndpointException,
-      showStatusFilter,
-      statusFiltersActions,
-      handleAddEventFilterClick,
-      handleAddExceptionClick,
-      handleAddEndpointExceptionClick,
-    } = useAlertsActions({
+    const { alertsActionItems, statusFilters } = useAlertsActions({
       ecsRowData: ecsData!,
       timelineId,
       closePopover: closePopOverAndFlyout,
@@ -154,77 +126,63 @@ export const TakeActionDropdown = React.memo(
       nonEcsRowData: nonEcsData ?? [],
     });
 
-    const caseActions = timelinesUi.getAddToCaseAction({
-      ecsRowData: ecsData,
-      useInsertTimeline: insertTimelineHook,
-      casePermissions,
-      showIcon: false,
-    });
-
-    const panel = useMemo(
-      () => ({
-        id: 0,
-        items: [
-          ...(showStatusFilter
-            ? [
-                {
-                  name: CHANGE_ALERT_STATUS,
-                  panel: 1,
-                },
-                {
-                  name: ACTION_ADD_ENDPOINT_EXCEPTION,
-                  onClick: handleAddEndpointExceptionClick,
-                  disabled: disabledAddEndpointException,
-                },
-                {
-                  name: ACTION_ADD_EXCEPTION,
-                  onClick: handleAddExceptionClick,
-                  disabled: disabledAddException,
-                },
-              ]
-            : [
-                {
-                  name: ACTION_ADD_EVENT_FILTER,
-                  onClick: handleAddEventFilterClick,
-                },
-              ]),
-          {
-            name: ACTION_ADD_TO_CASE,
-            panel: { id: 2, title: ACTION_ADD_TO_CASE, content: <>{caseActions}</> },
-          },
-          ...(isIsolationAllowed &&
-          isEndpointAlert &&
-          isolationSupported &&
-          isHostIsolationPanelOpen === false
-            ? [
-                {
-                  name: isolateHostTitle,
-                  onClick: isolateHostHandler,
-                  disabled: loading || agentStatus === HostStatus.UNENROLLED,
-                },
-              ]
-            : []),
-          ...(eventType === 'signal' && ecsData != null
-            ? [
-                {
-                  name: ACTION_INVESTIGATE_IN_TIMELINE,
-                  onClick: handleInvestigateInTimelineAlertClick,
-                },
-              ]
-            : []),
-        ],
-      }),
+    const panels = useMemo(
+      () => [
+        {
+          id: 0,
+          items: [
+            ...alertsActionItems,
+            ...addToCaseActionItem(timelineId),
+            ...(isIsolationAllowed &&
+            isEndpointAlert &&
+            isolationSupported &&
+            isHostIsolationPanelOpen === false
+              ? [
+                  {
+                    name: isolateHostTitle,
+                    onClick: isolateHostHandler,
+                    disabled: loading || agentStatus === HostStatus.UNENROLLED,
+                  },
+                ]
+              : []),
+            ...(eventType === 'signal' && ecsData != null
+              ? [
+                  {
+                    name: ACTION_INVESTIGATE_IN_TIMELINE,
+                    onClick: handleInvestigateInTimelineAlertClick,
+                  },
+                ]
+              : []),
+          ],
+        },
+        {
+          id: 1,
+          title: CHANGE_ALERT_STATUS,
+          content: <>{statusFilters}</>,
+        },
+        {
+          id: 2,
+          title: ACTION_ADD_TO_CASE,
+          content: (
+            <>
+              {timelinesUi.getAddToCaseAction({
+                ecsRowData: ecsData,
+                useInsertTimeline: insertTimelineHook,
+                casePermissions,
+                showIcon: false,
+              })}
+            </>
+          ),
+        },
+      ],
       [
         agentStatus,
-        caseActions,
-        disabledAddEndpointException,
-        disabledAddException,
+        alertsActionItems,
+        casePermissions,
         ecsData,
         eventType,
-        handleAddEndpointExceptionClick,
-        handleAddEventFilterClick,
-        handleAddExceptionClick,
         handleInvestigateInTimelineAlertClick,
+        insertTimelineHook,
         isEndpointAlert,
         isHostIsolationPanelOpen,
         isIsolationAllowed,
@@ -232,15 +190,11 @@ export const TakeActionDropdown = React.memo(
         isolateHostTitle,
         isolationSupported,
         loading,
-        showStatusFilter,
+        statusFilters,
+        timelineId,
+        timelinesUi,
       ]
     );
-
-    const createPanelTree = () => {
-      return flattenPanelTree(panel);
-    };
-
-    const panels = createPanelTree();
 
     const takeActionButton = useMemo(() => {
       return (

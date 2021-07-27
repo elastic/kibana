@@ -29,6 +29,7 @@ import {
   displayErrorToast,
 } from '../../../../common/components/toasters';
 import { useUserData } from '../../user_info';
+import { CHANGE_ALERT_STATUS } from '../../host_isolation/translations';
 
 interface Props {
   ecsRowData: Ecs;
@@ -158,7 +159,7 @@ export const useAlertsActions = ({
     return (
       <EuiContextMenuItem
         key="open-alert"
-        aria-label="Open alert"
+        aria-label={i18n.ACTION_OPEN_ALERT}
         data-test-subj="open-alert-status"
         id={FILTER_OPEN}
         onClick={openAlertActionOnClick}
@@ -192,7 +193,7 @@ export const useAlertsActions = ({
     return (
       <EuiContextMenuItem
         key="close-alert"
-        aria-label="Close alert"
+        aria-label={i18n.ACTION_CLOSE_ALERT}
         data-test-subj="close-alert-status"
         id={FILTER_CLOSED}
         onClick={closeAlertActionClick}
@@ -226,7 +227,7 @@ export const useAlertsActions = ({
     return (
       <EuiContextMenuItem
         key="in-progress-alert"
-        aria-label="Mark alert in progress"
+        aria-label={i18n.ACTION_IN_PROGRESS_ALERT}
         data-test-subj="in-progress-alert-status"
         id={FILTER_IN_PROGRESS}
         onClick={inProgressAlertActionClick}
@@ -248,7 +249,7 @@ export const useAlertsActions = ({
     return (
       <EuiContextMenuItem
         key="add-endpoint-exception-menu-item"
-        aria-label="Add Endpoint Exception"
+        aria-label={i18n.ACTION_ADD_ENDPOINT_EXCEPTION}
         data-test-subj="add-endpoint-exception-menu-item"
         id="addEndpointException"
         onClick={handleAddEndpointExceptionClick}
@@ -270,7 +271,7 @@ export const useAlertsActions = ({
     return (
       <EuiContextMenuItem
         key="add-exception-menu-item"
-        aria-label="Add Exception"
+        aria-label={i18n.ACTION_ADD_EXCEPTION}
         data-test-subj="add-exception-menu-item"
         id="addException"
         onClick={handleAddExceptionClick}
@@ -292,7 +293,7 @@ export const useAlertsActions = ({
     () => (
       <EuiContextMenuItem
         key="add-event-filter-menu-item"
-        aria-label="Add event filter"
+        aria-label={i18n.ACTION_ADD_EVENT_FILTER}
         data-test-subj="add-event-filter-menu-item"
         id="addEventFilter"
         onClick={handleAddEventFilterClick}
@@ -327,67 +328,6 @@ export const useAlertsActions = ({
     alertStatus,
   ]);
 
-  const statusFiltersActions = useMemo(() => {
-    if (!alertStatus) {
-      return [];
-    }
-
-    const disableInProgressAlert = !canUserCRUD || !hasIndexUpdateDelete;
-    const disableOpenCloseAlert = !hasIndexUpdateDelete && !hasIndexMaintenance;
-
-    switch (alertStatus) {
-      case 'open':
-        return [
-          {
-            name: i18n.ACTION_IN_PROGRESS_ALERT,
-            onClick: inProgressAlertActionClick,
-            disabled: disableInProgressAlert,
-          },
-          {
-            name: i18n.ACTION_CLOSE_ALERT,
-            onClick: closeAlertActionClick,
-            disabled: disableOpenCloseAlert,
-          },
-        ];
-      case 'in-progress':
-        return [
-          {
-            name: i18n.ACTION_OPEN_ALERT,
-            onClick: openAlertActionOnClick,
-            disabled: disableOpenCloseAlert,
-          },
-          {
-            name: i18n.ACTION_CLOSE_ALERT,
-            onClick: closeAlertActionClick,
-            disabled: disableOpenCloseAlert,
-          },
-        ];
-      case 'closed':
-        return [
-          {
-            name: i18n.ACTION_OPEN_ALERT,
-            onClick: openAlertActionOnClick,
-            disabled: disableOpenCloseAlert,
-          },
-          {
-            name: i18n.ACTION_IN_PROGRESS_ALERT,
-            onClick: inProgressAlertActionClick,
-            disabled: !canUserCRUD || !hasIndexUpdateDelete,
-          },
-        ];
-      default:
-        return [];
-    }
-  }, [
-    alertStatus,
-    canUserCRUD,
-    hasIndexUpdateDelete,
-    hasIndexMaintenance,
-    inProgressAlertActionClick,
-    closeAlertActionClick,
-    openAlertActionOnClick,
-  ]);
-
   const showStatusFilter = !isEvent && ruleId;
   const items = useMemo(
     () =>
@@ -403,16 +343,44 @@ export const useAlertsActions = ({
     ]
   );
 
+  const alertsActionItems = useMemo(
+    () =>
+      showStatusFilter
+        ? [
+            {
+              name: CHANGE_ALERT_STATUS,
+              panel: 1,
+            },
+            {
+              name: i18n.ACTION_ADD_ENDPOINT_EXCEPTION,
+              onClick: handleAddEndpointExceptionClick,
+              disabled: disabledAddEndpointException,
+            },
+            {
+              name: i18n.ACTION_ADD_EXCEPTION,
+              onClick: handleAddExceptionClick,
+              disabled: disabledAddException,
+            },
+          ]
+        : [
+            {
+              name: i18n.ACTION_ADD_EVENT_FILTER,
+              onClick: handleAddEventFilterClick,
+            },
+          ],
+    [
+      disabledAddEndpointException,
+      disabledAddException,
+      handleAddEndpointExceptionClick,
+      handleAddEventFilterClick,
+      handleAddExceptionClick,
+      showStatusFilter,
+    ]
+  );
+
   return {
-    disabledAddException,
-    disabledAddEndpointException,
+    alertsActionItems,
     items,
-    showStatusFilter,
-    statusFiltersActions,
-    closeAlertActionClick,
-    inProgressAlertActionClick,
-    handleAddExceptionClick,
-    handleAddEventFilterClick,
-    handleAddEndpointExceptionClick,
+    statusFilters,
   };
 };
