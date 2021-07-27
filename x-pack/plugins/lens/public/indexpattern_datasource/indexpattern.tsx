@@ -43,7 +43,7 @@ import {
 
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
+import { IndexPatternColumn, getErrorMessages } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -69,11 +69,15 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
-export * from './rename_columns';
-export * from './format_column';
-export * from './time_scale';
-export * from './counter_rate';
-export * from './suffix_formatter';
+export {
+  CounterRateArgs,
+  ExpressionFunctionCounterRate,
+  counterRate,
+} from '../../common/expressions';
+export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
+export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
+export { timeScale, TimeScaleArgs } from '../../common/expressions';
+export { renameColumns } from '../../common/expressions';
 
 export function getIndexPatternDatasource({
   core,
@@ -362,17 +366,14 @@ export function getIndexPatternDatasource({
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId, columnId }) => {
-      const layer = { ...state.layers[layerId] };
-      const current = state.layers[layerId].incompleteColumns || {};
-      if (!Object.values(current).length) {
+      const layer = state.layers[layerId];
+      if (!Object.values(layer.incompleteColumns || {}).length) {
         return;
       }
-      const newIncomplete: Record<string, IncompleteColumn> = { ...current };
-      delete newIncomplete[columnId];
       return mergeLayer({
         state,
         layerId,
-        newLayer: { ...layer, incompleteColumns: newIncomplete },
+        newLayer: { ...layer, incompleteColumns: undefined },
       });
     },
 

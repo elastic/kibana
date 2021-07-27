@@ -43,24 +43,18 @@ export async function runDockerGenerator(
   let imageFlavor = '';
   if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
   if (flags.ironbank) imageFlavor += '-ironbank';
-  if (build.isOss()) imageFlavor += '-oss';
 
   // General docker var config
-  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
+  const license = 'Elastic License';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactFlavor = build.isOss() ? '-oss' : '';
-  const artifactPrefix = `kibana${artifactFlavor}-${version}-linux`;
+  const artifactPrefix = `kibana-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
-  const dockerBuildDir = config.resolveFromRepo(
-    'build',
-    'kibana-docker',
-    build.isOss() ? `oss` : `default${imageFlavor}`
-  );
+  const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`

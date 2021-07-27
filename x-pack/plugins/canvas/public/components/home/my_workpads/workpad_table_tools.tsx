@@ -10,7 +10,8 @@ import { useSelector } from 'react-redux';
 
 import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 import type { State } from '../../../../types';
-import { useDeleteWorkpads, useDownloadWorkpad } from '../hooks';
+import { useDeleteWorkpads } from '../hooks';
+import { useDownloadWorkpad } from '../../hooks';
 
 import {
   WorkpadTableTools as Component,

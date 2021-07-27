@@ -10,7 +10,6 @@ export { CasesClient } from './client';
 import { ConfigType, ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
-export { CaseRequestContext } from './types';
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
   deprecations: ({ renameFromRoot }) => [

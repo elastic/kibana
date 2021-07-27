@@ -10,10 +10,6 @@ import { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
-export interface SecuritySolutionTabNavigationProps {
-  display?: 'default' | 'condensed';
-  navTabs: Record<string, NavTab>;
-}
 export interface TabNavigationComponentProps {
   pageName: string;
   tabName: SiemRouteType | undefined;
@@ -23,28 +19,53 @@ export interface TabNavigationComponentProps {
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
+export interface NavGroupTab {
+  id: string;
+  name: string;
+}
+export enum SecurityNavGroupKey {
+  detect = 'detect',
+  explore = 'explore',
+  investigate = 'investigate',
+  manage = 'manage',
+}
+
+export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
   id: string;
   name: string;
   href: string;
   disabled: boolean;
-  urlKey: UrlStateType;
-  isDetailPage?: boolean;
+  urlKey?: UrlStateType;
   pageId?: SecurityPageName;
 }
 
-export type SiemNavTabKey =
-  | SecurityPageName.overview
+export type SecurityNavKey =
+  | SecurityPageName.administration
+  | SecurityPageName.alerts
+  | SecurityPageName.case
+  | SecurityPageName.endpoints
+  | SecurityPageName.eventFilters
+  | SecurityPageName.exceptions
   | SecurityPageName.hosts
   | SecurityPageName.network
-  | SecurityPageName.detections
+  | SecurityPageName.overview
+  | SecurityPageName.rules
   | SecurityPageName.timelines
-  | SecurityPageName.case
-  | SecurityPageName.administration;
+  | SecurityPageName.trustedApps
+  | SecurityPageName.ueba;
 
-export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
+export type SecurityNav = Record<SecurityNavKey, NavTab>;
 
+export type GenericNavRecord = Record<string, NavTab>;
+
+export interface SecuritySolutionTabNavigationProps {
+  display?: 'default' | 'condensed';
+  navTabs: GenericNavRecord;
+}
 export type GetUrlForApp = (
   appId: string,
-  options?: { path?: string; absolute?: boolean }
+  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
 ) => string;
+
+export type NavigateToUrl = (url: string) => void;

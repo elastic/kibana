@@ -144,7 +144,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 54
+          "lineNumber": 55
         },
         "deprecated": false,
         "children": [
@@ -160,7 +160,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 64
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [
@@ -183,7 +183,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 64
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -211,7 +211,7 @@
               "APMPluginStartDependencies",
               ", unknown>, plugins: Pick<",
               "APMPluginSetupDependencies",
-              ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">) => { config$: ",
+              ", \"data\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">) => { config$: ",
               "Observable",
               "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
               "SearchAggregatedTransactionSetting",
@@ -229,7 +229,7 @@
               "ApmPluginRequestHandlerContext",
               "; }) => Promise<{ search<TParams extends ",
               "APMEventESSearchRequest",
-              ">(params: TParams, { includeLegacyData }?: { includeLegacyData?: boolean | undefined; }): Promise<",
+              ">(operationName: string, params: TParams): Promise<",
               "InferSearchResponseOf",
               "<TypeOfProcessorEvent<",
               "ValuesType",
@@ -237,7 +237,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 68
+              "lineNumber": 69
             },
             "deprecated": false,
             "children": [
@@ -262,7 +262,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 69
+                  "lineNumber": 70
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -277,11 +277,11 @@
                 "signature": [
                   "Pick<",
                   "APMPluginSetupDependencies",
-                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">"
+                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">"
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 70
+                  "lineNumber": 71
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -309,7 +309,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 260
+              "lineNumber": 270
             },
             "deprecated": false,
             "children": [
@@ -331,7 +331,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 260
+                  "lineNumber": 270
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -351,7 +351,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 279
+              "lineNumber": 289
             },
             "deprecated": false,
             "children": [],
@@ -433,7 +433,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/server/routes/typings.ts",
-          "lineNumber": 45
+          "lineNumber": 46
         },
         "deprecated": false,
         "children": [
@@ -456,7 +456,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -472,7 +472,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -488,7 +488,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -506,7 +506,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 53
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -522,7 +522,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -554,7 +554,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -692,6 +692,14 @@
                 "section": "def-server.HomeServerPluginStart",
                 "text": "HomeServerPluginStart"
               },
+              ">; } | undefined; fleet?: { setup: void; start: () => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.FleetStartContract",
+                "text": "FleetStartContract"
+              },
               ">; } | undefined; ml?: { setup: ",
               "SharedServices",
               "; start: () => Promise<void>; } | undefined; actions?: { setup: ",
@@ -778,7 +786,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 59
+              "lineNumber": 60
             },
             "deprecated": false
           },
@@ -800,7 +808,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 65
+              "lineNumber": 66
             },
             "deprecated": false
           }
@@ -1135,7 +1143,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { hasData: boolean; }, ",
+          ", { hasData: boolean; indices: ",
+          "ApmIndicesConfig",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/rum/client-metrics\": ",
           "ServerRoute",
@@ -1502,40 +1512,6 @@
             "text": "APMRouteHandlerResources"
           },
           ", { indices: string; hasData: boolean; serviceName: any; }, ",
-          "APMRouteCreateOptions",
-          ">; } & { \"GET /api/apm/rum/local_filters\": ",
-          "ServerRoute",
-          "<\"GET /api/apm/rum/local_filters\", ",
-          "TypeC",
-          "<{ query: ",
-          "IntersectionC",
-          "<[",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ filterNames: ",
-          "Type",
-          "<(\"host\" | \"location\" | \"browser\" | \"serviceName\" | \"agentName\" | \"containerId\" | \"podName\" | \"transactionResult\" | \"serviceVersion\" | \"transactionUrl\" | \"device\" | \"os\")[], string, unknown>; }>, ",
-          "TypeC",
-          "<{ uiFilters: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ start: ",
-          "Type",
-          "<number, string, unknown>; end: ",
-          "Type",
-          "<number, string, unknown>; }>]>, ",
-          "TypeC",
-          "<{}>]>; }>, ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
-          ", { localUiFilters: { options: any[]; name: \"host\" | \"location\" | \"browser\" | \"serviceName\" | \"agentName\" | \"containerId\" | \"podName\" | \"transactionResult\" | \"serviceVersion\" | \"transactionUrl\" | \"device\" | \"os\"; title: string; fieldName: string; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/service-map\": ",
           "ServerRoute",
@@ -2416,6 +2392,26 @@
           "<{ path: ",
           "TypeC",
           "<{ traceId: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { transaction: TypeOfProcessorEvent<",
+          "ProcessorEvent",
+          ">; }, ",
+          "APMRouteCreateOptions",
+          ">; } & { \"GET /api/apm/transactions/{transactionId}\": ",
+          "ServerRoute",
+          "<\"GET /api/apm/transactions/{transactionId}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ transactionId: ",
           "StringC",
           "; }>; }>, ",
           {
@@ -3569,11 +3565,99 @@
           },
           ", { result: string; }, ",
           "APMRouteCreateOptions",
+          ">; } & { \"GET /api/apm/sourcemaps\": ",
+          "ServerRoute",
+          "<\"GET /api/apm/sourcemaps\", undefined, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { artifacts: ",
+          "ArtifactSourceMap",
+          "[]; } | undefined, ",
+          "APMRouteCreateOptions",
+          ">; } & { \"POST /api/apm/sourcemaps\": ",
+          "ServerRoute",
+          "<\"POST /api/apm/sourcemaps\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ service_name: ",
+          "StringC",
+          "; service_version: ",
+          "StringC",
+          "; bundle_filepath: ",
+          "StringC",
+          "; sourcemap: ",
+          "Type",
+          "<{ version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: string[] | undefined; }, string, unknown>; }>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", ",
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.Artifact",
+            "text": "Artifact"
+          },
+          " | undefined, ",
+          "APMRouteCreateOptions",
+          ">; } & { \"DELETE /api/apm/sourcemaps/{id}\": ",
+          "ServerRoute",
+          "<\"DELETE /api/apm/sourcemaps/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", void, ",
+          "APMRouteCreateOptions",
+          ">; } & { \"GET /api/apm/fleet/has_data\": ",
+          "ServerRoute",
+          "<\"GET /api/apm/fleet/has_data\", undefined, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { hasData: boolean; }, ",
+          "APMRouteCreateOptions",
+          ">; } & { \"GET /api/apm/fleet/agents\": ",
+          "ServerRoute",
+          "<\"GET /api/apm/fleet/agents\", undefined, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { cloudStandaloneSetup: { apmServerUrl: string | undefined; secretToken: string | undefined; } | undefined; fleetAgents: { id: string; name: string; apmServerUrl: any; secretToken: any; }[]; }, ",
+          "APMRouteCreateOptions",
           ">; }>"
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/routes/get_global_apm_server_route_repository.ts",
-          "lineNumber": 60
+          "lineNumber": 64
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3625,7 +3709,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/apm/server/types.ts",
-        "lineNumber": 51
+        "lineNumber": 55
       },
       "deprecated": false,
       "children": [
@@ -3644,7 +3728,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 52
+            "lineNumber": 56
           },
           "deprecated": false
         },
@@ -3662,7 +3746,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 53
+            "lineNumber": 57
           },
           "deprecated": false,
           "returnComment": [],
@@ -3688,7 +3772,7 @@
             "ApmPluginRequestHandlerContext",
             "; }) => Promise<{ search<TParams extends ",
             "APMEventESSearchRequest",
-            ">(params: TParams, { includeLegacyData }?: { includeLegacyData?: boolean | undefined; }): Promise<",
+            ">(operationName: string, params: TParams): Promise<",
             "InferSearchResponseOf",
             "<TypeOfProcessorEvent<",
             "ValuesType",
@@ -3696,7 +3780,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 54
+            "lineNumber": 58
           },
           "deprecated": false,
           "returnComment": [],
@@ -3723,7 +3807,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/apm/server/types.ts",
-                "lineNumber": 54
+                "lineNumber": 58
               },
               "deprecated": false
             }

@@ -52,6 +52,8 @@ import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { ID } from '../containers/hosts';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -110,7 +112,7 @@ const HostsComponent = () => {
     [dispatch]
   );
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const filterQuery = useMemo(
+  const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -120,7 +122,7 @@ const HostsComponent = () => {
       }),
     [filters, indexPattern, uiSettings, query]
   );
-  const tabsFilterQuery = useMemo(
+  const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -130,6 +132,8 @@ const HostsComponent = () => {
       }),
     [indexPattern, query, tabsFilters, uiSettings]
   );
+
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -183,7 +187,7 @@ const HostsComponent = () => {
                 from={from}
                 setQuery={setQuery}
                 to={to}
-                skip={isInitializing}
+                skip={isInitializing || !filterQuery}
                 narrowDateRange={narrowDateRange}
               />
 
@@ -200,7 +204,7 @@ const HostsComponent = () => {
               deleteQuery={deleteQuery}
               docValueFields={docValueFields}
               to={to}
-              filterQuery={tabsFilterQuery}
+              filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
               setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

@@ -8,8 +8,9 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
-import { State, SeriesType, XYLayerConfig } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import type { State } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -132,8 +133,7 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      const mockFrame = createMockFramePublicAPI();
-      const initialState = xyVisualization.initialize(mockFrame);
+      const initialState = xyVisualization.initialize(() => 'l1');
 
       expect(initialState.layers).toHaveLength(1);
       expect(initialState.layers[0].xAccessor).not.toBeDefined();
@@ -144,7 +144,7 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "layerId": "",
+              "layerId": "l1",
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
@@ -162,9 +162,7 @@ describe('xy_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(createMockFramePublicAPI(), exampleState())).toEqual(
-        exampleState()
-      );
+      expect(xyVisualization.initialize(() => 'first', exampleState())).toEqual(exampleState());
     });
   });
 

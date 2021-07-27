@@ -15,7 +15,7 @@ import {
   httpServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../actions/server/mocks';
-import { alertsMock, alertsClientMock } from '../mocks';
+import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { UntypedNormalizedAlertType } from '../alert_type_registry';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
@@ -26,6 +26,7 @@ const alertType: UntypedNormalizedAlertType = {
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -64,11 +65,11 @@ describe('Task Runner Factory', () => {
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
   const services = alertsMock.createAlertServices();
-  const alertsClient = alertsClientMock.create();
+  const rulesClient = rulesClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     getServices: jest.fn().mockReturnValue(services),
-    getAlertsClientWithRequest: jest.fn().mockReturnValue(alertsClient),
+    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingSystemMock.create().get(),
@@ -78,6 +79,8 @@ describe('Task Runner Factory', () => {
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry: alertTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
+    supportsEphemeralTasks: true,
+    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
   };
 
   beforeEach(() => {

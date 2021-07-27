@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import { sha256 } from 'js-sha256';
+import { sha256 } from 'js-sha256'; // loaded here to reduce page load bundle size when FullStory is disabled
 import type { IBasePath, PackageInfo } from '../../../../src/core/public';
 
 export interface FullStoryDeps {
   basePath: IBasePath;
   orgId: string;
   packageInfo: PackageInfo;
-  userIdPromise: Promise<string | undefined>;
 }
 
-interface FullStoryApi {
+export interface FullStoryApi {
   identify(userId: string, userVars?: Record<string, any>): void;
   event(eventName: string, eventProperties: Record<string, any>): void;
 }
 
-export const initializeFullStory = async ({
+export interface FullStoryService {
+  fullStory: FullStoryApi;
+  sha256: typeof sha256;
+}
+
+export const initializeFullStory = ({
   basePath,
   orgId,
   packageInfo,
-  userIdPromise,
-}: FullStoryDeps) => {
+}: FullStoryDeps): FullStoryService => {
   // @ts-expect-error
   window._fs_debug = false;
   // @ts-expect-error
@@ -73,28 +76,10 @@ export const initializeFullStory = async ({
   /* eslint-enable */
 
   // @ts-expect-error
-  const fullstory: FullStoryApi = window.FSKibana;
+  const fullStory: FullStoryApi = window.FSKibana;
 
-  // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
-  // @ts-expect-error
-  window.FSKibana.event('Loaded Kibana', {
-    kibana_version_str: packageInfo.version,
-  });
-
-  // Use a promise here so we don't have to wait to retrieve the user to start recording the session
-  userIdPromise
-    .then((userId) => {
-      if (!userId) return;
-      // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
-      const hashedId = sha256(userId.toString());
-      // @ts-expect-error
-      window.FSKibana.identify(hashedId);
-    })
-    .catch((e) => {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`,
-        e
-      );
-    });
+  return {
+    fullStory,
+    sha256,
+  };
 };

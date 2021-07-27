@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { fetchStackProductUsage } from './fetch_stack_product_usage';
 
 describe('fetchStackProductUsage', () => {
@@ -16,7 +17,27 @@ describe('fetchStackProductUsage', () => {
   };
 
   it('should use appropiate query parameters', async () => {
-    const callCluster = jest.fn();
+    const searchMock = jest.fn().mockImplementation(() => ({
+      body: {
+        aggregations: {
+          uuids: {
+            buckets: [
+              {
+                key: 'sadfsdf',
+                indices: {
+                  buckets: [
+                    {
+                      key: '.monitoring-kibana-8',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    }));
+    const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
     await fetchStackProductUsage(
       config,
       callCluster,
@@ -34,7 +55,7 @@ describe('fetchStackProductUsage', () => {
         },
       ]
     );
-    const params = callCluster.mock.calls[0][1];
+    const params = searchMock.mock.calls[0][0];
     expect(params.body.query.bool.must[0].term.type.value).toBe('kibana_stats');
     expect(params.body.query.bool.must[1].term.cluster_uuid.value).toBe(clusterUuid);
     expect(params.body.query.bool.must[2].range.timestamp.gte).toBe('now-1h');
@@ -42,24 +63,28 @@ describe('fetchStackProductUsage', () => {
   });
 
   it('should get the usage data', async () => {
-    const callCluster = jest.fn().mockImplementation(() => ({
-      aggregations: {
-        uuids: {
-          buckets: [
-            {
-              key: 'sadfsdf',
-              indices: {
-                buckets: [
-                  {
-                    key: '.monitoring-kibana-8',
+    const callCluster = ({
+      search: jest.fn().mockImplementation(() => ({
+        body: {
+          aggregations: {
+            uuids: {
+              buckets: [
+                {
+                  key: 'sadfsdf',
+                  indices: {
+                    buckets: [
+                      {
+                        key: '.monitoring-kibana-8',
+                      },
+                    ],
                   },
-                ],
-              },
+                },
+              ],
             },
-          ],
+          },
         },
-      },
-    }));
+      })),
+    } as unknown) as ElasticsearchClient;
 
     const result = await fetchStackProductUsage(
       config,
@@ -78,27 +103,31 @@ describe('fetchStackProductUsage', () => {
   });
 
   it('should handle both collection types', async () => {
-    const callCluster = jest.fn().mockImplementation(() => ({
-      aggregations: {
-        uuids: {
-          buckets: [
-            {
-              key: 'sadfsdf',
-              indices: {
-                buckets: [
-                  {
-                    key: '.monitoring-kibana-8',
+    const callCluster = ({
+      search: jest.fn().mockImplementation(() => ({
+        body: {
+          aggregations: {
+            uuids: {
+              buckets: [
+                {
+                  key: 'sadfsdf',
+                  indices: {
+                    buckets: [
+                      {
+                        key: '.monitoring-kibana-8',
+                      },
+                      {
+                        key: '.monitoring-kibana-mb-8',
+                      },
+                    ],
                   },
-                  {
-                    key: '.monitoring-kibana-mb-8',
-                  },
-                ],
-              },
+                },
+              ],
             },
-          ],
+          },
         },
-      },
-    }));
+      })),
+    } as unknown) as ElasticsearchClient;
 
     const result = await fetchStackProductUsage(
       config,

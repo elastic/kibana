@@ -55,7 +55,7 @@ const MOCK_CLIENT_DATA = crawlerDataServerToClient(MOCK_SERVER_DATA);
 describe('CrawlerOverviewLogic', () => {
   const { mount } = new LogicMounter(CrawlerOverviewLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -138,7 +138,7 @@ describe('CrawlerOverviewLogic', () => {
         expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
           MOCK_CLIENT_DATA
         );
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('calls flashApiErrors when there is an error', async () => {

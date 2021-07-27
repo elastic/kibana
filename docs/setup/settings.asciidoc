@@ -36,7 +36,7 @@ Set to `false` to disable Console. *Default: `true`*
  <<ops-cGroupOverrides-cpuAcctPath, `ops.cGroupOverrides.cpuAcctPath`>>.
 
 | `csp.rules:`
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."] 
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
 A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
 that disables certain unnecessary and potentially insecure capabilities in
 the browser. It is strongly recommended that you keep the default CSP rules
@@ -73,8 +73,8 @@ that ship with {kib}.
 
 [NOTE]
 ============
-The `frame-ancestors` directive can also be configured by using 
-<<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors` 
+The `frame-ancestors` directive can also be configured by using
+<<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors`
 are ignored.
 ============
 
@@ -284,6 +284,11 @@ the username and password that the {kib} server uses to perform maintenance
 on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
+|[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
+ | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
+is an alternative to `elasticsearch.username` and `elasticsearch.password`.
+
 | `enterpriseSearch.host`
   | The URL of your Enterprise Search instance
 
@@ -368,18 +373,19 @@ The time interval policy will rotate the log file every given interval of time. 
 
 | [[regionmap-ES-map]] `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
-When `includeElasticMapsService` is turned off, only the vector layers configured by <<regionmap-settings, `map.regionmap`>>
-and the tile layer configured by <<tilemap-url, `map.tilemap.url`>> are available in <<maps, Maps>>. *Default: `true`*
+When `includeElasticMapsService` is turned off, only tile layer configured by <<tilemap-url, `map.tilemap.url`>> is available in <<maps, Maps>>. *Default: `true`*
 
 | `map.emsUrl:`
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
 | `map.proxyElasticMapsServiceInMaps:`
- | Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
 requests through the {kib} server. *Default: `false`*
 
 | [[regionmap-settings]] `map.regionmap:` {ess-icon}
- | Specifies additional vector layers for
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Specifies additional vector layers for
 use in <<maps, Maps>> visualizations. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
@@ -393,7 +399,6 @@ The following example shows a valid region map configuration.
 [source,text]
 --
 map.regionmap:
-  includeElasticMapsService: false
   layers:
     - name: "Departments of France"
       url: "http://my.cors.enabled.server.org/france_departements.geojson"
@@ -409,10 +414,12 @@ map.regionmap:
 |===
 
 | [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon}
- | Optional. References the originating source of the geojson file.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Optional. References the originating source of the geojson file.
 
 | [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon}
- | Mandatory. Each layer
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
 features you wish to expose. The following shows how to define multiple
 properties:
@@ -422,7 +429,6 @@ properties:
 [source,text]
 --
 map.regionmap:
-  includeElasticMapsService: false
   layers:
     - name: "Departments of France"
       url: "http://my.cors.enabled.server.org/france_departements.geojson"
@@ -438,11 +444,13 @@ map.regionmap:
 |===
 
 | [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon}
- | Mandatory. The human readable text that is shown under the Options tab when
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. The human readable text that is shown under the Options tab when
 building the Region Map visualization.
 
 | [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon}
- | Mandatory.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory.
 This value is used to do an inner-join between the document stored in
 {es} and the geojson file. For example, if the field in the geojson is
 called `Location` and has city names, there must be a field in {es}
@@ -450,12 +458,12 @@ that holds the same values that {kib} can then use to lookup for the geoshape
 data.
 
 | [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon}
- | Mandatory. A description of
-the map being provided.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. A description of the map being provided.
 
 | [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon}
- | Mandatory. The location of the
-geojson file as provided by a webserver.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. The location of the geojson file as provided by a webserver.
 
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
  | The map attribution string.
@@ -554,11 +562,10 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
 This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `none`*
 
-[[server-securityResponseHeaders-strictTransportSecurity]]
 a|
 `server.securityResponseHeaders:`
 `strictTransportSecurity:`
-| Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
+| [[server-securityResponseHeaders-strictTransportSecurity]] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
 header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
 `null`. To disable, set to `null`. *Default:* `null`
 
@@ -624,7 +631,7 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 setting specifies the port to use. *Default: `5601`*
 
 |[[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp:`
- | Sets whether or not the X-Opaque-Id header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
+ | Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
 | `server.requestId.ipAllowlist:`
  | A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`
@@ -775,10 +782,12 @@ out through *Advanced Settings*. *Default: `true`*
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
-| `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`
+|[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
+`exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 
- | `xpack.discoverEnhanced.actions.exploreDataInChart.enabled`
+|[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
+`exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
 | `xpack.license_management.enabled`

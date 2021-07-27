@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { px } from '../../../style/variables';
 
 interface IconPopoverProps {
   title: string;
@@ -59,7 +58,7 @@ export function IconPopover({
       closePopover={onClose}
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
-      <div style={{ minWidth: px(300) }}>
+      <div style={{ minWidth: 300 }}>
         {isLoading ? (
           <EuiLoadingContent data-test-subj="loading-content" />
         ) : (

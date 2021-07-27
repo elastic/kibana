@@ -44,7 +44,7 @@ test('should not create centroid feature for point and multipoint', () => {
   expect(centroidFeatures.length).toBe(0);
 });
 
-test('should not create centroid for too many features polygon', () => {
+test('should not create centroid for the metadata polygon', () => {
   const polygonFeature: Feature = {
     type: 'Feature',
     geometry: {
@@ -60,7 +60,7 @@ test('should not create centroid for too many features polygon', () => {
       ],
     },
     properties: {
-      __kbn_too_many_features__: true,
+      __kbn_metadata_feature__: true,
       prop0: 'value0',
       prop1: 0.0,
     },

@@ -15,13 +15,19 @@ export const plugin = (initContext: PluginInitializerContext) => new TaskManager
 export {
   TaskInstance,
   ConcreteTaskInstance,
+  EphemeralTask,
   TaskRunCreatorFunction,
   TaskStatus,
   RunContext,
 } from './task';
 
 export { asInterval } from './lib/intervals';
-export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
+export {
+  isUnrecoverableError,
+  throwUnrecoverableError,
+  isEphemeralTaskRejectedDueToCapacityError,
+} from './task_running';
+export { RunNowResult } from './task_scheduling';
 
 export {
   TaskManagerPlugin as TaskManager,

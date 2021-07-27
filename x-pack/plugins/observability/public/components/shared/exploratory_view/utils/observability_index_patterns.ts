@@ -100,11 +100,14 @@ export class ObservabilityIndexPatterns {
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
       defaultFieldFormats.forEach(({ field, format }) => {
-        const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
-        const params = fieldFormat.params();
-        if (!isParamsSame(params, format.params)) {
-          indexPattern.setFieldFormat(field, format);
-          isParamsDifferent = true;
+        const fieldByName = indexPattern.getFieldByName(field);
+        if (fieldByName) {
+          const fieldFormat = indexPattern.getFormatterForField(fieldByName);
+          const params = fieldFormat.params();
+          if (!isParamsSame(params, format.params)) {
+            indexPattern.setFieldFormat(field, format);
+            isParamsDifferent = true;
+          }
         }
       });
       if (isParamsDifferent) {

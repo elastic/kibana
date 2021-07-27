@@ -11,7 +11,7 @@ import React from 'react';
 
 import * as i18n from './translations';
 import { ActionLicense } from '../../containers/types';
-import { ErrorMessage } from '../callout/types';
+import { ErrorMessage } from './callout/types';
 
 export const getLicenseError = () => ({
   id: 'license-error',

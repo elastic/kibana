@@ -31,10 +31,10 @@
             "__index": {
               "type": "long"
             },
-            "__swimlane": {
+            "__pagerduty": {
               "type": "long"
             },
-            "__pagerduty": {
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -71,10 +71,10 @@
             "__index": {
               "type": "long"
             },
-            "__swimlane": {
+            "__pagerduty": {
               "type": "long"
             },
-            "__pagerduty": {
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -319,6 +319,9 @@
             "dotnet": {
               "type": "long"
             },
+            "iOS/swift": {
+              "type": "long"
+            },
             "go": {
               "type": "long"
             },
@@ -373,6 +376,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/swift": {
+              "type": "long"
+            },
             "opentelemetry/webjs": {
               "type": "long"
             }
@@ -381,6 +387,90 @@
         "agents": {
           "properties": {
             "dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "iOS/swift": {
               "properties": {
                 "agent": {
                   "properties": {
@@ -1260,6 +1350,20 @@
             }
           }
         },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
         "counts": {
           "properties": {
             "transaction": {
@@ -1542,6 +1646,17 @@
               }
             },
             "cloud": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
               "properties": {
                 "took": {
                   "properties": {
@@ -2165,6 +2280,19 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description":
+                  "Number of times the user used the fix action of an error displayed in the workspace."
+              }
+            },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
+            },
             "toggle_fullscreen_formula": {
               "type": "long",
               "_meta": {
@@ -2398,6 +2526,19 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the user opened one of the in-product help popovers."
+              }
+            },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description":
+                  "Number of times the user used the fix action of an error displayed in the workspace."
+              }
+            },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
               }
             },
             "toggle_fullscreen_formula": {
@@ -5396,79 +5537,6 @@
               }
             }
           }
-        },
-        "endpoints": {
-          "properties": {
-            "total_installed": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of installed endpoints"
-              }
-            },
-            "active_within_last_24_hours": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of active endpoints"
-              }
-            },
-            "os": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "full_name": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "Full name of the operating system"
-                    }
-                  },
-                  "platform": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "OS Platform. eg Centos, Ubuntu"
-                    }
-                  },
-                  "version": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)"
-                    }
-                  },
-                  "count": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The total number of endpoints from that platform"
-                    }
-                  }
-                }
-              }
-            },
-            "policies": {
-              "properties": {
-                "malware": {
-                  "properties": {
-                    "active": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of active malware policies"
-                      }
-                    },
-                    "inactive": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of inactive malware policies"
-                      }
-                    },
-                    "failure": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of failing malware policies"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -5762,6 +5830,77 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.disableLegacyUrlAliases.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
+          }
+        }
+      }
+    },
+    "task_manager": {
+      "properties": {
+        "ephemeral_tasks_enabled": {
+          "type": "boolean"
+        },
+        "ephemeral_request_capacity": {
+          "type": "short"
+        },
+        "ephemeral_stats": {
+          "properties": {
+            "status": {
+              "type": "keyword"
+            },
+            "queued_tasks": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            },
+            "load": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            },
+            "executions_per_cycle": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            }
           }
         }
       }

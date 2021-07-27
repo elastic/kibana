@@ -30,6 +30,7 @@ describe('SearchUILogic', () => {
     validFacetFields: [],
     titleField: '',
     urlField: '',
+    thumbnailField: '',
     facetFields: [],
     sortFields: [],
     activeField: ActiveField.None,
@@ -89,6 +90,17 @@ describe('SearchUILogic', () => {
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           urlField: 'foo',
+        });
+      });
+    });
+
+    describe('onThumbnailFieldChange', () => {
+      it('sets the thumbnailField value', () => {
+        mount({ thumbnailField: '' });
+        SearchUILogic.actions.onThumbnailFieldChange('foo');
+        expect(SearchUILogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          thumbnailField: 'foo',
         });
       });
     });

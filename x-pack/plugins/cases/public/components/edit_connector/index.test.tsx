@@ -13,7 +13,7 @@ import { EditConnector, EditConnectorProps } from './index';
 import { getFormMock, useFormMock } from '../__mock__/form';
 import { TestProviders } from '../../common/mock';
 import { connectorsMock } from '../../containers/configure/mock';
-import { caseUserActions } from '../../containers/mock';
+import { basicCase, basicPush, caseUserActions } from '../../containers/mock';
 import { useKibana } from '../../common/lib/kibana';
 
 jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
@@ -21,14 +21,32 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const onSubmit = jest.fn();
+const updateCase = jest.fn();
+const caseServices = {
+  '123': {
+    ...basicPush,
+    firstPushIndex: 0,
+    lastPushIndex: 0,
+    commentsToUpdate: [],
+    hasDataToPush: true,
+  },
+};
 const defaultProps: EditConnectorProps = {
+  caseData: basicCase,
+  caseServices,
+  configureCasesNavigation: {
+    href: 'blah',
+    onClick: jest.fn(),
+  },
+  connectorName: connectorsMock[0].name,
   connectors: connectorsMock,
-  userCanCrud: true,
+  hasDataToPush: true,
   isLoading: false,
+  isValidConnector: true,
   onSubmit,
-  selectedConnector: 'none',
-  caseFields: null,
+  updateCase,
   userActions: caseUserActions,
+  userCanCrud: true,
 };
 
 describe('EditConnector ', () => {
@@ -49,6 +67,7 @@ describe('EditConnector ', () => {
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
+    expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeTruthy();
     wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
 
     expect(
@@ -128,7 +147,7 @@ describe('EditConnector ', () => {
       wrapper.update();
       expect(formHookMock.setFieldValue).toBeCalledWith(
         'connectorId',
-        defaultProps.selectedConnector
+        defaultProps.caseData.connector.id
       );
     });
   });
@@ -155,6 +174,8 @@ describe('EditConnector ', () => {
     await waitFor(() =>
       expect(wrapper.find(`[data-test-subj="connector-edit"]`).exists()).toBeFalsy()
     );
+
+    expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
   });
 
   it('displays the permissions error message when one is provided', async () => {
@@ -173,24 +194,25 @@ describe('EditConnector ', () => {
       expect(
         wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
       ).toBeFalsy();
+
+      expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
     });
   });
 
-  it('displays the default none connector message', async () => {
-    const props = { ...defaultProps };
+  it('displays the callout message when none is selected', async () => {
+    const props = { ...defaultProps, connectors: [] };
     const wrapper = mount(
       <TestProviders>
         <EditConnector {...props} />
       </TestProviders>
     );
-
+    wrapper.update();
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="edit-connector-permissions-error-msg"]`).exists()
-      ).toBeFalsy();
-      expect(
-        wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
-      ).toBeTruthy();
+      expect(true).toBeTruthy();
+    });
+    wrapper.update();
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="push-callouts"]`).exists()).toEqual(true);
     });
   });
 });

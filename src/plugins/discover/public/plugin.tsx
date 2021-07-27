@@ -36,8 +36,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
-import { DocViewTable } from './application/components/table/table';
-
+import { DocViewerTable } from './application/components/table/table';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -252,7 +251,7 @@ export class DiscoverPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: DocViewTable,
+      component: DocViewerTable,
     });
     this.docViewsRegistry.addDocView({
       title: i18n.translate('discover.docViews.json.jsonTitle', {
@@ -404,6 +403,7 @@ export class DiscoverPlugin
       }
       // this is used by application mount and tests
       const { getInnerAngularModule } = await import('./application/angular/get_inner_angular');
+      await plugins.kibanaLegacy.loadAngularBootstrap();
       const module = getInnerAngularModule(
         innerAngularName,
         core,
@@ -474,7 +474,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
-      getServices().kibanaLegacy.loadFontAwesome();
+      await getServices().kibanaLegacy.loadAngularBootstrap();
       const { getInnerAngularModuleEmbeddable } = await import(
         './application/angular/get_inner_angular'
       );

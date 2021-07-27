@@ -6,16 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import {
+  functionWrapper,
+  fontStyle,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { progress } from './progress';
-import { fontStyle } from './__fixtures__/test_styles';
 
 const errors = getFunctionErrors().progress;
 
 // TODO: this test was not running and is not up to date
 describe.skip('progress', () => {
   const fn = functionWrapper(progress);
+
   const value = 0.33;
 
   it('returns a render as progress', () => {

@@ -32,6 +32,8 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 import { queryExecutor } from './executors/query';
 import { mlExecutor } from './executors/ml';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -187,11 +189,13 @@ describe('signal_rule_alert_type', () => {
     payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
     alert = signalRulesAlertType({
+      experimentalFeatures: allowedExperimentalValues,
       logger,
       eventsTelemetry: undefined,
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
+      mergeStrategy: 'missingFields',
     });
   });
 
@@ -454,8 +458,15 @@ describe('signal_rule_alert_type', () => {
     });
 
     it('and call ruleStatusService with the default message', async () => {
-      (queryExecutor as jest.Mock).mockRejectedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise({})
+      (queryExecutor as jest.Mock).mockReturnValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(
+          new ResponseError(
+            elasticsearchClientMock.createApiResponse({
+              statusCode: 400,
+              body: { error: { type: 'some_error_type' } },
+            })
+          )
+        )
       );
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();

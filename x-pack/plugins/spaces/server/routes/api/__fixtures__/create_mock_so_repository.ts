@@ -35,6 +35,7 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       }
       return {};
     }),
+    bulkUpdate: jest.fn(),
     delete: jest.fn((type: string, id: string) => {
       return {};
     }),

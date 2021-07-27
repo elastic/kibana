@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { AgentPolicy, PackagePolicy } from '../types';
@@ -21,12 +22,14 @@ import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
-  viewDataStepContent?: JSX.Element;
-}> = ({ agentPolicy, packagePolicy, viewDataStepContent }) => {
+  viewDataStep?: EuiStepProps;
+  showAddAgent?: boolean;
+}> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -45,16 +48,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="plusInCircle"
-      onClick={() => setIsEnrollmentFlyoutOpen(true)}
-      key="addAgent"
-    >
-      <FormattedMessage
-        id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-        defaultMessage="Add Agent"
-      />
-    </EuiContextMenuItem>,
+    ...(showAddAgent
+      ? [
+          <EuiContextMenuItem
+            icon="plusInCircle"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              setIsEnrollmentFlyoutOpen(true);
+            }}
+            key="addAgent"
+          >
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
+              defaultMessage="Add Agent"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"
@@ -106,12 +116,16 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicy={agentPolicy}
-            viewDataStepContent={viewDataStepContent}
+            viewDataStep={viewDataStep}
             onClose={onEnrollmentFlyoutClose}
           />
         </EuiPortal>
       )}
-      <ContextMenuActions items={menuItems} />
+      <ContextMenuActions
+        isOpen={isActionsMenuOpen}
+        items={menuItems}
+        onChange={(isOpen) => setIsActionsMenuOpen(isOpen)}
+      />
     </>
   );
 };

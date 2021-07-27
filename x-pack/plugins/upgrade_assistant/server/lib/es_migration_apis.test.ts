@@ -22,7 +22,13 @@ const asApiResponse = <T>(body: T): RequestEvent<T> =>
 
 describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {
-    indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
+    indices: fakeIndexNames.map((indexName) => {
+      // mark one index as closed to test blockerForReindexing flag
+      if (indexName === 'closed_index') {
+        return { name: indexName, attributes: ['closed'] };
+      }
+      return { name: indexName, attributes: ['open'] };
+    }),
   };
 
   // @ts-expect-error mock data is too loosely typed
@@ -39,12 +45,12 @@ describe('getUpgradeAssistantStatus', () => {
   esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(esClient, false);
+    await getUpgradeAssistantStatus(esClient);
     expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(esClient, false);
+    const resp = await getUpgradeAssistantStatus(esClient);
     expect(resp).toMatchSnapshot();
   });
 
@@ -59,7 +65,7 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient)).resolves.toHaveProperty(
       'readyForUpgrade',
       false
     );
@@ -76,32 +82,9 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient)).resolves.toHaveProperty(
       'readyForUpgrade',
       true
     );
-  });
-
-  it('filters out security realm deprecation on Cloud', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
-      // @ts-expect-error not full interface
-      asApiResponse({
-        cluster_settings: [
-          {
-            level: 'critical',
-            message: 'Security realm settings structure changed',
-            url: 'https://...',
-          },
-        ],
-        node_settings: [],
-        ml_settings: [],
-        index_settings: {},
-      })
-    );
-
-    const result = await getUpgradeAssistantStatus(esClient, true);
-
-    expect(result).toHaveProperty('readyForUpgrade', true);
-    expect(result).toHaveProperty('cluster', []);
   });
 });

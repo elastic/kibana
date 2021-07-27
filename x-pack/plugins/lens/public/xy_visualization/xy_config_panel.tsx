@@ -8,7 +8,7 @@
 import './xy_config_panel.scss';
 import React, { useMemo, useState, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType } from '@elastic/charts';
+import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -21,23 +21,21 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import {
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type {
   VisualizationLayerWidgetProps,
   VisualizationToolbarProps,
   VisualizationDimensionEditorProps,
-  FormatFactory,
   FramePublicAPI,
 } from '../types';
-import {
-  State,
+import { State, visualizationTypes, XYState } from './types';
+import type { FormatFactory } from '../../common';
+import type {
   SeriesType,
-  visualizationTypes,
   YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
-  XYState,
-} from './types';
+} from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
@@ -61,7 +59,11 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   };
 }
 
-const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+const legendOptions: Array<{
+  id: string;
+  value: 'auto' | 'show' | 'hide';
+  label: string;
+}> = [
   {
     id: `xy_legend_auto`,
     value: 'auto',
@@ -219,6 +221,25 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  const labelsOrientation = {
+    x: state?.labelsOrientation?.x ?? 0,
+    yLeft: state?.labelsOrientation?.yLeft ?? 0,
+    yRight: state?.labelsOrientation?.yRight ?? 0,
+  };
+
+  const onLabelsOrientationChange = (axis: AxesSettingsConfigKeys, orientation: number): void => {
+    const newLabelsOrientation = {
+      ...labelsOrientation,
+      ...{
+        [axis]: orientation,
+      },
+    };
+    setState({
+      ...state,
+      labelsOrientation: newLabelsOrientation,
+    });
+  };
+
   const axisTitlesVisibilitySettings = {
     x: state?.axisTitlesVisibilitySettings?.x ?? true,
     yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
@@ -319,30 +340,70 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
+            location={state?.legend.isInside ? 'inside' : 'outside'}
+            onLocationChange={(location) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  isInside: location === 'inside',
+                },
+              });
+            }}
             onDisplayChange={(optionId) => {
               const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
               if (newMode === 'auto') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: false,
+                  },
                 });
               } else if (newMode === 'show') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: true,
+                  },
                 });
               } else if (newMode === 'hide') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: false,
+                    showSingleSeries: false,
+                  },
                 });
               }
             }}
             position={state?.legend.position}
+            horizontalAlignment={state?.legend.horizontalAlignment}
+            verticalAlignment={state?.legend.verticalAlignment}
+            floatingColumns={state?.legend.floatingColumns}
+            onFloatingColumnsChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, floatingColumns: val },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,
                 legend: { ...state.legend, position: id as Position },
+              });
+            }}
+            onAlignmentChange={(value) => {
+              const [vertical, horizontal] = value.split('_');
+              const verticalAlignment = vertical as VerticalAlignment;
+              const horizontalAlignment = horizontal as HorizontalAlignment;
+              setState({
+                ...state,
+                legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
             renderValueInLegendSwitch={nonOrdinalXAxis}
@@ -384,6 +445,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               isDisabled={
                 Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
               }
+              orientation={labelsOrientation.yLeft}
+              setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yLeftExtent || { mode: 'full' }}
@@ -402,6 +465,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.x}
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            orientation={labelsOrientation.x}
+            setOrientation={onLabelsOrientationChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
@@ -436,6 +501,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length ===
                 0
               }
+              orientation={labelsOrientation.yRight}
+              setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
@@ -540,7 +607,10 @@ export function DimensionEditor(
               (yAxisConfig) => yAxisConfig.forAccessor === accessor
             );
             if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex].axisMode = newMode;
+              newYAxisConfigs[existingIndex] = {
+                ...newYAxisConfigs[existingIndex],
+                axisMode: newMode,
+              };
             } else {
               newYAxisConfigs.push({
                 forAccessor: accessor,
@@ -625,9 +695,9 @@ const ColorPicker = ({
         const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
         if (existingIndex !== -1) {
           if (text === '') {
-            delete newYConfigs[existingIndex].color;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: undefined };
           } else {
-            newYConfigs[existingIndex].color = output.hex;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: output.hex };
           }
         } else {
           newYConfigs.push({

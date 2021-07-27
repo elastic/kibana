@@ -44,3 +44,10 @@ export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
     defaultMessage: 'Open in Endpoint Security',
   }
 );
+
+export const EMPTY_STATUS = i18n.translate(
+  'xpack.securitySolution.hostIsolation.agentStatuses.empty',
+  {
+    defaultMessage: '-',
+  }
+);

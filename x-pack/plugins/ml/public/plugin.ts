@@ -17,11 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { ManagementSetup } from 'src/plugins/management/public';
-import type {
-  SharePluginSetup,
-  SharePluginStart,
-  UrlGeneratorContract,
-} from 'src/plugins/share/public';
+import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
@@ -36,13 +32,11 @@ import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SecurityPluginSetup } from '../../security/public';
 
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
 
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
-// Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
-import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
+import { MlLocatorDefinition, MlLocator } from './locator';
 import type { MapsStartApi } from '../../maps/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -84,7 +78,8 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
+
+  private locator: undefined | MlLocator;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -128,7 +123,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     if (pluginsSetup.share) {
-      this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+      this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
     }
 
     if (pluginsSetup.management) {
@@ -179,7 +174,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     return {
-      urlGenerator: this.urlGenerator,
+      locator: this.locator,
     };
   }
 
@@ -192,7 +187,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     return {
-      urlGenerator: this.urlGenerator,
+      locator: this.locator,
     };
   }
 

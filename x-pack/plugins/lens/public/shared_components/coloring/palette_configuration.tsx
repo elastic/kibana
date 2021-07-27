@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import {
   EuiFormRow,
   htmlIdGenerator,
@@ -26,7 +26,7 @@ import './palette_configuration.scss';
 
 import { CustomStops } from './color_stops';
 import { defaultPaletteParams, CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from './constants';
-import { CustomPaletteParams, RequiredPaletteParamTypes } from './types';
+import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import {
   getColorStops,
   getPaletteStops,
@@ -72,11 +72,13 @@ export function CustomizablePalette({
   activePalette,
   setPalette,
   dataBounds,
+  showContinuity = true,
 }: {
   palettes: PaletteRegistry;
   activePalette: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds: { min: number; max: number };
+  showContinuity?: boolean;
 }) {
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
@@ -95,7 +97,7 @@ export function CustomizablePalette({
           })}
         >
           <PalettePicker
-            data-test-subj="lnsDatatable_dynamicColoring_palette_picker"
+            data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"
             palettes={palettes}
             activePalette={activePalette}
             setPalette={(newPalette) => {
@@ -125,86 +127,88 @@ export function CustomizablePalette({
             showDynamicColorOnly
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={
-            <>
-              {i18n.translate('xpack.lens.table.dynamicColoring.continuity.label', {
-                defaultMessage: 'Color continuity',
-              })}{' '}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.lens.table.dynamicColoring.customPalette.continuityHelp',
-                  {
-                    defaultMessage:
-                      'Specify how colors appear before the first color stop, and after the last color stop.',
-                  }
-                )}
-                position="top"
-                size="s"
-              />
-            </>
-          }
-          display="rowCompressed"
-        >
-          <EuiSuperSelect
-            data-test-subj="lnsDatatable_dynamicColoring_continuity"
-            compressed
-            options={[
-              {
-                value: 'above',
-                inputDisplay: (
-                  <ContinuityOption iconType="continuityAbove">
-                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.aboveLabel', {
-                      defaultMessage: 'Above range',
-                    })}
-                  </ContinuityOption>
-                ),
-                'data-test-subj': 'continuity-above',
-              },
-              {
-                value: 'below',
-                inputDisplay: (
-                  <ContinuityOption iconType="continuityBelow">
-                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.belowLabel', {
-                      defaultMessage: 'Below range',
-                    })}
-                  </ContinuityOption>
-                ),
-                'data-test-subj': 'continuity-below',
-              },
-              {
-                value: 'all',
-                inputDisplay: (
-                  <ContinuityOption iconType="continuityAboveBelow">
-                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.allLabel', {
-                      defaultMessage: 'Above and below range',
-                    })}
-                  </ContinuityOption>
-                ),
-                'data-test-subj': 'continuity-all',
-              },
-              {
-                value: 'none',
-                inputDisplay: (
-                  <ContinuityOption iconType="continuityWithin">
-                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.noneLabel', {
-                      defaultMessage: 'Within range',
-                    })}
-                  </ContinuityOption>
-                ),
-                'data-test-subj': 'continuity-none',
-              },
-            ]}
-            valueOfSelected={activePalette.params?.continuity || defaultPaletteParams.continuity}
-            onChange={(continuity: Required<CustomPaletteParams>['continuity']) =>
-              setPalette(
-                mergePaletteParams(activePalette, {
-                  continuity,
-                })
-              )
+        {showContinuity && (
+          <EuiFormRow
+            label={
+              <>
+                {i18n.translate('xpack.lens.table.dynamicColoring.continuity.label', {
+                  defaultMessage: 'Color continuity',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.lens.table.dynamicColoring.customPalette.continuityHelp',
+                    {
+                      defaultMessage:
+                        'Specify how colors appear before the first color stop, and after the last color stop.',
+                    }
+                  )}
+                  position="top"
+                  size="s"
+                />
+              </>
             }
-          />
-        </EuiFormRow>
+            display="rowCompressed"
+          >
+            <EuiSuperSelect
+              data-test-subj="lnsPalettePanel_dynamicColoring_continuity"
+              compressed
+              options={[
+                {
+                  value: 'above',
+                  inputDisplay: (
+                    <ContinuityOption iconType="continuityAbove">
+                      {i18n.translate('xpack.lens.table.dynamicColoring.continuity.aboveLabel', {
+                        defaultMessage: 'Above range',
+                      })}
+                    </ContinuityOption>
+                  ),
+                  'data-test-subj': 'continuity-above',
+                },
+                {
+                  value: 'below',
+                  inputDisplay: (
+                    <ContinuityOption iconType="continuityBelow">
+                      {i18n.translate('xpack.lens.table.dynamicColoring.continuity.belowLabel', {
+                        defaultMessage: 'Below range',
+                      })}
+                    </ContinuityOption>
+                  ),
+                  'data-test-subj': 'continuity-below',
+                },
+                {
+                  value: 'all',
+                  inputDisplay: (
+                    <ContinuityOption iconType="continuityAboveBelow">
+                      {i18n.translate('xpack.lens.table.dynamicColoring.continuity.allLabel', {
+                        defaultMessage: 'Above and below range',
+                      })}
+                    </ContinuityOption>
+                  ),
+                  'data-test-subj': 'continuity-all',
+                },
+                {
+                  value: 'none',
+                  inputDisplay: (
+                    <ContinuityOption iconType="continuityWithin">
+                      {i18n.translate('xpack.lens.table.dynamicColoring.continuity.noneLabel', {
+                        defaultMessage: 'Within range',
+                      })}
+                    </ContinuityOption>
+                  ),
+                  'data-test-subj': 'continuity-none',
+                },
+              ]}
+              valueOfSelected={activePalette.params?.continuity || defaultPaletteParams.continuity}
+              onChange={(continuity: Required<CustomPaletteParams>['continuity']) =>
+                setPalette(
+                  mergePaletteParams(activePalette, {
+                    continuity,
+                  })
+                )
+              }
+            />
+          </EuiFormRow>
+        )}
         <EuiFormRow
           label={
             <>
@@ -231,7 +235,7 @@ export function CustomizablePalette({
             legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
               defaultMessage: 'Value type',
             })}
-            data-test-subj="lnsDatatable_dynamicColoring_custom_range_groups"
+            data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"
             name="dynamicColoringRangeType"
             buttonSize="compressed"
             options={[
@@ -240,14 +244,14 @@ export function CustomizablePalette({
                 label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.percent', {
                   defaultMessage: 'Percent',
                 }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_rangeType_groups_percent',
+                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_percent',
               },
               {
                 id: `${idPrefix}number`,
                 label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.number', {
                   defaultMessage: 'Number',
                 }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_rangeType_groups_number',
+                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_number',
               },
             ]}
             idSelected={
@@ -303,7 +307,7 @@ export function CustomizablePalette({
             <EuiText size="xs">
               <EuiLink
                 className="lnsPalettePanel__reverseButton"
-                data-test-subj="lnsDatatable_dynamicColoring_reverse"
+                data-test-subj="lnsPalettePanel_dynamicColoring_reverse"
                 onClick={() => {
                   const params: CustomPaletteParams = { reverse: !activePalette.params?.reverse };
                   if (isCurrentPaletteCustom) {
@@ -345,7 +349,7 @@ export function CustomizablePalette({
         >
           <CustomStops
             paletteConfiguration={activePalette?.params}
-            data-test-prefix="lnsDatatable"
+            data-test-prefix="lnsPalettePanel"
             colorStops={colorStopsToShow}
             dataBounds={dataBounds}
             onChange={(colorStops) => {
@@ -354,7 +358,7 @@ export function CustomizablePalette({
                 activePalette,
                 {
                   colorStops,
-                  steps: activePalette.params!.steps || DEFAULT_COLOR_STEPS,
+                  steps: activePalette.params?.steps || DEFAULT_COLOR_STEPS,
                   rangeMin: colorStops[0]?.stop,
                   rangeMax: colorStops[colorStops.length - 1]?.stop,
                 },

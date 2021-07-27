@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -24,13 +24,28 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
+import { useDownloadRenderedWorkpad } from '../../../hooks';
+import { useDownloadRuntime, useDownloadZippedRuntime } from './hooks';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
 import { OnCloseFn } from '../share_menu.component';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';
+import { useNotifyService } from '../../../../services';
 
 const strings = {
+  getCopyShareConfigMessage: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyShareConfigMessage', {
+      defaultMessage: 'Copied share markup to clipboard',
+    }),
+  getUnknownExportErrorMessage: (type: string) =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.unknownExportErrorMessage', {
+      defaultMessage: 'Unknown export type: {type}',
+      values: {
+        type,
+      },
+    }),
   getRuntimeStepTitle: () =>
     i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadRuntimeTitle', {
       defaultMessage: 'Download runtime',
@@ -66,10 +81,9 @@ export type OnDownloadFn = (type: 'share' | 'shareRuntime' | 'shareZip') => void
 export type OnCopyFn = () => void;
 
 export interface Props {
-  onCopy: OnCopyFn;
-  onDownload: OnDownloadFn;
   onClose: OnCloseFn;
   unsupportedRenderers?: string[];
+  renderedWorkpad: CanvasRenderedWorkpad;
 }
 
 const steps = (onDownload: OnDownloadFn, onCopy: OnCopyFn) => [
@@ -88,11 +102,39 @@ const steps = (onDownload: OnDownloadFn, onCopy: OnCopyFn) => [
 ];
 
 export const ShareWebsiteFlyout: FC<Props> = ({
-  onCopy,
-  onDownload,
   onClose,
   unsupportedRenderers,
+  renderedWorkpad,
 }) => {
+  const notifyService = useNotifyService();
+
+  const onCopy = useCallback(() => notifyService.info(strings.getCopyShareConfigMessage()), [
+    notifyService,
+  ]);
+
+  const downloadRenderedWorkpad = useDownloadRenderedWorkpad();
+  const downloadRuntime = useDownloadRuntime();
+  const downloadZippedRuntime = useDownloadZippedRuntime();
+
+  const onDownload = useCallback(
+    (type: 'share' | 'shareRuntime' | 'shareZip') => {
+      switch (type) {
+        case 'share':
+          downloadRenderedWorkpad(renderedWorkpad);
+          return;
+        case 'shareRuntime':
+          downloadRuntime();
+          return;
+        case 'shareZip':
+          downloadZippedRuntime(renderedWorkpad);
+          return;
+        default:
+          throw new Error(strings.getUnknownExportErrorMessage(type));
+      }
+    },
+    [downloadRenderedWorkpad, downloadRuntime, downloadZippedRuntime, renderedWorkpad]
+  );
+
   const link = (
     <EuiLink
       style={{ textDecoration: 'underline' }}

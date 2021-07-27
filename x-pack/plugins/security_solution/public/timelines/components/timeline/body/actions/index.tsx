@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import styled from 'styled-components';
+
 import {
   eventHasNotes,
   getEventType,
@@ -27,6 +29,11 @@ import { AddToCaseAction } from '../../../../../cases/components/timeline_action
 import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
+
+const ActionsContainer = styled.div`
+  align-items: center;
+  display: flex;
+`;
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
@@ -87,13 +94,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
-  const isEventContextMenuEnabled = useMemo(
-    () => !!ecsData.event?.kind && ecsData.event?.kind[0] === 'event',
-    [ecsData.event?.kind]
+  const isEventContextMenuEnabledForEndpoint = useMemo(
+    () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
+    [ecsData.event?.kind, ecsData.agent?.type]
   );
 
   return (
-    <>
+    <ActionsContainer>
       {showCheckboxes && (
         <div key="select-event-container" data-test-subj="select-event-container">
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
@@ -174,12 +181,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && !isEventContextMenuEnabled}
+          disabled={eventType !== 'signal' && !isEventContextMenuEnabledForEndpoint}
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
       </>
-    </>
+    </ActionsContainer>
   );
 };
 

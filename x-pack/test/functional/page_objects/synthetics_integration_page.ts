@@ -24,25 +24,17 @@ export function SyntheticsIntegrationPageProvider({
      *
      */
     async navigateToPackagePage(packageVersion: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'fleet',
-        `/integrations/synthetics-${packageVersion}/add-integration`,
-        {
-          shouldUseHashForSubUrl: true,
-          useActualUrl: true,
-        }
+        `/integrations/synthetics-${packageVersion}/add-integration`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async navigateToPackageEditPage(packageId: string, agentId: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'fleet',
-        `/policies/${agentId}/edit-integration/${packageId}`,
-        {
-          shouldUseHashForSubUrl: true,
-          useActualUrl: true,
-        }
+        `/policies/${agentId}/edit-integration/${packageId}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -86,7 +78,7 @@ export function SyntheticsIntegrationPageProvider({
      * @params {value} the value of the input
      */
     async fillTextInputByTestSubj(testSubj: string, value: string) {
-      const field = await testSubjects.find(testSubj, 5000);
+      const field = await testSubjects.find(testSubj);
       await field.scrollIntoViewIfNecessary({ bottomOffset: fixedFooterHeight });
       await field.click();
       await field.clearValue();
@@ -118,7 +110,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async findHTTPAdvancedOptionsAccordion() {
       await this.ensureIsOnPackagePage();
-      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion', 5000);
+      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion');
       return accordion;
     },
 

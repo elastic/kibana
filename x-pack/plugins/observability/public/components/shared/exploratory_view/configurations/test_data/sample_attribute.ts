@@ -5,45 +5,147 @@
  * 2.0.
  */
 export const sampleAttribute = {
-  title: 'Prefilled from exploratory view app',
-  description: '',
-  visualizationType: 'lnsXY',
+  description: 'undefined',
   references: [
-    { id: 'apm-*', name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern' },
-    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer0', type: 'index-pattern' },
+    {
+      id: 'apm-*',
+      name: 'indexpattern-datasource-current-indexpattern',
+      type: 'index-pattern',
+    },
+    {
+      id: 'apm-*',
+      name: 'indexpattern-datasource-layer-layer0',
+      type: 'index-pattern',
+    },
   ],
   state: {
     datasourceStates: {
       indexpattern: {
         layers: {
           layer0: {
-            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0'],
+            columnOrder: [
+              'x-axis-column-layer0',
+              'y-axis-column-layer0',
+              'y-axis-column-layer0X0',
+              'y-axis-column-layer0X1',
+              'y-axis-column-layer0X2',
+              'y-axis-column-layer0X3',
+              'y-axis-column-layer0X4',
+            ],
             columns: {
               'x-axis-column-layer0': {
-                sourceField: 'transaction.duration.us',
-                label: 'Page load time',
                 dataType: 'number',
-                operationType: 'range',
                 isBucketed: true,
-                scale: 'interval',
+                label: 'Page load time',
+                operationType: 'range',
                 params: {
-                  type: 'histogram',
-                  ranges: [{ from: 0, to: 1000, label: '' }],
                   maxBars: 'auto',
+                  ranges: [
+                    {
+                      from: 0,
+                      label: '',
+                      to: 1000,
+                    },
+                  ],
+                  type: 'histogram',
                 },
+                scale: 'interval',
+                sourceField: 'transaction.duration.us',
               },
               'y-axis-column-layer0': {
                 dataType: 'number',
-                isBucketed: false,
-                label: 'Pages loaded',
-                operationType: 'count',
-                scale: 'ratio',
-                sourceField: 'Records',
                 filter: {
                   language: 'kuery',
                   query:
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
+                isBucketed: false,
+                label: 'test-series',
+                operationType: 'formula',
+                params: {
+                  format: {
+                    id: 'percent',
+                    params: {
+                      decimals: 0,
+                    },
+                  },
+                  formula:
+                    "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                  isFormulaBroken: false,
+                },
+                references: ['y-axis-column-layer0X4'],
+                scale: 'ratio',
+              },
+              'y-axis-column-layer0X0': {
+                customLabel: true,
+                dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                },
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'count',
+                scale: 'ratio',
+                sourceField: 'Records',
+              },
+              'y-axis-column-layer0X1': {
+                customLabel: true,
+                dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                },
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'count',
+                scale: 'ratio',
+                sourceField: 'Records',
+              },
+              'y-axis-column-layer0X2': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'math',
+                params: {
+                  tinymathAst: 'y-axis-column-layer0X1',
+                },
+                references: ['y-axis-column-layer0X1'],
+                scale: 'ratio',
+              },
+              'y-axis-column-layer0X3': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'overall_sum',
+                references: ['y-axis-column-layer0X2'],
+                scale: 'ratio',
+              },
+              'y-axis-column-layer0X4': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'math',
+                params: {
+                  tinymathAst: {
+                    args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+                    location: {
+                      max: 30,
+                      min: 0,
+                    },
+                    name: 'divide',
+                    text:
+                      "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                    type: 'function',
+                  },
+                },
+                references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+                scale: 'ratio',
               },
             },
             incompleteColumns: {},
@@ -51,26 +153,51 @@ export const sampleAttribute = {
         },
       },
     },
+    filters: [],
+    query: {
+      language: 'kuery',
+      query: 'transaction.duration.us < 60000000',
+    },
     visualization: {
-      legend: { isVisible: true, position: 'right' },
-      valueLabels: 'hide',
-      fittingFunction: 'Linear',
+      axisTitlesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
       curveType: 'CURVE_MONOTONE_X',
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      preferredSeriesType: 'line',
+      fittingFunction: 'Linear',
+      gridlinesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
       layers: [
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
           seriesType: 'line',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
           xAccessor: 'x-axis-column-layer0',
+          yConfig: [
+            {
+              color: 'green',
+              forAccessor: 'y-axis-column-layer0',
+            },
+          ],
         },
       ],
+      legend: {
+        isVisible: true,
+        position: 'right',
+      },
+      preferredSeriesType: 'line',
+      tickLabelsVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      valueLabels: 'hide',
     },
-    query: { query: '', language: 'kuery' },
-    filters: [],
   },
+  title: 'Prefilled from exploratory view app',
+  visualizationType: 'lnsXY',
 };

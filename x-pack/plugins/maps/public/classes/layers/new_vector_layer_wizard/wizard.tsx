@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import { EuiEmptyPrompt, EuiPanel, EuiCallOut } from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
 import { RenderWizardArguments } from '../layer_wizard_registry';
@@ -125,36 +125,13 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     const IndexNameForm = getIndexNameFormComponent();
     return (
       <EuiPanel>
-        <>
-          <EuiEmptyPrompt
-            title={
-              <h4>
-                {i18n.translate('xpack.maps.layers.newVectorLayerWizard.createNewLayer', {
-                  defaultMessage: 'Create new layer',
-                })}
-              </h4>
-            }
-            body={
-              <Fragment>
-                <p>
-                  {i18n.translate(
-                    'xpack.maps.layers.newVectorLayerWizard.vectorEditorDescription',
-                    {
-                      defaultMessage: `Creates a new vector layer. This can be used to draw and store new shapes.`,
-                    }
-                  )}
-                </p>
-              </Fragment>
-            }
-          />
-          <IndexNameForm
-            indexName={this.state.indexName}
-            indexNameError={this.state.indexNameError}
-            onIndexNameChange={this._onIndexChange}
-            onIndexNameValidationStart={() => {}}
-            onIndexNameValidationEnd={() => {}}
-          />
-        </>
+        <IndexNameForm
+          indexName={this.state.indexName}
+          indexNameError={this.state.indexNameError}
+          onIndexNameChange={this._onIndexChange}
+          onIndexNameValidationStart={() => {}}
+          onIndexNameValidationEnd={() => {}}
+        />
       </EuiPanel>
     );
   }

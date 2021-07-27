@@ -20,6 +20,7 @@
   "ui": true,
   "extraPublicDirs": ["common"],
   "requiredBundles": [
+    "esUiShared",
     "kibanaReact",
     "savedObjectsManagement",
     "home"

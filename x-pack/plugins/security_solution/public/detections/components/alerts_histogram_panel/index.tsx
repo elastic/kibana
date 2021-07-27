@@ -129,6 +129,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsHistogramOption>(
@@ -152,7 +153,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     });
     const kibana = useKibana();
     const { navigateToApp } = kibana.services.application;
-    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.detections);
+    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
 
     const totalAlerts = useMemo(
       () =>
@@ -175,7 +176,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        navigateToApp(APP_ID, {
+          deepLinkId: SecurityPageName.alerts,
           path: getDetectionEngineUrl(urlSearch),
         });
       },
@@ -260,7 +262,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             }
           );
         }
-
+        setIsInspectDisabled(false);
         setAlertsQuery(
           getAlertsHistogramQuery(
             selectedStackByOption.value,
@@ -270,6 +272,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           )
         );
       } catch (e) {
+        setIsInspectDisabled(true);
         setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption.value, from, to, []));
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -304,6 +307,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             title={titleText}
             titleSize={onlyField == null ? 'm' : 's'}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
+            isInspectDisabled={isInspectDisabled}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>

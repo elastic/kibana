@@ -16,7 +16,6 @@ import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routin
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { licenseService } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../common/hooks/use_license');
 
 describe('Policy Details', () => {
@@ -130,7 +129,7 @@ describe('Policy Details', () => {
 
       const backToListLink = policyView.find('LinkIcon[dataTestSubj="policyDetailsBackLink"]');
       expect(backToListLink.prop('iconType')).toBe('arrowLeft');
-      expect(backToListLink.prop('href')).toBe(endpointListPath);
+      expect(backToListLink.prop('href')).toBe(`/app/security${endpointListPath}`);
       expect(backToListLink.text()).toBe('Back to endpoint hosts');
 
       const pageTitle = policyView.find('h1[data-test-subj="header-page-title"]');
@@ -172,7 +171,7 @@ describe('Policy Details', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution:administration',
+        'securitySolution',
         { path: endpointListPath },
       ]);
     });
@@ -298,6 +297,16 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(1);
       });
 
+      it('memory protection card and user notification checkbox are shown', () => {
+        const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="memory_protectionUserNotificationCheckbox"]'
+        );
+
+        expect(memory).toHaveLength(1);
+        expect(userNotificationCheckbox).toHaveLength(1);
+      });
+
       it('ransomware card is shown', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(1);
@@ -322,6 +331,15 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(0);
       });
 
+      it('memory protection card, and user notification checkbox are hidden', () => {
+        const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
+        expect(memory).toHaveLength(0);
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="memoryUserNotificationCheckbox"]'
+        );
+        expect(userNotificationCheckbox).toHaveLength(0);
+      });
+
       it('ransomware card is hidden', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(0);
@@ -329,7 +347,7 @@ describe('Policy Details', () => {
 
       it('shows the locked card in place of 1 paid feature', () => {
         const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(1);
+        expect(lockedCard).toHaveLength(2);
       });
     });
   });

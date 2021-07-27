@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({
@@ -20,7 +21,10 @@ export async function hasRumData({
   setup: Setup & Partial<SetupTimeRange>;
 }) {
   try {
-    const { start, end } = setup;
+    const {
+      start = moment().subtract(24, 'h').valueOf(),
+      end = moment().valueOf(),
+    } = setup;
 
     const params = {
       apm: {

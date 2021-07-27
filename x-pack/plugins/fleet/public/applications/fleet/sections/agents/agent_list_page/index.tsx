@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 
-import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
+import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
   useCapabilities,
@@ -42,7 +42,7 @@ import {
   ContextMenuActions,
 } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENT_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -328,6 +328,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
+    full: true,
   });
 
   const agentPolicies = useMemo(
@@ -350,6 +351,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     const isHosted = agentPolicy?.is_managed === true;
     return !isHosted;
   };
+
+  const agentToUnenrollHasFleetServer = useMemo(() => {
+    if (!agentToUnenroll || !agentToUnenroll.policy_id) {
+      return false;
+    }
+
+    const agentPolicy = agentPoliciesIndexedById[agentToUnenroll.policy_id];
+
+    if (!agentPolicy) {
+      return false;
+    }
+
+    return agentPolicy.package_policies.some(
+      (ap: string | PackagePolicy) =>
+        typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
+    );
+  }, [agentToUnenroll, agentPoliciesIndexedById]);
 
   const columns = [
     {
@@ -512,6 +530,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               fetchData();
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
+            hasFleetServer={agentToUnenrollHasFleetServer}
           />
         </EuiPortal>
       )}

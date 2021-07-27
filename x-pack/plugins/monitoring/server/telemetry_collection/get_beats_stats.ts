@@ -7,7 +7,8 @@
 
 import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -319,17 +320,17 @@ export function processResults(
  * @return {Promise}
  */
 async function fetchBeatsByType(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,
   { page = 0, ...options }: { page?: number } & BeatsProcessOptions,
   type: string
 ): Promise<void> {
-  const params = {
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_BEATS,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.type',
       'hits.hits._source.beats_stats.beat.version',
@@ -353,7 +354,7 @@ async function fetchBeatsByType(
             },
           },
         ],
-      }),
+      }) as estypes.QueryDslQueryContainer,
       from: page * HITS_SIZE,
       collapse: { field: `${type}.beat.uuid` },
       sort: [{ [`${type}.timestamp`]: { order: 'desc', unmapped_type: 'long' } }],
@@ -361,11 +362,11 @@ async function fetchBeatsByType(
     },
   };
 
-  const results = await callCluster<SearchResponse<BeatsStats>>('search', params);
+  const { body: results } = await callCluster.search(params);
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processResults(results, options);
+    processResults(results as SearchResponse<BeatsStats>, options);
 
     if (hitsLength === HITS_SIZE) {
       // call recursively
@@ -383,7 +384,7 @@ async function fetchBeatsByType(
 }
 
 export async function fetchBeatsStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -393,7 +394,7 @@ export async function fetchBeatsStats(
 }
 
 export async function fetchBeatsStates(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -411,7 +412,7 @@ export interface BeatsStatsByClusterUuid {
  * @return {Object} - Beats stats in an object keyed by the cluster UUIDs
  */
 export async function getBeatsStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string

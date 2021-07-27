@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
+import { ConfigProps, SeriesConfig } from '../../types';
+import {
+  FieldLabels,
+  OPERATION_COLUMN,
+  RECORDS_FIELD,
+  REPORT_METRIC_FIELD,
+  ReportTypes,
+} from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
@@ -24,9 +30,9 @@ import {
 } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'kpi-over-time',
+    reportType: ReportTypes.KPI,
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar', 'area'],
     xAxisColumn: {
@@ -34,14 +40,14 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
     },
     yAxisColumns: [
       {
-        sourceField: 'business.kpi',
+        sourceField: REPORT_METRIC_FIELD,
         operationType: 'median',
       },
     ],
     hasOperationType: true,
-    defaultFilters: Object.keys(MobileFields),
-    breakdowns: Object.keys(MobileFields),
-    filters: [
+    filterFields: Object.keys(MobileFields),
+    breakdownFields: Object.keys(MobileFields),
+    baseFilters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
     ],
     labels: {
@@ -52,50 +58,37 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
       [METRIC_SYSTEM_MEMORY_USAGE]: MEMORY_USAGE,
       [METRIC_SYSTEM_CPU_USAGE]: CPU_USAGE,
     },
-    reportDefinitions: [
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+    metricOptions: [
       {
-        field: SERVICE_NAME,
-        required: true,
+        label: RESPONSE_LATENCY,
+        field: TRANSACTION_DURATION,
+        id: TRANSACTION_DURATION,
+        columnType: OPERATION_COLUMN,
       },
       {
-        field: SERVICE_ENVIRONMENT,
-        required: true,
-      },
-      {
-        field: 'business.kpi',
-        custom: true,
-        options: [
+        field: RECORDS_FIELD,
+        id: RECORDS_FIELD,
+        label: TRANSACTIONS_PER_MINUTE,
+        columnFilters: [
           {
-            label: RESPONSE_LATENCY,
-            field: TRANSACTION_DURATION,
-            id: TRANSACTION_DURATION,
-            columnType: OPERATION_COLUMN,
-          },
-          {
-            field: RECORDS_FIELD,
-            id: RECORDS_FIELD,
-            label: TRANSACTIONS_PER_MINUTE,
-            columnFilters: [
-              {
-                language: 'kuery',
-                query: `processor.event: transaction`,
-              },
-            ],
-            timeScale: 'm',
-          },
-          {
-            label: MEMORY_USAGE,
-            field: METRIC_SYSTEM_MEMORY_USAGE,
-            id: METRIC_SYSTEM_MEMORY_USAGE,
-            columnType: OPERATION_COLUMN,
-          },
-          {
-            label: CPU_USAGE,
-            field: METRIC_SYSTEM_CPU_USAGE,
-            id: METRIC_SYSTEM_CPU_USAGE,
-            columnType: OPERATION_COLUMN,
+            language: 'kuery',
+            query: `processor.event: transaction`,
           },
         ],
+        timeScale: 'm',
+      },
+      {
+        label: MEMORY_USAGE,
+        field: METRIC_SYSTEM_MEMORY_USAGE,
+        id: METRIC_SYSTEM_MEMORY_USAGE,
+        columnType: OPERATION_COLUMN,
+      },
+      {
+        label: CPU_USAGE,
+        field: METRIC_SYSTEM_CPU_USAGE,
+        id: METRIC_SYSTEM_CPU_USAGE,
+        columnType: OPERATION_COLUMN,
       },
     ],
   };

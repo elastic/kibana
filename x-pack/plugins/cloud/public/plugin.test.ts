@@ -9,14 +9,14 @@ import { nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';
-import { initializeFullStoryMock } from './plugin.test.mocks';
+import { fullStoryApiMock, initializeFullStoryMock } from './plugin.test.mocks';
 import { CloudPlugin, CloudConfigType, loadFullStoryUserId } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
     describe('setupFullstory', () => {
       beforeEach(() => {
-        initializeFullStoryMock.mockReset();
+        jest.clearAllMocks();
       });
 
       const setupPlugin = async ({
@@ -63,28 +63,72 @@ describe('Cloud Plugin', () => {
         });
 
         expect(initializeFullStoryMock).toHaveBeenCalled();
-        const {
-          basePath,
-          orgId,
-          packageInfo,
-          userIdPromise,
-        } = initializeFullStoryMock.mock.calls[0][0];
+        const { basePath, orgId, packageInfo } = initializeFullStoryMock.mock.calls[0][0];
         expect(basePath.prepend).toBeDefined();
         expect(orgId).toEqual('foo');
         expect(packageInfo).toEqual(initContext.env.packageInfo);
-        expect(await userIdPromise).toEqual('1234');
       });
 
-      it('passes undefined user ID when security is not available', async () => {
+      it('calls FS.identify with hashed user ID when security is available', async () => {
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' } },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        expect(fullStoryApiMock.identify).toHaveBeenCalledWith(
+          '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'
+        );
+      });
+
+      it('does not call FS.identify when security is not available', async () => {
         await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' } },
           securityEnabled: false,
         });
 
-        expect(initializeFullStoryMock).toHaveBeenCalled();
-        const { orgId, userIdPromise } = initializeFullStoryMock.mock.calls[0][0];
-        expect(orgId).toEqual('foo');
-        expect(await userIdPromise).toEqual(undefined);
+        expect(fullStoryApiMock.identify).not.toHaveBeenCalled();
+      });
+
+      it('calls FS.event when security is available', async () => {
+        const { initContext } = await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' } },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
+          kibana_version_str: initContext.env.packageInfo.version,
+        });
+      });
+
+      it('calls FS.event when security is not available', async () => {
+        const { initContext } = await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' } },
+          securityEnabled: false,
+        });
+
+        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
+          kibana_version_str: initContext.env.packageInfo.version,
+        });
+      });
+
+      it('calls FS.event when FS.identify throws an error', async () => {
+        fullStoryApiMock.identify.mockImplementationOnce(() => {
+          throw new Error(`identify failed!`);
+        });
+        const { initContext } = await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' } },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
+          kibana_version_str: initContext.env.packageInfo.version,
+        });
       });
 
       it('does not call initializeFullStory when enabled=false', async () => {

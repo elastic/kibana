@@ -282,7 +282,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     signature: i18n.translate('xpack.lens.indexPattern.lastValue.signature', {
       defaultMessage: 'field: string',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation.markdown', {
       defaultMessage: `
 Returns the value of a field from the last document, ordered by the default time field of the index pattern.
 

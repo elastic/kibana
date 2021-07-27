@@ -69,6 +69,9 @@ interface FlyoutHeaderPanelProps {
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
+  const { indexPattern, browserFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { uiSettings } = useKibana().services;
+  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {
     activeTab,
@@ -79,6 +82,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     status: timelineStatus,
     updated,
     show,
+    filters,
+    kqlMode,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -90,6 +95,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         'timelineType',
         'updated',
         'show',
+        'filters',
+        'kqlMode',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -97,6 +104,30 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const isDataInTimeline = useMemo(
     () => !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
     [dataProviders, kqlQuery]
+  );
+  const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
+
+  const kqlQueryExpression =
+    isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
+      ? ' '
+      : kqlQueryTimeline;
+  const kqlQueryTest = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
+    kqlQueryExpression,
+  ]);
+
+  const combinedQueries = useMemo(
+    () =>
+      combineQueries({
+        config: esQueryConfig,
+        dataProviders,
+        indexPattern,
+        browserFields,
+        filters: filters ? filters : [],
+        kqlQuery: kqlQueryTest,
+        kqlMode,
+      }),
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryTest]
   );
 
   const handleClose = useCallback(() => {
@@ -112,9 +143,9 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <AddTimelineButton timelineId={timelineId} />
-        <EuiFlexItem grow>
+        <EuiFlexItem grow={false}>
           <ActiveTimelines
             timelineId={timelineId}
             timelineType={timelineType}
@@ -125,8 +156,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
           />
         </EuiFlexItem>
         {show && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               {(activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
                 <EuiFlexItem grow={false}>
                   <InspectButton
@@ -134,7 +165,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                     queryId={`${timelineId}-${activeTab}`}
                     inputId="timeline"
                     inspectIndex={0}
-                    isDisabled={!isDataInTimeline}
+                    isDisabled={!isDataInTimeline || combinedQueries?.filterQuery === undefined}
                     title={i18n.INSPECT_TIMELINE_TITLE}
                   />
                 </EuiFlexItem>
@@ -190,7 +221,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     [timelineType]
   );
 
-  const content = useMemo(() => (title.length ? title : placeholder), [title, placeholder]);
+  const content = useMemo(() => title || placeholder, [title, placeholder]);
 
   return (
     <EuiText>
@@ -206,11 +237,12 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   const description = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
   );
-
   return (
     <EuiText size="s" data-test-subj="timeline-description">
-      {description.length ? (
-        <LineClamp key={description.length} content={description} lineClampHeight={4.5} />
+      {description ? (
+        <LineClamp key={description.length} lineClampHeight={4.5}>
+          {description}
+        </LineClamp>
       ) : (
         commonI18n.DESCRIPTION
       )}
@@ -294,10 +326,6 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     kqlQueryExpression,
   ]);
 
-  const isBlankTimeline: boolean = useMemo(
-    () => isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query),
-    [dataProviders, filters, kqlQuery]
-  );
   const combinedQueries = useMemo(
     () =>
       combineQueries({
@@ -311,6 +339,14 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       }),
     [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
   );
+
+  const isBlankTimeline: boolean = useMemo(
+    () =>
+      (isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query)) ||
+      combinedQueries?.filterQuery === undefined,
+    [dataProviders, filters, kqlQuery, combinedQueries]
+  );
+
   const [loading, kpis] = useTimelineKpis({
     defaultIndex: selectedPatterns,
     docValueFields,
