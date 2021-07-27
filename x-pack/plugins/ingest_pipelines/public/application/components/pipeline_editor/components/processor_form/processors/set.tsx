@@ -8,7 +8,7 @@
 import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { EuiCode, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -142,11 +142,14 @@ const getValueConfig: (
       ],
     },
     labelAppend: (
-      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
-        {i18n.translate('xpack.ingestPipelines.pipelineEditor.useCopyFromLabel', {
-          defaultMessage: 'Use copy from field',
-        })}
-      </EuiButtonEmpty>
+      <EuiText size="xs">
+        <EuiLink onClick={toggleCustom} data-test-subj="toggleCustomField">
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.useCopyFromLabel"
+            defaultMessage="Use copy from field"
+          />
+        </EuiLink>
+      </EuiText>
     ),
     key: 'value',
   },
@@ -187,11 +190,14 @@ const getValueConfig: (
       ),
     },
     labelAppend: (
-      <EuiButtonEmpty size="xs" onClick={toggleCustom} data-test-subj="toggleCustomField">
-        {i18n.translate('xpack.ingestPipelines.pipelineEditor.useValueLabel', {
-          defaultMessage: 'Use value field',
-        })}
-      </EuiButtonEmpty>
+      <EuiText size="xs">
+        <EuiLink onClick={toggleCustom} data-test-subj="toggleCustomField">
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.useValueLabel"
+            defaultMessage="Use value field"
+          />
+        </EuiLink>
+      </EuiText>
     ),
     key: 'copy_from',
   },
