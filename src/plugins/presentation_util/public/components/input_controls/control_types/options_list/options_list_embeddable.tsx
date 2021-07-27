@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { esFilters } from '../../../../../../data/public';
+import { EuiSelectableOption } from '@elastic/eui';
+
+import { OptionsListComponent } from './options_list_component';
 import { Embeddable } from '../../../../../../embeddable/public';
 import { InputControlInput, InputControlOutput } from '../../embeddable/types';
-import { OptionsListComponent } from './options_list_component';
 
 interface OptionsListDataFetchProps {
   field: string;

@@ -6,29 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useEffect, useState, useCallback } from 'react';
-import classNames from 'classnames';
-
-import {
-  EuiButtonEmpty,
-  EuiIcon,
-  EuiNotificationBadge,
-  EuiPopover,
-  EuiSelectableOption,
-} from '@elastic/eui';
-import useMount from 'react-use/lib/useMount';
-import { Subject } from 'rxjs';
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { debounceTime, tap } from 'rxjs/operators';
-import useMountedState from 'react-use/lib/useMountedState';
+import useMount from 'react-use/lib/useMount';
+import classNames from 'classnames';
+import { Subject } from 'rxjs';
+import {
+  EuiIcon,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiSelectableOption,
+  EuiNotificationBadge,
+} from '@elastic/eui';
+
 import {
   OptionsListDataFetcher,
   OptionsListEmbeddable,
   OptionsListEmbeddableInput,
 } from './options_list_embeddable';
-import { InputControlOutput } from '../../embeddable/types';
-import { withEmbeddableSubscription } from '../../../../../../embeddable/public';
 import { OptionsListStrings } from './options_list_strings';
+import { InputControlOutput } from '../../embeddable/types';
 import { OptionsListPopover } from './options_list_popover_component';
+import { withEmbeddableSubscription } from '../../../../../../embeddable/public';
 
 import './options_list.scss';
 
@@ -49,7 +48,7 @@ interface OptionsListProps {
 
 export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
   const [availableOptions, setAvailableOptions] = useState<EuiSelectableOption[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<Set<string>>();
+  const selectedOptions = useRef<Set<string>>(new Set<string>());
 
   // raw search string is stored here so it is remembered when popover is closed.
   const [searchString, setSearchString] = useState<string>('');
@@ -59,6 +58,7 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
   const [loading, setIsLoading] = useState(false);
 
   const typeaheadSubject = useMemo(() => new Subject<string>(), []);
+
   useMount(() => {
     typeaheadSubject
       .pipe(
@@ -85,7 +85,7 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
       setIsLoading(false);
       // We now have new 'availableOptions', we need to ensure the previously selected options are still selected.
       const enabledIndices: number[] = [];
-      selectedOptions?.forEach((selectedOption) => {
+      selectedOptions.current?.forEach((selectedOption) => {
         const optionIndex = newOptions.findIndex(
           (availableOption) => availableOption.label === selectedOption
         );
@@ -97,7 +97,6 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
     return () => {
       canceled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern, timeRange, filters, field, query, debouncedSearchString, fetchData]);
 
   const updateItem = useCallback(
@@ -110,20 +109,16 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
       const newAvailableOptions = toggleAvailableOptions([index], availableOptions, !toggleOff);
       setAvailableOptions(newAvailableOptions);
 
-      setSelectedOptions((currentOptions) => {
-        const newOptions = currentOptions ?? new Set<string>();
-        if (toggleOff) newOptions.delete(item.label);
-        else newOptions.add(item.label);
-        return newOptions;
-      });
+      if (toggleOff) selectedOptions.current.delete(item.label);
+      else selectedOptions.current.add(item.label);
     },
     [availableOptions]
   );
 
-  const selectedOptionsString = Array.from(selectedOptions ?? []).join(
+  const selectedOptionsString = Array.from(selectedOptions.current).join(
     OptionsListStrings.summary.getSeparator()
   );
-  const selectedOptionsLength = Array.from(selectedOptions ?? []).length;
+  const selectedOptionsLength = Array.from(selectedOptions.current).length;
 
   const { twoLineLayout } = input;
   const button = (
