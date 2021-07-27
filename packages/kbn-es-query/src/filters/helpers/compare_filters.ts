@@ -7,7 +7,7 @@
  */
 
 import { defaults, isEqual, omit, map } from 'lodash';
-import { FilterMeta, Filter } from '../build_filters';
+import type { FilterMeta, Filter } from '../build_filters';
 
 export interface FilterCompareOptions {
   index?: boolean;

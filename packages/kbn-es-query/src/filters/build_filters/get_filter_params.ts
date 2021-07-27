@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PhrasesFilter } from './phrases_filter';
-import { PhraseFilter } from './phrase_filter';
-import { RangeFilter } from './range_filter';
+import type { PhrasesFilter } from './phrases_filter';
+import type { PhraseFilter } from './phrase_filter';
+import type { RangeFilter } from './range_filter';
 import { Filter, FILTERS } from './types';
 
 export function getFilterParams(filter: Filter) {

@@ -7,7 +7,7 @@
  */
 
 import { each, union } from 'lodash';
-import { Filter } from '..';
+import type { Filter } from '..';
 import { dedupFilters } from './dedup_filters';
 
 /**
@@ -25,5 +25,5 @@ export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
     results = union(results, dedupFilters(results, [filter]), comparatorOptions);
   });
 
-  return results;
+  return results;  
 };

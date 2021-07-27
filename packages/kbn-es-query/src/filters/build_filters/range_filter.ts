@@ -7,8 +7,8 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
-import { Filter, FilterMeta } from './types';
-import { IndexPatternBase, IndexPatternFieldBase } from '../..';
+import type { Filter, FilterMeta } from './types';
+import type { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
 

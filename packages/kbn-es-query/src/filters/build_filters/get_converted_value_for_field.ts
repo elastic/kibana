@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '../..';
+import { IndexPatternFieldBase } from '../../es_query';
 
 /**
  * @internal

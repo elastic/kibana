@@ -13,7 +13,7 @@ import { getMissingFilterField, isMissingFilter } from './missing_filter';
 import { getPhrasesFilterField, isPhrasesFilter } from './phrases_filter';
 import { getPhraseFilterField, isPhraseFilter } from './phrase_filter';
 import { getRangeFilterField, isRangeFilter } from './range_filter';
-import { Filter } from './types';
+import type { Filter } from './types';
 
 export const getFilterField = (filter: Filter) => {
   if (isExistsFilter(filter)) {

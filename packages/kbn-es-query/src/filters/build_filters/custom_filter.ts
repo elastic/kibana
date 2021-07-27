@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from './types';
+import type { Filter } from './types';
 
 export type CustomFilter = Filter & {
   query: any;

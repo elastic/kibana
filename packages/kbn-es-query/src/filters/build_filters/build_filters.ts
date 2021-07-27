@@ -13,7 +13,7 @@ import { buildPhrasesFilter } from './phrases_filter';
 import { buildRangeFilter } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
 
-import { IndexPatternFieldBase, IndexPatternBase } from '../..';
+import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 import { FilterMeta, FilterStateStore } from './types';
 
 export function buildFilter(

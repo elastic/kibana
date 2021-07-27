@@ -7,8 +7,8 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { get, isPlainObject } from 'lodash';
-import { Filter, FilterMeta } from './types';
-import { IndexPatternFieldBase, IndexPatternBase } from '../..';
+import type { Filter, FilterMeta } from './types';
+import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 
 export type PhraseFilterMeta = FilterMeta & {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 
 export type QueryStringFilterMeta = FilterMeta;
 

@@ -7,7 +7,7 @@
  */
 
 import { filter, find } from 'lodash';
-import { Filter } from '..';
+import type { Filter } from '..';
 import { compareFilters, FilterCompareOptions } from './compare_filters';
 
 /**

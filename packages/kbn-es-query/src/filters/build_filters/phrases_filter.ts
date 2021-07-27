@@ -8,7 +8,7 @@
 
 import { Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript } from './phrase_filter';
-import { IndexPatternFieldBase, IndexPatternBase } from '../..';
+import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values

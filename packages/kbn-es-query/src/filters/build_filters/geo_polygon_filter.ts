@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta, LatLon } from './types';
+import type { Filter, FilterMeta, LatLon } from './types';
 
 export type GeoPolygonFilterMeta = FilterMeta & {
   params: {

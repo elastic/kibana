@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase, IndexPatternBase } from '../..';
-import { Filter, FilterMeta } from './types';
+import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
+import type { Filter, FilterMeta } from './types';
 
 export type ExistsFilterMeta = FilterMeta;
 
