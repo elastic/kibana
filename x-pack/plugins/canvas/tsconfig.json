@@ -45,7 +45,6 @@
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/vis_type_tagcloud/tsconfig.json" },
     { "path": "../../../src/plugins/visualizations/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
