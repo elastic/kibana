@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import {
+  loginAndWaitForPage,
+  loginWithUserAndWaitForPageWithoutDateRange,
+} from '../../tasks/login';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
@@ -28,20 +31,33 @@ import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { populateTimeline } from '../../tasks/timeline';
 import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
+import { createUsersAndRoles, secReadCasesAll, secReadCasesAllUser } from '../../tasks/privileges';
+import { TOASTER } from '../../screens/configure_cases';
 
+const usersToCreate = [secReadCasesAllUser];
+const rolesToCreate = [secReadCasesAll];
 // Skipped at the moment as this has flake due to click handler issues. This has been raised with team members
 // and the code is being re-worked and then these tests will be unskipped
-describe.skip('Sourcerer', () => {
-  before(() => {
+describe('Sourcerer', () => {
+  beforeEach(() => {
     cleanKibana();
   });
-
-  beforeEach(() => {
-    cy.clearLocalStorage();
-    loginAndWaitForPage(HOSTS_URL);
+  describe('permissions', () => {
+    before(() => {
+      createUsersAndRoles(usersToCreate, rolesToCreate);
+    });
+    it(`role(s) ${secReadCasesAllUser.roles.join()} shows error when user does not have permissions`, () => {
+      loginWithUserAndWaitForPageWithoutDateRange(HOSTS_URL, secReadCasesAllUser);
+      cy.get(TOASTER).should('have.text', 'Write role required to generate data');
+    });
   });
 
-  describe('Default scope', () => {
+  describe.skip('Default scope', () => {
+    beforeEach(() => {
+      cy.clearLocalStorage();
+      loginAndWaitForPage(HOSTS_URL);
+    });
+
     it('has SIEM index patterns selected on initial load', () => {
       openSourcerer();
       isSourcererSelection(`auditbeat-*`);
@@ -76,7 +92,12 @@ describe.skip('Sourcerer', () => {
     });
   });
 
-  describe('Timeline scope', () => {
+  describe.skip('Timeline scope', () => {
+    beforeEach(() => {
+      cy.clearLocalStorage();
+      loginAndWaitForPage(HOSTS_URL);
+    });
+
     const alertPatterns = ['.siem-signals-default'];
     const rawPatterns = ['auditbeat-*'];
     const allPatterns = [...alertPatterns, ...rawPatterns];

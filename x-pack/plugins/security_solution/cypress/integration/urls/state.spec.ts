@@ -180,7 +180,6 @@ describe('url state', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     kqlSearch('source.ip: "10.142.0.9" {enter}');
     navigateFromHeaderTo(HOSTS);
-    cy.log('HERE!');
     cy.get(NETWORK).should(
       'have.attr',
       'href',

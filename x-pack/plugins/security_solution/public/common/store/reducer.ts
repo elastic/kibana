@@ -58,7 +58,7 @@ export const createInitialState = (
         ...sourcererModel.initialSourcererState.sourcererScopes,
         default: {
           ...sourcererModel.initialSourcererState.sourcererScopes.default,
-          indicesExist: defaultIndexPattern.title.length > 0,
+          indicesExist: defaultIndexPattern.id != null && defaultIndexPattern.title.length > 0,
         },
       },
       defaultIndexPattern,

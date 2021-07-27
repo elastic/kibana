@@ -57,12 +57,15 @@ export const createSourcererIndexPatternRoute = (
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asInternalUser
         );
-        const pattern = getKibanaIndexPattern(indexPatternService, request.body.patternList);
+        const pattern = await getKibanaIndexPattern(indexPatternService, request.body.patternList);
         return response.ok({ body: pattern });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
-          body: error.message,
+          body:
+            error.statusCode === 403
+              ? 'Users with write permissions need to access the Elastic Security app to initialize the app source data.'
+              : error.message,
           statusCode: error.statusCode,
         });
       }

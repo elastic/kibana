@@ -46,6 +46,7 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  * The Kibana server endpoint used for authentication
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
+const LOGOUT_API_ENDPOINT = '/logout';
 
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user
@@ -286,7 +287,7 @@ export const getEnvAuth = (): User => {
 };
 
 /**
- * Authenticates with Kibana, visits the specified `url`, and waits for the
+ * Authenticates with Kibana, visits the specified `url`, and waits for the`
  * Kibana global nav to be displayed before continuing
  */
 export const loginAndWaitForPage = (url: string, role?: ROLES) => {
@@ -326,4 +327,8 @@ export const loginAndWaitForHostDetailsPage = () => {
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const logout = () => {
+  cy.visit(LOGOUT_API_ENDPOINT);
 };

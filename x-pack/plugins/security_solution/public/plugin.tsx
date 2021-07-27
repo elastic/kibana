@@ -345,16 +345,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<SecurityAppStore> {
     if (!this._store) {
       const patternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [
-        { createStore, createInitialState },
-        defaultIndexPattern,
-        kibanaIndexPatterns,
-      ] = await Promise.all([
-        this.lazyApplicationDependencies(),
-        await coreStart.http.fetch(SOURCERER_API_URL, {
+      let defaultIndexPattern;
+      try {
+        // check for/generate default Security Solution Kibana index pattern
+        defaultIndexPattern = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({ patternList }),
-        }),
+        });
+      } catch (error) {
+        defaultIndexPattern = { id: null, ...error };
+      }
+      const [{ createStore, createInitialState }, kibanaIndexPatterns] = await Promise.all([
+        this.lazyApplicationDependencies(),
+
         startPlugins.data.indexPatterns.getIdsWithTitle(),
       ]);
 

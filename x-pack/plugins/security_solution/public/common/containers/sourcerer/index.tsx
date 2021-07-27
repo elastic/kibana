@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-
+import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -18,6 +18,7 @@ import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants
 import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { getPatternList } from '../../store/sourcerer/helpers';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -31,6 +32,23 @@ export const useInitSourcerer = (
     []
   );
   const defaultIndexPattern = useDeepEqualSelector(getDefaultIndexPatternSelector);
+  const { addError } = useAppToasts();
+
+  useEffect(() => {
+    const { id, ...rest } = defaultIndexPattern;
+    if (id === null) {
+      // if id is null, rest is error
+      addError(rest, {
+        title: i18n.translate('xpack.securitySolution.sourcerer.permissions.title', {
+          defaultMessage: 'Write role required to generate data',
+        }),
+        toastMessage: i18n.translate('xpack.securitySolution.sourcerer.permissions.toastMessage', {
+          defaultMessage:
+            'Users with write permission need to access the Elastic Security app to initialize the app source data.',
+        }),
+      });
+    }
+  }, [addError, defaultIndexPattern]);
   const defaultIndexPatternSelection = useMemo(() => getPatternList(defaultIndexPattern), [
     defaultIndexPattern,
   ]);
