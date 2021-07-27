@@ -22296,7 +22296,6 @@
     "xpack.securitySolution.endpointManagement.noPermissionsSubText": "似乎 Fleet 已禁用。必须启用 Fleet，才能使用此功能。如果您无权启用 Fleet，请联系您的 Kibana 管理员。",
     "xpack.securitySolution.endpointManagemnet.noPermissionsText": "您没有所需的 Kibana 权限，无法使用 Elastic Security 管理",
     "xpack.securitySolution.endpointsTab": "终端",
-    "xpack.securitySolution.enpdoint.resolver.panelutils.betaBadgeLabel": "公测版",
     "xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate": "日期无效",
     "xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved": "未检索时间戳",
     "xpack.securitySolution.event.module.linkToElasticEndpointSecurityDescription": "在 Endpoint Security 中打开",
