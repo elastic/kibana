@@ -9,7 +9,8 @@
 import { processBucket } from './process_bucket';
 
 import type { Panel, Series } from '../../../../common/types';
-import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
+import type { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
+import type { createFieldFormatAccessor } from '../create_field_format_accessor';
 
 function createValueObject(key: string | number, value: string | number, seriesId: string) {
   return { key_as_string: `${key}`, doc_count: value, key, [seriesId]: { value } };
@@ -84,6 +85,7 @@ function trendChecker(trend: string, slope: number) {
 
 describe('processBucket(panel)', () => {
   const extractFields = jest.fn() as ReturnType<typeof createFieldsFetcher>;
+  const getFieldFormatByName = jest.fn() as ReturnType<typeof createFieldFormatAccessor>;
   let panel: Panel;
 
   describe('single metric panel', () => {
@@ -94,7 +96,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('return the correct trend direction', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, getFieldFormatByName });
       const buckets = createBuckets([SERIES_ID]);
       for (const bucket of buckets) {
         const result = await bucketProcessor(bucket);
@@ -104,7 +106,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('properly handle 0 values for trend', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, getFieldFormatByName });
       const bucketforNaNResult = {
         key: 'NaNScenario',
         expectedTrend: 'flat',
@@ -128,7 +130,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('have the side effect to create the timeseries property if missing on bucket', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, getFieldFormatByName });
       const buckets = createBuckets([SERIES_ID]);
 
       for (const bucket of buckets) {
@@ -148,7 +150,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('return the correct trend direction', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, getFieldFormatByName });
       const buckets = createBuckets(SERIES);
 
       for (const bucket of buckets) {
