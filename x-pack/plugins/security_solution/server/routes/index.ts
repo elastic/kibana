@@ -54,11 +54,10 @@ import { persistNoteRoute } from '../lib/timeline/routes/notes';
 
 import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
-import { SetupPlugins } from '../plugin';
+import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { createSourcererIndexPatternRoute } from '../lib/sourcerer/routes';
-import { PluginStart } from '../../../../../src/plugins/data/server';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -67,7 +66,7 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataClient: RuleDataClient | null,
-  getStartServices: StartServicesAccessor<{}, PluginStart>
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......

@@ -17,7 +17,7 @@ import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { IndexPattern, IndexPatternsService } from '../../../../../../../src/plugins/data/common';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { sourcererSchema } from './schema';
-import { PluginStart } from '../../../../../../../src/plugins/data/server';
+import { StartPlugins } from '../../../plugin';
 
 const getKibanaIndexPattern = async (
   indexPatternsService: IndexPatternsService,
@@ -38,7 +38,7 @@ const getKibanaIndexPattern = async (
 
 export const createSourcererIndexPatternRoute = (
   router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<{}, PluginStart>
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
     {
@@ -53,7 +53,12 @@ export const createSourcererIndexPatternRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const [, , { indexPatterns }] = await getStartServices();
+        const [
+          ,
+          {
+            data: { indexPatterns },
+          },
+        ] = await getStartServices();
         const indexPatternService = await indexPatterns.indexPatternsServiceFactory(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asInternalUser
