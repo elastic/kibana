@@ -172,8 +172,6 @@ type TestSubject =
   | 'valueFieldInput'
   | 'mediaTypeSelectorField'
   | 'networkDirectionField.input'
-  | 'sourceIpField.input'
-  | 'destinationIpField.input'
   | 'toggleCustomField'
   | 'ignoreEmptyField.input'
   | 'overrideField.input'
@@ -189,7 +187,5 @@ type TestSubject =
   | 'ianaField.input'
   | 'transportField.input'
   | 'seedField.input'
-  | 'copyFromField'
-  | 'copyFromField.input'
   | 'copyFromInput'
   | 'trimSwitch.input';
