@@ -41,14 +41,14 @@ import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/ent
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
-import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
 import { CodeSignature } from '../../../../common/ecs/file';
+import { IndexPatternBase } from '@kbn/es-query';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): IIndexPattern => ({
+const getMockIndexPattern = (): IndexPatternBase => ({
   fields,
   id: '1234',
   title: 'logstash-*',
@@ -90,9 +90,6 @@ const mockLinuxEndpointFields = [
     readFromDocValues: false,
   },
 ];
-
-export const getEndpointField = (name: string) =>
-  mockEndpointFields.find((field) => field.name === name) as IFieldType;
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -185,7 +182,7 @@ describe('Exception helpers', () => {
         meta: {},
         name: 'some name',
         namespace_type: 'single',
-        os_types: ['linux'],
+        os_types: [],
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
       };
@@ -367,7 +364,7 @@ describe('Exception helpers', () => {
           name: 'nested.field',
         },
       ],
-    } as IIndexPattern;
+    } as IndexPatternBase;
 
     test('it should return false with an empty array', () => {
       const payload: ExceptionListItemSchema[] = [];

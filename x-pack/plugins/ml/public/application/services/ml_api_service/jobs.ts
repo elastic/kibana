@@ -27,7 +27,7 @@ import type {
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import type { Category } from '../../../../common/types/categories';
-import type { JobsExistResponse } from '../../../../common/types/job_service';
+import type { JobsExistResponse, BulkCreateResults } from '../../../../common/types/job_service';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
@@ -360,6 +360,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       categories: Array<{ count?: number; category: Category }>;
     }>({
       path: `${ML_BASE_PATH}/jobs/datafeed_preview`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  bulkCreateJobs(jobs: { job: Job; datafeed: Datafeed } | Array<{ job: Job; datafeed: Datafeed }>) {
+    const body = JSON.stringify(jobs);
+    return httpService.http<BulkCreateResults>({
+      path: `${ML_BASE_PATH}/jobs/bulk_create`,
       method: 'POST',
       body,
     });

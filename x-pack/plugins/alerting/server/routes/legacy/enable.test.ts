@@ -9,10 +9,10 @@ import { enableAlertRoute } from './enable';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { alertsClientMock } from '../../alerts_client.mock';
+import { rulesClientMock } from '../../rules_client.mock';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -33,10 +33,10 @@ describe('enableAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_enable"`);
 
-    alertsClient.enable.mockResolvedValueOnce();
+    rulesClient.enable.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           id: '1',
@@ -47,8 +47,8 @@ describe('enableAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(alertsClient.enable).toHaveBeenCalledTimes(1);
-    expect(alertsClient.enable.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.enable).toHaveBeenCalledTimes(1);
+    expect(rulesClient.enable.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -67,9 +67,9 @@ describe('enableAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.enable.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.enable.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);
