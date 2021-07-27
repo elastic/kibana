@@ -80,6 +80,7 @@ export {
   axisExtentConfig,
   layerConfig,
   xyChart,
+  labelsOrientationConfig,
 } from '../../common/expressions';
 
 export type XYChartRenderProps = XYChartProps & {
@@ -287,6 +288,12 @@ export function XYChart({
     yRight: true,
   };
 
+  const labelsOrientation = args.labelsOrientation || {
+    x: 0,
+    yLeft: 0,
+    yRight: 0,
+  };
+
   const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
 
   const chartHasMoreThanOneBarSeries =
@@ -328,6 +335,10 @@ export function XYChart({
           groupId === 'right'
             ? tickLabelsVisibilitySettings?.yRight
             : tickLabelsVisibilitySettings?.yLeft,
+        rotation:
+          groupId === 'right'
+            ? args.labelsOrientation?.yRight || 0
+            : args.labelsOrientation?.yLeft || 0,
       },
       axisTitle: {
         visible:
@@ -526,6 +537,7 @@ export function XYChart({
         style={{
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
+            rotation: labelsOrientation?.x,
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,
