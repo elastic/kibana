@@ -11,8 +11,7 @@ import { delay } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  /* eslint-disable ban/ban */
-  describe.only('uptime alerts', () => {
+  describe('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
