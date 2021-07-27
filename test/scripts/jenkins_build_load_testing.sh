@@ -82,14 +82,11 @@ nohup ./metricbeat > metricbeat.log 2>&1 &
 popd
 
 echo " -> Running gatling load testing"
-for i in "${sim_array[@]}"; do
-  sleep 30
-  echo "Running simulation $i .."
-  export GATLING_SIMULATIONS="$i"
-  node scripts/functional_tests \
-    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-    --config test/load/config.ts || exit 0;
-done
+export GATLING_SIMULATIONS="$sim_array"
+node scripts/functional_tests \
+  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+  --config test/load/config.ts;
+
 
 echo " -> Simulations run is finished"
 
