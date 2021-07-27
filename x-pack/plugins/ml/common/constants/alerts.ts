@@ -26,12 +26,12 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, string> = {
     defaultMessage: 'Datafeed is not started',
   }),
   mml: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
-    defaultMessage: 'Model memory limit',
+    defaultMessage: 'Model memory limit reached',
   }),
   errorMessages: i18n.translate(
     'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckName',
     {
-      defaultMessage: 'There are errors in job messages',
+      defaultMessage: 'There are errors in the job messages',
     }
   ),
   behindRealtime: i18n.translate(
@@ -41,6 +41,6 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, string> = {
     }
   ),
   delayedData: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckName', {
-    defaultMessage: 'Delayed data has occurred',
+    defaultMessage: 'Data delay has occurred',
   }),
 };

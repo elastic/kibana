@@ -191,7 +191,7 @@ describe('JobsHealthService', () => {
         },
       },
       {
-        name: 'Model memory limit',
+        name: 'Model memory limit reached',
         context: {
           results: [
             {
@@ -201,7 +201,7 @@ describe('JobsHealthService', () => {
               failed_category_count: 0,
             },
           ],
-          message: '1 job reached the hard model memory limit',
+          message: '1 job reached the hard model memory limit.',
         },
       },
     ]);
