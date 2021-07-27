@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { once, merge } from 'lodash';
+import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
@@ -91,7 +91,11 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import signalExtraFields from './lib/detection_engine/routes/index/signal_extra_fields.json';
-import { getNewSignalsTemplate } from './lib/detection_engine/routes/index/get_signals_template';
+import {
+  createSignalsFieldAliases,
+  getNewSignalsTemplate,
+  getRbacRequiredFields,
+} from './lib/detection_engine/routes/index/get_signals_template';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 
 export interface SetupPlugins {
@@ -254,12 +258,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
 
       // sec
-      ruleDataClient
-        .getWriter({ namespace: 'default' })
-        .bulk({ body: [{ index: {} }, { '@timestamp': 1626499490000 }] });
-      ruleDataClient
-        .getWriter({ namespace: 'default' })
-        .bulk({ body: [{ index: {} }, { '@timestamp': 1626499490000 }] });
 
       // Register reference rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
@@ -363,13 +361,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             return;
           }
           const existingSignalsTemplates = existingTemplateResponse.body;
-          const fieldAliases: Record<string, unknown> = {};
-          Object.entries(aadFieldConversion).forEach(([key, value]) => {
-            fieldAliases[value] = {
-              type: 'alias',
-              path: key,
-            };
-          });
+          const fieldAliases = createSignalsFieldAliases();
           const existingTemplateNames = Object.keys(existingSignalsTemplates);
           for (const existingTemplateName of existingTemplateNames) {
             const spaceId = existingTemplateName.substr(config.signalsIndex.length + 1);
@@ -377,16 +369,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts');
             const aadIndexAliasName = `${alertsIndexPattern}-${spaceId}`;
 
-            const indexAliases = {
-              aliases: {
-                [aadIndexAliasName]: {
-                  is_write_index: false,
-                },
-              },
-            };
-            const signalsTemplate = getNewSignalsTemplate(existingTemplateName);
-            merge(signalsTemplate.template.mappings.properties, fieldAliases);
-            merge(signalsTemplate.template, indexAliases);
+            const signalsTemplate = getNewSignalsTemplate(
+              existingTemplateName,
+              spaceId,
+              aadIndexAliasName
+            );
 
             try {
               await clusterClient.indices.putIndexTemplate({
@@ -400,32 +387,30 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   is_write_index: false,
                 },
               });
+
+              // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
+              // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
+              // mapping) or else this call will fail and not update ANY signals indices
+              const newMapping = {
+                properties: {
+                  ...signalExtraFields,
+                  ...fieldAliases,
+                  ...getRbacRequiredFields(spaceId),
+                },
+              };
+              await clusterClient.indices.putMapping({
+                index: `${config.signalsIndex}*`,
+                body: newMapping,
+                allow_no_indices: true,
+              } as estypes.IndicesPutMappingRequest);
+
               await clusterClient.indices.deleteTemplate({ name: existingTemplateName });
             } catch (err) {
-              this.logger.error(`Failed to install new siem signals template: ${err.message}`);
+              this.logger.error(
+                `Failed to install new siem signals template for space ${spaceId}: ${err.message}`
+              );
             }
           }
-
-          // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
-          // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
-          // mapping) or else this call will fail and not update ANY signals indices
-          const newMapping = {
-            properties: {
-              ...signalExtraFields,
-              ...fieldAliases,
-            },
-          };
-          await clusterClient.indices
-            .putMapping({
-              index: `${config.signalsIndex}*`,
-              body: newMapping,
-              allow_no_indices: true,
-            } as estypes.IndicesPutMappingRequest)
-            .catch((err) => {
-              this.logger.error(
-                `Failed to insert alerts as data field aliases to signals indices: ${err.message}`
-              );
-            });
         };
         updateExistingSignalsIndices();
       }

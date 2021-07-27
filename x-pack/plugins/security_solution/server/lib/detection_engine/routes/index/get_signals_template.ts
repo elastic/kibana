@@ -8,6 +8,7 @@
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
+import aadFieldConversion from './signal_aad_mapping.json';
 
 /**
   @constant
@@ -70,10 +71,55 @@ export const getSignalsTemplate = (index: string) => {
   return template;
 };
 
-export const getNewSignalsTemplate = (index: string) => {
+export const createSignalsFieldAliases = () => {
+  const fieldAliases: Record<string, unknown> = {};
+  Object.entries(aadFieldConversion).forEach(([key, value]) => {
+    fieldAliases[value] = {
+      type: 'alias',
+      path: key,
+    };
+  });
+  return fieldAliases;
+};
+
+export const getRbacRequiredFields = (spaceId: string) => {
+  return {
+    'kibana.space_ids': {
+      type: 'constant_keyword',
+      value: spaceId,
+    },
+    'kibana.consumers': {
+      type: 'constant_keyword',
+      value: 'siem',
+    },
+    'kibana.producer': {
+      type: 'constant_keyword',
+      value: 'siem',
+    },
+    // TODO: discuss naming of this field and what the value will be for legacy signals.
+    // Can we leave it as 'siem.signals' or do we need a runtime field that will map signal.rule.type
+    // to the new ruleTypeId?
+    'kibana.alert.rule.rule_type_id': {
+      type: 'constant_keyword',
+      value: 'siem.signals',
+    },
+  };
+};
+
+export const getNewSignalsTemplate = (
+  index: string,
+  spaceId: string,
+  aadIndexAliasName: string
+) => {
+  const fieldAliases = createSignalsFieldAliases();
   const template = {
     index_patterns: [`${index}-*`],
     template: {
+      aliases: {
+        [aadIndexAliasName]: {
+          is_write_index: false,
+        },
+      },
       settings: {
         index: {
           lifecycle: {
@@ -92,6 +138,8 @@ export const getNewSignalsTemplate = (index: string) => {
         properties: {
           ...ecsMapping.mappings.properties,
           ...otherMapping.mappings.properties,
+          ...fieldAliases,
+          ...getRbacRequiredFields(spaceId),
           signal: signalsMapping.mappings.properties.signal,
           threat: {
             ...ecsMapping.mappings.properties.threat,
