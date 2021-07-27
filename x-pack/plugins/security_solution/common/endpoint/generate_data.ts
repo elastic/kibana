@@ -827,7 +827,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       event: {
         action: 'rule_detection',
         kind: 'alert',
-        category: 'intrusion_detection', // TODO FIXME random event type for behavior?
+        category: 'behavior',
         code: 'behavior',
         id: this.seededUUIDv4(),
         dataset: 'endpoint.diagnostic.collection',
