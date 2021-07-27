@@ -136,7 +136,7 @@ function createRoot() {
       xpack: {
         reporting: {
           // browser install causes issues with Jest
-          enabled: false
+          enabled: false,
         },
       },
     },
