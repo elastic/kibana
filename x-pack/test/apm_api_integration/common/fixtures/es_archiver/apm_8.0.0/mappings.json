@@ -7,7 +7,7 @@
       ".kibana_8.0.0": {
       }
     },
-    "index": ".kibana_8.0.0_001",
+    "index": ".kibana_1",
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {

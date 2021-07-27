@@ -74,16 +74,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .toMatchInline(`
           Array [
             "Response status 404",
-            "No converter found for return value of type: class com.sun.proxy.$Proxy161",
+            "No converter found for return value of type: class com.sun.proxy.$Proxy162",
             "Response status 404",
-            "java.io.IOException: Connection reset by peer",
-            "null",
-            "Broken pipe",
+            "Connection reset by peer",
             "Request method 'POST' not supported",
-            "java.io.IOException: Connection reset by peer",
-            "java.io.IOException: Connection reset by peer",
-            "java.io.IOException: Connection reset by peer",
-            "java.io.IOException: Connection reset by peer",
+            "java.io.IOException: Broken pipe",
           ]
         `);
 
@@ -95,16 +90,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(occurences).toMatchInline(`
           Array [
-            24,
+            12,
             11,
-            6,
-            3,
             3,
             2,
             2,
-            1,
-            1,
-            1,
             1,
           ]
         `);
@@ -114,9 +104,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(firstItem).toMatchInline(`
           Object {
             "group_id": "d16d39e7fa133b8943cea035430a7b4e",
-            "last_seen": 1627323317588,
+            "last_seen": 1627374613628,
             "name": "Response status 404",
-            "occurrences": 24,
+            "occurrences": 12,
           }
         `);
       });

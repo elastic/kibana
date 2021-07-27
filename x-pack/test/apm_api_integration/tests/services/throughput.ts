@@ -68,13 +68,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('has the correct start date', () => {
         expectSnapshot(
           new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-07-26T17:47:00.000Z"`);
+        ).toMatchInline(`"2021-07-27T08:08:00.000Z"`);
       });
 
       it('has the correct end date', () => {
         expectSnapshot(
           new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-07-26T18:17:00.000Z"`);
+        ).toMatchInline(`"2021-07-27T08:38:00.000Z"`);
       });
 
       it('has the correct number of buckets', () => {
@@ -122,21 +122,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('has the correct start date', () => {
         expectSnapshot(
           new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-07-26T18:02:00.000Z"`);
+        ).toMatchInline(`"2021-07-27T08:23:00.000Z"`);
 
         expectSnapshot(
           new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-07-26T18:02:00.000Z"`);
+        ).toMatchInline(`"2021-07-27T08:23:00.000Z"`);
       });
 
       it('has the correct end date', () => {
         expectSnapshot(
           new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-07-26T18:17:00.000Z"`);
+        ).toMatchInline(`"2021-07-27T08:38:00.000Z"`);
 
         expectSnapshot(
           new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-07-26T18:17:00.000Z"`);
+        ).toMatchInline(`"2021-07-27T08:38:00.000Z"`);
       });
 
       it('has the correct number of buckets', () => {

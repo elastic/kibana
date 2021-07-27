@@ -334,17 +334,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Object {
             "errorRate": Object {
-              "value": 0,
+              "value": 0.00308832612723904,
             },
             "impact": 100,
             "latency": Object {
-              "value": 26437.1889400922,
+              "value": 30177.8418777023,
             },
             "name": "postgresql",
             "spanSubtype": "postgresql",
             "spanType": "db",
             "throughput": Object {
-              "value": 50.6333333333333,
+              "value": 53.9666666666667,
             },
             "type": "external",
           }
@@ -387,19 +387,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(latencyValues).toMatchInline(`
           Array [
             Object {
-              "latency": 11805.5979381443,
+              "latency": 10125.412371134,
               "name": "elasticsearch",
             },
             Object {
-              "latency": 37592.4642857143,
+              "latency": 42984.2941176471,
               "name": "opbeans-python",
             },
             Object {
-              "latency": 26437.1889400922,
+              "latency": 30177.8418777023,
               "name": "postgresql",
             },
             Object {
-              "latency": 1795.27083333333,
+              "latency": 1341.11624072547,
               "name": "redis",
             },
           ]
@@ -423,15 +423,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             Object {
               "name": "opbeans-python",
-              "throughput": 1.86666666666667,
+              "throughput": 1.7,
             },
             Object {
               "name": "postgresql",
-              "throughput": 50.6333333333333,
+              "throughput": 53.9666666666667,
             },
             Object {
               "name": "redis",
-              "throughput": 40,
+              "throughput": 40.4333333333333,
             },
           ]
         `);
@@ -452,27 +452,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {
               "impact": 0,
-              "latency": 11805.5979381443,
+              "latency": 10125.412371134,
               "name": "elasticsearch",
               "throughput": 3.23333333333333,
             },
             Object {
-              "impact": 2.46081127888134,
-              "latency": 37592.4642857143,
+              "impact": 2.52744598670713,
+              "latency": 42984.2941176471,
               "name": "opbeans-python",
-              "throughput": 1.86666666666667,
+              "throughput": 1.7,
             },
             Object {
               "impact": 100,
-              "latency": 26437.1889400922,
+              "latency": 30177.8418777023,
               "name": "postgresql",
-              "throughput": 50.6333333333333,
+              "throughput": 53.9666666666667,
             },
             Object {
-              "impact": 2.58678740675499,
-              "latency": 1795.27083333333,
+              "impact": 1.34642037334926,
+              "latency": 1341.11624072547,
               "name": "redis",
-              "throughput": 40,
+              "throughput": 40.4333333333333,
             },
           ]
         `);

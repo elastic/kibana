@@ -69,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "service": Object {
               "agent": Object {
-                "ephemeral_id": "a44f3d9d-8c18-4a9a-9533-c1c43d5507c5",
+                "ephemeral_id": "1f810e6f-e78a-4f49-9773-2142b9af9943",
                 "name": "java",
                 "version": "1.25.1-SNAPSHOT.UNKNOWN",
               },
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "version": "11.0.11",
               },
               "versions": Array [
-                "2021-07-26 03:47:49",
+                "2021-07-27 03:47:01",
               ],
             },
           }
@@ -124,7 +124,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "version": "3.9.6",
               },
               "versions": Array [
-                "2021-07-26 03:47:46",
+                "2021-07-27 03:46:59",
               ],
             },
           }

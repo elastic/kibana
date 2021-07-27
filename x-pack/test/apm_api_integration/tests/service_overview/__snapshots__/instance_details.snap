@@ -2,9 +2,9 @@
 
 exports[`APM API tests basic apm_8.0.0 Instance details when data is loaded fetch instance details return the correct data 1`] = `
 Object {
-  "@timestamp": "2021-07-26T17:55:16.435Z",
+  "@timestamp": "2021-07-27T08:08:17.707Z",
   "agent": Object {
-    "ephemeral_id": "a44f3d9d-8c18-4a9a-9533-c1c43d5507c5",
+    "ephemeral_id": "1f810e6f-e78a-4f49-9773-2142b9af9943",
     "name": "java",
     "version": "1.25.1-SNAPSHOT.UNKNOWN",
   },
@@ -25,26 +25,25 @@ Object {
     "region": "europe-west1",
   },
   "container": Object {
-    "id": "974d235c34fe915c11a0dbebc96688ad6c103ff7bbad4be82607b39e41a0e332",
+    "id": "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
   },
   "host": Object {
     "architecture": "amd64",
-    "ip": "10.40.0.217",
+    "ip": "10.40.0.248",
     "os": Object {
       "platform": "Linux",
     },
   },
   "kubernetes": Object {
     "pod": Object {
-      "name": "opbeans-java-764655fc46-ttmr8",
-      "uid": "3cf881c4-5602-4b33-8b4d-ed40a804082d",
+      "name": "opbeans-java-59f5cddddf-s9bvt",
+      "uid": "9aa1e495-4eca-49ca-bd26-2914e05a0226",
     },
   },
   "service": Object {
     "environment": "production",
     "framework": Object {
-      "name": "Spring Web MVC",
-      "version": "5.0.6.RELEASE",
+      "name": "Servlet API",
     },
     "language": Object {
       "name": "Java",
@@ -52,13 +51,13 @@ Object {
     },
     "name": "opbeans-java",
     "node": Object {
-      "name": "974d235c34fe915c11a0dbebc96688ad6c103ff7bbad4be82607b39e41a0e332",
+      "name": "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
     },
     "runtime": Object {
       "name": "Java",
       "version": "11.0.11",
     },
-    "version": "2021-07-26 03:47:49",
+    "version": "2021-07-27 03:47:01",
   },
 }
 `;

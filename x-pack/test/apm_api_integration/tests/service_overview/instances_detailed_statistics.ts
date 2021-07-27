@@ -106,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(Object.keys(response.body.currentPeriod)).toMatchInline(`
             Array [
-              "974d235c34fe915c11a0dbebc96688ad6c103ff7bbad4be82607b39e41a0e332",
+              "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
             ]
           `);
 
@@ -173,12 +173,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(Object.keys(response.body.currentPeriod)).toMatchInline(`
             Array [
-              "974d235c34fe915c11a0dbebc96688ad6c103ff7bbad4be82607b39e41a0e332",
+              "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
             ]
           `);
           expectSnapshot(Object.keys(response.body.previousPeriod)).toMatchInline(`
             Array [
-              "974d235c34fe915c11a0dbebc96688ad6c103ff7bbad4be82607b39e41a0e332",
+              "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
             ]
           `);
 

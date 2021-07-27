@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body.serviceCount).toMatchInline(`10`);
 
-        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`143.133333333333`);
+        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`132.833333333333`);
         expectSnapshot(response.body.transactionPerMinute.timeseries.length).toMatchInline(`30`);
 
         expectSnapshot(
@@ -67,24 +67,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Array [
             Object {
-              "x": "2021-07-26T17:47:00.000Z",
+              "x": "2021-07-27T08:08:00.000Z",
+              "y": 85,
+            },
+            Object {
+              "x": "2021-07-27T08:09:00.000Z",
               "y": 108,
             },
             Object {
-              "x": "2021-07-26T17:48:00.000Z",
-              "y": 102,
+              "x": "2021-07-27T08:10:00.000Z",
+              "y": 76,
             },
             Object {
-              "x": "2021-07-26T17:49:00.000Z",
-              "y": 93,
+              "x": "2021-07-27T08:11:00.000Z",
+              "y": 77,
             },
             Object {
-              "x": "2021-07-26T17:50:00.000Z",
-              "y": 121,
-            },
-            Object {
-              "x": "2021-07-26T17:51:00.000Z",
-              "y": 98,
+              "x": "2021-07-27T08:12:00.000Z",
+              "y": 56,
             },
           ]
         `);
