@@ -17,14 +17,7 @@ import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { IndexPattern, ISearchSource } from '../../../../../kibana_services';
 import { openOptionsPopover } from './open_options_popover';
-
-export interface TopNavLink {
-  id: string;
-  label: string;
-  description: string;
-  run: (anchorElement: HTMLElement) => void;
-  testId: string;
-}
+import type { TopNavMenuData } from '../../../../../../../navigation/public';
 
 /**
  * Helper function to build the top nav links
@@ -45,7 +38,7 @@ export const getTopNavLinks = ({
   state: GetStateReturn;
   onOpenInspector: () => void;
   searchSource: ISearchSource;
-}): TopNavLink[] => {
+}): TopNavMenuData[] => {
   const options = {
     id: 'options',
     label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {

@@ -45,14 +45,20 @@ const toggleButtons = [
   },
 ];
 
-export const DocumentViewOption = ({ viewId, setViewId }) => {
+export const DocumentViewOption = ({
+  viewId,
+  setViewId,
+}: {
+  viewId: string;
+  setViewId: (id: string) => void;
+}) => {
   return (
     <EuiButtonGroup
       buttonSize={'s'}
       legend="This is a basic group"
       options={toggleButtons}
       idSelected={viewId}
-      onChange={(id) => setViewId(id)}
+      onChange={(id: string) => setViewId(id)}
     />
   );
 };

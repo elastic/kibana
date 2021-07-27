@@ -88,6 +88,7 @@ export function DiscoverLayout({
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+  // remember in storage
   const [viewId, setViewId] = useState(`discoverViewOptionDocument`);
 
   const scrollableDesktop = useRef<HTMLDivElement>(null);
