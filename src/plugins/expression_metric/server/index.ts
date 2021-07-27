@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './function_wrapper';
-export * from './test_styles';
+import { ExpressionMetricPlugin } from './plugin';
+
+export type { ExpressionMetricPluginSetup, ExpressionMetricPluginStart } from './plugin';
+
+export function plugin() {
+  return new ExpressionMetricPlugin();
+}
