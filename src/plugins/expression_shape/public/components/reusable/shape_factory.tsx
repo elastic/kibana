@@ -10,32 +10,59 @@ import React from 'react';
 import { viewBoxToString } from '../../../common/lib';
 import { ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
-const getShapeComponent = (svgParams: SvgConfig) =>
-  function Shape({ shapeAttributes, shapeContentAttributes }: ShapeProps) {
-    const { viewBox: initialViewBox, shapeProps, shapeType } = svgParams;
+export const getShapeComponent = (svgParams: SvgConfig) =>
+  function Shape({
+    shapeAttributes,
+    shapeContentAttributes,
+    children,
+    textAttributes,
+  }: ShapeProps) {
+    const {
+      viewBox: initialViewBox,
+      shapeProps: defaultShapeContentAttributes,
+      textAttributes: defaultTextAttributes,
+      shapeType,
+    } = svgParams;
 
     const viewBox = shapeAttributes?.viewBox
       ? viewBoxToString(shapeAttributes?.viewBox)
       : viewBoxToString(initialViewBox);
 
     const SvgContentElement = getShapeContentElement(shapeType);
+
+    const TextElement = textAttributes
+      ? React.forwardRef<SVGTextElement>((props, ref) => <text {...props} ref={ref} />)
+      : null;
+
     return (
       <svg xmlns="http://www.w3.org/2000/svg" {...{ ...(shapeAttributes || {}), viewBox }}>
-        <SvgContentElement {...{ ...(shapeContentAttributes || {}), ...shapeProps }} />
+        <SvgContentElement
+          {...{ ...defaultShapeContentAttributes, ...(shapeContentAttributes || {}) }}
+        />
+        {children}
+        {TextElement && (
+          <TextElement {...{ ...(defaultTextAttributes || {}), ...(textAttributes || {}) }}>
+            {textAttributes?.textContent}
+          </TextElement>
+        )}
       </svg>
     );
   };
 
-function getShapeContentElement(type?: SvgElementTypes) {
+export function getShapeContentElement(type?: SvgElementTypes) {
   switch (type) {
     case SvgElementTypes.circle:
-      return (props: SvgConfig['shapeProps']) => <circle {...props} />;
+      return React.forwardRef<SVGCircleElement | null>((props, ref) => (
+        <circle {...props} ref={ref} />
+      ));
     case SvgElementTypes.rect:
-      return (props: SvgConfig['shapeProps']) => <rect {...props} />;
+      return React.forwardRef<SVGRectElement | null>((props, ref) => <rect {...props} ref={ref} />);
     case SvgElementTypes.path:
-      return (props: SvgConfig['shapeProps']) => <path {...props} />;
+      return React.forwardRef<SVGPathElement | null>((props, ref) => <path {...props} ref={ref} />);
     default:
-      return (props: SvgConfig['shapeProps']) => <polygon {...props} />;
+      return React.forwardRef<SVGPolygonElement | null>((props, ref) => (
+        <polygon {...props} ref={ref} />
+      ));
   }
 }
 

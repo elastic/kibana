@@ -8,7 +8,6 @@
 import { markdown } from '../canvas_plugin_src/renderers/markdown';
 import { pie } from '../canvas_plugin_src/renderers/pie';
 import { plot } from '../canvas_plugin_src/renderers/plot';
-import { progress } from '../canvas_plugin_src/renderers/progress';
 import { table } from '../canvas_plugin_src/renderers/table';
 import { text } from '../canvas_plugin_src/renderers/text';
 import { imageRenderer as image } from '../../../../src/plugins/expression_image/public';
@@ -18,7 +17,10 @@ import {
 } from '../../../../src/plugins/expression_error/public';
 import { repeatImageRenderer as repeatImage } from '../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
-import { shapeRenderer as shape } from '../../../../src/plugins/expression_shape/public';
+import {
+  shapeRenderer as shape,
+  progressRenderer as progress,
+} from '../../../../src/plugins/expression_shape/public';
 import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
 
 /**

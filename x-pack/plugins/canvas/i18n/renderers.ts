@@ -89,16 +89,6 @@ export const RendererStrings = {
         defaultMessage: 'Render an XY plot from your data',
       }),
   },
-  progress: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.progress.displayName', {
-        defaultMessage: 'Progress indicator',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.progress.helpDescription', {
-        defaultMessage: 'Render a progress indicator that reveals a percentage of an element',
-      }),
-  },
   table: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.table.displayName', {

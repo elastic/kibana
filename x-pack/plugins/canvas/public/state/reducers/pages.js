@@ -8,7 +8,7 @@
 import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { getId } from '../../lib/get_id';
+import { getId } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';

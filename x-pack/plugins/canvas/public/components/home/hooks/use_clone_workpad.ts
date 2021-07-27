@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { useNotifyService, useWorkpadService } from '../../../services';
-import { getId } from '../../../lib/get_id';
+import { getId } from '../../../../../../../src/plugins/presentation_util/common/lib';
 
 export const useCloneWorkpad = () => {
   const workpadService = useWorkpadService();

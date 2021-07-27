@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getId } from '../lib/get_id';
+import { getId } from '../../../../../src/plugins/presentation_util/common/lib';
 import { DEFAULT_WORKPAD_CSS } from '../../common/lib/constants';
 
 export const getDefaultElement = () => {

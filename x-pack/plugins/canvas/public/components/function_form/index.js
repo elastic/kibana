@@ -8,7 +8,7 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { findExpressionType } from '../../lib/find_expression_type';
-import { getId } from '../../lib/get_id';
+import { getId } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { createAsset } from '../../state/actions/assets';
 import {
   fetchContext,

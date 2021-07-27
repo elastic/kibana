@@ -6,15 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IInterpreterRenderHandlers } from '../../../../../../src/plugins/expressions';
-import { ShapeRendererConfig } from '../../../common/types';
-
-export interface ShapeComponentProps extends ShapeRendererConfig {
-  onLoaded: IInterpreterRenderHandlers['done'];
-  parentNode: HTMLElement;
-}
-
-export interface Dimensions {
+export interface ViewBoxParams {
+  minX: number;
+  minY: number;
   width: number;
   height: number;
 }

@@ -27,6 +27,7 @@ export class ExpressionShapePlugin
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
     expressions.registerFunction(shapeFunction);
     expressions.registerRenderer(shapeRenderer);
+    expressions.registerRenderer(progressRenderer);
   }
 
   public start(core: CoreStart): ExpressionShapePluginStart {}

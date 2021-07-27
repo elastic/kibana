@@ -8,10 +8,9 @@
 import { markdown } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
-import { progress } from './progress';
 import { text } from './text';
 import { table } from './table';
 
-export const renderFunctions = [markdown, pie, plot, progress, table, text];
+export const renderFunctions = [markdown, pie, plot, table, text];
 
 export const renderFunctionFactories = [];
