@@ -111,7 +111,7 @@ const EnrichmentAccordion: React.FC<{
   const { id = `threat-details-item`, field, provider, type, value } = getEnrichmentIdentifiers(
     enrichment
   );
-  const accordionId = `${id}-${index}`;
+  const accordionId = `${id}${field}`;
   return (
     <StyledEuiAccordion
       id={accordionId}

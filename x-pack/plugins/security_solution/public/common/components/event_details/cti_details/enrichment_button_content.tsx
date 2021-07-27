@@ -26,7 +26,9 @@ export const EnrichmentButtonContent: React.FC<{
   const title = `${field} ${value}${provider ? ` ${i18n.PROVIDER_PREPOSITION} ${provider}` : ''}`;
   return (
     <OverflowParent data-test-subj={'enrichment-button-content'}>
-      <OverflowContainer>{title}</OverflowContainer>
+      <OverflowContainer>
+        <strong>{title}</strong>
+      </OverflowContainer>
     </OverflowParent>
   );
 };
