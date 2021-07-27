@@ -51,7 +51,7 @@ describe('JobsHealthService', () => {
           jobs: jobsIds.map((j: string) => {
             return {
               job_id: j,
-              state: j === 'test_job_02' ? 'opened' : 'closed',
+              state: j === 'test_job_02' || 'test_job_01' ? 'opened' : 'closed',
               model_size_stats: {
                 memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
                 log_time: 1626935914540,

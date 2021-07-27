@@ -141,7 +141,7 @@ export function jobsHealthServiceProvider(
       const jobsStats = await getJobStats(jobIds);
 
       return jobsStats
-        .filter((j) => j.model_size_stats.memory_status !== 'ok')
+        .filter((j) => j.state === 'opened' && j.model_size_stats.memory_status !== 'ok')
         .map(({ job_id: jobId, model_size_stats: modelSizeStats }) => {
           return {
             job_id: jobId,
