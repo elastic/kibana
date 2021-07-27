@@ -29,7 +29,18 @@ export const renderApp = ({ element }: AppMountParameters) => {
     <Router history={history()}>
       <KibanaContextProvider services={services}>
         <Switch>
-          <Route path="/context/:indexPatternId/:id" children={<ContextMainApp history={history} indexPatternList={[]} services={services} savedSearch={undefined}/>} />
+          <Route
+            path="/context/:indexPatternId/:id"
+            children={
+              <ContextMainApp
+                history={history}
+                indexPatternList={[]}
+                services={services}
+                savedSearch={undefined}
+              />
+            }
+          />
+          <Route path="/view/:id" children={<DiscoverMainRoute opts={opts} />} />
           <Route path="/" exact children={<DiscoverMainRoute opts={opts} />} />
         </Switch>
       </KibanaContextProvider>

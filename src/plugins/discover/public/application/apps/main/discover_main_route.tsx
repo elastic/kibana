@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/target/types/public';
+import { redirectTo } from '@reach/router';
 import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
@@ -17,6 +18,11 @@ import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pat
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverMainApp } from './discover_main_app';
+import {
+  getDashboardBreadcrumb,
+  getDashboardTitle,
+} from '../../../../../dashboard/public/dashboard_strings';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
 
 export interface DiscoverMainProps {
   opts: {
@@ -45,7 +51,14 @@ interface DiscoverLandingParams {
 
 export function DiscoverMainRoute(props: DiscoverMainProps) {
   const { services, history } = props.opts;
-  const { chrome, uiSettings: config, data, toastNotifications, core, http: { basePath } } = services;
+  const {
+    chrome,
+    uiSettings: config,
+    data,
+    toastNotifications,
+    core,
+    http: { basePath },
+  } = services;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
@@ -56,7 +69,6 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     const savedSearchId = id;
 
     async function loadSavedSearch() {
-
       const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
       setSavedSearch(loadedSavedSearch);
       if (savedSearchId) {
@@ -119,6 +131,10 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     core.application.navigateToApp,
     basePath,
   ]);
+
+  useEffect(() => {
+    chrome.setBreadcrumbs(id ? getSavedSearchBreadcrumbs(id) : getRootBreadcrumbs());
+  }, [chrome, id]);
 
   if (!indexPattern || !savedSearch) {
     return null;
