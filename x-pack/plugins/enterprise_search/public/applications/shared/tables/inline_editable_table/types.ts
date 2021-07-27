@@ -9,10 +9,9 @@ import React from 'react';
 
 import { Column } from '../reorderable_table/types';
 
-export interface ItemWithAnID {
+export type ItemWithAnID = {
   id: number;
-  [key: string]: unknown; // TODO could this be string instead of unknown?
-}
+} & object;
 
 export interface EditingRenderFlags {
   isInvalid: boolean;

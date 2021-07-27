@@ -13,6 +13,11 @@ import { shallow } from 'enzyme';
 
 import { ReorderableTable } from '../reorderable_table';
 
+jest.mock('./get_updated_columns', () => ({
+  getUpdatedColumns: jest.fn(),
+}));
+import { getUpdatedColumns } from './get_updated_columns';
+
 import { InlineEditableTable } from './inline_editable_table';
 
 jest.mock('./inline_editable_table_logic', () => ({
@@ -22,10 +27,15 @@ import { getInlineEditableTableLogic } from './inline_editable_table_logic';
 
 const items = [{ id: 1 }, { id: 2 }];
 const requiredParams = {
+  columns: [],
   items,
   instanceId: 'MyInstance',
   title: 'Some Title',
 };
+
+interface Foo {
+  id: number;
+}
 
 describe('InlineEditableTable', () => {
   const mockValues = {};
@@ -61,7 +71,7 @@ describe('InlineEditableTable', () => {
     expect(wrapper.find(ReorderableTable).prop('unreorderableItems')).toBe(uneditableItems);
   });
 
-  it('can apply an additiona className', () => {
+  it('can apply an additional className', () => {
     const wrapper = shallow(
       <InlineEditableTable {...requiredParams} className="myTestClassName" />
     );
@@ -107,5 +117,37 @@ describe('InlineEditableTable', () => {
     expect(rowProps(items[0])).toEqual({ className: '' });
     // Since editingItemId is 2 and the second item (position 1) in item list has an id of 2, it gets this class
     expect(rowProps(items[1])).toEqual({ className: 'is-being-edited' });
+  });
+
+  it('will update the passed columns and pass them through to the underlying table', () => {
+    const updatedColumns = {};
+    const canRemoveLastItem = true;
+    const isLoading = true;
+    const lastItemWarning = 'A warning';
+    const uneditableItems: Foo[] = [];
+
+    (getUpdatedColumns as jest.Mock).mockReturnValue(updatedColumns);
+    const wrapper = shallow(
+      <InlineEditableTable
+        {...requiredParams}
+        canRemoveLastItem={canRemoveLastItem}
+        isLoading={isLoading}
+        lastItemWarning={lastItemWarning}
+        uneditableItems={uneditableItems}
+      />
+    );
+    const columns = wrapper.find(ReorderableTable).prop('columns');
+    expect(columns).toEqual(updatedColumns);
+
+    expect(getUpdatedColumns).toHaveBeenCalledWith({
+      columns: requiredParams.columns,
+      displayedItems: items,
+      isActivelyEditing: expect.any(Function),
+      instanceId: requiredParams.instanceId,
+      canRemoveLastItem,
+      isLoading,
+      lastItemWarning,
+      uneditableItems,
+    });
   });
 });

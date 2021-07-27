@@ -365,6 +365,14 @@ export const Library: React.FC = () => {
             items={[{ id: 1 }, { id: 2 }]}
             instanceId="MyInstance"
             title="Some Title"
+            columns={[
+              {
+                field: 'foo',
+                name: 'Foo',
+                render: (item) => <div>{item.id}</div>,
+                editingRender: (item) => <div>Editing: {item.id}</div>,
+              },
+            ]}
           />
           <EuiSpacer />
 

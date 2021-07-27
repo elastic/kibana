@@ -17,29 +17,38 @@ import { i18n } from '@kbn/i18n';
 import { ReorderableTable } from '../reorderable_table';
 
 import { EMPTY_ITEM } from './constants';
+import { getUpdatedColumns } from './get_updated_columns';
 import { getInlineEditableTableLogic } from './inline_editable_table_logic';
-import { ItemWithAnID } from './types';
+import { InlineEditableTableColumn, ItemWithAnID } from './types';
 
 import './inline_editable_tables.scss';
 
 interface InlineEditableTableProps<Item extends ItemWithAnID> {
+  columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
   instanceId: string;
   title: string;
   addButtonText?: string;
+  canRemoveLastItem?: boolean;
   className?: string;
   description?: React.ReactNode;
+  isLoading?: boolean;
+  lastItemWarning?: string;
   noItemsMessage?: (editNewItem: () => void) => React.ReactNode;
   uneditableItems?: Item[];
 }
 
 export const InlineEditableTable = <Item extends ItemWithAnID>({
+  columns,
   items,
   instanceId,
   title,
   addButtonText,
+  canRemoveLastItem,
   className,
   description,
+  isLoading,
+  lastItemWarning,
   noItemsMessage = () => null,
   uneditableItems,
   ...rest
@@ -57,13 +66,16 @@ export const InlineEditableTable = <Item extends ItemWithAnID>({
       : [...items, EMPTY_ITEM]
     : items;
 
-  // TODO
-  const updatedColumns = [
-    {
-      name: 'ID',
-      render: (item: Item) => <div>{item.id}</div>,
-    },
-  ];
+  const updatedColumns = getUpdatedColumns({
+    columns,
+    displayedItems, // TODO what is this type error
+    instanceId,
+    isActivelyEditing,
+    canRemoveLastItem,
+    isLoading,
+    lastItemWarning,
+    uneditableItems,
+  });
 
   return (
     <>
