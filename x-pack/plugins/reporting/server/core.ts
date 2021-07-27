@@ -26,6 +26,7 @@ import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { ReportingConfig, ReportingSetup } from './';
+import { initializeBrowserDriverFactory } from './browsers';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
@@ -33,7 +34,7 @@ import { ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter } from './types';
 
-export interface ReportingInternalSetup {
+export interface ReportingPluginSetupDeps {
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
@@ -45,9 +46,7 @@ export interface ReportingInternalSetup {
   logger: LevelLogger;
 }
 
-export interface ReportingInternalStart {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
-  store: ReportingStore;
+export interface ReportingPluginStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
@@ -56,11 +55,16 @@ export interface ReportingInternalStart {
   logger: LevelLogger;
 }
 
+type ReportingInternalPluginStartDeps = ReportingPluginStartDeps & {
+  browserDriverFactory: HeadlessChromiumDriverFactory;
+  store: ReportingStore;
+};
+
 export class ReportingCore {
-  private pluginSetupDeps?: ReportingInternalSetup;
-  private pluginStartDeps?: ReportingInternalStart;
+  private pluginSetupDeps?: ReportingPluginSetupDeps;
+  private pluginStartDeps?: ReportingInternalPluginStartDeps;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
-  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
+  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalPluginStartDeps>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
@@ -86,7 +90,7 @@ export class ReportingCore {
   /*
    * Register setupDeps
    */
-  public pluginSetup(setupDeps: ReportingInternalSetup) {
+  public pluginSetup(setupDeps: ReportingPluginSetupDeps) {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
@@ -100,9 +104,17 @@ export class ReportingCore {
   /*
    * Register startDeps
    */
-  public async pluginStart(startDeps: ReportingInternalStart) {
+  public async pluginStart(deps: ReportingPluginStartDeps) {
+    const browserDriverFactory = await initializeBrowserDriverFactory(this, this.logger);
+    const store = new ReportingStore(this, this.logger);
+
+    const startDeps = { browserDriverFactory, store, ...deps };
+
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+
+    // must be called after start deps observer is fulfilled
+    await store.start();
 
     const { taskManager } = startDeps;
     const { executeTask, monitorTask } = this;

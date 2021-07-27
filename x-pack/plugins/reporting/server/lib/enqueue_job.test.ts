@@ -8,7 +8,7 @@
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
 import { TaskManagerStartContract } from '../../../task_manager/server';
-import { ReportingInternalStart } from '../core';
+import { ReportingPluginStartDeps } from '../core';
 import {
   createMockConfigSchema,
   createMockLevelLogger,
@@ -59,7 +59,7 @@ describe('Enqueue Job', () => {
         ensureScheduled: jest.fn(),
         schedule: scheduleMock,
       } as unknown) as TaskManagerStartContract,
-    } as unknown) as ReportingInternalStart);
+    } as unknown) as ReportingPluginStartDeps);
   });
 
   it('returns a Report object', async () => {

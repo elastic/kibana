@@ -8,10 +8,9 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
-import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { LevelLogger, ReportingStore } from './lib';
+import { LevelLogger } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -97,22 +96,14 @@ export class ReportingPlugin
     (async () => {
       await reportingCore.pluginSetsUp();
 
-      const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
-      const store = new ReportingStore(reportingCore, this.logger);
-
       await reportingCore.pluginStart({
-        browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
-        store,
         esClient: core.elasticsearch.client,
         data: plugins.data,
         taskManager: plugins.taskManager,
         logger: this.logger,
       });
-
-      // Note: this must be called after ReportingCore.pluginStart
-      await store.start();
 
       this.logger.debug('Start complete');
     })().catch((e) => {
