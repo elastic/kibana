@@ -259,7 +259,7 @@ image::images/lens_advanced_5_2.png[Line chart with cumulative sum of orders mad
 
 *Lens* allows you to compare the selected time range with historical data using the *Time shift* option. 
 
-If multiple time shifts are used in a single chart, a multiple of the date histogram interval should be chosen, or the data points might not line up and gaps may appear.
+If multiple time shifts are used in a single chart, a multiple of the date histogram interval should be chosen, or the data points might not line up and gaps can appear.
 For example, if a daily interval is used, shifting one series by *36h*, and another by *1d* is not recommended. You can reduce the interval to *12h*, or create two separate charts.
 
 To compare current sales numbers with sales from a week ago, follow these steps: 
@@ -279,6 +279,8 @@ To create a week-over-week comparison, shift the second *Count of Records* by on
 . Open the *Add advanced options* dropdown, then select *Time shift*.
 
 . Click *1 week ago*.
++
+To define custom time shifts, enter the time value, the time increment, then press Enter. For example, to use a one week time shift, enter *1w*.
 +
 [role="screenshot"]
 image::images/lens_time_shift.png[Line chart with week-over-week sales comparison]
@@ -310,7 +312,7 @@ image::images/lens_percent_chage.png[Bar chart with percent change in sales betw
 
 [discrete]
 [[view-customers-over-time-by-continents]]
-=== View table of customers by category over time
+=== Create a table of customers by category over time
 
 Tables are useful when you want to display the actual field values.
 You can build a date histogram table, and group the customer count metric by category, such as the continent registered in user accounts.
@@ -325,7 +327,7 @@ In *Lens* you can split the metric in a table leveraging the *Columns* field, wh
 
 . In the layer pane, click *Unique count of customer_id*.
 
-.. In the *Display name* field, enter `Customers`, then click *Close*.
+. In the *Display name* field, enter `Customers`, then click *Close*.
 
 . From the *Available fields* list, drag *order_date* to the *Rows* field in the layer pane.
 

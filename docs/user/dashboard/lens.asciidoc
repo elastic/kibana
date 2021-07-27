@@ -201,14 +201,14 @@ Apply filters to visualizations directly from the values in the legend. Only *Ba
 [[lens-faq]]
 ==== Frequently asked questions
 
-For the answers to common *Lens* questions, review the following. 
+For answers to common *Lens* questions, review the following. 
 
 [discrete]
 [[kql]]
-.When should I use KQL filters, the Filters function, or the Filter by option?
+.*When should I use KQL filters, the Filters function, or the Filter by option?*
 [%collapsible]
 ====
-To focus on a known set of data for all the visualization results, use the <<semi-structured-search, KQL *Search*>> field.
+Use the <<semi-structured-search, KQL *Search*>> field to focus on a known set of data for the entire visualization. You can combine KQL filters with other filters using AND logic.
 
 Use the *Filters* function to apply:
 
@@ -225,7 +225,7 @@ Use the *Filter by* advanced option to:
 
 [discrete]
 [[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
-.When should I normalize the data by unit or use a custom interval?
+.*When should I normalize the data by unit or use a custom interval?*
 [%collapsible]
 ====
 * *Normalize by unit* &mdash; Calculates the average for the interval. When you normalize the data by unit, the data appears less granular, but *Lens* is able to calculate the data faster. 
@@ -251,7 +251,7 @@ To create a custom interval:
 
 [discrete]
 [[what-is-the-other-category]]
-.What data is categorized as Other?
+.*What data is categorized as Other?*
 [%collapsible]
 ====
 The *Other* category contains all of the documents that do not match the specified criteria or filters. 
@@ -264,7 +264,7 @@ To disable *Group other values as "Other"*, click a field in the layer pane, cli
 
 [discrete]
 [[how-can-i-include-documents-without-the-field-in-the-operation]]
-.How do I add documents without a field?
+.*How do I add documents without a field?*
 [%collapsible]
 ====
 By default, *Lens* retrieves only the documents from the fields. 
@@ -278,7 +278,7 @@ which is helpful when you want to make a comparison to the whole documentation s
 
 [discrete]
 [[is-it-possible-to-have-more-than-one-Y-axis-scale]]
-.Can I add more than one y-axis scale to a visualization?
+.*Can I add more than one y-axis scale to a visualization?*
 [%collapsible]
 ====
 For each y-axis, you can select *Left* and *Right*, and configure a different scale.
@@ -286,10 +286,11 @@ For each y-axis, you can select *Left* and *Right*, and configure a different sc
 
 [discrete]
 [[why-is-my-value-with-the-right-color-using-value-based-coloring]]
-.Why is my value the incorrect color when I use value-based coloring?
+.*Why is my value the incorrect color when I use value-based coloring?*
 [%collapsible]
 ====
 Here's a short list of few different aspects to check:
+
 * Make sure the value falls within the desired color stop value defined in the panel. Color stop values are "inclusive".
 
 * Make sure you have the correct value precision setup. Value formatters could round the numeric values up or down.
@@ -304,16 +305,8 @@ Here's a short list of few different aspects to check:
 ====
 
 [discrete]
-[[when-do-i-use-runtime-fields-vs-formula]]
-.When do I use runtime fields vs. formula?
-[%collapsible]
-====
-TBD
-====
-
-[discrete]
 [[can-i-sort-by-multiple-columns]]
-.How do I sort by multiple columns?
+.*How do I sort by multiple columns?*
 [%collapsible]
 ====
 Multiple column sorting is unsupported, but is supported in *Discover*. For information on how to sort multiple columns in *Discover*, 
@@ -322,7 +315,7 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 
 [discrete]
 [[is-it-possible-to-use-saved-serches-in-lens]]
-.How do I visualize saved searches?
+.*How do I visualize saved searches?*
 [%collapsible]
 ====
 Visualizing saved searches in unsupported.
@@ -330,7 +323,7 @@ Visualizing saved searches in unsupported.
 
 [discrete]
 [[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
-.How do I change the number of suggestions?
+.*How do I change the number of suggestions?*
 [%collapsible]
 ====
 Configuring the *Suggestions* is unsupported.
@@ -338,7 +331,7 @@ Configuring the *Suggestions* is unsupported.
 
 [discrete]
 [[why-my-field-x-is-missing-from-the-fields-list]]
-.Why is my field missing from the list?
+.*Why is my field missing from the list?*
 [%collapsible]
 ====
 Full-text fields are unsupported and do not appear in data summaries.
@@ -346,7 +339,7 @@ Full-text fields are unsupported and do not appear in data summaries.
 
 [discrete]
 [[how-to-handle-gaps-in-time-series-visualizations]]
-.What do I do with gaps in time series visualizations?
+.*What do I do with gaps in time series visualizations?*
 [%collapsible]
 ====
 When you create *Area* and *Line* charts with sparse time series data, open *Visual options* in the editor toolbar, then select a *Missing values* option.
@@ -354,10 +347,9 @@ When you create *Area* and *Line* charts with sparse time series data, open *Vis
 
 [discrete]
 [[is-it-possible-to-change-the-scale-of-Y-axis]]
-.Can I statically define the y-axis scale?
+.*Can I statically define the y-axis scale?*
 [%collapsible]
 ====
-
 You can set the scale, or _bounds_, for area, bar, and line charts. You can configure the bounds for all functions, except *Percentile*. Logarithmic scales are unsupported.
 
 To configure the bounds, use the menus in the editor toolbar. Bar and area charts required 0 in the scale between *Lower bound* and *Upper bound*. 
@@ -365,7 +357,7 @@ To configure the bounds, use the menus in the editor toolbar. Bar and area chart
 
 [discrete]
 [[is-it-possible-to-have-pagination-for-datatable]]
-.Is it possible to have pagination in a data table?
+.*Is it possible to have pagination in a data table?*
 [%collapsible]
 ====
 Pagination in a data table is unsupported. To use pagination in data tables, create an <<types-of-visualizations,aggregation-based data table>>.
@@ -373,11 +365,19 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 
 [discrete]
 [[is-it-possible-to-select-color-for-specific-bar-or-point]]
-.How do I change the color for a single data point?
+.*How do I change the color for a single data point?*
 [%collapsible]
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
 ====
+
+//[discrete]
+//[[when-do-i-use-runtime-fields-vs-formula]]
+//.*When do I use runtime fields vs. formula?*
+//[%collapsible]
+//====
+//
+//====
 
 
 

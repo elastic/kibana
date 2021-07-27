@@ -38,9 +38,7 @@ Create the dashboard where you'll display the visualization panels.
 [role="screenshot"]
 image::images/lens_end_to_end_1_2.png[Lens index pattern selector, width=50%]
 
-. To create the visualizations in this tutorial, you'll use the *Records*, *timestamp*, *bytes*, *clientip*, and *referer.keyword* fields.
-+
-To see the most frequent values of a field, hover over the field name, then click *i*.
+. To create the visualizations in this tutorial, you'll use the *Records*, *timestamp*, *bytes*, *clientip*, and *referer.keyword* fields. To see the most frequent values of a field, hover over the field name, then click *i*.
 
 [discrete]
 [[view-the-number-of-website-visitors]]
@@ -192,18 +190,18 @@ Create a proportional visualization that helps you to determine if your users tr
 
 . From the *Available fields* list, drag *bytes* to the *Break down by* field in the layer pane.
 
-. To specify the file size ranges, click *bytes* in the layer pane.
-+
 Use the *Intervals* function to select documents based on the number range of a field. 
 If the ranges were non numeric, or if the query required multiple clauses, you could use the *Filters* function.
 
-.. Click *Create custom ranges*, enter the following, then press Return:
+. To specify the file size ranges, click *bytes* in the layer pane.
+
+. Click *Create custom ranges*, enter the following, then press Return:
 
 * *Ranges* &mdash; `0` -> `10240`
 
 * *Label* &mdash; `Below 10KB`
 
-.. Click *Add range*, enter the following, then press Return:
+. Click *Add range*, enter the following, then press Return:
 
 * *Ranges* &mdash; `10240` -> `+∞`
 
@@ -212,7 +210,7 @@ If the ranges were non numeric, or if the query required multiple clauses, you c
 [role="screenshot"]
 image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 
-.. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
+. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
 
 To display the values as a percentage of the sum of all values, use the *Pie* chart. 
 
