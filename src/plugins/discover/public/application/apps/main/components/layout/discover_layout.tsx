@@ -51,10 +51,13 @@ import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
+import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
+const DataVisualizerGridMemoized = React.memo(DiscoverDataVisualizerGrid);
+
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 
@@ -350,6 +353,16 @@ export function DiscoverLayout({
                             defaultMessage="Documents"
                           />
                         </h2>
+                        <DataVisualizerGridMemoized
+                          savedSearch={savedSearch}
+                          services={services}
+                          indexPattern={indexPattern}
+                          searchDescription={savedSearch.description}
+                          searchTitle={savedSearch.lastSavedTitle}
+                          sampleSize={sampleSize}
+                          query={state.query}
+                          columns={columns}
+                        />
                         {isLegacy && rows && rows.length && (
                           <DocTableLegacyMemoized
                             columns={columns}

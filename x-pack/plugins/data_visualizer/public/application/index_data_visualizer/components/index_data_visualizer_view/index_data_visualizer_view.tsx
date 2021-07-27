@@ -70,7 +70,7 @@ import { DataVisualizerIndexPatternManagement } from '../index_pattern_managemen
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
 
-interface DataVisualizerPageState {
+export interface DataVisualizerPageState {
   overallStats: OverallStats;
   metricConfigs: FieldVisConfig[];
   totalMetricFieldCount: number;
@@ -85,7 +85,7 @@ const defaultSearchQuery = {
   match_all: {},
 };
 
-function getDefaultPageState(): DataVisualizerPageState {
+export function getDefaultPageState(): DataVisualizerPageState {
   return {
     overallStats: {
       totalCount: 0,

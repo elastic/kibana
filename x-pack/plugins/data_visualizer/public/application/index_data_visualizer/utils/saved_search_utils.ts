@@ -15,17 +15,25 @@ import {
   Query,
   Filter,
 } from '@kbn/es-query';
-import { SavedSearchSavedObject } from '../../../../common/types';
+import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
+import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
-export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
-  const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-  return JSON.parse(search.searchSourceJSON) as {
-    query: Query;
-    filter: Filter[];
-  };
+export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | SavedSearch) {
+  // @todo: add type assertion for savedsearch or export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
+  const search = isSavedSearchSavedObject(savedSearch)
+    ? savedSearch?.attributes?.kibanaSavedObjectMeta
+    : // @ts-expect-error kibanaSavedObjectMeta does exist
+      savedSearch?.kibanaSavedObjectMeta;
+
+  return typeof search?.searchSourceJSON === 'string'
+    ? (JSON.parse(search.searchSourceJSON) as {
+        query: Query;
+        filter: any[];
+      })
+    : undefined;
 }
 
 export function createCombinedQuery(

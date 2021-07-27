@@ -36,6 +36,7 @@ import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { EmbeddableStart } from '../../embeddable/public';
 import type { AddTopNavDataService } from './application/apps/main/services/add_top_nav_data';
 
 export interface DiscoverServices {
@@ -46,6 +47,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
+  embeddable: EmbeddableStart;
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
@@ -88,6 +90,7 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
+    embeddable: plugins.embeddable,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getEmbeddableInjector,

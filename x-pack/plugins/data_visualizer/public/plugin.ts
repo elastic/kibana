@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SharePluginStart } from '../../../../src/plugins/share/public';
 import { Plugin } from '../../../../src/core/public';
 
@@ -21,6 +21,7 @@ import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/index
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
+import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
 import {
   IndexDataVisualizerLocator,
   IndexDataVisualizerLocatorDefinition,
@@ -32,6 +33,7 @@ import { DiscoverNavLinkRegistrar } from './application/index_data_visualizer/se
 export interface DataVisualizerSetupDependencies {
   share?: SharePluginSetup;
   home?: HomePublicPluginSetup;
+  embeddable: EmbeddableSetup;
   discover?: DiscoverSetup;
 }
 export interface DataVisualizerStartDependencies {
@@ -62,6 +64,9 @@ export class DataVisualizerPlugin
     if (plugins.home) {
       registerHomeAddData(plugins.home);
       registerHomeFeatureCatalogue(plugins.home);
+    }
+    if (plugins.embeddable) {
+      registerEmbeddables(plugins.embeddable, core);
     }
 
     if (plugins.share) {

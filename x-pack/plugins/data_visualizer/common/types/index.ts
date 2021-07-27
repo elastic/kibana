@@ -6,6 +6,7 @@
  */
 
 import type { SimpleSavedObject } from 'kibana/public';
+import { isPopulatedObject } from '../utils/object_utils';
 export type { JobFieldType } from './job_field_type';
 export type {
   FieldRequestConfig,
@@ -27,3 +28,7 @@ export interface DataVisualizerTableState {
 }
 
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
+
+export function isSavedSearchSavedObject(arg: unknown): arg is SavedSearchSavedObject {
+  return isPopulatedObject(arg, ['id', 'type']);
+}
