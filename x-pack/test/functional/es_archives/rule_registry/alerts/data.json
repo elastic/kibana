@@ -57,6 +57,23 @@
     "source": {
       "event.kind" : "signal",
       "@timestamp": "2020-12-16T15:16:18.570Z",
+      "rule.id": "siem.signals",
+      "message": "hello world security",
+      "kibana.rac.alert.owner": "siem",
+      "kibana.rac.alert.status": "open",
+      "kibana.space_ids": ["space1", "space2"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-security.alerts",
+    "id": "020204",
+    "source": {
+      "event.kind" : "signal",
+      "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.customRule",
       "message": "hello world security",
       "kibana.rac.alert.owner": "siem",

@@ -222,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
         addTests({
           space: SPACE_1,
           featureIds: ['siem'],
-          expectedNumberAlerts: 1,
+          expectedNumberAlerts: 2,
           body: {
             ...getPostBody(),
             defaultIndex: ['.alerts-*'],
@@ -248,7 +248,7 @@ export default ({ getService }: FtrProviderContext) => {
         addTests({
           space: SPACE_2,
           featureIds: ['siem'],
-          expectedNumberAlerts: 1,
+          expectedNumberAlerts: 2,
           body: {
             ...getPostBody(),
             alertConsumers: ['siem'],
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
           addTests({
             space: SPACE_1,
             featureIds: ['siem', 'apm'],
-            expectedNumberAlerts: 3,
+            expectedNumberAlerts: 4,
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],
@@ -341,7 +341,7 @@ export default ({ getService }: FtrProviderContext) => {
           addTests({
             space: SPACE_2,
             featureIds: ['siem', 'apm'],
-            expectedNumberAlerts: 3,
+            expectedNumberAlerts: 4,
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],
@@ -360,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
           addTests({
             space: SPACE_1,
             featureIds: ['siem'],
-            expectedNumberAlerts: 1,
+            expectedNumberAlerts: 2,
             body: {
               ...getPostBody(),
               defaultIndex: ['.alerts-*'],

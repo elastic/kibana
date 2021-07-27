@@ -100,8 +100,8 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      // there's 4 total alerts, one is assigned to space2 only
-      expect(resp.body.totalCount).to.be(3);
+      // there's 5 total alerts, one is assigned to space2 only
+      expect(resp.body.totalCount).to.be(4);
     });
 
     it('should not return alerts from another space', async () => {

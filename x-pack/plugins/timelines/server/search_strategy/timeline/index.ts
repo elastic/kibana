@@ -42,7 +42,6 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
   data: PluginStart,
   alerting: AlertingPluginStartContract
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
-  let isUsingInternal = false;
   const esAsInternal = data.search.searchAsInternalUser;
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -59,8 +58,6 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
       const queryFactory: TimelineFactory<T> = timelineFactory[factoryQueryType];
 
       if (alertConsumers != null && entityType != null && entityType === EntityType.ALERTS) {
-        isUsingInternal = true;
-
         const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
 
         if (!allFeatureIdsValid) {
@@ -81,10 +78,8 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
       }
     },
     cancel: async (id, options, deps) => {
-      if (!isUsingInternal && es.cancel) {
+      if (es.cancel) {
         return es.cancel(id, options, deps);
-      } else if (isUsingInternal && esAsInternal.cancel) {
-        return esAsInternal.cancel(id, options, deps);
       }
     },
   };
