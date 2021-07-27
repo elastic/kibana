@@ -12,7 +12,8 @@ import type { ShapeType } from './shape_factory';
 
 export type ShapeProps = {
   shapeAttributes?: ShapeAttributes;
-  shapeContentAttributes?: ShapeContentAttributes & SpecificShapeContentAttributes;
+  shapeContentAttributes?: ShapeContentAttributes &
+    SpecificShapeContentAttributes & { ref?: React.RefObject<any> };
   textAttributes?: SvgTextAttributes;
 } & Component['props'] & { ref?: React.RefObject<any> };
 

@@ -73,7 +73,6 @@ function ProgressComponent({
     fill: 'none',
     stroke: barColor,
     strokeWidth: `${barWeight}px`,
-    ref: progressRef,
   };
 
   const percent = value / max;
@@ -117,7 +116,7 @@ function ProgressComponent({
     <div className="shapeAligner">
       <ProgressDrawer
         shapeType={shapeType}
-        shapeContentAttributes={shapeContentAttributes}
+        shapeContentAttributes={{ ...shapeContentAttributes, ref: progressRef }}
         shapeAttributes={shapeAttributes}
         textAttributes={{ ...textAttributes, ref: textRef }}
         ref={shapeRef}
