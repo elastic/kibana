@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { ToastsSetup } from 'src/core/public';
+import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
 import { getDefaultLayoutSelectors } from '../../common';
 import { BaseParams, LayoutParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -17,6 +17,7 @@ import { ReportingPanelContent } from './reporting_panel_content';
 export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
+  uiSettings: IUiSettingsClient;
   reportType: string;
   layoutOption?: 'canvas' | 'print';
   objectId?: string;

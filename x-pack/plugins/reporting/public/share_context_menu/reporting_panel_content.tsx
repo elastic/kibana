@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Component, ReactElement } from 'react';
-import { ToastsSetup } from 'src/core/public';
+import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
@@ -29,6 +29,7 @@ import { ReportingAPIClient } from '../lib/reporting_api_client';
 export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
+  uiSettings: IUiSettingsClient;
   reportType: string;
 
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.

@@ -18,6 +18,7 @@ import { ExportPanelShareOpts } from '.';
 export const ReportingCsvShareProvider = ({
   apiClient,
   toasts,
+  uiSettings,
   license$,
   startServices$,
   usesUiCapabilities,
@@ -81,6 +82,7 @@ export const ReportingCsvShareProvider = ({
               requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
+              uiSettings={uiSettings}
               reportType={CSV_JOB_TYPE}
               layoutId={undefined}
               objectId={objectId}
