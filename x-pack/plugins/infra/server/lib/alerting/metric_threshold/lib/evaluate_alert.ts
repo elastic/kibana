@@ -126,8 +126,10 @@ const getMetric: (
     .add(1, timeUnit)
     .startOf(timeUnit)
     .valueOf();
+
   // We need enough data for 5 buckets worth of data. We also need
   // to convert the intervalAsSeconds to milliseconds.
+  // TODO: We only need to get 5 buckets for the rate query, so this logic should move there.
   const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
 
   const from = roundTimestamp(
