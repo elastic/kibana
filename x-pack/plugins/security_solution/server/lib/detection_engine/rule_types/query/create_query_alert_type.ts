@@ -21,13 +21,22 @@ import { createSecurityRuleTypeFactory } from '../create_security_rule_type_fact
 
 export const createQueryAlertType = (createOptions: {
   experimentalFeatures: ExperimentalFeatures;
+  indexAlias: string;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
 }) => {
-  const { experimentalFeatures, lists, logger, mergeStrategy, ruleDataClient } = createOptions;
+  const {
+    experimentalFeatures,
+    indexAlias,
+    lists,
+    logger,
+    mergeStrategy,
+    ruleDataClient,
+  } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
+    indexAlias,
     lists,
     logger,
     mergeStrategy,

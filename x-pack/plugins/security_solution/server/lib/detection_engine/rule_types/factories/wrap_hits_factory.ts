@@ -14,16 +14,13 @@ import { WrappedRACAlert } from '../types';
 
 export const wrapHitsFactory = ({
   ruleSO,
-  signalsIndex,
   mergeStrategy,
 }: {
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
-  signalsIndex: string;
   mergeStrategy: ConfigType['alertMergeStrategy'];
 }): WrapHits => (events) => {
   const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
     {
-      _index: signalsIndex, // TODO: this isn't needed in rule_registry
       _id: generateId(
         doc._index,
         doc._id,

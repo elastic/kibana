@@ -14,7 +14,7 @@ import { toError } from '@kbn/securitysolution-list-api';
 import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { ruleStatusServiceFactory } from '../signals/rule_status_service';
-import { buildRuleMessageFactory } from '../signals/rule_messages';
+import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -35,6 +35,7 @@ import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory } from './factories';
 
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
+  indexAlias,
   lists,
   logger,
   mergeStrategy,
@@ -45,7 +46,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
     ...type,
     async executor(options) {
       const {
-        alertId, // rename to ruleId
+        alertId, // TODO: rename to ruleId?
         params,
         previousStartedAt,
         services,
@@ -54,7 +55,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         updatedBy: updatedByUser,
       } = options;
       let runState = state;
-      const { from, maxSignals, meta, outputIndex, ruleId, timestampOverride, to } = params;
+      const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
       const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
@@ -79,7 +80,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         id: alertId,
         ruleId,
         name,
-        index: outputIndex as string, // FIXME?
+        index: indexAlias,
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
@@ -189,7 +190,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
         const wrapHits = wrapHitsFactory({
           ruleSO,
-          signalsIndex: outputIndex, // FIXME
           mergeStrategy,
         });
 

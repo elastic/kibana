@@ -236,9 +236,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.logger!.error(err);
       });
 
+      const indexAlias = ruleDataService.getFullAssetName('security.alerts');
+
       ruleDataClient = ruleDataService.getRuleDataClient(
         SERVER_APP_ID,
-        ruleDataService.getFullAssetName('security.alerts'),
+        indexAlias,
         () => initializeRuleDataTemplatesPromise
       );
 
@@ -248,6 +250,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.setupPlugins.alerting.registerType(
         createQueryAlertType({
           experimentalFeatures,
+          indexAlias,
           lists: plugins.lists,
           logger: this.logger,
           mergeStrategy: this.config.alertMergeStrategy,

@@ -88,6 +88,7 @@ type SecurityAlertTypeWithExecutor<
 };
 
 export type CreateSecurityRuleTypeFactory = (options: {
+  indexAlias: string;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -101,8 +102,6 @@ export type CreateSecurityRuleTypeFactory = (options: {
   type: SecurityAlertTypeWithExecutor<TState, TServices, TParams, TAlertInstanceContext>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any>;
-
-export type RACBaseHit<T> = BaseHit<T>;
 
 export interface RACAlertSignal {
   [key: string]: SearchTypes;
