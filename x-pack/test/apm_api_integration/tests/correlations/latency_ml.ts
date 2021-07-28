@@ -194,7 +194,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         // continues querying until the search strategy finishes
         await retry.waitForWithTimeout(
           'search strategy eventually completes and returns full results',
-          5000,
+          10000,
           async () => {
             const response = await supertest
               .post(`/internal/bsearch`)
