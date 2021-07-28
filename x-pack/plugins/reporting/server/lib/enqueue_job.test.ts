@@ -77,24 +77,36 @@ describe('Enqueue Job', () => {
       ({} as unknown) as KibanaRequest
     );
 
-    expect(report).toMatchInlineSnapshot();
-  });
-
-  it('handles unversioned version', async () => {
-    const enqueueJob = enqueueJobFactory(mockReporting, logger);
-    const report = await enqueueJob(
-      'printablePdf',
-      {
-        objectType: 'visualization',
-        title: 'cool-viz',
-        version: '7.14.0',
-        browserTimezone: 'UTC',
-      },
-      false,
-      ({} as unknown) as ReportingRequestHandlerContext,
-      ({} as unknown) as KibanaRequest
-    );
-
-    expect(report).toMatchInlineSnapshot();
+    const { _id, created_at: _created_at, ...snapObj } = report;
+    expect(snapObj).toMatchInlineSnapshot(`
+      Object {
+        "_index": ".reporting-foo-index-234",
+        "_primary_term": undefined,
+        "_seq_no": undefined,
+        "attempts": 0,
+        "browser_type": undefined,
+        "completed_at": undefined,
+        "created_by": false,
+        "jobtype": "printable_pdf",
+        "kibana_id": undefined,
+        "kibana_name": undefined,
+        "max_attempts": undefined,
+        "meta": Object {
+          "layout": undefined,
+          "objectType": "visualization",
+        },
+        "migration_version": "7.14.0",
+        "output": null,
+        "payload": Object {
+          "createJobTest": Object {
+            "test1": "yes",
+          },
+        },
+        "process_expiration": undefined,
+        "started_at": undefined,
+        "status": "pending",
+        "timeout": undefined,
+      }
+    `);
   });
 });

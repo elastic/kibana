@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { notificationServiceMock, uiSettingsServiceMock } from 'src/core/public/mocks';
-
+import { coreMock, notificationServiceMock, uiSettingsServiceMock } from 'src/core/public/mocks';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent, Props } from './reporting_panel_content';
+
+const coreSetup = coreMock.createSetup();
+const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
 
 describe('ReportingPanelContent', () => {
   const mountComponent = (props: Partial<Props>) =>
@@ -22,20 +25,12 @@ describe('ReportingPanelContent', () => {
         layoutId="test"
         getJobParams={jest.fn().mockReturnValue({})}
         objectId={'my-object-id'}
-        apiClient={{ getReportingJobPath: () => 'test' } as any}
+        apiClient={apiClient}
         toasts={notificationServiceMock.createSetupContract().toasts}
         uiSettings={uiSettingsServiceMock.createSetupContract()}
         {...props}
       />
     );
-
-  describe('rendering', () => {
-    it('default view', () => {
-      const wrapper = mountComponent({});
-      expect(wrapper.find('EuiForm')).toMatchSnapshot();
-      expect(wrapper.find('EuiCopy')).toContain('flargSS!');
-    });
-  });
 
   describe('saved state', () => {
     it('prevents generating reports when saving is required and we have unsaved changes', () => {
@@ -59,6 +54,9 @@ describe('ReportingPanelContent', () => {
       wrapper.update();
       expect(wrapper.find('[data-test-subj="generateReportButton"]').last().props().disabled).toBe(
         false
+      );
+      expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
+        `"http://localhost/api/reporting/generate/test?jobParams=%28version%3A%277.15.0%27%29"`
       );
     });
   });
