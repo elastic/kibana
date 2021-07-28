@@ -172,7 +172,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
         },
         attributes,
-        { convertToMultiNamespaceType: false }
+        { isTypeBeingConverted: false }
       );
 
       expect(migrationFunc).not.toHaveBeenCalled();
@@ -224,7 +224,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
         },
         attributes,
-        { convertToMultiNamespaceType: false }
+        { isTypeBeingConverted: false }
       );
 
       expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).not.toHaveBeenCalled();
@@ -288,7 +288,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
         },
         attributes,
-        { convertToMultiNamespaceType: false }
+        { isTypeBeingConverted: false }
       );
 
       expect(migrationFunc).toHaveBeenCalled();
@@ -346,7 +346,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
         },
         attributes,
-        { convertToMultiNamespaceType: false }
+        { isTypeBeingConverted: false }
       );
 
       expect(migrationFunc).toHaveBeenCalled();
@@ -398,7 +398,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
         },
         attributes,
-        { convertToMultiNamespaceType: false }
+        { isTypeBeingConverted: false }
       );
 
       expect(migrationFunc).toHaveBeenCalled();
@@ -450,7 +450,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
         },
         attributes,
-        { convertToMultiNamespaceType: false }
+        { isTypeBeingConverted: false }
       );
 
       expect(migrationFunc).toHaveBeenCalled();
@@ -510,7 +510,7 @@ describe('createMigration()', () => {
           namespace: 'namespace',
         },
         attributes,
-        { convertToMultiNamespaceType: false }
+        { isTypeBeingConverted: false }
       );
 
       expect(migrationFunc).toHaveBeenCalled();
