@@ -6,7 +6,7 @@
  */
 
 /** The minimum (fixed) width of the Actions column */
-export const MINIMUM_ACTIONS_COLUMN_WIDTH = 50; // px;
+export const MINIMUM_ACTIONS_COLUMN_WIDTH = 148; // px;
 
 /** Additional column width to include when checkboxes are shown **/
 export const SHOW_CHECK_BOXES_COLUMN_WIDTH = 24; // px;

@@ -10,9 +10,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { startCase } from 'lodash';
 import { decorators } from './decorators';
-import { getEuiSelectableOptions, flightFields } from './flights';
+import { getEuiSelectableOptions, flightFields, flightFieldLabels, FlightField } from './flights';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddable } from '../control_types/options_list';
 import { ControlFrame } from '../control_frame/control_frame';
 
@@ -64,7 +63,7 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
         indexPattern: '',
         multiSelect: true,
         twoLineLayout: twoLine,
-        title: startCase(field),
+        title: flightFieldLabels[field as FlightField],
       });
     });
     Promise.all(embeddableCreatePromises).then((newEmbeddables) => setEmbeddables(newEmbeddables));

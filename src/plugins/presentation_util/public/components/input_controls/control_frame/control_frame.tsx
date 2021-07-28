@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  // EuiButtonEmpty,
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiFormRow,
-  // EuiPopover,
-} from '@elastic/eui';
-
-import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
+import classNames from 'classnames';
+import { EuiFormControlLayout, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+
 import { InputControlEmbeddable } from '../embeddable/types';
 
 import './control_frame.scss';
@@ -36,7 +30,6 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
   const form = (
     <EuiFormControlLayout
       className="controlFrame--formControlLayout"
-      // fullWidth={true}
       prepend={
         twoLine ? undefined : (
           <EuiFormLabel htmlFor={embeddable.id}>{embeddable.getInput().title}</EuiFormLabel>

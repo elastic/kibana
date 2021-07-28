@@ -26,6 +26,8 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import {
@@ -46,7 +48,6 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { compose } from './lib/compose/kibana';
 import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
 import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
 import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
@@ -67,6 +68,7 @@ import {
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
   REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+  CUSTOM_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -212,7 +214,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+              mappings: { dynamic: false, ...mappingFromFieldMap(technicalRuleFieldMap) },
             },
           },
         });
@@ -271,6 +273,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const referenceRuleTypes = [
       REFERENCE_RULE_ALERT_TYPE_ID,
       REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+      CUSTOM_ALERT_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,
@@ -291,6 +294,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ml: plugins.ml,
         lists: plugins.lists,
         mergeStrategy: this.config.alertMergeStrategy,
+        experimentalFeatures,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
@@ -316,8 +320,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         taskManager: plugins.taskManager!,
       });
     }
-
-    compose(core, plugins, endpointContext);
 
     core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(

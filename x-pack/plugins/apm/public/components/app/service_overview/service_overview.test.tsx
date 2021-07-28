@@ -32,9 +32,13 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { uiSettingsServiceMock } from '../../../../../../../src/core/public/mocks';
 
-const KibanaReactContext = createKibanaReactContext({
+const uiSettings = uiSettingsServiceMock.create().setup({} as any);
+
+const KibanaReactContext = createKibanaReactContext(({
+  notifications: { toasts: { add: () => {} } },
+  uiSettings,
   usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+} as unknown) as Partial<CoreStart>);
 
 const mockParams = {
   rangeFrom: 'now-15m',
@@ -46,8 +50,6 @@ const location = {
   pathname: '/services/test%20service%20name/overview',
   search: fromQuery(mockParams),
 };
-
-const uiSettings = uiSettingsServiceMock.create().setup({} as any);
 
 function Wrapper({ children }: { children?: ReactNode }) {
   const value = ({
@@ -63,11 +65,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
   return (
     <MemoryRouter initialEntries={[location]}>
-      <KibanaReactContext.Provider
-        services={{
-          uiSettings,
-        }}
-      >
+      <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper value={value}>
           <MockUrlParamsContextProvider params={mockParams}>
             {children}

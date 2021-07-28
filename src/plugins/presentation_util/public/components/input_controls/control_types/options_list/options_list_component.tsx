@@ -11,15 +11,7 @@ import { debounceTime, tap } from 'rxjs/operators';
 import useMount from 'react-use/lib/useMount';
 import classNames from 'classnames';
 import { Subject } from 'rxjs';
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiIcon,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiSelectableOption,
-  EuiNotificationBadge,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiSelectableOption } from '@elastic/eui';
 
 import {
   OptionsListDataFetcher,
