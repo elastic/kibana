@@ -313,12 +313,6 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 ====
 
 [float]
-<<<<<<< HEAD
-[[why-my-field-x-is-missing-from-the-fields-list]]
-===== Why is my field X missing from the fields list?
-
-*Lens* does not support the visualization of full-text fields, therefore it is not showing them in the data summary.
-=======
 [[why-my-field-is-missing-from-the-fields-list]]
 .*Why is my field missing from the fields list?*
 [%collapsible]
@@ -332,7 +326,6 @@ Fields do not appear in the *Available fields* in the following scenarios:
 
 Verify if the field appears in the *Empty fields* list. *Lens* uses heuristics to determine if the fields contain values. For sparse data sets, the heuristics are less precise.
 ====
->>>>>>> 833b12ecc15 ([DOCS] Updates Lens and editor pages for 7.14 (#104756))
 
 [float]
 [[how-to-handle-gaps-in-time-series-visualizations]]
@@ -368,9 +361,6 @@ You can display icons with <<managing-index-patterns, field formatter>> in data 
 Visualizing saved searches in unsupported.
 ====
 
-<<<<<<< HEAD
-** If a `Percent` configuration is used, and the data range changes, the colors displayed are affected.
-=======
 [discrete]
 [[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
 .*How do I change the number of suggestions?*
@@ -402,4 +392,3 @@ Specifying the color for a single data point, such as a single bar or line, is u
 //====
 //
 //====
->>>>>>> 833b12ecc15 ([DOCS] Updates Lens and editor pages for 7.14 (#104756))
