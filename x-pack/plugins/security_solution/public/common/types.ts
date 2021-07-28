@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { ResponseErrorAttributes } from 'kibana/server';
 export interface ServerApiError {
   statusCode: number;
   error: string;
   message: string;
+  attributes?: ResponseErrorAttributes | undefined;
 }
 
 export interface SecuritySolutionUiConfigType {

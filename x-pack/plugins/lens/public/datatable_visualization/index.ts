@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { EditorFrameSetup, FormatFactory } from '../types';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { CoreSetup } from 'kibana/public';
+import type { ChartsPluginSetup } from 'src/plugins/charts/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { EditorFrameSetup } from '../types';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { FormatFactory } from '../../common';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;
