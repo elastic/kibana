@@ -12,23 +12,36 @@ import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent, Props } from './reporting_panel_content';
 
 const coreSetup = coreMock.createSetup();
-const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
+const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0-test');
 
 describe('ReportingPanelContent', () => {
-  const mountComponent = (props: Partial<Props>) =>
+  const props: Partial<Props> = {
+    layoutId: 'super_cool_layout_id_X',
+  };
+  const jobParams = {
+    appState: 'very_cool_app_state_X',
+    objectType: 'noice_object',
+    title: 'ultimate_title',
+  };
+
+  beforeEach(() => {
+    props.layoutId = 'super_cool_layout_id_X';
+  });
+
+  const mountComponent = (newProps: Partial<Props>) =>
     mountWithIntl(
       <ReportingPanelContent
         requiresSavedState
-        // We have unsaved changes
-        isDirty={true}
+        isDirty={true} // We have unsaved changes
         reportType="test"
-        layoutId="test"
-        getJobParams={jest.fn().mockReturnValue({})}
-        objectId={'my-object-id'}
+        objectId="my-object-id"
+        layoutId={props.layoutId}
+        getJobParams={() => jobParams}
         apiClient={apiClient}
         toasts={notificationServiceMock.createSetupContract().toasts}
         uiSettings={uiSettingsServiceMock.createSetupContract()}
         {...props}
+        {...newProps}
       />
     );
 
@@ -55,8 +68,22 @@ describe('ReportingPanelContent', () => {
       expect(wrapper.find('[data-test-subj="generateReportButton"]').last().props().disabled).toBe(
         false
       );
+    });
+
+    it('changing the layout triggers refreshing the state with the latest job params', () => {
+      const wrapper = mountComponent({ requiresSavedState: false });
+      wrapper.update();
       expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-        `"http://localhost/api/reporting/generate/test?jobParams=%28version%3A%277.15.0%27%29"`
+        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_X%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
+      );
+
+      // force the prop to update
+      props.layoutId = 'super_cool_layout_id_Y';
+      jobParams.appState = 'very_cool_app_state_Y';
+      wrapper.setProps({ layoutId: 'super_cool_layout_id_Y' });
+      wrapper.update();
+      expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
+        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_Y%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
       );
     });
   });
