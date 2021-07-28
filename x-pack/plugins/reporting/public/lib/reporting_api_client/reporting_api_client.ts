@@ -156,10 +156,6 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(resp.job);
   }
 
-  public getKibanaVersion() {
-    return this.kibanaVersion;
-  }
-
   public getDecoratedJobParams(baseParams: BaseParams): DecoratedBaseParams {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param

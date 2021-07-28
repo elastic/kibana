@@ -28,6 +28,15 @@ describe('ReportingPanelContent', () => {
         {...props}
       />
     );
+
+  describe('rendering', () => {
+    it('default view', () => {
+      const wrapper = mountComponent({});
+      expect(wrapper.find('EuiForm')).toMatchSnapshot();
+      expect(wrapper.find('EuiCopy')).toContain('flargSS!');
+    });
+  });
+
   describe('saved state', () => {
     it('prevents generating reports when saving is required and we have unsaved changes', () => {
       const wrapper = mountComponent({

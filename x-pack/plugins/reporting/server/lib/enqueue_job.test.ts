@@ -77,17 +77,24 @@ describe('Enqueue Job', () => {
       ({} as unknown) as KibanaRequest
     );
 
-    expect(report).toMatchObject({
-      _id: expect.any(String),
-      _index: '.reporting-foo-index-234',
-      attempts: 0,
-      created_by: false,
-      created_at: expect.any(String),
-      jobtype: 'printable_pdf',
-      meta: { objectType: 'visualization' },
-      output: null,
-      payload: { createJobTest: { test1: 'yes' } },
-      status: 'pending',
-    });
+    expect(report).toMatchInlineSnapshot();
+  });
+
+  it('handles unversioned version', async () => {
+    const enqueueJob = enqueueJobFactory(mockReporting, logger);
+    const report = await enqueueJob(
+      'printablePdf',
+      {
+        objectType: 'visualization',
+        title: 'cool-viz',
+        version: '7.14.0',
+        browserTimezone: 'UTC',
+      },
+      false,
+      ({} as unknown) as ReportingRequestHandlerContext,
+      ({} as unknown) as KibanaRequest
+    );
+
+    expect(report).toMatchInlineSnapshot();
   });
 });

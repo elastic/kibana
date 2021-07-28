@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -20,37 +19,34 @@ const getJobParamsDefault: () => BaseParams = () => ({
 
 test('ScreenCapturePanelContent renders the default view properly', () => {
   const coreSetup = coreMock.createSetup();
-  const component = mount(
-    <IntlProvider locale="en">
-      <ScreenCapturePanelContent
-        reportType="Analytical App"
-        requiresSavedState={false}
-        apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
-        toasts={coreSetup.notifications.toasts}
-        uiSettings={coreSetup.uiSettings}
-        getJobParams={getJobParamsDefault}
-      />
-    </IntlProvider>
+  const component = mountWithIntl(
+    <ScreenCapturePanelContent
+      reportType="Analytical App"
+      requiresSavedState={false}
+      apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
+      toasts={coreSetup.notifications.toasts}
+      uiSettings={coreSetup.uiSettings}
+      getJobParams={getJobParamsDefault}
+    />
   );
   expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.find('EuiCopy')).toContain('flargSS!');
   expect(component.text()).not.toMatch('Full page layout');
   expect(component.text()).not.toMatch('Optimize for printing');
 });
 
 test('ScreenCapturePanelContent properly renders a view with "canvas" layout option', () => {
   const coreSetup = coreMock.createSetup();
-  const component = mount(
-    <IntlProvider locale="en">
-      <ScreenCapturePanelContent
-        layoutOption="canvas"
-        reportType="Analytical App"
-        requiresSavedState={false}
-        apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
-        toasts={coreSetup.notifications.toasts}
-        uiSettings={coreSetup.uiSettings}
-        getJobParams={getJobParamsDefault}
-      />
-    </IntlProvider>
+  const component = mountWithIntl(
+    <ScreenCapturePanelContent
+      layoutOption="canvas"
+      reportType="Analytical App"
+      requiresSavedState={false}
+      apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
+      toasts={coreSetup.notifications.toasts}
+      uiSettings={coreSetup.uiSettings}
+      getJobParams={getJobParamsDefault}
+    />
   );
   expect(component.find('EuiForm')).toMatchSnapshot();
   expect(component.text()).toMatch('Full page layout');
@@ -58,18 +54,16 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
 
 test('ScreenCapturePanelContent properly renders a view with "print" layout option', () => {
   const coreSetup = coreMock.createSetup();
-  const component = mount(
-    <IntlProvider locale="en">
-      <ScreenCapturePanelContent
-        layoutOption="print"
-        reportType="Analytical App"
-        requiresSavedState={false}
-        apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
-        toasts={coreSetup.notifications.toasts}
-        uiSettings={coreSetup.uiSettings}
-        getJobParams={getJobParamsDefault}
-      />
-    </IntlProvider>
+  const component = mountWithIntl(
+    <ScreenCapturePanelContent
+      layoutOption="print"
+      reportType="Analytical App"
+      requiresSavedState={false}
+      apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
+      toasts={coreSetup.notifications.toasts}
+      uiSettings={coreSetup.uiSettings}
+      getJobParams={getJobParamsDefault}
+    />
   );
   expect(component.find('EuiForm')).toMatchSnapshot();
   expect(component.text()).toMatch('Optimize for printing');

@@ -15,9 +15,9 @@ import type { ReportingAPIClient } from '../lib/reporting_api_client';
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
-  license$: LicensingPluginSetup['license$'];
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
   uiSettings: IUiSettingsClient;
+  license$: LicensingPluginSetup['license$']; // FIXME: 'license$' is deprecated
+  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
   usesUiCapabilities: boolean;
 }
 
@@ -27,8 +27,8 @@ export interface ReportingSharingData {
 }
 
 export interface JobParamsProviderOptions {
-  shareableUrl: string;
   apiClient: ReportingAPIClient;
-  objectType: string;
   sharingData: ReportingSharingData;
+  shareableUrl: string;
+  objectType: string;
 }

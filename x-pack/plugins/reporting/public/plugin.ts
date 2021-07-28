@@ -108,6 +108,9 @@ export class ReportingPublicPlugin
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
+  /*
+   * Use a single instance of ReportingAPIClient for all the reporting code
+   */
   private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
     if (!this.apiClient) {
       this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
