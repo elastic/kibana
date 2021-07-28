@@ -69,7 +69,7 @@ export default function ({ getService }) {
 
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
-        expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
+        expect(fetchedPolicy.indices).to.eql([indexName]);
       });
 
       it('should add hidden indices linked to policies', async () => {
@@ -97,7 +97,7 @@ export default function ({ getService }) {
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
         // The index name is dynamically generated as .ds-<indexName>-XXX so we don't check for exact match
-        expect(fetchedPolicy.linkedIndices[0]).to.contain(indexName);
+        expect(fetchedPolicy.indices[0]).to.contain(indexName);
       });
     });
 
