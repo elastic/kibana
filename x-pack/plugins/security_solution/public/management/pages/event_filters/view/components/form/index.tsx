@@ -18,8 +18,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash/fp';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
@@ -65,17 +69,22 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const handleOnBuilderChange = useCallback(
       (arg: ExceptionBuilder.OnChangeProps) => {
-        if (isEmpty(arg.exceptionItems)) return;
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            entry: {
-              ...arg.exceptionItems[0],
-              name: exception?.name ?? '',
-              comments: exception?.comments ?? [],
-              os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
-            },
-            hasItemsError: arg.errorExists || !arg.exceptionItems[0].entries.length,
+            ...(arg.exceptionItems[0]
+              ? {
+                  entry: {
+                    ...arg.exceptionItems[0],
+                    name: exception?.name ?? '',
+                    comments: exception?.comments ?? [],
+                    os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                  },
+                  hasItemsError: arg.errorExists || !arg.exceptionItems[0]?.entries?.length,
+                }
+              : {
+                  hasItemsError: true,
+                }),
           },
         });
       },
