@@ -1,4 +1,4 @@
-[[configuring-tls]]
+[[configuring-tls-communication]]
 === Encrypt communications in {kib}
 ++++
 <titleabbrev>Encrypt communications</titleabbrev>
