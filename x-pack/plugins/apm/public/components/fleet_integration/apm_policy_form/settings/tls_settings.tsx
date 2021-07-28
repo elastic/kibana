@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
 import { SettingDefinition } from './typings';
