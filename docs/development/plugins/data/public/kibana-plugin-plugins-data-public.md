@@ -30,9 +30,7 @@
 |  Enumeration | Description |
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-public.bucket_types.md) |  |
-|  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.es_field_types.md) | \* |
 |  [IndexPatternType](./kibana-plugin-plugins-data-public.indexpatterntype.md) |  |
-|  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
 |  [SearchSessionState](./kibana-plugin-plugins-data-public.searchsessionstate.md) | Possible state that current session can be in |
@@ -103,7 +101,7 @@
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
 |  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-data-public.apply_filter_trigger.md) |  |
 |  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
-|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
+|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) |  |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.es_search_strategy.md) |  |
@@ -114,7 +112,7 @@
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
-|  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
+|  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) |  |
 |  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-public.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
