@@ -9,7 +9,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
-  const reason = fields[ALERT_REASON] ?? '';
+  const reason = fields[ALERT_REASON] ?? '-';
   const link = '/app/metrics/inventory'; // FIXME? Not sure if we need to do something with this link
 
   return {
