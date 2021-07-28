@@ -9,9 +9,7 @@ import { isEmpty } from 'lodash/fp';
 
 import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/types/timeline';
-import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../common/types/timeline';
-import * as i18n from './translations';
+import type { TimelineEventsType } from '../../../../common/types/timeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -64,23 +62,3 @@ export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
   }
   return 'raw';
 };
-
-export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
-
-export const getPinTooltip = ({
-  isPinned,
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  eventHasNotes,
-  timelineType,
-}: {
-  isPinned: boolean;
-  eventHasNotes: boolean;
-  timelineType: TimelineTypeLiteral;
-}) =>
-  timelineType === TimelineType.template
-    ? i18n.DISABLE_PIN
-    : isPinned && eventHasNotes
-    ? i18n.PINNED_WITH_NOTES
-    : isPinned
-    ? i18n.PINNED
-    : i18n.UNPINNED;

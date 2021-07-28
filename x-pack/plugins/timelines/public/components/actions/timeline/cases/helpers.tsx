@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ToasterContent } from './toaster_content';
 import * as i18n from './translations';
-import { Case } from '../../../../../../cases/common';
+import type { Case } from '../../../../../../cases/common';
 import type { ToastsStart, Toast } from '../../../../../../../../src/core/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 

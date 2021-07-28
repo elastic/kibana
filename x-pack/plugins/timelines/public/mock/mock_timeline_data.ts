@@ -1572,7 +1572,6 @@ export const mockTgridModel: TGridModel = {
   loadingEventIds: [],
   savedObjectId: 'ef579e40-jibber-jabber',
   selectedEventIds: {},
-  show: false,
   showCheckboxes: false,
   sort: [
     {

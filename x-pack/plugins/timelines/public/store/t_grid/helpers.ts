@@ -421,25 +421,3 @@ export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
         [expandedTabType]: {},
       };
 };
-
-interface UpdateShowTimelineProps {
-  id: string;
-  show: boolean;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineShowTimeline = ({
-  id,
-  show,
-  timelineById,
-}: UpdateShowTimelineProps): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      show,
-    },
-  };
-};
