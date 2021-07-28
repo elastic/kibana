@@ -11,6 +11,10 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 
+function isStringArray(data: unknown): data is string[] {
+  return isRight(t.array(t.string).decode(data));
+}
+
 export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'POST',
   path: '/api/uptime/journey/screenshot/block',
@@ -23,60 +27,21 @@ export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: 
     }),
   },
   handler: async ({ request, response, uptimeEsClient }) => {
-    const { hashes } = request.body;
+    const { hashes: blockIds } = request.body;
 
-    const decoded = t.array(t.string).decode(hashes);
-    if (!isRight(decoded)) {
-      return response.badRequest();
-    }
-    const { right: data } = decoded;
+    if (!isStringArray(blockIds)) return response.badRequest();
+
     const result = await libs.requests.getJourneyScreenshotBlocks({
-      blockIds: data,
+      blockIds,
       uptimeEsClient,
     });
+
     if (result.length === 0) {
       return response.notFound();
     }
+
     return response.ok({
       body: result,
-      headers: {
-        'Cache-Control': 'max-age=604800',
-      },
-    });
-  },
-});
-
-export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
-  method: 'GET',
-  path: '/api/uptime/journey/screenshot/block',
-  validate: {
-    query: schema.object({
-      hash: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-      _inspect: schema.maybe(schema.boolean()),
-    }),
-  },
-  handler: async ({ request, response, uptimeEsClient }) => {
-    const { hash } = request.query;
-
-    const decoded = t.union([t.string, t.array(t.string)]).decode(hash);
-    if (!isRight(decoded)) {
-      return response.badRequest();
-    }
-    const { right: data } = decoded;
-    const result = await libs.requests.getJourneyScreenshotBlocks({
-      blockIds: Array.isArray(data) ? data : [data],
-      uptimeEsClient,
-    });
-    if (result.length === 0) {
-      return response.notFound();
-    }
-    return response.ok({
-      body: result[0],
-      headers: {
-        // we can cache these blocks with extreme prejudice as they are inherently unchanging
-        // when queried by ID, since the ID is the hash of the data
-        'Cache-Control': 'max-age=604800',
-      },
     });
   },
 });
