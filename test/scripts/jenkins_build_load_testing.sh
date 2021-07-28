@@ -8,8 +8,6 @@ do
 done
 echo "Simulation classes: $simulations";
 
-IFS=',' read -ra sim_array <<< "${simulations}"
-
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
@@ -82,7 +80,7 @@ nohup ./metricbeat > metricbeat.log 2>&1 &
 popd
 
 echo " -> Running gatling load testing"
-export GATLING_SIMULATIONS="$sim_array"
+GATLING_SIMULATIONS="${simulations}"
 node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
   --config test/load/config.ts;
