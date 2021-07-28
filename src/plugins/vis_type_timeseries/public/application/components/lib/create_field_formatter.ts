@@ -12,5 +12,5 @@ import type { FieldFormatMap } from '../../../../../data/common';
 export const createFieldFormatter = (fieldName: string = '', fieldFormatMap?: FieldFormatMap) => {
   const fieldFormat = getFieldFormats().deserialize(fieldFormatMap?.[fieldName]);
 
-  return (value: number) => fieldFormat.convert(value);
+  return (value: unknown) => fieldFormat.convert(value);
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES } from '../../../../../common/enums';
+import { BUCKET_TYPES, PANEL_TYPES } from '../../../../../common/enums';
 import { createFieldFormatAccessor } from '../../../../lib/vis_data/create_field_format_accessor';
 import type { Panel, Series, PanelData } from '../../../../../common/types';
 import type { FieldFormatsRegistry } from '../../../../../../data/common';
@@ -25,7 +25,8 @@ export function formatLabel(
   return (next: (results: PanelData[]) => unknown) => async (results: PanelData[]) => {
     const termsField = series.terms_field;
 
-    if (termsField) {
+    // no need to format labels for markdown as they also used there as variables keys
+    if (termsField && panel.type !== PANEL_TYPES.MARKDOWN) {
       const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
       const getFieldFormatByName = createFieldFormatAccessor(
         fieldFormatService,

@@ -26,7 +26,7 @@ import {
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
 
 export const SeriesConfig = (props) => {
-  const defaults = { offset_time: '', value_template: '' };
+  const defaults = { offset_time: '', value_template: '{{value}}' };
   const model = { ...defaults, ...props.model };
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
@@ -38,7 +38,36 @@ export const SeriesConfig = (props) => {
   return (
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
-        <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+        <EuiFlexItem grow={false}>
+          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('template')}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.seriesConfig.templateLabel"
+                defaultMessage="Template"
+              />
+            }
+            helpText={
+              <span>
+                <FormattedMessage
+                  id="visTypeTimeseries.seriesConfig.templateHelpText"
+                  defaultMessage="eg. {templateExample}"
+                  values={{ templateExample: <EuiCode>{'{{value}}/s'}</EuiCode> }}
+                />
+              </span>
+            }
+            fullWidth
+          >
+            <EuiFieldText
+              onChange={handleTextChange('value_template')}
+              value={model.value_template}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={i18n.translate('visTypeTimeseries.seriesConfig.ignoreFieldFormatting', {
@@ -67,33 +96,6 @@ export const SeriesConfig = (props) => {
       <EuiHorizontalRule margin="s" />
 
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('template')}
-            label={
-              <FormattedMessage
-                id="visTypeTimeseries.seriesConfig.templateLabel"
-                defaultMessage="Template"
-              />
-            }
-            helpText={
-              <span>
-                <FormattedMessage
-                  id="visTypeTimeseries.seriesConfig.templateHelpText"
-                  defaultMessage="eg. {templateExample}"
-                  values={{ templateExample: <EuiCode>{'{{value}}/s'}</EuiCode> }}
-                />
-              </span>
-            }
-            fullWidth
-          >
-            <EuiFieldText
-              onChange={handleTextChange('value_template')}
-              value={model.value_template}
-              fullWidth
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('offsetSeries')}

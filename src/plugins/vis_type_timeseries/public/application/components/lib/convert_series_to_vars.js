@@ -8,6 +8,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { startsWith, snakeCase, last } from 'lodash';
+import { BUCKET_TYPES } from '../../../../common/enums';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
@@ -48,8 +49,12 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
             }),
           },
         };
+        const rowLabel =
+          seriesModel.split_mode === BUCKET_TYPES.TERMS
+            ? createFieldFormatter(seriesModel.terms_field, fieldFormatMap)(row.label)
+            : row.label;
         set(variables, varName, data);
-        set(variables, `${label}.label`, row.label);
+        set(variables, `${label}.label`, rowLabel);
 
         /**
          * Handle the case when a field has "key_as_string" value.

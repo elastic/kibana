@@ -44,7 +44,7 @@ export class TableSeriesConfig extends Component {
   }
 
   render() {
-    const defaults = { offset_time: '', value_template: '' };
+    const defaults = { offset_time: '', value_template: '{{value}}' };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
