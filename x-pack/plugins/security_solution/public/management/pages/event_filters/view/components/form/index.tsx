@@ -18,11 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
