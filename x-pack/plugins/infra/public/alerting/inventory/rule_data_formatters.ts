@@ -10,7 +10,7 @@ import { ObservabilityRuleTypeFormatter } from '../../../../observability/public
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
-  const link = '/app/metrics/inventory'; // FIXME? Not sure if we need to do something with this link
+  const link = '/app/metrics/inventory'; // TODO https://github.com/elastic/kibana/issues/106497
 
   return {
     reason,
