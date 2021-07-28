@@ -73,44 +73,43 @@ function createRule() {
 
       scheduleActions.mockClear();
 
-      state =
-        (await type.executor({
-          alertId: 'alertId',
+      state = ((await type.executor({
+        alertId: 'alertId',
+        createdBy: 'createdBy',
+        name: 'name',
+        params: {},
+        previousStartedAt,
+        startedAt,
+        rule: {
+          actions: [],
+          consumer: 'consumer',
+          createdAt,
           createdBy: 'createdBy',
+          enabled: true,
           name: 'name',
-          params: {},
-          previousStartedAt,
-          startedAt,
-          rule: {
-            actions: [],
-            consumer: 'consumer',
-            createdAt,
-            createdBy: 'createdBy',
-            enabled: true,
-            name: 'name',
-            notifyWhen: 'onActionGroupChange',
-            producer: 'producer',
-            ruleTypeId: 'ruleTypeId',
-            ruleTypeName: 'ruleTypeName',
-            schedule: {
-              interval: '1m',
-            },
-            tags: ['tags'],
-            throttle: null,
-            updatedAt: createdAt,
-            updatedBy: 'updatedBy',
+          notifyWhen: 'onActionGroupChange',
+          producer: 'producer',
+          ruleTypeId: 'ruleTypeId',
+          ruleTypeName: 'ruleTypeName',
+          schedule: {
+            interval: '1m',
           },
-          services: {
-            alertInstanceFactory,
-            savedObjectsClient: {} as any,
-            scopedClusterClient: {} as any,
-          },
-          spaceId: 'spaceId',
-          state,
           tags: ['tags'],
+          throttle: null,
+          updatedAt: createdAt,
           updatedBy: 'updatedBy',
-          namespace: 'namespace',
-        })) ?? {};
+        },
+        services: {
+          alertInstanceFactory,
+          savedObjectsClient: {} as any,
+          scopedClusterClient: {} as any,
+        },
+        spaceId: 'spaceId',
+        state,
+        tags: ['tags'],
+        updatedBy: 'updatedBy',
+        namespace: 'namespace',
+      })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
     },
