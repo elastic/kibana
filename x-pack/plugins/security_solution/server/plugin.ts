@@ -89,7 +89,6 @@ import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifa
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
 import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
-import { EndpointMetadataService } from './endpoint/services/metadata';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -396,12 +395,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       packageService: plugins.fleet?.packageService,
       packagePolicyService: plugins.fleet?.packagePolicyService,
       agentPolicyService: plugins.fleet?.agentPolicyService,
-      endpointMetadataService: new EndpointMetadataService(
-        core.savedObjects,
-        plugins.fleet?.agentService!,
-        plugins.fleet?.agentPolicyService!,
-        logger
-      ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
@@ -410,6 +403,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logger,
       manifestManager,
       registerIngestCallback,
+      savedObjectsStart: core.savedObjects,
       licenseService,
       exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
