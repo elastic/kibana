@@ -44,9 +44,9 @@ export class FieldFormatsService {
 }
 
 /** @public */
-export type FieldFormatsSetup = Pick<FieldFormatsRegistry, 'register'>;
+export type FieldFormatsSetup = Pick<FieldFormatsRegistry, 'register' | 'has'>;
 
 /** @public */
-export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'> & {
+export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' | 'register'> & {
   deserialize: FormatFactory;
 };

@@ -95,4 +95,4 @@ export interface IFieldFormatMetaParams {
   };
 }
 
-export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'register'>;
