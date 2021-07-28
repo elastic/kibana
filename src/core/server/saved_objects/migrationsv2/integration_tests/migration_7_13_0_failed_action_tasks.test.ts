@@ -90,7 +90,6 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
     });
 
     root = createRoot();
-    await root.preboot();
     await root.setup();
     await root.start();
 
