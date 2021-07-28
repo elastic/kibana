@@ -7,8 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { useApmRouter } from '../../hooks/use_apm_router';
+import { truncate } from '../../utils/style';
 import { SpanIcon } from './span_icon';
+
+const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
   backendName: string;
@@ -26,18 +30,18 @@ export function BackendLink({
   const { link } = useApmRouter();
 
   return (
-    <EuiLink
+    <StyledLink
       href={link('/backends/:backendName/overview', {
         path: { backendName },
         query,
       })}
     >
-      <EuiFlexGroup gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
         <EuiFlexItem>{backendName}</EuiFlexItem>
       </EuiFlexGroup>
-    </EuiLink>
+    </StyledLink>
   );
 }

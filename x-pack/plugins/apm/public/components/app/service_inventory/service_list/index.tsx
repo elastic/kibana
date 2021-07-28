@@ -51,19 +51,10 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = euiStyled(ServiceOrTransactionsOverviewLink)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM}
-  ${truncate('100%')};
-`;
-
 const ToolTipWrapper = euiStyled.span`
   width: 100%;
   .apmServiceList__serviceNameTooltip {
     width: 100%;
-    .apmServiceList__serviceNameContainer {
-      // removes 24px referent to the icon placed on the left side of the text.
-      width: calc(100% - 24px);
-    }
   }
 `;
 
@@ -104,7 +95,7 @@ export function getServiceColumns({
       }),
       width: '40%',
       sortable: true,
-      render: (_, { serviceName, agentName, transactionType }) => (
+      render: (_, { serviceName, agentName }) => (
         <ToolTipWrapper>
           <EuiToolTip
             delay="long"
