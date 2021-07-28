@@ -61,7 +61,7 @@ import { EnsureSOAuthCallback } from '../../authorization';
 import {
   transformCaseArrayResponseToExternalModel,
   transformCaseSavedObjectToExternalModel,
-  transformCreateAttributesToESModel,
+  transformAttributesToESModel,
   transformUpdateResponseToExternalModel,
 } from './transform';
 
@@ -1071,7 +1071,7 @@ export class CasesService {
   public async postNewCase({ unsecuredSavedObjectsClient, attributes, id }: PostCaseArgs) {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      const transformedAttributes = transformCreateAttributesToESModel(attributes);
+      const transformedAttributes = transformAttributesToESModel(attributes);
       const createdCase = await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
@@ -1092,7 +1092,7 @@ export class CasesService {
   }: PatchCaseArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      const transformedAttributes = transformCreateAttributesToESModel(updatedAttributes);
+      const transformedAttributes = transformAttributesToESModel(updatedAttributes);
       const updatedCase = await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,

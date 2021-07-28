@@ -55,6 +55,7 @@ export class CaseUserActionService {
   public async bulkCreate({ unsecuredSavedObjectsClient, actions }: PostCaseUserActionArgs) {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
+
       return await unsecuredSavedObjectsClient.bulkCreate<CaseUserActionAttributes>(
         actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
       );

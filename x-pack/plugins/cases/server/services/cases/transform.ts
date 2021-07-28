@@ -56,19 +56,19 @@ export function transformUpdateResponseToExternalModel(
   };
 }
 
-export function transformCreateAttributesToESModel(
+export function transformAttributesToESModel(
   caseAttributes: CaseAttributes
 ): {
   attributes: ESCaseAttributes;
   references?: SavedObjectReference[];
 };
-export function transformCreateAttributesToESModel(
+export function transformAttributesToESModel(
   caseAttributes: Partial<CaseAttributes>
 ): {
   attributes: Partial<ESCaseAttributes>;
   references?: SavedObjectReference[];
 };
-export function transformCreateAttributesToESModel(
+export function transformAttributesToESModel(
   caseAttributes: Partial<CaseAttributes>
 ): {
   attributes: Partial<ESCaseAttributes>;
@@ -76,32 +76,38 @@ export function transformCreateAttributesToESModel(
 } {
   const { connector, external_service, ...restAttributes } = caseAttributes;
 
-  let pushConnectorID: string | undefined;
-  let restExternalService: ExternalServicesWithoutConnectorID | null = null;
+  let transformedAttributes: Partial<ESCaseAttributes> = { ...restAttributes };
+  let pushConnectorID: string | undefined | null;
 
   if (external_service) {
+    let restExternalService: ExternalServicesWithoutConnectorID | null | undefined;
     ({ connector_id: pushConnectorID, ...restExternalService } = external_service);
+    transformedAttributes = {
+      ...transformedAttributes,
+      external_service: restExternalService,
+    };
   }
 
-  const transformedConnector = connector && {
-    name: connector.name,
-    type: connector.type,
-    fields: transformFieldsToESModel(connector),
-  };
+  if (connector) {
+    transformedAttributes = {
+      ...transformedAttributes,
+      connector: {
+        name: connector.name,
+        type: connector.type,
+        fields: transformFieldsToESModel(connector),
+      },
+    };
+  }
 
   return {
-    attributes: {
-      ...restAttributes,
-      ...(transformedConnector && { connector: transformedConnector }),
-      external_service: restExternalService,
-    },
+    attributes: transformedAttributes,
     references: buildReferences(connector?.id, pushConnectorID),
   };
 }
 
 function buildReferences(
   connectorID?: string,
-  pushConnectorID?: string
+  pushConnectorID?: string | null
 ): SavedObjectReference[] | undefined {
   const connectorRef =
     connectorID && connectorID !== noneConnectorId
@@ -168,12 +174,12 @@ function transformESExternalService(
 ): CaseFullExternalService | null {
   const connectorIDRef = findConnectorIDReference(pushConnectorIDReferenceName, references);
 
-  if (!externalService || !connectorIDRef) {
+  if (!externalService) {
     return null;
   }
 
   return {
     ...externalService,
-    connector_id: connectorIDRef.id,
+    connector_id: connectorIDRef?.id ?? null,
   };
 }

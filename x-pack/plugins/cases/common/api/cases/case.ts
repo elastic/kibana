@@ -92,7 +92,7 @@ const CaseBasicRt = rt.type({
  * a type without the connector_id field.
  */
 export const CaseExternalServiceBasicRt = rt.type({
-  connector_id: rt.string,
+  connector_id: rt.union([rt.string, rt.null]),
   connector_name: rt.string,
   external_id: rt.string,
   external_title: rt.string,
