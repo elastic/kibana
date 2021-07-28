@@ -77,16 +77,12 @@ export const createRuleTypeMocks = () => {
       lists: listMock.createSetup(),
       logger: loggerMock,
       ruleDataClient: ({
-        getReader: () => {
-          return {
-            search: jest.fn(),
-          };
-        },
-        getWriter: () => {
-          return {
-            bulk: jest.fn(),
-          };
-        },
+        getReader: jest.fn(() => ({
+          search: jest.fn(),
+        })),
+        getWriter: jest.fn(() => ({
+          bulk: jest.fn(),
+        })),
         isWriteEnabled: jest.fn(() => true),
       } as unknown) as RuleDataClient,
     },

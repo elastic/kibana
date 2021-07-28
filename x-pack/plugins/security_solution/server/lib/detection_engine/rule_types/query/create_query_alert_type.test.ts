@@ -14,7 +14,6 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
-import { bulkCreateFactory } from '../factories';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -51,14 +50,6 @@ describe('Custom query alerts', () => {
       index: ['*'],
       from: 'now-1m',
       to: 'now',
-      runOpts: {
-        bulkCreate: bulkCreateFactory(
-          dependencies.logger,
-          services.alertWithPersistence,
-          dependencies.buildRuleMessage,
-          'wait_for'
-        ),
-      },
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
@@ -84,7 +75,7 @@ describe('Custom query alerts', () => {
     );
 
     await executor({ params });
-    expect(services.alertInstanceFactory).not.toBeCalled();
+    expect(dependencies.ruleDataClient.getWriter).not.toBeCalled();
   });
 
   it('sends a properly formatted alert when events are found', async () => {
@@ -128,15 +119,6 @@ describe('Custom query alerts', () => {
     );
 
     await executor({ params });
-    expect(services.alertInstanceFactory).toBeCalled();
-    /*
-    expect(services.alertWithPersistence).toBeCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          'event.kind': 'signal',
-        }),
-      ])
-    );
-    */
+    expect(dependencies.ruleDataClient.getWriter).toBeCalled();
   });
 });
