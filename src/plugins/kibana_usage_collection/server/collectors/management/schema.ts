@@ -388,6 +388,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'autocomplete:valueSuggestionMethod': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:timeout': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
