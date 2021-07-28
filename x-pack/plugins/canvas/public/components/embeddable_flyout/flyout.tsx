@@ -66,8 +66,7 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   ...restProps
 }) => {
   const dispatch = useDispatch();
-  const state: State = useSelector<State, State>((stateProps) => stateProps);
-  const pageId = useSelector<State, string>((stateProps) => getSelectedPage(stateProps));
+  const pageId = useSelector<State, string>((state) => getSelectedPage(state));
 
   const addEmbeddable: AddEmbeddable = useCallback(
     (selectedPageId, partialElement) => dispatch(addElement(selectedPageId, partialElement)),
@@ -92,7 +91,6 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   return (
     <EmbeddableFlyoutPortal
       {...restProps}
-      {...state}
       availableEmbeddables={availableEmbeddables || []}
       onSelect={onSelect}
     />
