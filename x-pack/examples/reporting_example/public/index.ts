@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
 import { ReportingExamplePlugin } from './plugin';
 
-export function plugin(initContext: PluginInitializerContext) {
-  return new ReportingExamplePlugin(initContext);
+export function plugin() {
+  return new ReportingExamplePlugin();
 }
 export { PluginSetup, PluginStart } from './types';

@@ -14,7 +14,7 @@ import { ReportingExampleApp } from './components/app';
 export const renderApp = (
   coreStart: CoreStart,
   deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
-  { appBasePath, element }: AppMountParameters
+  { appBasePath, element }: AppMountParameters // FIXME: appBasePath is deprecated
 ) => {
   ReactDOM.render(<ReportingExampleApp basename={appBasePath} {...coreStart} {...deps} />, element);
 

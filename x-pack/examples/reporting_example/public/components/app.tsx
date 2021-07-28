@@ -31,7 +31,7 @@ import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CoreStart } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
+import { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types'; // FIXME: https://github.com/elastic/kibana/issues/107085
 
 interface ReportingExampleAppProps {
   basename: string;
