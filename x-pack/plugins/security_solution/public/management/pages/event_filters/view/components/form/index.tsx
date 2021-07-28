@@ -68,7 +68,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            ...(arg.exceptionItems[0]
+            ...(arg.exceptionItems[0] !== undefined
               ? {
                   entry: {
                     ...arg.exceptionItems[0],
