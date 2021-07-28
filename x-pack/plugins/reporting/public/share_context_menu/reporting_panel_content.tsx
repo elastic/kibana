@@ -49,26 +49,26 @@ interface State {
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
-  private jobParams: BaseParams;
   private mounted?: boolean;
 
   constructor(props: Props) {
     super(props);
 
-    this.jobParams = props.getJobParams();
+    // Get objectType from job params
+    const { objectType } = props.getJobParams();
 
     this.state = {
       isStale: false,
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
-      objectType: this.jobParams.objectType,
+      objectType,
     };
   }
 
   private getAbsoluteReportGenerationUrl = (props: Props) => {
     const relativePath = this.props.apiClient.getReportingJobPath(
       props.reportType,
-      this.props.apiClient.getDecoratedJobParams(this.jobParams)
+      this.props.apiClient.getDecoratedJobParams(this.props.getJobParams())
     );
     return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
   };
@@ -231,7 +231,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private createReportingJob = () => {
     const { intl } = this.props;
-    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(this.jobParams);
+    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
+      this.props.getJobParams()
+    );
 
     return this.props.apiClient
       .createReportingJob(this.props.reportType, decoratedJobParams)
