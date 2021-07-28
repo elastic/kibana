@@ -109,6 +109,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: StrategyMap = {};
   private sessionService: ISearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
+  private searchAsInternalUser!: ISearchStrategy;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -156,9 +157,24 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
+    // We don't want to register this because we don't want the client to be able to access this
+    // strategy, but we do want to expose it to other server-side plugins
+    // see x-pack/plugins/security_solution/server/search_strategy/timeline/index.ts
+    // for example use case
+    this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
+      this.initializerContext.config.legacy.globalConfig$,
+      this.logger,
+      usage,
+      true
+    );
+
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
 
-    registerBsearchRoute(bfetch, (request: KibanaRequest) => this.asScoped(request));
+    registerBsearchRoute(
+      bfetch,
+      (request: KibanaRequest) => this.asScoped(request),
+      core.executionContext
+    );
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
@@ -216,6 +232,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         uiSettings,
         indexPatterns,
       }),
+      searchAsInternalUser: this.searchAsInternalUser,
       getSearchStrategy: this.getSearchStrategy,
       asScoped: this.asScoped,
       searchSource: {

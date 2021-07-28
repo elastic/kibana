@@ -9,6 +9,7 @@
 import { TelemetryEventsSender } from './sender';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
+import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
  * Creates a mocked Telemetry Events Sender
@@ -21,6 +22,8 @@ export const createMockTelemetryEventsSender = (
     start: jest.fn(),
     stop: jest.fn(),
     fetchDiagnosticAlerts: jest.fn(),
+    fetchEndpointMetrics: jest.fn(),
+    fetchEndpointPolicyResponses: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
@@ -31,6 +34,22 @@ export const createMockTelemetryEventsSender = (
     copyLicenseFields: jest.fn(),
     sendEvents: jest.fn(),
   } as unknown) as jest.Mocked<TelemetryEventsSender>;
+};
+
+/**
+ * Creates a mocked package policy
+ */
+export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
+  return ({
+    id: jest.fn(),
+    inputs: jest.fn(),
+    version: jest.fn(),
+    revision: jest.fn(),
+    updated_at: jest.fn(),
+    updated_by: jest.fn(),
+    created_at: jest.fn(),
+    created_by: jest.fn(),
+  } as unknown) as jest.Mocked<PackagePolicy>;
 };
 
 /**

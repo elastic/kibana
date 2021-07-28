@@ -8,15 +8,13 @@
 
 import './index.scss';
 import angular from 'angular';
-import { getServices } from '../kibana_services';
 import { renderApp as renderReactApp } from './index';
+
 
 /**
  * Here's where Discover's inner angular is mounted and rendered
  */
 export async function renderApp(moduleName: string, element: HTMLElement) {
-  // do not wait for fontawesome
-  getServices().kibanaLegacy.loadFontAwesome();
   await import('./angular');
   const $injector = mountDiscoverApp(moduleName, element);
   return () => $injector.get('$rootScope').$destroy();

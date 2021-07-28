@@ -18,8 +18,7 @@ import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPatternBase } from '@kbn/es-query';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
@@ -47,15 +46,15 @@ interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
   osTypes?: OsTypeArray;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPatternBase;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IIndexPattern,
+    pattern: IndexPatternBase,
     type: ExceptionListType,
     osTypes?: OsTypeArray
-  ) => IIndexPattern;
+  ) => IndexPatternBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;

@@ -22,6 +22,7 @@ import {
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
+  cellHasFormulas,
 } from '../../../../../../../src/plugins/data/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
@@ -30,7 +31,6 @@ import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { TaskRunResult } from '../../../lib/tasks';
 import { JobParamsCSV } from '../types';
-import { cellHasFormulas } from './cell_has_formula';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 

@@ -14,6 +14,10 @@ export const NOTES_TOOLTIP = i18n.translate(
   }
 );
 
+export const TGRID_BODY_ARIA_LABEL = i18n.translate('xpack.timelines.tgrid.body.ariaLabel', {
+  defaultMessage: 'Alerts',
+});
+
 export const NOTES_DISABLE_TOOLTIP = i18n.translate(
   'xpack.timelines.timeline.body.notes.disableEventTooltip',
   {

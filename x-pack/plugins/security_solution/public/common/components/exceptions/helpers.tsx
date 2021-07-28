@@ -33,10 +33,10 @@ import {
   addIdToEntries,
   ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
+import { IndexPatternBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { AlertData, Flattened } from './types';
 
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
@@ -46,10 +46,10 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
-  patterns: IIndexPattern,
+  patterns: IndexPatternBase,
   type: ExceptionListType,
   osTypes?: OsTypeArray
-): IIndexPattern => {
+): IndexPatternBase => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -325,8 +325,8 @@ export const getCodeSignatureValue = (
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => {
       return {
-        subjectName: signature.subject_name ?? '',
-        trusted: signature.trusted.toString() ?? '',
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted?.toString() ?? '',
       };
     });
   } else {
@@ -634,7 +634,7 @@ export const getPrepopulatedMemoryShellcodeException = ({
  */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: IIndexPattern
+  indexPatterns: IndexPatternBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
     return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);

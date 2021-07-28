@@ -7,6 +7,8 @@
 
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
+
 import React, { Suspense, useState } from 'react';
 import {
   ALERT_DURATION,
@@ -20,6 +22,7 @@ import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
+
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { decorateResponse } from './decorate_response';
@@ -34,6 +37,25 @@ interface AlertsTableTGridProps {
   setRefetch: (ref: () => void) => void;
 }
 
+const EventsThContent = styled.div.attrs(({ className = '' }) => ({
+  className: `siemEventsTable__thContent ${className}`,
+}))<{ textAlign?: string; width?: number }>`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
+  line-height: ${({ theme }) => theme.eui.euiLineHeight};
+  min-width: 0;
+  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  text-align: ${({ textAlign }) => textAlign};
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  > button.euiButtonIcon,
+  > .euiToolTipAnchor > button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
+`;
 /**
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
  * plus additional TGrid column properties
@@ -55,7 +77,7 @@ export const columns: Array<
       defaultMessage: 'Triggered',
     }),
     id: ALERT_START,
-    initialWidth: 116,
+    initialWidth: 176,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -80,7 +102,6 @@ export const columns: Array<
     }),
     linkField: '*',
     id: RULE_NAME,
-    initialWidth: 400,
   },
 ];
 
@@ -99,8 +120,16 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const leadingControlColumns = [
     {
       id: 'expand',
-      width: 40,
-      headerCellRender: () => null,
+      width: 20,
+      headerCellRender: () => {
+        return (
+          <EventsThContent>
+            {i18n.translate('xpack.observability.alertsTable.actionsTextLabel', {
+              defaultMessage: 'Actions',
+            })}
+          </EventsThContent>
+        );
+      },
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const decoratedAlerts = decorateResponse(
@@ -120,7 +149,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     },
     {
       id: 'view_in_app',
-      width: 40,
+      width: 20,
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});

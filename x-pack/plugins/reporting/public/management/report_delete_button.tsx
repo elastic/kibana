@@ -7,7 +7,8 @@
 
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 import React, { Fragment, PureComponent } from 'react';
-import { Job, Props as ListingProps } from './report_listing';
+import { Job } from '../lib/job';
+import { Props as ListingProps } from './report_listing';
 
 type DeleteFn = () => Promise<void>;
 type Props = { jobsToDelete: Job[]; performDelete: DeleteFn } & ListingProps;
@@ -46,7 +47,7 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
               id: 'xpack.reporting.listing.table.deleteConfirmTitle',
               defaultMessage: `Delete the "{name}" report?`,
             },
-            { name: jobsToDelete[0].object_title }
+            { name: jobsToDelete[0].title }
           );
     const message = intl.formatMessage({
       id: 'xpack.reporting.listing.table.deleteConfirmMessage',
@@ -91,7 +92,7 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
           {intl.formatMessage(
             {
               id: 'xpack.reporting.listing.table.deleteReportButton',
-              defaultMessage: `Delete ({num})`,
+              defaultMessage: `Delete {num, plural, one {report} other {reports} }`,
             },
             { num: jobsToDelete.length }
           )}

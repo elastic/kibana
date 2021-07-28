@@ -7,9 +7,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
-import { Filter } from 'src/plugins/data/public';
-import { DslQuery } from 'src/plugins/data/common';
+import { DslQuery, Filter } from '@kbn/es-query';
 import { Assign } from '@kbn/utility-types';
 import { Spec } from 'vega';
 import { EsQueryParser } from './es_query_parser';
