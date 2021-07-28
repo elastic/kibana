@@ -6,41 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
-  buildQueryFromFilters,
-} from '../common';
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
-/*
- * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
- * Filter helper namespace:
- */
-export const esFilters = {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-};
+export * from './deprecated';
+export { getEsQueryConfig, buildQueryFromFilters } from '../common';
 
 /**
  * Exporters (CSV)
@@ -51,34 +22,6 @@ export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
 };
-
-/*
- * esQuery and esKuery:
- */
-
-import { getEsQueryConfig } from '../common';
-
-/*
- * Filter helper namespace
- * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
- */
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-/*
- * Filter helper namespace
- * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
- */
-export const esQuery = {
-  buildQueryFromFilters,
-  getEsQueryConfig,
-  buildEsQuery,
-};
-
-export type { EsQueryConfig, KueryNode, IFieldSubType } from '../common';
 
 /*
  * Field Formats:
@@ -285,10 +228,7 @@ export const search = {
 export {
   // kbn field types
   castEsToKbnFieldTypeName,
-  // query
-  Filter,
   getTime,
-  Query,
   // timefilter
   RefreshInterval,
   TimeRange,

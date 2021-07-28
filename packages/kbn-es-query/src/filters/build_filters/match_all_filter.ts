@@ -6,8 +6,17 @@
  * Side Public License, v 1.
  */
 
-export { IndexPatternSelectProps } from './index_pattern_select';
-export { FilterLabel, FilterItem } from './filter_bar';
-export { QueryStringInput, QueryStringInputProps } from './query_string_input';
-export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
-export { SuggestionsComponent } from './typeahead';
+import type { Filter, FilterMeta } from './types';
+
+export interface MatchAllFilterMeta extends FilterMeta {
+  field: any;
+  formattedValue: string;
+}
+
+export type MatchAllFilter = Filter & {
+  meta: MatchAllFilterMeta;
+  match_all: any;
+};
+
+export const isMatchAllFilter = (filter: any): filter is MatchAllFilter =>
+  filter && filter.match_all;
