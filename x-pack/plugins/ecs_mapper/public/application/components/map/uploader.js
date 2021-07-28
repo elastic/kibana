@@ -23,7 +23,7 @@ export class EcsMapperUploadView extends Component {
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
-      results: []
+      results: [],
     };
 
     this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
@@ -73,12 +73,15 @@ export class EcsMapperUploadView extends Component {
           fileSize: file.size,
           loading: true,
         });
-        const results = this.props.mapper.fetchPipelineFromMapping(fileContents, FieldCopyAction.Copy);
+        const results = this.props.mapper.fetchPipelineFromMapping(
+          fileContents,
+          FieldCopyAction.Copy
+        );
         console.log(results);
         this.setState({
           loading: false,
           loaded: true,
-          results: result
+          results: results,
         });
       } catch (error) {
         this.setState({
