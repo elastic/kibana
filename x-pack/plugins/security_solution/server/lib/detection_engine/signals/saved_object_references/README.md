@@ -25,7 +25,7 @@ GET .kibana/_search
 Run a query in dev tools and you should see this code that adds the following savedObject references
 to any newly saved rule:
 
-```json
+```json5
       {
         "_index" : ".kibana-hassanabad19_8.0.0_001",
         "_id" : "alert:38482620-ef1b-11eb-ad71-7de7959be71c",
@@ -38,7 +38,7 @@ to any newly saved rule:
               "__internal_immutable:false"
             ],
             "alertTypeId" : "siem.signals",
-         ...
+            "other data... other data": "other data...other data",
               "exceptionsList" : [
                 {
                   "id" : "endpoint_list",
@@ -53,7 +53,7 @@ to any newly saved rule:
                   "namespace_type" : "single"
                 }
               ],
-         ...
+          "other data... other data": "other data...other data",
           "references" : [
             {
               "name" : "param:exceptionsList_0",
@@ -66,7 +66,7 @@ to any newly saved rule:
               "type" : "exception-list"
             }
           ],
-         ...
+         "other data... other data": "other data...other data",
 ```
 
 The structure is that the alerting framework in conjunction with this code will make an array of saved object references which are going to be:
