@@ -4,118 +4,86 @@
     "classes": [
       {
         "parentPluginId": "ml",
-        "id": "def-public.MlUrlGenerator",
+        "id": "def-public.MlLocatorDefinition",
         "type": "Class",
         "tags": [],
-        "label": "MlUrlGenerator",
+        "label": "MlLocatorDefinition",
         "description": [],
         "signature": [
           {
             "pluginId": "ml",
             "scope": "public",
             "docId": "kibMlPluginApi",
-            "section": "def-public.MlUrlGenerator",
-            "text": "MlUrlGenerator"
+            "section": "def-public.MlLocatorDefinition",
+            "text": "MlLocatorDefinition"
           },
           " implements ",
           {
             "pluginId": "share",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorsDefinition",
-            "text": "UrlGeneratorsDefinition"
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
           },
-          "<\"ML_APP_URL_GENERATOR\">"
+          "<",
+          "MlLocatorParams",
+          ">"
         ],
         "source": {
-          "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
-          "lineNumber": 44
+          "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+          "lineNumber": 32
         },
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "ml",
-            "id": "def-public.MlUrlGenerator.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
-              "lineNumber": 45
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "ml",
-                "id": "def-public.MlUrlGenerator.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "Params"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
-                  "lineNumber": 45
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-public.MlUrlGenerator.id",
+            "id": "def-public.MlLocatorDefinition.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [],
             "signature": [
-              "\"ML_APP_URL_GENERATOR\""
+              "\"ML_APP_LOCATOR\""
             ],
             "source": {
-              "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
-              "lineNumber": 47
+              "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+              "lineNumber": 33
             },
             "deprecated": false
           },
           {
             "parentPluginId": "ml",
-            "id": "def-public.MlUrlGenerator.createUrl",
+            "id": "def-public.MlLocatorDefinition.getLocation",
             "type": "Function",
             "tags": [],
-            "label": "createUrl",
+            "label": "getLocation",
             "description": [],
             "signature": [
-              "(mlUrlGeneratorParams: ",
-              "MlUrlGeneratorState",
-              ") => Promise<string>"
+              "(params: ",
+              "MlLocatorParams",
+              ") => Promise<",
+              "KibanaLocation",
+              "<object>>"
             ],
             "source": {
-              "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
-              "lineNumber": 49
+              "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+              "lineNumber": 35
             },
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "ml",
-                "id": "def-public.MlUrlGenerator.createUrl.$1",
+                "id": "def-public.MlLocatorDefinition.getLocation.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "mlUrlGeneratorParams",
+                "label": "params",
                 "description": [],
                 "signature": [
-                  "MlUrlGeneratorState"
+                  "MlLocatorParams"
                 ],
                 "source": {
-                  "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
-                  "lineNumber": 50
+                  "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+                  "lineNumber": 35
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -317,21 +285,15 @@
           "\nProvides a URL to ML plugin page\nTODO remove basePath parameter"
         ],
         "signature": [
-          "(ml: { urlGenerator: ",
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorContract",
-            "text": "UrlGeneratorContract"
-          },
-          "<\"ML_APP_URL_GENERATOR\"> | undefined; } | undefined, basePath: string | undefined, params: ",
-          "MlUrlGeneratorState",
-          ") => string | undefined"
+          "(ml: { locator: ",
+          "MlLocator",
+          " | undefined; } | undefined, basePath: string | undefined, params: ",
+          "MlLocatorParams",
+          ") => string"
         ],
         "source": {
-          "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
-          "lineNumber": 16
+          "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+          "lineNumber": 15
         },
         "deprecated": false,
         "children": [
@@ -343,19 +305,13 @@
             "label": "ml",
             "description": [],
             "signature": [
-              "{ urlGenerator: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorContract",
-                "text": "UrlGeneratorContract"
-              },
-              "<\"ML_APP_URL_GENERATOR\"> | undefined; } | undefined"
+              "{ locator: ",
+              "MlLocator",
+              " | undefined; } | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
-              "lineNumber": 17
+              "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+              "lineNumber": 16
             },
             "deprecated": false,
             "isRequired": false
@@ -371,8 +327,8 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
-              "lineNumber": 18
+              "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+              "lineNumber": 17
             },
             "deprecated": false,
             "isRequired": false
@@ -385,11 +341,11 @@
             "label": "params",
             "description": [],
             "signature": [
-              "MlUrlGeneratorState"
+              "MlLocatorParams"
             ],
             "source": {
-              "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
-              "lineNumber": 19
+              "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+              "lineNumber": 18
             },
             "deprecated": false,
             "isRequired": true
@@ -409,7 +365,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 43
+          "lineNumber": 45
         },
         "deprecated": false,
         "children": [
@@ -422,7 +378,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 44
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -438,7 +394,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 45
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -451,7 +407,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 46
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -464,7 +420,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 47
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -477,7 +433,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 48
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -490,7 +446,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 49
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -506,7 +462,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 50
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -522,7 +478,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 51
+              "lineNumber": 53
             },
             "deprecated": false
           },
@@ -538,7 +494,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 52
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -554,7 +510,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 53
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -570,7 +526,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 54
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -586,7 +542,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 55
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -602,7 +558,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 56
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -618,7 +574,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 57
+              "lineNumber": 59
             },
             "deprecated": false
           }
@@ -868,7 +824,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-          "lineNumber": 161
+          "lineNumber": 157
         },
         "deprecated": false,
         "children": [
@@ -884,7 +840,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 162
+              "lineNumber": 158
             },
             "deprecated": false
           },
@@ -897,7 +853,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 163
+              "lineNumber": 159
             },
             "deprecated": false
           },
@@ -910,7 +866,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 164
+              "lineNumber": 160
             },
             "deprecated": false
           },
@@ -923,7 +879,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 165
+              "lineNumber": 161
             },
             "deprecated": false
           }
@@ -1292,7 +1248,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
@@ -1336,7 +1292,7 @@
           },
           " extends Pick<",
           "UseDataGridReturnType",
-          ", \"status\" | \"errorMessage\" | \"baseline\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"pagination\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCount\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"status\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"pagination\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "source": {
           "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
@@ -1382,6 +1338,22 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.UseIndexDataReturnType.indexPatternFields",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatternFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+              "lineNumber": 85
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1441,7 +1413,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/public/embeddables/types.ts",
-          "lineNumber": 49
+          "lineNumber": 45
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1501,6 +1473,32 @@
       },
       {
         "parentPluginId": "ml",
+        "id": "def-public.MlLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "MlLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "MlLocatorParams",
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/locator.ts",
+          "lineNumber": 258
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
         "id": "def-public.RenderCellValue",
         "type": "Type",
         "tags": [],
@@ -1536,7 +1534,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 22
+          "lineNumber": 21
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1552,7 +1550,7 @@
           "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly DATA_FRAME_ANALYTICS_MODELS_MANAGE: \"data_frame_analytics/models\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
         ],
         "source": {
-          "path": "x-pack/plugins/ml/common/constants/ml_url_generator.ts",
+          "path": "x-pack/plugins/ml/common/constants/locator.ts",
           "lineNumber": 10
         },
         "deprecated": false,
@@ -1567,19 +1565,13 @@
       "label": "MlPluginStart",
       "description": [],
       "signature": [
-        "{ urlGenerator: ",
-        {
-          "pluginId": "share",
-          "scope": "public",
-          "docId": "kibSharePluginApi",
-          "section": "def-public.UrlGeneratorContract",
-          "text": "UrlGeneratorContract"
-        },
-        "<\"ML_APP_URL_GENERATOR\"> | undefined; }"
+        "{ locator: ",
+        "MlLocator",
+        " | undefined; }"
       ],
       "source": {
         "path": "x-pack/plugins/ml/public/plugin.ts",
-        "lineNumber": 203
+        "lineNumber": 198
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -1967,7 +1959,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 43
+          "lineNumber": 45
         },
         "deprecated": false,
         "children": [
@@ -1980,7 +1972,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 44
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -1996,7 +1988,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 45
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -2009,7 +2001,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 46
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -2022,7 +2014,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 47
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -2035,7 +2027,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 48
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -2048,7 +2040,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 49
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -2064,7 +2056,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 50
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -2080,7 +2072,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 51
+              "lineNumber": 53
             },
             "deprecated": false
           },
@@ -2096,7 +2088,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 52
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -2112,7 +2104,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 53
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -2128,7 +2120,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 54
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -2144,7 +2136,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 55
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -2160,7 +2152,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 56
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -2176,7 +2168,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 57
+              "lineNumber": 59
             },
             "deprecated": false
           }
@@ -2192,7 +2184,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 62
+          "lineNumber": 64
         },
         "deprecated": false,
         "children": [
@@ -2208,7 +2200,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 63
+              "lineNumber": 65
             },
             "deprecated": false
           },
@@ -2221,7 +2213,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 64
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -2237,7 +2229,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 65
+              "lineNumber": 67
             },
             "deprecated": false
           },
@@ -2253,7 +2245,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 66
+              "lineNumber": 68
             },
             "deprecated": false
           },
@@ -2269,7 +2261,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 67
+              "lineNumber": 69
             },
             "deprecated": false
           },
@@ -2282,7 +2274,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 68
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -2295,7 +2287,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -2308,7 +2300,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 70
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -2321,7 +2313,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 71
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -2334,7 +2326,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 72
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -2347,7 +2339,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 73
+              "lineNumber": 75
             },
             "deprecated": false
           },
@@ -2363,7 +2355,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 74
+              "lineNumber": 76
             },
             "deprecated": false
           },
@@ -2376,7 +2368,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 75
+              "lineNumber": 77
             },
             "deprecated": false
           },
@@ -2389,7 +2381,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 76
+              "lineNumber": 78
             },
             "deprecated": false
           }
@@ -2405,7 +2397,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 15
+          "lineNumber": 17
         },
         "deprecated": false,
         "children": [
@@ -2421,7 +2413,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 16
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -2434,7 +2426,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 17
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -2447,7 +2439,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 18
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -2460,7 +2452,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 19
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -2473,7 +2465,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 20
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -2486,7 +2478,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 21
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -2499,7 +2491,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 22
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -2512,7 +2504,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 23
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -2525,7 +2517,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 24
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -2538,7 +2530,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 25
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -2554,7 +2546,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 26
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -2570,7 +2562,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 27
+              "lineNumber": 29
             },
             "deprecated": false
           },
@@ -2583,7 +2575,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 28
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -2596,7 +2588,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 29
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -2612,7 +2604,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 30
+              "lineNumber": 32
             },
             "deprecated": false
           },
@@ -2628,7 +2620,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 31
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -2645,7 +2637,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 32
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -2661,7 +2653,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 33
+              "lineNumber": 35
             },
             "deprecated": false
           },
@@ -2677,7 +2669,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 34
+              "lineNumber": 36
             },
             "deprecated": false
           },
@@ -2693,7 +2685,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 35
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -2709,7 +2701,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 36
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -2725,7 +2717,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 37
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -2741,7 +2733,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -2757,7 +2749,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
           }
@@ -2852,6 +2844,22 @@
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
               "lineNumber": 48
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AuditMessage.cleared",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cleared",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 49
             },
             "deprecated": false
           }
@@ -3025,7 +3033,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-          "lineNumber": 53
+          "lineNumber": 54
         },
         "deprecated": false,
         "children": [
@@ -3038,7 +3046,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -3054,7 +3062,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -3070,7 +3078,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 56
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -3086,7 +3094,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 57
+              "lineNumber": 58
             },
             "deprecated": false
           }
@@ -3455,7 +3463,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
@@ -3598,7 +3606,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 81
+          "lineNumber": 83
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3804,7 +3812,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 79
+          "lineNumber": 81
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3917,6 +3925,23 @@
       },
       {
         "parentPluginId": "ml",
+        "id": "def-server.MLAnomalyDoc",
+        "type": "Type",
+        "tags": [],
+        "label": "MLAnomalyDoc",
+        "description": [],
+        "signature": [
+          "AnomalyRecordDoc"
+        ],
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 15
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
         "id": "def-server.MlSummaryJobs",
         "type": "Type",
         "tags": [],
@@ -3928,7 +3953,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-          "lineNumber": 51
+          "lineNumber": 52
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4030,7 +4055,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 60
+          "lineNumber": 62
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4538,7 +4563,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 22
+          "lineNumber": 21
         },
         "deprecated": false,
         "initialIsOpen": false
