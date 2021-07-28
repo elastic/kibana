@@ -52,7 +52,7 @@ const defaultTotalAlertsObj: AlertsTotal = {
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
 
 const ViewAlertsFlexItem = styled(EuiFlexItem)`
-  margin-left: 24px;
+  margin-left: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 interface AlertsHistogramPanelProps {
