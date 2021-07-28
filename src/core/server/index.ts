@@ -312,6 +312,7 @@ export type {
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
   SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,

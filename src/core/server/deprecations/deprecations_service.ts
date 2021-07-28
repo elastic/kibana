@@ -156,6 +156,7 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
               message,
               correctiveActions,
               documentationUrl,
+              requireRestart: true,
             };
           });
         },

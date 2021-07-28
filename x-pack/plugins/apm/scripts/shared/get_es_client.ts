@@ -30,11 +30,13 @@ export function getEsClient({
     auth,
   });
 
+  const originalSearch = client.search.bind(client);
+
   async function search<
     TDocument = unknown,
     TSearchRequest extends ESSearchRequest = ESSearchRequest
   >(request: TSearchRequest) {
-    const response = await client.search<TDocument>(request);
+    const response = await originalSearch<TDocument>(request);
 
     return {
       ...response,
