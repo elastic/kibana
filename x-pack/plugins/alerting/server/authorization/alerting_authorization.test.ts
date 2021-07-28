@@ -1265,7 +1265,7 @@ describe('AlertingAuthorization', () => {
     test('creates a spaceId only filter if security is disabled, but require space awareness', async () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
-        alertTypeRegistry,
+        ruleTypeRegistry,
         features,
         auditLogger,
         getSpace,
