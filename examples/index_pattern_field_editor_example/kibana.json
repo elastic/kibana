@@ -6,5 +6,10 @@
   "ui": true,
   "requiredPlugins": ["data", "indexPatternFieldEditor", "developerExamples"],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": [],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Index pattern field editor example app"
 }
