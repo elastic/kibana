@@ -22,13 +22,13 @@ import { buildFieldsRequest, formatTimelineData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
-  buildDsl: (options: TimelineEventsAllRequestOptions) => {
+  buildDsl: ({ authFilter, ...options }: TimelineEventsAllRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
-    return buildTimelineEventsAllQuery(queryOptions);
+    return buildTimelineEventsAllQuery({ ...queryOptions, authFilter });
   },
   parse: async (
     options: TimelineEventsAllRequestOptions,
