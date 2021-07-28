@@ -27,6 +27,8 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import {
@@ -67,6 +69,7 @@ import {
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
   REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+  CUSTOM_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -227,7 +230,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               },
               // TODO: once https://github.com/elastic/kibana/pull/105096 is merged, add aliases into mappings.
               // Until we add the actual fields to the mappings we can't add aliases for them
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+              mappings: { dynamic: false, ...mappingFromFieldMap(technicalRuleFieldMap) },
             },
           },
         });
@@ -286,6 +289,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const referenceRuleTypes = [
       REFERENCE_RULE_ALERT_TYPE_ID,
       REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+      CUSTOM_ALERT_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,
