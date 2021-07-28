@@ -20,7 +20,7 @@ export interface IShortUrlClient {
    * @param param The parameters for the URL.
    * @returns The created short URL.
    */
-  create<P extends SerializableState>(locator: LocatorPublic<P>, params: P): Promise<ShortUrl<P>>;
+  create<P extends SerializableState>(params: ShortUrlCreateParams<P>): Promise<ShortUrl<P>>;
 
   /**
    * Delete a short URL.
@@ -36,6 +36,27 @@ export interface IShortUrlClient {
    * @param slug The slug (ID) of the short URL.
    */
   get(slug: string): Promise<ShortUrl>;
+}
+
+/**
+ * New short URL creation parameters.
+ */
+export interface ShortUrlCreateParams<P extends SerializableState> {
+  /**
+   * Locator which will be used to resolve the short URL.
+   */
+  locator: LocatorPublic<P>;
+
+  /**
+   * Locator parameters which will be used to resolve the short URL.
+   */
+  params: P;
+
+  /**
+   * Optional, short URL slug - the part that will be used to resolve the short
+   * URL. This part will be visible to the user, it can have user-friendly text.
+   */
+  slug?: string;
 }
 
 /**

@@ -6,25 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { Logger, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { SerializableState } from 'src/plugins/kibana_utils/common';
-import { LocatorPublic } from '../../../common';
-import { IShortUrlClient, ShortUrl } from '../../../common/url_service/short_urls';
-import { ShortUrlSavedObjectAttributes } from './types';
+import { IShortUrlClient, ShortUrl, ShortUrlCreateParams } from '../../../common/url_service';
+import { ShortUrlStorage } from './types';
 
-export type ShortUrlSavedObject = SavedObject<ShortUrlSavedObjectAttributes>;
-
+/**
+ * Dependencies of the Short URL Client.
+ */
 export interface ServerShortUrlClientDependencies {
-  logger: Logger;
-  savedObjectsClient: SavedObjectsClientContract;
+  /**
+   * Current version of Kibana, e.g. 7.15.0.
+   */
+  currentVersion: string;
+
+  /**
+   * Storage provider for short URLs.
+   */
+  storage: ShortUrlStorage;
 }
 
 export class ServerShortUrlClient implements IShortUrlClient {
-  constructor(private readonly deps: ServerShortUrlClientDependencies) {}
+  constructor(private readonly dependencies: ServerShortUrlClientDependencies) {}
 
   public create<P extends SerializableState>(
-    locator: LocatorPublic<P>,
-    params: P
+    params: ShortUrlCreateParams<P>
   ): Promise<ShortUrl<P>> {
     throw new Error('not implemented');
   }

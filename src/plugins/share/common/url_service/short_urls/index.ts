@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './short_urls';
+export * from './types';
