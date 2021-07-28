@@ -237,11 +237,11 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           const createdSignalsCount = result.createdSignals.length;
 
           if (actions.length) {
-            const notificationRuleParams: NotificationRuleTypeParams = {
+            const notificationRuleParams: NotificationRuleTypeParams = ({
               ...params,
               name: name as string,
               id: ruleSO.id as string,
-            };
+            } as unknown) as NotificationRuleTypeParams;
 
             const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
             const toInMs = parseScheduleDates('now')?.format('x');
