@@ -61,22 +61,24 @@ export function BackendDetailDependenciesTable() {
     data?.services.map((dependency) => {
       const { location } = dependency;
       const name = getNodeName(location);
-      const href =
-        location.type === NodeType.service
-          ? apmRouter.link('/services/:serviceName/overview', {
-              path: { serviceName: location.serviceName },
-              query: {
-                comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-                comparisonType,
-                environment,
-                kuery,
-                rangeFrom,
-                rangeTo,
-                latencyAggregationType: undefined,
-                transactionType: undefined,
-              },
-            })
-          : '';
+
+      if (location.type !== NodeType.service) {
+        throw new Error('Expected a service node');
+      }
+
+      const href = apmRouter.link('/services/:serviceName/overview', {
+        path: { serviceName: location.serviceName },
+        query: {
+          comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+          comparisonType,
+          environment,
+          kuery,
+          rangeFrom,
+          rangeTo,
+          latencyAggregationType: undefined,
+          transactionType: undefined,
+        },
+      });
 
       return {
         name,

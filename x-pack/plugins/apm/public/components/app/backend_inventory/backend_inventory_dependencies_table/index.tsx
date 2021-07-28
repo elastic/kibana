@@ -55,20 +55,21 @@ export function BackendInventoryDependenciesTable() {
     data?.backends.map((dependency) => {
       const { location } = dependency;
       const name = getNodeName(location);
-      const href =
-        location.type === NodeType.backend
-          ? apmRouter.link('/backends/:backendName/overview', {
-              path: { backendName: location.backendName },
-              query: {
-                comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-                comparisonType,
-                environment,
-                kuery,
-                rangeFrom,
-                rangeTo,
-              },
-            })
-          : '';
+
+      if (location.type !== NodeType.backend) {
+        throw new Error('Expected a backend node');
+      }
+      const href = apmRouter.link('/backends/:backendName/overview', {
+        path: { backendName: location.backendName },
+        query: {
+          comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+          comparisonType,
+          environment,
+          kuery,
+          rangeFrom,
+          rangeTo,
+        },
+      });
 
       return {
         name,
