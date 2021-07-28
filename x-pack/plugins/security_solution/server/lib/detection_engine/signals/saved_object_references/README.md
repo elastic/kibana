@@ -74,11 +74,14 @@ to any newly saved rule:
 
 The structure is that the alerting framework in conjunction with this code will make an array of saved object references which are going to be:
 ```json
-"references" : [
 {
-  "name" : "param:exceptionsList_1",
-  "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
-  "type" : "exception-list"
+  "references" : [
+    {
+      "name" : "param:exceptionsList_1",
+      "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
+      "type" : "exception-list"
+    }
+  ]
 }
 ```
 
@@ -101,20 +104,22 @@ a warning.
 
 Within the rule parameters you can still keep the last known good saved object reference id as above it is shown
 ```json
-"exceptionsList" : [
-  {
-    "id" : "endpoint_list",
-    "list_id" : "endpoint_list",
-    "namespace_type" : "agnostic",
-    "type" : "endpoint"
-  },
-  {
-    "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
-    "list_id" : "cd152d0d-3590-4a45-a478-eed04da7936b",
-    "type" : "detection",
-    "namespace_type" : "single"
-  }
-],
+{
+  "exceptionsList" : [
+    {
+      "id" : "endpoint_list",
+      "list_id" : "endpoint_list",
+      "namespace_type" : "agnostic",
+      "type" : "endpoint"
+    },
+    {
+      "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
+      "list_id" : "cd152d0d-3590-4a45-a478-eed04da7936b",
+      "type" : "detection",
+      "namespace_type" : "single"
+    }
+  ],
+}
 ```
 
 ## How to add a new saved object id reference to a rule
