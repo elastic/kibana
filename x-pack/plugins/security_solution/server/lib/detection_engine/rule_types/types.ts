@@ -23,7 +23,7 @@ import {
   PersistenceServices,
   RuleDataClient,
 } from '../../../../../rule_registry/server';
-import { BaseHit, SearchTypes } from '../../../../../timelines/common';
+import { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -126,4 +126,4 @@ export interface RACAlert {
 
 export type RACSourceHit = SearchHit<RACAlert>;
 
-export type WrappedRACAlert = RACBaseHit<RACAlert>;
+export type WrappedRACAlert = BaseHit<RACAlert>;
