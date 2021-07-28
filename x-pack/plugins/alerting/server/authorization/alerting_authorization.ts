@@ -17,6 +17,7 @@ import { AlertingAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
 import {
   asFiltersByRuleTypeAndConsumer,
+  asFiltersBySpaceId,
   AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
@@ -68,6 +69,7 @@ export interface ConstructorOptions {
   request: KibanaRequest;
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
+  getSpaceId: (request: KibanaRequest) => string | undefined;
   auditLogger: AlertingAuthorizationAuditLogger;
   exemptConsumerIds: string[];
   authorization?: SecurityPluginSetup['authz'];
@@ -81,7 +83,7 @@ export class AlertingAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly exemptConsumerIds: string[];
-  private readonly spaceId: Promise<string | undefined>;
+  private readonly spaceId: string | undefined;
 
   constructor({
     alertTypeRegistry,
@@ -90,6 +92,7 @@ export class AlertingAuthorization {
     features,
     auditLogger,
     getSpace,
+    getSpaceId,
     exemptConsumerIds,
   }: ConstructorOptions) {
     this.request = request;
@@ -102,7 +105,7 @@ export class AlertingAuthorization {
     // manually authorize each rule type in the management UI.
     this.exemptConsumerIds = exemptConsumerIds;
 
-    this.spaceId = getSpace(request).then((maybeSpace) => maybeSpace?.id);
+    this.spaceId = getSpaceId(request);
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -141,7 +144,7 @@ export class AlertingAuthorization {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async getSpaceId(): Promise<string | undefined> {
+  public getSpaceId(): string | undefined {
     return this.spaceId;
   }
 
@@ -303,7 +306,7 @@ export class AlertingAuthorization {
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts),
+        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, this.spaceId),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
@@ -345,7 +348,9 @@ export class AlertingAuthorization {
         },
       };
     }
+
     return {
+      filter: asFiltersBySpaceId(filterOpts, this.spaceId),
       ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
       logSuccessfulAuthorization: () => {},
     };

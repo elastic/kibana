@@ -19,6 +19,7 @@ export interface AlertingAuthorizationClientFactoryOpts {
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
+  getSpaceId: (request: KibanaRequest) => string | undefined;
   features: FeaturesPluginStart;
 }
 
@@ -29,6 +30,7 @@ export class AlertingAuthorizationClientFactory {
   private securityPluginSetup?: SecurityPluginSetup;
   private features!: FeaturesPluginStart;
   private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
+  private getSpaceId!: (request: KibanaRequest) => string | undefined;
 
   public initialize(options: AlertingAuthorizationClientFactoryOpts) {
     if (this.isInitialized) {
@@ -40,6 +42,7 @@ export class AlertingAuthorizationClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
     this.securityPluginStart = options.securityPluginStart;
     this.features = options.features;
+    this.getSpaceId = options.getSpaceId;
   }
 
   public create(request: KibanaRequest, exemptConsumerIds: string[] = []): AlertingAuthorization {
@@ -49,6 +52,7 @@ export class AlertingAuthorizationClientFactory {
       request,
       getSpace: this.getSpace,
       alertTypeRegistry: this.alertTypeRegistry,
+      getSpaceId: this.getSpaceId,
       features: features!,
       auditLogger: new AlertingAuthorizationAuditLogger(
         securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
