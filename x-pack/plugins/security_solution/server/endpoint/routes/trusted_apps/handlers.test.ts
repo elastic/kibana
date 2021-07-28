@@ -116,7 +116,6 @@ describe('handlers', () => {
     };
 
     context.service.getPackagePolicyService = () => packagePolicyClient;
-    context.service.getScopedSavedObjectsClient = () => savedObjectClient;
 
     // Ensure that `logFactory.get()` always returns the same instance for the same given prefix
     const instances = new Map<string, ReturnType<typeof context.logFactory.get>>();
