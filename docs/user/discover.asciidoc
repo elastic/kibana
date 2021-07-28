@@ -257,8 +257,7 @@ image:images/discover-visualize.png[Discover sidebar field popover with visualiz
 +
 {kib} creates a visualization best suited for this field.
 
-. Drag `manufacturer.keyword` from the field list and drop it on
-the visualization builder pane.
+. From the *Available fields* list, drag and drop `manufacturer.keyword` onto the workspace.
 +
 [role="screenshot"]
 image:images/discover-from-visualize.png[Visualization that opens from Discover based on your data]
@@ -271,6 +270,12 @@ your data appears in a map.
 +
 [role="screenshot"]
 image:images/discover-maps.png[Map containing documents]
+
+[float]
+[[share-your-findings]]
+=== Share your findings
+
+To share your findings with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
 
 [float]

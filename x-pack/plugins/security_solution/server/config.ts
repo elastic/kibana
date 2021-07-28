@@ -73,6 +73,12 @@ export const configSchema = schema.object({
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
   validateArtifactDownloads: schema.boolean({ defaultValue: true }),
+
+  /**
+   * Detection prebuilt rules
+   */
+  prebuiltRulesFromFileSystem: schema.boolean({ defaultValue: true }),
+  prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
 });
 
 export const createConfig = (context: PluginInitializerContext) =>

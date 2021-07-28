@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
@@ -42,9 +41,6 @@ export function TraceOverview() {
     },
     [environment, kuery, start, end]
   );
-
-  useTrackPageview({ app: 'apm', path: 'traces_overview' });
-  useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
 
   return (
     <>

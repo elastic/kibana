@@ -7,6 +7,22 @@
 The following pages have moved or been deleted.
 
 --
+[role="exclude",id="configuring-tls"]
+== Encrypt TLS communications in {kib}
+Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-http[Encrypt HTTP client communications for {kib}].
+
+[float]
+[role="exclude",id="configuring-tls-browser-kib"]
+=== Encrypt traffic between the browser and {kib}
+
+Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-browser[Encrypt traffic between your browser and {kib}].
+
+[float]
+[role="exclude",id="configuring-tls-kib-es"]
+=== Encrypt traffic between {kib} and {es}
+
+Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[Encrypt traffic between {kib} and {es}].
+
 [role="exclude",id="monitoring-xpack-kibana"]
 == Configuring monitoring in {kib}
 
@@ -329,3 +345,37 @@ This content has moved. Refer to <<discover-view-surrounding-documents>>.
 
 This content has moved. Refer to <<string-field-formatters>>.
 
+[role="exclude",id="embedding"]
+== Embed {kib} content in a web page
+
+This content has moved. Refer to <<embedded-content-authentication>> and <<embed-code>>.
+
+[role="exclude",id="reporting-troubleshooting-system-dependencies"]
+== System dependencies
+
+This content has moved. Refer to <<install-reporting-packages>>.
+
+[role="exclude",id="graph-getting-started"]
+== Create a graph
+
+This content has moved. Refer to <<xpack-graph>>.
+
+[role="exclude",id="graph-limitations"]
+== Graph limitations
+
+This content has moved. Refer to <<graph-troubleshooting>>.
+
+[role="exclude",id="profiler-getting-started"]
+== Getting start with Search Profiler
+
+This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="profiler-complicated"]
+== Profiling a more complicated querying
+
+This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="profiler-render"]
+== Rendering pre-captured profiler JSON
+
+This content has moved. Refer to <<xpack-profiler>>.

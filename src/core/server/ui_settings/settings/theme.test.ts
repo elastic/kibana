@@ -35,11 +35,11 @@ describe('theme settings', () => {
 
     it('should only accept valid values', () => {
       expect(() => validate('v7')).not.toThrow();
-      expect(() => validate('v8 (beta)')).not.toThrow();
+      expect(() => validate('v8')).not.toThrow();
       expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(`
 "types that failed validation:
 - [0]: expected value to equal [v7]
-- [1]: expected value to equal [v8 (beta)]"
+- [1]: expected value to equal [v8]"
 `);
     });
   });

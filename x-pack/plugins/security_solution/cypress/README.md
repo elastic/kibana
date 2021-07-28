@@ -27,6 +27,77 @@ This is the configuration used by CI. It uses the FTR to spawn both a Kibana ins
 This configuration runs cypress tests against an arbitrary host.
 **WARNING**: When using your own instances you need to take into account that if you already have data on it, the tests may fail, as well as, they can put your instances in an undesired state, since our tests uses es_archive to populate data.
 
+#### integration-test (CI)
+
+This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_integration).
+
+The two clusters are named `admin` and `data` and are reachable as follows:
+
+|       | Elasticsearch          | Kibana                 |
+|-------|------------------------|------------------------|
+| admin | https://localhost:9200 | https://localhost:5601 |
+| data  | https://localhost:9210 | https://localhost:5602 |
+
+### Working with integration-test
+
+#### Initial setup and prerequisites
+
+The entry point is [integration-test/jenkins_test.sh](https://github.com/elastic/integration-test/blob/master/jenkins_test.sh), it essentially prepares the VMs and there runs tests. Some snapshots (`phase1` and `phase2`) are taken along the way so that it's possible to short cut the VM preparation when iterating over tests for development or debugging.
+
+The VMs are managed with Vagrant using the VirtualBox provider therefore you need to install both these tools. The host OS can be either Windows, Linux or MacOS.
+
+`jenkins_test.sh` assumes that a `kibana` folder is present alongside the `integration-test` where it's executed from. The `kibana` folder is used only for loading the test suites though, the actual packages for the VMs preparation are downloaded from elastic.co according to the `BUILD` environment variable or the branch which `jenkins_test.sh` is invoked from. It's your responsibility to checkout the matching branches in `kibana` and `integration-test` as needed.
+
+Read [integration-test#readme](https://github.com/elastic/integration-test#readme) for further details.
+
+#### Use cases
+
+There is no way to just set up the test environment without also executing tests at least once. On the other hand it's time consuming to go throught the whole CI procedure to just iterate over the tests therefore the following instructions support the two use cases:
+
+* reproduce e2e the CI execution locally, ie. for debugging a CI failure
+* use the CI script to easily setup the environment for tests development/debugging
+
+The missing use case, application TDD, requires a different solution that runs from the checked out repositories instead of the pre-built packages and it's yet to be developed.
+
+#### Run the CI flow
+
+This is the CI flow narrowed down to the execution of CCS Cypress tests:
+
+```shell
+cd integration-test
+VMS=ubuntu16_tar_ccs_cypress ./jenkins_test.sh
+```
+
+It destroys and rebuilds the VM. There installs, provisions and starts the stack according to the configuration in [integration-test/provision/ubuntu16_tar_ccs_cypress.sh](https://github.com/elastic/integration-test/blob/master/provision/ubuntu16_tar_ccs_cypress.sh).
+
+The tests are executed using the FTR runner `SecuritySolutionCypressCcsTestRunner` defined in [x-pack/test/security_solution_cypress/runner.ts](../../../test/security_solution_cypress/runner.ts) as configured in [x-pack/test/security_solution_cypress/ccs_config.ts](../../../test/security_solution_cypress/ccs_config.ts).
+
+#### Re-run the tests
+
+After the first run it's possible to restore the VM at `phase2`, right before tests were executed, and run them again:
+
+```shell
+cd integration-test
+MODE=retest ./jenkins_test.sh
+```
+
+It remembers which VM the first round was executed on, you don't need to specify `VMS` any more.
+
+In case your tests are cleaning after themselves and therefore result idempotent, you can skip the restoration to `phase2` and directly run the Cypress command line. See [CCS Custom Target + Headless](#ccs-custom-target--headless) further below for details but ensure you'll define the `CYPRESS_*` following the correspondence:
+
+| Cypress command line           | [integration-test/provision/ubuntu16_tar_ccs_cypress.sh](https://github.com/elastic/integration-test/blob/master/provision/ubuntu16_tar_ccs_cypress.sh) |
+|--------------------------------|----------------------------------|
+| CYPRESS_BASE_URL               | TEST_KIBANA_URL                  |
+| CYPRESS_ELASTICSEARCH_URL      | TEST_ES_URL                      |
+| CYPRESS_CCS_KIBANA_URL         | TEST_KIBANA_URLDATA              |
+| CYPRESS_CCS_ELASTICSEARCH_URL  | TEST_ES_URLDATA                  |
+| CYPRESS_CCS_REMOTE_NAME        | TEST_CCS_REMOTE_NAME             |
+| CYPRESS_ELASTICSEARCH_USERNAME | ELASTICSEARCH_USERNAME           |
+| CYPRESS_ELASTICSEARCH_PASSWORD | ELASTICSEARCH_PASSWORD           |
+| TEST_CA_CERT_PATH              | integration-test/certs/ca/ca.crt |
+
+Note: `TEST_CA_CERT_PATH` above is truly without `CYPRESS_` prefix.
+
 ### Test Execution: Examples
 
 #### FTR + Headless (Chrome)
@@ -115,7 +186,41 @@ cd x-pack/plugins/security_solution
 CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run:firefox
 ```
 
+#### CCS Custom Target + Headless
+
+This test execution requires two clusters configured for CCS. See [Search across clusters](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-cross-cluster-search.html) for instructions on how to prepare such setup.
+
+The instructions below assume:
+* Search cluster is on server1
+* Remote cluster is on server2
+* Remote cluster is accessible from the search cluster with name `remote`
+* Security and TLS are enabled
+
+```shell
+# bootstrap Kibana from the project root
+yarn kbn bootstrap
+
+# launch the Cypress test runner with overridden environment variables
+cd x-pack/plugins/security_solution
+CYPRESS_ELASTICSEARCH_USERNAME="user" \
+CYPRESS_ELASTICSEARCH_PASSWORD="pass" \
+CYPRESS_BASE_URL="https://user:pass@server1:5601" \
+CYPRESS_ELASTICSEARCH_URL="https://user:pass@server1:9200" \
+CYPRESS_CCS_KIBANA_URL="https://user:pass@server2:5601" \
+CYPRESS_CCS_ELASTICSEARCH_URL="https://user:pass@server2:9200" \
+CYPRESS_CCS_REMOTE_NAME="remote" \
+yarn cypress:run:ccs
+```
+
+Similar sequence, just ending with `yarn cypress:open:ccs`, can be used for interactive test running via Cypress UI.
+
+Appending `--browser firefox` to the `yarn cypress:run:ccs` command above will run the tests on Firefox instead of Chrome.
+
 ## Folder Structure
+
+### ccs_integration/
+
+Contains the specs that are executed in a Cross Cluster Search configuration.
 
 ### integration/
 
@@ -207,6 +312,44 @@ Task [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/maste
 Because of `cy.exec`, used to invoke `es_archiver`, it's necessary to override its environment with `NODE_TLS_REJECT_UNAUTHORIZED=1`. It indeed would inject `NODE_TLS_REJECT_UNAUTHORIZED=0` and make `es_archive` otherwise abort with the following warning if used over https:
 
 > Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+
+### CCS
+
+Tests running in CCS configuration need to care about two aspects:
+
+1. data (eg. to trigger alerts) is generated/loaded on the remote cluster
+2. queries (eg. detection rules) refer to remote indices
+
+Incorrect handling of the above points might result in false positives, in that the remote cluster is not involved but the test passes anyway.
+
+#### Remote data loading
+
+Helpers `esArchiverCCSLoad` and `esArchiverCCSUnload` are provided by [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts):
+
+```javascript
+import { esArchiverCCSLoad, esArchiverCCSUnload } from '../../tasks/es_archiver';
+```
+
+They will use the `CYPRESS_CCS_*_URL` environment variables for accessing the remote cluster. Complex tests involving local and remote data can interleave them with `esArchiverLoad` and `esArchiverUnload` as needed.
+
+#### Remote indices queries
+
+Queries accessing remote indices follow the usual `<remote_name>:<remote_index>` notation but should not hard-code the remote name in the test itself.
+
+For such reason the environemnt variable `CYPRESS_CCS_REMOTE_NAME` is defined and, in the case of detection rules, used as shown below:
+
+```javascript
+const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
+
+export const unmappedCCSRule: CustomRule = {
+  customQuery: '*:*',
+  index: [`${ccsRemoteName}:unmapped*`],
+  ...
+};
+
+```
+
+Similar approach should be used in defining all index patterns, rules, and queries to be applied on remote data.
 
 ## Development Best Practices
 

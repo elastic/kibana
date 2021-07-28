@@ -43,7 +43,10 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     'data-test-subj': dataTestSubj,
   }) => {
     const pageTitle = useMemo(() => {
-      if ((from === 'package' || from === 'package-edit' || from === 'edit') && packageInfo) {
+      if (
+        (from === 'package' || from === 'package-edit' || from === 'edit' || from === 'policy') &&
+        packageInfo
+      ) {
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
@@ -12,13 +13,8 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
@@ -85,8 +81,7 @@ export async function getServiceErrorGroupMainStatistics({
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => ({
       group_id: bucket.key as string,
-      name:
-        getErrorName(bucket.sample.hits.hits[0]._source) ?? NOT_AVAILABLE_LABEL,
+      name: getErrorName(bucket.sample.hits.hits[0]._source),
       last_seen: new Date(
         bucket.sample.hits.hits[0]?._source['@timestamp']
       ).getTime(),

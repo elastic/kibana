@@ -104,16 +104,7 @@ export function Correlations() {
         width: '20%',
       });
     }
-    if (urlParams.transactionName) {
-      properties.push({
-        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
-          defaultMessage: 'Transaction',
-        }),
-        fieldName: TRANSACTION_NAME,
-        val: urlParams.transactionName,
-        width: '20%',
-      });
-    }
+
     if (urlParams.environment) {
       properties.push({
         label: i18n.translate('xpack.apm.correlations.environmentLabel', {
@@ -125,12 +116,24 @@ export function Correlations() {
       });
     }
 
+    if (urlParams.transactionName) {
+      properties.push({
+        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
+          defaultMessage: 'Transaction',
+        }),
+        fieldName: TRANSACTION_NAME,
+        val: urlParams.transactionName,
+        width: '20%',
+      });
+    }
+
     return properties;
   }, [serviceName, urlParams.environment, urlParams.transactionName]);
 
   return (
     <>
       <EuiButton
+        data-test-subj="apmViewCorrelationsButton"
         fill
         onClick={() => {
           setIsFlyoutVisible(true);
@@ -144,13 +147,17 @@ export function Correlations() {
       {isFlyoutVisible && (
         <EuiPortal>
           <EuiFlyout
+            data-test-subj="apmCorrelationsFlyout"
             size="l"
             ownFocus
             onClose={() => setIsFlyoutVisible(false)}
           >
             <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
               <EuiTitle>
-                <h2 id="correlations-flyout">
+                <h2
+                  data-test-subj="apmCorrelationsFlyoutHeader"
+                  id="correlations-flyout"
+                >
                   {CORRELATIONS_TITLE}
                   &nbsp;
                   <EuiBetaBadge

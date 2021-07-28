@@ -402,6 +402,11 @@ export enum HostStatus {
    * Host is inactive as indicated by its checkin status during the last checkin window
    */
   INACTIVE = 'inactive',
+
+  /**
+   * Host is unenrolled
+   */
+  UNENROLLED = 'unenrolled',
 }
 
 export enum MetadataQueryStrategyVersions {

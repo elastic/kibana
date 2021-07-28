@@ -30,7 +30,7 @@ export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {
   };
 
   return (
-    <EuiButtonEmpty color="danger" flush="left" size="xs" iconType="beaker" onClick={copyDocs}>
+    <EuiButtonEmpty color="danger" flush="left" size="s" iconType="beaker" onClick={copyDocs}>
       Generate function reference
     </EuiButtonEmpty>
   );

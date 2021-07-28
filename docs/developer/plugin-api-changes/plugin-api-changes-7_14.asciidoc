@@ -1,0 +1,260 @@
+[[plugin-api-changes]]
+== Plugin API changes in 7.14
+++++
+<titleabbrev>Plugin API changes</titleabbrev>
+++++
+
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application to {kib} 7.14.
+
+Other versions: {kibana-ref-all}/7.13/plugin-api-changes.html[7.13] |
+{kibana-ref-all}/7.12/plugin-api-changes.html[7.12] |
+{kibana-ref-all}/7.11/plugin-api-changes-7-11.html[7.11] |
+{kibana-ref-all}/7.10/breaking-changes-7.10.html#general-plugin-API-changes-7-10[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html#general-plugin-API-changes-79[7.9] |
+{kibana-ref-all}/7.8/breaking-changes-7.8.html#general-plugin-API-changes-78[7.8]
+
+[[breaking_plugin_v7.14.0_101492]]
+.Security plugin return types improved
+[%collapsible]
+====
+
+`__legacy` and `sessionTimeout` were removed from the Security plugin's setup contract:
+
+* Changed to explicit interfaces instead of `ReturnType<X>` as recommended in the Developer Guide.
+Improved the API docs and supports comments.
+* Removed `__legacy` return from the `Setup` function because it was unused.
+* Removed `sessionTimeout` return from the `Setup` function because it was also unused.
+* Added comments.
+
+Refer to https://github.com/elastic/kibana/pull/101492[#101492].
+
+====
+
+[[breaking_plugin_v7.14.0_101045]]
+.URL locators introduced as part of the URL Service
+[%collapsible]
+====
+
+URL generators are now deprecated. Instead, create a generator for deep links in {kib} using locators in the URL Service.
+
+**Deep link providers**
+
+Before you created a URL generator, like so:
+
+```ts
+plugins.share.urlGenerators.registerUrlGenerator(/* ... */);
+```
+
+Now you create a "locator":
+
+```ts
+plugins.share.url.locators.create(/* ... */);
+```
+
+
+**Deep link consumers**
+
+Before you used a URL generator to get a relative deep link in {kib}:
+
+```ts
+plugins.share.urlGenerators.getUrlGenerator('MY_GENERATOR').createUrl(/* ... */);
+```
+
+Now you create a relative link, or navigate immediately using locators:
+
+```ts
+plugins.share.locators.get('MY_LOCATOR')!.getLocation(/* ... */);
+plugins.share.locators.get('MY_LOCATOR')!.navigate(/* ... */);
+```
+
+Refer to https://github.com/elastic/kibana/pull/101045[#101045].
+
+====
+
+[[breaking_plugin_v7.14.0_100005]]
+.`NodesVersionCompatibility` interface changed
+[%collapsible]
+====
+
+The `NodesVersionCompatibility` now includes an optional  `nodesInfroRequestError` parameter:
+
+*Before*
+
+```ts
+export interface NodesVersionCompatibility {
+  isCompatible: boolean;
+  message?: string;
+  incompatibleNodes: NodeInfo[];
+  warningNodes: NodeInfo[];
+  kibanaVersion: string;
+}
+```
+
+*After*
+
+```ts
+export interface NodesVersionCompatibility {
+  isCompatible: boolean;
+  message?: string;
+  incompatibleNodes: NodeInfo[];
+  warningNodes: NodeInfo[];
+  kibanaVersion: string;
+  nodesInfoRequestError?: Error // any error that's thrown from a call to `nodes.info` will surface here.
+}
+```
+
+If present, the error is also available on `ElasticsearchStatusMeta`:
+
+*Before*
+
+```ts
+export interface ElasticsearchStatusMeta {
+  warningNodes: NodesVersionCompatibility['warningNodes'];
+  incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+}
+```
+
+*After*
+
+```ts
+export interface ElasticsearchStatusMeta {
+  warningNodes: NodesVersionCompatibility['warningNodes'];
+  incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+  nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
+}
+```
+
+Refer to https://github.com/elastic/kibana/pull/100005[#100005].
+
+====
+
+[[breaking_plugin_v7.14.0_99633]]
+.`chrome.navLinks.update` API removed
+[%collapsible]
+====
+
+The `chrome.navLinks.update` API was replaced with the `appUpdater` API.
+
+**Before**
+
+```ts
+export class MyPlugin implements Plugin {
+  setup({ application }) {
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+
+  start() {
+    // later, when the navlink needs to be updated
+    chrome.navLinks.update('my-app', { hidden: true });
+  }
+}
+```
+
+**After**
+
+```ts
+export class MyPlugin implements Plugin {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+
+  setup({ application }) {
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$: this.appUpdater,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+
+  start() {
+     // later, when the navlink needs to be updated
+     appUpdater.next(() => ({
+       navLinkStatus: AppNavLinkStatus.disabled,
+     }))
+  }
+}
+```
+
+Refer to https://github.com/elastic/kibana/pull/99633[#99633].
+
+====
+
+[[breaking_plugin_v7.14.0_99629]]
+.Config objects no longer mutated during deprecations
+[%collapsible]
+====
+
+When a plugin implements a custom deprecation function, it used to mutate the config object.
+Now it returns either the `set` command to extend `config` or the `unset` command
+to remove the `config` property. Refer to https://en.wikipedia.org/wiki/Command_pattern[Command pattern].
+
+*Before*
+
+```typescript
+(config, path, addDeprecation) => {
+  set(config, path, newValue);
+  set(config, another_path);
+  return config
+}
+```
+*After*
+
+```typescript
+(config, path, addDeprecation) => {
+  return {
+    set: [{ key: path, value: newValue }],
+    unset: [{ key: another_path }]
+  }
+}
+```
+
+`@kbn/config` doesn't enforce `config` **runtime** immutability,
+but only **compile-time** check. It's done to prevent cases when a deprecation
+depends on another deprecation to be executed because
+our test coverage cannot detect such cases.
+You can do that manually in a follow-up if you think it's worth the effort.
+
+```js
+rename('foo.bar', 'foo.baz'),
+(config, path, addDeprecation) => {
+  if(config.baz) {
+  // ...
+}
+```
+
+Refer to https://github.com/elastic/kibana/pull/99629[#99629].
+
+====
+
+[[breaking_plugin_v7.14.0_98248]]
+.UI settings client API updated
+[%collapsible]
+====
+
+The unused `overrideLocalDefault` and `getSaved$` methods were removed.
+
+Refer to https://github.com/elastic/kibana/pull/98248[#98248].
+
+====
+
+[[breaking_plugin_v7.14.0_77965]]
+.Custom plugin status checks improved
+[%collapsible]
+====
+
+Custom status checks registered by plugins on the `core.status.set` API
+must now emit a value within 30s or they will timeout to an `unavailable` status.
+
+Refer to https://github.com/elastic/kibana/pull/77965[#77965].
+
+====

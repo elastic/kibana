@@ -605,9 +605,9 @@ export type Filter = {
 // Warning: (ae-missing-release-tag) "getCapabilitiesForRollupIndices" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export function getCapabilitiesForRollupIndices(indices: {
-    [key: string]: any;
-}): {
+export function getCapabilitiesForRollupIndices(indices: Record<string, {
+    rollup_jobs: any;
+}>): {
     [key: string]: any;
 };
 
@@ -1147,9 +1147,7 @@ export interface KueryNode {
 // @public (undocumented)
 export const mergeCapabilitiesWithFields: (rollupIndexCapabilities: {
     [key: string]: any;
-}, fieldsFromFieldCapsApi: {
-    [key: string]: any;
-}, previousFields?: FieldDescriptor[]) => FieldDescriptor[];
+}, fieldsFromFieldCapsApi: Record<string, FieldDescriptor>, previousFields?: FieldDescriptor[]) => FieldDescriptor[];
 
 // Warning: (ae-missing-release-tag) "METRIC_TYPES" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1504,6 +1502,7 @@ export const UI_SETTINGS: {
     readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
     readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
     readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
+    readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: "autocomplete:valueSuggestionMethod";
 };
 
 // Warning: (ae-missing-release-tag) "usageProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

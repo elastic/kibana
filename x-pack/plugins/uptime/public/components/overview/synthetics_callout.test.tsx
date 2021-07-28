@@ -67,9 +67,6 @@ describe('SyntheticsCallout', () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiCallOut>
-        <EuiSpacer
-          size="s"
-        />
       </Fragment>
     `);
   });
@@ -128,9 +125,6 @@ describe('SyntheticsCallout', () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiCallOut>
-        <EuiSpacer
-          size="s"
-        />
       </Fragment>
     `);
     wrapper.find('EuiButton').simulate('click');

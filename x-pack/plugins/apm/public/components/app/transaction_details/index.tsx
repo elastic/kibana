@@ -9,7 +9,6 @@ import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { flatten, isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useTrackPageview } from '../../../../../observability/public';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -40,9 +39,6 @@ export function TransactionDetails() {
     status: waterfallStatus,
   } = useWaterfallFetcher();
   const { transactionName } = urlParams;
-
-  useTrackPageview({ app: 'apm', path: 'transaction_details' });
-  useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });
 
   const selectedSample = flatten(
     distributionData.buckets.map((bucket) => bucket.samples)

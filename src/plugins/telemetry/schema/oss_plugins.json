@@ -7592,6 +7592,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "autocomplete:valueSuggestionMethod": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "search:timeout": {
           "type": "long",
           "_meta": {

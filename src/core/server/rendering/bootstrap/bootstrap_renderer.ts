@@ -50,12 +50,12 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request }) {
     let darkMode = false;
-    let themeVersion = 'v7';
+    let themeVersion = 'v8';
 
     try {
       const authenticated = isAuthenticated(request);
       darkMode = authenticated ? await uiSettingsClient.get('theme:darkMode') : false;
-      themeVersion = authenticated ? await uiSettingsClient.get('theme:version') : 'v7';
+      themeVersion = authenticated ? await uiSettingsClient.get('theme:version') : 'v8';
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
     }

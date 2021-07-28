@@ -26,8 +26,9 @@ import {
   getProcessCodeSignature,
   retrieveAlertOsTypes,
   filterIndexPatterns,
+  getCodeSignatureValue,
 } from './helpers';
-import { AlertData } from './types';
+import { AlertData, Flattened } from './types';
 import {
   ListOperatorTypeEnum as OperatorTypeEnum,
   EntriesArray,
@@ -41,6 +42,7 @@ import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
+import { CodeSignature } from '../../../../common/ecs/file';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -183,7 +185,7 @@ describe('Exception helpers', () => {
         meta: {},
         name: 'some name',
         namespace_type: 'single',
-        os_types: ['linux'],
+        os_types: [],
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
       };
@@ -337,6 +339,17 @@ describe('Exception helpers', () => {
       ];
       const result = entryHasListType(payload);
       expect(result).toEqual(true);
+    });
+  });
+
+  describe('#getCodeSignatureValue', () => {
+    test('it should return empty string if code_signature nested value are undefined', () => {
+      // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
+      const payload = ([{ trusted: undefined, subject_name: undefined }] as unknown) as Flattened<
+        CodeSignature[]
+      >;
+      const result = getCodeSignatureValue(payload);
+      expect(result).toEqual([{ trusted: '', subjectName: '' }]);
     });
   });
 

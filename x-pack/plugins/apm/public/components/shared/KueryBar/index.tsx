@@ -101,6 +101,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
           selectionStart,
           selectionEnd: selectionStart,
           useTimeRange: true,
+          method: 'terms_agg',
         })) || []
       )
         .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
