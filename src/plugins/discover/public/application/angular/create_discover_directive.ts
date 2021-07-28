@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DiscoverMainApp } from '../apps/main';
+import { DiscoverMainRoute } from '../apps/main';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDiscoverDirective(reactDirective: any) {
-  return reactDirective(DiscoverMainApp, [
+  return reactDirective(DiscoverMainRoute, [
     ['indexPattern', { watchDepth: 'reference' }],
     ['opts', { watchDepth: 'reference' }],
   ]);

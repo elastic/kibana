@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-// required for i18nIdDirective
-import 'angular-sanitize';
-
-import './discover';
-import './doc_viewer';
+export { NotFoundRoute } from './not_found_route';

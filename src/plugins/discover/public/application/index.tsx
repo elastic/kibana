@@ -16,6 +16,7 @@ import { getServices } from '../kibana_services';
 import { DiscoverMainRoute } from './apps/main';
 import { ContextAppRoute } from './apps/context';
 import { SingleDocRoute } from './apps/doc';
+import { NotFoundRoute } from './apps/not_found';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 
 export const renderApp = ({ element }: AppMountParameters) => {
@@ -60,6 +61,9 @@ export const renderApp = ({ element }: AppMountParameters) => {
           />
           <Route path="/view/:id" children={<DiscoverMainRoute opts={opts} />} />
           <Route path="/" exact children={<DiscoverMainRoute opts={opts} />} />
+          <Route path="*">
+            <NotFoundRoute services={services} />
+          </Route>
         </Switch>
       </KibanaContextProvider>
     </Router>

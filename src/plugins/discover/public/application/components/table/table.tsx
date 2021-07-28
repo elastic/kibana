@@ -54,7 +54,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
+  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
   const mapping = useCallback((name) => indexPattern?.fields.getByName(name), [
     indexPattern?.fields,

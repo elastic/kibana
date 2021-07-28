@@ -63,6 +63,7 @@ export interface DiscoverServices {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
+  restorePreviousUrl: () => void;
 }
 
 export async function buildServices(
@@ -106,5 +107,6 @@ export async function buildServices(
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
     http: core.http,
+    restorePreviousUrl: () => {},
   };
 }
