@@ -202,7 +202,7 @@ describe('The metric threshold alert type', () => {
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
       const instanceID = '*';
-      await execute(Comparator.LT_OR_EQ, [1.0], [3.0]);
+      await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
@@ -221,7 +221,7 @@ describe('The metric threshold alert type', () => {
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
       expect(reasons[0]).toContain('current value is 1');
-      expect(reasons[1]).toContain('current value is 3.5');
+      expect(reasons[1]).toContain('current value is 3');
       expect(reasons[0]).toContain('threshold of 1');
       expect(reasons[1]).toContain('threshold of 3');
     });
