@@ -1112,7 +1112,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 206
+          "lineNumber": 211
         },
         "deprecated": false,
         "children": [
@@ -1136,7 +1136,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 208
+              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -1160,7 +1160,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 210
+              "lineNumber": 215
             },
             "deprecated": false
           },
@@ -1184,7 +1184,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 212
+              "lineNumber": 217
             },
             "deprecated": false
           },
@@ -1208,7 +1208,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 214
+              "lineNumber": 219
             },
             "deprecated": false
           },
@@ -1232,7 +1232,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 216
+              "lineNumber": 221
             },
             "deprecated": false
           },
@@ -1252,7 +1252,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 223
+              "lineNumber": 228
             },
             "deprecated": true,
             "references": []
@@ -1279,7 +1279,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 227
+              "lineNumber": 232
             },
             "deprecated": false,
             "returnComment": [],
@@ -1299,7 +1299,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 251
+          "lineNumber": 256
         },
         "deprecated": false,
         "children": [
@@ -1323,7 +1323,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 253
+              "lineNumber": 258
             },
             "deprecated": false
           },
@@ -1347,7 +1347,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 255
+              "lineNumber": 260
             },
             "deprecated": false
           },
@@ -1371,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 257
+              "lineNumber": 262
             },
             "deprecated": false
           },
@@ -1395,7 +1395,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 259
+              "lineNumber": 264
             },
             "deprecated": false
           },
@@ -1419,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 261
+              "lineNumber": 266
             },
             "deprecated": false
           },
@@ -1443,7 +1443,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 263
+              "lineNumber": 268
             },
             "deprecated": false
           },
@@ -1467,7 +1467,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 265
+              "lineNumber": 270
             },
             "deprecated": false
           },
@@ -1491,7 +1491,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 267
+              "lineNumber": 272
             },
             "deprecated": false
           },
@@ -1515,7 +1515,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 269
+              "lineNumber": 274
             },
             "deprecated": false
           },
@@ -1539,7 +1539,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 271
+              "lineNumber": 276
             },
             "deprecated": false
           },
@@ -1563,7 +1563,31 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 273
+              "lineNumber": 278
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreStart.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "{@link ExecutionContextServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ExecutionContextServiceStart",
+                "text": "ExecutionContextServiceStart"
+              }
+            ],
+            "source": {
+              "path": "src/core/public/index.ts",
+              "lineNumber": 280
             },
             "deprecated": false
           },
@@ -1583,7 +1607,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 280
+              "lineNumber": 287
             },
             "deprecated": true,
             "references": [
@@ -1591,7 +1615,7 @@
                 "plugin": "monitoring",
                 "link": {
                   "path": "x-pack/plugins/monitoring/public/legacy_shims.ts",
-                  "lineNumber": 81
+                  "lineNumber": 89
                 }
               }
             ]
@@ -1770,7 +1794,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 426
+          "lineNumber": 443
         },
         "deprecated": false,
         "children": [
@@ -1783,7 +1807,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 427
+              "lineNumber": 444
             },
             "deprecated": false
           },
@@ -1796,7 +1820,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 428
+              "lineNumber": 445
             },
             "deprecated": false
           },
@@ -1808,11 +1832,11 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly settings: string; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; }"
+              "{ readonly settings: string; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; readonly ecs: { readonly guide: string; }; }"
             ],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 429
+              "lineNumber": 446
             },
             "deprecated": false
           }
@@ -1984,6 +2008,68 @@
               "lineNumber": 69
             },
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ExecutionContextServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionContextServiceStart",
+        "description": [],
+        "source": {
+          "path": "src/core/public/execution_context/execution_context_service.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ExecutionContextServiceStart.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreates a context container carrying the meta-data of a runtime operation.\nProvided meta-data will be propagated to Kibana and Elasticsearch servers.\n```js\nconst context = executionContext.create(...);\nhttp.fetch('/endpoint/', { context });\n```"
+            ],
+            "signature": [
+              "(context: ",
+              "KibanaExecutionContext",
+              ") => ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.IExecutionContextContainer",
+                "text": "IExecutionContextContainer"
+              }
+            ],
+            "source": {
+              "path": "src/core/public/execution_context/execution_context_service.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.context",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "KibanaExecutionContext"
+                ],
+                "source": {
+                  "path": "src/core/public/execution_context/execution_context_service.ts",
+                  "lineNumber": 26
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -2191,6 +2277,60 @@
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.IExecutionContextContainer",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExecutionContextContainer",
+        "description": [],
+        "source": {
+          "path": "src/core/public/execution_context/execution_context_container.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IExecutionContextContainer.toHeader",
+            "type": "Function",
+            "tags": [],
+            "label": "toHeader",
+            "description": [],
+            "signature": [
+              "() => Record<string, string>"
+            ],
+            "source": {
+              "path": "src/core/public/execution_context/execution_context_container.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IExecutionContextContainer.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => Readonly<",
+              "KibanaExecutionContext",
+              ">"
+            ],
+            "source": {
+              "path": "src/core/public/execution_context/execution_context_container.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -2668,6 +2808,100 @@
             "deprecated": false,
             "returnComment": [],
             "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.KibanaExecutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaExecutionContext",
+        "description": [],
+        "source": {
+          "path": "src/core/types/execution_context.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.KibanaExecutionContext.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nKibana application initated an operation."
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.KibanaExecutionContext.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "public name of a user-facing feature"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.KibanaExecutionContext.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "unique value to identify the source"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.KibanaExecutionContext.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "human readable description. For example, a vis title, action name"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.KibanaExecutionContext.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -7510,7 +7744,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 237
+          "lineNumber": 242
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -7525,7 +7759,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -7588,7 +7822,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -8157,7 +8391,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-          "lineNumber": 210
+          "lineNumber": 222
         },
         "deprecated": false,
         "children": [
@@ -8175,7 +8409,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 214
+              "lineNumber": 226
             },
             "deprecated": false
           },
@@ -8190,7 +8424,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 219
+              "lineNumber": 231
             },
             "deprecated": false
           },
@@ -8205,7 +8439,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 224
+              "lineNumber": 236
             },
             "deprecated": false
           },
@@ -8223,7 +8457,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 230
+              "lineNumber": 242
             },
             "deprecated": false
           },
@@ -8241,7 +8475,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 237
+              "lineNumber": 249
             },
             "deprecated": false
           },
@@ -8259,7 +8493,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 242
+              "lineNumber": 254
             },
             "deprecated": false
           },
@@ -8277,7 +8511,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 247
+              "lineNumber": 259
             },
             "deprecated": false
           },
@@ -8295,7 +8529,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 252
+              "lineNumber": 264
             },
             "deprecated": false
           },
@@ -8310,7 +8544,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 258
+              "lineNumber": 270
             },
             "deprecated": false
           },
@@ -8328,7 +8562,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 264
+              "lineNumber": 276
             },
             "deprecated": false
           },
@@ -8343,7 +8577,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 270
+              "lineNumber": 282
             },
             "deprecated": false
           },
@@ -8354,14 +8588,14 @@
             "tags": [],
             "label": "username",
             "description": [
-              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe username that the Kibana server uses to perform its administrative functions."
+              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe username that the Kibana server uses to perform its administrative functions.\nCannot be used in conjunction with serviceAccountToken."
             ],
             "signature": [
               "string | undefined"
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 276
+              "lineNumber": 289
             },
             "deprecated": false
           },
@@ -8379,7 +8613,25 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 282
+              "lineNumber": 295
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchConfig.serviceAccountToken",
+            "type": "string",
+            "tags": [],
+            "label": "serviceAccountToken",
+            "description": [
+              "\nIf Elasticsearch security features are enabled, this setting provides the service account\ntoken that the Kibana server users to perform its administrative functions.\n\nThis is an alternative to specifying a username and password."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 303
             },
             "deprecated": false
           },
@@ -8397,7 +8649,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 289
+              "lineNumber": 310
             },
             "deprecated": false
           },
@@ -8415,7 +8667,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 299
+              "lineNumber": 320
             },
             "deprecated": false
           },
@@ -8431,7 +8683,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 301
+              "lineNumber": 322
             },
             "deprecated": false,
             "children": [
@@ -8443,11 +8695,11 @@
                 "label": "rawConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ password?: string | undefined; username?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; hosts: string | string[]; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; }>"
+                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; hosts: string | string[]; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; }>"
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-                  "lineNumber": 301
+                  "lineNumber": 322
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8621,225 +8873,7 @@
               "lineNumber": 143
             },
             "deprecated": true,
-            "references": [
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 107
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 111
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 185
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
-                  "lineNumber": 107
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
-                  "lineNumber": 148
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 125
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 218
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 235
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 73
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 87
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 97
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 98
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 108
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 127
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 142
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 159
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 176
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 187
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 192
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 218
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 249
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 258
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 261
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 265
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 284
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 293
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 303
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 306
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 328
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 334
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 338
-                }
-              }
-            ],
+            "references": [],
             "children": [
               {
                 "parentPluginId": "core",
@@ -8922,7 +8956,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-              "lineNumber": 161
+              "lineNumber": 168
             },
             "deprecated": false,
             "children": [],
@@ -8974,7 +9008,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-              "lineNumber": 184
+              "lineNumber": 191
             },
             "deprecated": false,
             "children": [
@@ -9015,7 +9049,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 184
+                  "lineNumber": 191
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -9330,29 +9364,7 @@
             },
             "deprecated": true,
             "removeBy": "7.16",
-            "references": [
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 103
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 104
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 121
-                }
-              }
-            ],
+            "references": [],
             "children": [
               {
                 "parentPluginId": "core",
@@ -9450,41 +9462,6 @@
             "deprecated": true,
             "removeBy": "7.16",
             "references": [
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 114
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 115
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 116
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 119
-                }
-              },
-              {
-                "plugin": "data",
-                "link": {
-                  "path": "src/plugins/data/server/autocomplete/value_suggestions_route.ts",
-                  "lineNumber": 65
-                }
-              },
               {
                 "plugin": "indexManagement",
                 "link": {
@@ -9679,188 +9656,6 @@
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/component_templates/privileges.ts",
                   "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 31
-                }
-              },
-              {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 35
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
-                  "lineNumber": 106
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
-                  "lineNumber": 147
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/plugin.ts",
-                  "lineNumber": 361
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/framework/kibana_framework_adapter.ts",
-                  "lineNumber": 34
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts",
-                  "lineNumber": 60
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts",
-                  "lineNumber": 60
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
-                  "lineNumber": 41
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/routes/api/v1/alerts/enable.ts",
-                  "lineNumber": 96
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/routes/api/v1/elasticsearch_settings/check/internal_monitoring.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.test.ts",
-                  "lineNumber": 20
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.test.ts",
-                  "lineNumber": 63
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/add_prepackaged_rules_route.test.ts",
-                  "lineNumber": 93
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/create_rules_bulk_route.test.ts",
-                  "lineNumber": 38
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/create_rules_route.test.ts",
-                  "lineNumber": 40
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/get_prepackaged_rules_status_route.test.ts",
-                  "lineNumber": 77
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/import_rules_route.test.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals.test.ts",
-                  "lineNumber": 28
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals.test.ts",
-                  "lineNumber": 56
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.test.ts",
-                  "lineNumber": 28
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.test.ts",
-                  "lineNumber": 38
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.test.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.test.ts",
-                  "lineNumber": 58
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.test.ts",
-                  "lineNumber": 70
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/helpers.test.ts",
-                  "lineNumber": 50
                 }
               }
             ],
@@ -10170,7 +9965,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 322
+          "lineNumber": 355
         },
         "deprecated": true,
         "references": [
@@ -10185,7 +9980,7 @@
             "plugin": "fleet",
             "link": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 190
+              "lineNumber": 184
             }
           },
           {
@@ -10224,7 +10019,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 328
+              "lineNumber": 361
             },
             "deprecated": false,
             "children": [
@@ -10247,7 +10042,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 328
+                  "lineNumber": 361
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10264,7 +10059,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 328
+                  "lineNumber": 361
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10292,7 +10087,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 330
+              "lineNumber": 363
             },
             "deprecated": false,
             "children": [
@@ -10314,7 +10109,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 330
+                  "lineNumber": 363
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10331,7 +10126,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 330
+                  "lineNumber": 363
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10351,7 +10146,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 332
+              "lineNumber": 365
             },
             "deprecated": false,
             "children": [],
@@ -10983,7 +10778,7 @@
         ],
         "source": {
           "path": "src/core/server/context/context_service.ts",
-          "lineNumber": 92
+          "lineNumber": 107
         },
         "deprecated": false,
         "children": [
@@ -11008,11 +10803,101 @@
             ],
             "source": {
               "path": "src/core/server/context/context_service.ts",
-              "lineNumber": 96
+              "lineNumber": 111
             },
             "deprecated": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CorePreboot",
+        "type": "Interface",
+        "tags": [],
+        "label": "CorePreboot",
+        "description": [
+          "\nContext passed to the `setup` method of `preboot` plugins."
+        ],
+        "source": {
+          "path": "src/core/server/index.ts",
+          "lineNumber": 484
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CorePreboot.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [
+              "{@link ElasticsearchServicePreboot}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchServicePreboot",
+                "text": "ElasticsearchServicePreboot"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/index.ts",
+              "lineNumber": 486
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CorePreboot.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "{@link HttpServicePreboot}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.HttpServicePreboot",
+                "text": "HttpServicePreboot"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/index.ts",
+              "lineNumber": 488
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CorePreboot.preboot",
+            "type": "Object",
+            "tags": [],
+            "label": "preboot",
+            "description": [
+              "{@link PrebootServicePreboot}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.PrebootServicePreboot",
+                "text": "PrebootServicePreboot"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/index.ts",
+              "lineNumber": 490
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -11024,7 +10909,7 @@
         "tags": [],
         "label": "CoreSetup",
         "description": [
-          "\nContext passed to the plugins `setup` method.\n"
+          "\nContext passed to the `setup` method of `standard` plugins.\n"
         ],
         "signature": [
           {
@@ -11038,7 +10923,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 471
+          "lineNumber": 502
         },
         "deprecated": false,
         "children": [
@@ -11062,7 +10947,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 473
+              "lineNumber": 504
             },
             "deprecated": false
           },
@@ -11086,7 +10971,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 475
+              "lineNumber": 506
             },
             "deprecated": false
           },
@@ -11110,7 +10995,31 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 477
+              "lineNumber": 508
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreSetup.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "{@link ExecutionContextSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/index.ts",
+              "lineNumber": 510
             },
             "deprecated": false
           },
@@ -11143,7 +11052,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 479
+              "lineNumber": 512
             },
             "deprecated": false
           },
@@ -11167,7 +11076,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 484
+              "lineNumber": 517
             },
             "deprecated": false
           },
@@ -11191,7 +11100,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 486
+              "lineNumber": 519
             },
             "deprecated": false
           },
@@ -11215,7 +11124,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 488
+              "lineNumber": 521
             },
             "deprecated": false
           },
@@ -11239,7 +11148,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 490
+              "lineNumber": 523
             },
             "deprecated": false
           },
@@ -11263,7 +11172,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 492
+              "lineNumber": 525
             },
             "deprecated": false
           },
@@ -11287,7 +11196,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 494
+              "lineNumber": 527
             },
             "deprecated": false
           },
@@ -11311,7 +11220,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 496
+              "lineNumber": 529
             },
             "deprecated": false
           },
@@ -11337,7 +11246,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 498
+              "lineNumber": 531
             },
             "deprecated": false,
             "returnComment": [],
@@ -11357,7 +11266,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 519
+          "lineNumber": 552
         },
         "deprecated": false,
         "children": [
@@ -11381,7 +11290,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 521
+              "lineNumber": 554
             },
             "deprecated": false
           },
@@ -11405,7 +11314,31 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 523
+              "lineNumber": 556
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreStart.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "{@link ExecutionContextStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/index.ts",
+              "lineNumber": 558
             },
             "deprecated": false
           },
@@ -11429,7 +11362,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 525
+              "lineNumber": 560
             },
             "deprecated": false
           },
@@ -11453,7 +11386,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 527
+              "lineNumber": 562
             },
             "deprecated": false
           },
@@ -11477,7 +11410,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 529
+              "lineNumber": 564
             },
             "deprecated": false
           },
@@ -11501,7 +11434,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 531
+              "lineNumber": 566
             },
             "deprecated": false
           }
@@ -12087,6 +12020,22 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.DeprecationsDetails.requireRestart",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "requireRestart",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.DeprecationsDetails.correctiveActions",
             "type": "Object",
             "tags": [],
@@ -12097,7 +12046,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false
           }
@@ -12232,7 +12181,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 239
+          "lineNumber": 256
         },
         "deprecated": false,
         "children": [
@@ -12247,7 +12196,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 243
+              "lineNumber": 260
             },
             "deprecated": false
           },
@@ -12265,7 +12214,31 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 248
+              "lineNumber": 265
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.DiscoveredPlugin.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the plugin, defaults to `standard`."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.PluginType",
+                "text": "PluginType"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 270
             },
             "deprecated": false
           },
@@ -12283,7 +12256,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 254
+              "lineNumber": 276
             },
             "deprecated": false
           },
@@ -12301,7 +12274,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 261
+              "lineNumber": 283
             },
             "deprecated": false
           },
@@ -12319,9 +12292,171 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 273
+              "lineNumber": 295
             },
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.ElasticsearchConfigPreboot",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchConfigPreboot",
+        "description": [
+          "\nA limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.\n"
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/types.ts",
+          "lineNumber": 248
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchConfigPreboot.hosts",
+            "type": "Array",
+            "tags": [],
+            "label": "hosts",
+            "description": [
+              "\nHosts that the client will connect to. If sniffing is enabled, this list will\nbe used as seeds to discover the rest of your cluster."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/types.ts",
+              "lineNumber": 253
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchConfigPreboot.credentialsSpecified",
+            "type": "boolean",
+            "tags": [],
+            "label": "credentialsSpecified",
+            "description": [
+              "\nIndicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`)."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/types.ts",
+              "lineNumber": 258
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.ElasticsearchServicePreboot",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchServicePreboot",
+        "description": [],
+        "source": {
+          "path": "src/core/server/elasticsearch/types.ts",
+          "lineNumber": 25
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchServicePreboot.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "\nA limited set of Elasticsearch configuration entries.\n"
+            ],
+            "signature": [
+              "{ readonly hosts: string[]; readonly credentialsSpecified: boolean; }"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/types.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchServicePreboot.createClient",
+            "type": "Function",
+            "tags": [],
+            "label": "createClient",
+            "description": [
+              "\nCreate application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.\n"
+            ],
+            "signature": [
+              "(type: string, clientConfig?: Partial<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClientConfig",
+                "text": "ElasticsearchClientConfig"
+              },
+              "> | undefined) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ICustomClusterClient",
+                "text": "ICustomClusterClient"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/types.ts",
+              "lineNumber": 53
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "Unique identifier of the client"
+                ],
+                "source": {
+                  "path": "src/core/server/elasticsearch/types.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.clientConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "clientConfig",
+                "description": [
+                  "A config consists of Elasticsearch JS client options and\nvalid sub-set of Elasticsearch service config.\nWe fill all the missing properties in the `clientConfig` using the default\nElasticsearch config so that we don't depend on default values set and\ncontrolled by underlying Elasticsearch JS client.\nWe don't run validation against the passed config and expect it to be valid."
+                ],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.ElasticsearchClientConfig",
+                    "text": "ElasticsearchClientConfig"
+                  },
+                  "> | undefined"
+                ],
+                "source": {
+                  "path": "src/core/server/elasticsearch/types.ts",
+                  "lineNumber": 55
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -12335,7 +12470,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 25
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [
@@ -12387,32 +12522,10 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 30
+              "lineNumber": 67
             },
             "deprecated": true,
-            "references": [
-              {
-                "plugin": "console",
-                "link": {
-                  "path": "src/plugins/console/server/plugin.ts",
-                  "lineNumber": 42
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/plugin.ts",
-                  "lineNumber": 94
-                }
-              },
-              {
-                "plugin": "monitoring",
-                "link": {
-                  "path": "x-pack/plugins/monitoring/server/plugin.ts",
-                  "lineNumber": 105
-                }
-              }
-            ]
+            "references": []
           }
         ],
         "initialIsOpen": false
@@ -12426,7 +12539,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 89
+          "lineNumber": 129
         },
         "deprecated": false,
         "children": [
@@ -12450,7 +12563,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 98
+              "lineNumber": 138
             },
             "deprecated": false
           },
@@ -12483,7 +12596,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 116
+              "lineNumber": 156
             },
             "deprecated": false,
             "returnComment": [],
@@ -12499,7 +12612,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/types.ts",
-                  "lineNumber": 117
+                  "lineNumber": 157
                 },
                 "deprecated": false
               },
@@ -12525,7 +12638,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/types.ts",
-                  "lineNumber": 118
+                  "lineNumber": 158
                 },
                 "deprecated": false
               }
@@ -12579,24 +12692,10 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 126
+              "lineNumber": 166
             },
             "deprecated": true,
             "references": [
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 106
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 118
-                }
-              },
               {
                 "plugin": "indexManagement",
                 "link": {
@@ -12609,41 +12708,6 @@
                 "link": {
                   "path": "x-pack/plugins/global_search/server/services/context.ts",
                   "lineNumber": 29
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 41
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 125
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 218
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-                  "lineNumber": 235
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-                  "lineNumber": 42
                 }
               },
               {
@@ -12674,7 +12738,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 179
+          "lineNumber": 219
         },
         "deprecated": false,
         "children": [
@@ -12690,7 +12754,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 180
+              "lineNumber": 220
             },
             "deprecated": false
           },
@@ -12706,7 +12770,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 181
+              "lineNumber": 221
             },
             "deprecated": false
           },
@@ -12722,7 +12786,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 182
+              "lineNumber": 222
             },
             "deprecated": false
           }
@@ -12792,6 +12856,104 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.ExecutionContextSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionContextSetup",
+        "description": [],
+        "source": {
+          "path": "src/core/server/execution_context/execution_context_service.ts",
+          "lineNumber": 52
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ExecutionContextSetup.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "\nStores the meta-data of a runtime operation.\nData are carried over all async operations automatically.\nThe sequential calls merge provided \"context\" object shallowly."
+            ],
+            "signature": [
+              "(context: Partial<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.KibanaServerExecutionContext",
+                "text": "KibanaServerExecutionContext"
+              },
+              ">) => void"
+            ],
+            "source": {
+              "path": "src/core/server/execution_context/execution_context_service.ts",
+              "lineNumber": 58
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ExecutionContextSetup.set.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.KibanaServerExecutionContext",
+                    "text": "KibanaServerExecutionContext"
+                  },
+                  ">"
+                ],
+                "source": {
+                  "path": "src/core/server/execution_context/execution_context_service.ts",
+                  "lineNumber": 58
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ExecutionContextSetup.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nRetrieves an opearation meta-data for the current async context."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IExecutionContextContainer",
+                "text": "IExecutionContextContainer"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/execution_context/execution_context_service.ts",
+              "lineNumber": 62
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.FakeRequest",
         "type": "Interface",
         "tags": [],
@@ -12801,7 +12963,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 189
+          "lineNumber": 229
         },
         "deprecated": false,
         "children": [
@@ -12819,7 +12981,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 191
+              "lineNumber": 231
             },
             "deprecated": false
           }
@@ -12835,7 +12997,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/deprecations/types.ts",
-          "lineNumber": 70
+          "lineNumber": 72
         },
         "deprecated": false,
         "children": [
@@ -12857,7 +13019,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 71
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -13173,7 +13335,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 72
+              "lineNumber": 74
             },
             "deprecated": false
           }
@@ -13340,7 +13502,7 @@
         ],
         "source": {
           "path": "src/core/server/http_resources/types.ts",
-          "lineNumber": 99
+          "lineNumber": 105
         },
         "deprecated": false,
         "children": [
@@ -13572,7 +13734,7 @@
             ],
             "source": {
               "path": "src/core/server/http_resources/types.ts",
-              "lineNumber": 101
+              "lineNumber": 107
             },
             "deprecated": false,
             "returnComment": [],
@@ -13596,7 +13758,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http_resources/types.ts",
-                  "lineNumber": 102
+                  "lineNumber": 108
                 },
                 "deprecated": false
               },
@@ -13818,7 +13980,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http_resources/types.ts",
-                  "lineNumber": 103
+                  "lineNumber": 109
                 },
                 "deprecated": false
               }
@@ -14128,7 +14290,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/i18n/i18n_service.ts",
-          "lineNumber": 27
+          "lineNumber": 32
         },
         "deprecated": false,
         "children": [
@@ -14146,7 +14308,7 @@
             ],
             "source": {
               "path": "src/core/server/i18n/i18n_service.ts",
-              "lineNumber": 31
+              "lineNumber": 36
             },
             "deprecated": false,
             "children": [],
@@ -14166,7 +14328,7 @@
             ],
             "source": {
               "path": "src/core/server/i18n/i18n_service.ts",
-              "lineNumber": 36
+              "lineNumber": 41
             },
             "deprecated": false,
             "children": [],
@@ -14186,7 +14348,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/client/cluster_client.ts",
-          "lineNumber": 29
+          "lineNumber": 30
         },
         "deprecated": false,
         "children": [
@@ -14214,7 +14376,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/client/cluster_client.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -14247,7 +14409,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/client/cluster_client.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             },
             "deprecated": false,
             "returnComment": [],
@@ -14286,7 +14448,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/client/cluster_client.ts",
-                  "lineNumber": 37
+                  "lineNumber": 38
                 },
                 "deprecated": false
               }
@@ -15170,7 +15332,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/client/cluster_client.ts",
-          "lineNumber": 45
+          "lineNumber": 46
         },
         "deprecated": false,
         "children": [
@@ -15188,11 +15350,71 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/client/cluster_client.ts",
-              "lineNumber": 50
+              "lineNumber": 51
             },
             "deprecated": false,
             "returnComment": [],
             "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.IExecutionContextContainer",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExecutionContextContainer",
+        "description": [],
+        "source": {
+          "path": "src/core/server/execution_context/execution_context_container.ts",
+          "lineNumber": 48
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IExecutionContextContainer.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "source": {
+              "path": "src/core/server/execution_context/execution_context_container.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IExecutionContextContainer.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => Readonly<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.KibanaServerExecutionContext",
+                "text": "KibanaServerExecutionContext"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "src/core/server/execution_context/execution_context_container.ts",
+              "lineNumber": 50
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15354,7 +15576,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/rendering/types.ts",
-          "lineNumber": 69
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -15372,7 +15594,7 @@
             ],
             "source": {
               "path": "src/core/server/rendering/types.ts",
-              "lineNumber": 74
+              "lineNumber": 85
             },
             "deprecated": false
           }
@@ -15797,6 +16019,141 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.KibanaExecutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaExecutionContext",
+        "description": [],
+        "source": {
+          "path": "src/core/types/execution_context.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.KibanaExecutionContext.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nKibana application initated an operation."
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.KibanaExecutionContext.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "public name of a user-facing feature"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.KibanaExecutionContext.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "unique value to identify the source"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.KibanaExecutionContext.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "human readable description. For example, a vis title, action name"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.KibanaExecutionContext.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/types/execution_context.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.KibanaServerExecutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaServerExecutionContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.KibanaServerExecutionContext",
+            "text": "KibanaServerExecutionContext"
+          },
+          " extends Partial<",
+          "KibanaExecutionContext",
+          ">"
+        ],
+        "source": {
+          "path": "src/core/server/execution_context/execution_context_service.ts",
+          "lineNumber": 25
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.KibanaServerExecutionContext.requestId",
+            "type": "string",
+            "tags": [],
+            "label": "requestId",
+            "description": [],
+            "source": {
+              "path": "src/core/server/execution_context/execution_context_service.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.LegacyAPICaller",
         "type": "Interface",
         "tags": [
@@ -15837,559 +16194,6 @@
             "link": {
               "path": "x-pack/plugins/index_lifecycle_management/server/plugin.ts",
               "lineNumber": 29
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/fetch_es_usage.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/fetch_es_usage.ts",
-              "lineNumber": 45
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/fetch_stack_product_usage.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/fetch_stack_product_usage.ts",
-              "lineNumber": 36
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/get_stack_products_usage.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/get_stack_products_usage.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/fetch_license_type.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/lib/fetch_license_type.ts",
-              "lineNumber": 14
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_high_level_stats.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_high_level_stats.ts",
-              "lineNumber": 251
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_high_level_stats.ts",
-              "lineNumber": 272
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_logstash_stats.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_logstash_stats.ts",
-              "lineNumber": 264
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_logstash_stats.ts",
-              "lineNumber": 328
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_logstash_stats.ts",
-              "lineNumber": 395
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_beats_stats.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_beats_stats.ts",
-              "lineNumber": 322
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_beats_stats.ts",
-              "lineNumber": 386
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_beats_stats.ts",
-              "lineNumber": 396
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_beats_stats.ts",
-              "lineNumber": 414
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_es_stats.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_es_stats.ts",
-              "lineNumber": 20
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_es_stats.ts",
-              "lineNumber": 38
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_kibana_stats.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_kibana_stats.ts",
-              "lineNumber": 186
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_all_stats.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_all_stats.ts",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_cluster_uuids.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_cluster_uuids.ts",
-              "lineNumber": 21
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_cluster_uuids.ts",
-              "lineNumber": 33
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_licenses.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_licenses.ts",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/get_licenses.ts",
-              "lineNumber": 35
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 462
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 481
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/lib/alerts/disable_watcher_cluster_alerts.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/lib/alerts/disable_watcher_cluster_alerts.ts",
-              "lineNumber": 25
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/lib/alerts/disable_watcher_cluster_alerts.ts",
-              "lineNumber": 36
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_es_stats.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_es_stats.d.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_es_stats.d.ts",
-              "lineNumber": 20
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_high_level_stats.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_high_level_stats.d.ts",
-              "lineNumber": 78
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_high_level_stats.d.ts",
-              "lineNumber": 83
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_kibana_stats.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_kibana_stats.d.ts",
-              "lineNumber": 82
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_beats_stats.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_beats_stats.d.ts",
-              "lineNumber": 120
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_beats_stats.d.ts",
-              "lineNumber": 123
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_beats_stats.d.ts",
-              "lineNumber": 129
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_logstash_stats.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_logstash_stats.d.ts",
-              "lineNumber": 100
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_logstash_stats.d.ts",
-              "lineNumber": 103
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_logstash_stats.d.ts",
-              "lineNumber": 109
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_all_stats.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_all_stats.d.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_cluster_uuids.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_cluster_uuids.d.ts",
-              "lineNumber": 5
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_cluster_uuids.d.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_licenses.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_licenses.d.ts",
-              "lineNumber": 7
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/get_licenses.d.ts",
-              "lineNumber": 20
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
-              "lineNumber": 4
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/target/types/server/schemas/common/get_call_cluster.mock.d.ts",
-              "lineNumber": 5
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/lib/alerts/disable_watcher_cluster_alerts.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/lib/alerts/disable_watcher_cluster_alerts.d.ts",
-              "lineNumber": 3
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/fetch_es_usage.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/fetch_es_usage.d.ts",
-              "lineNumber": 4
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/fetch_license_type.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/fetch_license_type.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/fetch_stack_product_usage.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/fetch_stack_product_usage.d.ts",
-              "lineNumber": 4
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/get_stack_products_usage.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/lib/get_stack_products_usage.d.ts",
-              "lineNumber": 4
             }
           }
         ],
@@ -18334,22 +18138,7 @@
         },
         "deprecated": true,
         "removeBy": "7.16",
-        "references": [
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/types.ts",
-              "lineNumber": 55
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/types.ts",
-              "lineNumber": 111
-            }
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "core",
@@ -19798,7 +19587,7 @@
         "tags": [],
         "label": "Plugin",
         "description": [
-          "\nThe interface that should be returned by a `PluginInitializer`.\n"
+          "\nThe interface that should be returned by a `PluginInitializer` for a `standard` plugin.\n"
         ],
         "signature": [
           {
@@ -19812,7 +19601,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 303
+          "lineNumber": 336
         },
         "deprecated": false,
         "children": [
@@ -19836,7 +19625,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 309
+              "lineNumber": 342
             },
             "deprecated": false,
             "children": [
@@ -19859,7 +19648,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 309
+                  "lineNumber": 342
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19876,7 +19665,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 309
+                  "lineNumber": 342
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19904,7 +19693,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 311
+              "lineNumber": 344
             },
             "deprecated": false,
             "children": [
@@ -19926,7 +19715,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 311
+                  "lineNumber": 344
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19943,7 +19732,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 311
+                  "lineNumber": 344
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19963,7 +19752,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 313
+              "lineNumber": 346
             },
             "deprecated": false,
             "children": [],
@@ -20102,7 +19891,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 358
+          "lineNumber": 391
         },
         "deprecated": false,
         "children": [
@@ -20118,7 +19907,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 359
+              "lineNumber": 392
             },
             "deprecated": false
           },
@@ -20134,11 +19923,11 @@
               "EnvironmentMode",
               "; packageInfo: Readonly<",
               "PackageInfo",
-              ">; instanceUuid: string; }"
+              ">; instanceUuid: string; configs: readonly string[]; }"
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 360
+              "lineNumber": 393
             },
             "deprecated": false
           },
@@ -20156,7 +19945,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 383
+              "lineNumber": 417
             },
             "deprecated": false
           },
@@ -20190,7 +19979,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 387
+              "lineNumber": 421
             },
             "deprecated": false
           }
@@ -20208,7 +19997,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 135
+          "lineNumber": 147
         },
         "deprecated": false,
         "children": [
@@ -20223,7 +20012,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 140
+              "lineNumber": 152
             },
             "deprecated": false
           },
@@ -20238,7 +20027,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 145
+              "lineNumber": 157
             },
             "deprecated": false
           },
@@ -20253,7 +20042,31 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 150
+              "lineNumber": 162
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PluginManifest.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the plugin, defaults to `standard`."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.PluginType",
+                "text": "PluginType"
+              }
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 167
             },
             "deprecated": false
           },
@@ -20271,7 +20084,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 160
+              "lineNumber": 177
             },
             "deprecated": false
           },
@@ -20289,7 +20102,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 166
+              "lineNumber": 183
             },
             "deprecated": false
           },
@@ -20307,7 +20120,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 178
+              "lineNumber": 195
             },
             "deprecated": false
           },
@@ -20325,7 +20138,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 185
+              "lineNumber": 202
             },
             "deprecated": false
           },
@@ -20340,7 +20153,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 191
+              "lineNumber": 208
             },
             "deprecated": false
           },
@@ -20355,7 +20168,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 196
+              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -20375,7 +20188,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 204
+              "lineNumber": 221
             },
             "deprecated": true,
             "references": []
@@ -20394,7 +20207,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 210
+              "lineNumber": 227
             },
             "deprecated": false
           },
@@ -20412,7 +20225,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 215
+              "lineNumber": 232
             },
             "deprecated": false
           },
@@ -20430,9 +20243,214 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 231
+              "lineNumber": 248
             },
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PrebootPlugin",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootPlugin",
+        "description": [
+          "\nThe interface that should be returned by a `PluginInitializer` for a `preboot` plugin.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.PrebootPlugin",
+            "text": "PrebootPlugin"
+          },
+          "<TSetup, TPluginsSetup>"
+        ],
+        "source": {
+          "path": "src/core/server/plugins/types.ts",
+          "lineNumber": 325
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PrebootPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CorePreboot",
+                "text": "CorePreboot"
+              },
+              ", plugins: TPluginsSetup) => TSetup"
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 326
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.PrebootPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CorePreboot",
+                    "text": "CorePreboot"
+                  }
+                ],
+                "source": {
+                  "path": "src/core/server/plugins/types.ts",
+                  "lineNumber": 326
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.PrebootPlugin.setup.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsSetup"
+                ],
+                "source": {
+                  "path": "src/core/server/plugins/types.ts",
+                  "lineNumber": 326
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PrebootPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 328
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PrebootServicePreboot",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootServicePreboot",
+        "description": [
+          "\nKibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met.\n"
+        ],
+        "source": {
+          "path": "src/core/server/preboot/types.ts",
+          "lineNumber": 67
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PrebootServicePreboot.isSetupOnHold",
+            "type": "Function",
+            "tags": [],
+            "label": "isSetupOnHold",
+            "description": [
+              "\nIndicates whether Kibana is currently on hold and cannot proceed to `setup` yet."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/core/server/preboot/types.ts",
+              "lineNumber": 71
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved",
+            "type": "Function",
+            "tags": [],
+            "label": "holdSetupUntilResolved",
+            "description": [
+              "\nRegisters a `Promise` as a precondition before Kibana can proceed to `setup`. This method can be invoked multiple\ntimes and from multiple `preboot` plugins. Kibana will proceed to `setup` only when all registered `Promises`\ninstances are resolved, or it will shut down if any of them is rejected."
+            ],
+            "signature": [
+              "(reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>) => void"
+            ],
+            "source": {
+              "path": "src/core/server/preboot/types.ts",
+              "lineNumber": 81
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.reason",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [
+                  "A string that explains the reason why this promise should hold `setup`. It's supposed to be a human\nreadable string that will be recorded in the logs or standard output."
+                ],
+                "source": {
+                  "path": "src/core/server/preboot/types.ts",
+                  "lineNumber": 82
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.promise",
+                "type": "Object",
+                "tags": [],
+                "label": "promise",
+                "description": [
+                  "A `Promise` that should resolved before Kibana can proceed to `setup`."
+                ],
+                "signature": [
+                  "Promise<{ shouldReloadConfig: boolean; } | undefined>"
+                ],
+                "source": {
+                  "path": "src/core/server/preboot/types.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -20446,7 +20464,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/deprecations/types.ts",
-          "lineNumber": 66
+          "lineNumber": 68
         },
         "deprecated": false,
         "children": [
@@ -20478,7 +20496,7 @@
             ],
             "source": {
               "path": "src/core/server/deprecations/types.ts",
-              "lineNumber": 67
+              "lineNumber": 69
             },
             "deprecated": false,
             "returnComment": [],
@@ -20501,7 +20519,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/deprecations/types.ts",
-                  "lineNumber": 67
+                  "lineNumber": 69
                 },
                 "deprecated": false
               }
@@ -20521,7 +20539,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 438
+          "lineNumber": 456
         },
         "deprecated": false,
         "children": [
@@ -20625,7 +20643,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 439
+              "lineNumber": 457
             },
             "deprecated": false
           }
@@ -21895,7 +21913,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/ui_settings/types.ts",
-          "lineNumber": 80
+          "lineNumber": 88
         },
         "deprecated": false,
         "children": [
@@ -21915,7 +21933,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 98
+              "lineNumber": 106
             },
             "deprecated": false,
             "children": [
@@ -21933,7 +21951,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 98
+                  "lineNumber": 106
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -21953,7 +21971,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/ui_settings/types.ts",
-          "lineNumber": 102
+          "lineNumber": 110
         },
         "deprecated": false,
         "children": [
@@ -21986,7 +22004,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 117
+              "lineNumber": 125
             },
             "deprecated": false,
             "children": [
@@ -22010,7 +22028,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 117
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -22076,7 +22094,22 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PluginType",
+        "type": "Enum",
+        "tags": [],
+        "label": "PluginType",
+        "description": [],
+        "source": {
+          "path": "src/core/server/plugins/types.ts",
+          "lineNumber": 120
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "core",
@@ -22436,11 +22469,34 @@
             "section": "def-server.ElasticsearchConfig",
             "text": "ElasticsearchConfig"
           },
-          ", \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"hosts\" | \"username\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; }"
+          ", \"username\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"hosts\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; }"
         ],
         "source": {
           "path": "src/core/server/elasticsearch/client/client_config.ts",
           "lineNumber": 22
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.ExecutionContextStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecutionContextStart",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          }
+        ],
+        "source": {
+          "path": "src/core/server/execution_context/execution_context_service.ts",
+          "lineNumber": 68
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23023,204 +23079,7 @@
         },
         "deprecated": true,
         "removeBy": "7.16",
-        "references": [
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 85
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 110
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 110
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 154
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 183
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.test.ts",
-              "lineNumber": 33
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 90
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_usage_collector.ts",
-              "lineNumber": 22
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/index.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/index.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/telemetry_collection/register_monitoring_telemetry_collection.ts",
-              "lineNumber": 34
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/target/types/server/types.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/target/types/server/types.d.ts",
-              "lineNumber": 70
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/target/types/server/types.d.ts",
-              "lineNumber": 94
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/types.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/types.d.ts",
-              "lineNumber": 61
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/index.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/index.d.ts",
-              "lineNumber": 5
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/register_monitoring_telemetry_collection.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/telemetry_collection/register_monitoring_telemetry_collection.d.ts",
-              "lineNumber": 3
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/get_usage_collector.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/kibana_monitoring/collectors/get_usage_collector.d.ts",
-              "lineNumber": 5
-            }
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -23297,167 +23156,6 @@
               "path": "x-pack/plugins/index_management/server/plugin.ts",
               "lineNumber": 38
             }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 74
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/es_client/instantiate_client.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/es_client/instantiate_client.ts",
-              "lineNumber": 29
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/license_service.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/license_service.ts",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/static_globals.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/static_globals.ts",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/static_globals.ts",
-              "lineNumber": 43
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/plugin.ts",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/plugin.ts",
-              "lineNumber": 74
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/server/plugin.ts",
-              "lineNumber": 284
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/types.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/types.d.ts",
-              "lineNumber": 47
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/plugin.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/plugin.d.ts",
-              "lineNumber": 29
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/license_service.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/license_service.d.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/static_globals.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/static_globals.d.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/static_globals.d.ts",
-              "lineNumber": 15
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/es_client/instantiate_client.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "monitoring",
-            "link": {
-              "path": "x-pack/plugins/monitoring/target/types/server/es_client/instantiate_client.d.ts",
-              "lineNumber": 5
-            }
           }
         ],
         "initialIsOpen": false
@@ -23499,48 +23197,6 @@
         "deprecated": true,
         "removeBy": "7.16",
         "references": [
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 103
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 104
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 112
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 115
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 116
-            }
-          },
           {
             "plugin": "indexManagement",
             "link": {
@@ -23635,7 +23291,7 @@
             "section": "def-server.ElasticsearchConfig",
             "text": "ElasticsearchConfig"
           },
-          ", \"password\" | \"sniffOnStart\" | \"sniffOnConnectionFault\" | \"hosts\" | \"username\" | \"requestHeadersWhitelist\" | \"customHeaders\" | \"apiVersion\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; sniffInterval?: number | false | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; }"
+          ", \"username\" | \"password\" | \"sniffOnStart\" | \"sniffOnConnectionFault\" | \"hosts\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\" | \"apiVersion\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; sniffInterval?: number | false | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; }"
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts",
@@ -23894,6 +23550,14 @@
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCorePluginApi",
+            "section": "def-server.PrebootPlugin",
+            "text": "PrebootPlugin"
+          },
+          "<TSetup, TPluginsSetup> | ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
             "section": "def-server.AsyncPlugin",
             "text": "AsyncPlugin"
           },
@@ -23901,7 +23565,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 465
+          "lineNumber": 499
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24045,7 +23709,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 201
+          "lineNumber": 241
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24087,7 +23751,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 346
+          "lineNumber": 379
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24114,7 +23778,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 509
+          "lineNumber": 542
         },
         "deprecated": false,
         "initialIsOpen": false
