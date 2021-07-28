@@ -21,7 +21,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/monitoring/server/types.ts",
-          "lineNumber": 94
+          "lineNumber": 95
         },
         "deprecated": false,
         "children": [
@@ -37,7 +37,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "deprecated": false,
             "returnComment": [],
@@ -55,7 +55,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "deprecated": false,
             "returnComment": [],
@@ -81,7 +81,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 97
+              "lineNumber": 98
             },
             "deprecated": false,
             "returnComment": [],
@@ -108,7 +108,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/monitoring/server/types.ts",
-                  "lineNumber": 97
+                  "lineNumber": 98
                 },
                 "deprecated": false
               }
@@ -126,7 +126,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 98
+              "lineNumber": 99
             },
             "deprecated": false,
             "returnComment": [],
@@ -193,7 +193,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/monitoring/server/types.ts",
-        "lineNumber": 101
+        "lineNumber": 102
       },
       "deprecated": false,
       "children": [
@@ -209,7 +209,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/monitoring/server/types.ts",
-            "lineNumber": 102
+            "lineNumber": 103
           },
           "deprecated": false,
           "returnComment": [],
