@@ -9,9 +9,9 @@
 import { runBazel } from '../utils/bazel';
 import { ICommand } from './';
 
-export const BuildBazelCommand: ICommand = {
+export const BuildCommand: ICommand = {
   description: 'Runs a build in the Bazel built packages',
-  name: 'build-bazel',
+  name: 'build',
 
   async run(projects, projectGraph, { options }) {
     const runOffline = options?.offline === true;
