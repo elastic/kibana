@@ -9,6 +9,7 @@ import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
 import { migrationMocks } from 'src/core/server/mocks';
 
 import { getCreateMigration } from './create_migration';
+import { EncryptionError, EncryptionErrorOperation } from './crypto';
 import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 
 afterEach(() => {
@@ -39,20 +40,20 @@ describe('createMigration()', () => {
       encryptedSavedObjectsServiceMock.create()
     );
     expect(() =>
-      migrationCreator(
-        function (doc): doc is SavedObjectUnsanitizedDoc {
+      migrationCreator({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc {
           return true;
         },
-        (doc) => doc,
-        {
+        migration: (doc) => doc,
+        inputType: {
           type: 'known-type-1',
           attributesToEncrypt: new Set(),
         },
-        {
+        migratedType: {
           type: 'known-type-2',
           attributesToEncrypt: new Set(),
-        }
-      )
+        },
+      })
     ).toThrowErrorMatchingInlineSnapshot(
       `"An Invalid Encrypted Saved Objects migration is trying to migrate across types (\\"known-type-1\\" => \\"known-type-2\\"), which isn't permitted"`
     );
@@ -68,12 +69,12 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        (doc) => doc
-      );
+        migration: (doc) => doc,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -111,6 +112,402 @@ describe('createMigration()', () => {
         attributes
       );
     });
+
+    it('throws error on decryption failure if shouldMigrateIfDecryptionFails is false', () => {
+      const instantiateServiceWithLegacyType = jest.fn(() =>
+        encryptedSavedObjectsServiceMock.create()
+      );
+      const migrationFunc = jest.fn((doc) => doc);
+
+      const migrationCreator = getCreateMigration(
+        encryptionSavedObjectService,
+        instantiateServiceWithLegacyType
+      );
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+      });
+
+      const attributes = {
+        firstAttr: 'first_attr',
+      };
+
+      encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
+        throw new Error('decryption failed!');
+      });
+
+      expect(() => {
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: 'namespace',
+            attributes,
+          },
+          migrationContext
+        );
+      }).toThrowError(`decryption failed!`);
+
+      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes,
+        { convertToMultiNamespaceType: false }
+      );
+
+      expect(migrationFunc).not.toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
+    });
+
+    it('throws error on decryption failure if shouldMigrateIfDecryptionFails is true but error is not encryption error', () => {
+      const instantiateServiceWithLegacyType = jest.fn(() =>
+        encryptedSavedObjectsServiceMock.create()
+      );
+      const migrationFunc = jest.fn((doc) => doc);
+
+      const migrationCreator = getCreateMigration(
+        encryptionSavedObjectService,
+        instantiateServiceWithLegacyType
+      );
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
+
+      const attributes = {
+        firstAttr: 'first_attr',
+      };
+
+      encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
+        throw new Error('decryption failed!');
+      });
+
+      expect(() => {
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: 'namespace',
+            attributes,
+          },
+          migrationContext
+        );
+      }).toThrowError(`decryption failed!`);
+
+      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes,
+        { convertToMultiNamespaceType: false }
+      );
+
+      expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).not.toHaveBeenCalled();
+      expect(migrationFunc).not.toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
+    });
+
+    it('runs migration function on decryption failure if shouldMigrateIfDecryptionFails is true and error is encryption error', () => {
+      const instantiateServiceWithLegacyType = jest.fn(() =>
+        encryptedSavedObjectsServiceMock.create()
+      );
+      const migrationFunc = jest.fn((doc) => doc);
+
+      const migrationCreator = getCreateMigration(
+        encryptionSavedObjectService,
+        instantiateServiceWithLegacyType
+      );
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
+
+      const attributes = {
+        firstAttr: 'first_attr',
+        attrToStrip: 'secret',
+      };
+      const strippedAttributes = {
+        firstAttr: 'first_attr',
+      };
+
+      encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
+        throw new EncryptionError(
+          `Unable to decrypt attribute "'attribute'"`,
+          'attribute',
+          EncryptionErrorOperation.Decryption,
+          new Error('decryption failed')
+        );
+      });
+
+      encryptionSavedObjectService.stripOrDecryptAttributesSync.mockReturnValueOnce({
+        attributes: strippedAttributes,
+      });
+
+      noopMigration(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+          attributes,
+        },
+        migrationContext
+      );
+
+      expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes,
+        { convertToMultiNamespaceType: false }
+      );
+
+      expect(migrationFunc).toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        strippedAttributes
+      );
+    });
+
+    it('throws error on migration failure', () => {
+      const instantiateServiceWithLegacyType = jest.fn(() =>
+        encryptedSavedObjectsServiceMock.create()
+      );
+      const migrationFunc = jest.fn(() => {
+        throw new Error('migration failed!');
+      });
+
+      const migrationCreator = getCreateMigration(
+        encryptionSavedObjectService,
+        instantiateServiceWithLegacyType
+      );
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+      });
+
+      const attributes = {
+        firstAttr: 'first_attr',
+      };
+
+      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+
+      expect(() => {
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: 'namespace',
+            attributes,
+          },
+          migrationContext
+        );
+      }).toThrowError(`migration failed!`);
+
+      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes,
+        { convertToMultiNamespaceType: false }
+      );
+
+      expect(migrationFunc).toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
+    });
+
+    it('throws error on migration failure even if shouldMigrateIfDecryptionFails is true', () => {
+      const instantiateServiceWithLegacyType = jest.fn(() =>
+        encryptedSavedObjectsServiceMock.create()
+      );
+      const migrationFunc = jest.fn(() => {
+        throw new Error('migration failed!');
+      });
+
+      const migrationCreator = getCreateMigration(
+        encryptionSavedObjectService,
+        instantiateServiceWithLegacyType
+      );
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
+
+      const attributes = {
+        firstAttr: 'first_attr',
+      };
+
+      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+
+      expect(() => {
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: 'namespace',
+            attributes,
+          },
+          migrationContext
+        );
+      }).toThrowError(`migration failed!`);
+
+      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes,
+        { convertToMultiNamespaceType: false }
+      );
+
+      expect(migrationFunc).toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
+    });
+
+    it('throws error on encryption failure', () => {
+      const instantiateServiceWithLegacyType = jest.fn(() =>
+        encryptedSavedObjectsServiceMock.create()
+      );
+      const migrationFunc = jest.fn((doc) => doc);
+
+      const migrationCreator = getCreateMigration(
+        encryptionSavedObjectService,
+        instantiateServiceWithLegacyType
+      );
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+      });
+
+      const attributes = {
+        firstAttr: 'first_attr',
+      };
+
+      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+      encryptionSavedObjectService.encryptAttributesSync.mockImplementationOnce(() => {
+        throw new Error('encryption failed!');
+      });
+
+      expect(() => {
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: 'namespace',
+            attributes,
+          },
+          migrationContext
+        );
+      }).toThrowError(`encryption failed!`);
+
+      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes,
+        { convertToMultiNamespaceType: false }
+      );
+
+      expect(migrationFunc).toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes
+      );
+    });
+
+    it('throws error on encryption failure even if shouldMigrateIfDecryptionFails is true', () => {
+      const instantiateServiceWithLegacyType = jest.fn(() =>
+        encryptedSavedObjectsServiceMock.create()
+      );
+      const migrationFunc = jest.fn((doc) => doc);
+
+      const migrationCreator = getCreateMigration(
+        encryptionSavedObjectService,
+        instantiateServiceWithLegacyType
+      );
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+          return true;
+        },
+        migration: migrationFunc,
+        shouldMigrateIfDecryptionFails: true,
+      });
+
+      const attributes = {
+        firstAttr: 'first_attr',
+      };
+
+      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+      encryptionSavedObjectService.encryptAttributesSync.mockImplementationOnce(() => {
+        throw new Error('encryption failed!');
+      });
+
+      expect(() => {
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: 'namespace',
+            attributes,
+          },
+          migrationContext
+        );
+      }).toThrowError(`encryption failed!`);
+
+      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes,
+        { convertToMultiNamespaceType: false }
+      );
+
+      expect(migrationFunc).toHaveBeenCalled();
+      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+        },
+        attributes
+      );
+    });
   });
 
   describe('migration of a single legacy type', () => {
@@ -122,13 +519,13 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      const noopMigration = migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      const noopMigration = migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           return true;
         },
-        (doc) => doc,
-        inputType
-      );
+        migration: (doc) => doc,
+        inputType,
+      });
 
       const attributes = {
         firstAttr: 'first_attr',
@@ -183,12 +580,12 @@ describe('createMigration()', () => {
           encryptionSavedObjectService,
           instantiateServiceWithLegacyType
         );
-        const noopMigration = migrationCreator<InputType, MigrationType>(
-          function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+        const noopMigration = migrationCreator<InputType, MigrationType>({
+          isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
             return true;
           },
-          (doc) => doc
-        );
+          migration: (doc) => doc,
+        });
 
         const attributes = {
           firstAttr: 'first_attr',
@@ -257,15 +654,15 @@ describe('createMigration()', () => {
         encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
-      return migrationCreator<InputType, MigrationType>(
-        function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+      return migrationCreator<InputType, MigrationType>({
+        isMigrationNeededPredicate(doc): doc is SavedObjectUnsanitizedDoc<InputType> {
           // migrate doc that have the second field
           return (
             typeof (doc as SavedObjectUnsanitizedDoc<InputType>).attributes.nonEncryptedAttr ===
             'string'
           );
         },
-        ({ attributes: { firstAttr, nonEncryptedAttr }, ...doc }) => ({
+        migration: ({ attributes: { firstAttr, nonEncryptedAttr }, ...doc }) => ({
           attributes: {
             // modify an encrypted field
             firstAttr: `~~${firstAttr}~~`,
@@ -275,8 +672,8 @@ describe('createMigration()', () => {
           ...doc,
         }),
         inputType,
-        migrationType
-      );
+        migratedType: migrationType,
+      });
     }
 
     it('doesnt decrypt saved objects that dont need to be migrated', async () => {
