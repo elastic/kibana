@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Logger, SavedObjectReference } from 'src/core/server';
+import { RuleParams } from '../../schemas/rule_schemas';
+import { injectExceptionsReferences } from './inject_exceptions_list';
+
+/**
+ * Injects references and returns the saved object references.
+ * @param logger Kibana injected logger
+ * @param params The params of the base rule(s).
+ * @returns The rule parameters with the saved object references.
+ *
+ * How to add a new injected references here:
+ * ---
+ * Add a new file for injection named: inject_<paramName>.ts, example: inject_foo.ts
+ * Add a new function into that file named: inject<ParamName>, example: injectFooReferences(logger, params.foo)
+ * Add a new line below and spread the new parameter together like so:
+ *
+ * const foo = injectFooReferences(logger, params.foo, savedObjectReferences);
+ * const ruleParamsWithSavedObjectReferences: RuleParams = {
+ *   ...params,
+ *   foo,
+ *   exceptionsList,
+ * };
+ */
+export const injectReferences = (
+  logger: Logger,
+  params: RuleParams,
+  savedObjectReferences: SavedObjectReference[]
+): RuleParams => {
+  logger.debug(
+    [
+      'Injecting references into the rule params of: ',
+      JSON.stringify(params),
+      ', savedObjectReferences: ',
+      JSON.stringify(savedObjectReferences),
+    ].join('')
+  );
+  const exceptionsList = injectExceptionsReferences(
+    logger,
+    params.exceptionsList,
+    savedObjectReferences
+  );
+  const ruleParamsWithSavedObjectReferences: RuleParams = {
+    ...params,
+    exceptionsList,
+  };
+  logger.debug(
+    [
+      'The saved object references injected are: ',
+      JSON.stringify(ruleParamsWithSavedObjectReferences),
+    ].join('')
+  );
+  return ruleParamsWithSavedObjectReferences;
+};

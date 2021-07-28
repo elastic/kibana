@@ -70,6 +70,7 @@ import { wrapHitsFactory } from './wrap_hits_factory';
 import { wrapSequencesFactory } from './wrap_sequences_factory';
 import { ConfigType } from '../../../config';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { injectReferences, extractReferences } from './saved_object_references';
 
 export const signalRulesAlertType = ({
   logger,
@@ -93,6 +94,10 @@ export const signalRulesAlertType = ({
     name: 'SIEM signal',
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
+    useSavedObjectReferences: {
+      extractReferences: (params) => extractReferences(logger, params),
+      injectReferences: (params, references) => injectReferences(logger, params, references),
+    },
     validate: {
       params: {
         validate: (object: unknown): RuleParams => {
