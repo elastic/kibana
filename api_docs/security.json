@@ -1739,14 +1739,14 @@
           {
             "plugin": "alerting",
             "link": {
-              "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
               "lineNumber": 23
             }
           },
           {
             "plugin": "alerting",
             "link": {
-              "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
               "lineNumber": 98
             }
           }

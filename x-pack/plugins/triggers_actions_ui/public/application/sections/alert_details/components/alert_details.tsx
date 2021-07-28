@@ -60,7 +60,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const history = useHistory();
   const {
     application: { capabilities },
-    alertTypeRegistry,
+    ruleTypeRegistry,
     actionTypeRegistry,
     setBreadcrumbs,
     chrome,
@@ -92,8 +92,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     // can the user save the alert
     canSaveAlert &&
     // is this alert type editable from within Alerts Management
-    (alertTypeRegistry.has(alert.alertTypeId)
-      ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
+    (ruleTypeRegistry.has(alert.alertTypeId)
+      ? !ruleTypeRegistry.get(alert.alertTypeId).requiresAppContext
       : false);
 
   const alertActions = alert.actions;
@@ -138,7 +138,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 setEditFlyoutVisibility(false);
               }}
               actionTypeRegistry={actionTypeRegistry}
-              alertTypeRegistry={alertTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
               onSave={setAlert}
             />
           )}
@@ -219,10 +219,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiSwitch
-                  name="disable"
+                  name="enable"
                   disabled={!canSaveAlert || !alertType.enabledInLicense}
-                  checked={!isEnabled}
-                  data-test-subj="disableSwitch"
+                  checked={isEnabled}
+                  data-test-subj="enableSwitch"
                   onChange={async () => {
                     if (isEnabled) {
                       setIsEnabled(false);
@@ -237,8 +237,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   }}
                   label={
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.disableTitle"
-                      defaultMessage="Disable"
+                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
+                      defaultMessage="Enable"
                     />
                   }
                 />

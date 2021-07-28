@@ -31,7 +31,7 @@ export const useScheduledQueryGroup = ({
     () => http.get(packagePolicyRouteService.getInfoPath(scheduledQueryGroupId)),
     {
       keepPreviousData: true,
-      enabled: !skip,
+      enabled: !skip || !scheduledQueryGroupId,
       select: (response) => response.item,
     }
   );

@@ -65,7 +65,10 @@ export class ReportingPlugin
     });
 
     registerUiSettings(core);
-    registerDeprecations(reportingCore, core);
+    registerDeprecations({
+      core,
+      reportingCore,
+    });
     registerReportingUsageCollector(reportingCore, plugins);
     registerRoutes(reportingCore, this.logger);
 

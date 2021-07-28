@@ -5,5 +5,10 @@
   "configPath": ["index_patterns_test_plugin"],
   "server": true,
   "ui": false,
-  "requiredPlugins": ["data"]
+  "requiredPlugins": ["data"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Index pattern test plugin"
 }

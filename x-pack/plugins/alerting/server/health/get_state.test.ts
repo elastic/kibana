@@ -71,6 +71,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       pollInterval
     ).subscribe();
@@ -104,6 +105,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       pollInterval,
       retryDelay
@@ -148,6 +150,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 
@@ -178,6 +181,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 
@@ -208,6 +212,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 
@@ -235,6 +240,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -265,6 +271,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -301,6 +308,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 
