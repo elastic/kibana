@@ -269,7 +269,7 @@ const defaultFieldGroups: {
 };
 
 const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
-  defaultMessage: 'Field filters',
+  defaultMessage: 'Filter by type',
 });
 
 const htmlId = htmlIdGenerator('datapanel');
