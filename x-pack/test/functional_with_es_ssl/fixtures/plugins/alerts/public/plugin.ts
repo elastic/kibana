@@ -27,7 +27,7 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       (alert: SanitizedAlert) => `/rule/${alert.id}`
     );
 
-    triggersActionsUi.alertTypeRegistry.register({
+    triggersActionsUi.ruleTypeRegistry.register({
       id: 'test.always-firing',
       description: 'Always fires',
       iconClass: 'alert',
@@ -39,7 +39,7 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       requiresAppContext: false,
     });
 
-    triggersActionsUi.alertTypeRegistry.register({
+    triggersActionsUi.ruleTypeRegistry.register({
       id: 'test.noop',
       description: `Doesn't do anything`,
       iconClass: 'alert',
