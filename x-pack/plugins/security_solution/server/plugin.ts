@@ -26,6 +26,7 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import {
@@ -62,8 +63,7 @@ import {
   SERVER_APP_ID,
   SIGNALS_ID,
   NOTIFICATIONS_ID,
-  REFERENCE_RULE_ALERT_TYPE_ID,
-  REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+  QUERY_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -86,10 +86,10 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
-import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
 import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
+import { EndpointMetadataService } from './endpoint/services/metadata';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -275,14 +275,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const referenceRuleTypes = [
-      REFERENCE_RULE_ALERT_TYPE_ID,
-      REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
-    ];
+    const racRuleTypes = [QUERY_ALERT_TYPE_ID];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
-      ...(isRuleRegistryEnabled ? referenceRuleTypes : []),
+      ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature(
@@ -399,6 +396,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       packageService: plugins.fleet?.packageService,
       packagePolicyService: plugins.fleet?.packagePolicyService,
       agentPolicyService: plugins.fleet?.agentPolicyService,
+      endpointMetadataService: new EndpointMetadataService(
+        core.savedObjects,
+        plugins.fleet?.agentService!,
+        plugins.fleet?.agentPolicyService!,
+        logger
+      ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
@@ -407,7 +410,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logger,
       manifestManager,
       registerIngestCallback,
-      savedObjectsStart: core.savedObjects,
       licenseService,
       exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
