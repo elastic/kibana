@@ -2309,7 +2309,7 @@ describe('SavedObjectsRepository', () => {
         client.delete.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({ result: 'not_found' })
         );
-        await expectNotFoundError(type, id);
+        await expectNotFoundEsUnavailableError(type, id);
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
@@ -2319,7 +2319,7 @@ describe('SavedObjectsRepository', () => {
             error: { type: 'index_not_found_exception' },
           })
         );
-        await expectNotFoundError(type, id);
+        await expectNotFoundEsUnavailableError(type, id);
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
@@ -3257,7 +3257,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.get).toHaveBeenCalledTimes(1);
       });
 
-      it.skip(`throws when ES does not return the correct header when finding the document during get`, async () => {
+      it(`throws when ES does not return the correct header when finding the document during get`, async () => {
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
         );

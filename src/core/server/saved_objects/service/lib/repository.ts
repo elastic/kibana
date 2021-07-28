@@ -648,7 +648,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    const { body, statusCode } = await this.client.delete(
+    const { body, statusCode, headers } = await this.client.delete(
       {
         id: rawId,
         index: this.getIndexForType(type),
@@ -665,9 +665,15 @@ export class SavedObjectsRepository {
 
     const deleteDocNotFound = body.result === 'not_found';
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
+    const esHeaderFound = isEsHeaderValid(headers);
     if (deleteDocNotFound || deleteIndexNotFound) {
-      // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      if (esHeaderFound) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      } else {
+        // throw if we can't verify the response is from Elasticsearch
+        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
+      }
     }
 
     throw new Error(
@@ -968,6 +974,11 @@ export class SavedObjectsRepository {
         )
       : undefined;
 
+    // // initial header check to ensure the response is from Elasticsearch
+    // if (bulkGetResponse && !isEsHeaderValid(bulkGetResponse.headers)) {
+    //   throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    // }
+
     return {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
@@ -1018,15 +1029,9 @@ export class SavedObjectsRepository {
       { ignore: [404] }
     );
     const indexNotFound = statusCode === 404;
-    const esHeaderFound = isEsHeaderValid(headers);
     // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
-    if (!isFoundGetResponse(body) && !esHeaderFound) {
+    if (!isFoundGetResponse(body) && !isEsHeaderValid(headers)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-      // const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      // throw SavedObjectsErrorHelpers.decorateEsUnavailableError(
-      //   new Error(`${notFoundError.message}`),
-      //   `x-elastic-product not present or not recognized` // alternative: cannot verify response from elasticsearch
-      // );
     }
     if (
       !isFoundGetResponse(body) ||
@@ -1253,18 +1258,17 @@ export class SavedObjectsRepository {
         _source_includes: ['namespace', 'namespaces', 'originId'],
         require_alias: true,
       })
-      // TODO: clean this up and make it generic
       .then((res) => {
         const indexNotFound = res.statusCode === 404;
         const esHeaderFound = isEsHeaderValid(res.headers);
-        // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
+        // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearchq
         if (indexNotFound && !esHeaderFound) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
         }
         return res;
       })
       .catch((err) => {
-        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
+        if (SavedObjectsErrorHelpers.isNotFoundEsUnavailableError(err)) {
           throw err;
         }
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
@@ -2088,7 +2092,7 @@ export class SavedObjectsRepository {
    * @param id The ID of the saved object.
    * @param namespace The target namespace.
    * @returns Raw document from Elasticsearch.
-   * @throws Will throw an error if the saved object is not found, or if it doesn't include the target namespace.
+   * @throws Will throw an error if the saved object is not found, if it doesn't include the target namespace or if the response is not identifiable as an Elasticsearch response.
    */
   private async preflightCheckIncludesNamespace(type: string, id: string, namespace?: string) {
     if (!this._registry.isMultiNamespace(type)) {
