@@ -131,6 +131,7 @@ export const getColumns = ({
         [data.category, 'fields', data.field],
         browserFields
       );
+      // console.log(data.field, fieldFromBrowserField);
       return (
         <FieldValueCell
           contextId={contextId}

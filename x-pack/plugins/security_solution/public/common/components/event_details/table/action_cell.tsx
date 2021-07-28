@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState, useRef } from 'react';
-import { getDraggableId } from '@kbn/securitysolution-t-grid';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EventFieldsData } from '../types';

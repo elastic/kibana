@@ -25,7 +25,7 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/com
 
 import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
-import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
+import { useGetTimelineId } from './draggable_wrapper_hover_content';
 import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
 
@@ -478,6 +478,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
           setContainerRef(e);
         }}
         tabIndex={-1}
+        data-provider-id={getDraggableId(dataProvider.id)}
       >
         {truncate ? (
           <TruncatableText data-test-subj="render-truncatable-content">

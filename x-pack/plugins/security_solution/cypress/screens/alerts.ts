@@ -14,19 +14,19 @@ export const ALERTS_COUNT =
 
 export const ALERT_CHECKBOX = '[data-test-subj="select-event-container"] .euiCheckbox__input';
 
-export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
+export const ALERT_ID = '[data-test-subj="render-content-_id"]';
 
 export const ALERT_RISK_SCORE_HEADER = '[data-test-subj="header-text-signal.rule.risk_score"]';
 
-export const ALERT_RULE_METHOD = '[data-test-subj="draggable-content-signal.rule.type"]';
+export const ALERT_RULE_METHOD = '[data-test-subj="render-content-signal.rule.type"]';
 
-export const ALERT_RULE_NAME = '[data-test-subj="draggable-content-signal.rule.name"]';
+export const ALERT_RULE_NAME = '[data-test-subj="render-content-signal.rule.name"]';
 
-export const ALERT_RULE_RISK_SCORE = '[data-test-subj="draggable-content-signal.rule.risk_score"]';
+export const ALERT_RULE_RISK_SCORE = '[data-test-subj="render-content-signal.rule.risk_score"]';
 
-export const ALERT_RULE_SEVERITY = '[data-test-subj="draggable-content-signal.rule.severity"]';
+export const ALERT_RULE_SEVERITY = '[data-test-subj="render-content-signal.rule.severity"]';
 
-export const ALERT_RULE_VERSION = '[data-test-subj="draggable-content-signal.rule.version"]';
+export const ALERT_RULE_VERSION = '[data-test-subj="render-content-signal.rule.version"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 

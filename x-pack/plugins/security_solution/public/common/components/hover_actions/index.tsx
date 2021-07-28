@@ -295,7 +295,7 @@ export const HoverActions: React.FC<Props> = React.memo(
               value={values}
             />
           )}
-          {showFilters && (
+          {field != null && (
             <div data-test-subj="hover-actions-copy-button">
               {getCopyButton({
                 field,
