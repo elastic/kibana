@@ -40,6 +40,7 @@ import type {
   RefreshTarget,
   OutdatedDocumentsRefresh,
   CheckUnknownDocumentsState,
+  CalculateExcludeFiltersState,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -71,6 +72,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setWriteBlock({ client, index: state.sourceIndex.value }),
+    CALCULATE_EXCLUDE_FILTERS: (state: CalculateExcludeFiltersState) =>
+      Actions.calculateExcludeFilters({
+        client,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+      }),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
       Actions.createIndex({
         client,

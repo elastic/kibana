@@ -101,7 +101,7 @@ export class FormatSelectEditor extends PureComponent<
         : undefined
     );
 
-  onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
+  onFormatParamsChange = (newParams: { [key: string]: any }) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };
