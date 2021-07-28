@@ -24,15 +24,8 @@ import {
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
-import {
-  Container,
-  EmbeddableInput,
-  EmbeddableOutput,
-  SavedObjectEmbeddableInput,
-  IEmbeddable,
-  EmbeddableEditorState,
-  EmbeddableStateTransfer,
-} from '../..';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable, EmbeddableStateTransfer } from '../..';
+import { goToApp } from '../../lib/go_to_app';
 
 const EDITOR_CONTAINER_ID = 'kbnQuickEditEditorContainer';
 
@@ -42,12 +35,6 @@ interface Props {
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   application: ApplicationStart;
   stateTransferService?: EmbeddableStateTransfer;
-}
-
-interface NavigationContext {
-  app: string;
-  path: string;
-  state?: EmbeddableEditorState;
 }
 
 export class QuickEditFlyout extends React.Component<Props> {
@@ -78,63 +65,8 @@ export class QuickEditFlyout extends React.Component<Props> {
     }
   }
 
-  private async goToApp(context: IEmbeddable) {
-    const { stateTransferService, application, embeddable, initialInput } = this.props;
-
-    const appTarget = this.getAppTarget(context);
-    if (appTarget) {
-      // Restore embeddable to original state before navigating away
-      embeddable.updateInput(initialInput);
-
-      if (stateTransferService && appTarget.state) {
-        await stateTransferService.navigateToEditor(appTarget.app, {
-          path: appTarget.path,
-          state: appTarget.state,
-        });
-      } else {
-        await application.navigateToApp(appTarget.app, { path: appTarget.path });
-      }
-      return;
-    }
-
-    const href = await this.getHref(context);
-    if (href) {
-      window.location.href = href;
-      return;
-    }
-  }
-
-  private async getHref(embeddable: IEmbeddable): Promise<string> {
-    const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
-    return editUrl ? editUrl : '';
-  }
-
-  private getAppTarget(embeddable: IEmbeddable): NavigationContext | undefined {
-    const app = embeddable ? embeddable.getOutput().editApp : undefined;
-    const path = embeddable ? embeddable.getOutput().editPath : undefined;
-    if (app && path) {
-      if (this.currentAppId) {
-        const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
-        const state: EmbeddableEditorState = {
-          originatingApp: this.currentAppId,
-          valueInput: byValueMode ? this.getExplicitInput(embeddable) : undefined,
-          embeddableId: embeddable.id,
-        };
-        return { app, path, state };
-      }
-      return { app, path };
-    }
-  }
-
-  private getExplicitInput(embeddable: IEmbeddable): EmbeddableInput {
-    return (
-      (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
-      embeddable.getInput()
-    );
-  }
-
   public render() {
-    const { embeddable, initialInput, onClose } = this.props;
+    const { embeddable, stateTransferService, application, initialInput, onClose } = this.props;
 
     const enhancedAriaLabel = i18n.translate('embeddableApi.quickEdit.flyout.titleLabel', {
       defaultMessage: 'Edit {title}',
@@ -160,7 +92,10 @@ export class QuickEditFlyout extends React.Component<Props> {
             </EuiFlexItem>
             <EuiLink
               onClick={() => {
-                this.goToApp(embeddable);
+                // Restore embeddable to original state before navigating away
+                embeddable.updateInput(initialInput);
+
+                goToApp(embeddable, this.currentAppId || '', { stateTransferService, application });
                 onClose();
               }}
               external={true}
