@@ -261,6 +261,12 @@ support for scripted fields. See
 [[l_glos]]
 == L
 
+[[glossary-labs]] labs ::
+// tag::labs-def[]
+An in-progress or experimental feature in *Canvas* or *Dashboard* that you can try out and provide feedback.
+When enabled, you’ll see *Labs* in the toolbar.
+// end::labs-def[]
+
 [[glossary-lens]] Lens ::
 // tag::lens-def[]
 Enables you to build visualizations by dragging and dropping data fields.
@@ -492,7 +498,7 @@ See
 
 [[glossary-wms]] Web Map Service (WMS) ::
 // tag::wms-def[]
-A layer type in the *Maps* application. 
+A layer type in the *Maps* application.
 Add a WMS source to provide authoritative geographic context to your map.
 See the https://www.ogc.org/standards/wms[OpenGIS Web Map Service].
 // end::wms-def[]

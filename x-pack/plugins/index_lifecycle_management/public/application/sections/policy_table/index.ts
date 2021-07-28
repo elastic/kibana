@@ -5,4 +5,11 @@
  * 2.0.
  */
 
+import { PolicyFromES } from '../../../../common/types';
+
 export { PolicyTable } from './policy_table.container';
+
+export type TableColumn = Extract<
+  keyof PolicyFromES,
+  'version' | 'name' | 'indices' | 'modifiedDate'
+>;

@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       },
       deprecationType: 'config',
       domainId: 'corePluginDeprecations',
+      requireRestart: true,
     },
     {
       level: 'critical',
@@ -40,6 +41,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       },
       deprecationType: 'config',
       domainId: 'corePluginDeprecations',
+      requireRestart: true,
     },
     {
       level: 'critical',
@@ -53,6 +55,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       documentationUrl: 'config-secret-doc-url',
       deprecationType: 'config',
       domainId: 'corePluginDeprecations',
+      requireRestart: true,
     },
     {
       message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
