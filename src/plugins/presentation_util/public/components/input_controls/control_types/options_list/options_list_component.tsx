@@ -123,51 +123,11 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
   const selectedOptionsLength = Array.from(selectedOptions.current).length;
 
   const { twoLineLayout } = input;
+
   const button = (
-    <EuiButtonEmpty
-      color="text"
-      className={classNames('optionsList--buttonOverride', {
-        // 'optionsList--buttonOverrideTwoLine': twoLineLayout,
-        'optionsList--buttonOverrideSingle': !twoLineLayout,
-      })}
-      textProps={{
-        className: 'optionsList--control',
-      }}
-      onClick={() => setIsPopoverOpen((openState) => !openState)}
-      contentProps={{ className: 'optionsList--buttonContentOverride' }}
-    >
-      <span
-        className={classNames('optionsList--selections', {
-          'optionsList--selectionsEmpty': !selectedOptionsLength,
-        })}
-      >
-        {!selectedOptionsLength
-          ? OptionsListStrings.summary.getPlaceholder()
-          : selectedOptionsString}
-      </span>
-
-      <span
-        className="optionsList--notification"
-        style={{
-          visibility: selectedOptionsLength > 1 ? 'visible' : 'hidden',
-        }}
-      >
-        <EuiNotificationBadge size={'m'} color="subdued">
-          {selectedOptionsLength}
-        </EuiNotificationBadge>
-      </span>
-
-      <span className="optionsList--notification">
-        <EuiIcon type={'arrowDown'} />
-      </span>
-    </EuiButtonEmpty>
-  );
-
-  const newButton = (
     <EuiFilterButton
       iconType="arrowDown"
       className={classNames('optionsList--filterBtn', {
-        // 'optionsList--filterBtnTwoLine': twoLineLayout,
         'optionsList--filterBtnSingle': !twoLineLayout,
       })}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
@@ -176,22 +136,19 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
       hasActiveFilters={selectedOptionsLength > 0}
       numActiveFilters={selectedOptionsLength}
     >
-      {!selectedOptionsLength
-        ? OptionsListStrings.summary.getPlaceholder()
-        : Array.from(selectedOptions.current).join(', ')}
+      {!selectedOptionsLength ? OptionsListStrings.summary.getPlaceholder() : selectedOptionsString}
     </EuiFilterButton>
   );
 
   return (
     <EuiFilterGroup
       className={classNames('optionsList--filterGroup', {
-        // 'optionsList--filterGroupTwoLine': twoLineLayout,
         'optionsList--filterGroupSingle': !twoLineLayout,
       })}
     >
       <EuiPopover
         id="popoverExampleMultiSelect"
-        button={newButton}
+        button={button}
         isOpen={isPopoverOpen}
         className="optionsList--popoverOverride"
         anchorClassName="optionsList--anchorOverride"
