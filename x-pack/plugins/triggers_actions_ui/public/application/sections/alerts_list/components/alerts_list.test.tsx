@@ -11,7 +11,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
 import {
@@ -47,7 +47,7 @@ jest.mock('react-router-dom', () => ({
 const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const alertType = {
   id: 'test_alert_type',
@@ -74,7 +74,7 @@ const alertTypeFromApi = {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },
 };
-alertTypeRegistry.list.mockReturnValue([alertType]);
+ruleTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -101,7 +101,7 @@ describe('alerts_list component empty', () => {
     loadAllActions.mockResolvedValue([]);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -284,9 +284,9 @@ describe('alerts_list component with items', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    alertTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.has.mockReturnValue(true);
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -368,7 +368,7 @@ describe('alerts_list component with items', () => {
   it('sorts alerts when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -382,6 +382,28 @@ describe('alerts_list component with items', () => {
         sort: {
           field: 'name',
           direction: 'desc',
+        },
+      })
+    );
+  });
+
+  it('sorts alerts when clicking the enabled column', async () => {
+    await setup();
+    wrapper
+      .find('[data-test-subj="tableHeaderCell_enabled_0"] .euiTableHeaderButton')
+      .first()
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAlerts).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: 'enabled',
+          direction: 'asc',
         },
       })
     );
@@ -413,7 +435,7 @@ describe('alerts_list component empty with show only capability', () => {
     ]);
     loadAllActions.mockResolvedValue([]);
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -500,9 +522,9 @@ describe('alerts_list with show only capability', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    alertTypeRegistry.has.mockReturnValue(false);
+    ruleTypeRegistry.has.mockReturnValue(false);
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -607,9 +629,9 @@ describe('alerts_list with disabled itmes', () => {
     ]);
     loadAllActions.mockResolvedValue([]);
 
-    alertTypeRegistry.has.mockReturnValue(false);
+    ruleTypeRegistry.has.mockReturnValue(false);
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;

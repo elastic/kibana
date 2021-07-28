@@ -21,10 +21,9 @@ const registerAlertTypes = (
 ) => {
   if (alertingPlugin) {
     alertingPlugin.registerType(registerMetricThresholdAlertType(libs));
-    alertingPlugin.registerType(registerMetricInventoryThresholdAlertType(libs));
     alertingPlugin.registerType(registerMetricAnomalyAlertType(libs, ml));
 
-    const registerFns = [registerLogThresholdAlertType];
+    const registerFns = [registerLogThresholdAlertType, registerMetricInventoryThresholdAlertType];
     registerFns.forEach((fn) => {
       fn(alertingPlugin, libs);
     });
