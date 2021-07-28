@@ -55,8 +55,8 @@ export const TrustedAppsPage = memo(() => {
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const policyList = useTrustedAppsSelector(listOfPolicies);
-  const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
-  const didEntriesExist = useTrustedAppsSelector(prevEntriesExist) === true;
+  const doEntriesExist = useTrustedAppsSelector(entriesExist);
+  const didEntriesExist = useTrustedAppsSelector(prevEntriesExist);
   const navigationCallbackQuery = useTrustedAppsNavigateCallback(
     (query: string, includedPolicies?: string, excludedPolicies?: string) => ({
       filter: query,
