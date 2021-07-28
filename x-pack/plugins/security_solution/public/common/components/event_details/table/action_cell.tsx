@@ -9,7 +9,7 @@ import React, { useCallback, useState, useRef } from 'react';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EventFieldsData } from '../types';
-import { useGetTimelineId } from '../../drag_and_drop/draggable_wrapper_hover_content';
+import { useGetTimelineId } from '../../drag_and_drop/use_get_timeline_id_from_dom';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { BrowserField } from '../../../containers/source';
 
