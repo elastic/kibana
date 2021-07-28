@@ -3,8 +3,9 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "incremental": true,
-    "outDir": "target",
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "outDir": "target_types",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-config-schema/src",
