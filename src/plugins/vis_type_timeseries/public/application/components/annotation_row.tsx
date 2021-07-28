@@ -176,6 +176,7 @@ export const AnnotationRow = ({
                   }}
                   onChange={handleQueryChange}
                   indexPatterns={[model.index_pattern]}
+                  data-test-subj="annotationQueryBar"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -240,7 +241,12 @@ export const AnnotationRow = ({
                 }
                 fullWidth
               >
-                <EuiFieldText onChange={handleChange('fields')} value={model.fields} fullWidth />
+                <EuiFieldText
+                  onChange={handleChange('fields')}
+                  value={model.fields}
+                  fullWidth
+                  data-test-subj="annotationFieldsInput"
+                />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -267,6 +273,7 @@ export const AnnotationRow = ({
                   onChange={handleChange('template')}
                   value={model.template}
                   fullWidth
+                  data-test-subj="annotationRowTemplateInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>

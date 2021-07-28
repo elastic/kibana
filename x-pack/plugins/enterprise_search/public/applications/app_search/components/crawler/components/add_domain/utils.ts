@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { HttpLogic } from '../../../../../shared/http';
+
+import { CrawlerDomainValidationResultFromServer } from '../../types';
+
 export const extractDomainAndEntryPointFromUrl = (
   url: string
 ): { domain: string; entryPoint: string } => {
@@ -18,4 +22,33 @@ export const extractDomainAndEntryPointFromUrl = (
   }
 
   return { domain, entryPoint };
+};
+
+export const getDomainWithProtocol = async (domain: string) => {
+  const { http } = HttpLogic.values;
+
+  if (!domain.startsWith('https://') && !domain.startsWith('http://')) {
+    try {
+      const route = '/api/app_search/crawler/validate_url';
+      const checks = ['tcp', 'url_request'];
+
+      const httpsCheckData: CrawlerDomainValidationResultFromServer = await http.post(route, {
+        body: JSON.stringify({ url: `https://${domain}`, checks }),
+      });
+      if (httpsCheckData.valid) {
+        return `https://${domain}`;
+      }
+
+      const httpCheckData: CrawlerDomainValidationResultFromServer = await http.post(route, {
+        body: JSON.stringify({ url: `http://${domain}`, checks }),
+      });
+      if (httpCheckData.valid) {
+        return `http://${domain}`;
+      }
+    } catch (error) {
+      // Do nothing as later validation steps will catch errors
+    }
+  }
+
+  return domain;
 };
