@@ -24,12 +24,13 @@ import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
-import { useCapabilities, useStartServices } from '../../../../../hooks';
+import { useCapabilities, usePackageInstallations, useStartServices } from '../../../../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
   packageTitle?: string;
   packageVersion?: string;
+  hasUpgrade: boolean;
 }
 
 interface Props {
@@ -55,6 +56,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
 }) => {
   const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
+  const { updatableIntegrations } = usePackageInstallations();
 
   // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
@@ -68,11 +70,22 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           namespacesValues.push(packagePolicy.namespace);
         }
 
+        const updatableIntegrationRecord = updatableIntegrations.get(
+          packagePolicy.package?.name ?? ''
+        );
+
+        const hasUpgrade =
+          !!updatableIntegrationRecord &&
+          updatableIntegrationRecord.policiesToUpgrade.some(
+            ({ id }) => id === packagePolicy.policy_id
+          );
+
         return {
           ...packagePolicy,
           packageName: packagePolicy.package?.name ?? '',
           packageTitle: packagePolicy.package?.title ?? '',
           packageVersion: packagePolicy.package?.version ?? '',
+          hasUpgrade,
         };
       }
     );
@@ -81,7 +94,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     inputTypesValues.sort(stringSortAscending);
 
     return [mappedPackagePolicies, namespacesValues.map(toFilterOption)];
-  }, [originalPackagePolicies]);
+  }, [originalPackagePolicies, updatableIntegrations]);
 
   const columns = useMemo(
     (): EuiInMemoryTableProps<InMemoryPackagePolicy>['columns'] => [
@@ -138,6 +151,17 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       defaultMessage="v{version}"
                       values={{ version: packagePolicy.package.version }}
                     />
+
+                    {packagePolicy.hasUpgrade && (
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
+                          { defaultMessage: 'Upgrade Available' }
+                        )}
+                      >
+                        <EuiIcon type="alert" color="warning" />
+                      </EuiToolTip>
+                    )}
                   </EuiText>
                 </EuiFlexItem>
               )}

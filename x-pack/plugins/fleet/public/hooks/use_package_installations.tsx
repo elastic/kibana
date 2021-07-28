@@ -14,6 +14,18 @@ import type { PackagePolicy } from '../types';
 import { useGetPackages } from './use_request/epm';
 import { useGetAgentPolicies } from './use_request/agent_policy';
 
+interface UpdatableIntegration {
+  currentVersion: string;
+  policiesToUpgrade: Array<{
+    id: string;
+    name: string;
+    agentsCount: number;
+    pkgPolicyId: string;
+    pkgPolicyName: string;
+    pkgPolicyIntegrationVersion: string;
+  }>;
+}
+
 export const usePackageInstallations = () => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
     experimental: true,
@@ -38,7 +50,7 @@ export const usePackageInstallations = () => {
     [allInstalledPackages]
   );
 
-  const updatableIntegrations = useMemo(
+  const updatableIntegrations = useMemo<Map<string, UpdatableIntegration>>(
     () =>
       (agentPolicyData?.items || []).reduce((result, policy) => {
         policy.package_policies.forEach((pkgPolicy: PackagePolicy | string) => {
@@ -60,7 +72,7 @@ export const usePackageInstallations = () => {
             packageData.policiesToUpgrade.push({
               id: policy.id,
               name: policy.name,
-              agentsCount: policy.agents,
+              agentsCount: policy.agents ?? 0,
               pkgPolicyId: pkgPolicy.id,
               pkgPolicyName: pkgPolicy.name,
               pkgPolicyIntegrationVersion: version,
@@ -69,7 +81,7 @@ export const usePackageInstallations = () => {
           }
         });
         return result;
-      }, new Map()),
+      }, new Map<string, UpdatableIntegration>()),
     [allInstalledPackages, agentPolicyData]
   );
 
