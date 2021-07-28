@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 
-interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
+export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
   request: string;
   refetch: (() => void) | null;
@@ -40,14 +40,11 @@ export const useInspectButton = ({
         refetch,
       });
     }
-  }, [setQuery, loading, response, request, refetch, uniqueQueryId]);
 
-  useEffect(() => {
     return () => {
       if (deleteQuery) {
         deleteQuery({ id: uniqueQueryId });
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
 };
