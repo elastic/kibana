@@ -38,20 +38,8 @@ export const getElasticsearchMetricQuery = (
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
-
-  const to = moment(timeframe ? timeframe.end : Date.now())
-    .add(1, timeUnit)
-    .startOf(timeUnit)
-    .valueOf();
-
-  // We need enough data for 5 buckets worth of data. We also need
-  // to convert the intervalAsSeconds to milliseconds.
-  const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
-
-  const from = roundTimestamp(
-    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
-    timeUnit
-  );
+  const to = timeframe.end;
+  const from = timeframe.start;
 
   const deliveryDelay = 60 * 1000; // INFO: This allows us to account for any delay ES has in indexing the most recent data.
 
