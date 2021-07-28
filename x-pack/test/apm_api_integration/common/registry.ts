@@ -141,6 +141,7 @@ export const registry = {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Loading ${archiveName}`);
+
               await esArchiver.load(
                 Path.join(
                   'x-pack/test/apm_api_integration/common/fixtures/es_archiver',

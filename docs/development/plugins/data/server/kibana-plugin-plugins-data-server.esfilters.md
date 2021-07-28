@@ -8,14 +8,14 @@
 
 ```typescript
 esFilters: {
-    buildQueryFilter: (query: any, index: string, alias: string) => import("../common").QueryStringFilter;
-    buildCustomFilter: typeof buildCustomFilter;
-    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
-    buildExistsFilter: (field: import("../common").IndexPatternFieldBase, indexPattern: import("../common").IndexPatternBase) => import("../common").ExistsFilter;
-    buildFilter: typeof buildFilter;
-    buildPhraseFilter: (field: import("../common").IndexPatternFieldBase, value: any, indexPattern: import("../common").IndexPatternBase) => import("../common").PhraseFilter;
-    buildPhrasesFilter: (field: import("../common").IndexPatternFieldBase, params: any[], indexPattern: import("../common").IndexPatternBase) => import("../common").PhrasesFilter;
-    buildRangeFilter: (field: import("../common").IndexPatternFieldBase, params: import("../common").RangeFilterParams, indexPattern: import("../common").IndexPatternBase, formattedValue?: string | undefined) => import("../common").RangeFilter;
-    isFilterDisabled: (filter: import("../common").Filter) => boolean;
+    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
+    buildCustomFilter: typeof import("@kbn/es-query").buildCustomFilter;
+    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
+    buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
+    buildFilter: typeof import("@kbn/es-query").buildFilter;
+    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: any, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
+    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: any[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
+    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
+    isFilterDisabled: (filter: import("@kbn/es-query").Filter) => boolean;
 }
 ```
