@@ -399,7 +399,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                 },
               };
               await clusterClient.indices.putMapping({
-                index: `${config.signalsIndex}*`,
+                index: `${existingTemplateName}-*`,
                 body: newMapping,
                 allow_no_indices: true,
               } as estypes.IndicesPutMappingRequest);
