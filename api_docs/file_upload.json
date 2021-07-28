@@ -1348,6 +1348,14 @@
                 "section": "def-common.ES_FIELD_TYPES",
                 "text": "ES_FIELD_TYPES"
               },
+              ".VERSION | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".BOOLEAN | ",
               {
                 "pluginId": "data",
