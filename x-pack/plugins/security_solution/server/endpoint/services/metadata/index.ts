@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export { getMetadataForEndpoints } from './metadata/metadata';
-export * from './actions';
+export * from './endpoint_metadata_service';
+export * from './errors';

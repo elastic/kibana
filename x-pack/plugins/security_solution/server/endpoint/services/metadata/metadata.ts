@@ -7,10 +7,12 @@
 
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { SearchResponse } from 'elasticsearch';
-import { HostMetadata } from '../../../common/endpoint/types';
-import { SecuritySolutionRequestHandlerContext } from '../../types';
-import { getESQueryHostMetadataByIDs } from '../routes/metadata/query_builders';
-import { queryResponseToHostListResult } from '../routes/metadata/support/query_strategies';
+import { HostMetadata } from '../../../../common/endpoint/types';
+import { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { getESQueryHostMetadataByIDs } from '../../routes/metadata/query_builders';
+import { queryResponseToHostListResult } from '../../routes/metadata/support/query_strategies';
+
+// FIXME: fold this function into the EndpointMetadaService
 
 export async function getMetadataForEndpoints(
   endpointIDs: string[],
