@@ -103,9 +103,13 @@ export interface BaseParams {
   title: string;
 }
 
+/*
+ * Job Params are defined by the application, and on the client side, are decorated by the Reporting service.
+ * These are required for handling additional formatting or state migrations
+ */
 export type DecoratedBaseParams = BaseParams & {
-  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
-  version: string; // version of the last supported release, in case the params need migration for forward-compatibility
+  browserTimezone: string; // to format dates in the user's time zone
+  version: string; // to handle any state migrations
 };
 
 export type JobId = string;

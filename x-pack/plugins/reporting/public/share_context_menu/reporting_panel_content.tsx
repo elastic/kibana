@@ -17,12 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import moment from 'moment';
 import React, { Component, ReactElement } from 'react';
 import { ToastsSetup } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
-import { DecoratedBaseParams } from '../../common/types';
+import { BaseParams, DecoratedBaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface Props {
@@ -30,11 +31,10 @@ export interface Props {
   toasts: ToastsSetup;
   reportType: string;
 
-  /** Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.  **/
-  requiresSavedState: boolean;
+  requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
   layoutId: string | undefined;
   objectId?: string;
-  getJobParams: () => DecoratedBaseParams;
+  getJobParams: () => BaseParams;
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
@@ -65,12 +65,28 @@ class ReportingPanelContentUi extends Component<Props, State> {
     };
   }
 
+  private getDecoratedJobParams(): DecoratedBaseParams {
+    // If the TZ is set to the default "Browser", it will not be useful for
+    // server-side export. We need to derive the timezone and pass it as a param
+    // to the export API.
+    const browserTimezone =
+      this.props.uiSettings.get('dateFormat:tz') === 'Browser'
+        ? moment.tz.guess()
+        : this.props.uiSettings.get('dateFormat:tz');
+
+    return {
+      browserTimezone,
+      version: this.props.apiClient.getKibanaVersion(),
+      ...this.props.getJobParams(),
+    };
+  }
+
   private getAbsoluteReportGenerationUrl = (props: Props) => {
     const relativePath = this.props.apiClient.getReportingJobPath(
       props.reportType,
-      props.getJobParams()
+      this.getDecoratedJobParams()
     );
-    return url.resolve(window.location.href, relativePath);
+    return url.resolve(window.location.href, relativePath); // FIXME: (from: string, to: string): string' is deprecated
   };
 
   public componentDidUpdate(_prevProps: Props, prevState: State) {

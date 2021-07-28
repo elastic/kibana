@@ -7,7 +7,6 @@
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
 import React, { Component } from 'react';
 import { ToastsSetup } from 'src/core/public';
 import { getDefaultLayoutSelectors } from '../../common';
@@ -45,16 +44,10 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   public render() {
     return (
       <ReportingPanelContent
-        requiresSavedState={this.props.requiresSavedState}
-        apiClient={this.props.apiClient}
-        toasts={this.props.toasts}
-        reportType={this.props.reportType}
+        {...this.props}
         layoutId={this.getLayout().id}
-        objectId={this.props.objectId}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}
-        isDirty={this.props.isDirty}
-        onClose={this.props.onClose}
       />
     );
   }
@@ -148,13 +141,9 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   };
 
   private getJobParams = (): Required<BaseParams> => {
-    const browserTimezone = moment.tz.guess();
-
     return {
       ...this.props.getJobParams(),
       layout: this.getLayout(),
-      browserTimezone,
-      version: 'FIXME',
     };
   };
 }
