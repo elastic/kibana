@@ -1077,7 +1077,7 @@ export type FieldFormatsContentType = 'html' | 'text';
 export type FieldFormatsGetConfigFn = GetConfigFn;
 
 // @public (undocumented)
-export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'> & {
+export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' | 'register'> & {
     deserialize: FormatFactory;
 };
 
