@@ -31,6 +31,14 @@ export type ExpressionValueVisDimension = ExpressionValueBoxed<
   }
 >;
 
+const getNumberAccessor = (accessor: number, columns: Datatable['columns']) =>
+  columns.length > accessor ? accessor : undefined;
+
+const getDatatableColumnAccessor = (
+  accessor: DatatableColumn['id'],
+  columns: Datatable['columns']
+) => columns.find((c) => c.id === accessor);
+
 export const visDimension = (): ExpressionFunctionDefinition<
   'visdimension',
   Datatable,
@@ -69,13 +77,13 @@ export const visDimension = (): ExpressionFunctionDefinition<
   fn: (input, args) => {
     const accessor =
       typeof args.accessor === 'number'
-        ? args.accessor
-        : input.columns.find((c) => c.id === args.accessor);
+        ? getNumberAccessor(args.accessor, input.columns)
+        : getDatatableColumnAccessor(args.accessor, input.columns);
 
     if (accessor === undefined) {
       throw new Error(
         i18n.translate('visualizations.function.visDimension.error.accessor', {
-          defaultMessage: 'Column name provided is invalid',
+          defaultMessage: 'Column name or index provided is invalid',
         })
       );
     }
