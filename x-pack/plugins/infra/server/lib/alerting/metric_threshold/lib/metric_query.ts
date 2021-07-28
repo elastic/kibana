@@ -38,11 +38,17 @@ export const getElasticsearchMetricQuery = (
   const intervalAsMS = intervalAsSeconds * 1000;
   const to = timeframe.end;
   const from = timeframe.start;
-  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
-  const offsetInMS =
-    [Aggregators.P95, Aggregators.P99, Aggregators.AVERAGE].indexOf(aggType) > -1
-      ? parseInt(offset, 10)
-      : 0;
+  let offset = '0ms';
+  let offsetInMS = 0;
+
+  if (
+    [Aggregators.P95, Aggregators.P99, Aggregators.AVERAGE, Aggregators.RATE].indexOf(aggType) > -1
+  ) {
+    // Only calculate offset for aggs that require a full bucket to evaluate
+    offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
+  }
+
+  offsetInMS = parseInt(offset, 10);
 
   const aggregations =
     aggType === Aggregators.COUNT

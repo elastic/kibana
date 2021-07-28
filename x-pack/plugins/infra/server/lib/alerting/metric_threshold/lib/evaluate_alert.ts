@@ -235,23 +235,29 @@ const getValuesFromAggregations = (
       }));
     }
     if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
-      return buckets
-        .map((bucket) => {
-          const values = bucket.aggregatedValue?.values || [];
-          const firstValue = first(values);
-          if (!firstValue) return null;
-          return { key: bucket.from_as_string, value: firstValue.value };
-        })
-        .filter(dropPartialBuckets(dropPartialBucketsOptions));
+      return (
+        buckets
+          .map((bucket) => {
+            const values = bucket.aggregatedValue?.values || [];
+            const firstValue = first(values);
+            if (!firstValue) return null;
+            return { key: bucket.from_as_string, value: firstValue.value };
+          })
+          // P95 & P99 can only be calculated accurately on full buckets
+          .filter(dropPartialBuckets(dropPartialBucketsOptions))
+      );
     }
 
     if (aggType === Aggregators.AVERAGE) {
-      buckets
-        .map((bucket) => ({
-          key: bucket.key_as_string ?? bucket.from_as_string,
-          value: bucket.aggregatedValue?.value ?? null,
-        }))
-        .filter(dropPartialBuckets(dropPartialBucketsOptions));
+      return (
+        buckets
+          .map((bucket) => ({
+            key: bucket.key_as_string ?? bucket.from_as_string,
+            value: bucket.aggregatedValue?.value ?? null,
+          }))
+          // AVG can only be calculated accurately on full buckets
+          .filter(dropPartialBuckets(dropPartialBucketsOptions))
+      );
     }
 
     return buckets.map((bucket) => ({

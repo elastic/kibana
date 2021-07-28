@@ -245,9 +245,9 @@ describe('The metric threshold alert type', () => {
         },
       });
     test('alerts based on the doc_count value instead of the aggregatedValue', async () => {
-      await execute(Comparator.GT, [2]);
+      await execute(Comparator.GT, [0.9]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      await execute(Comparator.LT, [1.5]);
+      await execute(Comparator.LT, [0.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
   });
