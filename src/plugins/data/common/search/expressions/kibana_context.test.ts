@@ -9,7 +9,7 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ExecutionContext } from 'src/plugins/expressions/common';
 import { KibanaContext } from './kibana_context_type';
-import { FilterStateStore, buildFilter, FILTERS } from '../../query/es_query';
+import { FilterStateStore, buildFilter, FILTERS } from '../../es_query';
 
 import {
   getKibanaContextFn,
@@ -21,7 +21,6 @@ type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 
 const createExecutionContextMock = (): DeeplyMockedKeys<ExecutionContext> => ({
   abortSignal: {} as any,
-  getExecutionContext: jest.fn(),
   getSearchContext: jest.fn(),
   getSearchSessionId: jest.fn(),
   inspectorAdapters: jest.fn(),
