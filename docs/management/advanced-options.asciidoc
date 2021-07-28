@@ -201,12 +201,13 @@ truncation.
 [[presentation-labs]]
 ==== Presentation Labs
 
+[horizontal]
 [[labs-canvas-enable-ui]]`labs:canvas:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard. 
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<defer-loading-panels-below-the-fold,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Dashboard*.
@@ -505,11 +506,11 @@ Shows the Timelion tutorial to users when they first open the Timelion app.
 Used for calculating automatic intervals in visualizations, this is the number
 of buckets to try to represent.
 
-
 [float]
 [[kibana-visualization-settings]]
 ==== Visualization
 
+[horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.
@@ -532,7 +533,6 @@ The maximum geoHash precision displayed in tile maps. 7 is high, 10 is very high
 and 12 is the maximum. For more information, refer to
 {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Cell dimensions at the equator].
 
-[horizontal]
 [[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
 **The legacy XY charts are deprecated and will not be supported as of 7.16.**
 The visualize editor uses a new XY charts library with improved performance, color palettes, fill capacity, and more. Enable this option if you prefer to use the legacy charts library.
@@ -544,11 +544,11 @@ The visualize editor uses new pie charts with improved performance, color palett
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
 
-
 [float]
 [[kibana-telemetry-settings]]
 ==== Usage Data
 
+[horizontal]
 [[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
 When enabled, helps improve the Elastic Stack by providing usage statistics for
 basic features. This data will not be shared outside of Elastic.
