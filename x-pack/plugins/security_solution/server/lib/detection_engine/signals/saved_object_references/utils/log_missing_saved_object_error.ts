@@ -20,11 +20,12 @@ export const logMissingSavedObjectError = ({
   logger: Logger;
   exceptionItem: RuleParams['exceptionsList'][0];
 }): void => {
-  logger.warn(
+  logger.error(
     [
-      'The saved object references were not found for our exception list when we were expecting to find it. Kibana migrations might not have run correctly or someone might have removed it manually.',
-      'Returning the last known good exception list id which might not work.',
+      'The saved object references were not found for our exception list when we were expecting to find it. ',
+      'Kibana migrations might not have run correctly or someone might have removed the saved object references manually. ',
+      'Returning the last known good exception list id which might not work. exceptionItem with its id being returned is: ',
       JSON.stringify(exceptionItem),
-    ].join()
+    ].join('')
   );
 };

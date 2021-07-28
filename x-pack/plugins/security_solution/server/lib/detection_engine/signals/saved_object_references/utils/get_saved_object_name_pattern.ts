@@ -17,4 +17,10 @@ export const getSavedObjectNamePattern = ({
 }: {
   name: string;
   index: number;
-}): string => `${name}_${index}`;
+}): string => {
+  if (!(index >= 0)) {
+    throw new TypeError(`"index" should alway be >= 0 instead of: ${index}`);
+  } else {
+    return `${name}_${index}`;
+  }
+};

@@ -31,8 +31,15 @@ export const injectExceptionsReferences = ({
   exceptionsList: RuleParams['exceptionsList'];
   savedObjectReferences: SavedObjectReference[];
 }): RuleParams['exceptionsList'] => {
+  if (exceptionsList == null) {
+    logger.error(
+      'Exception list is null when it never should be. This indicates potentially that saved object migrations did not run correctly. Returning empty exception list'
+    );
+    return [];
+  }
   return exceptionsList.map((exceptionItem, index) => {
     const savedObjectReference = getSavedObjectReferenceForExceptionsList({
+      logger,
       index,
       savedObjectReferences,
     });

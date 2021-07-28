@@ -23,13 +23,13 @@ export const logWarningIfDifferentReferencesDetected = ({
   savedObjectId: string;
 }): void => {
   if (savedObjectReferenceId !== savedObjectId) {
-    logger.warn(
+    logger.error(
       [
-        'The id of the saved object reference: ',
+        'The id of the "saved object reference id": ',
         savedObjectReferenceId,
-        'is not the same as the saved object id: ',
+        ' is not the same as the "saved object id": ',
         savedObjectId,
-        'Preferring and using the saved object reference id instead of the saved object id',
+        '. Preferring and using the "saved object reference id" instead of the "saved object id"',
       ].join('')
     );
   }
