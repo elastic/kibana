@@ -9,11 +9,15 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-
+import { ClassNames } from '@emotion/react';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { TagCloudVisDependencies } from './plugin';
 import { TagCloudVisRenderValue } from './tag_cloud_fn';
+
+const tagCloudVisClass = {
+  height: '100%',
+};
 
 const TagCloudChart = lazy(() => import('./components/tag_cloud_chart'));
 
@@ -31,15 +35,22 @@ export const getTagCloudVisRenderer: (
 
     render(
       <I18nProvider>
-        <VisualizationContainer handlers={handlers}>
-          <TagCloudChart
-            {...config}
-            palettesRegistry={palettesRegistry}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-            syncColors={config.syncColors}
-          />
-        </VisualizationContainer>
+        <ClassNames>
+          {({ css, cx }) => (
+            <VisualizationContainer
+              handlers={handlers}
+              className={cx('tagCloudContainer', css(tagCloudVisClass))}
+            >
+              <TagCloudChart
+                {...config}
+                palettesRegistry={palettesRegistry}
+                renderComplete={handlers.done}
+                fireEvent={handlers.event}
+                syncColors={config.syncColors}
+              />
+            </VisualizationContainer>
+          )}
+        </ClassNames>
       </I18nProvider>,
       domNode
     );
