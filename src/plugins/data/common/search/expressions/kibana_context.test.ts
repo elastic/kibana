@@ -204,7 +204,7 @@ describe('kibanaContextFn', () => {
   it('deduplicates duplicated filters and keeps the first enabled filter', async () => {
     const { fn } = kibanaContextFn;
     const filter1 = buildFilter(
-      { fields: [] },
+      { fields: [], title: '' },
       { name: 'test', type: 'test' },
       FILTERS.PHRASE,
       false,
@@ -216,7 +216,7 @@ describe('kibanaContextFn', () => {
       FilterStateStore.APP_STATE
     );
     const filter2 = buildFilter(
-      { fields: [] },
+      { fields: [], title: '' },
       { name: 'test', type: 'test' },
       FILTERS.PHRASE,
       false,
@@ -229,7 +229,7 @@ describe('kibanaContextFn', () => {
     );
 
     const filter3 = buildFilter(
-      { fields: [] },
+      { fields: [], title: '' },
       { name: 'test', type: 'test' },
       FILTERS.PHRASE,
       false,
