@@ -35,8 +35,12 @@ export const getAgentHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body: GetOneAgentResponse = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: {
+        ...agent,
+        status: AgentService.getAgentStatus(agent),
+      },
     };
 
     return response.ok({ body });
@@ -87,8 +91,12 @@ export const updateAgentHandler: RequestHandler<
     await AgentService.updateAgent(esClient, request.params.agentId, {
       user_provided_metadata: request.body.user_provided_metadata,
     });
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: {
+        ...agent,
+        status: AgentService.getAgentStatus(agent),
+      },
     };
 
     return response.ok({ body });
@@ -124,7 +132,10 @@ export const getAgentsHandler: RequestHandler<
       : 0;
 
     const body: GetAgentsResponse = {
-      list: agents,
+      list: agents.map((agent) => ({
+        ...agent,
+        status: AgentService.getAgentStatus(agent),
+      })),
       total,
       totalInactive,
       page,
