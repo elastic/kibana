@@ -985,17 +985,17 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "apm",
-              "link": {
-                "path": "x-pack/plugins/apm/public/plugin.ts",
-                "lineNumber": 85
-              }
-            },
-            {
               "plugin": "cloud",
               "link": {
                 "path": "x-pack/plugins/cloud/public/plugin.ts",
                 "lineNumber": 86
+              }
+            },
+            {
+              "plugin": "apm",
+              "link": {
+                "path": "x-pack/plugins/apm/public/plugin.ts",
+                "lineNumber": 91
               }
             }
           ]
@@ -1136,7 +1136,7 @@
         ],
         "source": {
           "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
-          "lineNumber": 169
+          "lineNumber": 173
         },
         "deprecated": false,
         "initialIsOpen": false
