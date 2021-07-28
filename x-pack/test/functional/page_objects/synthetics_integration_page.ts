@@ -178,7 +178,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async configureHeaders(testSubj: string, headers: Record<string, string>) {
       const headersContainer = await testSubjects.find(testSubj);
-      const addHeaderButton = await headersContainer.findByCssSelector('button');
+      const addHeaderButton = await testSubjects.find(`${testSubj}__button`);
       const keys = Object.keys(headers);
 
       await Promise.all(

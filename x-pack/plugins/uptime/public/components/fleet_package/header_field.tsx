@@ -15,9 +15,10 @@ interface Props {
   contentMode?: Mode;
   defaultValue: Record<string, string>;
   onChange: (value: Record<string, string>) => void;
+  'data-test-subj': string;
 }
 
-export const HeaderField = ({ contentMode, defaultValue, onChange }: Props) => {
+export const HeaderField = ({ contentMode, defaultValue, onChange, 'data-test-subj': dataTestSubj }: Props) => {
   const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
   const formattedDefaultValues: Pair[] = [
     ...defaultValueKeys.map<Pair>((key) => {
@@ -55,6 +56,7 @@ export const HeaderField = ({ contentMode, defaultValue, onChange }: Props) => {
       }
       defaultPairs={headers}
       onChange={setHeaders}
+      data-test-subj={dataTestSubj}
     />
   );
 };
