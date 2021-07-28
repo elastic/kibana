@@ -57,7 +57,7 @@ const i18nTexts = {
         criticalDeprecations,
       },
     }),
-  getTotalDeprecationsTooltip: (clusterCount: number, indexCount: number) =>
+  getTotalDeprecationsMessage: (clusterCount: number, indexCount: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip', {
       defaultMessage:
         'This cluster is using {clusterCount} deprecated cluster settings and {indexCount} deprecated index settings',
@@ -105,42 +105,6 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiStat
-            data-test-subj="totalDeprecations"
-            title={error ? '--' : allDeprecations.length}
-            description={
-              <>
-                <span>{i18nTexts.totalDeprecationsTitle}</span>{' '}
-                <EuiIconTip
-                  content={i18nTexts.getTotalDeprecationsTooltip(
-                    esDeprecations?.cluster.length ?? 0,
-                    esDeprecations?.indices.length ?? 0
-                  )}
-                  position="right"
-                  iconProps={{
-                    tabIndex: -1,
-                  }}
-                />
-              </>
-            }
-            isLoading={isLoading}
-          >
-            {error === null && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getTotalDeprecationsTooltip(
-                        esDeprecations?.cluster.length ?? 0,
-                        esDeprecations?.indices.length ?? 0
-                      )}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-          </EuiStat>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiStat
             data-test-subj="criticalDeprecations"
             title={error ? '--' : criticalDeprecations.length}
             description={i18nTexts.criticalDeprecationsTitle}
@@ -158,6 +122,28 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
             )}
 
             {error && <EsStatsErrors error={error} />}
+          </EuiStat>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj="totalDeprecations"
+            title={error ? '--' : allDeprecations.length}
+            description={i18nTexts.totalDeprecationsTitle}
+            isLoading={isLoading}
+          >
+            {error === null && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getTotalDeprecationsMessage(
+                        esDeprecations?.cluster.length ?? 0,
+                        esDeprecations?.indices.length ?? 0
+                      )}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
           </EuiStat>
         </EuiFlexItem>
       </EuiFlexGroup>

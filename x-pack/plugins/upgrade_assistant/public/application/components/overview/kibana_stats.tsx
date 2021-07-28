@@ -125,25 +125,6 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ history }) =>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiStat
-            data-test-subj="totalDeprecations"
-            title={error ? '--' : kibanaDeprecations?.length ?? '0'}
-            description={i18nTexts.totalDeprecationsTitle}
-            isLoading={isLoading}
-          >
-            {error === undefined && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getTotalDeprecationsMessage(kibanaDeprecations?.length ?? 0)}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-          </EuiStat>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiStat
             data-test-subj="criticalDeprecations"
             title={
               kibanaDeprecations
@@ -185,6 +166,25 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ history }) =>
                   }}
                 />
               </>
+            )}
+          </EuiStat>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj="totalDeprecations"
+            title={error ? '--' : kibanaDeprecations?.length ?? '0'}
+            description={i18nTexts.totalDeprecationsTitle}
+            isLoading={isLoading}
+          >
+            {error === undefined && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getTotalDeprecationsMessage(kibanaDeprecations?.length ?? 0)}
+                </p>
+              </EuiScreenReaderOnly>
             )}
           </EuiStat>
         </EuiFlexItem>

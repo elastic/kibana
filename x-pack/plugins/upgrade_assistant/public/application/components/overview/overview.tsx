@@ -54,7 +54,7 @@ const i18nTexts = {
         defaultMessage="Get ready for the next version of Elastic Stack. Prepare to upgrade by identifying deprecated settings and features below. When you are ready, follow the {upgradeGuideLink} to complete your version upgrade."
         values={{
           upgradeGuideLink: (
-            <EuiLink href={upgradeGuideLink} target="_blank">
+            <EuiLink href={upgradeGuideLink} target="_blank" external={false}>
               {i18n.translate('xpack.upgradeAssistant.overview.pageDescriptionLink', {
                 defaultMessage: 'upgrade guide',
               })}
@@ -190,6 +190,7 @@ const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps
 
         <Collapsible renderFooterLinks={viewLogs}>
           <LogStream
+            height={200}
             sourceId="deprecation_logs"
             startTimestamp={startTimestamp}
             endTimestamp={endTimestamp}
