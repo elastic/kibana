@@ -20,7 +20,7 @@ interface AppDependencies {
 export const renderApp = ({ el, I18nContext }: AppDependencies) => {
   render(
     <I18nContext>
-      <EcsMapperMainUi />
+      <EcsMapperMainUi/>
     </I18nContext>,
     el
   );

@@ -40,6 +40,13 @@ export class EcsMapperUploadView extends Component {
     this.setState({ hasPermissionToImport });
   }
 
+  onManageIngestPipeline = () => {
+    console.log("routing");
+    this.props.navigateToApp('management', {
+      path: `/ingest/ingest_pipelines/edit/test-pipeline`,
+    });
+  }
+
   onFilePickerChange = (files) => {
     this.setState(
       {
@@ -120,7 +127,11 @@ export class EcsMapperUploadView extends Component {
 
           {loading && <LoadingPanel />}
 
-          {loaded && <ResultsPanel />}
+          {loaded && (
+            <ResultsPanel
+              onManageIngestPipeline={this.onManageIngestPipeline}
+            />
+          )}
         </>
       </div>
     );

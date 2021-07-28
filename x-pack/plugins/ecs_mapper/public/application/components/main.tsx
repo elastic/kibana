@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { getPluginsStart } from '../../kibana_services';
+import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 // @ts-ignore
@@ -14,14 +14,18 @@ import { EcsMapperUploadView } from '../components/map/index';
 
 export const EcsMapperMainUi: FC = () => {
   const { fileUpload, mapper } = getPluginsStart();
+  const { application } = getCoreStart();
+  const { navigateToApp } = application;
+  
   const services = {
     fileUpload,
     mapper,
+    navigateToApp
   };
 
   return (
     <KibanaContextProvider services={{ ...services }}>
-      <EcsMapperUploadView fileUpload={fileUpload} mapper={mapper} />
+      <EcsMapperUploadView fileUpload={fileUpload} mapper={mapper} navigateToApp={navigateToApp}/>
     </KibanaContextProvider>
   );
 };

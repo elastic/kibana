@@ -8,7 +8,7 @@
 import { DevToolsSetup } from 'src/plugins/dev_tools/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { FileUploadPluginStart } from '../../file_upload/public';
-import { Plugin, CoreSetup, CoreStart } from '../../../../src/core/public';
+import { Plugin, CoreSetup, CoreStart, ApplicationStart } from '../../../../src/core/public';
 
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDevTool, registerHomeFeatureCatalogue } from './registration';
@@ -32,6 +32,7 @@ export interface EcsMapperSetupDependencies {
 export interface EcsMapperStartDependencies {
   fileUpload: FileUploadPluginStart;
   mapper: MapperClient;
+  application: ApplicationStart;
 }
 
 export type EcsMapperPluginSetup = ReturnType<EcsMapperPlugin['setup']>;

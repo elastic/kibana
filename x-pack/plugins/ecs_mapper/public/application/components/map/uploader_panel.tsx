@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,17 +19,22 @@ import {
   EuiFilePicker,
   EuiLoadingSpinner,
   EuiTitle,
+  EuiText,
+  EuiButton,
 } from '@elastic/eui';
-
 import { MapperInformational } from './mapper_informational';
 
 import './mapper_upload.scss';
 
-interface Props {
+interface AboutProps {
   onFilePickerChange(files: FileList | null): void;
 }
 
-export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
+interface ResultsProps {
+  onManageIngestPipeline(): void;
+}
+
+export const AboutPanel: FC<AboutProps> = ({ onFilePickerChange }) => {
   return (
     <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileUpload">
       <EuiPageBody className="prfDevTool__page__pageBody">
@@ -88,21 +92,34 @@ export const LoadingPanel: FC = () => {
   );
 };
 
-export const ResultsPanel: FC = () => {
+export const ResultsPanel: FC<ResultsProps> = ({ onManageIngestPipeline }) =>  {
   return (
     <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperResultsLoaded">
       <EuiPageBody className="prfDevTool__page__pageBody">
         <EuiPageContent className="prfDevTool__page__pageBodyContent">
-          <div style={{ textAlign: 'center' }}>
-            <EuiTitle size="s">
-              <h1 role="alert">
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem grow={true}>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ecsMapper.file.informational.instructions"
+                    defaultMessage="Upload successful!"
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="m" />
+              <EuiButton
+                target="_self"
+                onClick={() => onManageIngestPipeline()}
+                data-test-subj="ecsMapperManagePipelineButton"
+                >
                 <FormattedMessage
-                  id="xpack.ecsMapper.file.upload.resultsTitle"
-                  defaultMessage="Super exciting results coming soon...."
+                  id="xpack.ecsMapper.manageIngestPipeline"
+                  defaultMessage="Let's take a look!"
                 />
-              </h1>
-            </EuiTitle>
-          </div>
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
