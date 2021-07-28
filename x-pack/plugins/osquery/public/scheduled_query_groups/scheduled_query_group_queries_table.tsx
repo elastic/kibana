@@ -244,6 +244,19 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             query: { match_phrase: { action_id: actionId } },
             $state: { store: FilterStateStore.APP_STATE },
           },
+          {
+            meta: {
+              index: 'logs-*',
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'agent.type',
+              params: { query: 'osquerybeat' },
+            },
+            query: { match_phrase: { 'agent.type': 'osquerybeat' } },
+            $state: { store: FilterStateStore.APP_STATE },
+          },
         ],
         refreshInterval: {
           pause: true,
