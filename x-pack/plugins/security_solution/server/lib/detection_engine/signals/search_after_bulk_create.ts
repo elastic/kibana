@@ -7,7 +7,6 @@
 
 import { identity } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -74,7 +73,8 @@ export const searchAfterAndBulkCreate = async ({
           to: tuple.to.toISOString(),
           services,
           logger,
-          filter: filter as QueryDslQueryContainer,
+          // @ts-expect-error please, declare a type explicitly instead of unknown
+          filter,
           pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
           timestampOverride: ruleParams.timestampOverride,
           trackTotalHits,
