@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from '../../../../../src/core/public/mocks';
 import { ReportInfoButton } from './report_info_button';
 
 jest.mock('../lib/reporting_api_client');
 
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-const httpSetup = {} as any;
-const apiClient = new ReportingAPIClient(httpSetup);
+const coreSetup = coreMock.createSetup();
+const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
 
 describe('ReportInfoButton', () => {
   it('handles button click flyout on click', () => {

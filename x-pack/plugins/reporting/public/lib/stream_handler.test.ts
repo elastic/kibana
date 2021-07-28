@@ -26,7 +26,8 @@ const mockJobsFound: Job[] = [
   { id: 'job-source-mock3', status: 'pending', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
 ].map((j) => new Job(j as ReportApiJSON)); // prettier-ignore
 
-const jobQueueClientMock = new ReportingAPIClient(coreMock.createSetup().http);
+const coreSetup = coreMock.createSetup();
+const jobQueueClientMock = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
 jobQueueClientMock.findForJobIds = async (jobIds: string[]) => mockJobsFound;
 jobQueueClientMock.getInfo = () =>
   Promise.resolve(({ content: 'this is the completed report data' } as unknown) as Job);

@@ -25,7 +25,7 @@ test('ScreenCapturePanelContent renders the default view properly', () => {
       <ScreenCapturePanelContent
         reportType="Analytical App"
         requiresSavedState={false}
-        apiClient={new ReportingAPIClient(coreSetup.http, '7.15.0')}
+        apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
         toasts={coreSetup.notifications.toasts}
         uiSettings={coreSetup.uiSettings}
         getJobParams={getJobParamsDefault}
@@ -45,7 +45,7 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
         layoutOption="canvas"
         reportType="Analytical App"
         requiresSavedState={false}
-        apiClient={new ReportingAPIClient(coreSetup.http, '7.15.0')}
+        apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
         toasts={coreSetup.notifications.toasts}
         uiSettings={coreSetup.uiSettings}
         getJobParams={getJobParamsDefault}
@@ -64,7 +64,7 @@ test('ScreenCapturePanelContent properly renders a view with "print" layout opti
         layoutOption="print"
         reportType="Analytical App"
         requiresSavedState={false}
-        apiClient={new ReportingAPIClient(coreSetup.http, '7.15.0')}
+        apiClient={new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0')}
         toasts={coreSetup.notifications.toasts}
         uiSettings={coreSetup.uiSettings}
         getJobParams={getJobParamsDefault}
