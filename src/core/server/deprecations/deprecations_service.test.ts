@@ -91,6 +91,7 @@ describe('DeprecationsService', () => {
             "documentationUrl": "testDocUrl",
             "level": "critical",
             "message": "testMessage",
+            "requireRestart": true,
           },
         ]
       `);
