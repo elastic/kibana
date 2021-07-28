@@ -185,7 +185,7 @@ describe('Exception helpers', () => {
         meta: {},
         name: 'some name',
         namespace_type: 'single',
-        os_types: ['linux'],
+        os_types: [],
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
       };

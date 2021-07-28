@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { FieldValueSuggestions } from './index';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import * as searchHook from '../../../hooks/use_es_search';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 jest.setTimeout(30000);
 
-// flaky https://github.com/elastic/kibana/issues/105784
-describe.skip('FieldValueSuggestions', () => {
+describe('FieldValueSuggestions', () => {
   jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(1500);
   jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(1500);
 
@@ -108,6 +107,8 @@ describe.skip('FieldValueSuggestions', () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith(['US'], []);
 
+    await waitForElementToBeRemoved(() => screen.queryByText('Apply'));
+
     rerender(
       <EuiThemeProvider darkMode={false}>
         <FieldValueSuggestions
@@ -121,6 +122,8 @@ describe.skip('FieldValueSuggestions', () => {
         />
       </EuiThemeProvider>
     );
+
+    fireEvent.click(screen.getByText('Service name'));
 
     fireEvent.click(await screen.findByText('US'));
     fireEvent.click(await screen.findByText('Pak'));
