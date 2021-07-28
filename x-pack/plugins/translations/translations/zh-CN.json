@@ -698,7 +698,7 @@
     "dashboard.unsavedChangesBadge": "未保存的更改",
     "dashboard.urlWasRemovedInSixZeroWarningMessage": "6.0 中已移除 url“dashboard/create”。请更新您的书签。",
     "data.advancedSettings.autocompleteIgnoreTimerange": "使用时间范围",
-    "data.advancedSettings.autocompleteIgnoreTimerangeText": "禁用此属性可从您的完全数据集中获取自动完成建议，而非从当前时间范围。",
+    "data.advancedSettings.autocompleteIgnoreTimerangeText": "禁用此属性可从您的完全数据集中获取自动完成建议，而非从当前时间范围。 {learnMoreLink}",
     "data.advancedSettings.courier.batchSearchesText": "Kibana 使用新的异步搜索和基础架构。\n           如果想回退到旧式同步操作，请启用此选项",
     "data.advancedSettings.courier.batchSearchesTextDeprecation": "此设置已过时，将在 Kibana 8.0 中移除。",
     "data.advancedSettings.courier.batchSearchesTitle": "使用同步搜索",
