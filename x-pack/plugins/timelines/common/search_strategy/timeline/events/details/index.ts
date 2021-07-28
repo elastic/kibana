@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/common-utils';
+
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
@@ -28,4 +30,5 @@ export interface TimelineEventsDetailsRequestOptions
   extends Partial<TimelineRequestOptionsPaginated> {
   indexName: string;
   eventId: string;
+  authFilter?: JsonObject;
 }

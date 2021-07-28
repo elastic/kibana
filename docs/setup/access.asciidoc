@@ -12,25 +12,28 @@ include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 [[log-on-to-the-web-application]]
 === Log on to the web application
 
-If you are using a self-managed deployment, you access {kib} through the web application on port 5601.
+If you are using a self-managed deployment, access {kib} through the web application on port 5601.
 
 . Point your web browser to the machine where you are running {kib} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
-
-. To allow remote users to connect to {kib}, set the parameter `server.host` in kibana.yml to a non-loopback address.
-
-. On the home page, click *{kib}*.
 +
-To make the {kib} page your landing page, click *Make this my landing page*.
+To remotely connect to {kib}, set <server-host,server.host>> to a non-loopback address.
+
+. Log on to your account.
+
+. Go to the home page, then click *{kib}*.
+
+. To make the {kib} page your landing page, click *Make this my landing page*.
 
 [float]
 [[status]]
 === Check the {kib} status
 
-To view the {kib} status page, use the status endpoint. For example, `localhost:5601/status`. The status page displays
-information about the server resource usage and installed plugins.
+The status page displays information about the server resource usage and installed plugins.
+
+To view the {kib} status page, use the status endpoint. For example, `localhost:5601/status`. 
 
 [role="screenshot"]
-image::images/kibana-status-page-7_5_0.png[]
+image::images/kibana-status-page-7_14_0.png[Kibana server status page]
 
 For JSON-formatted server status details, use the `localhost:5601/api/status` API endpoint. 
 
