@@ -21,7 +21,6 @@ export default function ({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function () {
-    this.tags(['pete']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
