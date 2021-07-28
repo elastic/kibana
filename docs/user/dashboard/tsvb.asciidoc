@@ -12,12 +12,6 @@ With *TSVB*, you can:
 * Use custom functions and some math on aggregations.
 * Customize the data with labels and colors.
 
-<<<<<<< HEAD
-=======
-[role="screenshot"]
-image::images/tsvb-screenshot.png[TSVB overview]
-
->>>>>>> 833b12ecc15 ([DOCS] Updates Lens and editor pages for 7.14 (#104756))
 [float]
 [[tsvb-required-choices]]
 ==== Open and set up TSVB
