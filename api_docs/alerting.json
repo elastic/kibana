@@ -701,7 +701,7 @@
             "description": [],
             "signature": [
               "() => Set<",
-              "RegistryAlertType",
+              "RegistryRuleType",
               ">"
             ],
             "source": {
@@ -1330,7 +1330,7 @@
             "description": [],
             "signature": [
               "() => Set<",
-              "RegistryAlertType",
+              "RegistryRuleType",
               ">"
             ],
             "source": {

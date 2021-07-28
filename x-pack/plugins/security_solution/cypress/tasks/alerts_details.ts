@@ -6,10 +6,10 @@
  */
 
 import {
+  ENRICHMENT_COUNT_NOTIFICATION,
   JSON_CONTENT,
   JSON_VIEW_TAB,
   TABLE_TAB,
-  THREAT_INTEL_TAB,
 } from '../screens/alerts_details';
 
 export const openJsonView = () => {
@@ -21,7 +21,7 @@ export const openTable = () => {
 };
 
 export const openThreatIndicatorDetails = () => {
-  cy.get(THREAT_INTEL_TAB).click();
+  cy.get(ENRICHMENT_COUNT_NOTIFICATION).click();
 };
 
 export const scrollJsonViewToBottom = () => {
