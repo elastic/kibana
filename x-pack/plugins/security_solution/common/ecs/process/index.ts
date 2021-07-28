@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CodeSignature, Ext } from '../file';
+import { Ext } from '../file';
 
 export interface ProcessEcs {
   Ext?: Ext;
@@ -26,7 +26,6 @@ export interface ProcessEcs {
 
 export interface ProcessPe {
   original_file_name?: string;
-  code_signature?: CodeSignature;
   company?: string;
   description?: string;
   file_version?: string;
