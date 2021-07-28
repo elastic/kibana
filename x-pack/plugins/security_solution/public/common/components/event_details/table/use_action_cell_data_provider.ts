@@ -36,6 +36,7 @@ export interface UseActionCellDataProvider {
   fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
   fieldType?: string;
   isObjectArray?: boolean;
+  isThreatMatch?: boolean;
   linkValue?: string | null;
   values: string[] | null | undefined;
 }
@@ -48,6 +49,7 @@ export const useActionCellDataProvider = ({
   fieldFromBrowserField,
   fieldType,
   isObjectArray,
+  isThreatMatch,
   linkValue,
   values,
 }: UseActionCellDataProvider): { idList: string[]; stringValues: string[] } | null => {
@@ -61,6 +63,10 @@ export const useActionCellDataProvider = ({
     let valueAsString: string = isString(value) ? value : `${values}`;
     if (fieldFromBrowserField == null) {
       stringifiedValues.push(valueAsString);
+      if (isThreatMatch) {
+        id = `threat-match-${contextId}-${field}-${value}-${eventId}`;
+        memo.push(id);
+      }
       return memo;
     }
     const appendedUniqueId = `${contextId}-${eventId}-${field}-${index}-${value}-${eventId}-${field}-${value}`;

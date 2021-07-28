@@ -15,6 +15,9 @@ import { FormattedFieldValue } from '../../../../timelines/components/timeline/b
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers } from './helpers';
 import { EnrichmentIcon } from './enrichment_icon';
+import { ActionCell } from '../table/action_cell';
+import { TimelineEventsDetailsItem } from '../../../../../../timelines/common';
+import { EventFieldsData } from '../types';
 
 export interface ThreatSummaryItem {
   title: {
@@ -28,6 +31,7 @@ export interface ThreatSummaryItem {
     index: number;
     value: string | undefined;
     provider: string | undefined;
+    data: TimelineEventsDetailsItem | undefined;
   };
 }
 
@@ -54,6 +58,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
   index,
   value,
   provider,
+  data,
 }) => {
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}-${index}-${provider}`;
   return (
@@ -81,11 +86,20 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
           </RightMargin>
         </>
       )}
+      <ActionCell
+        data={(data ?? { field: fieldName }) as EventFieldsData}
+        contextId={timelineId}
+        eventId={eventId}
+        isThreatMatch={true}
+        timelineId={timelineId}
+        values={value ? [value] : []}
+      />
     </>
   );
 };
 
 const buildThreatSummaryItems = (
+  data: TimelineEventsDetailsItem[],
   enrichments: CtiEnrichment[],
   timelineId: string,
   eventId: string
@@ -105,6 +119,7 @@ const buildThreatSummaryItems = (
         provider,
         timelineId,
         value,
+        data: data.find((item) => item.field === field),
       },
     };
   });
@@ -115,7 +130,7 @@ const columns: Array<EuiBasicTableColumn<ThreatSummaryItem>> = [
     field: 'title',
     truncateText: false,
     render: EnrichmentTitle,
-    width: '160px',
+    width: '220px',
     name: '',
   },
   {
@@ -130,13 +145,14 @@ const ThreatSummaryViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   timelineId: string;
   eventId: string;
-}> = ({ enrichments, timelineId, eventId }) => (
+  data: TimelineEventsDetailsItem[];
+}> = ({ enrichments, timelineId, eventId, data }) => (
   <Indent>
     <StyledEuiInMemoryTable
       columns={columns}
       compressed
       data-test-subj="threat-summary-view"
-      items={buildThreatSummaryItems(enrichments, timelineId, eventId)}
+      items={buildThreatSummaryItems(data, enrichments, timelineId, eventId)}
     />
   </Indent>
 );
