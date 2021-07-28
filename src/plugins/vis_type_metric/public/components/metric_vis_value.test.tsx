@@ -46,7 +46,7 @@ describe('MetricVisValue', () => {
     const component = shallow(
       <MetricVisValue fontSize={12} metric={baseMetric} onFilter={onFilter} />
     );
-    component.find('.mtrVis__container-isfilterable').simulate('click');
+    component.simulate('click');
     expect(onFilter).toHaveBeenCalledWith(baseMetric);
   });
 });
