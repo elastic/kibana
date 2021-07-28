@@ -248,8 +248,6 @@ const getValuesFromAggregations = (
         key: bucket.key_as_string ?? bucket.from_as_string,
         value: bucket.aggregatedValue?.value ?? null,
       }));
-      // AVG can only be calculated accurately on full buckets
-      // .filter(dropPartialBuckets(dropPartialBucketsOptions))
     }
 
     if (aggType === Aggregators.RATE) {
