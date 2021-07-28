@@ -2974,15 +2974,6 @@ apollo-server-errors@^2.0.2:
   resolved "https://registry.yarnpkg.com/apollo-server-errors/-/apollo-server-errors-2.0.2.tgz#e9cbb1b74d2cd78aed23cd886ca2d0c186323b2b"
   integrity sha512-zyWDqAVDCkj9espVsoUpZr9PwDznM8UW6fBfhV+i1br//s2AQb07N6ektZ9pRIEvkhykDZW+8tQbDwAO0vUROg==
 
-apollo-server-hapi@^1.3.6:
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/apollo-server-hapi/-/apollo-server-hapi-1.3.6.tgz#44dea128b64c1c10fdd35ac8307896a57ba1f4a8"
-  integrity sha1-RN6hKLZMHBD901rIMHiWpXuh9Kg=
-  dependencies:
-    apollo-server-core "^1.3.6"
-    apollo-server-module-graphiql "^1.3.4"
-    boom "^7.1.0"
-
 apollo-server-module-graphiql@^1.3.4:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/apollo-server-module-graphiql/-/apollo-server-module-graphiql-1.3.4.tgz#50399b7c51b7267d0c841529f5173e5fc7304de4"
@@ -4630,7 +4621,7 @@ boolbase@~1.0.0:
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
   integrity sha1-aN/1++YMUes3cl6p4+0xDcwed24=
 
-boom@7.x.x, boom@^7.1.0:
+boom@7.x.x:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/boom/-/boom-7.3.0.tgz#733a6d956d33b0b1999da3fe6c12996950d017b9"
   integrity sha512-Swpoyi2t5+GhOEGw8rEsKvTxFLIDiiKoUc2gsoV6Lyr43LHBIzch3k2MvYUs8RTROrIkVJ3Al0TkaOGjnb+B6A==
