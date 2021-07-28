@@ -11,8 +11,8 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices, RuleDataClient } from '../../../../../../rule_registry/server';
 import { QUERY_ALERT_TYPE_ID } from '../../../../../common/constants';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { SetupPlugins } from '../../../../../target/types/server/plugin';
 import { ConfigType } from '../../../../config';
+import { SetupPlugins } from '../../../../plugin';
 
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
