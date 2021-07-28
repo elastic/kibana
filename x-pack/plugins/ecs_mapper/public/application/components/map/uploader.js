@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 
-import { AboutPanel, LoadingPanel, ResultsPanel } from './upload_panel';
+import { AboutPanel, LoadingPanel, ResultsPanel } from './uploader_panel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
 
