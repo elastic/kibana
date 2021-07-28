@@ -184,7 +184,7 @@ export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
   RuleParams,
-  RuleParams,
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -195,7 +195,7 @@ export const isAlertExecutor = (
 
 export type SignalRuleAlertTypeDefinition = AlertType<
   RuleParams,
-  RuleParams,
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
