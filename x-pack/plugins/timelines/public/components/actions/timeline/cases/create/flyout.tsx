@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useMemo } from 'react';
-import styled, { StyledComponent } from 'styled-components';
+import React, { memo, useMemo } from 'react';
+import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import * as i18n from '../translations';
