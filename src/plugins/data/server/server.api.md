@@ -1048,6 +1048,7 @@ export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest
     // (undocumented)
     asScoped: (request: KibanaRequest) => IScopedSearchClient;
     getSearchStrategy: (name?: string) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
+    searchAsInternalUser: ISearchStrategy;
     // (undocumented)
     searchSource: {
         asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
@@ -1470,6 +1471,7 @@ export const UI_SETTINGS: {
     readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
     readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
     readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
+    readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: "autocomplete:valueSuggestionMethod";
 };
 
 // Warning: (ae-missing-release-tag) "usageProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1517,7 +1519,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:280:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:281:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:81:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/search/types.ts:115:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/search/types.ts:120:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
