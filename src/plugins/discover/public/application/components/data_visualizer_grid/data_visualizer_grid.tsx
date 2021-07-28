@@ -8,6 +8,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { IndexPattern, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { ErrorEmbeddable, IEmbeddable, isErrorEmbeddable } from '../../../../../embeddable/public';
@@ -17,7 +18,6 @@ import type {
   DataVisualizerGridEmbeddableOutput,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable';
-
 export interface DiscoverDataVisualizerGridProps {
   /**
    * Determines which columns are displayed
@@ -45,6 +45,7 @@ export interface DiscoverDataVisualizerGridProps {
   services: DiscoverServices;
   savedSearch?: SavedSearch;
   query?: Query;
+  filters?: Filter[];
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -52,7 +53,7 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 });
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
-  const { services, indexPattern, savedSearch, query, columns } = props;
+  const { services, indexPattern, savedSearch, query, columns, filters } = props;
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -67,11 +68,12 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
         indexPattern,
         savedSearch,
         query,
+        filters,
         visibleFieldNames: columns,
       });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query, columns]);
+  }, [embeddable, indexPattern, savedSearch, query, columns, filters]);
 
   useEffect(() => {
     return () => {
