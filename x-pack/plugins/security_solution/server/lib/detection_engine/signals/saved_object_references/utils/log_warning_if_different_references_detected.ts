@@ -7,11 +7,21 @@
 
 import { Logger } from 'src/core/server';
 
-export const logWarningIfDifferentReferencesDetected = (
-  logger: Logger,
-  savedObjectReferenceId: string,
-  savedObjectId: string
-): void => {
+/**
+ * This will log a warning that the saved object reference id and the saved object id are not the same if that is true.
+ * @param logger The kibana injected logger
+ * @param savedObjectReferenceId The saved object reference id from "references: [{ id: ...}]"
+ * @param savedObjectId The saved object id from a structure such as exceptions { exceptionsList: { "id": "..." } }
+ */
+export const logWarningIfDifferentReferencesDetected = ({
+  logger,
+  savedObjectReferenceId,
+  savedObjectId,
+}: {
+  logger: Logger;
+  savedObjectReferenceId: string;
+  savedObjectId: string;
+}): void => {
   if (savedObjectReferenceId !== savedObjectId) {
     logger.warn(
       [

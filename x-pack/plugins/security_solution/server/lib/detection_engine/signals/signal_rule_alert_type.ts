@@ -95,8 +95,9 @@ export const signalRulesAlertType = ({
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     useSavedObjectReferences: {
-      extractReferences: (params) => extractReferences(logger, params),
-      injectReferences: (params, references) => injectReferences(logger, params, references),
+      extractReferences: (params) => extractReferences({ logger, params }),
+      injectReferences: (params, savedObjectReferences) =>
+        injectReferences({ logger, params, savedObjectReferences }),
     },
     validate: {
       params: {

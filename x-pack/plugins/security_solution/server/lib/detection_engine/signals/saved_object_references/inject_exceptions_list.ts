@@ -8,27 +8,47 @@
 import { Logger, SavedObjectReference } from 'src/core/server';
 import { RuleParams } from '../../schemas/rule_schemas';
 import {
-  createExceptionReference,
   getSavedObjectReferenceForExceptionsList,
   logMissingSavedObjectError,
   logWarningIfDifferentReferencesDetected,
 } from './utils';
 
-export const injectExceptionsReferences = (
-  logger: Logger,
-  exceptionsList: RuleParams['exceptionsList'],
-  savedObjectReferences: SavedObjectReference[]
-): RuleParams['exceptionsList'] => {
+/**
+ * This injects any "exceptionsList" "id"'s from saved object reference and returns the "exceptionsList" using the saved object reference. If for
+ * some reason it is missing on saved object reference, we log an error about it and then take the last known good value from the "exceptionsList"
+ *
+ * @param logger The kibana injected logger
+ * @param exceptionsList The exceptions list to merge the saved object reference from.
+ * @param savedObjectReferences The saved object references which should contain an "exceptionsList"
+ * @returns The exceptionsList with the saved object reference replacing any value in the saved object's id.
+ */
+export const injectExceptionsReferences = ({
+  logger,
+  exceptionsList,
+  savedObjectReferences,
+}: {
+  logger: Logger;
+  exceptionsList: RuleParams['exceptionsList'];
+  savedObjectReferences: SavedObjectReference[];
+}): RuleParams['exceptionsList'] => {
   return exceptionsList.map((exceptionItem, index) => {
-    const savedObjectReference = getSavedObjectReferenceForExceptionsList(
+    const savedObjectReference = getSavedObjectReferenceForExceptionsList({
       index,
-      savedObjectReferences
-    );
+      savedObjectReferences,
+    });
     if (savedObjectReference != null) {
-      logWarningIfDifferentReferencesDetected(logger, savedObjectReference.id, exceptionItem.id);
-      return createExceptionReference(logger, exceptionItem, savedObjectReference);
+      logWarningIfDifferentReferencesDetected({
+        logger,
+        savedObjectReferenceId: savedObjectReference.id,
+        savedObjectId: exceptionItem.id,
+      });
+      const reference: RuleParams['exceptionsList'][0] = {
+        ...exceptionItem,
+        id: savedObjectReference.id,
+      };
+      return reference;
     } else {
-      logMissingSavedObjectError(logger, exceptionItem);
+      logMissingSavedObjectError({ logger, exceptionItem });
       return exceptionItem;
     }
   });

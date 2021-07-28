@@ -11,10 +11,6 @@ import { injectExceptionsReferences } from './inject_exceptions_list';
 
 /**
  * Injects references and returns the saved object references.
- * @param logger Kibana injected logger
- * @param params The params of the base rule(s).
- * @returns The rule parameters with the saved object references.
- *
  * How to add a new injected references here:
  * ---
  * Add a new file for injection named: inject_<paramName>.ts, example: inject_foo.ts
@@ -27,17 +23,24 @@ import { injectExceptionsReferences } from './inject_exceptions_list';
  *   foo,
  *   exceptionsList,
  * };
+ * @param logger Kibana injected logger
+ * @param params The params of the base rule(s).
+ * @returns The rule parameters with the saved object references.
  */
-export const injectReferences = (
-  logger: Logger,
-  params: RuleParams,
-  savedObjectReferences: SavedObjectReference[]
-): RuleParams => {
-  const exceptionsList = injectExceptionsReferences(
+export const injectReferences = ({
+  logger,
+  params,
+  savedObjectReferences,
+}: {
+  logger: Logger;
+  params: RuleParams;
+  savedObjectReferences: SavedObjectReference[];
+}): RuleParams => {
+  const exceptionsList = injectExceptionsReferences({
     logger,
-    params.exceptionsList,
-    savedObjectReferences
-  );
+    exceptionsList: params.exceptionsList,
+    savedObjectReferences,
+  });
   const ruleParamsWithSavedObjectReferences: RuleParams = {
     ...params,
     exceptionsList,

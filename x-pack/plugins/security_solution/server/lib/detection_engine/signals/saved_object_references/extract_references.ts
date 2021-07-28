@@ -12,11 +12,6 @@ import { extractExceptionsList } from './extract_exceptions_list';
 
 /**
  * Extracts references and returns the saved object references.
- *
- * @param logger Kibana injected logger
- * @param params The params of the base rule(s).
- * @returns The rule parameters and the saved object references to store.
- *
  * How to add a new extracted references here:
  * ---
  * Add a new file for extraction named: extract_<paramName>.ts, example: extract_foo.ts
@@ -32,12 +27,21 @@ import { extractExceptionsList } from './extract_exceptions_list';
  *
  * If you do remove params, then update the types in: security_solution/server/lib/detection_engine/signals/types.ts
  * to use an omit for the functions of "isAlertExecutor" and "SignalRuleAlertTypeDefinition"
+ * @param logger Kibana injected logger
+ * @param params The params of the base rule(s).
+ * @returns The rule parameters and the saved object references to store.
  */
-export const extractReferences = (
-  logger: Logger,
-  params: RuleParams
-): RuleParamsAndRefs<RuleParams> => {
-  const exceptionReferences = extractExceptionsList(logger, params.exceptionsList);
+export const extractReferences = ({
+  logger,
+  params,
+}: {
+  logger: Logger;
+  params: RuleParams;
+}): RuleParamsAndRefs<RuleParams> => {
+  const exceptionReferences = extractExceptionsList({
+    logger,
+    exceptionsList: params.exceptionsList,
+  });
   const returnReferences = [...exceptionReferences];
 
   // Modify params if you want to remove any elements separately here. For exceptionLists, we do not remove the id and instead

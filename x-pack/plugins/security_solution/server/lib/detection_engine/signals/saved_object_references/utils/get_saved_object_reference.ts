@@ -8,12 +8,25 @@
 import { SavedObjectReference } from 'src/core/server';
 import { getSavedObjectNamePattern } from './get_saved_object_name_pattern';
 
-export const getSavedObjectReference = (
-  name: string,
-  index: number,
-  savedObjectReferences: SavedObjectReference[]
-): SavedObjectReference | undefined => {
+/**
+ * Given a saved object name, and an index, this will return the specific named saved object reference
+ * even if it is mixed in with other reference objects. This is needed since a references array can contain multiple
+ * types of saved objects in a single array, we have to use the name to get the value.
+ * @param name The name of the saved object reference we are getting from the array
+ * @param index The index position to get for the exceptions list.
+ * @param savedObjectReferences The saved object references which can contain "exceptionsList" mixed with other saved object types
+ * @returns The saved object reference if found, otherwise undefined
+ */
+export const getSavedObjectReference = ({
+  name,
+  index,
+  savedObjectReferences,
+}: {
+  name: string;
+  index: number;
+  savedObjectReferences: SavedObjectReference[];
+}): SavedObjectReference | undefined => {
   return savedObjectReferences.find(
-    (reference) => reference.name === getSavedObjectNamePattern(name, index)
+    (reference) => reference.name === getSavedObjectNamePattern({ name, index })
   );
 };

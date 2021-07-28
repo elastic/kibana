@@ -8,10 +8,18 @@
 import { Logger } from 'src/core/server';
 import { RuleParams } from '../../../schemas/rule_schemas';
 
-export const logMissingSavedObjectError = (
-  logger: Logger,
-  exceptionItem: RuleParams['exceptionsList'][0]
-): void => {
+/**
+ * This will log a warning that we are missing an object reference.
+ * @param logger The kibana injected logger
+ * @param exceptionItem The exception item to log the warning out as
+ */
+export const logMissingSavedObjectError = ({
+  logger,
+  exceptionItem,
+}: {
+  logger: Logger;
+  exceptionItem: RuleParams['exceptionsList'][0];
+}): void => {
   logger.warn(
     [
       'The saved object references were not found for our exception list when we were expecting to find it. Kibana migrations might not have run correctly or someone might have removed it manually.',
