@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
+import { FilterStateStore, buildFilter, FILTERS } from '../../query/es_query';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ExecutionContext } from 'src/plugins/expressions/common';
 import { KibanaContext } from './kibana_context_type';
