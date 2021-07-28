@@ -51,7 +51,11 @@ describe('JobsHealthService', () => {
           jobs: jobsIds.map((j: string) => {
             return {
               job_id: j,
-              state: j === 'test_job_02' ? 'opened' : 'closed',
+              state: j === 'test_job_02' || 'test_job_01' ? 'opened' : 'closed',
+              model_size_stats: {
+                memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
+                log_time: 1626935914540,
+              },
             };
           }) as MlJobStats,
         },
@@ -129,7 +133,9 @@ describe('JobsHealthService', () => {
         behindRealtime: null,
         delayedData: null,
         errorMessages: null,
-        mml: null,
+        mml: {
+          enabled: false,
+        },
       },
       includeJobs: {
         jobIds: ['test_job_01'],
@@ -167,12 +173,34 @@ describe('JobsHealthService', () => {
     expect(mlClient.getDatafeedStats).toHaveBeenCalledWith({
       datafeed_id: 'test_datafeed_01,test_datafeed_02',
     });
+    expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
     expect(executionResult).toEqual([
       {
         name: 'Datafeed is not started',
         context: {
-          jobIds: ['test_job_02'],
+          results: [
+            {
+              job_id: 'test_job_02',
+              job_state: 'opened',
+              datafeed_id: 'test_datafeed_02',
+              datafeed_state: 'stopped',
+            },
+          ],
           message: 'Datafeed is not started for the following jobs:',
+        },
+      },
+      {
+        name: 'Model memory limit reached',
+        context: {
+          results: [
+            {
+              job_id: 'test_job_01',
+              log_time: 1626935914540,
+              memory_status: 'hard_limit',
+            },
+          ],
+          message:
+            '1 job reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
         },
       },
     ]);

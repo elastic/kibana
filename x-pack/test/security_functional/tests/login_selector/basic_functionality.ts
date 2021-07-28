@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/98562
-  describe.skip('Basic functionality', function () {
+  describe('Basic functionality', function () {
     this.tags('includeFirefox');
 
     const testCredentials = { username: 'admin_user', password: 'change_me' };
@@ -121,7 +120,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .post('/authentication/app/setup')
         .send({ simulateUnauthorized: false })
         .expect(200);
-      await PageObjects.security.loginSelector.login('basic', 'basic1');
+      await PageObjects.security.loginSelector.login('basic', 'basic1', {
+        // By default, login waits till chrome appears, but the test authentication app is a chromeless app.
+        expectedLoginResult: () => testSubjects.waitForEnabled('testEndpointsAuthenticationApp'),
+      });
 
       const currentURL = parse(await browser.getCurrentUrl());
       expect(currentURL.path).to.eql('/authentication/app?one=two');
@@ -129,16 +131,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('can login after `Unauthorized` error during request authentication preserving original URL', async () => {
       // 1. Navigate to Kibana to make sure user is properly authenticated.
-      await PageObjects.common.navigateToUrl('management', 'security/users', {
-        ensureCurrentUrl: false,
-        shouldLoginIfPrompted: false,
-        shouldUseHashForSubUrl: false,
-      });
+      await browser.get(`${deployment.getHostPort()}/authentication/app?one=two`);
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
-      await PageObjects.security.loginSelector.login('basic', 'basic1', testCredentials);
-      expect(parse(await browser.getCurrentUrl()).pathname).to.eql(
-        '/app/management/security/users'
-      );
+      await PageObjects.security.loginSelector.login('basic', 'basic1', {
+        ...testCredentials,
+        // By default, login waits till chrome appears, but the test authentication app is a chromeless app.
+        expectedLoginResult: () => testSubjects.waitForEnabled('testEndpointsAuthenticationApp'),
+      });
+      expect(parse(await browser.getCurrentUrl()).pathname).to.eql('/authentication/app');
 
       // 2. Now disable user and try to refresh page causing authentication to fail.
       await security.user.disable(testCredentials.username);
@@ -150,10 +150,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // 3. Re-enable user and try to login again.
       await security.user.enable(testCredentials.username);
-      await PageObjects.security.loginSelector.login('basic', 'basic1', testCredentials);
-      expect(parse(await browser.getCurrentUrl()).pathname).to.eql(
-        '/app/management/security/users'
-      );
+      await PageObjects.security.loginSelector.login('basic', 'basic1', {
+        ...testCredentials,
+        // By default, login waits till chrome appears, but the test authentication app is a chromeless app.
+        expectedLoginResult: () => testSubjects.waitForEnabled('testEndpointsAuthenticationApp'),
+      });
+      expect(parse(await browser.getCurrentUrl()).pathname).to.eql('/authentication/app');
     });
 
     it('should show toast with error if SSO fails', async () => {
