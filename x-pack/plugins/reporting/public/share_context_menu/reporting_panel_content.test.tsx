@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { notificationServiceMock } from 'src/core/public/mocks';
+import { notificationServiceMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 
 import { ReportingPanelContent, Props } from './reporting_panel_content';
 
@@ -24,6 +24,7 @@ describe('ReportingPanelContent', () => {
         objectId={'my-object-id'}
         apiClient={{ getReportingJobPath: () => 'test' } as any}
         toasts={notificationServiceMock.createSetupContract().toasts}
+        uiSettings={uiSettingsServiceMock.createSetupContract()}
         {...props}
       />
     );

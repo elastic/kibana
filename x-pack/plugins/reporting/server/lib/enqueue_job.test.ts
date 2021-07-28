@@ -70,6 +70,7 @@ describe('Enqueue Job', () => {
         objectType: 'visualization',
         title: 'cool-viz',
         version: '7.14.0',
+        browserTimezone: 'UTC',
       },
       false,
       ({} as unknown) as ReportingRequestHandlerContext,

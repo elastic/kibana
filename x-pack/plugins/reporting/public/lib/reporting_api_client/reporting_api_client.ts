@@ -6,7 +6,7 @@
  */
 
 import { stringify } from 'query-string';
-import rison from 'rison-node';
+import rison, { RisonObject } from 'rison-node';
 import { HttpSetup } from 'src/core/public';
 import {
   API_BASE_GENERATE,
@@ -15,7 +15,14 @@ import {
   API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import { DownloadReportFn, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
+import {
+  BaseParams,
+  DecoratedBaseParams,
+  DownloadReportFn,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+} from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
@@ -30,14 +37,10 @@ export interface DiagnoseResponse {
   logs: string;
 }
 
-interface JobParams {
-  [paramName: string]: any;
-}
-
 interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
-  getReportingJobPath(exportType: string, jobParams: JobParams): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+  getReportingJobPath(exportType: string, jobParams: BaseParams): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
   createReportingJob(exportType: string, jobParams: any): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
@@ -61,11 +64,7 @@ interface IReportingAPI {
 }
 
 export class ReportingAPIClient implements IReportingAPI {
-  private http: HttpSetup;
-
-  constructor(http: HttpSetup) {
-    this.http = http;
-  }
+  constructor(private http: HttpSetup, private kibanaVersion: string) {}
 
   public getReportURL(jobId: string) {
     const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
@@ -128,13 +127,15 @@ export class ReportingAPIClient implements IReportingAPI {
     return reports.map((report) => new Job(report));
   }
 
-  public getReportingJobPath(exportType: string, jobParams: JobParams) {
-    const params = stringify({ jobParams: rison.encode(jobParams) });
+  public getReportingJobPath(exportType: string, jobParams: BaseParams) {
+    const risonObject: RisonObject = jobParams as Record<string, any>;
+    const params = stringify({ jobParams: rison.encode(risonObject) });
     return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
   }
 
-  public async createReportingJob(exportType: string, jobParams: any) {
-    const jobParamsRison = rison.encode(jobParams);
+  public async createReportingJob(exportType: string, jobParams: DecoratedBaseParams) {
+    const risonObject: RisonObject = jobParams as Record<string, any>;
+    const jobParamsRison = rison.encode(risonObject);
     const resp: { job: ReportApiJSON } = await this.http.post(
       `${API_BASE_GENERATE}/${exportType}`,
       {
@@ -148,6 +149,10 @@ export class ReportingAPIClient implements IReportingAPI {
     add(resp.job.id);
 
     return new Job(resp.job);
+  }
+
+  public getKibanaVersion() {
+    return this.kibanaVersion;
   }
 
   public getManagementLink: ManagementLinkFn = () =>

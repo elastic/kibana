@@ -50,19 +50,19 @@ interface State {
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
+  private jobParams: BaseParams;
   private mounted?: boolean;
 
   constructor(props: Props) {
     super(props);
 
-    // Get objectType from job params
-    const { objectType } = props.getJobParams();
+    this.jobParams = props.getJobParams();
 
     this.state = {
       isStale: false,
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
-      objectType,
+      objectType: this.jobParams.objectType,
     };
   }
 
@@ -78,7 +78,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return {
       browserTimezone,
       version: this.props.apiClient.getKibanaVersion(),
-      ...this.props.getJobParams(),
+      ...this.jobParams,
     };
   }
 
@@ -87,7 +87,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       props.reportType,
       this.getDecoratedJobParams()
     );
-    return url.resolve(window.location.href, relativePath); // FIXME: (from: string, to: string): string' is deprecated
+    return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
   };
 
   public componentDidUpdate(_prevProps: Props, prevState: State) {
@@ -250,7 +250,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     const { intl } = this.props;
 
     return this.props.apiClient
-      .createReportingJob(this.props.reportType, this.props.getJobParams())
+      .createReportingJob(this.props.reportType, this.getDecoratedJobParams())
       .then(() => {
         this.props.toasts.addSuccess({
           title: intl.formatMessage(

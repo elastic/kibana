@@ -11,6 +11,7 @@ import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
+  HttpSetup,
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
@@ -90,6 +91,7 @@ export class ReportingPublicPlugin
       ReportingPublicPluginStartDendencies
     > {
   private kibanaVersion: string;
+  private apiClient?: ReportingAPIClient;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -105,12 +107,19 @@ export class ReportingPublicPlugin
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
+  private getApiClient(http: HttpSetup) {
+    if (!this.apiClient) {
+      this.apiClient = new ReportingAPIClient(http, this.kibanaVersion);
+    }
+    return this.apiClient;
+  }
+
   private getContract(core?: CoreSetup) {
     if (core) {
       this.contract = {
         getDefaultLayoutSelectors,
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core),
+        components: getSharedComponents(core, this.getApiClient(core.http)),
       };
     }
 
@@ -122,7 +131,7 @@ export class ReportingPublicPlugin
   }
 
   public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
-    const { http, getStartServices, uiSettings } = core;
+    const { getStartServices, uiSettings } = core;
     const {
       home,
       management,
@@ -134,7 +143,7 @@ export class ReportingPublicPlugin
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
-    const apiClient = new ReportingAPIClient(http);
+    const apiClient = this.getApiClient(core.http);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -187,12 +196,10 @@ export class ReportingPublicPlugin
     );
 
     const reportingStart = this.getContract(core);
-    const kibanaVersion = this.kibanaVersion;
     const { toasts } = core.notifications;
 
     share.register(
       ReportingCsvShareProvider({
-        kibanaVersion,
         apiClient,
         toasts,
         license$,
@@ -204,7 +211,6 @@ export class ReportingPublicPlugin
 
     share.register(
       reportingScreenshotShareProvider({
-        kibanaVersion,
         apiClient,
         toasts,
         license$,
@@ -218,8 +224,8 @@ export class ReportingPublicPlugin
   }
 
   public start(core: CoreStart) {
-    const { http, notifications } = core;
-    const apiClient = new ReportingAPIClient(http);
+    const { notifications } = core;
+    const apiClient = this.getApiClient(core.http);
     const streamHandler = new StreamHandler(notifications, apiClient);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)

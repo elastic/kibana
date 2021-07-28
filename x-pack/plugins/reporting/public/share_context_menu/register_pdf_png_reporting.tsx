@@ -48,6 +48,7 @@ const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => 
 export const reportingScreenshotShareProvider = ({
   apiClient,
   toasts,
+  uiSettings,
   license$,
   startServices$,
   usesUiCapabilities,
@@ -126,6 +127,7 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
+            uiSettings={uiSettings}
             reportType="png"
             objectId={objectId}
             requiresSavedState={true}
@@ -162,6 +164,7 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
+            uiSettings={uiSettings}
             reportType="printablePdf"
             objectId={objectId}
             requiresSavedState={true}
