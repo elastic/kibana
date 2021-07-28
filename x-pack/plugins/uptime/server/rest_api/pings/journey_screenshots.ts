@@ -54,7 +54,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
         body: {
           screenshotRef: result,
         },
-        headers: getSharedHeaders(result.synthetics.step.name, result.totalSteps ?? 0),
+        headers: getSharedHeaders(result.synthetics.step.name, result.totalSteps),
       });
     }
 

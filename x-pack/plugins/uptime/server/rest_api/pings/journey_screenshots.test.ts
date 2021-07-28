@@ -61,6 +61,7 @@ describe('journey screenshot route', () => {
         },
         type: 'step/screenshot_ref',
       },
+      totalSteps: 3,
     };
 
     const route = createJourneyScreenshotRoute({
@@ -78,7 +79,7 @@ describe('journey screenshot route', () => {
       Object {
         "cache-control": "max-age=600",
         "caption-name": "a step name",
-        "max-steps": "0",
+        "max-steps": "3",
       }
     `);
     // @ts-expect-error response doesn't match interface for testing
@@ -95,6 +96,7 @@ describe('journey screenshot route', () => {
         },
         type: 'step/screenshot',
       },
+      totalSteps: 3,
     };
     const route = createJourneyScreenshotRoute({
       // @ts-expect-error incomplete implementation for testing
@@ -118,7 +120,7 @@ describe('journey screenshot route', () => {
           "cache-control": "max-age=600",
           "caption-name": "a step name",
           "content-type": "image/jpeg",
-          "max-steps": "undefined",
+          "max-steps": "3",
         },
         "message": "Ok",
         "status": 200,
@@ -157,7 +159,6 @@ describe('journey screenshot route', () => {
       requests: {
         getJourneyScreenshot: jest.fn().mockReturnValue({
           synthetics: {
-            blob_mime: 'image/jpeg',
             step: {
               name: 'a step name',
             },
