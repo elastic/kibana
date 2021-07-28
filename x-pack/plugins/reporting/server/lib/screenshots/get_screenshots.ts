@@ -5,162 +5,53 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import * as Rx from 'rxjs';
-import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
-import { HeadlessChromiumDriverFactory } from '../../browsers';
-import { CaptureConfig } from '../../types';
-import { ElementsPositionAndAttribute, ScreenshotObservableOpts, ScreenshotResults } from './';
-import { checkPageIsOpen } from './check_browser_open';
-import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
-import { getElementPositionAndAttributes } from './get_element_position_data';
-import { getNumberOfItems } from './get_number_of_items';
-import { captureScreenshots } from './capture_screenshots';
-import { getTimeRange } from './get_time_range';
-import { injectCustomCss } from './inject_css';
-import { openUrl } from './open_url';
-import { waitForRenderComplete } from './wait_for_render';
-import { waitForVisualizations } from './wait_for_visualizations';
+import { i18n } from '@kbn/i18n';
+import { LevelLogger, startTrace } from '../';
+import { HeadlessChromiumDriver } from '../../browsers';
+import { LayoutInstance } from '../layouts';
+import { ElementsPositionAndAttribute, Screenshot } from './';
 
-const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
-const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
-
-interface ScreenSetupData {
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
-  timeRange: string | null;
-  error?: Error;
-}
-
-export function getScreenshots(
-  captureConfig: CaptureConfig,
-  browserDriverFactory: HeadlessChromiumDriverFactory,
-  { logger, urls, conditionalHeaders, layout, browserTimezone }: ScreenshotObservableOpts
-): Rx.Observable<ScreenshotResults[]> {
-  const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
-
-  const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
-  const create$ = browserDriverFactory.createPage(
-    { viewport: layout.getBrowserViewport(), browserTimezone },
-    logger
+export const getScreenshots = async (
+  browser: HeadlessChromiumDriver,
+  layout: LayoutInstance,
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[],
+  logger: LevelLogger
+): Promise<Screenshot[]> => {
+  logger.info(
+    i18n.translate('xpack.reporting.screencapture.takingScreenshots', {
+      defaultMessage: `taking screenshots`,
+    })
   );
 
-  return create$.pipe(
-    mergeMap(({ driver, exit$ }) => {
-      apmCreatePage?.end();
-      exit$.subscribe({ error: () => apmTrans?.end() });
+  const screenshots: Screenshot[] = [];
 
-      return Rx.from(urls).pipe(
-        concatMap((url, index) => {
-          const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
-            mergeMap(() => {
-              // If we're moving to another page in the app, we'll want to wait for the app to tell us
-              // it's loaded the next page.
-              const page = index + 1;
-              const pageLoadSelector =
-                page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
+  for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
+    const endTrace = startTrace('get_screenshots', 'read');
+    const item = elementsPositionAndAttributes[i];
 
-              return openUrl(
-                captureConfig,
-                driver,
-                url,
-                pageLoadSelector,
-                conditionalHeaders,
-                logger
-              );
-            }),
-            mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
-            mergeMap(async (itemsCount) => {
-              // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
-              const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
-              await Promise.all([
-                driver.setViewport(viewport, logger),
-                waitForVisualizations(captureConfig, driver, itemsCount, layout, logger),
-              ]);
-            }),
-            mergeMap(async () => {
-              // Waiting till _after_ elements have rendered before injecting our CSS
-              // allows for them to be displayed properly in many cases
-              await injectCustomCss(driver, layout, logger);
+    const base64EncodedData = await browser.screenshot(item.position);
 
-              const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
-              if (layout.positionElements) {
-                // position panel elements for print layout
-                await layout.positionElements(driver, logger);
-              }
-              if (apmPositionElements) apmPositionElements.end();
+    if (!base64EncodedData) {
+      throw new Error(`Failure in getScreenshots! Base64 data is void`);
+    }
 
-              await waitForRenderComplete(captureConfig, driver, layout, logger);
-            }),
-            mergeMap(async () => {
-              return await Promise.all([
-                getTimeRange(driver, layout, logger),
-                getElementPositionAndAttributes(driver, layout, logger),
-              ]).then(([timeRange, elementsPositionAndAttributes]) => ({
-                elementsPositionAndAttributes,
-                timeRange,
-              }));
-            }),
-            catchError((err) => {
-              checkPageIsOpen(driver); // if browser has closed, throw a relevant error about it
+    screenshots.push({
+      base64EncodedData,
+      title: item.attributes.title,
+      description: item.attributes.description,
+    });
 
-              logger.error(err);
-              return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
-            })
-          );
+    endTrace();
+  }
 
-          return setup$.pipe(
-            takeUntil(exit$),
-            mergeMap(
-              async (data: ScreenSetupData): Promise<ScreenshotResults> => {
-                checkPageIsOpen(driver); // re-check that the browser has not closed
-
-                const elements = data.elementsPositionAndAttributes
-                  ? data.elementsPositionAndAttributes
-                  : getDefaultElementPosition(layout.getViewport(1));
-                const screenshots = await captureScreenshots(driver, layout, elements, logger);
-                const { timeRange, error: setupError } = data;
-                return {
-                  timeRange,
-                  screenshots,
-                  error: setupError,
-                  elementsPositionAndAttributes: elements,
-                };
-              }
-            )
-          );
-        }),
-        take(urls.length),
-        toArray()
-      );
-    }),
-    first()
+  logger.info(
+    i18n.translate('xpack.reporting.screencapture.screenshotsTaken', {
+      defaultMessage: `screenshots taken: {numScreenhots}`,
+      values: {
+        numScreenhots: screenshots.length,
+      },
+    })
   );
-}
 
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  height: DEFAULT_SCREENSHOT_CLIP_HEIGHT,
-  width: DEFAULT_SCREENSHOT_CLIP_WIDTH,
-  zoom: 1,
-});
-/*
- * If an error happens setting up the page, we don't know if there actually
- * are any visualizations showing. These defaults should help capture the page
- * enough for the user to see the error themselves
- */
-const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
-  const height = dimensions?.height || DEFAULT_SCREENSHOT_CLIP_HEIGHT;
-  const width = dimensions?.width || DEFAULT_SCREENSHOT_CLIP_WIDTH;
-
-  const defaultObject = {
-    position: {
-      boundingClientRect: { top: 0, left: 0, height, width },
-      scroll: { x: 0, y: 0 },
-    },
-    attributes: {},
-  };
-  return [defaultObject];
+  return screenshots;
 };

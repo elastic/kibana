@@ -32,7 +32,7 @@ import {
 } from '../../test_helpers';
 import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
-import { getScreenshots } from './get_screenshots';
+import { getScreenshots } from './';
 
 /*
  * Mocks

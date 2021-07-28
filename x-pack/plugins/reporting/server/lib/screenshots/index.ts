@@ -9,7 +9,7 @@ import { LevelLogger } from '../';
 import { ConditionalHeaders } from '../../export_types/common';
 import { LayoutInstance } from '../layouts';
 
-export { getScreenshots } from './get_screenshots';
+export { screenshotsObservable } from './observable';
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
