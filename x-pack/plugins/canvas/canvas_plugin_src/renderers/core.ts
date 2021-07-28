@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { image } from './image';
 import { markdown } from './markdown';
-import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
 import { text } from './text';
 import { table } from './table';
 
-export const renderFunctions = [image, markdown, metric, pie, plot, progress, table, text];
+export const renderFunctions = [markdown, pie, plot, progress, table, text];
 
 export const renderFunctionFactories = [];
