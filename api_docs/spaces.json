@@ -1356,14 +1356,14 @@
                 "plugin": "infra",
                 "link": {
                   "path": "x-pack/plugins/infra/server/plugin.ts",
-                  "lineNumber": 153
+                  "lineNumber": 174
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 190
+                  "lineNumber": 187
                 }
               },
               {
@@ -2197,14 +2197,14 @@
               "plugin": "infra",
               "link": {
                 "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 153
+                "lineNumber": 174
               }
             },
             {
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 190
+                "lineNumber": 187
               }
             }
           ]
