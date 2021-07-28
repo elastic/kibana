@@ -41,12 +41,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex,
     });
 
-    if (result === null) return response.notFound();
-    if (isFullScreenshot(result)) {
-      if (!result.synthetics?.blob) {
-        return response.notFound();
-      }
-
+    if (isFullScreenshot(result) && !!result.synthetics?.blob) {
       return response.ok({
         body: Buffer.from(result.synthetics.blob, 'base64'),
         headers: {
@@ -55,15 +50,9 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
         },
       });
     } else if (isRefResult(result)) {
-      // const blockIds = result.screenshot_ref.blocks.map(({ hash }) => hash);
-      // const blocks: ScreenshotBlockDoc[] = await libs.requests.getJourneyScreenshotBlocks({
-      //   uptimeEsClient,
-      //   blockIds,
-      // });
       return response.ok({
         body: {
           screenshotRef: result,
-          // blocks,
         },
         headers: getSharedHeaders(result.synthetics.step.name, result.totalSteps ?? 0),
       });

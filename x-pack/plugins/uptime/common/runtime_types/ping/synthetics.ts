@@ -82,10 +82,9 @@ export const FullScreenshotType = t.type({
   synthetics: t.intersection([
     t.partial({
       blob: t.string,
+      blob_mime: t.string,
     }),
     t.type({
-      blob: t.string,
-      blob_mime: t.string,
       step: t.type({
         name: t.string,
       }),
