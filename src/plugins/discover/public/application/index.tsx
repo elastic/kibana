@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { AppMountParameters } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { getServices } from '../kibana_services';
 import { DiscoverMainRoute } from './apps/main';
 import { ContextAppRoute } from './apps/context';
@@ -19,13 +20,24 @@ import { KibanaContextProvider } from '../../../kibana_react/public';
 
 export const renderApp = ({ element }: AppMountParameters) => {
   const services = getServices();
-  const { history } = services;
+  const { history, capabilities, chrome } = services;
   const opts = {
     services,
     history: history(),
     navigateTo: () => {},
     indexPatternList: [],
   };
+  if (!capabilities.discover.save) {
+    chrome.setBadge({
+      text: i18n.translate('discover.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('discover.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save searches',
+      }),
+      iconType: 'glasses',
+    });
+  }
   const app = (
     <Router history={history()}>
       <KibanaContextProvider services={services}>

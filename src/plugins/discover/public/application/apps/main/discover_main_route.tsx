@@ -18,6 +18,7 @@ import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
+import { i18n } from '@kbn/i18n';
 
 export interface DiscoverMainProps {
   opts: {
@@ -52,7 +53,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     data,
     toastNotifications,
     core,
-    http: { basePath },
+    http: { basePath }
   } = services;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
