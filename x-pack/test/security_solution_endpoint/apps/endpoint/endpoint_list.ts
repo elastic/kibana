@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Policy status',
       'OS',
       'IP address',
-      'Sensor',
+      'Version',
       'Last active',
       'Actions',
     ],
@@ -186,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Policy Status',
             'IP Address',
             'Hostname',
-            'Sensor Version',
+            'Version',
           ];
           const keys = await pageObjects.endpoint.endpointFlyoutDescriptionKeys(
             'endpointDetailsFlyout'
@@ -239,7 +239,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Policy status',
             'OS',
             'IP address',
-            'Sensor',
+            'Version',
             'Last active',
             'Actions',
           ],
@@ -269,7 +269,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Policy status',
             'OS',
             'IP address',
-            'Sensor',
+            'Version',
             'Last active',
             'Actions',
           ],

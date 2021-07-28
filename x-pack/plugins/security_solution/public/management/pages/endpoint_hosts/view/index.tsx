@@ -396,7 +396,7 @@ export const EndpointList = () => {
         field: 'metadata.agent.version',
         width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
-          defaultMessage: 'Sensor',
+          defaultMessage: 'Version',
         }),
         // eslint-disable-next-line react/display-name
         render: (version: string) => {
