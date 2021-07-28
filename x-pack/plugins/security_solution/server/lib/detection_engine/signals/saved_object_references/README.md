@@ -25,7 +25,7 @@ GET .kibana/_search
 Run a query in dev tools and you should see this code that adds the following savedObject references
 to any newly saved rule:
 
-```json5
+```json
       {
         "_index" : ".kibana-hassanabad19_8.0.0_001",
         "_id" : "alert:38482620-ef1b-11eb-ad71-7de7959be71c",
