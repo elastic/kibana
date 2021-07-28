@@ -21,7 +21,6 @@ type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 
 const createExecutionContextMock = (): DeeplyMockedKeys<ExecutionContext> => ({
   abortSignal: {} as any,
-  getExecutionContext: jest.fn(),
   getSearchContext: jest.fn(),
   getSearchSessionId: jest.fn(),
   inspectorAdapters: jest.fn(),
