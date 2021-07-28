@@ -12,28 +12,26 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { createApmApiSupertest } from '../../common/apm_api_supertest';
+import { getErrorGroupIds } from './get_error_group_ids';
 
 type ErrorGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const apmApiSupertest = createApmApiSupertest(supertest);
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
   const { start, end } = metadata;
-  const groupIds = [
-    '051f95eabf120ebe2f8b0399fe3e54c5',
-    '3bb34b98031a19c277bf59c3db82d3f3',
-    'b1c3ff13ec52de11187facf9c6a82538',
-    '9581687a53eac06aba50ba17cbd959c5',
-    '97c2eef51fec10d177ade955670a2f15',
-  ];
 
   registry.when(
     'Error groups detailed statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
+        const groupIds = await getErrorGroupIds({ apmApiSupertest, start, end });
+
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
@@ -58,6 +56,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
+        const groupIds = await getErrorGroupIds({ apmApiSupertest, start, end });
+
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,
@@ -119,7 +119,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           status: number;
           body: ErrorGroupsDetailedStatistics;
         };
+        let groupIds: string[];
+
         before(async () => {
+          groupIds = await getErrorGroupIds({ apmApiSupertest, start, end });
+
           response = await supertest.get(
             url.format({
               pathname: `/api/apm/services/opbeans-java/error_groups/detailed_statistics`,

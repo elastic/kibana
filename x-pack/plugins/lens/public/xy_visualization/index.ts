@@ -35,6 +35,7 @@ export class XyVisualization {
         gridlinesConfig,
         axisTitlesVisibilityConfig,
         axisExtentConfig,
+        labelsOrientationConfig,
         layerConfig,
         xyChart,
         getXyChartRenderer,
@@ -46,6 +47,7 @@ export class XyVisualization {
       expressions.registerFunction(() => yAxisConfig);
       expressions.registerFunction(() => tickLabelsConfig);
       expressions.registerFunction(() => axisExtentConfig);
+      expressions.registerFunction(() => labelsOrientationConfig);
       expressions.registerFunction(() => gridlinesConfig);
       expressions.registerFunction(() => axisTitlesVisibilityConfig);
       expressions.registerFunction(() => layerConfig);
