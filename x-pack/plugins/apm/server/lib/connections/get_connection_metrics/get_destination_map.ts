@@ -78,6 +78,11 @@ export const getDestinationMap = ({
               { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
               ...rangeQuery(startWithOffset, endWithOffset),
               ...filter,
+              {
+                bool: {
+                  must_not: [{ term: { [AGENT_NAME]: 'rum-js' } }],
+                },
+              },
             ],
           },
         },

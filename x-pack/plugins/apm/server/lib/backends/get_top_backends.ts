@@ -17,12 +17,14 @@ export async function getTopBackends({
   end,
   numBuckets,
   environment,
+  offset,
 }: {
   setup: Setup;
   start: number;
   end: number;
   numBuckets: number;
   environment?: string;
+  offset?: string;
 }) {
   const metricItems = await getConnectionMetrics({
     setup,
@@ -30,9 +32,11 @@ export async function getTopBackends({
     end,
     numBuckets,
     filter: [...environmentQuery(environment)],
+    offset,
+    collapseBy: 'downstream',
   });
 
   return getConnectionMetricItemsWithRelativeImpact(
-    metricItems.filter((item) => item.to.type !== NodeType.service)
+    metricItems.filter((item) => item.location.type !== NodeType.service)
   );
 }

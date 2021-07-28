@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -17,14 +16,14 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { NodeIcon } from '../../../shared/node_icon';
 
-export function ServiceOverviewDependenciesTable() {
+export function BackendInventoryDependenciesTable() {
   const {
     urlParams: { start, end, environment, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, kuery, latencyAggregationType },
-  } = useApmParams('/services/:serviceName/overview');
+    query: { rangeFrom, rangeTo, kuery },
+  } = useApmParams('/backends');
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -35,8 +34,6 @@ export function ServiceOverviewDependenciesTable() {
 
   const apmRouter = useApmRouter();
 
-  const { serviceName, transactionType } = useApmServiceContext();
-
   // Fetches current period dependencies
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -45,18 +42,17 @@ export function ServiceOverviewDependenciesTable() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        endpoint: 'GET /api/apm/backends/top_backends',
         params: {
-          path: { serviceName },
           query: { start, end, environment, numBuckets: 20, offset },
         },
       });
     },
-    [start, end, serviceName, environment, offset]
+    [start, end, environment, offset]
   );
 
   const dependencies =
-    data?.serviceDependencies.map((dependency) => {
+    data?.backends.map((dependency) => {
       const { location } = dependency;
       const name = getNodeName(location);
       const href =
@@ -72,19 +68,7 @@ export function ServiceOverviewDependenciesTable() {
                 rangeTo,
               },
             })
-          : apmRouter.link('/services/:serviceName/overview', {
-              path: { serviceName: location.serviceName },
-              query: {
-                comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-                comparisonType,
-                environment,
-                kuery,
-                rangeFrom,
-                rangeTo,
-                latencyAggregationType,
-                transactionType,
-              },
-            });
+          : '';
 
       return {
         name,
@@ -99,19 +83,19 @@ export function ServiceOverviewDependenciesTable() {
     <DependenciesTable
       dependencies={dependencies}
       title={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableTitle',
+        'xpack.apm.backendInventory.dependenciesTableTitle',
         {
-          defaultMessage: 'Dependencies',
+          defaultMessage: 'Backends',
         }
       )}
       nameColumnTitle={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnBackend',
+        'xpack.apm.backendInventory.dependenciesTableColumnBackend',
         {
           defaultMessage: 'Backend',
         }
       )}
-      serviceName={serviceName}
       status={status}
+      compact={false}
     />
   );
 }

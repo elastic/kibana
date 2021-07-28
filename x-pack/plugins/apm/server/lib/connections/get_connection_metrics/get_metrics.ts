@@ -70,6 +70,11 @@ export const getMetrics = async ({
                 },
               },
               ...rangeQuery(startWithOffset, endWithOffset),
+              {
+                bool: {
+                  must_not: [{ term: { [AGENT_NAME]: 'rum-js' } }],
+                },
+              },
             ],
           },
         },

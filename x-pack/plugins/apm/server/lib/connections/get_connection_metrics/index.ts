@@ -22,6 +22,7 @@ export function getConnectionMetrics({
   end,
   numBuckets,
   filter,
+  collapseBy,
   offset,
 }: {
   setup: Setup;
@@ -29,6 +30,7 @@ export function getConnectionMetrics({
   end: number;
   numBuckets: number;
   filter: QueryDslQueryContainer[];
+  collapseBy: 'upstream' | 'downstream';
   offset?: string;
 }) {
   return withApmSpan('get_connection_metrics', async () => {
@@ -50,23 +52,24 @@ export function getConnectionMetrics({
       }),
     ]);
 
-    const metricsWithDestinationIds = allMetrics.map((metricItem) => {
+    const metricsWithLocationIds = allMetrics.map((metricItem) => {
       const { from, timeseries, value } = metricItem;
       let to: Node = metricItem.to;
 
       to = destinationMap.get(to.backendName) ?? to;
 
+      const location = collapseBy === 'upstream' ? from : to;
+
       return {
-        from,
-        to,
+        location,
         metrics: [{ timeseries, value }],
-        destinationId: to.id,
+        id: location.id,
       };
     }, []);
 
-    const metricsJoinedByDestinationId = joinByKey(
-      metricsWithDestinationIds,
-      'destinationId',
+    const metricsJoinedById = joinByKey(
+      metricsWithLocationIds,
+      'id',
       (a, b) => {
         const { metrics: metricsA, ...itemA } = a;
         const { metrics: metricsB, ...itemB } = b;
@@ -75,7 +78,7 @@ export function getConnectionMetrics({
       }
     );
 
-    const metricItems = metricsJoinedByDestinationId.map((item) => {
+    const metricItems = metricsJoinedById.map((item) => {
       const mergedMetrics = item.metrics.reduce<
         ValuesType<typeof item.metrics>
       >(

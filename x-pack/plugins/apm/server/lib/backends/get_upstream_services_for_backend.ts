@@ -18,6 +18,7 @@ export async function getUpstreamServicesForBackend({
   backendName,
   numBuckets,
   environment,
+  offset,
 }: {
   setup: Setup;
   start: number;
@@ -25,6 +26,7 @@ export async function getUpstreamServicesForBackend({
   backendName: string;
   numBuckets: number;
   environment?: string;
+  offset?: string;
 }) {
   const metricItems = await getConnectionMetrics({
     setup,
@@ -34,7 +36,9 @@ export async function getUpstreamServicesForBackend({
       { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
       ...environmentQuery(environment),
     ],
+    collapseBy: 'upstream',
     numBuckets,
+    offset,
   });
 
   return getConnectionMetricItemsWithRelativeImpact(metricItems);

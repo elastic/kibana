@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { AgentName } from '../typings/es_schemas/ui/fields/agent';
 
 export enum NodeType {
@@ -32,12 +31,8 @@ export interface BackendNode extends NodeBase {
 
 export type Node = ServiceNode | BackendNode;
 
-export interface Connection {
-  from: Node;
-  to: Node;
-}
-
-export interface ConnectionMetricItem extends Connection {
+export interface ConnectionMetricItem {
+  location: Node;
   metrics: {
     latency: {
       value: number | null;
@@ -58,4 +53,14 @@ export interface ConnectionMetricItemWithImpact extends ConnectionMetricItem {
   metrics: ConnectionMetricItem['metrics'] & {
     impact: number;
   };
+}
+
+export interface ConnectionMetricItemWithComparisonData {
+  location: Node;
+  currentMetrics: ConnectionMetricItemWithImpact['metrics'];
+  previousMetrics: ConnectionMetricItemWithImpact['metrics'] | null;
+}
+
+export function getNodeName(node: Node) {
+  return node.type === NodeType.service ? node.serviceName : node.backendName;
 }

@@ -642,7 +642,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
       serviceDependencies: currentPeriod.map((item) => {
         const { metrics, ...rest } = item;
         const previousPeriodItem = previousPeriod.find(
-          (prevItem) => item.to.id === prevItem.to.id
+          (prevItem) => item.location.id === prevItem.location.id
         );
 
         return {

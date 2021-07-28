@@ -38,6 +38,7 @@ export async function getServiceDependencies({
       ...environmentQuery(environment),
     ],
     offset,
+    collapseBy: 'downstream',
   });
 
   return getConnectionMetricItemsWithRelativeImpact(metricItems);
