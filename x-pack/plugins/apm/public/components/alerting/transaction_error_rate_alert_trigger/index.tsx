@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { defaults, omit } from 'lodash';
 import React from 'react';
-import { defaults } from 'lodash';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
 import {
   EnvironmentField,
@@ -20,12 +22,8 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { useServiceName } from '../../../hooks/use_service_name';
-import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
-import { getTransactionType } from '../../../context/apm_service/apm_service_context';
 
 interface AlertParams {
   windowSize: number;
@@ -38,45 +36,34 @@ interface AlertParams {
 
 interface Props {
   alertParams: AlertParams;
+  metadata?: AlertMetadata;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
 export function TransactionErrorRateAlertTrigger(props: Props) {
-  const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { urlParams } = useUrlParams();
+  const { services } = useKibana();
+  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  const serviceNameFromUrl = useServiceName();
+  createCallApmApi(services as CoreStart);
 
   const transactionTypes = useServiceTransactionTypesFetcher(
-    serviceNameFromUrl
+    metadata?.serviceName
   );
-  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
-
-  const transactionTypeFromUrl = getTransactionType({
-    transactionType: urlParams.transactionType,
-    transactionTypes,
-    agentName,
-  });
-
-  const { start, end, environment: environmentFromUrl } = urlParams;
 
   const params = defaults(
-    { ...alertParams },
+    { ...omit(metadata, ['start', 'end']), ...alertParams },
     {
       threshold: 30,
       windowSize: 5,
       windowUnit: 'm',
-      transactionType: transactionTypeFromUrl,
-      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
-      serviceName: serviceNameFromUrl,
     }
   );
 
   const { environmentOptions } = useEnvironmentsFetcher({
     serviceName: params.serviceName,
-    start,
-    end,
+    start: metadata?.start,
+    end: metadata?.end,
   });
 
   const thresholdAsPercent = (params.threshold ?? 0) / 100;
@@ -105,10 +92,6 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       params.windowUnit,
     ]
   );
-
-  if (params.serviceName && !transactionTypes.length) {
-    return null;
-  }
 
   const fields = [
     <ServiceField value={params.serviceName} />,
