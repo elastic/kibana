@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export * from './endpoint_metadata_service';
-export * from './errors';
+export interface DraggableUXStyles {
+  alignItems?: string;
+  flexBasis?: string;
+  flexGrow?: number;
+}
+export interface Column<Item> extends DraggableUXStyles {
+  name: string;
+  render: (item: Item) => React.ReactNode;
+}

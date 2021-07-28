@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export { getMetadataForEndpoints } from './metadata';
-export * from './actions';
+import { DraggableUXStyles } from './types';
+
+export const DRAGGABLE_UX_STYLE: DraggableUXStyles = {
+  flexBasis: '16px',
+  flexGrow: 0,
+  alignItems: 'center',
+};
