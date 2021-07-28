@@ -6,40 +6,36 @@
  * Side Public License, v 1.
  */
 
+import { SerializableState } from 'src/plugins/kibana_utils/common';
+import { ShortUrlData } from '../../../common/url_service/short_urls/types';
+
 /**
- * Fields that stored in the short url saved object.
+ * Interface used for persisting short URLs.
  */
-export interface ShortUrlSavedObjectAttributes {
+export interface ShortUrlStorage {
   /**
-   * The slug of the short URL, the part after the `/` in the URL.
+   * Create and store a new short URL entry.
    */
-  readonly slug: string;
+  create<P extends SerializableState = SerializableState>(
+    data: Omit<ShortUrlData<P>, 'id'>
+  ): Promise<ShortUrlData<P>>;
 
   /**
-   * Number of times the short URL has been resolved.
+   * Fetch a short URL entry by ID.
    */
-  readonly accessCount: number;
+  getById<P extends SerializableState = SerializableState>(id: string): Promise<ShortUrlData<P>>;
 
   /**
-   * The timestamp of the last time the short URL was resolved.
+   * Fetch a short URL entry by slug.
    */
-  readonly accessDate: number;
+  getBySlug<P extends SerializableState = SerializableState>(
+    slug: string
+  ): Promise<ShortUrlData<P>>;
 
   /**
-   * The timestamp when the short URL was created.
-   */
-  readonly createDate: number;
-
-  /**
-   * Serialized locator state.
-   */
-  readonly locatorJSON: string;
-
-  /**
-   * Legacy field - was used in old short URL versions. This field will
-   * be removed in a future by a migration.
+   * Delete an existing short URL entry.
    *
-   * @deprecated
+   * @returns True if the short URL was deleted, false otherwise.
    */
-  readonly url: string;
+  delete(id: string): Promise<void>;
 }
