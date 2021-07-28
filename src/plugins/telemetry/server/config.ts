@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
-import { ENDPOINT_VERSION } from '../common/constants';
+import { PluginConfigDescriptor } from 'kibana/server';
+import { TELEMETRY_ENDPOINT } from '../common/constants';
+
+const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
+  schema.literal('prod'),
+  schema.literal('staging'),
+];
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -23,24 +29,30 @@ export const configSchema = schema.object({
   // `config` is used internally and not intended to be set
   config: schema.string({ defaultValue: getConfigPath() }),
   banner: schema.boolean({ defaultValue: true }),
+  sendUsageTo: schema.conditional(
+    schema.contextRef('dist'),
+    schema.literal(false), // Point to staging if it's not a distributable release
+    schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' }),
+    schema.oneOf(clusterEnvSchema, { defaultValue: 'prod' })
+  ),
   url: schema.conditional(
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
-      defaultValue: `https://telemetry-staging.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
+      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
     }),
     schema.string({
-      defaultValue: `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
+      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD,
     })
   ),
   optInStatusUrl: schema.conditional(
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
-      defaultValue: `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
+      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.STAGING,
     }),
     schema.string({
-      defaultValue: `https://telemetry.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
+      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.PROD,
     })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
@@ -49,3 +61,15 @@ export const configSchema = schema.object({
 });
 
 export type TelemetryConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<TelemetryConfigType> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    enabled: true,
+    banner: true,
+    allowChangingOptInStatus: true,
+    optIn: true,
+    sendUsageFrom: true,
+    sendUsageTo: true,
+  },
+};
