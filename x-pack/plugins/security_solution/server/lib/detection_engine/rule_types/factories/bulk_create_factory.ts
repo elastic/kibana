@@ -42,7 +42,7 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
 
   const start = performance.now();
 
-  const { response } = await alertWithPersistence(
+  const response = await alertWithPersistence(
     wrappedDocs.map((doc) => ({
       id: doc._id,
       fields: doc.fields ?? {},

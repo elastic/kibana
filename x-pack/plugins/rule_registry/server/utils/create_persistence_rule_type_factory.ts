@@ -15,10 +15,6 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
   return {
     ...type,
     executor: async (options) => {
-      const {
-        services: { alertInstanceFactory },
-      } = options;
-
       const state = await type.executor({
         ...options,
         services: {
@@ -37,11 +33,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                   },
                 ]),
               });
-              // TODO: return single alert instance
-              return {
-                instances: alerts.map((alert) => alertInstanceFactory(alert.id)),
-                response,
-              };
+              return response;
             } else {
               logger.debug('Writing is disabled.');
             }

@@ -10,7 +10,6 @@ import { BulkResponse } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import {
-  AlertInstance,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
@@ -28,10 +27,7 @@ export type PersistenceAlertService<
     id: string;
     fields: Record<string, unknown>;
   }>
-) => Promise<{
-  instances: Array<AlertInstance<TState, TContext, TActionGroupIds>>;
-  response: ApiResponse<BulkResponse, unknown>;
-}>;
+) => Promise<ApiResponse<BulkResponse, unknown>>;
 
 export type PersistenceAlertQueryService = (
   query: ESSearchRequest

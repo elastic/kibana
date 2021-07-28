@@ -256,9 +256,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             logger.info(buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`));
 
             if (createdSignalsCount) {
-              // TODO: notification for ALL alerts?
-              // should be an array of alert instances
-              // TODO: revert this to single alert instance
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,

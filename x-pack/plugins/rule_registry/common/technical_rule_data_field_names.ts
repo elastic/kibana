@@ -6,5 +6,3 @@
  */
 
 export * from '@kbn/rule-data-utils/target/technical_field_names';
-
-// TODO: move the below to technical_field_names package
