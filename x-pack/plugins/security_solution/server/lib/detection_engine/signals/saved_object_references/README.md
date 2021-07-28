@@ -66,7 +66,10 @@ to any newly saved rule:
               "type" : "exception-list"
             }
           ],
-         "other data... other data": "other data...other data",
+         "other data... other data": "other data...other data"
+          }
+        }
+      }
 ```
 
 The structure is that the alerting framework in conjunction with this code will make an array of saved object references which are going to be:
