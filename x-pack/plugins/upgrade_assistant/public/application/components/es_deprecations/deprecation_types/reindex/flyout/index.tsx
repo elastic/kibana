@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EsDeprecationAccordion } from './deprecation_group_item';
+export { ReindexFlyout, ReindexFlyoutProps } from './container';

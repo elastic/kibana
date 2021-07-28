@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
-import { ReindexState } from '../polling_service';
+import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
 
 const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({

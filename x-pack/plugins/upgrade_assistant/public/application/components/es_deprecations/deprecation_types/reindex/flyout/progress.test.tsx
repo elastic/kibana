@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
-import { ReindexState } from '../polling_service';
+import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
 
 describe('ReindexProgress', () => {

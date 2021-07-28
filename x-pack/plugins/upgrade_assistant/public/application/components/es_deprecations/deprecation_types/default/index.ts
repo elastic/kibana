@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ReindexFlyout } from './container';
+export { DefaultTableRow } from './table_row';

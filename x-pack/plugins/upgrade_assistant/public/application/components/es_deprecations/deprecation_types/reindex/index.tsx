@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FixMlSnapshotsButton } from './button';
+export { ReindexTableRow } from './table_row';

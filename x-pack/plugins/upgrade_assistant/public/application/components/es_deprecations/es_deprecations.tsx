@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { EsDeprecationsTable } from './es_deprecations_table';
+import { EsDeprecationErrors } from './es_deprecation_errors';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
@@ -64,7 +65,7 @@ export const EsDeprecationsContent = () => {
   useEffect(() => {
     if (isLoading === false) {
       async function sendTelemetryData() {
-        await api.sendTelemetryData({
+        await api.sendPageTelemetryData({
           elasticsearch: true,
         });
       }
@@ -74,8 +75,7 @@ export const EsDeprecationsContent = () => {
   }, [api, isLoading]);
 
   if (error) {
-    // TODO handle error
-    return null;
+    return <EsDeprecationErrors error={error} />;
   }
 
   if (isLoading) {
@@ -120,7 +120,7 @@ export const EsDeprecationsContent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              href={docLinks.links.deprecationInfo}
+              href={docLinks.links.elasticsearch.deprecationInfo}
               iconType="popout"
               iconSide="right"
               target="_blank"

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FixIndexSettingsButton } from './button';
+export { MlSnapshotsTableRow } from './table_row';

@@ -5,27 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../../common/types';
-import { ResponseError } from '../lib/api';
-
-export interface UpgradeAssistantTabProps {
-  alertBanner?: React.ReactNode;
-  checkupData?: UpgradeAssistantStatus | null;
-  deprecations?: EnrichedDeprecationInfo[];
-  refreshCheckupData: () => void;
-  error: ResponseError | null;
-  isLoading: boolean;
-  navigateToOverviewPage: () => void;
-}
-
-// eslint-disable-next-line react/prefer-stateless-function
-export class UpgradeAssistantTabComponent<
-  T extends UpgradeAssistantTabProps = UpgradeAssistantTabProps,
-  S = {}
-> extends React.Component<T, S> {}
-
 export enum LoadingState {
   Loading,
   Success,
@@ -39,3 +18,5 @@ export enum GroupByOption {
   index = 'index',
   node = 'node',
 }
+
+export type DeprecationTableColumns = 'type' | 'index' | 'message' | 'correctiveAction';

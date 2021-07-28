@@ -11,11 +11,15 @@ import { ApiService, ResponseError } from '../../../../lib/api';
 
 const POLL_INTERVAL_MS = 1000;
 
-export interface SnapshotStatus {
+interface SnapshotStatus {
   snapshotId: string;
   jobId: string;
   status: 'complete' | 'in_progress' | 'error' | 'idle';
   action?: 'upgrade' | 'delete';
+}
+
+export interface SnapshotState extends SnapshotStatus {
+  error: ResponseError | undefined;
 }
 
 export const useSnapshotState = ({

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ReindexButton } from './button';
+export { IndexSettingsTableRow } from './table_row';

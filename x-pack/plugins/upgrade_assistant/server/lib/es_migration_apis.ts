@@ -43,20 +43,27 @@ export async function getUpgradeAssistantStatus(
       },
     ],
     index_settings: {
-      logs: [
+      logs2: [
         {
           level: 'warning',
-          message: "C Index name cannot contain ':'",
+          message: 'translog retention settings are ignored',
           url:
             'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_index_name',
           details: "This index is named [logs:apache], which contains the illegal character ':'.",
+        },
+        {
+          level: 'critical',
+          message: 'Index created before 7.0',
+          url:
+            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
+          details: 'This index was created using version: 6.8.13',
         },
       ],
     },
     ml_settings: [
       {
         level: 'critical',
-        message: "D Cluster name cannot contain ':'",
+        message: 'model snapshot [1627343998] for job [my_job] needs to be deleted or upgraded',
         url:
           'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
         details:
