@@ -39,7 +39,10 @@ export const getElasticsearchMetricQuery = (
   const to = timeframe.end;
   const from = timeframe.start;
   const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
-  const offsetInMS = parseInt(offset, 10);
+  const offsetInMS =
+    [Aggregators.P95, Aggregators.P99, Aggregators.AVERAGE].indexOf(aggType) > -1
+      ? parseInt(offset, 10)
+      : 0;
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -57,7 +60,7 @@ export const getElasticsearchMetricQuery = (
         };
 
   const baseAggs =
-    [Aggregators.AVERAGE, Aggregators.P95, Aggregators.P99].indexOf(aggType) > -1
+    aggType === Aggregators.RATE
       ? {
           aggregatedIntervals: {
             date_histogram: {
