@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
 import { monaco } from '@kbn/monaco';
@@ -102,116 +102,134 @@ export interface Props {
   fullWidth?: boolean;
 }
 
-export class CodeEditor extends React.Component<Props, {}> {
-  _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+export const CodeEditor: React.FC<Props> = ({
+  languageId,
+  value,
+  onChange,
+  width,
+  height,
+  options,
+  overrideEditorWillMount,
+  editorDidMount,
+  editorWillMount,
+  useDarkTheme,
+  transparentBackground,
+  suggestionProvider,
+  signatureProvider,
+  hoverProvider,
+  languageConfiguration,
+}) => {
+  const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-  _editorWillMount = (__monaco: unknown) => {
-    if (__monaco !== monaco) {
-      throw new Error('react-monaco-editor is using a different version of monaco');
-    }
-
-    if (this.props.overrideEditorWillMount) {
-      this.props.overrideEditorWillMount();
-      return;
-    }
-
-    if (this.props.editorWillMount) {
-      this.props.editorWillMount();
-    }
-
-    monaco.languages.onLanguage(this.props.languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(
-          this.props.languageId,
-          this.props.suggestionProvider
-        );
+  const _editorWillMount = useCallback(
+    (__monaco: unknown) => {
+      if (__monaco !== monaco) {
+        throw new Error('react-monaco-editor is using a different version of monaco');
       }
 
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(
-          this.props.languageId,
-          this.props.signatureProvider
-        );
+      if (overrideEditorWillMount) {
+        overrideEditorWillMount();
+        return;
       }
 
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
+      if (editorWillMount) {
+        editorWillMount();
       }
 
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(
-          this.props.languageId,
-          this.props.languageConfiguration
-        );
+      monaco.languages.onLanguage(languageId, () => {
+        if (suggestionProvider) {
+          monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
+        }
+
+        if (signatureProvider) {
+          monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
+        }
+
+        if (hoverProvider) {
+          monaco.languages.registerHoverProvider(languageId, hoverProvider);
+        }
+
+        if (languageConfiguration) {
+          monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
+        }
+      });
+
+      // Register themes
+      monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+      monaco.editor.defineTheme(
+        'euiColorsTransparent',
+        useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+      );
+    },
+    [
+      overrideEditorWillMount,
+      editorWillMount,
+      languageId,
+      useDarkTheme,
+      suggestionProvider,
+      signatureProvider,
+      hoverProvider,
+      languageConfiguration,
+    ]
+  );
+
+  const _editorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
+      if (__monaco !== monaco) {
+        throw new Error('react-monaco-editor is using a different version of monaco');
       }
-    });
 
-    // Register themes
-    monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
-    monaco.editor.defineTheme(
-      'euiColorsTransparent',
-      this.props.useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-    );
-  };
+      _editor.current = editor;
 
-  _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
-    if (__monaco !== monaco) {
-      throw new Error('react-monaco-editor is using a different version of monaco');
+      if (editorDidMount) {
+        editorDidMount(editor);
+      }
+    },
+    [editorDidMount]
+  );
+
+  const _updateDimensions = useCallback(() => {
+    if (_editor.current) {
+      _editor.current.layout();
     }
+  }, []);
 
-    this._editor = editor;
-
-    if (this.props.editorDidMount) {
-      this.props.editorDidMount(editor);
-    }
-  };
-
-  render() {
-    const { languageId, value, onChange, width, height, options } = this.props;
-
-    return (
-      <>
-        <MonacoEditor
-          theme={this.props.transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
-          language={languageId}
-          value={value}
-          onChange={onChange}
-          width={width}
-          height={height}
-          editorWillMount={this._editorWillMount}
-          editorDidMount={this._editorDidMount}
-          options={{
-            renderLineHighlight: 'none',
-            scrollBeyondLastLine: false,
-            minimap: {
-              enabled: false,
-            },
-            scrollbar: {
-              useShadows: false,
-            },
-            wordBasedSuggestions: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            matchBrackets: 'never',
-            ...options,
-          }}
-        />
-        <ReactResizeDetector
-          handleWidth
-          handleHeight
-          onResize={this._updateDimensions}
-          refreshMode="debounce"
-        />
-      </>
-    );
-  }
-
-  _updateDimensions = () => {
-    if (this._editor) {
-      this._editor.layout();
-    }
-  };
-}
+  return (
+    <>
+      <MonacoEditor
+        theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
+        language={languageId}
+        value={value}
+        onChange={onChange}
+        width={width}
+        height={height}
+        editorWillMount={_editorWillMount}
+        editorDidMount={_editorDidMount}
+        options={{
+          renderLineHighlight: 'none',
+          scrollBeyondLastLine: false,
+          minimap: {
+            enabled: false,
+          },
+          scrollbar: {
+            useShadows: false,
+          },
+          wordBasedSuggestions: false,
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+          matchBrackets: 'never',
+          ...options,
+        }}
+      />
+      <ReactResizeDetector
+        handleWidth
+        handleHeight
+        onResize={_updateDimensions}
+        refreshMode="debounce"
+      />
+    </>
+  );
+};
 
 // React.lazy requires default export
 // eslint-disable-next-line import/no-default-export

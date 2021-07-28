@@ -9,7 +9,16 @@
 import React from 'react';
 import { CodeEditor } from './code_editor';
 import { monaco } from '@kbn/monaco';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
+
+const mockMonaco = monaco;
+
+jest.mock('react-monaco-editor', () => {
+  return (props: any) => {
+    props.editorWillMount(mockMonaco);
+    return null;
+  };
+});
 
 // disabled because this is a test, but also it seems we shouldn't need this?
 /* eslint-disable-next-line @kbn/eslint/module_migration */
@@ -37,7 +46,7 @@ const logs = `
 `;
 
 test('is rendered', () => {
-  const component = shallow(
+  const component = mount(
     <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
   );
 
@@ -72,7 +81,7 @@ test('editor mount setup', () => {
 
   monaco.editor.defineTheme = jest.fn();
 
-  const wrapper = shallow(
+  mount(
     <CodeEditor
       languageId="loglang"
       value={logs}
@@ -82,9 +91,6 @@ test('editor mount setup', () => {
       hoverProvider={hoverProvider}
     />
   );
-
-  const instance = wrapper.instance() as CodeEditor;
-  instance._editorWillMount(monaco);
 
   // Verify our mount callback will be called
   expect(editorWillMount.mock.calls.length).toBe(1);
