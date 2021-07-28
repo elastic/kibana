@@ -19,6 +19,10 @@ const colorMap: { [key: string]: string } = {
 };
 
 export function SeverityBadge({ severityLevel }: SeverityBadgeProps) {
+  if (!severityLevel) {
+    return null;
+  }
+
   return (
     <EuiBadge color={severityLevel ? colorMap[severityLevel] : 'default'}>
       {severityLevel ??
