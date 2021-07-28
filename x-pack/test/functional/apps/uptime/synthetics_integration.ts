@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     use_output: 'default',
   });
 
-  describe('When on the Synthetics Integration Policy Create Page', function () {
+  describe.only('When on the Synthetics Integration Policy Create Page', function () {
     this.tags(['ciGroup6']);
     const basicConfig = {
       name: monitorName,
@@ -253,7 +253,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('allows configuring http advanced options', async () => {
+      it.only('allows configuring http advanced options', async () => {
         // This test ensures that updates made to the Synthetics Policy are carried all the way through
         // to the generated Agent Policy that is dispatch down to the Elastic Agent.
         const config = generateHTTPConfig('http://elastic.co');
