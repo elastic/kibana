@@ -224,7 +224,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const defaults = getDefaultPageState();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData(currentSavedSearch, currentIndexPattern, uiSettings);
+    const searchData = extractSearchData({
+      indexPattern: currentIndexPattern,
+      uiSettings,
+      savedSearch: currentSavedSearch,
+    });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       return {

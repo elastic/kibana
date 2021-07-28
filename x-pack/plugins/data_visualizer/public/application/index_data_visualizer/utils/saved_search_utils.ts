@@ -67,32 +67,62 @@ export function createCombinedQuery(
 }
 
 /**
- * Extract query data from the saved search object.
+ * Extract query data from the saved search object
+ * and merge with query data and filters
  */
-export function extractSearchData(
-  savedSearch: SavedSearchSavedObject | null,
-  indexPattern: IndexPattern,
-  uiSettings: IUiSettingsClient
-) {
-  if (!savedSearch) {
-    return undefined;
+export function extractSearchData({
+  indexPattern,
+  uiSettings,
+  savedSearch,
+  query,
+  filters,
+}: {
+  indexPattern: IndexPattern;
+  uiSettings: IUiSettingsClient;
+  savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
+  query?: Query;
+  filters?: Filter[];
+}) {
+  if (!indexPattern || !savedSearch) return;
+
+  const savedSearchData = getQueryFromSavedSearch(savedSearch);
+  const userQuery = query;
+  const userFilters = filters;
+
+  // If no saved search available, use user's query and filters
+  if (!savedSearchData && userQuery) {
+    const combinedQuery = createCombinedQuery(
+      userQuery,
+      Array.isArray(userFilters) ? userFilters : [],
+      indexPattern,
+      uiSettings
+    );
+
+    return {
+      searchQuery: combinedQuery,
+      searchString: userQuery.query,
+      queryLanguage: userQuery.language as SearchQueryLanguage,
+    };
   }
 
-  const data = getQueryFromSavedSearch(savedSearch);
+  // If saved search available, merge saved search with latest user query or filters differ from extracted saved search data
+  if (savedSearchData) {
+    const currentQuery = userQuery ?? savedSearchData?.query;
+    const currentFilters = userFilters ?? savedSearchData?.filter;
 
-  if (!data) return;
-  const combinedQuery = createCombinedQuery(
-    data.query,
-    Array.isArray(data.filter) ? data.filter : [],
-    indexPattern,
-    uiSettings
-  );
+    const combinedQuery = createCombinedQuery(
+      currentQuery,
+      Array.isArray(currentFilters) ? currentFilters : [],
+      indexPattern,
+      uiSettings
+    );
 
-  return {
-    searchQuery: combinedQuery,
-    searchString: data.query.query,
-    queryLanguage: data.query.language as SearchQueryLanguage,
-  };
+    return {
+      searchQuery: combinedQuery,
+      searchString: currentQuery.query,
+      queryLanguage: currentQuery.language as SearchQueryLanguage,
+    };
+  }
 }
 
 const DEFAULT_QUERY = {

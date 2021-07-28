@@ -375,6 +375,7 @@ export function DiscoverLayout({
                             searchTitle={savedSearch.lastSavedTitle}
                             sampleSize={sampleSize}
                             query={state.query}
+                            filters={state.filters}
                             columns={columns}
                           />
                         )}

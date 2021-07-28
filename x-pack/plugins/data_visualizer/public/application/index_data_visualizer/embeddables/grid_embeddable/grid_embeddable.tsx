@@ -8,19 +8,11 @@
 import { merge, Observable, Subject } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
-import React, {
-  Dispatch,
-  SetStateAction,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Filter } from '@kbn/es-query';
 import {
   Embeddable,
   EmbeddableInput,
@@ -68,6 +60,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   savedSearch?: SavedSearch;
   query?: Query;
   visibleFieldNames?: string[];
+  filters?: Filter[];
 }
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
@@ -88,18 +81,31 @@ const useDataVisualizerGridData = (
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const { currentSavedSearch, currentIndexPattern, currentQuery, visibleFieldNames } = useMemo(
+  const {
+    currentSavedSearch,
+    currentIndexPattern,
+    currentQuery,
+    currentFilters,
+    visibleFieldNames,
+  } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
       currentIndexPattern: input.indexPattern,
       currentQuery: input?.query,
       visibleFieldNames: input?.visibleFieldNames ?? [],
+      currentFilters: input?.filters,
     }),
     [input]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData(currentSavedSearch, currentIndexPattern, uiSettings);
+    const searchData = extractSearchData({
+      indexPattern: currentIndexPattern,
+      uiSettings,
+      savedSearch: currentSavedSearch,
+      query: currentQuery,
+      filters: currentFilters,
+    });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       return {
@@ -115,7 +121,13 @@ const useDataVisualizerGridData = (
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState]);
+  }, [
+    currentSavedSearch,
+    currentIndexPattern,
+    dataVisualizerListState,
+    currentQuery,
+    currentFilters,
+  ]);
 
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
@@ -601,7 +613,15 @@ const useDataVisualizerGridData = (
     return [actionColumn];
   }, [input.indexPattern, services, searchQueryLanguage, searchString]);
 
-  return { configs, searchQueryLanguage, searchString, searchQuery, extendedColumns };
+  return {
+    configs,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+    extendedColumns,
+    documentCountStats,
+    metricsStats,
+  };
 };
 
 export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddableInput }) => {
