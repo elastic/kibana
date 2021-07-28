@@ -28,6 +28,7 @@ export {
   isEphemeralTaskRejectedDueToCapacityError,
 } from './task_running';
 export { RunNowResult } from './task_scheduling';
+export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 
 export {
   TaskManagerPlugin as TaskManager,
