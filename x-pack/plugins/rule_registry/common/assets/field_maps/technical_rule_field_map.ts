@@ -36,32 +36,32 @@ export const technicalRuleFieldMap = {
   'kibana.consumers': {
     type: 'keyword',
     array: true,
-    required: true,
+    required: false,
   },
   'kibana.version': {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ECS_VERSION]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_SEVERITY]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_RISK_SCORE]: {
     type: 'float',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_WORKFLOW_STATUS]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_WORKFLOW_USER]: {
     type: 'keyword',
@@ -81,7 +81,7 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_ACTION_GROUP]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_REASON]: {
     type: 'keyword',
@@ -91,57 +91,57 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_AUTHOR]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_CONSUMERS]: {
     type: 'keyword',
     array: true,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_CREATED_AT]: {
     type: 'date',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_CREATED_BY]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_DESCRIPTION]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_ENABLED]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_FROM]: {
     type: 'date',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_ID]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_INTERVAL]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_LICENSE]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_NAME]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_NOTE]: {
     type: 'keyword',
@@ -156,27 +156,27 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_RISK_SCORE_MAPPING]: {
     type: 'object',
     array: false,
-    required: true,
+    required: false,
   },
   [`${Fields.ALERT_RULE_RISK_SCORE_MAPPING}.field`]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [`${Fields.ALERT_RULE_RISK_SCORE_MAPPING}.operator`]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [`${Fields.ALERT_RULE_RISK_SCORE_MAPPING}.value`]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_RULE_ID]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_RULE_NAME_OVERRIDE]: {
     type: 'keyword',
@@ -186,57 +186,57 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_SEVERITY_MAPPING]: {
     type: 'object',
     array: false,
-    required: true,
+    required: false,
   },
   [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.field`]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.operator`]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.value`]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.severity`]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_TAGS]: {
     type: 'keyword',
     array: true,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_TO]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_TYPE]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_UPDATED_AT]: {
     type: 'date',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_UPDATED_BY]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [Fields.ALERT_RULE_VERSION]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
 } as const;
 

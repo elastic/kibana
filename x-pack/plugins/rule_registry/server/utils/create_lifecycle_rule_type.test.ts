@@ -177,13 +177,9 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(
-          alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')
-        ).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')).toBeTruthy();
 
-        expect(
-          alertDocuments.every((doc) => doc['kibana.alert.duration.us'] === 0)
-        ).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc['kibana.alert.duration.us'] === 0)).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc['event.action'] === 'open')).toBeTruthy();
 
@@ -284,9 +280,7 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(
-          alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')
-        ).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')).toBeTruthy();
         expect(alertDocuments.every((doc) => doc['event.action'] === 'active')).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc['kibana.alert.duration.us'] > 0)).toBeTruthy();
