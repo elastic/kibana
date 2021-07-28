@@ -33,6 +33,7 @@ describe('aggregation utils', () => {
         3,
         5,
       ]);
+      expect(expectations.length).toBe(ranges.length);
       expect(expectations).toEqual([
         1,
         2.333333333333333,
@@ -42,7 +43,6 @@ describe('aggregation utils', () => {
       expect(ranges).toEqual([
         { to: 1 },
         { from: 1, to: 3 },
-        { from: 3, to: 3 },
         { from: 3, to: 5 },
         { from: 5 },
       ]);
@@ -67,6 +67,7 @@ describe('aggregation utils', () => {
         3696636,
         3696636,
       ]);
+      expect(expectations.length).toBe(ranges.length);
       expect(expectations).toEqual([
         5000,
         1856256.7999999998,
@@ -80,18 +81,6 @@ describe('aggregation utils', () => {
         },
         {
           from: 5000,
-          to: 5000,
-        },
-        {
-          from: 5000,
-          to: 3090428,
-        },
-        {
-          from: 3090428,
-          to: 3090428,
-        },
-        {
-          from: 3090428,
           to: 3090428,
         },
         {
@@ -100,38 +89,6 @@ describe('aggregation utils', () => {
         },
         {
           from: 3618812,
-          to: 3618812,
-        },
-        {
-          from: 3618812,
-          to: 3618812,
-        },
-        {
-          from: 3618812,
-          to: 3618812,
-        },
-        {
-          from: 3618812,
-          to: 3696636,
-        },
-        {
-          from: 3696636,
-          to: 3696636,
-        },
-        {
-          from: 3696636,
-          to: 3696636,
-        },
-        {
-          from: 3696636,
-          to: 3696636,
-        },
-        {
-          from: 3696636,
-          to: 3696636,
-        },
-        {
-          from: 3696636,
           to: 3696636,
         },
         {

@@ -29,7 +29,7 @@ export const computeExpectationsAndRanges = (
   }
   tempFractions.push(2 / 100);
 
-  const ranges = percentiles.reduce((p, to) => {
+  const ranges = tempPercentiles.reduce((p, to) => {
     const from = p[p.length - 1]?.to;
     if (from !== undefined) {
       p.push({ from, to });
