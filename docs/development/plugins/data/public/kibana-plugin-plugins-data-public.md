@@ -30,7 +30,9 @@
 |  Enumeration | Description |
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-public.bucket_types.md) |  |
+|  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.es_field_types.md) | \* |
 |  [IndexPatternType](./kibana-plugin-plugins-data-public.indexpatterntype.md) |  |
+|  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
 |  [SearchSessionState](./kibana-plugin-plugins-data-public.searchsessionstate.md) | Possible state that current session can be in |
@@ -41,8 +43,12 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [extractTimeRange(filters, timeFieldName)](./kibana-plugin-plugins-data-public.extracttimerange.md) |  |
+|  [generateFilters(filterManager, field, values, operation, index)](./kibana-plugin-plugins-data-public.generatefilters.md) | Generate filter objects, as a result of triggering a filter action on a specific index pattern field. |
 |  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
+|  [getDisplayValueFromFilter(filter, indexPatterns)](./kibana-plugin-plugins-data-public.getdisplayvaluefromfilter.md) |  |
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
+|  [getEsQueryConfig(config)](./kibana-plugin-plugins-data-public.getesqueryconfig.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
 |  [isEsError(e)](./kibana-plugin-plugins-data-public.iseserror.md) | Checks if a given errors originated from Elasticsearch. Those params are assigned to the attributes property of an error. |
@@ -101,18 +107,20 @@
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
 |  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-data-public.apply_filter_trigger.md) |  |
 |  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
-|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) |  |
+|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.es_search_strategy.md) |  |
-|  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) |  |
+|  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) | Filter helpers namespace: |
 |  [esKuery](./kibana-plugin-plugins-data-public.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-public.esquery.md) |  |
 |  [exporters](./kibana-plugin-plugins-data-public.exporters.md) |  |
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
-|  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) |  |
+|  [FilterItem](./kibana-plugin-plugins-data-public.filteritem.md) |  |
+|  [FilterLabel](./kibana-plugin-plugins-data-public.filterlabel.md) |  |
+|  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-public.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
