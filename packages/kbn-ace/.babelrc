@@ -1,3 +1,6 @@
 {
-  "presets": ["@kbn/babel-preset/node_preset"]
+  "presets": ["@kbn/babel-preset/node_preset"],
+  "ignore": [
+    "src/ace/modes/x_json/worker/x_json.ace.worker.js"
+  ]
 }

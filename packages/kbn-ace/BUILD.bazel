@@ -8,6 +8,7 @@ PKG_REQUIRE_NAME = "@kbn/ace"
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
+    "src/ace/modes/x_json/worker/x_json.ace.worker.js",
   ],
   exclude = [
     "src/ace/modes/x_json/worker/worker.d.ts",
@@ -42,6 +43,10 @@ TYPES_DEPS = [
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
   build_pkg_name = package_name(),
 )
 
