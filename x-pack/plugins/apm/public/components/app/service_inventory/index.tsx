@@ -111,7 +111,7 @@ export function ServiceInventory() {
 
   return (
     <>
-      <SearchBar />
+      <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="s">
         {displayMlCallout && (
           <EuiFlexItem>
