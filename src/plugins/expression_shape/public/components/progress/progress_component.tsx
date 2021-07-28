@@ -71,7 +71,6 @@ function ProgressComponent({
   const BarProgress = shapeData.shapeType ? getShapeContentElement(shapeData.shapeType) : null;
 
   const shapeContentAttributes = {
-    className: 'canvasProgress__background',
     fill: 'none',
     stroke: barColor,
     strokeWidth: `${barWeight}px`,
@@ -82,7 +81,6 @@ function ProgressComponent({
 
   const barProgressAttributes = {
     ...shapeData.shapeProps,
-    className: 'canvasProgress__value',
     fill: 'none',
     stroke: valueColor,
     strokeWidth: `${valueWeight}px`,
@@ -101,14 +99,12 @@ function ProgressComponent({
     : {};
 
   const textAttributes: SvgTextAttributes = {
-    className: 'canvasProgress__label',
     style: font.spec as CSSProperties,
     ...updatedTextAttributes,
   };
 
   const updatedViewBox = getViewBox(shapeType, shapeData.viewBox, offset, labelWidth, labelHeight);
   const shapeAttributes = {
-    className: 'canvasProgress',
     id: getId('svg'),
     ...(dimensions || {}),
     viewBox: updatedViewBox,
