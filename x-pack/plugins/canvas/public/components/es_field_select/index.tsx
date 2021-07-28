@@ -16,7 +16,7 @@ export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = (props
   const [fields, setFields] = useState<string[]>([]);
 
   useEffect(() => {
-    getFields(index).then((newFields) => setFields(newFields ?? []));
+    getFields(index).then((newFields) => setFields(newFields || []));
   }, [index]);
 
   useEffect(() => {
