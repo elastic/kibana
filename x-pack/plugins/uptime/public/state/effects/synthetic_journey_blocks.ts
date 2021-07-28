@@ -19,7 +19,7 @@ import {
   ScreenshotBlockCache,
   updateHitCountsAction,
 } from '../reducers/synthetics';
-import { journeyScreenshotBlockSelector, syntheticsImageCacheSizeSelector } from '../selectors';
+import { syntheticsSelector } from '../selectors';
 
 function* fetchBlocks(hashes: string[]) {
   yield put(setBlockLoadingAction(hashes));
@@ -43,7 +43,7 @@ export function* fetchScreenshotBlocks() {
    * a fetch to the backend.
    */
   yield throttle(20, String(fetchBlocksAction), function* () {
-    const blocks: ScreenshotBlockCache = yield select(journeyScreenshotBlockSelector);
+    const { blocks }: { blocks: ScreenshotBlockCache } = yield select(syntheticsSelector);
     const toFetch = Object.keys(blocks).filter((hash) => {
       const block = blocks[hash];
       return isPendingBlock(block) && block.status !== 'loading';
@@ -72,7 +72,7 @@ const MAX_CACHE_SIZE = 4000000;
 
 export function* pruneBlockCache() {
   yield takeEvery(String(putCacheSize), function* (_action: Action<number>) {
-    const cacheSize: number = yield select(syntheticsImageCacheSizeSelector);
+    const { cacheSize }: { cacheSize: number } = yield select(syntheticsSelector);
 
     if (cacheSize > MAX_CACHE_SIZE) {
       yield put(pruneCacheAction(cacheSize - MAX_CACHE_SIZE));

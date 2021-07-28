@@ -15,7 +15,7 @@ import {
   ScreenshotBlockCache,
   StoreScreenshotBlock,
 } from '../state/reducers/synthetics';
-import { journeyScreenshotBlockSelector } from '../state/selectors';
+import { syntheticsSelector } from '../state/selectors';
 
 function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes: string[]) {
   for (const hash of hashes) {
@@ -63,7 +63,7 @@ export const useCompositeImage = (
   imageData?: string
 ): void => {
   const dispatch = useDispatch();
-  const blocks: ScreenshotBlockCache = useSelector(journeyScreenshotBlockSelector);
+  const { blocks }: { blocks: ScreenshotBlockCache } = useSelector(syntheticsSelector);
 
   React.useEffect(() => {
     dispatch(

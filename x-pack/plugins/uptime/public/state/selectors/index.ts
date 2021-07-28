@@ -99,9 +99,4 @@ export const journeySelector = ({ journeys }: AppState) => journeys;
 
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
 
-export const journeyScreenshotBlockSelector = ({
-  synthetics: { blocks },
-}: AppState): ScreenshotBlockCache => blocks;
-
-export const syntheticsImageCacheSizeSelector = ({ synthetics: { cacheSize } }: AppState): number =>
-  cacheSize;
+export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
