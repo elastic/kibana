@@ -13,3 +13,38 @@
   "type": "index-pattern",
   "version": "WzQsMl0="
 }
+
+{
+  "attributes": {
+    "columns": [
+      "_source"
+    ],
+    "description": "A Saved Search Description",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "A Saved Search",
+    "version": 1
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "ab12e3c0-f231-11e6-9486-733b1ac9221a",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "version": "WzUsMl0="
+}
