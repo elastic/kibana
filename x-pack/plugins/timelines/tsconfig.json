@@ -25,6 +25,7 @@
      { "path": "../features/tsconfig.json" },
      { "path": "../cases/tsconfig.json" },
      { "path": "../licensing/tsconfig.json" },
-     { "path": "../spaces/tsconfig.json" }
+     { "path": "../spaces/tsconfig.json" },
+     { "path": "../alerting/tsconfig.json" }
     ]
   }
