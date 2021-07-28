@@ -105,7 +105,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     return [7, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
-  protected randomChoice<T>(choices: T[] | readonly T[]): T {
+  protected randomChoice<T>(choices: T[]): T {
     return choices[this.randomN(choices.length)];
   }
 

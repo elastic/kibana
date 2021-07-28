@@ -11,6 +11,7 @@ import {
   RouteConfig,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -40,14 +41,12 @@ import {
   metadataTransformPrefix,
 } from '../../../../common/endpoint/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { AgentNotFoundError, PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import {
   ClusterClientMock,
   ScopedClusterClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
-import { EndpointHostNotFoundError } from '../../services/metadata';
-import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
@@ -72,7 +71,6 @@ describe('test endpoint route', () => {
     page: 1,
     perPage: 1,
   };
-  const agentGenerator = new FleetAgentGenerator('seed');
 
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -339,7 +337,7 @@ describe('test endpoint route', () => {
         });
         expect(mockResponse.notFound).toBeCalled();
         const message = mockResponse.notFound.mock.calls[0][0]?.body;
-        expect(message).toBeInstanceOf(EndpointHostNotFoundError);
+        expect(message).toEqual('Endpoint Not Found');
       });
 
       it('should return a single endpoint with status healthy', async () => {
@@ -348,9 +346,10 @@ describe('test endpoint route', () => {
           params: { id: response.hits.hits[0]._id },
         });
 
-        mockAgentService.getAgent = jest
-          .fn()
-          .mockReturnValue(agentGenerator.generate({ status: 'online' }));
+        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('online');
+        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+          active: true,
+        } as unknown) as Agent);
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
@@ -383,9 +382,13 @@ describe('test endpoint route', () => {
           params: { id: response.hits.hits[0]._id },
         });
 
-        mockAgentService.getAgent = jest
-          .fn()
-          .mockRejectedValue(new AgentNotFoundError('not found'));
+        mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
+          SavedObjectsErrorHelpers.createGenericNotFoundError();
+        });
+
+        mockAgentService.getAgent = jest.fn().mockImplementation(() => {
+          SavedObjectsErrorHelpers.createGenericNotFoundError();
+        });
 
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
@@ -418,11 +421,10 @@ describe('test endpoint route', () => {
           params: { id: response.hits.hits[0]._id },
         });
 
-        mockAgentService.getAgent = jest.fn().mockReturnValue(
-          agentGenerator.generate({
-            status: 'error',
-          })
-        );
+        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('warning');
+        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+          active: true,
+        } as unknown) as Agent);
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
@@ -471,7 +473,7 @@ describe('test endpoint route', () => {
         );
 
         expect(mockScopedClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
-        expect(mockResponse.badRequest).toBeCalled();
+        expect(mockResponse.customError).toBeCalled();
       });
     });
   });

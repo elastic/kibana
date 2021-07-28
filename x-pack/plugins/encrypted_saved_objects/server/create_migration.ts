@@ -13,6 +13,7 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
 
+import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 import { normalizeNamespace } from './saved_objects';
 
@@ -21,20 +22,28 @@ type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
-type IsMigrationNeededPredicate<InputAttributes, MigratedAttributes> = (
+export type IsMigrationNeededPredicate<InputAttributes, MigratedAttributes> = (
   encryptedDoc:
     | SavedObjectUnsanitizedDoc<InputAttributes>
     | SavedObjectUnsanitizedDoc<MigratedAttributes>
 ) => encryptedDoc is SavedObjectUnsanitizedDoc<InputAttributes>;
 
+export interface CreateEncryptedSavedObjectsMigrationFnOpts<
+  InputAttributes = unknown,
+  MigratedAttributes = InputAttributes
+> {
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>;
+  migration: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
+  shouldMigrateIfDecryptionFails?: boolean;
+  inputType?: EncryptedSavedObjectTypeRegistration;
+  migratedType?: EncryptedSavedObjectTypeRegistration;
+}
+
 export type CreateEncryptedSavedObjectsMigrationFn = <
   InputAttributes = unknown,
   MigratedAttributes = InputAttributes
 >(
-  isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>,
-  migration: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>,
-  inputType?: EncryptedSavedObjectTypeRegistration,
-  migratedType?: EncryptedSavedObjectTypeRegistration
+  opts: CreateEncryptedSavedObjectsMigrationFnOpts<InputAttributes, MigratedAttributes>
 ) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>;
 
 export const getCreateMigration = (
@@ -42,12 +51,15 @@ export const getCreateMigration = (
   instantiateServiceWithLegacyType: (
     typeRegistration: EncryptedSavedObjectTypeRegistration
   ) => EncryptedSavedObjectsService
-): CreateEncryptedSavedObjectsMigrationFn => (
-  isMigrationNeededPredicate,
-  migration,
-  inputType,
-  migratedType
-) => {
+): CreateEncryptedSavedObjectsMigrationFn => (opts) => {
+  const {
+    isMigrationNeededPredicate,
+    migration,
+    shouldMigrateIfDecryptionFails,
+    inputType,
+    migratedType,
+  } = opts;
+
   if (inputType && migratedType && inputType.type !== migratedType.type) {
     throw new Error(
       `An Invalid Encrypted Saved Objects migration is trying to migrate across types ("${inputType.type}" => "${migratedType.type}"), which isn't permitted`
@@ -107,21 +119,34 @@ export const getCreateMigration = (
     const encryptDescriptor = { id, type, namespace: descriptorNamespace };
 
     // decrypt the attributes using the input type definition
-    // then migrate the document
-    // then encrypt the attributes using the migration type definition
-    return mapAttributes(
-      migration(
-        mapAttributes(encryptedDoc, (inputAttributes) =>
-          inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
-            isTypeBeingConverted,
-            originId,
-          })
-        ),
-        context
-      ),
-      (migratedAttributes) =>
-        migratedService.encryptAttributesSync<any>(encryptDescriptor, migratedAttributes)
-    );
+    // if an error occurs during decryption, use the shouldMigrateIfDecryptionFails flag
+    // to determine whether to throw the error or continue the migration
+    // if we are continuing the migration, strip encrypted attributes from the document using stripOrDecryptAttributesSync
+    const documentToMigrate = mapAttributes(encryptedDoc, (inputAttributes) => {
+      try {
+        return inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
+          isTypeBeingConverted,
+          originId,
+        });
+      } catch (err) {
+        if (!shouldMigrateIfDecryptionFails || !(err instanceof EncryptionError)) {
+          throw err;
+        }
+
+        context.log.warn(
+          `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Encrypted attributes have been stripped from the original document and migration will be applied but this may cause errors later on.`
+        );
+        return inputService.stripOrDecryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
+          isTypeBeingConverted,
+          originId,
+        }).attributes;
+      }
+    });
+
+    // migrate and encrypt the document
+    return mapAttributes(migration(documentToMigrate, context), (migratedAttributes) => {
+      return migratedService.encryptAttributesSync<any>(encryptDescriptor, migratedAttributes);
+    });
   };
 };
 
