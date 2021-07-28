@@ -8,21 +8,21 @@
 import { Store } from 'redux';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type {
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   CoreStart,
 } from '../../../../src/core/public';
-import type { TimelinesUIStart, TGridProps } from './types';
 import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserWrappedProps } from './components';
 import {
   getLastUpdatedLazy,
   getLoadingPanelLazy,
   getTGridLazy,
   getFieldsBrowserLazy,
+  getAddToCaseLazy,
 } from './methods';
+import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
@@ -34,7 +34,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
 
   public setup(core: CoreSetup) {}
 
-  public start(core: CoreStart, { data }: { data: DataPublicPluginStart }): TimelinesUIStart {
+  public start(core: CoreStart, { data }: TimelinesStartPlugins): TimelinesUIStart {
     const config = this.initializerContext.config.get<{ enabled: boolean }>();
     if (!config.enabled) {
       return {} as TimelinesUIStart;
@@ -76,6 +76,9 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       setTGridEmbeddedStore: (store: Store) => {
         this.setStore(store);
+      },
+      getAddToCaseAction: (props) => {
+        return getAddToCaseLazy(props);
       },
     };
   }
