@@ -202,7 +202,7 @@ export function getKibanasForClusters(
       return {
         clusterUuid,
         stats: {
-          uuids: kibanaUuids.map(({ key }: Bucket) => key),
+          uuids: (aggregations?.kibana_uuids?.buckets ?? []).map(({ key }: Bucket) => key),
           status,
           requests_total: requestsTotal,
           concurrent_connections: connections,

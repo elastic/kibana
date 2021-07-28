@@ -60,7 +60,6 @@ export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
   };
 
   useEffect(() => {
-    console.log('alerts modal', alerts, alertsEnableModalProvider.shouldShowAlertsModal(alerts));
     if (alertsEnableModalProvider.shouldShowAlertsModal(alerts)) {
       setIsModalVisible(true);
     }

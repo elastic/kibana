@@ -75,9 +75,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.exists(SUBJ_CLUSTER_ALERTS);
     }
 
-    async closeAlertsModal() {
-      console.log('CLOSE ALERTS MODAL!!!');
-      await new Promise((res) => setTimeout(res, 3000));
+    closeAlertsModal() {
       return testSubjects.click('alerts-modal-button');
     }
 
