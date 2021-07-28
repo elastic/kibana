@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export*/
-export default {
+/* eslint-disable-next-line*/
+    export default {
   'apm_8.0.0': {
-    start: '2020-12-08T13:57:56.135Z',
-    end: '2020-12-08T14:27:56.135Z',
+    start: '2021-07-27T08:08:11.069Z',
+    end: '2021-07-27T08:38:11.069Z',
   },
 };
