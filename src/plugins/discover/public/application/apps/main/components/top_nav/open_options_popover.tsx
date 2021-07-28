@@ -45,6 +45,7 @@ const toggleButtons = [
   },
 ];
 
+// @todo: move this somewhere else
 export const DocumentViewOption = ({
   viewId,
   setViewId,
@@ -54,6 +55,8 @@ export const DocumentViewOption = ({
 }) => {
   return (
     <EuiButtonGroup
+      color={'primary'}
+      style={{ paddingRight: 20 }}
       buttonSize={'s'}
       legend="This is a basic group"
       options={toggleButtons}

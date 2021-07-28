@@ -355,7 +355,8 @@ export function DiscoverLayout({
 
                     <EuiFlexItem className="eui-yScroll">
                       <section
-                        className="dscTable eui-yScroll eui-xScroll"
+                        // @todo: add back eui-xScroll?
+                        className="dscTable eui-yScroll"
                         aria-labelledby="documentsAriaLabel"
                         ref={scrollableDesktop}
                         tabIndex={-1}
