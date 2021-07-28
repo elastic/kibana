@@ -2262,7 +2262,7 @@ describe('Task Runner', () => {
         params: {
           ...mockedTaskInstance.params,
           spaceId: 'foo',
-        }
+        },
       },
       taskRunnerFactoryInitializerParams
     );
