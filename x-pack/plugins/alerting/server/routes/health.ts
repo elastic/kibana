@@ -44,11 +44,28 @@ export const healthRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
+          const isEsSecurityEnabled: boolean | null = licenseState.getIsSecurityEnabled();
           const areApiKeysEnabled = await context.alerting.areApiKeysEnabled();
           const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
 
+          console.log(`isEsSecurityEnabled: ${isEsSecurityEnabled}`);
+          console.log(`areApiKeysEnabled: ${areApiKeysEnabled}`);
+          let isSufficientlySecure;
+          if (isEsSecurityEnabled === null) {
+            isSufficientlySecure = false;
+          } else {
+            // if isKibanaSecurityEnabled = true and isEsSecurityEnabled = true, then areApiKeysEnabled must be true for alerting to be enabled
+            // - yarn es snapshot --ssl -E xpack.security.authc.api_key.enabled=false, yarn start --ssl
+            // - yarn es snapshot --ssl, yarn start --ssl
+            // if isKibanaSecurityEnabled = true and isEsSecurityEnabled = false, then it doesn't matter what areApiKeysEnabled is for alerting to be enabled
+            // - yarn es snapshot -E xpack.security.enabled=false, yarn start
+            // if isKibanaSecurityEnabled = false then it doesn't matter what isEsSecurityEnabled or areApiKeysEnabled are
+            isSufficientlySecure = !isEsSecurityEnabled || (isEsSecurityEnabled && areApiKeysEnabled);
+          }
+
+          console.log(`isSufficientlySecure: ${isSufficientlySecure}`);
           const frameworkHealth: AlertingFrameworkHealth = {
-            isSufficientlySecure: areApiKeysEnabled,
+            isSufficientlySecure,
             hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
             alertingFrameworkHeath,
           };
