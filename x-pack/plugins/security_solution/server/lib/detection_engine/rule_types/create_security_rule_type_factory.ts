@@ -273,7 +273,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           logger.debug(
             buildRuleMessage(
-              `[+] Finished indexing ${createdSignalsCount} signals into ${outputIndex}`
+              `[+] Finished indexing ${createdSignalsCount} signals into alias ${indexAlias}`
             )
           );
 

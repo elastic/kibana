@@ -21,6 +21,7 @@ export const wrapHitsFactory = ({
 }): WrapHits => (events) => {
   const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
     {
+      _index: '',
       _id: generateId(
         doc._index,
         doc._id,

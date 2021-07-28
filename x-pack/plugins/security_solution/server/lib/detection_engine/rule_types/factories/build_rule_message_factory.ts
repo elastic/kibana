@@ -13,7 +13,6 @@ export interface BuildRuleMessageFactoryParams {
   index: string;
 }
 
-// TODO: remove signals index
 export const buildRuleMessageFactory = ({
   id,
   ruleId,
