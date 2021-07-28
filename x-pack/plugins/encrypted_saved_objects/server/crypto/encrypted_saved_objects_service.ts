@@ -70,7 +70,7 @@ interface DecryptParameters extends CommonParameters {
    * the object was previously encrypted with its namespace in the descriptor portion of the AAD; on the other hand, if the object is being
    * decrypted during object migration, the object was never encrypted with its namespace in the descriptor portion of the AAD.
    */
-  convertToMultiNamespaceType?: boolean;
+  isTypeBeingConverted?: boolean;
   /**
    * If the originId (old object ID) is present and the object is being converted from a single-namespace type to a multi-namespace type,
    * we will attempt to decrypt with both the old object ID and the current object ID.
@@ -489,7 +489,7 @@ export class EncryptedSavedObjectsService {
         );
       }
       if (!encryptionAADs.length) {
-        if (params?.convertToMultiNamespaceType) {
+        if (params?.isTypeBeingConverted) {
           // The object is either pending conversion to a multi-namespace type, or it was just converted. We may need to attempt to decrypt
           // it with several different descriptors depending upon how the migrations are structured, and whether this is a full index
           // migration or a single document migration. Note that the originId is set either when the document is converted _or_ when it is

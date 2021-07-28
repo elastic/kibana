@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Semver from 'semver';
+import semver from 'semver';
 
 import type {
   SavedObjectMigrationContext,
@@ -69,7 +69,7 @@ export const getCreateMigration = (
 
     // After it is converted, the object's old ID is stored in the `originId` field. In addition, objects that are imported a certain way
     // may have this field set, but it would not be necessary to use this to decrypt saved object attributes.
-    const originId = encryptedDoc.originId;
+    const { type, id, originId } = encryptedDoc;
 
     // If an object is slated to be converted, it should be decrypted flexibly:
     // * If this is an index migration:
@@ -82,30 +82,29 @@ export const getCreateMigration = (
     //   re-encrypted without a namespace in the descriptor.
     // To account for these different scenarios, when this field is set, the ESO service will attempt several different permutations of
     // the descriptor when decrypting the object.
-    const convertToMultiNamespaceType =
+    const isTypeBeingConverted =
       !!context.convertToMultiNamespaceTypeVersion &&
-      Semver.lte(context.migrationVersion, context.convertToMultiNamespaceTypeVersion);
-
-    // If an object has been converted right before this migration function is called, it will no longer have a `namespace` field, but it
-    // will have a `namespaces` field; in that case, the first/only element in that array should be used as the namespace in the descriptor
-    // during decryption.
-    const decryptDescriptorNamespace =
-      convertToMultiNamespaceType && encryptedDoc.namespaces?.length
-        ? normalizeNamespace(encryptedDoc.namespaces[0]) // `namespaces` contains string values, but we need to normalize this to the namespace ID representation
-        : encryptedDoc.namespace;
+      semver.lte(context.migrationVersion, context.convertToMultiNamespaceTypeVersion);
 
     // This approximates the behavior of getDescriptorNamespace(); the intent is that if there is ever a case where a multi-namespace object
     // has the `namespace` field, it will not be encrypted with that field in its descriptor. It would be preferable to rely on
     // getDescriptorNamespace() here, but that requires the SO type registry which can only be retrieved from a promise, and this is not an
     // async function
-    const encryptDescriptorNamespace = context.isSingleNamespaceType
-      ? encryptedDoc.namespace
-      : undefined;
+    const descriptorNamespace = context.isSingleNamespaceType ? encryptedDoc.namespace : undefined;
+    let decryptDescriptorNamespace = descriptorNamespace;
 
-    const { id, type } = encryptedDoc;
+    // If an object has been converted right before this migration function is called, it will no longer have a `namespace` field, but it
+    // will have a `namespaces` field; in that case, the first/only element in that array should be used as the namespace in the descriptor
+    // during decryption.
+    if (isTypeBeingConverted) {
+      decryptDescriptorNamespace = encryptedDoc.namespaces?.length
+        ? normalizeNamespace(encryptedDoc.namespaces[0]) // `namespaces` contains string values, but we need to normalize this to the namespace ID representation
+        : encryptedDoc.namespace;
+    }
+
     // These descriptors might have a `namespace` that is undefined. That is expected for multi-namespace and namespace-agnostic types.
     const decryptDescriptor = { id, type, namespace: decryptDescriptorNamespace };
-    const encryptDescriptor = { id, type, namespace: encryptDescriptorNamespace };
+    const encryptDescriptor = { id, type, namespace: descriptorNamespace };
 
     // decrypt the attributes using the input type definition
     // then migrate the document
@@ -114,7 +113,7 @@ export const getCreateMigration = (
       migration(
         mapAttributes(encryptedDoc, (inputAttributes) =>
           inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
-            convertToMultiNamespaceType,
+            isTypeBeingConverted,
             originId,
           })
         ),
