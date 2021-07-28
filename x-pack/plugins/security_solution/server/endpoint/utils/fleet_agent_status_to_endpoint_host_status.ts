@@ -8,8 +8,6 @@
 import { AgentStatus } from '../../../../fleet/common';
 import { HostStatus } from '../../../common/endpoint/types';
 
-// For an understanding of how fleet agent status is calculated:
-// @see `x-pack/plugins/fleet/common/services/agent_status.ts`
 const STATUS_MAPPING: ReadonlyMap<AgentStatus, HostStatus> = new Map([
   ['online', HostStatus.HEALTHY],
   ['offline', HostStatus.OFFLINE],
@@ -22,12 +20,10 @@ const STATUS_MAPPING: ReadonlyMap<AgentStatus, HostStatus> = new Map([
   ['degraded', HostStatus.UNHEALTHY],
 ]);
 
-export const DEFAULT_ENDPOINT_HOST_STATUS = HostStatus.UNHEALTHY;
-
 /**
  * A Map of Fleet Agent Status to Endpoint Host Status.
  * Default status is `HostStatus.UNHEALTHY`
  */
 export const fleetAgentStatusToEndpointHostStatus = (status: AgentStatus): HostStatus => {
-  return STATUS_MAPPING.get(status) || DEFAULT_ENDPOINT_HOST_STATUS;
+  return STATUS_MAPPING.get(status) || HostStatus.UNHEALTHY;
 };

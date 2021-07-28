@@ -118,7 +118,7 @@ interface AgentBase {
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
-  status?: AgentStatus;
+  status?: string;
   packages: string[];
 }
 

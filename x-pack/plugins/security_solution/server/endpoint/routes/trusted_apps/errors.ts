@@ -7,9 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { NotFoundError } from '../../errors';
-
-export class TrustedAppNotFoundError extends NotFoundError {
+export class TrustedAppNotFoundError extends Error {
   constructor(id: string) {
     super(`Trusted Application (${id}) not found`);
   }

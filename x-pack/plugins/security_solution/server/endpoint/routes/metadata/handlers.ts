@@ -9,9 +9,7 @@ import Boom from '@hapi/boom';
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  IKibanaResponse,
   IScopedClusterClient,
-  KibanaResponseFactory,
   Logger,
   RequestHandler,
   SavedObjectsClientContract,
@@ -37,8 +35,6 @@ import {
   queryResponseToHostListResult,
   queryResponseToHostResult,
 } from './support/query_strategies';
-import { NotFoundError } from '../../errors';
-import { EndpointHostUnEnrolledError } from '../../services/metadata';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -60,33 +56,6 @@ const IGNORED_ELASTIC_AGENT_IDS = [
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
-};
-
-const errorHandler = <E extends Error>(
-  logger: Logger,
-  res: KibanaResponseFactory,
-  error: E
-): IKibanaResponse => {
-  if (error instanceof NotFoundError) {
-    return res.notFound({ body: error });
-  }
-
-  if (error instanceof EndpointHostUnEnrolledError) {
-    return res.badRequest({ body: error });
-  }
-
-  // legacy check for Boom errors. `ts-ignore` is for the errors around non-standard error properties
-  // @ts-ignore
-  const boomStatusCode = error.isBoom && error?.output?.statusCode;
-  if (boomStatusCode) {
-    return res.customError({
-      statusCode: boomStatusCode,
-      body: error,
-    });
-  }
-
-  // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
-  throw error;
 };
 
 export const getMetadataListRequestHandler = function (
@@ -153,17 +122,34 @@ export const getMetadataRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
+    const agentService = endpointAppContext.service.getAgentService();
+    if (agentService === undefined) {
+      throw new Error('agentService not available');
+    }
+
+    const metadataRequestContext: MetadataRequestContext = {
+      esClient: context.core.elasticsearch.client,
+      endpointAppContextService: endpointAppContext.service,
+      logger,
+      requestHandlerContext: context,
+      savedObjectsClient: context.core.savedObjects.client,
+    };
 
     try {
-      return response.ok({
-        body: await endpointMetadataService.getEnrichedHostMetadata(
-          context.core.elasticsearch.client.asCurrentUser,
-          request.params.id
-        ),
-      });
-    } catch (error) {
-      return errorHandler(logger, response, error);
+      const doc = await getHostData(metadataRequestContext, request?.params?.id);
+      if (doc) {
+        return response.ok({ body: doc });
+      }
+      return response.notFound({ body: 'Endpoint Not Found' });
+    } catch (err) {
+      logger.warn(JSON.stringify(err, null, 2));
+      if (err.isBoom) {
+        return response.customError({
+          statusCode: err.output.statusCode,
+          body: { message: err.message },
+        });
+      }
+      throw err;
     }
   };
 };

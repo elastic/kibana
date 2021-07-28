@@ -20,7 +20,8 @@ export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  return (await getAgentById(esClient, agentId)).status!;
+  const agent = await getAgentById(esClient, agentId);
+  return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
