@@ -39,9 +39,11 @@ import { ServiceListMetric } from './ServiceListMetric';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
+type ServicesDetailedStatisticsAPIResponse = APIReturnType<'GET /api/apm/services/detailed_statistics'>;
 
 interface Props {
   items: Items;
+  comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
 }
 type ServiceListItem = ValuesType<Items>;
@@ -75,8 +77,10 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 
 export function getServiceColumns({
   showTransactionTypeColumn,
+  comparisonData,
 }: {
   showTransactionTypeColumn: boolean;
+  comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
   return [
     {
@@ -155,34 +159,40 @@ export function getServiceColumns({
         ]
       : []),
     {
-      field: 'avgResponseTime',
+      field: 'latency',
       name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { avgResponseTime }) => (
+      render: (_, { serviceName, latency }) => (
         <ServiceListMetric
-          series={avgResponseTime?.timeseries}
+          series={comparisonData?.currentPeriod[serviceName]?.latency}
+          comparisonSeries={
+            comparisonData?.previousPeriod[serviceName]?.latency
+          }
           color="euiColorVis1"
-          valueLabel={asMillisecondDuration(avgResponseTime?.value || 0)}
+          valueLabel={asMillisecondDuration(latency || 0)}
         />
       ),
       align: 'left',
       width: `${unit * 10}px`,
     },
     {
-      field: 'transactionsPerMinute',
+      field: 'throughput',
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { transactionsPerMinute }) => (
+      render: (_, { serviceName, throughput }) => (
         <ServiceListMetric
-          series={transactionsPerMinute?.timeseries}
+          series={comparisonData?.currentPeriod[serviceName]?.throughput}
+          comparisonSeries={
+            comparisonData?.previousPeriod[serviceName]?.throughput
+          }
           color="euiColorVis0"
-          valueLabel={asTransactionRate(transactionsPerMinute?.value)}
+          valueLabel={asTransactionRate(throughput)}
         />
       ),
       align: 'left',
@@ -195,14 +205,16 @@ export function getServiceColumns({
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { transactionErrorRate }) => {
-        const value = transactionErrorRate?.value;
-
-        const valueLabel = asPercent(value, 1);
-
+      render: (_, { serviceName, transactionErrorRate }) => {
+        const valueLabel = asPercent(transactionErrorRate, 1);
         return (
           <ServiceListMetric
-            series={transactionErrorRate?.timeseries}
+            series={
+              comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
+            }
+            comparisonSeries={
+              comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
+            }
             color="euiColorVis7"
             valueLabel={valueLabel}
           />
@@ -214,7 +226,7 @@ export function getServiceColumns({
   ];
 }
 
-export function ServiceList({ items, noItemsMessage }: Props) {
+export function ServiceList({ items, noItemsMessage, comparisonData }: Props) {
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
   const showTransactionTypeColumn = items.some(
@@ -224,8 +236,8 @@ export function ServiceList({ items, noItemsMessage }: Props) {
   );
 
   const serviceColumns = useMemo(
-    () => getServiceColumns({ showTransactionTypeColumn }),
-    [showTransactionTypeColumn]
+    () => getServiceColumns({ showTransactionTypeColumn, comparisonData }),
+    [showTransactionTypeColumn, comparisonData]
   );
 
   const columns = displayHealthStatus
@@ -287,7 +299,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    (item) => item.transactionsPerMinute?.value ?? 0,
+                    // (item) => item.transactionsPerMinute?.value ?? 0,
                   ],
                   [sortDirection, sortDirection]
                 )
@@ -298,12 +310,12 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                       // Use `?? -1` here so `undefined` will appear after/before `0`.
                       // In the table this will make the "N/A" items always at the
                       // bottom/top.
-                      case 'avgResponseTime':
-                        return item.avgResponseTime?.value ?? -1;
-                      case 'transactionsPerMinute':
-                        return item.transactionsPerMinute?.value ?? -1;
+                      case 'latency':
+                        return item.latency ?? -1;
+                      case 'throughput':
+                        return item.throughput ?? -1;
                       case 'transactionErrorRate':
-                        return item.transactionErrorRate?.value ?? -1;
+                        return item.transactionErrorRate ?? -1;
                       default:
                         return item[sortField as keyof typeof item];
                     }

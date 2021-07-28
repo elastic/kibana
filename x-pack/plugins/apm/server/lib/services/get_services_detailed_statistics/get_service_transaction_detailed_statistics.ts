@@ -81,7 +81,7 @@ export async function getServiceTransactionDetailedStatistics({
               ...getDocumentTypeFilterForAggregatedTransactions(
                 searchAggregatedTransactions
               ),
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],

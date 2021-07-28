@@ -12,10 +12,19 @@ export function ServiceListMetric({
   color,
   series,
   valueLabel,
+  comparisonSeries,
 }: {
   color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
   series?: Array<{ x: number; y: number | null }>;
+  comparisonSeries?: Array<{ x: number; y: number | null }>;
   valueLabel: React.ReactNode;
 }) {
-  return <SparkPlot valueLabel={valueLabel} series={series} color={color} />;
+  return (
+    <SparkPlot
+      valueLabel={valueLabel}
+      series={series}
+      color={color}
+      comparisonSeries={comparisonSeries}
+    />
+  );
 }

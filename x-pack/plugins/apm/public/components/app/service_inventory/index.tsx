@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import uuid from 'uuid';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -16,24 +17,38 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './service_list';
 import { MLCallout } from './service_list/MLCallout';
 
 const initialData = {
-  items: [],
-  hasHistoricalData: true,
-  hasLegacyData: false,
+  requestId: '',
+  mainStatistics: { items: [], hasHistoricalData: true, hasLegacyData: false },
 };
 
 let hasDisplayedToast = false;
 
 function useServicesFetcher() {
   const {
-    urlParams: { environment, kuery, start, end },
+    urlParams: {
+      environment,
+      kuery,
+      start,
+      end,
+      comparisonEnabled,
+      comparisonType,
+    },
   } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
+
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
 
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
@@ -48,14 +63,57 @@ function useServicesFetcher() {
               end,
             },
           },
+        }).then((response) => {
+          return {
+            requestId: uuid(),
+            mainStatistics: response,
+          };
         });
       }
     },
-    [environment, kuery, start, end]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      environment,
+      kuery,
+      start,
+      end,
+      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
+      offset,
+    ]
+  );
+
+  const { mainStatistics, requestId } = data;
+
+  const { data: comparisonData } = useFetcher(
+    (callApmApi) => {
+      if (start && end && mainStatistics.items.length) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/detailed_statistics',
+          params: {
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              serviceNames: JSON.stringify(
+                mainStatistics.items
+                  .map(({ serviceName }) => serviceName)
+                  .sort()
+              ),
+              offset,
+            },
+          },
+        });
+      }
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
   );
 
   useEffect(() => {
-    if (data.hasLegacyData && !hasDisplayedToast) {
+    if (mainStatistics.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
 
       core.notifications.toasts.addWarning({
@@ -82,14 +140,22 @@ function useServicesFetcher() {
         ),
       });
     }
-  }, [data.hasLegacyData, upgradeAssistantHref, core.notifications.toasts]);
+  }, [
+    mainStatistics.hasLegacyData,
+    upgradeAssistantHref,
+    core.notifications.toasts,
+  ]);
 
-  return { servicesData: data, servicesStatus: status };
+  return {
+    servicesData: mainStatistics,
+    servicesStatus: status,
+    comparisonData,
+  };
 }
 
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
-  const { servicesData, servicesStatus } = useServicesFetcher();
+  const { servicesData, servicesStatus, comparisonData } = useServicesFetcher();
 
   const {
     anomalyDetectionJobsData,
@@ -121,6 +187,7 @@ export function ServiceInventory() {
         <EuiFlexItem>
           <ServiceList
             items={servicesData.items}
+            comparisonData={comparisonData}
             noItemsMessage={
               <NoServicesMessage
                 historicalDataFound={servicesData.hasHistoricalData}
