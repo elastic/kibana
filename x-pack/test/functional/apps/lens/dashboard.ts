@@ -90,8 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
     // setting set in kibana.yml to work (not enabled by default)
     it('should be able to drill down to discover', async () => {
-      // await PageObjects.common.navigateToApp('dashboard');
-      // await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
