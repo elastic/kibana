@@ -24,10 +24,11 @@ export const EVENT_FILTER_LIST = {
 };
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [
-  `name`,
-  `entries.value`,
-  `entries.entries.value`,
-  `comments.comment`,
+  'name',
+  'entries.value',
+  'entries.list.id',
+  'entries.entries.value',
+  'comments.comment',
 ];
 
 export { ENDPOINT_EVENT_FILTERS_LIST_ID, EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL };
