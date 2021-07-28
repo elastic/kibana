@@ -147,7 +147,7 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
-      var name = item.doc.span.name;
+      let name = item.doc.span.name;
       if (item.doc.span.composite) {
         const compositePrefix =
           item.doc.span.composite.compression_strategy === 'exact_match'
@@ -245,7 +245,7 @@ function getItemBarStyle(
   width: number,
   left: number
 ): React.CSSProperties {
-  var itemBarStyle = { left: `${left}%`, width: `${width}%` };
+  let itemBarStyle = { left: `${left}%`, width: `${width}%` };
 
   if (item.docType === 'span' && item.doc.span.composite) {
     const percNumItems = 100.0 / item.doc.span.composite.count;
