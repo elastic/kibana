@@ -199,8 +199,9 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
     if (agentHit.body.found === false) {
       throw agentNotFoundError;
     }
+    const agent = searchHitToAgent(agentHit.body);
 
-    return searchHitToAgent(agentHit.body);
+    return agent;
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       throw agentNotFoundError;
