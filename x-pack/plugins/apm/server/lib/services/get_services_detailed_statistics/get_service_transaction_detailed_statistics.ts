@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { keyBy } from 'lodash';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -17,35 +16,39 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
-import { ServicesItemsSetup } from './get_services_items';
 
-interface AggregationParams {
-  environment?: string;
-  kuery?: string;
-  setup: ServicesItemsSetup;
-  searchAggregatedTransactions: boolean;
-  maxNumServices: number;
-}
-
-export async function getServiceTransactionStats({
+export async function getServiceTransactionDetailedStatistics({
+  serviceNames,
   environment,
   kuery,
   setup,
   searchAggregatedTransactions,
-  maxNumServices,
-}: AggregationParams) {
+  offset,
+}: {
+  serviceNames: string[];
+  environment?: string;
+  kuery?: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+  offset?: string;
+}) {
   const { apmEventClient, start, end } = setup;
+  const offsetInMs = getOffsetInMs(start, offset);
+  const startWithOffset = start - offsetInMs;
+  const endWithOffset = end - offsetInMs;
 
   const outcomes = getOutcomeAggregation();
 
@@ -88,7 +91,8 @@ export async function getServiceTransactionStats({
           services: {
             terms: {
               field: SERVICE_NAME,
-              size: maxNumServices,
+              include: serviceNames,
+              size: serviceNames.length,
             },
             aggs: {
               transactionType: {
@@ -97,18 +101,22 @@ export async function getServiceTransactionStats({
                 },
                 aggs: {
                   ...metrics,
-                  environments: {
-                    terms: {
-                      field: SERVICE_ENVIRONMENT,
-                    },
-                  },
-                  sample: {
-                    top_metrics: {
-                      metrics: [{ field: AGENT_NAME } as const],
-                      sort: {
-                        '@timestamp': 'desc' as const,
+                  timeseries: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: getBucketSizeForAggregatedTransactions({
+                        start: startWithOffset,
+                        end: endWithOffset,
+                        numBuckets: 20,
+                        searchAggregatedTransactions,
+                      }).intervalString,
+                      min_doc_count: 0,
+                      extended_bounds: {
+                        min: startWithOffset,
+                        max: endWithOffset,
                       },
                     },
+                    aggs: metrics,
                   },
                 },
               },
@@ -119,7 +127,7 @@ export async function getServiceTransactionStats({
     }
   );
 
-  return (
+  return keyBy(
     response.aggregations?.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
         bucket.transactionType.buckets.find(
@@ -129,23 +137,30 @@ export async function getServiceTransactionStats({
 
       return {
         serviceName: bucket.key as string,
-        transactionType: topTransactionTypeBucket.key as string,
-        environments: topTransactionTypeBucket.environments.buckets.map(
-          (environmentBucket) => environmentBucket.key as string
+        latency: topTransactionTypeBucket.timeseries.buckets.map(
+          (dateBucket) => ({
+            x: dateBucket.key + offsetInMs,
+            y: dateBucket.avg_duration.value,
+          })
         ),
-        agentName: topTransactionTypeBucket.sample.top[0].metrics[
-          AGENT_NAME
-        ] as AgentName,
-        latency: topTransactionTypeBucket.avg_duration.value,
-        transactionErrorRate: calculateTransactionErrorPercentage(
-          topTransactionTypeBucket.outcomes
+        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
+          (dateBucket) => ({
+            x: dateBucket.key + offsetInMs,
+            y: calculateTransactionErrorPercentage(dateBucket.outcomes),
+          })
         ),
-        throughput: calculateThroughput({
-          start,
-          end,
-          value: topTransactionTypeBucket.doc_count,
-        }),
+        throughput: topTransactionTypeBucket.timeseries.buckets.map(
+          (dateBucket) => ({
+            x: dateBucket.key + offsetInMs,
+            y: calculateThroughput({
+              start,
+              end,
+              value: dateBucket.doc_count,
+            }),
+          })
+        ),
       };
-    }) ?? []
+    }) ?? [],
+    'serviceName'
   );
 }
