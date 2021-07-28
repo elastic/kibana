@@ -6,5 +6,5 @@
  */
 
 export * from './artifacts';
-export { getMetadataForEndpoints } from './metadata/metadata';
+export { getMetadataForEndpoints } from './metadata';
 export * from './actions';
