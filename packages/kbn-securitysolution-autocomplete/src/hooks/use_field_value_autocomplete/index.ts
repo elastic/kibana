@@ -9,19 +9,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../../src/plugins/data/public';
 type AutocompleteStart = any;
 
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-type IFieldType = any;
-type IIndexPattern = any;
-
 interface FuncArgs {
-  fieldSelected: IFieldType | undefined;
-  patterns: IIndexPattern | undefined;
+  fieldSelected: IndexPatternFieldBase | undefined;
+  patterns: IndexPatternBase | undefined;
   searchQuery: string;
   value: string | string[] | undefined;
 }
@@ -33,10 +29,10 @@ export type UseFieldValueAutocompleteReturn = [boolean, boolean, string[], Func 
 export interface UseFieldValueAutocompleteProps {
   autocompleteService: AutocompleteStart;
   fieldValue: string | string[] | undefined;
-  indexPattern: IIndexPattern | undefined;
+  indexPattern: IndexPatternBase | undefined;
   operatorType: OperatorTypeEnum;
   query: string;
-  selectedField: IFieldType | undefined;
+  selectedField: IndexPatternFieldBase | undefined;
 }
 /**
  * Hook for using the field value autocomplete service
