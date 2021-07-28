@@ -247,11 +247,21 @@ export class TaskRunner<
       actions,
     } = alert;
     const {
-      params: { alertId },
+      params: { alertId: potentiallyLegacyAlertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const alertType = this.alertTypeRegistry.get(alertTypeId);
+
+    // We need to ensure the `alertId` resolves to an actual saved object due to https://github.com/elastic/kibana/issues/100067
+    // It might be an old id that needs aliased
+    const {
+      saved_object: { id: alertId },
+    } = await this.context.internalSavedObjectsRepository.resolve<RawAlert>(
+      'alert',
+      potentiallyLegacyAlertId,
+      { namespace: this.context.spaceIdToNamespace(spaceId) }
+    );
 
     const alertInstances = mapValues<
       Record<string, RawAlertInstance>,
@@ -433,8 +443,18 @@ export class TaskRunner<
     event: Event
   ) {
     const {
-      params: { alertId, spaceId },
+      params: { alertId: potentiallyLegacyAlertId, spaceId },
     } = this.taskInstance;
+
+    // We need to ensure the `alertId` resolves to an actual saved object due to https://github.com/elastic/kibana/issues/100067
+    // It might be an old id that needs aliased
+    const {
+      saved_object: { id: alertId },
+    } = await this.context.internalSavedObjectsRepository.resolve<RawAlert>(
+      'alert',
+      potentiallyLegacyAlertId,
+      { namespace: this.context.spaceIdToNamespace(spaceId) }
+    );
 
     // Validate
     const validatedParams = validateAlertTypeParams(alert.params, this.alertType.validate?.params);
@@ -460,8 +480,19 @@ export class TaskRunner<
 
   async loadAlertAttributesAndRun(event: Event): Promise<Resultable<AlertTaskRunResult, Error>> {
     const {
-      params: { alertId, spaceId },
+      params: { alertId: potentiallyLegacyAlertId, spaceId },
     } = this.taskInstance;
+
+    // We need to ensure the `alertId` resolves to an actual saved object due to https://github.com/elastic/kibana/issues/100067
+    // It might be an old id that needs aliased
+    const {
+      saved_object: { id: alertId },
+    } = await this.context.internalSavedObjectsRepository.resolve<RawAlert>(
+      'alert',
+      potentiallyLegacyAlertId,
+      { namespace: this.context.spaceIdToNamespace(spaceId) }
+    );
+
     // TODO: Change when https://github.com/elastic/kibana/issues/106567 is resolved
     let apiKey: string | null;
     try {
@@ -500,14 +531,27 @@ export class TaskRunner<
 
   async run(): Promise<AlertTaskRunResult> {
     const {
-      params: { alertId, spaceId },
+      params: { alertId: potentiallyLegacyAlertId, spaceId },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    // We need to ensure the `alertId` resolves to an actual saved object due to https://github.com/elastic/kibana/issues/100067
+    // It might be an old id that needs aliased
+    const {
+      saved_object: { id: alertId },
+    } = await this.context.internalSavedObjectsRepository.resolve<RawAlert>(
+      'alert',
+      potentiallyLegacyAlertId,
+      { namespace: this.context.spaceIdToNamespace(spaceId) }
+    );
+
+    // TODO: handle resolve here
+
     const runDate = new Date();
     const runDateString = runDate.toISOString();
+
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
 
     const namespace = this.context.spaceIdToNamespace(spaceId);

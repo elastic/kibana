@@ -41,23 +41,22 @@ export default function createGetExistingTests({ getService }: FtrProviderContex
     });
 
     it('should resolve to an alias match for the non default space rule', async () => {
-      const oldObjectId = '8855c6f7-8a73-52a1-bd36-3c929ce3ecb6';
-      const newObjectId = '80827100-ee87-11eb-8dcd-cb59df51587b'; // This ID is not found in the test data archive; it is deterministically generated when the alerting rule is migrated to 8.0
-      const spaceId = 'customspace';
-
-      await registerWithTaskManager(oldObjectId, spaceId);
-      const response = await resolveAlertingRule(newObjectId, spaceId);
+      const oldObjectId = '58f37000-ef16-11eb-8970-13ff1ce2b1b6';
+      const newObjectId = '8d7d8746-5863-5fd4-990e-027292e83a9a'; // This ID is not found in the test data archive; it is deterministically generated when the alerting rule is migrated to 8.0
+      const spaceId = 'chrisspace';
+      await registerWithTaskManager(newObjectId, spaceId);
+      const response = await resolveAlertingRule(oldObjectId, spaceId);
       expect(response.body.resolveResponse).to.eql({
         outcome: 'aliasMatch',
-        aliasTargetId: oldObjectId,
+        aliasTargetId: newObjectId,
       });
     });
 
     it('should resolve to an exact match for the default space rule', async () => {
-      const objectId = '4c23c3a0-ee87-11eb-8dcd-cb59df51587b';
-
-      await registerWithTaskManager(objectId);
-      const response = await resolveAlertingRule(objectId);
+      const oldObjectId = '41a31d60-ef16-11eb-8970-13ff1ce2b1b6';
+      const newObjectId = '41a31d60-ef16-11eb-8970-13ff1ce2b1b6'; // This ID is not found in the test data archive; it is deterministically generated when the alerting rule is migrated to 8.0
+      await registerWithTaskManager(newObjectId);
+      const response = await resolveAlertingRule(oldObjectId);
       expect(response.body.resolveResponse).to.eql({
         outcome: 'exactMatch',
       });
