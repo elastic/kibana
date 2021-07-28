@@ -7,7 +7,8 @@
 
 import { stringify } from 'query-string';
 import rison, { RisonObject } from 'rison-node';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup, IUiSettingsClient } from 'src/core/public';
+import moment from 'moment';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
@@ -64,7 +65,11 @@ interface IReportingAPI {
 }
 
 export class ReportingAPIClient implements IReportingAPI {
-  constructor(private http: HttpSetup, private kibanaVersion: string) {}
+  constructor(
+    private http: HttpSetup,
+    private uiSettings: IUiSettingsClient,
+    private kibanaVersion: string
+  ) {}
 
   public getReportURL(jobId: string) {
     const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
@@ -153,6 +158,22 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public getKibanaVersion() {
     return this.kibanaVersion;
+  }
+
+  public getDecoratedJobParams(baseParams: BaseParams): DecoratedBaseParams {
+    // If the TZ is set to the default "Browser", it will not be useful for
+    // server-side export. We need to derive the timezone and pass it as a param
+    // to the export API.
+    const browserTimezone =
+      this.uiSettings.get('dateFormat:tz') === 'Browser'
+        ? moment.tz.guess()
+        : this.uiSettings.get('dateFormat:tz');
+
+    return {
+      browserTimezone,
+      version: this.kibanaVersion,
+      ...baseParams,
+    };
   }
 
   public getManagementLink: ManagementLinkFn = () =>

@@ -17,13 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import moment from 'moment';
 import React, { Component, ReactElement } from 'react';
 import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
-import { BaseParams, DecoratedBaseParams } from '../../common/types';
+import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface Props {
@@ -66,26 +65,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
     };
   }
 
-  private getDecoratedJobParams(): DecoratedBaseParams {
-    // If the TZ is set to the default "Browser", it will not be useful for
-    // server-side export. We need to derive the timezone and pass it as a param
-    // to the export API.
-    const browserTimezone =
-      this.props.uiSettings.get('dateFormat:tz') === 'Browser'
-        ? moment.tz.guess()
-        : this.props.uiSettings.get('dateFormat:tz');
-
-    return {
-      browserTimezone,
-      version: this.props.apiClient.getKibanaVersion(),
-      ...this.jobParams,
-    };
-  }
-
   private getAbsoluteReportGenerationUrl = (props: Props) => {
     const relativePath = this.props.apiClient.getReportingJobPath(
       props.reportType,
-      this.getDecoratedJobParams()
+      this.props.apiClient.getDecoratedJobParams(this.jobParams)
     );
     return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
   };
@@ -248,9 +231,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private createReportingJob = () => {
     const { intl } = this.props;
+    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(this.jobParams);
 
     return this.props.apiClient
-      .createReportingJob(this.props.reportType, this.getDecoratedJobParams())
+      .createReportingJob(this.props.reportType, decoratedJobParams)
       .then(() => {
         this.props.toasts.addSuccess({
           title: intl.formatMessage(

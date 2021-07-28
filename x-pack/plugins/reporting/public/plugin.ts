@@ -15,6 +15,7 @@ import {
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
+  IUiSettingsClient,
 } from 'src/core/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
@@ -107,9 +108,9 @@ export class ReportingPublicPlugin
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  private getApiClient(http: HttpSetup) {
+  private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
     if (!this.apiClient) {
-      this.apiClient = new ReportingAPIClient(http, this.kibanaVersion);
+      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
     }
     return this.apiClient;
   }
@@ -119,7 +120,7 @@ export class ReportingPublicPlugin
       this.contract = {
         getDefaultLayoutSelectors,
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core, this.getApiClient(core.http)),
+        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
       };
     }
 
@@ -135,7 +136,7 @@ export class ReportingPublicPlugin
     const {
       home,
       management,
-      licensing: { license$ },
+      licensing: { license$ }, // FIXME: 'license$' is deprecated
       share,
       uiActions,
     } = setupDeps;
@@ -143,7 +144,7 @@ export class ReportingPublicPlugin
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
-    const apiClient = this.getApiClient(core.http);
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -225,7 +226,7 @@ export class ReportingPublicPlugin
 
   public start(core: CoreStart) {
     const { notifications } = core;
-    const apiClient = this.getApiClient(core.http);
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
     const streamHandler = new StreamHandler(notifications, apiClient);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
