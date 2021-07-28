@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { IndexPatternSelectProps } from './index_pattern_select';
-export { FilterLabel, FilterItem } from './filter_bar';
-export { QueryStringInput, QueryStringInputProps } from './query_string_input';
-export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
-export { SuggestionsComponent } from './typeahead';
+export * from './compare_filters';
+export * from './dedup_filters';
+export * from './uniq_filters';
+export * from './meta_filter';
+export * from './only_disabled';
