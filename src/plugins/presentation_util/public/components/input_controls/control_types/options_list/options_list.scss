@@ -21,11 +21,16 @@
     flex-grow: 1;
     justify-content: space-between;
   }
+  &.optionsList--filterBtnSingle {
+    width: 100%;
+  }
+  &.optionsList--filterBtnPlaceholder {
+    .euiFilterButton__textShift {
+      color: $euiTextSubduedColor;
+    }
+  }
 }
 
-.optionsList--filterBtnSingle {
-  width: 100%;
-}
 
 .optionsList--filterGroupSingle {
   box-shadow: none;

@@ -129,6 +129,7 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
       iconType="arrowDown"
       className={classNames('optionsList--filterBtn', {
         'optionsList--filterBtnSingle': !twoLineLayout,
+        'optionsList--filterBtnPlaceholder': !selectedOptionsLength,
       })}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
       isSelected={isPopoverOpen}
