@@ -65,7 +65,7 @@ function formatSubtype(subtype: string | undefined) {
 
 function getSpanTypes(span: Span) {
   const { type, subtype, action } = span.span;
-  
+
   return {
     spanType: formatType(type),
     spanSubtype: formatSubtype(subtype),
@@ -145,7 +145,8 @@ export function SpanFlyout({
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
                     {
-                      defaultMessage: 'This is a sample document for a group of consecutive, similar spans!',
+                      defaultMessage:
+                        'This is a sample document for a group of consecutive, similar spans',
                     }
                   )}
                 </EuiCallOut>
@@ -159,14 +160,14 @@ export function SpanFlyout({
           <Summary
             items={[
               <TimestampTooltip time={span.timestamp.us / 1000} />,
-                <DurationSummaryItem
-                  duration={span.span.duration.us}
-                  totalDuration={totalDuration}
-                  parentType="transaction"
-                />,
+              <DurationSummaryItem
+                duration={span.span.duration.us}
+                totalDuration={totalDuration}
+                parentType="transaction"
+              />,
               <>
                 {span.span.composite && (
-                  <CompositeSpanDurationSummaryItem 
+                  <CompositeSpanDurationSummaryItem
                     count={span.span.composite.count}
                     durationSum={span.span.composite.sum.us}
                   />

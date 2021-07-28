@@ -18,16 +18,22 @@ interface Props {
 function CompositeSpanDurationSummaryItem({ count, durationSum }: Props) {
   const avgDuration = durationSum / count;
 
-  const label = i18n.translate('xpack.apm.compositeSpanDurationLabel', {
-    defaultMessage: 'Average duration',
-  });
-  const callsLabel = i18n.translate('xpack.apm.compositeSpanCallsLabel', {
-    defaultMessage: 'calls',
-  });
   return (
     <>
-      <EuiToolTip content={label}>
-        <EuiText>{count} {callsLabel}, &#8709; {asDuration(avgDuration)}</EuiText>
+      <EuiToolTip
+        content={i18n.translate('xpack.apm.compositeSpanDurationLabel', {
+          defaultMessage: 'Average duration',
+        })}
+      >
+        <EuiText>
+          {i18n.translate('xpack.apm.compositeSpanCallsLabel', {
+            defaultMessage: `{count} calls, on avg. {duration}`,
+            values: {
+              count,
+              duration: asDuration(avgDuration),
+            },
+          })}
+        </EuiText>
       </EuiToolTip>
     </>
   );

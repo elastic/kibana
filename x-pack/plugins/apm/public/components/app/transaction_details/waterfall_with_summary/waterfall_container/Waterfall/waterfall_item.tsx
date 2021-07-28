@@ -16,7 +16,7 @@ import { Margins } from '../../../../../shared/charts/Timeline';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { ErrorCount } from '../../ErrorCount';
 import { SyncBadge } from './sync_badge';
-import { IWaterfallSpanOrTransaction, IWaterfallSpan } from './waterfall_helpers/waterfall_helpers';
+import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -148,10 +148,13 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
       var name = item.doc.span.name;
-      if(item.doc.span.composite !== undefined){
-        const compositePrefix = item.doc.span.composite.compression_strategy === 'exact_match' ? 'x' : '';
-        name = item.doc.span.composite.count + compositePrefix + ' ' + name;
-      } 
+      if (item.doc.span.composite) {
+        const compositePrefix =
+          item.doc.span.composite.compression_strategy === 'exact_match'
+            ? 'x'
+            : '';
+        name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
+      }
       return <EuiText size="s">{name}</EuiText>;
     case 'transaction':
       return (
@@ -187,7 +190,7 @@ export function WaterfallItem({
     }
   );
 
-  const isCompositeSpan = item.docType === 'span' && (item as IWaterfallSpan).doc.span.composite !== undefined;
+  const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
   const itemBarStyle = getItemBarStyle(item, color, width, left);
 
   return (
@@ -236,27 +239,30 @@ export function WaterfallItem({
   );
 }
 
-function getItemBarStyle(item: IWaterfallSpanOrTransaction, color: string, width: number, left: number): React.CSSProperties {
+function getItemBarStyle(
+  item: IWaterfallSpanOrTransaction,
+  color: string,
+  width: number,
+  left: number
+): React.CSSProperties {
   var itemBarStyle = { left: `${left}%`, width: `${width}%` };
-  
-  if(item.docType === 'span'){
-    const spanItem = item as IWaterfallSpan;
 
-    if(spanItem.doc.span.composite !== undefined){
-      const composite = spanItem.doc.span.composite;
-      const percNumItems = 100.0 / composite.count;
-      const percDuration = percNumItems * (composite.sum.us / spanItem.doc.span.duration.us);
+  if (item.docType === 'span' && item.doc.span.composite) {
+    const percNumItems = 100.0 / item.doc.span.composite.count;
+    const spanSumRatio =
+      item.doc.span.composite.sum.us / item.doc.span.duration.us;
+    const percDuration = percNumItems * spanSumRatio;
 
-      itemBarStyle = {
-        ...itemBarStyle,
-        ...{
-          backgroundImage: `repeating-linear-gradient(90deg, ${color},`+
-            ` ${color} max(${percDuration}%,3px),` +
-            ` transparent max(${percDuration}%,3px),` +
-            ` transparent max(${percNumItems}%,max(${percDuration}%,3px) + 3px))`
-        }
-      };
-    }
+    itemBarStyle = {
+      ...itemBarStyle,
+      ...{
+        backgroundImage:
+          `repeating-linear-gradient(90deg, ${color},` +
+          ` ${color} max(${percDuration}%,3px),` +
+          ` transparent max(${percDuration}%,3px),` +
+          ` transparent max(${percNumItems}%,max(${percDuration}%,3px) + 3px))`,
+      },
+    };
   }
 
   return itemBarStyle;
