@@ -46,7 +46,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
     ...type,
     async executor(options) {
       const {
-        alertId, // TODO: rename to ruleId?
+        alertId,
         params,
         previousStartedAt,
         services,
@@ -237,10 +237,11 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           const createdSignalsCount = result.createdSignals.length;
 
           if (actions.length) {
+            // @ts-expect-error
             const notificationRuleParams: NotificationRuleTypeParams = {
               ...params,
-              name,
-              id: ruleSO.id,
+              name: name as string,
+              id: ruleSO.id as string,
             };
 
             const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');

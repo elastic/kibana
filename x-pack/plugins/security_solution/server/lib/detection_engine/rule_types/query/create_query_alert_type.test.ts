@@ -37,7 +37,8 @@ describe('Custom query alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const queryAlertType = createQueryAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      lists: '',
+      indexAlias: 'alerts.security-alerts',
+      lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
       ruleDataClient: dependencies.ruleDataClient,
@@ -90,7 +91,8 @@ describe('Custom query alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const queryAlertType = createQueryAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      lists: '',
+      indexAlias: 'alerts.security-alerts',
+      lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
       ruleDataClient: dependencies.ruleDataClient,

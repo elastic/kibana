@@ -94,7 +94,7 @@ export type CreateSecurityRuleTypeFactory = (options: {
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
 }) => <
-  TParams extends RuleParams,
+  TParams extends RuleParams & { index: string[] | undefined },
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends PersistenceServices<TAlertInstanceContext>,
   TState extends AlertTypeState

@@ -16,6 +16,7 @@ import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
+import { listMock } from '../../../../../../lists/server/mocks';
 
 export const createRuleTypeMocks = () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -73,6 +74,7 @@ export const createRuleTypeMocks = () => {
       alerting,
       buildRuleMessage: jest.fn(),
       config$: mockedConfig$,
+      lists: listMock.createSetup(),
       logger: loggerMock,
       ruleDataClient: ({
         getReader: () => {
