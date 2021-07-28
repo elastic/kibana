@@ -26,6 +26,7 @@
     "inputControl": "src/plugins/input_control_vis",
     "inspector": "src/plugins/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
+    "interactiveSetup": "src/plugins/interactiveSetup",
     "interpreter": "src/legacy/core_plugins/interpreter",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",

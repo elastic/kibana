@@ -10,8 +10,5 @@
   "configPath": ["interactiveSetup"],
   "type": "preboot",
   "server": true,
-  "ui": true,
-  "requiredPlugins": [],
-  "requiredBundles": [],
-  "extraPublicDirs": []
+  "ui": true
 }

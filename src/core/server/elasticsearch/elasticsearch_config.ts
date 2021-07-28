@@ -33,7 +33,7 @@ export const configSchema = schema.object({
   }),
   sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
-    defaultValue: 'https://localhost:9200',
+    defaultValue: 'http://localhost:9200',
   }),
   username: schema.maybe(
     schema.conditional(

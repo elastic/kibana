@@ -9,6 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import type { CorePreboot, PrebootPlugin, PluginInitializerContext } from 'src/core/server';
 import fs from 'fs/promises';
+import { constants } from 'fs';
+import path from 'path';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import chalk from 'chalk';
@@ -21,27 +23,23 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
   }
 
   public setup(core: CorePreboot) {
-    const { enabled } = this.#initializerContext.config.get<ConfigType>();
+    const config = this.#initializerContext.config.get<ConfigType>();
+    const logger = this.#initializerContext.logger.get('plugins', 'interactiveSetup');
 
     const isDev = this.#initializerContext.env.mode.dev;
-    const isConfigured =
-      core.elasticsearch.config.credentialsSpecified && core.elasticsearch.config.hosts.length;
+    const isManuallyConfigured =
+      core.elasticsearch.config.credentialsSpecified ||
+      core.elasticsearch.config.hosts.length !== 1 ||
+      core.elasticsearch.config.hosts[0] !== 'http://localhost:9200';
+    const skipInteractiveSetup =
+      config.holdSetup === 'never'
+        ? true
+        : config.holdSetup === 'always'
+        ? false
+        : isManuallyConfigured;
 
-    /**
-     * env: dev -> enabled: false -> skip
-     * env: dev -> enabled: undefined -> skip
-     * env: dev -> enabled: true -> hold setup
-     * env: prod -> enabled: false -> skip
-     * env: prod -> enabled: undefined -> hold setup if not configured
-     * env: prod -> enabled: true -> hold setup if not configured
-     */
-    const shouldHoldSetupPhase = isDev
-      ? enabled === true
-      : enabled !== false
-      ? !isConfigured
-      : false;
-
-    if (!shouldHoldSetupPhase) {
+    if (skipInteractiveSetup) {
+      logger.info('Skipping interactive setup');
       return;
     }
 
@@ -50,7 +48,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
 
       prebootRouter.post(
         {
-          path: '/api/preboot/setup',
+          path: '/internal/interactive_setup/enroll/kibana',
           validate: {
             body: schema.oneOf([
               schema.object({
@@ -62,7 +60,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
                 hosts: schema.arrayOf(schema.string(), { minSize: 1 }),
                 username: schema.string(),
                 password: schema.string(),
-                caFingerprint: schema.string(),
+                caCert: schema.string(),
               }),
             ]),
           },
@@ -70,6 +68,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
         },
         async (context, request, response) => {
           if (!core.preboot.isSetupOnHold()) {
+            logger.error('Invalid attempt to access enrollment endpoint outside of preboot phase');
             return response.badRequest();
           }
 
@@ -88,46 +87,55 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
               },
             });
 
+          const configPath = isDev
+            ? this.#initializerContext.env.configs.find((fpath) =>
+                path.basename(fpath).includes('dev')
+              )
+            : this.#initializerContext.env.configs[0];
+
+          if (!configPath) {
+            logger.error('Failed to setup Kibana due to missing config file');
+            return response.customError({ statusCode: 500, body: 'Cannot find config file.' });
+          }
+          const caPath = path.join(path.dirname(configPath), 'ca.crt');
+
           try {
+            await Promise.all([
+              fs.access(configPath, constants.W_OK),
+              fs.access(caPath, constants.W_OK),
+            ]);
+
             const { body } = await client.asCurrentUser.transport.request({
               method: 'GET',
               path: '/_security/enroll/kibana',
             });
 
-            const configPath = isDev
-              ? this.#initializerContext.env.configs.find((path) => path.includes('dev'))
-              : this.#initializerContext.env.configs[0];
-
-            if (!configPath) {
-              return response.customError({ statusCode: 500, body: 'Cannot find config file.' });
-            }
-
-            await fs.appendFile(
-              configPath,
-              `
-
-elasticsearch.hosts: [${request.body.hosts.map((host) => `"https://${host}"`).join(', ')}]
-elasticsearch.username: "kibana_system"
-elasticsearch.password: "${body.password}"
-elasticsearch.ssl.verificationMode: "none"
-`
-            );
+            await Promise.all([
+              fs.appendFile(configPath, generateConfig(request.body.hosts, body.password, caPath)),
+              fs.writeFile(caPath, generateCertificate(body.http_ca)),
+            ]);
 
             completeSetup({ shouldReloadConfig: true });
 
             return response.noContent();
-          } catch (err) {
-            return response.customError({ statusCode: 500, body: getDetailedErrorMessage(err) });
+          } catch (error) {
+            logger.error('Failed to setup Kibana', {
+              error,
+            });
+            return response.customError({ statusCode: 500, body: getDetailedErrorMessage(error) });
           }
         }
       );
 
+      const holdSetupReason = `
+
+${chalk.bold(chalk.whiteBright(`${chalk.cyanBright('i')} Kibana has not been configured.`))}
+
+Go to ${chalk.underline(chalk.cyanBright('http://localhost:5601'))} to get started.
+`;
+
       core.preboot.holdSetupUntilResolved(
-        `\n\n${chalk.bold(
-          chalk.whiteBright(`${chalk.cyanBright('i')} Kibana has not been configured.`)
-        )}\n\nGo to ${chalk.cyanBright(
-          chalk.underline('http://localhost:5601')
-        )} to get started.\n`,
+        holdSetupReason,
         new Promise((resolve) => {
           completeSetup = resolve;
         })
@@ -136,6 +144,28 @@ elasticsearch.ssl.verificationMode: "none"
   }
 
   public stop() {}
+}
+
+export function generateCertificate(pem: string) {
+  return `-----BEGIN CERTIFICATE-----
+${pem
+  .replace(/_/g, '/')
+  .replace(/-/g, '+')
+  .replace(/([^\n]{1,65})/g, '$1\n')
+  .replace(/\n$/g, '')}
+-----END CERTIFICATE-----
+`;
+}
+
+export function generateConfig(hosts: string[], password: string, caPath: string) {
+  return `
+
+# This section was automatically generated during setup.
+elasticsearch.hosts: [ ${hosts.map((host) => `"https://${host}"`).join(', ')} ]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "${password}"
+elasticsearch.ssl.certificateAuthorities: [ "${caPath}" ]
+`;
 }
 
 export function btoa(str: string) {

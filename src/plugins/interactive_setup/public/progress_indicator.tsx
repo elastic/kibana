@@ -47,7 +47,7 @@ export const ProgressIndicator: FunctionComponent = () => {
     }
   }, [status.loading, status.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [helpRequired, cancelHelp, resetHelp] = useTimeout(15000);
+  const [helpRequired, cancelHelp, resetHelp] = useTimeout(20000);
 
   useEffect(() => {
     if (status.value === 'complete') {
@@ -83,8 +83,8 @@ export const ProgressIndicator: FunctionComponent = () => {
         ]}
       />
       {helpRequired() && (
-        <EuiCallOut title="Process is not responding" color="warning">
-          Check terminal for cause of error.
+        <EuiCallOut iconType="alert" title="Process is not responding" color="warning">
+          Check terminal for error cause.
         </EuiCallOut>
       )}
     </EuiPanel>

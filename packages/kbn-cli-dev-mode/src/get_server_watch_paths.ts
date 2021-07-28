@@ -43,7 +43,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
         fromRoot('src/core'),
         fromRoot('src/legacy/server'),
         fromRoot('src/legacy/utils'),
-        // fromRoot('config'),
+        fromRoot('config'),
         ...pluginPaths,
         ...pluginScanDirs,
       ].map((path) => Path.resolve(path))

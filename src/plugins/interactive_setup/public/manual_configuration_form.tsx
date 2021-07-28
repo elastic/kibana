@@ -93,7 +93,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
       return errors;
     },
     onSubmit: async (values) => {
-      await http.post('/api/preboot/setup', {
+      await http.post('/internal/interactive_setup/enroll/kibana', {
         body: JSON.stringify({
           hosts: [values.host],
           username: values.username,
