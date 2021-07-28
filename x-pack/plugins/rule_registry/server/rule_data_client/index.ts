@@ -96,11 +96,20 @@ export class RuleDataClient implements IRuleDataClient {
           if (response.body.errors) {
             if (
               response.body.items.length > 0 &&
-              (response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception' ||
-                response.body.items?.[0]?.index?.error?.type === 'illegal_argument_exception')
+              (response.body.items.every(
+                (item) => item.index?.error?.type === 'index_not_found_exception'
+              ) ||
+                response.body.items.every(
+                  (item) => item.index?.error?.type === 'illegal_argument_exception'
+                ))
             ) {
               return this.createWriteTargetIfNeeded({ namespace }).then(() => {
-                return clusterClient.bulk(requestWithDefaultParameters);
+                return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
+                  if (retryResponse.body.errors) {
+                    throw new ResponseError(retryResponse);
+                  }
+                  return retryResponse;
+                });
               });
             }
             const error = new ResponseError(response);
@@ -152,6 +161,21 @@ export class RuleDataClient implements IRuleDataClient {
         } else {
           throw err;
         }
+      }
+    } else {
+      // If we find indices matching the pattern, then we expect one of them to be the write index for the alias.
+      // Throw an error if none of them are the write index.
+      const { body: aliasesResponse } = await clusterClient.indices.getAlias({
+        index: `${alias}-*`,
+      });
+      if (
+        !Object.entries(aliasesResponse).some(
+          ([_, aliasesObject]) => aliasesObject.aliases[alias]?.is_write_index
+        )
+      ) {
+        throw Error(
+          `Indices matching pattern ${alias}-* exist but none are set as the write index for alias ${alias}`
+        );
       }
     }
   }
