@@ -19,11 +19,17 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiButtonIconColor,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema, SchemaType } from '../../../shared/schema/types';
+import { ReorderableTable } from '../../../shared/tables/reorderable_table';
 import { Result } from '../result';
+
+const NO_ITEMS = (
+  <EuiEmptyPrompt iconType="clock" title={<h2>No Items</h2>} body={<p>No Items</p>} />
+);
 
 export const Library: React.FC = () => {
   const props = {
@@ -249,12 +255,107 @@ export const Library: React.FC = () => {
           </EuiDragDropContext>
           <EuiSpacer />
 
-          <EuiSpacer />
           <EuiTitle size="s">
             <h3>With field value type highlights</h3>
           </EuiTitle>
           <EuiSpacer />
           <Result {...props} schemaForTypeHighlights={schema} />
+          <EuiSpacer />
+
+          <EuiTitle size="m">
+            <h2>ReorderableTable</h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableReordering
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering enabled, but dragging disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableDragging
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With unreorderable items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            unreorderableItems={[{ id: 4 }, { id: 5 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>Using the rowProps prop to apply dynamic properties to each row</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            rowProps={(item) => ({
+              style: {
+                backgroundColor: item.id % 2 === 0 ? 'red' : 'green',
+              },
+            })}
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With no items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[]}
+            columns={[
+              { name: 'ID', render: (item: { id: number }) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+
+          <EuiSpacer />
+          <EuiSpacer />
           <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageContent>
