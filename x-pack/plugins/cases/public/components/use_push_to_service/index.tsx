@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLink, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { useGetActionLicense } from '../../containers/use_get_action_license';
@@ -23,7 +22,7 @@ import * as i18n from './translations';
 import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { CasesNavigation } from '../links';
-import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './callout/types';
+import { ErrorMessage } from './callout/types';
 
 export interface UsePushToService {
   caseId: string;
@@ -102,10 +101,6 @@ export const usePushToService = ({
 
     if (actionLicense != null && !actionLicense.enabledInConfig) {
       return [getKibanaConfigError()];
-    }
-
-    if (connectors.length === 0 && connector.id === 'none' && !loadingLicense && !hasLicenseError) {
-      return [getConnectorMissingInfo()];
     }
 
     if (connector.id === 'none' && !loadingLicense && !hasLicenseError) {
