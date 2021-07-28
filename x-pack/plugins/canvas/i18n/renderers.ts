@@ -69,16 +69,6 @@ export const RendererStrings = {
         },
       }),
   },
-  metric: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.metric.displayName', {
-        defaultMessage: 'Metric',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.metric.helpDescription', {
-        defaultMessage: 'Render a number over a label',
-      }),
-  },
   pie: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.pie.displayName', {
