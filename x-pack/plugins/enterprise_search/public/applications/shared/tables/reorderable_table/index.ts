@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export { getMetadataForEndpoints } from './metadata';
-export * from './actions';
+export { ReorderableTable } from './reorderable_table';
