@@ -16,7 +16,6 @@ import { ItemWithAnID, InlineEditableTableColumn } from './types';
 interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   displayedItems: Item[];
-  instanceId: string;
   isActivelyEditing: (item: Item) => boolean;
   canRemoveLastItem?: boolean;
   isLoading?: boolean;
@@ -27,7 +26,6 @@ interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
 export const getUpdatedColumns = <Item extends ItemWithAnID>({
   columns,
   displayedItems,
-  instanceId,
   // TODO v
   isActivelyEditing,
   canRemoveLastItem,
@@ -43,7 +41,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
         // TODO render: (value, item: Item) => {
         render: (item: Item) => {
           if (isActivelyEditing(item)) {
-            return <EditingColumn column={column} instanceId={instanceId} isLoading={isLoading} />;
+            return <EditingColumn column={column} isLoading={isLoading} />;
           }
           // TODO return column.render(value, item);
           return column.render(item);
@@ -57,7 +55,6 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
       render: (item: Item) => (
         <ActionColumn
           displayedItems={displayedItems}
-          instanceId={instanceId}
           isLoading={isLoading} // TODO This should be consistently optional or not optional
           canRemoveLastItem={canRemoveLastItem}
           lastItemWarning={lastItemWarning}

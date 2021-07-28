@@ -373,6 +373,10 @@ export const Library: React.FC = () => {
                 editingRender: (item) => <div>Editing: {item.id}</div>,
               },
             ]}
+            // TODO Don't drill these
+            onAdd={() => {}}
+            onDelete={() => {}}
+            onUpdate={() => {}}
           />
           <EuiSpacer />
 

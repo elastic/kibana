@@ -18,12 +18,11 @@ import {
   SAVE_BUTTON_LABEL,
 } from '../../constants';
 
-import { getInlineEditableTableLogic } from './inline_editable_table_logic';
+import { InlineEditableTableLogic } from './inline_editable_table_logic';
 import { ItemWithAnID } from './types';
 
-interface ActionColumnProps<Item> {
+interface ActionColumnProps<Item extends ItemWithAnID> {
   displayedItems: Item[];
-  instanceId: string;
   // TODO maybe this should be  a selector
   isActivelyEditing: (i: Item) => boolean;
   isLoading: boolean;
@@ -35,7 +34,6 @@ interface ActionColumnProps<Item> {
 
 export const ActionColumn = <Item extends ItemWithAnID>({
   displayedItems,
-  instanceId,
   isActivelyEditing,
   isLoading,
   item,
@@ -43,13 +41,11 @@ export const ActionColumn = <Item extends ItemWithAnID>({
   lastItemWarning,
   uneditableItems,
 }: ActionColumnProps<Item>) => {
-  // TODO There is a kea thing that lets us not have to pass this down all of the time
-  const inlineEditableTableLogic = getInlineEditableTableLogic<ItemWithAnID>()({ instanceId });
   const { doesEditingItemValueContainEmptyProperty, formErrors, isEditingUnsavedItem } = useValues(
-    inlineEditableTableLogic
+    InlineEditableTableLogic
   );
   const { editExistingItem, deleteItem, doneEditing, saveExistingItem, saveNewItem } = useActions(
-    inlineEditableTableLogic
+    InlineEditableTableLogic
   );
 
   // TODO this could be passed in as a boolean prop?

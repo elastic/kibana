@@ -10,6 +10,7 @@ import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import React from 'react';
 
 import { shallow } from 'enzyme';
+import { BindLogic } from 'kea';
 
 import { ReorderableTable } from '../reorderable_table';
 
@@ -18,18 +19,13 @@ jest.mock('./get_updated_columns', () => ({
 }));
 import { getUpdatedColumns } from './get_updated_columns';
 
-import { InlineEditableTable } from './inline_editable_table';
-
-jest.mock('./inline_editable_table_logic', () => ({
-  getInlineEditableTableLogic: jest.fn().mockReturnValue(jest.fn()),
-}));
-import { getInlineEditableTableLogic } from './inline_editable_table_logic';
+import { InlineEditableTable, InlineEditableTableContents } from './inline_editable_table';
+import { InlineEditableTableLogic } from './inline_editable_table_logic';
 
 const items = [{ id: 1 }, { id: 2 }];
 const requiredParams = {
   columns: [],
   items,
-  instanceId: 'MyInstance',
   title: 'Some Title',
 };
 
@@ -47,9 +43,48 @@ describe('InlineEditableTable', () => {
     setMockActions(mockActions);
   });
 
-  it('renders a ReorderableTable', () => {
-    const wrapper = shallow(<InlineEditableTable {...requiredParams} items={items} />);
+  it('wraps the table in a bound logic, and passes through only required props to the underlying component', () => {
+    const instanceId = 'MyInstance';
+    const onAdd = jest.fn();
+    const onDelete = jest.fn();
+    const onReorder = jest.fn();
+    const onUpdate = jest.fn();
+    const transformItem = jest.fn();
+    const validateItem = jest.fn();
+    const wrapper = shallow(
+      <InlineEditableTable
+        {...requiredParams}
+        instanceId={instanceId}
+        onAdd={onAdd}
+        onDelete={onDelete}
+        onReorder={onReorder}
+        onUpdate={onUpdate}
+        transformItem={transformItem}
+        validateItem={validateItem}
+      />
+    );
+    const bindLogic = wrapper.find(BindLogic);
+    expect(bindLogic.props()).toEqual(
+      expect.objectContaining({
+        logic: InlineEditableTableLogic,
+        props: {
+          columns: requiredParams.columns,
+          instanceId,
+          onAdd,
+          onDelete,
+          onReorder,
+          onUpdate,
+          transformItem,
+          validateItem,
+        },
+      })
+    );
 
+    expect(bindLogic.children().props()).toEqual(requiredParams);
+  });
+
+  it('renders a ReorderableTable', () => {
+    const wrapper = shallow(<InlineEditableTableContents {...requiredParams} items={items} />);
     const reorderableTable = wrapper.find(ReorderableTable);
     expect(reorderableTable.exists()).toBe(true);
     expect(reorderableTable.prop('items')).toEqual(items);
@@ -58,7 +93,7 @@ describe('InlineEditableTable', () => {
 
   it('renders a description if one is provided', () => {
     const wrapper = shallow(
-      <InlineEditableTable {...requiredParams} description={<p>Some Description</p>} />
+      <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
     );
     expect(wrapper.find('[data-test-subj="description"]').exists()).toBe(true);
   });
@@ -66,26 +101,21 @@ describe('InlineEditableTable', () => {
   it('can specify items in the table that are uneditable', () => {
     const uneditableItems = [{ id: 3 }];
     const wrapper = shallow(
-      <InlineEditableTable {...requiredParams} uneditableItems={uneditableItems} />
+      <InlineEditableTableContents {...requiredParams} uneditableItems={uneditableItems} />
     );
     expect(wrapper.find(ReorderableTable).prop('unreorderableItems')).toBe(uneditableItems);
   });
 
   it('can apply an additional className', () => {
     const wrapper = shallow(
-      <InlineEditableTable {...requiredParams} className="myTestClassName" />
+      <InlineEditableTableContents {...requiredParams} className="myTestClassName" />
     );
     expect(wrapper.find('.editableTable.myTestClassName').exists()).toBe(true);
   });
 
-  it('uses the instanceId prop to key the included logic', () => {
-    shallow(<InlineEditableTable {...requiredParams} instanceId="MyInstance" />);
-    expect(getInlineEditableTableLogic()).toHaveBeenCalledWith({ instanceId: 'MyInstance' });
-  });
-
   it('will use the value of addButtonText as custom text on the New Row button', () => {
     const wrapper = shallow(
-      <InlineEditableTable {...requiredParams} addButtonText="Add a new row custom text" />
+      <InlineEditableTableContents {...requiredParams} addButtonText="Add a new row custom text" />
     );
     expect(wrapper.find('[data-test-subj="actionButton"]').children().text()).toEqual(
       'Add a new row custom text'
@@ -96,13 +126,17 @@ describe('InlineEditableTable', () => {
     beforeEach(() => setMockValues({ ...mockValues, isEditingUnsavedItem: true }));
 
     it('will change the displayed items to END with an empty item', () => {
-      const wrapper = shallow(<InlineEditableTable {...requiredParams} items={items} />);
+      const wrapper = shallow(<InlineEditableTableContents {...requiredParams} items={items} />);
       expect(wrapper.find(ReorderableTable).prop('items')).toEqual([...items, {}]);
     });
 
     it('will change the displayed items to START with an empty item when there are uneditableItems', () => {
       const wrapper = shallow(
-        <InlineEditableTable {...requiredParams} items={items} uneditableItems={[{ id: 3 }]} />
+        <InlineEditableTableContents
+          {...requiredParams}
+          items={items}
+          uneditableItems={[{ id: 3 }]}
+        />
       );
 
       expect(wrapper.find(ReorderableTable).prop('items')).toEqual([{}, ...items]);
@@ -112,7 +146,7 @@ describe('InlineEditableTable', () => {
   it('will style the row that is currently being edited', () => {
     setMockValues({ ...mockValues, isEditing: true, editingItemId: 2 });
     const itemList = [{ id: 1 }, { id: 2 }];
-    const wrapper = shallow(<InlineEditableTable {...requiredParams} items={itemList} />);
+    const wrapper = shallow(<InlineEditableTableContents {...requiredParams} items={itemList} />);
     const rowProps = wrapper.find(ReorderableTable).prop('rowProps') as (item: any) => object;
     expect(rowProps(items[0])).toEqual({ className: '' });
     // Since editingItemId is 2 and the second item (position 1) in item list has an id of 2, it gets this class
@@ -128,7 +162,7 @@ describe('InlineEditableTable', () => {
 
     (getUpdatedColumns as jest.Mock).mockReturnValue(updatedColumns);
     const wrapper = shallow(
-      <InlineEditableTable
+      <InlineEditableTableContents
         {...requiredParams}
         canRemoveLastItem={canRemoveLastItem}
         isLoading={isLoading}
@@ -143,7 +177,6 @@ describe('InlineEditableTable', () => {
       columns: requiredParams.columns,
       displayedItems: items,
       isActivelyEditing: expect.any(Function),
-      instanceId: requiredParams.instanceId,
       canRemoveLastItem,
       isLoading,
       lastItemWarning,

@@ -24,7 +24,6 @@ interface Foo {
 
 describe('getUpdatedColumns', () => {
   const displayedItems: Foo[] = [];
-  const instanceId = 'MyInstance';
   const canRemoveLastItem = true;
   const lastItemWarning = 'I am a warning';
   const uneditableItems: Foo[] = [];
@@ -51,7 +50,6 @@ describe('getUpdatedColumns', () => {
       newColumns = getUpdatedColumns({
         columns,
         displayedItems,
-        instanceId,
         canRemoveLastItem,
         lastItemWarning,
         uneditableItems,
@@ -82,7 +80,6 @@ describe('getUpdatedColumns', () => {
       const actionColumn = wrapper.find(ActionColumn);
       expect(actionColumn.props()).toEqual({
         displayedItems,
-        instanceId,
         isLoading: false,
         canRemoveLastItem,
         lastItemWarning,
@@ -106,7 +103,6 @@ describe('getUpdatedColumns', () => {
       const newColumns = getUpdatedColumns({
         columns,
         displayedItems,
-        instanceId,
         isLoading: true,
         isActivelyEditing: () => true,
       });
@@ -116,7 +112,6 @@ describe('getUpdatedColumns', () => {
       const column = wrapper.find(EditingColumn);
       expect(column.props()).toEqual({
         column: columns[0],
-        instanceId,
         isLoading: true,
       });
     });
@@ -125,7 +120,6 @@ describe('getUpdatedColumns', () => {
       const newColumns = getUpdatedColumns({
         columns,
         displayedItems,
-        instanceId,
         isActivelyEditing: () => false,
       });
 

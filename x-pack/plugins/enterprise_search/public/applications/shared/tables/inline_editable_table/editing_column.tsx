@@ -11,23 +11,20 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFormRow, EuiText } from '@elastic/eui';
 
-import { getInlineEditableTableLogic } from './inline_editable_table_logic';
-import { InlineEditableTableColumn as InlineEditableTableColumnType, ItemWithAnID } from './types';
+import { InlineEditableTableLogic } from './inline_editable_table_logic';
+import { InlineEditableTableColumn, ItemWithAnID } from './types';
 
 interface EditingColumnProps<Item extends ItemWithAnID> {
-  column: InlineEditableTableColumnType<Item>;
-  instanceId: string;
+  column: InlineEditableTableColumn<Item>;
   isLoading?: boolean;
 }
 
 export const EditingColumn = <Item extends ItemWithAnID>({
   column,
-  instanceId,
   isLoading = false,
 }: EditingColumnProps<Item>) => {
-  const inlineEditableTableLogic = getInlineEditableTableLogic<ItemWithAnID>()({ instanceId });
-  const { formErrors, editingItemValue } = useValues(inlineEditableTableLogic);
-  const { setEditingItemValue } = useActions(inlineEditableTableLogic);
+  const { formErrors, editingItemValue } = useValues(InlineEditableTableLogic);
+  const { setEditingItemValue } = useActions(InlineEditableTableLogic);
 
   if (!editingItemValue) return null;
 

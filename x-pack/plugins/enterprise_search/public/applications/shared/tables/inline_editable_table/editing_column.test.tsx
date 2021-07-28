@@ -25,7 +25,6 @@ describe('EditingColumn', () => {
 
   const requiredProps = {
     column,
-    instanceId: 'MyInstance',
   };
 
   const mockValues = {

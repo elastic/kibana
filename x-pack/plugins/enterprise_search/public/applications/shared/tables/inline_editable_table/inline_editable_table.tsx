@@ -9,7 +9,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { useActions, useValues } from 'kea';
+import { useActions, useValues, BindLogic } from 'kea';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,15 +18,14 @@ import { ReorderableTable } from '../reorderable_table';
 
 import { EMPTY_ITEM } from './constants';
 import { getUpdatedColumns } from './get_updated_columns';
-import { getInlineEditableTableLogic } from './inline_editable_table_logic';
-import { InlineEditableTableColumn, ItemWithAnID } from './types';
+import { InlineEditableTableLogic } from './inline_editable_table_logic';
+import { FormErrors, InlineEditableTableColumn, ItemWithAnID } from './types';
 
 import './inline_editable_tables.scss';
 
 interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
-  instanceId: string;
   title: string;
   addButtonText?: string;
   canRemoveLastItem?: boolean;
@@ -38,10 +37,50 @@ interface InlineEditableTableProps<Item extends ItemWithAnID> {
   uneditableItems?: Item[];
 }
 
-export const InlineEditableTable = <Item extends ItemWithAnID>({
+export const InlineEditableTable = <Item extends ItemWithAnID>(
+  props: InlineEditableTableProps<Item> & {
+    instanceId: string;
+    onAdd(item: Item, onSuccess: () => void): void;
+    onDelete(item: Item, onSuccess: () => void): void;
+    onReorder?(items: Item[], oldItems: Item[], onSuccess: () => void): void;
+    onUpdate(item: Item, onSuccess: () => void): void;
+    transformItem?(item: Item): Item;
+    validateItem?(item: Item): FormErrors;
+  }
+) => {
+  const {
+    instanceId,
+    columns,
+    onAdd,
+    onDelete,
+    onReorder,
+    onUpdate,
+    transformItem,
+    validateItem,
+    ...rest
+  } = props;
+  return (
+    <BindLogic
+      logic={InlineEditableTableLogic}
+      props={{
+        instanceId,
+        columns,
+        onAdd,
+        onDelete,
+        onReorder,
+        onUpdate,
+        transformItem,
+        validateItem,
+      }}
+    >
+      <InlineEditableTableContents {...rest} columns={columns} />
+    </BindLogic>
+  );
+};
+
+export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   columns,
   items,
-  instanceId,
   title,
   addButtonText,
   canRemoveLastItem,
@@ -53,9 +92,8 @@ export const InlineEditableTable = <Item extends ItemWithAnID>({
   uneditableItems,
   ...rest
 }: InlineEditableTableProps<Item>) => {
-  const inlineEditableTableLogic = getInlineEditableTableLogic<ItemWithAnID>()({ instanceId });
-  const { editingItemId, isEditing, isEditingUnsavedItem } = useValues(inlineEditableTableLogic);
-  const { editNewItem, reorderItems } = useActions(inlineEditableTableLogic);
+  const { editingItemId, isEditing, isEditingUnsavedItem } = useValues(InlineEditableTableLogic);
+  const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
 
   const isEditingItem = (item: Item) => item.id === editingItemId;
   const isActivelyEditing = (item: Item) => isEditing && isEditingItem(item);
@@ -68,8 +106,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>({
 
   const updatedColumns = getUpdatedColumns({
     columns,
-    displayedItems, // TODO what is this type error
-    instanceId,
+    displayedItems, // TODO empty items are {} which do not have ids
     isActivelyEditing,
     canRemoveLastItem,
     isLoading,

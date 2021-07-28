@@ -15,7 +15,6 @@ import { ActionColumn } from './action_column';
 
 const requiredParams = {
   displayedItems: [],
-  instanceId: 'MyInstance',
   isActivelyEditing: () => false,
   isLoading: false,
   item: { id: 1 },
@@ -47,7 +46,6 @@ describe('ActionColumn', () => {
     const wrapper = shallow(
       <ActionColumn
         displayedItems={[]}
-        instanceId={'MyInstance'}
         isActivelyEditing={() => false}
         isLoading={false}
         item={{ id: 1 }}
@@ -64,7 +62,6 @@ describe('ActionColumn', () => {
     const wrapper = shallow(
       <ActionColumn
         displayedItems={[]}
-        instanceId={'MyInstance'}
         isActivelyEditing={() => false}
         isLoading={false}
         item={item}
