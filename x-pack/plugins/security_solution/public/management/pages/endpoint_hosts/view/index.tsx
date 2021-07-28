@@ -156,7 +156,7 @@ export const EndpointList = () => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `#/integrations/${
+      path: `/integrations/${
         endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
       }/add-integration`,
       state: {
@@ -203,7 +203,7 @@ export const EndpointList = () => {
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
     'fleet',
     {
-      path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
+      path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
         onDoneNavigateTo: [
           'securitySolution',

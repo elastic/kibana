@@ -23,6 +23,7 @@ export {
   PackagePolicyInputStream,
   NewPackagePolicy,
   UpdatePackagePolicy,
+  DryRunPackagePolicy,
   PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,

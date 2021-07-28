@@ -14,7 +14,7 @@ import { Datatable } from 'src/plugins/expressions/public';
 import { IUiSettingsClient } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { Args, ColumnConfigArg } from '../expression';
+import { DatatableArgs, ColumnConfigArg } from '../../../common/expressions';
 import { DataContextType } from './types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
@@ -91,7 +91,7 @@ describe('datatable cell renderer', () => {
     const paletteRegistry = chartPluginMock.createPaletteRegistry();
     const customPalette = paletteRegistry.get('custom');
 
-    function getCellRenderer(columnConfig: Args) {
+    function getCellRenderer(columnConfig: DatatableArgs) {
       return createGridCell(
         {
           a: { convert: (x) => `formatted ${x}` } as FieldFormat,
@@ -101,7 +101,7 @@ describe('datatable cell renderer', () => {
         ({ get: jest.fn() } as unknown) as IUiSettingsClient
       );
     }
-    function getColumnConfiguration(): Args {
+    function getColumnConfiguration(): DatatableArgs {
       return {
         title: 'myData',
         columns: [
@@ -136,7 +136,10 @@ describe('datatable cell renderer', () => {
       });
     }
 
-    async function renderCellComponent(columnConfig: Args, context: Partial<DataContextType> = {}) {
+    async function renderCellComponent(
+      columnConfig: DatatableArgs,
+      context: Partial<DataContextType> = {}
+    ) {
       const CellRendererWithPalette = getCellRenderer(columnConfig);
       const setCellProps = jest.fn();
 

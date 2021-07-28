@@ -7,16 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
+import { FieldComponent } from '@kbn/securitysolution-autocomplete';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { FieldComponent } from '../../../../common/components/autocomplete/field';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface AutocompleteFieldProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
-  indices: IIndexPattern;
+  indices: IndexPatternBase;
   isDisabled: boolean;
   fieldType: string;
   placeholder?: string;
@@ -32,7 +31,7 @@ export const AutocompleteField = ({
   placeholder,
 }: AutocompleteFieldProps) => {
   const handleFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: IndexPatternFieldBase[]): void => {
       // TODO: Update onChange type in FieldComponent as newField can be undefined
       field.setValue(newField?.name ?? '');
     },
