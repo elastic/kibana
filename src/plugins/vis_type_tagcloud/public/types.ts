@@ -6,16 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ChartsPluginSetup, PaletteOutput } from '../../charts/public';
-import type { SerializedFieldFormat } from '../../expressions/public';
 import { ExpressionValueVisDimension } from '../../visualizations/public';
-
-interface Dimension {
-  accessor: number;
-  format: {
-    id?: string;
-    params?: SerializedFieldFormat<object>;
-  };
-}
 
 interface TagCloudCommonParams {
   scale: 'linear' | 'log' | 'square root';
