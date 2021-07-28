@@ -21,11 +21,12 @@ import {
   AlertInstanceContext,
   RawAlert,
 } from '../types';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -42,6 +43,7 @@ export interface CreateExecutionHandlerOptions<
   kibanaBaseUrl: string | undefined;
   alertType: NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -70,6 +72,7 @@ export type ExecutionHandler<ActionGroupIds extends string> = (
 
 export function createExecutionHandler<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -93,6 +96,7 @@ export function createExecutionHandler<
   maxEphemeralActionsPerAlert,
 }: CreateExecutionHandlerOptions<
   Params,
+  ExtractedParams,
   State,
   InstanceState,
   InstanceContext,

@@ -174,5 +174,5 @@ export interface PersistableStateService<P extends SerializableState = Serializa
   /**
    * returns all registered migrations
    */
-  getAllMigrations?: () => MigrateFunctionsObject;
+  getAllMigrations: () => MigrateFunctionsObject;
 }
