@@ -14,16 +14,27 @@ import {
   createMockLevelLogger,
   createMockReportingCore,
 } from '../test_helpers';
-import { BasePayload, ReportingRequestHandlerContext } from '../types';
+import { ReportingRequestHandlerContext } from '../types';
 import { ExportTypesRegistry, ReportingStore } from './';
 import { enqueueJobFactory } from './enqueue_job';
 import { Report } from './store';
-import { TaskRunResult } from './tasks';
 
 describe('Enqueue Job', () => {
   const logger = createMockLevelLogger();
   let mockReporting: ReportingCore;
   let mockExportTypesRegistry: ExportTypesRegistry;
+
+  const mockBaseParams = {
+    browserTimezone: 'UTC',
+    headers: 'cool_encrypted_headers',
+    objectType: 'cool_object_type',
+    title: 'cool_title',
+    version: 'unknown' as any,
+  };
+
+  beforeEach(() => {
+    mockBaseParams.version = '7.15.0-test';
+  });
 
   beforeAll(async () => {
     mockExportTypesRegistry = new ExportTypesRegistry();
@@ -34,10 +45,8 @@ describe('Enqueue Job', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['turquoise'],
-      createJobFnFactory: () => async () =>
-        (({ createJobTest: { test1: 'yes' } } as unknown) as BasePayload),
-      runTaskFnFactory: () => async () =>
-        (({ runParamsTest: { test2: 'yes' } } as unknown) as TaskRunResult),
+      createJobFnFactory: () => async () => mockBaseParams,
+      runTaskFnFactory: jest.fn(),
     });
     mockReporting = await createMockReportingCore(createMockConfigSchema());
     mockReporting.getExportTypesRegistry = () => mockExportTypesRegistry;
@@ -66,12 +75,7 @@ describe('Enqueue Job', () => {
     const enqueueJob = enqueueJobFactory(mockReporting, logger);
     const report = await enqueueJob(
       'printablePdf',
-      {
-        objectType: 'visualization',
-        title: 'cool-viz',
-        version: '7.14.0',
-        browserTimezone: 'UTC',
-      },
+      mockBaseParams,
       false,
       ({} as unknown) as ReportingRequestHandlerContext,
       ({} as unknown) as KibanaRequest
@@ -93,14 +97,16 @@ describe('Enqueue Job', () => {
         "max_attempts": undefined,
         "meta": Object {
           "layout": undefined,
-          "objectType": "visualization",
+          "objectType": "cool_object_type",
         },
         "migration_version": "7.14.0",
         "output": null,
         "payload": Object {
-          "createJobTest": Object {
-            "test1": "yes",
-          },
+          "browserTimezone": "UTC",
+          "headers": "cool_encrypted_headers",
+          "objectType": "cool_object_type",
+          "title": "cool_title",
+          "version": "7.15.0-test",
         },
         "process_expiration": undefined,
         "started_at": undefined,
@@ -108,5 +114,20 @@ describe('Enqueue Job', () => {
         "timeout": undefined,
       }
     `);
+  });
+
+  it('provides a default kibana version field for older POST URLs', async () => {
+    const enqueueJob = enqueueJobFactory(mockReporting, logger);
+    mockBaseParams.version = undefined;
+    const report = await enqueueJob(
+      'printablePdf',
+      mockBaseParams,
+      false,
+      ({} as unknown) as ReportingRequestHandlerContext,
+      ({} as unknown) as KibanaRequest
+    );
+
+    const { _id, created_at: _created_at, ...snapObj } = report;
+    expect(snapObj.payload.version).toBe('7.14.0');
   });
 });
