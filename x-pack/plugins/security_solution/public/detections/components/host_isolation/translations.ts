@@ -8,28 +8,49 @@
 import { i18n } from '@kbn/i18n';
 
 export const CHANGE_ALERT_STATUS = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.changeAlertStatus',
+  'xpack.securitySolution.endpoint.takeAction.changeAlertStatus',
   {
     defaultMessage: 'Change alert status',
   }
 );
 
+export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.endpoint.takeAction.addEndpointException',
+  {
+    defaultMessage: 'Add Endpoint exception',
+  }
+);
+
+export const ACTION_ADD_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.endpoint.takeAction.addException',
+  {
+    defaultMessage: 'Add rule exception',
+  }
+);
+
+export const ACTION_ADD_EVENT_FILTER = i18n.translate(
+  'xpack.securitySolution.endpoint.takeAction.addEventFilter',
+  {
+    defaultMessage: 'Add Endpoint event filter',
+  }
+);
+
 export const ISOLATE_HOST = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.isolateHost',
+  'xpack.securitySolution.endpoint.takeAction.isolateHost',
   {
     defaultMessage: 'Isolate host',
   }
 );
 
 export const UNISOLATE_HOST = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.unisolateHost',
+  'xpack.securitySolution.endpoint.takeAction.unisolateHost',
   {
     defaultMessage: 'Release host',
   }
 );
 
 export const INVESTIGATE_IN_TIMELINE = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.investigateInTimeline',
+  'xpack.securitySolution.endpoint.takeAction.investigateInTimeline',
   {
     defaultMessage: 'investigate in timeline',
   }
@@ -37,7 +58,7 @@ export const INVESTIGATE_IN_TIMELINE = i18n.translate(
 
 export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
   i18n.translate(
-    'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWithAlert',
+    'xpack.securitySolution.endpoint.takeAction.isolateHost.casesAssociatedWithAlert',
     {
       defaultMessage:
         '{caseCount} {caseCount, plural, one {case} other {cases}} associated with this host',
@@ -46,6 +67,6 @@ export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
   );
 
 export const RETURN_TO_ALERT_DETAILS = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.returnToAlertDetails',
+  'xpack.securitySolution.endpoint.takeAction.returnToAlertDetails',
   { defaultMessage: 'Return to alert details' }
 );

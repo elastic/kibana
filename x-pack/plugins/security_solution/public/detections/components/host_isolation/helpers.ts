@@ -8,7 +8,7 @@
 import { ACTION_ADD_TO_CASE } from '../alerts_table/translations';
 
 export const addToCaseActionItem = (timelineId: string | null | undefined) =>
-  ['detections-page', 'detections-rules-details-page', 'timeline-1'].includes(timelineId)
+  ['detections-page', 'detections-rules-details-page', 'timeline-1'].includes(timelineId ?? '')
     ? [
         {
           name: ACTION_ADD_TO_CASE,

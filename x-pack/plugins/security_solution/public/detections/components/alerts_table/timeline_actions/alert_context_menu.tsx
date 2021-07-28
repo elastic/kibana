@@ -7,8 +7,9 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { indexOf } from 'lodash';
 
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
@@ -24,8 +25,9 @@ import { AlertData, EcsHit } from '../../../../common/components/exceptions/type
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
-import { useAlertsActions } from './use_alerts_actions.ts';
+import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionModal } from './use_add_exception_modal';
+import { useEventFilterModal } from './use_event_filter_modal';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -45,7 +47,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   timelineId,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -70,36 +71,80 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel]);
 
-  const closeAddEventFilterModal = useCallback((): void => {
-    setIsAddEventFilterModalOpen(false);
-  }, []);
-
-  const openAddEventFilterModal = useCallback((): void => {
-    setIsAddEventFilterModalOpen(true);
-  }, []);
-
   const {
+    alertStatus,
+    disabledAddException,
+    disabledAddEndpointException,
     exceptionModalType,
     ruleId,
     ruleName,
     ruleIndices,
-    alertStatus,
-    handleOpenExceptionModal,
     onAddExceptionCancel,
     onAddExceptionConfirm,
+    handleAddExceptionClick,
+    handleAddEndpointExceptionClick,
   } = useExceptionModal({
     ecsRowData,
     refetch,
     timelineId,
+    onAddExceptionClick: closePopover,
+    onAddEndpointExceptionClick: closePopover,
   });
 
-  const { items } = useAlertsActions({
+  const {
+    closeAddEventFilterModal,
+    handleAddEventFilterClick,
+    isAddEventFilterModalOpen,
+  } = useEventFilterModal({
+    onAddEventFilterClick: closePopover,
+  });
+
+  const { statusActions } = useAlertsActions({
     ecsRowData,
     timelineId,
     closePopover,
-    handleOpenExceptionModal,
-    openAddEventFilterModal,
   });
+
+  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
+
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items:
+          !isEvent && ruleId
+            ? [
+                ...statusActions,
+                {
+                  name: i18n.ACTION_ADD_ENDPOINT_EXCEPTION,
+                  onClick: handleAddEndpointExceptionClick,
+                  disabled: disabledAddEndpointException,
+                },
+                {
+                  name: i18n.ACTION_ADD_EXCEPTION,
+                  onClick: handleAddExceptionClick,
+                  disabled: disabledAddException,
+                },
+              ]
+            : [
+                {
+                  name: i18n.ACTION_ADD_EVENT_FILTER,
+                  onClick: handleAddEventFilterClick,
+                },
+              ],
+      },
+    ],
+    [
+      disabledAddEndpointException,
+      disabledAddException,
+      handleAddEndpointExceptionClick,
+      handleAddEventFilterClick,
+      handleAddExceptionClick,
+      isEvent,
+      ruleId,
+      statusActions,
+    ]
+  );
 
   return (
     <>
@@ -114,7 +159,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <ContextMenuPanel items={items} />
+            <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
           </EuiPopover>
         </EventsTdContent>
       </div>
@@ -138,7 +183,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 };
 
-const ContextMenuPanel = styled(EuiContextMenuPanel)`
+const ContextMenuPanel = styled(EuiContextMenu)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
