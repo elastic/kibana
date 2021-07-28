@@ -216,7 +216,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   }
   async componentDidMount() {
     try {
-      const policies = await loadPolicies(false);
+      const policies = await loadPolicies();
       this.setState({ policies });
     } catch (err) {
       showApiError(

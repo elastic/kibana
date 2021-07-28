@@ -45,4 +45,5 @@ export const UI_SETTINGS = {
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',
+  AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: 'autocomplete:valueSuggestionMethod',
 } as const;

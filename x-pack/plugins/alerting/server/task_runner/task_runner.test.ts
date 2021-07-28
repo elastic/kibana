@@ -36,8 +36,8 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
-import { UntypedNormalizedAlertType } from '../alert_type_registry';
-import { alertTypeRegistryMock } from '../alert_type_registry.mock';
+import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
 
 const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
@@ -84,7 +84,7 @@ describe('Task Runner', () => {
   const services = alertsMock.createAlertServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
-  const alertTypeRegistry = alertTypeRegistryMock.create();
+  const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -101,7 +101,7 @@ describe('Task Runner', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
-    alertTypeRegistry,
+    ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
@@ -184,7 +184,7 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
       (actionTypeId, actionId, params) => params
     );
-    alertTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.get.mockReturnValue(alertType);
   });
 
   test('successfully executes the task', async () => {
@@ -2718,7 +2718,7 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
-    alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+    ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
       throw new Error('OMG');
     });
 

@@ -32,7 +32,7 @@ import {
   SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
-  AlertTypeRegistry,
+  RuleTypeRegistry,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -49,7 +49,7 @@ import {
   AlertInstanceContext,
   WithoutReservedActionGroups,
 } from '../../common';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -89,7 +89,7 @@ export class TaskRunner<
     ActionGroupIds,
     RecoveryActionGroupId
   >;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly ruleTypeRegistry: RuleTypeRegistry;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -108,7 +108,7 @@ export class TaskRunner<
     this.logger = context.logger;
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
-    this.alertTypeRegistry = context.alertTypeRegistry;
+    this.ruleTypeRegistry = context.ruleTypeRegistry;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -249,7 +249,7 @@ export class TaskRunner<
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
-    const alertType = this.alertTypeRegistry.get(alertTypeId);
+    const alertType = this.ruleTypeRegistry.get(alertTypeId);
 
     const alertInstances = mapValues<
       Record<string, RawAlertInstance>,
@@ -478,7 +478,7 @@ export class TaskRunner<
     }
 
     try {
-      this.alertTypeRegistry.ensureAlertTypeEnabled(alert.alertTypeId);
+      this.ruleTypeRegistry.ensureRuleTypeEnabled(alert.alertTypeId);
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
     }
