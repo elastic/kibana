@@ -82,6 +82,7 @@ export type FieldFormatInstanceType = (new (
   // Static properties:
   id: FieldFormatId;
   title: string;
+  hidden?: boolean;
   fieldType: string | string[];
 };
 

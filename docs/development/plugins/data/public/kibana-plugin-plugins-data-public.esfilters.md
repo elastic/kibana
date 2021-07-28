@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+> Please import helpers from the package kbn/es-query directly. This import will be removed in v8.0.0.
 > 
 
 Filter helpers namespace:
