@@ -439,7 +439,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem>
-              {i18n.translate('xpack.lens.configPanel.chartType', {
+              {i18n.translate('xpack.lens.configPanel.visualizationType', {
                 defaultMessage: 'Visualization type',
               })}
             </EuiFlexItem>
