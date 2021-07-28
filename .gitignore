@@ -19,6 +19,9 @@ target
 *.iml
 *.log
 
+# Ignore example plugin builds
+/examples/*/build
+
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
 /test/*/screenshots/diff
@@ -79,6 +82,6 @@ report.asciidoc
 .yarn-local-mirror
 
 # Bazel
-bazel
-bazel-*
+/bazel
+/bazel-*
 .bazelrc.user
