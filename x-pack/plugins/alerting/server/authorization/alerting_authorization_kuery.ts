@@ -7,8 +7,8 @@
 
 import { remove } from 'lodash';
 import { JsonObject } from '@kbn/common-utils';
-import { EsQueryConfig, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
-import { KueryNode } from '../../../../../src/plugins/data/server';
+import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
+
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
@@ -24,6 +24,7 @@ export interface AlertingAuthorizationFilterOpts {
 interface AlertingAuthorizationFilterFieldNames {
   ruleTypeId: string;
   consumer: string;
+  spaceIds?: string;
 }
 
 const esQueryConfig: EsQueryConfig = {
@@ -35,22 +36,28 @@ const esQueryConfig: EsQueryConfig = {
 
 export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
-  opts: AlertingAuthorizationFilterOpts
+  opts: AlertingAuthorizationFilterOpts,
+  spaceId: string | undefined
 ): KueryNode | JsonObject {
   const kueryNode = nodeBuilder.or(
     Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('ruleTypeId', id);
-      filters.push(
-        nodeBuilder.and([
-          nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
-          nodeBuilder.or(
-            Object.keys(authorizedConsumers).map((consumer) => {
-              ensureFieldIsSafeForQuery('consumer', consumer);
-              return nodeBuilder.is(opts.fieldNames.consumer, consumer);
-            })
-          ),
-        ])
-      );
+      const andNodes = [
+        nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
+        nodeBuilder.or(
+          Object.keys(authorizedConsumers).map((consumer) => {
+            ensureFieldIsSafeForQuery('consumer', consumer);
+            return nodeBuilder.is(opts.fieldNames.consumer, consumer);
+          })
+        ),
+      ];
+
+      if (opts.fieldNames.spaceIds != null && spaceId != null) {
+        andNodes.push(nodeBuilder.is(opts.fieldNames.spaceIds, spaceId));
+      }
+
+      filters.push(nodeBuilder.and(andNodes));
+
       return filters;
     }, [])
   );
@@ -60,6 +67,29 @@ export function asFiltersByRuleTypeAndConsumer(
   }
 
   return kueryNode;
+}
+
+// This is a specific use case currently for alerts as data
+// Space ids are stored in the alerts documents and even if security is disabled
+// still need to consider the users space privileges
+export function asFiltersBySpaceId(
+  opts: AlertingAuthorizationFilterOpts,
+  spaceId: string | undefined
+): KueryNode | JsonObject | undefined {
+  if (opts.fieldNames.spaceIds != null && spaceId != null) {
+    const kueryNode = nodeBuilder.is(opts.fieldNames.spaceIds, spaceId);
+
+    switch (opts.type) {
+      case AlertingAuthorizationFilterType.ESDSL:
+        return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
+      case AlertingAuthorizationFilterType.KQL:
+        return kueryNode;
+      default:
+        return undefined;
+    }
+  }
+
+  return undefined;
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {

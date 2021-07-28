@@ -7,19 +7,23 @@
  */
 
 import { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { IndexPatternFieldBase } from '@kbn/es-query';
 import { typeMatch } from '../type_match';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-type IFieldType = any;
 
 /**
  * Given an array of lists and optionally a field this will return all
  * the lists that match against the field based on the types from the field
+ *
+ * NOTE: That we support one additional property from "FieldSpec" located here:
+ * src/plugins/data/common/index_patterns/fields/types.ts
+ * This type property is esTypes. If it exists and is on there we will read off the esTypes.
  * @param lists The lists to match against the field
  * @param field The field to check against the list to see if they are compatible
  */
-export const filterFieldToList = (lists: ListSchema[], field?: IFieldType): ListSchema[] => {
+export const filterFieldToList = (
+  lists: ListSchema[],
+  field?: IndexPatternFieldBase & { esTypes?: string[] }
+): ListSchema[] => {
   if (field != null) {
     const { esTypes = [] } = field;
     return lists.filter(({ type }) => esTypes.some((esType: string) => typeMatch(type, esType)));

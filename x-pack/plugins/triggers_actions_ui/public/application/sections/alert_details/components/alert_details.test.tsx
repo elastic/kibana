@@ -26,7 +26,7 @@ import {
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -45,7 +45,7 @@ jest.mock('../../../lib/capabilities', () => ({
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const mockAlertApis = {
   muteAlert: jest.fn(),
@@ -739,7 +739,7 @@ describe('edit button', () => {
       minimumLicenseRequired: 'basic',
     },
   ];
-  alertTypeRegistry.has.mockReturnValue(true);
+  ruleTypeRegistry.has.mockReturnValue(true);
   const alertTypeR: AlertTypeModel = {
     id: 'my-alert-type',
     iconClass: 'test',
@@ -751,8 +751,8 @@ describe('edit button', () => {
     alertParamsExpression: jest.fn(),
     requiresAppContext: false,
   };
-  alertTypeRegistry.get.mockReturnValue(alertTypeR);
-  useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+  ruleTypeRegistry.get.mockReturnValue(alertTypeR);
+  useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
   it('should render an edit button when alert and actions are editable', () => {
     const alert = mockAlert({
