@@ -12,6 +12,8 @@ import useMount from 'react-use/lib/useMount';
 import classNames from 'classnames';
 import { Subject } from 'rxjs';
 import {
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiIcon,
   EuiPopover,
   EuiButtonEmpty,
@@ -125,7 +127,7 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
     <EuiButtonEmpty
       color="text"
       className={classNames('optionsList--buttonOverride', {
-        'optionsList--buttonOverrideTwoLine': twoLineLayout,
+        // 'optionsList--buttonOverrideTwoLine': twoLineLayout,
         'optionsList--buttonOverrideSingle': !twoLineLayout,
       })}
       textProps={{
@@ -161,27 +163,53 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
     </EuiButtonEmpty>
   );
 
-  return (
-    <EuiPopover
-      id="popoverExampleMultiSelect"
-      button={button}
-      isOpen={isPopoverOpen}
-      className="optionsList--popoverOverride"
-      anchorClassName="optionsList--anchorOverride"
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="upLeft"
-      ownFocus
-      repositionOnScroll
+  const newButton = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      className={classNames('optionsList--filterBtn', {
+        // 'optionsList--filterBtnTwoLine': twoLineLayout,
+        'optionsList--filterBtnSingle': !twoLineLayout,
+      })}
+      onClick={() => setIsPopoverOpen((openState) => !openState)}
+      isSelected={isPopoverOpen}
+      numFilters={availableOptions.length}
+      hasActiveFilters={selectedOptionsLength > 0}
+      numActiveFilters={selectedOptionsLength}
     >
-      <OptionsListPopover
-        loading={loading}
-        updateItem={updateItem}
-        searchString={searchString}
-        typeaheadSubject={typeaheadSubject}
-        availableOptions={availableOptions}
-      />
-    </EuiPopover>
+      {!selectedOptionsLength
+        ? OptionsListStrings.summary.getPlaceholder()
+        : Array.from(selectedOptions.current).join(', ')}
+    </EuiFilterButton>
+  );
+
+  return (
+    <EuiFilterGroup
+      className={classNames('optionsList--filterGroup', {
+        // 'optionsList--filterGroupTwoLine': twoLineLayout,
+        'optionsList--filterGroupSingle': !twoLineLayout,
+      })}
+    >
+      <EuiPopover
+        id="popoverExampleMultiSelect"
+        button={newButton}
+        isOpen={isPopoverOpen}
+        className="optionsList--popoverOverride"
+        anchorClassName="optionsList--anchorOverride"
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="upLeft"
+        ownFocus
+        repositionOnScroll
+      >
+        <OptionsListPopover
+          loading={loading}
+          updateItem={updateItem}
+          searchString={searchString}
+          typeaheadSubject={typeaheadSubject}
+          availableOptions={availableOptions}
+        />
+      </EuiPopover>
+    </EuiFilterGroup>
   );
 };
 

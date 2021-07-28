@@ -1,8 +1,19 @@
 .controlFrame--formControlLayout {
-  max-width: unset;
+  // max-width: unset;
+  width: 100%;
 }
 
+// .controlFrame--control {
+//   width: 100%;
+//   height: 100%;
+// }
+
 .controlFrame--control {
+  &.optionsList--filterBtnSingle {
+    height: 100%;
+  }
+}
+
+.optionsList--filterBtnTwoLine {
   width: 100%;
-  height: 100%;
 }

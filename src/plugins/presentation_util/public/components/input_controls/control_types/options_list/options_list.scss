@@ -7,30 +7,30 @@
   height: 100%;
 }
 
-.optionsList--buttonContentOverride {
-  padding: 0 !important;
-}
+// .optionsList--buttonContentOverride {
+//   padding: 0 !important;
+// }
 
-.optionsList--buttonOverride {
-  &:hover:not(:disabled),
-  &:focus:not(:disabled) {
-    // Remove underline from whole button so notifications don't get the underline
-    text-decoration: none;
-  }
-}
+// .optionsList--buttonOverride {
+//   &:hover:not(:disabled),
+//   &:focus:not(:disabled) {
+//     // Remove underline from whole button so notifications don't get the underline
+//     text-decoration: none;
+//   }
+// }
 
-.optionsList--buttonOverrideTwoLine {
-  height: auto !important;
-  width: 100%;
-}
+// .optionsList--buttonOverrideTwoLine {
+//   height: auto !important;
+//   width: 100%;
+// }
 
-.optionsList--buttonOverrideSingle {
-  height: 100%;
-  width: 100%;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  overflow: hidden;
-}
+// .optionsList--buttonOverrideSingle {
+//   height: 100%;
+//   width: 100%;
+//   border-top-left-radius: 0;
+//   border-bottom-left-radius: 0;
+//   overflow: hidden;
+// }
 
 .optionsList--items {
   @include euiScrollBar;
@@ -41,31 +41,60 @@
   max-width: 100%;
 }
 
-.optionsList--control {
-  height: $euiFormControlHeight;
-  flex-direction: row;
-  background-color: $euiFormBackgroundColor;
+// .optionsList--control {
+//   height: $euiFormControlHeight;
+//   flex-direction: row;
+//   background-color: $euiFormBackgroundColor;
+//   width: 100%;
+//   flex-grow: 1;
+//   display: flex;
+//   align-items: center;
+
+//   .optionsList--selections {
+//     flex: 1;
+//     width: 0;
+//     margin: $euiSizeXS $euiSizeXS 0 $euiSizeS;
+//     text-align: left;
+//     min-width: 200px;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+//     white-space: nowrap;
+//   }
+
+//   .optionsList--selectionsEmpty {
+//     color: $euiButtonColorDisabledText
+//   }
+
+//   .optionsList--notification {
+//     padding: $euiSizeXS;
+//   }
+// }
+
+.optionsList--filterBtn {
+  // background-color: $euiColorEmptyShade;
+  .euiFilterButton__text-hasNotification {
+    flex-grow: 1;
+    justify-content: space-between;
+  }
+}
+
+.optionsList--filterBtnSingle {
   width: 100%;
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
+  // .euiFilterButton__text-hasNotification {
+  //   flex-grow: 1;
+  //   justify-content: space-between;
+  // }
+}
 
-  .optionsList--selections {
-    flex: 1;
-    width: 0;
-    margin: $euiSizeXS $euiSizeXS 0 $euiSizeS;
-    text-align: left;
-    min-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.optionsList--filterGroupSingle {
+  box-shadow: none;
+  height: 100%;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: $euiBorderRadius - 1px;
+  border-bottom-right-radius: $euiBorderRadius - 1px;
+}
 
-  .optionsList--selectionsEmpty {
-    color: $euiButtonColorDisabledText
-  }
-
-  .optionsList--notification {
-    padding: $euiSizeXS;
-  }
+.optionsList--filterGroup {
+  width: 100%;
 }
