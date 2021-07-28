@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { Readable, pipeline } from 'stream';
+import { promisify } from 'util';
 import { UpdateResponse } from '@elastic/elasticsearch/api/types';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { LevelLogger } from '../';
+import { LevelLogger, getContentStreamFactory } from '../';
 import { ReportingCore } from '../../';
 import {
   RunContext,
@@ -55,6 +57,7 @@ export class ExecuteReportTask implements ReportingTask {
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
+  private getContentStream: ReturnType<typeof getContentStreamFactory>;
 
   constructor(
     private reporting: ReportingCore,
@@ -62,6 +65,7 @@ export class ExecuteReportTask implements ReportingTask {
     logger: LevelLogger
   ) {
     this.logger = logger.clone(['runTask']);
+    this.getContentStream = getContentStreamFactory(reporting);
   }
 
   /*
@@ -251,7 +255,17 @@ export class ExecuteReportTask implements ReportingTask {
     this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
     const completedTime = moment().toISOString();
-    const docOutput = this._formatOutput(output);
+    const { content, ...docOutput } = this._formatOutput(output);
+    const stream = await this.getContentStream({
+      id: report._id,
+      index: report._index!,
+      if_primary_term: report._primary_term,
+      if_seq_no: report._seq_no,
+    });
+
+    await promisify(pipeline)(Readable.from(content ?? ''), stream);
+    report._seq_no = stream.getSeqNo();
+    report._primary_term = stream.getPrimaryTerm();
 
     const store = await this.getStore();
     const doc = {
