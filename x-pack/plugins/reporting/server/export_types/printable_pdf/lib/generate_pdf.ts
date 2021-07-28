@@ -11,7 +11,7 @@ import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { screenshotsObservable, ScreenshotResults } from '../../../lib/screenshots';
+import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
@@ -48,7 +48,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.endLayout();
 
     tracker.startScreenshots();
-    const screenshots$ = screenshotsObservable(captureConfig, browserDriverFactory, {
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urls,
       conditionalHeaders,

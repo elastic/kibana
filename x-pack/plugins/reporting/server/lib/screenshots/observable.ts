@@ -31,7 +31,7 @@ interface ScreenSetupData {
   error?: Error;
 }
 
-export function screenshotsObservable(
+export function getScreenshots$(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory,
   { logger, urls, conditionalHeaders, layout, browserTimezone }: ScreenshotObservableOpts

@@ -11,7 +11,7 @@ import { finalize, map, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../lib/layouts';
-import { screenshotsObservable, ScreenshotResults } from '../../../lib/screenshots';
+import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 
 function getBase64DecodedSize(value: string) {
@@ -45,7 +45,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
-    const screenshots$ = screenshotsObservable(captureConfig, browserDriverFactory, {
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urls: [url],
       conditionalHeaders,
