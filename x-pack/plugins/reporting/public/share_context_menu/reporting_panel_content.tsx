@@ -22,7 +22,7 @@ import { ToastsSetup } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
-import { BaseParams } from '../../common/types';
+import { DecoratedBaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface Props {
@@ -34,7 +34,7 @@ export interface Props {
   requiresSavedState: boolean;
   layoutId: string | undefined;
   objectId?: string;
-  getJobParams: () => BaseParams; // FIXME: not sure if should be DecoratedBaseParams
+  getJobParams: () => DecoratedBaseParams;
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
@@ -73,7 +73,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return url.resolve(window.location.href, relativePath);
   };
 
-  public componentDidUpdate(prevProps: Props, prevState: State) {
+  public componentDidUpdate(_prevProps: Props, prevState: State) {
     if (this.props.layoutId && this.props.layoutId !== prevState.layoutId) {
       this.setState({
         ...prevState,
