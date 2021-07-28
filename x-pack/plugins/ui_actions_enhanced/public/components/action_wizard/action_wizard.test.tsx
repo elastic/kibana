@@ -92,5 +92,6 @@ test('if action is beta, beta badge is shown', () => {
     }
   );
   const screen = render(<Demo actionFactories={[dashboardFactory, betaUrl]} />);
-  expect(screen.getByText(/Beta/i)).toBeVisible();
+  // Uses the single letter beta badge
+  expect(screen.getByText(/^B/i)).toBeVisible();
 });

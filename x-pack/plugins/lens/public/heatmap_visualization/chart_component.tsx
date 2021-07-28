@@ -16,11 +16,11 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { CustomPaletteState } from 'src/plugins/charts/public';
+import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';
-import { HeatmapRenderProps } from './types';
+import type { HeatmapRenderProps } from './types';
 import './index.scss';
-import { LensBrushEvent, LensFilterEvent } from '../types';
+import type { LensBrushEvent, LensFilterEvent } from '../types';
 import {
   applyPaletteParams,
   defaultPaletteParams,

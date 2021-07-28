@@ -296,7 +296,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                           }
                         )}
                         color="primary"
-                        size="l"
                         onClick={() => {
                           handleEndDateChange(CHART_DIRECTION.BACK);
                         }}
@@ -460,7 +459,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                           }
                         )}
                         color="primary"
-                        size="l"
                         onClick={() => {
                           handleEndDateChange(CHART_DIRECTION.FORWARD);
                         }}

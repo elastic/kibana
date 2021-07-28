@@ -15,6 +15,7 @@ import {
   AppMountParameters,
   AppUpdater,
   DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
@@ -73,6 +74,11 @@ export type CanvasStart = void;
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private initContext: PluginInitializerContext;
+
+  constructor(initContext: PluginInitializerContext) {
+    this.initContext = initContext;
+  }
 
   public setup(coreSetup: CoreSetup<CanvasStartDeps>, setupPlugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(setupPlugins.expressions);
@@ -105,7 +111,9 @@ export class CanvasPlugin
         srcPlugin.start(coreStart, startPlugins);
 
         const { pluginServices } = await import('./services');
-        pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
+        pluginServices.setRegistry(
+          pluginServiceRegistry.start({ coreStart, startPlugins, initContext: this.initContext })
+        );
 
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
