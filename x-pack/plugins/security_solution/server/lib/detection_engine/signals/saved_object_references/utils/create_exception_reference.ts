@@ -17,6 +17,5 @@ export const createExceptionReference = (
     ...exceptionItem,
     id: savedObjectReference.id,
   };
-  logger.debug(`Saved object reference found for exception list:, ${JSON.stringify(reference)}`);
   return reference;
 };

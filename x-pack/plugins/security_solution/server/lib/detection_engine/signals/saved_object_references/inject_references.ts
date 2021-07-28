@@ -33,14 +33,6 @@ export const injectReferences = (
   params: RuleParams,
   savedObjectReferences: SavedObjectReference[]
 ): RuleParams => {
-  logger.debug(
-    [
-      'Injecting references into the rule params of: ',
-      JSON.stringify(params),
-      ', savedObjectReferences: ',
-      JSON.stringify(savedObjectReferences),
-    ].join('')
-  );
   const exceptionsList = injectExceptionsReferences(
     logger,
     params.exceptionsList,
@@ -50,11 +42,5 @@ export const injectReferences = (
     ...params,
     exceptionsList,
   };
-  logger.debug(
-    [
-      'The saved object references injected are: ',
-      JSON.stringify(ruleParamsWithSavedObjectReferences),
-    ].join('')
-  );
   return ruleParamsWithSavedObjectReferences;
 };

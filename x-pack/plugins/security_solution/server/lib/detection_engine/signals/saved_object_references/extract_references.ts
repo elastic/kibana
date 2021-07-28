@@ -37,8 +37,6 @@ export const extractReferences = (
   logger: Logger,
   params: RuleParams
 ): RuleParamsAndRefs<RuleParams> => {
-  logger.debug(['Extracting any saved object references from rule_id: ', params.ruleId].join(''));
-
   const exceptionReferences = extractExceptionsList(logger, params.exceptionsList);
   const returnReferences = [...exceptionReferences];
 

@@ -19,14 +19,6 @@ export const injectExceptionsReferences = (
   exceptionsList: RuleParams['exceptionsList'],
   savedObjectReferences: SavedObjectReference[]
 ): RuleParams['exceptionsList'] => {
-  logger.debug(
-    [
-      'Injecting "exceptionsList" saved object references for the alerting rule parameters, saved object references are:',
-      JSON.stringify(savedObjectReferences),
-      'exceptionsList is:',
-      JSON.stringify(exceptionsList),
-    ].join('')
-  );
   return exceptionsList.map((exceptionItem, index) => {
     const savedObjectReference = getSavedObjectReferenceForExceptionsList(
       index,

@@ -15,21 +15,15 @@ export const extractExceptionsList = (
   exceptionsList: RuleParams['exceptionsList']
 ): SavedObjectReference[] => {
   if (exceptionsList == null) {
-    logger.debug(
-      `Exception list does not exist to extract saved object references for. Returning empty saved object reference`
+    logger.warn(
+      'Exception list is null when it never should be. This indicates potentially that saved object migrations did not run correctly. Returning empty saved object reference'
     );
     return [];
   } else {
-    const references = exceptionsList.map((exceptionItem, index) => ({
+    return exceptionsList.map((exceptionItem, index) => ({
       name: getSavedObjectNamePatternForExceptionsList(index),
       id: exceptionItem.id,
       type: EXCEPTION_LIST_NAMESPACE,
     }));
-    logger.debug(
-      `Found exception list to extract exception list saved object references: ${JSON.stringify(
-        references
-      )}`
-    );
-    return references;
   }
 };
