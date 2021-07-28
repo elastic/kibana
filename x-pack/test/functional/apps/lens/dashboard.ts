@@ -62,8 +62,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to add filters/timerange by clicking in XYChart', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      // await PageObjects.common.navigateToApp('dashboard');
+      // await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
@@ -90,8 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
     // setting set in kibana.yml to work (not enabled by default)
     it('should be able to drill down to discover', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      // await PageObjects.common.navigateToApp('dashboard');
+      // await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
@@ -109,8 +109,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to add filters by clicking in pie chart', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      // await PageObjects.common.navigateToApp('dashboard');
+      // await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.clickByButtonText('lnsPieVis');
@@ -130,8 +130,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not carry over filters if creating a new lens visualization from within dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      // await PageObjects.common.navigateToApp('dashboard');
+      // await PageObjects.dashboard.clickNewDashboard();
       await filterBar.addFilter('geo.src', 'is', 'US');
       await filterBar.toggleFilterPinned('geo.src');
       await filterBar.addFilter('geo.dest', 'is', 'LS');
@@ -147,8 +147,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('CSV export action exists in panel context menu', async () => {
       const ACTION_ID = 'ACTION_EXPORT_CSV';
       const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      // await PageObjects.common.navigateToApp('dashboard');
+      // await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.clickByButtonText('lnsPieVis');
@@ -160,8 +160,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show all data from all layers in the inspector', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
@@ -179,9 +177,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.createLayer();
 
-      expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
-
-      await PageObjects.lens.switchToVisualization('line');
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -207,11 +202,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.openInspectorRequestsView();
       const requests = await inspector.getRequestNames();
       expect(requests.split(',').length).to.be(2);
+      await inspector.close();
     });
 
     it('unlink lens panel from embeddable library', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      // await PageObjects.common.navigateToApp('dashboard');
+      // await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.clickByButtonText('lnsPieVis');
@@ -248,9 +244,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show validation messages if any error appears', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
