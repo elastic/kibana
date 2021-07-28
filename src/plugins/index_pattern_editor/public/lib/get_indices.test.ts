@@ -33,26 +33,27 @@ export const successfulResponse = {
 };
 
 const mockGetTags = () => [];
+const mockIsRollupIndex = () => false;
 
 const http = httpServiceMock.createStartContract();
 http.get.mockResolvedValue(successfulResponse);
 
 describe('getIndices', () => {
   it('should work in a basic case', async () => {
-    const result = await getIndices(http, mockGetTags, 'kibana', false);
+    const result = await getIndices(http, mockIsRollupIndex, 'kibana', false);
     expect(result.length).toBe(3);
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
   });
 
   it('should ignore ccs query-all', async () => {
-    expect((await getIndices(http, mockGetTags, '*:', false)).length).toBe(0);
+    expect((await getIndices(http, mockIsRollupIndex, '*:', false)).length).toBe(0);
   });
 
   it('should ignore a single comma', async () => {
-    expect((await getIndices(http, mockGetTags, ',', false)).length).toBe(0);
-    expect((await getIndices(http, mockGetTags, ',*', false)).length).toBe(0);
-    expect((await getIndices(http, mockGetTags, ',foobar', false)).length).toBe(0);
+    expect((await getIndices(http, mockIsRollupIndex, ',', false)).length).toBe(0);
+    expect((await getIndices(http, mockIsRollupIndex, ',*', false)).length).toBe(0);
+    expect((await getIndices(http, mockIsRollupIndex, ',foobar', false)).length).toBe(0);
   });
 
   it('response object to item array', () => {
@@ -89,7 +90,7 @@ describe('getIndices', () => {
       http.get.mockImplementationOnce(() => {
         throw new Error('Test error');
       });
-      const result = await getIndices(http, mockGetTags, 'kibana', false);
+      const result = await getIndices(http, mockIsRollupIndex, 'kibana', false);
       expect(result.length).toBe(0);
     });
   });
