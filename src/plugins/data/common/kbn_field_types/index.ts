@@ -6,11 +6,39 @@
  * Side Public License, v 1.
  */
 
-export { KbnFieldType } from './kbn_field_type';
+// NOTE: trick to mark exports as deprecated (only for constants and types, but not for interfaces, classes or enums)
+import {
+  castEsToKbnFieldTypeName as oldCastEsToKbnFieldTypeName,
+  getFilterableKbnTypeNames as oldGetFilterableKbnTypeNames,
+  getKbnFieldType as oldGetKbnFieldType,
+  getKbnTypeNames as oldGetKbnTypeNames,
+  KbnFieldType,
+} from '@kbn/field-types';
+
+/**
+ * @deprecated import from "@kbn/field-types" instead
+ */
+const castEsToKbnFieldTypeName = oldCastEsToKbnFieldTypeName;
+
+/**
+ * @deprecated import from "@kbn/field-types" instead
+ */
+const getFilterableKbnTypeNames = oldGetFilterableKbnTypeNames;
+
+/**
+ * @deprecated import from "@kbn/field-types" instead
+ */
+const getKbnFieldType = oldGetKbnFieldType;
+
+/**
+ * @deprecated import from "@kbn/field-types" instead
+ */
+const getKbnTypeNames = oldGetKbnTypeNames;
 
 export {
   castEsToKbnFieldTypeName,
   getKbnFieldType,
   getKbnTypeNames,
   getFilterableKbnTypeNames,
-} from './kbn_field_types';
+  KbnFieldType,
+};
