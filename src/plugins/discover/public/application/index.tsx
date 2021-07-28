@@ -8,12 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { AppMountParameters } from 'kibana/public';
 import { getServices } from '../kibana_services';
 import { DiscoverMainRoute } from './apps/main';
-import { ContextMainApp } from './apps/context';
+import { ContextAppRoute } from './apps/context';
+import { SingleDocRoute } from './apps/doc';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 
 export const renderApp = ({ element }: AppMountParameters) => {
@@ -31,14 +32,19 @@ export const renderApp = ({ element }: AppMountParameters) => {
         <Switch>
           <Route
             path="/context/:indexPatternId/:id"
-            children={
-              <ContextMainApp
-                history={history}
-                indexPatternList={[]}
-                services={services}
-                savedSearch={undefined}
+            children={<ContextAppRoute indexPatternList={[]} services={services} />}
+          />
+          <Route
+            path="/doc/:indexPattern/:index/:type"
+            render={(props) => (
+              <Redirect
+                to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
               />
-            }
+            )}
+          />
+          <Route
+            path="/doc/:indexPatternId/:index"
+            children={<SingleDocRoute services={services} />}
           />
           <Route path="/view/:id" children={<DiscoverMainRoute opts={opts} />} />
           <Route path="/" exact children={<DiscoverMainRoute opts={opts} />} />

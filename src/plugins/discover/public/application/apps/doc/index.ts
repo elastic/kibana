@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ContextAppRoute } from './context_app_route';
+export { SingleDocRoute } from './single_doc_route';

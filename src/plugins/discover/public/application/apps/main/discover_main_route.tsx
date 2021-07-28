@@ -9,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/target/types/public';
-import { redirectTo } from '@reach/router';
 import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
@@ -18,10 +17,6 @@ import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pat
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverMainApp } from './discover_main_app';
-import {
-  getDashboardBreadcrumb,
-  getDashboardTitle,
-} from '../../../../../dashboard/public/dashboard_strings';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
 
 export interface DiscoverMainProps {

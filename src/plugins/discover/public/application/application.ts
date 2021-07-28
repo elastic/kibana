@@ -10,7 +10,6 @@ import './index.scss';
 import angular from 'angular';
 import { getServices } from '../kibana_services';
 import { renderApp as renderReactApp } from './index';
-import { DiscoverServices } from '../build_services';
 
 /**
  * Here's where Discover's inner angular is mounted and rendered
