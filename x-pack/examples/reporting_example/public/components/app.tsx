@@ -40,7 +40,6 @@ interface ReportingExampleAppProps {
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
-  version: string;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
@@ -49,7 +48,6 @@ export const ReportingExampleApp = ({
   basename,
   reporting,
   screenshotMode,
-  version,
 }: ReportingExampleAppProps) => {
   const { getDefaultLayoutSelectors } = reporting;
 
@@ -83,7 +81,6 @@ export const ReportingExampleApp = ({
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
-      version,
     };
   };
 

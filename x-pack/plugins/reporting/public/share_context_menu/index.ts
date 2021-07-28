@@ -13,7 +13,6 @@ import type { LayoutParams } from '../../common/types';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface ExportPanelShareOpts {
-  kibanaVersion: string;
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   license$: LicensingPluginSetup['license$'];
@@ -31,6 +30,5 @@ export interface JobParamsProviderOptions {
   shareableUrl: string;
   apiClient: ReportingAPIClient;
   objectType: string;
-  browserTimezone: string;
   sharingData: ReportingSharingData;
 }

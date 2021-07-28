@@ -16,14 +16,12 @@ const basePath = ({
   get: () => 'basepath/s/spacey',
   serverBasePath: `basepath`,
 } as unknown) as IBasePath;
-const kibanaVersion = '7.15,0';
 const workpadSharingData = { workpad: workpads[0], pageCount: 12 };
 
 test('getPdfJobParams returns the correct job params for canvas layout', () => {
-  const jobParams = getPdfJobParams(workpadSharingData, basePath, kibanaVersion);
+  const jobParams = getPdfJobParams(workpadSharingData, basePath);
   expect(jobParams).toMatchInlineSnapshot(`
     Object {
-      "browserTimezone": "America/New_York",
       "layout": Object {
         "dimensions": Object {
           "height": 0,
@@ -47,7 +45,6 @@ test('getPdfJobParams returns the correct job params for canvas layout', () => {
         "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/12",
       ],
       "title": "base workpad",
-      "version": "7.15,0",
     }
   `);
 });

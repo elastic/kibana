@@ -101,11 +101,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
               content: (
                 <services.reporting.components.ReportingPanelPDF
                   getJobParams={() =>
-                    getPdfJobParams(
-                      sharingData,
-                      platformService.getBasePathInterface(),
-                      platformService.getKibanaVersion()
-                    )
+                    getPdfJobParams(sharingData, platformService.getBasePathInterface())
                   }
                   layoutOption="canvas"
                   onClose={closePopover}

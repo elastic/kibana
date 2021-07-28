@@ -11,7 +11,7 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import { ToastsSetup } from 'src/core/public';
 import { getDefaultLayoutSelectors } from '../../common';
-import { BaseParams, LayoutParams } from '../../common/types';
+import { BaseParams, DecoratedBaseParams, LayoutParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content';
 
@@ -147,17 +147,14 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return { id: 'preserve_layout', dimensions, selectors };
   };
 
-  private getJobParams = (): Required<BaseParams> => {
-    const outerParams = this.props.getJobParams();
-    let browserTimezone = outerParams.browserTimezone;
-    if (!browserTimezone) {
-      browserTimezone = moment.tz.guess();
-    }
+  private getJobParams = (): Required<DecoratedBaseParams> => {
+    const browserTimezone = moment.tz.guess();
 
     return {
       ...this.props.getJobParams(),
       layout: this.getLayout(),
       browserTimezone,
+      version: 'FIXME',
     };
   };
 }

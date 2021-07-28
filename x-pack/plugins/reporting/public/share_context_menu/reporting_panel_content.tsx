@@ -34,7 +34,7 @@ export interface Props {
   requiresSavedState: boolean;
   layoutId: string | undefined;
   objectId?: string;
-  getJobParams: () => BaseParams;
+  getJobParams: () => BaseParams; // FIXME: not sure if should be DecoratedBaseParams
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;

@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import React from 'react';
 import type { SearchSourceFields } from 'src/plugins/data/common';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
@@ -17,12 +16,10 @@ import { ReportingPanelContent } from './reporting_panel_content_lazy';
 import { ExportPanelShareOpts } from '.';
 
 export const ReportingCsvShareProvider = ({
-  kibanaVersion,
   apiClient,
   toasts,
   license$,
   startServices$,
-  uiSettings,
   usesUiCapabilities,
 }: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
@@ -46,27 +43,16 @@ export const ReportingCsvShareProvider = ({
     capabilityHasCsvReporting = true; // deprecated
   }
 
-  // If the TZ is set to the default "Browser", it will not be useful for
-  // server-side export. We need to derive the timezone and pass it as a param
-  // to the export API.
-  // TODO: create a helper utility in Reporting. This is repeated in a few places.
-  const browserTimezone =
-    uiSettings.get('dateFormat:tz') === 'Browser'
-      ? moment.tz.guess()
-      : uiSettings.get('dateFormat:tz');
-
   const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
 
     const jobParams: JobParamsCSV = {
-      browserTimezone,
       title: sharingData.title as string,
       objectType,
       searchSource: sharingData.searchSource as SearchSourceFields,
       columns: sharingData.columns as string[] | undefined,
-      version: kibanaVersion,
     };
 
     const getJobParams = () => jobParams;

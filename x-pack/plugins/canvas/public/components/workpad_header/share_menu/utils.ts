@@ -6,7 +6,6 @@
  */
 
 import { IBasePath } from 'kibana/public';
-import moment from 'moment-timezone';
 import rison from 'rison-node';
 import { BaseParams } from '../../../../../reporting/common/types';
 import { CanvasWorkpad } from '../../../../types';
@@ -21,8 +20,7 @@ type JobParamsPDF = BaseParams & { relativeUrls: string[] };
 
 export function getPdfJobParams(
   { workpad: { id, name: title, width, height }, pageCount }: CanvasWorkpadSharingData,
-  basePath: IBasePath,
-  kibanaVersion: string
+  basePath: IBasePath
 ): JobParamsPDF {
   const urlPrefix = basePath.get().replace(basePath.serverBasePath, ''); // for Spaces prefix, which is included in basePath.get()
   const canvasEntry = `${urlPrefix}/app/canvas#`;
@@ -44,7 +42,6 @@ export function getPdfJobParams(
   }
 
   return {
-    browserTimezone: moment.tz.guess(),
     layout: {
       dimensions: { width, height },
       id: 'canvas',
@@ -52,6 +49,5 @@ export function getPdfJobParams(
     objectType: 'canvas workpad',
     relativeUrls: workpadUrls,
     title,
-    version: kibanaVersion,
   };
 }

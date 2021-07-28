@@ -16,8 +16,6 @@ import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 const getJobParamsDefault: () => BaseParams = () => ({
   objectType: 'test-object-type',
   title: 'Test Report Title',
-  browserTimezone: 'America/New_York',
-  version: '7.14.0',
 });
 
 test('ScreenCapturePanelContent renders the default view properly', () => {

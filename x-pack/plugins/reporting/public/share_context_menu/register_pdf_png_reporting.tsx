@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import React from 'react';
 import { ShareContext } from 'src/plugins/share/public';
 import type { JobParamsPNG } from '../../server/export_types/png/types';
@@ -15,10 +14,7 @@ import { checkLicense } from '../lib/license_check';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 
-const getPdfJobParams = (
-  opts: JobParamsProviderOptions,
-  kibanaVersion: string
-) => (): JobParamsPDF => {
+const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => {
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
@@ -31,14 +27,10 @@ const getPdfJobParams = (
     title: opts.sharingData.title,
     layout: opts.sharingData.layout,
     relativeUrls: [relativeUrl], // multi URL for PDF
-    version: kibanaVersion,
   };
 };
 
-const getPngJobParams = (
-  opts: JobParamsProviderOptions,
-  kibanaVersion: string
-) => (): JobParamsPNG => {
+const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
     window.location.origin + opts.apiClient.getServerBasePath(),
@@ -50,17 +42,14 @@ const getPngJobParams = (
     title: opts.sharingData.title,
     layout: opts.sharingData.layout,
     relativeUrl, // single URL for PNG
-    version: kibanaVersion,
   };
 };
 
 export const reportingScreenshotShareProvider = ({
-  kibanaVersion,
   apiClient,
   toasts,
   license$,
   startServices$,
-  uiSettings,
   usesUiCapabilities,
 }: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
@@ -89,15 +78,6 @@ export const reportingScreenshotShareProvider = ({
     capabilityHasDashboardScreenshotReporting = true;
     capabilityHasVisualizeScreenshotReporting = true;
   }
-
-  // If the TZ is set to the default "Browser", it will not be useful for
-  // server-side export. We need to derive the timezone and pass it as a param
-  // to the export API.
-  // TODO: create a helper utility in Reporting. This is repeated in a few places.
-  const browserTimezone =
-    uiSettings.get('dateFormat:tz') === 'Browser'
-      ? moment.tz.guess()
-      : uiSettings.get('dateFormat:tz');
 
   const getShareMenuItems = ({
     objectType,
@@ -149,16 +129,12 @@ export const reportingScreenshotShareProvider = ({
             reportType="png"
             objectId={objectId}
             requiresSavedState={true}
-            getJobParams={getPngJobParams(
-              {
-                shareableUrl,
-                apiClient,
-                objectType,
-                browserTimezone,
-                sharingData,
-              },
-              kibanaVersion
-            )}
+            getJobParams={getPngJobParams({
+              shareableUrl,
+              apiClient,
+              objectType,
+              sharingData,
+            })}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -190,16 +166,12 @@ export const reportingScreenshotShareProvider = ({
             objectId={objectId}
             requiresSavedState={true}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getPdfJobParams(
-              {
-                shareableUrl,
-                apiClient,
-                objectType,
-                browserTimezone,
-                sharingData,
-              },
-              kibanaVersion
-            )}
+            getJobParams={getPdfJobParams({
+              shareableUrl,
+              apiClient,
+              objectType,
+              sharingData,
+            })}
             isDirty={isDirty}
             onClose={onClose}
           />

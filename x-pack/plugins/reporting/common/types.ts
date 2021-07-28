@@ -64,7 +64,7 @@ export interface ReportSource {
   payload: {
     headers: string; // encrypted headers
     isDeprecated?: boolean; // set to true when the export type is being phased out
-  } & BaseParams;
+  } & DecoratedBaseParams;
   meta: { objectType: string; layout?: string }; // for telemetry
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
@@ -98,12 +98,15 @@ export interface ReportDocument extends ReportDocumentHead {
 }
 
 export interface BaseParams {
-  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
   layout?: LayoutParams;
   objectType: string;
   title: string;
-  version: string; // version of the last supported release, in case the params need migration for forward-compatibility
 }
+
+export type DecoratedBaseParams = BaseParams & {
+  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
+  version: string; // version of the last supported release, in case the params need migration for forward-compatibility
+};
 
 export type JobId = string;
 

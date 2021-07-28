@@ -11,9 +11,9 @@ import type { BaseParams, BasePayload } from '../../types';
 export type RawValue = string | object | null | undefined;
 
 interface BaseParamsCSV {
-  browserTimezone: string; // used for formatting timestamps
   searchSource: SearchSourceFields;
   columns?: string[];
+  // BUG: CSV export can not do relative time range - needs `forceNow` param
 }
 
 export type JobParamsCSV = BaseParamsCSV & BaseParams;
