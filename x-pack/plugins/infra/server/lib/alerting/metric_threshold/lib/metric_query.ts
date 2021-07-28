@@ -78,8 +78,8 @@ export const getElasticsearchMetricQuery = (
               field: timefield,
               ranges: [
                 {
-                  from: from - intervalAsMS,
-                  to: from + intervalAsMS - deliveryDelay,
+                  from: to - intervalAsMS - deliveryDelay,
+                  to: to - deliveryDelay,
                 },
               ],
             },
