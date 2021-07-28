@@ -153,7 +153,7 @@ const TlsError = ({ docLinks, className }: PromptErrorProps) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.tlsErrorTitle"
-          defaultMessage="You must enable Transport Layer Security"
+          defaultMessage="You must enable Transport Layer Security and API keys"
         />
       </h2>
     }
