@@ -21,13 +21,13 @@ export const computeExpectationsAndRanges = (
   for (let i = 1; i < percentiles.length; i++) {
     if (percentiles[i] !== percentiles[i - 1]) {
       tempPercentiles.push(percentiles[i]);
-      tempFractions.push(2 / 100);
+      tempFractions.push(PERCENTILES_STEP / 100);
     } else {
       tempFractions[tempFractions.length - 1] =
         tempFractions[tempFractions.length - 1] + step / 100;
     }
   }
-  tempFractions.push(2 / 100);
+  tempFractions.push(PERCENTILES_STEP / 100);
 
   const ranges = tempPercentiles.reduce((p, to) => {
     const from = p[p.length - 1]?.to;
