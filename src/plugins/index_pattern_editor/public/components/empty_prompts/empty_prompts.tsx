@@ -45,7 +45,7 @@ export const EmptyPrompts: FC<Props> = ({
 
   useCallback(() => {
     if (!hasDataIndices)
-      getIndices(http, () => [], '*:*', false).then((dataSources) =>
+      getIndices(http, () => false, '*:*', false).then((dataSources) =>
         setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
       );
   }, [http, hasDataIndices]);

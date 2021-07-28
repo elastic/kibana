@@ -35,7 +35,6 @@ import {
   TypeField,
   TitleField,
   schema,
-  geti18nTexts,
   Footer,
   AdvancedParamsContent,
   EmptyPrompts,
@@ -75,9 +74,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     services: { http, indexPatternService, uiSettings },
   } = useKibana<IndexPatternEditorContext>();
 
-  const i18nTexts = geti18nTexts();
-
-  // return type, interal type
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
@@ -113,7 +109,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [{ title, allowHidden, type }] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
-  // const [lastTitle, setLastTitle] = useState('');
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
   const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
@@ -134,7 +129,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
-    getIndices(http, () => [], '*', allowHidden).then((dataSources) => {
+    getIndices(http, () => false, '*', allowHidden).then((dataSources) => {
       setAllSources(dataSources);
       const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
       setMatchedIndices(matchedSet);
@@ -222,35 +217,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }, [matchedIndices, loadTimestampFieldOptions, title, getFields]);
 
   const reloadMatchedIndices = useCallback(
-    async (title2: string) => {
-      // todo move to utility lib
+    async (newTitle: string) => {
       const isRollupIndex = (indexName: string) =>
         getRollupIndices(rollupIndicesCapabilities).includes(indexName);
       let newRollupIndexName: string | undefined;
-
-      // move inside getIndices
-      const getIndexTags = (indexName: string) =>
-        isRollupIndex(indexName)
-          ? [
-              {
-                key: INDEX_PATTERN_TYPE.ROLLUP,
-                name: i18nTexts.rollupLabel,
-                color: 'primary',
-              },
-            ]
-          : [];
 
       const fetchIndices = async (query: string = '') => {
         setIsLoadingMatchedIndices(true);
         const indexRequests = [];
 
         if (query?.endsWith('*')) {
-          const exactMatchedQuery = getIndices(http, getIndexTags, query, allowHidden);
+          const exactMatchedQuery = getIndices(http, isRollupIndex, query, allowHidden);
           indexRequests.push(exactMatchedQuery);
           indexRequests.push(Promise.resolve([]));
         } else {
-          const exactMatchQuery = getIndices(http, getIndexTags, query, allowHidden);
-          const partialMatchQuery = getIndices(http, getIndexTags, `${query}*`, allowHidden);
+          const exactMatchQuery = getIndices(http, isRollupIndex, query, allowHidden);
+          const partialMatchQuery = getIndices(http, isRollupIndex, `${query}*`, allowHidden);
 
           indexRequests.push(exactMatchQuery);
           indexRequests.push(partialMatchQuery);
@@ -281,13 +263,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
         return { matchedIndicesResult, newRollupIndexName };
       };
 
-      // setLastTitle(title2);
-      return fetchIndices(title2);
+      return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, i18nTexts.rollupLabel, rollupIndicesCapabilities]
+    [http, allowHidden, allSources, type, rollupIndicesCapabilities]
   );
 
-  // todo test
   if (isLoadingSources || isLoadingIndexPatterns) {
     return <EuiLoadingSpinner size="xl" />;
   }

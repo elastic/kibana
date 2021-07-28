@@ -9,7 +9,7 @@
 import { sortBy } from 'lodash';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { Tag } from '../types';
+import { Tag, INDEX_PATTERN_TYPE } from '../types';
 // todo move into this plugin, consider removing all ipm references
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 
@@ -26,9 +26,24 @@ const frozenLabel = i18n.translate('indexPatternEditor.frozenLabel', {
   defaultMessage: 'Frozen',
 });
 
+const rollupLabel = i18n.translate('indexPatternEditor.rollupLabel', {
+  defaultMessage: 'Rollup',
+});
+
+const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexName: string) =>
+  isRollupIndex(indexName)
+    ? [
+        {
+          key: INDEX_PATTERN_TYPE.ROLLUP,
+          name: rollupLabel,
+          color: 'primary',
+        },
+      ]
+    : [];
+
 export async function getIndices(
   http: HttpStart,
-  getIndexTags: (indexName: string) => Tag[],
+  isRollupIndex: (indexName: string) => boolean,
   rawPattern: string,
   showAllIndices: boolean
 ): Promise<MatchedItem[]> {
@@ -63,7 +78,7 @@ export async function getIndices(
       return [];
     }
 
-    return responseToItemArray(response, getIndexTags);
+    return responseToItemArray(response, getIndexTags(isRollupIndex));
   } catch {
     return [];
   }
@@ -71,7 +86,7 @@ export async function getIndices(
 
 export const responseToItemArray = (
   response: ResolveIndexResponse,
-  getIndexTags: (indexName: string) => Tag[]
+  getTags: (indexName: string) => Tag[]
 ): MatchedItem[] => {
   const source: MatchedItem[] = [];
 
@@ -79,7 +94,7 @@ export const responseToItemArray = (
     const tags: MatchedItem['tags'] = [{ key: 'index', name: indexLabel, color: 'default' }];
     const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
 
-    tags.push(...getIndexTags(index.name));
+    tags.push(...getTags(index.name));
     if (isFrozen) {
       tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
     }
