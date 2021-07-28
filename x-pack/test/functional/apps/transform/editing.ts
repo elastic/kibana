@@ -112,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should show the edit flyout');
-          await transform.table.clickTransformRowAction('Edit');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Edit');
           await transform.editFlyout.assertTransformEditFlyoutExists();
         });
 

@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
             );
 
             await transform.testExecution.logTestStep('should stop the transform');
-            await transform.table.clickTransformRowAction('Stop');
+            await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Stop');
           }
 
           await transform.testExecution.logTestStep('should display the stopped transform');
@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
             'Delete',
             true
           );
-          await transform.table.clickTransformRowAction('Delete');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Delete');
           await transform.table.assertTransformDeleteModalExists();
 
           await transform.testExecution.logTestStep('should delete the transform');

@@ -589,7 +589,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.transformId, false);
 
           await transform.testExecution.logTestStep('should navigate to discover');
-          await transform.table.clickTransformRowAction('Discover');
+          await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
 
           if (testData.discoverAdjustSuperDatePicker) {
             await transform.discover.assertNoResults(testData.destinationIndex);
