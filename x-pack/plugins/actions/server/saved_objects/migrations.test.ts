@@ -139,12 +139,7 @@ describe('handles errors during migrations', () => {
         `encryptedSavedObject 7.10.0 migration failed for action ${action.id} with error: Can't migrate!`,
         {
           migrations: {
-            actionDocument: {
-              ...action,
-              attributes: {
-                ...action.attributes,
-              },
-            },
+            actionDocument: action,
           },
         }
       );
@@ -162,12 +157,7 @@ describe('handles errors during migrations', () => {
         `encryptedSavedObject 7.11.0 migration failed for action ${action.id} with error: Can't migrate!`,
         {
           migrations: {
-            actionDocument: {
-              ...action,
-              attributes: {
-                ...action.attributes,
-              },
-            },
+            actionDocument: action,
           },
         }
       );
@@ -185,12 +175,7 @@ describe('handles errors during migrations', () => {
         `encryptedSavedObject 7.14.0 migration failed for action ${action.id} with error: Can't migrate!`,
         {
           migrations: {
-            actionDocument: {
-              ...action,
-              attributes: {
-                ...action.attributes,
-              },
-            },
+            actionDocument: action,
           },
         }
       );
