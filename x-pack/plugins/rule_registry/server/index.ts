@@ -14,12 +14,10 @@ export type { RacRequestHandlerContext, RacApiRequestHandlerContext } from './ty
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
 export { getRuleData, RuleExecutorData } from './utils/get_rule_executor_data';
-export {
-  createLifecycleRuleTypeFactory,
-  LifecycleAlertService,
-} from './utils/create_lifecycle_rule_type_factory';
+export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 export {
   LifecycleRuleExecutor,
+  LifecycleAlertService,
   LifecycleAlertServices,
   createLifecycleExecutor,
 } from './utils/create_lifecycle_executor';

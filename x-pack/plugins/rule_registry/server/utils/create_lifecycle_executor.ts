@@ -38,7 +38,7 @@ import { RuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { getRuleData } from './get_rule_executor_data';
 
-type LifecycleAlertService<
+export type LifecycleAlertService<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never

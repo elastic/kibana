@@ -237,7 +237,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           const createdSignalsCount = result.createdSignals.length;
 
           if (actions.length) {
-            // @ts-expect-error
             const notificationRuleParams: NotificationRuleTypeParams = {
               ...params,
               name: name as string,

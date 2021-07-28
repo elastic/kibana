@@ -149,7 +149,7 @@ describe('status check alert', () => {
       const alert = statusCheckAlertFactory(server, libs, plugins);
       // @ts-ignore the executor can return `void`, but ours never does
       const options = mockOptions();
-      const state: Record<string, any> = await alert.executor(options);
+      const state: Record<string, any> | void = await alert.executor(options);
       const {
         services: { alertWithLifecycle },
       } = options;
