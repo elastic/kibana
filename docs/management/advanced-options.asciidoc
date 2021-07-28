@@ -5,7 +5,7 @@
 specify the default index pattern, and set the precision for displayed decimal values.
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
-. Scroll or search for the setting,
+. Scroll or search for the setting.
 . Make your change, then click *Save changes*.
 
 [float]
