@@ -2773,7 +2773,7 @@ image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
 The Timelion visualization panel appears on the dashboard.
 +
 [role="screenshot"]
-image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
+image::user/dashboard/images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
 
 [float]
 [[breaking-v7.10.0]]
