@@ -450,14 +450,11 @@ const mockLibs: any = {
   }),
   configuration: createMockStaticConfiguration({}),
   metricsRules: {
-    createLifecycleRuleExecutor: (executor: any) => {
-      return async function (options) {
-        await executor({
-          params: options.params,
-          services: options.services,
-        });
-      };
-    },
+    createLifecycleRuleExecutor: (executor: any) => async (options) =>
+      await executor({
+        params: options.params,
+        services: options.services,
+      }),
   },
 };
 
