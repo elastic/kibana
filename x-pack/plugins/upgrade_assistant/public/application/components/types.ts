@@ -39,8 +39,3 @@ export enum GroupByOption {
   index = 'index',
   node = 'node',
 }
-
-export enum TelemetryState {
-  Running,
-  Complete,
-}

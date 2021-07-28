@@ -53,8 +53,6 @@ const i18nTexts = {
 };
 
 export const EsDeprecationsContent = () => {
-  // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
-
   const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
 
   const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
@@ -63,21 +61,17 @@ export const EsDeprecationsContent = () => {
     breadcrumbs.setBreadcrumbs('esDeprecations');
   }, [breadcrumbs]);
 
-  // TODO: refactor telemetry as we no longer need to keep track of tabs
-  // useEffect(() => {
-  //   if (isLoading === false) {
-  //     setTelemetryState(TelemetryState.Running);
+  useEffect(() => {
+    if (isLoading === false) {
+      async function sendTelemetryData() {
+        await api.sendTelemetryData({
+          elasticsearch: true,
+        });
+      }
 
-  //     async function sendTelemetryData() {
-  //       await api.sendTelemetryData({
-  //         [tabName]: true,
-  //       });
-  //       setTelemetryState(TelemetryState.Complete);
-  //     }
-
-  //     sendTelemetryData();
-  //   }
-  // }, [api, tabName, isLoading]);
+      sendTelemetryData();
+    }
+  }, [api, isLoading]);
 
   if (error) {
     // TODO handle error

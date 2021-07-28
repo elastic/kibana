@@ -2283,8 +2283,7 @@
             "error_fix_action": {
               "type": "long",
               "_meta": {
-                "description":
-                  "Number of times the user used the fix action of an error displayed in the workspace."
+                "description": "Number of times the user used the fix action of an error displayed in the workspace."
               }
             },
             "open_formula_popover": {
@@ -2531,8 +2530,7 @@
             "error_fix_action": {
               "type": "long",
               "_meta": {
-                "description":
-                  "Number of times the user used the fix action of an error displayed in the workspace."
+                "description": "Number of times the user used the fix action of an error displayed in the workspace."
               }
             },
             "open_formula_popover": {
@@ -5923,16 +5921,10 @@
         },
         "ui_open": {
           "properties": {
-            "cluster": {
+            "elasticsearch": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
-              }
-            },
-            "indices": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
+                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
               }
             },
             "overview": {
