@@ -1255,7 +1255,28 @@ export class SavedObjectsRepository {
         _source_includes: ['namespace', 'namespaces', 'originId'],
         require_alias: true,
       })
+      // TODO: clean this up and make it generic
+      .then((res) => {
+        const indexNotFound = res.statusCode === 404;
+        const esHeaderFound =
+          res.headers && res.headers['x-elastic-product']
+            ? res.headers['x-elastic-product'] === 'Elasticsearch'
+            : false;
+
+        // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
+        if (indexNotFound && !esHeaderFound) {
+          const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+          throw SavedObjectsErrorHelpers.decorateEsUnavailableError(
+            new Error(`${notFoundError.message}`),
+            `x-elastic-product not present or not recognized` // alternative: cannot verify response from elasticsearch
+          );
+        }
+        return res;
+      })
       .catch((err) => {
+        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
+          throw err;
+        }
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           // see "404s from missing index" above
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);

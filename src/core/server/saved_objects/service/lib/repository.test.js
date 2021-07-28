@@ -3877,26 +3877,34 @@ describe('SavedObjectsRepository', () => {
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { ...mockGetResponse },
+            { statusCode: 200 },
+            { 'x-elastic-product': 'Elasticsearch' }
+          )
         );
       }
       client.update.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          _id: `${type}:${id}`,
-          ...mockVersionProps,
-          result: 'updated',
-          // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
-          get: {
-            _source: {
-              namespaces: [options?.namespace ?? 'default'],
-              namespace: options?.namespace,
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          {
+            _id: `${type}:${id}`,
+            ...mockVersionProps,
+            result: 'updated',
+            // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
+            get: {
+              _source: {
+                namespaces: [options?.namespace ?? 'default'],
+                namespace: options?.namespace,
 
-              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
-              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
-              ...(includeOriginId && { originId }),
+                // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+                // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+                ...(includeOriginId && { originId }),
+              },
             },
           },
-        })
+          { statusCode: 200 },
+          { 'x-elastic-product': 'Elasticsearch' }
+        )
       );
       const result = await savedObjectsRepository.update(type, id, attributes, options);
       expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
