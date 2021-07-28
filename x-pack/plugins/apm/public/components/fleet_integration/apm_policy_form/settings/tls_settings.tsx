@@ -113,7 +113,7 @@ export function TLSSettingsForm({ vars, onChange }: Props) {
           newVars,
           // only validates TLS when its flag is enabled
           !newVars[TLS_ENABLED_KEY].value ||
-            isSettingsFormValid(flattenedTLSSettings, vars)
+            isSettingsFormValid(flattenedTLSSettings, newVars)
         );
       }}
     />
