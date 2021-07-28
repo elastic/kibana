@@ -14,10 +14,12 @@ import {
   AlertServicesMock,
   AlertInstanceMock,
 } from '../../../../../alerting/server/mocks';
+import { LifecycleAlertServices } from '../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { InfraSources } from '../../sources';
-import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -62,7 +64,7 @@ describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor(({
+      executor({
         services,
         params: {
           sourceId,
@@ -74,10 +76,7 @@ describe('The metric threshold alert type', () => {
             },
           ],
         },
-        /**
-         * TODO: Remove this use of `as` by utilizing a proper type
-         */
-      } as unknown) as MetricThresholdAlertExecutorOptions);
+      });
     test('alerts as expected with the > comparator', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
@@ -450,11 +449,26 @@ const mockLibs: any = {
     config: createMockStaticConfiguration({}),
   }),
   configuration: createMockStaticConfiguration({}),
+  metricsRules: {
+    createLifecycleRuleExecutor: (executor: any) => {
+      return async function (options) {
+        await executor({
+          params: options.params,
+          services: options.services,
+        });
+      };
+    },
+  },
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);
 
-const services: AlertServicesMock = alertsMock.createAlertServices();
+const alertsServices = alertsMock.createAlertServices();
+const services: AlertServicesMock &
+  LifecycleAlertServices<AlertInstanceState, AlertInstanceContext, string> = {
+  ...alertsServices,
+  ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
+};
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
   const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
   if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
