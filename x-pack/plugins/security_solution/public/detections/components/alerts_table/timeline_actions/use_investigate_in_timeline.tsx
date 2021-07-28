@@ -15,9 +15,11 @@ import { timelineActions } from '../../../../timelines/store/timeline';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { CreateTimelineProps } from '../types';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
+import { getEventType } from '../../../../timelines/components/timeline/body/helpers';
 
 interface UseInvestigateInTimelineActionProps {
-  ecsRowData: Ecs | Ecs[] | null;
+  ecsRowData: Ecs | null;
   nonEcsRowData: TimelineNonEcsData[];
   alertIds?: string[];
   fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
@@ -99,8 +101,19 @@ export const useInvestigateInTimeline = ({
     searchStrategyClient,
     updateTimelineIsLoading,
   ]);
+  const eventType = ecsRowData != null ? getEventType(ecsRowData) : null;
+
+  const investigateInTimelineAction =
+    eventType === 'signal' && ecsRowData != null
+      ? [
+          {
+            name: ACTION_INVESTIGATE_IN_TIMELINE,
+            onClick: investigateInTimelineAlertClick,
+          },
+        ]
+      : [];
 
   return {
-    handleInvestigateInTimelineAlertClick: investigateInTimelineAlertClick,
+    investigateInTimelineAction,
   };
 };

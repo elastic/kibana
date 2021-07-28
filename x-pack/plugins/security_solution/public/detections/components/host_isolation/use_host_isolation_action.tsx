@@ -5,17 +5,30 @@
  * 2.0.
  */
 import { useCallback } from 'react';
+import { HostStatus } from '../../../../common/endpoint/types';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 interface UseHostIsolationProps {
+  agentStatus: HostStatus | undefined;
   closePopover: () => void;
+  isEndpointAlert: boolean;
+  isHostIsolationPanelOpen: boolean;
+  isIsolationAllowed: boolean;
   isolationStatus: boolean;
+  isolationSupported: boolean;
+  loadingHostIsolationStatus: boolean;
   onIsolationStatusChange: (action: 'isolateHost' | 'unisolateHost') => void;
 }
 
 export const useHostIsolationAction = ({
-  onIsolationStatusChange,
-  isolationStatus,
+  agentStatus,
   closePopover,
+  onIsolationStatusChange,
+  isEndpointAlert,
+  isIsolationAllowed,
+  isolationStatus,
+  isolationSupported,
+  isHostIsolationPanelOpen,
+  loadingHostIsolationStatus,
 }: UseHostIsolationProps) => {
   const isolateHostHandler = useCallback(() => {
     closePopover();
@@ -28,5 +41,19 @@ export const useHostIsolationAction = ({
 
   const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
 
-  return { isolateHostHandler, isolateHostTitle };
+  const hostIsolationAction =
+    isIsolationAllowed &&
+    isEndpointAlert &&
+    isolationSupported &&
+    isHostIsolationPanelOpen === false
+      ? [
+          {
+            name: isolateHostTitle,
+            onClick: isolateHostHandler,
+            disabled: loadingHostIsolationStatus || agentStatus === HostStatus.UNENROLLED,
+          },
+        ]
+      : [];
+
+  return { hostIsolationAction };
 };

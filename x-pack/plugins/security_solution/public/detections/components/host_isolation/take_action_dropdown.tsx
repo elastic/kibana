@@ -16,10 +16,8 @@ import {
 } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
-import { HostStatus } from '../../../../common/endpoint/types';
 import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
 
-import { getEventType } from '../../../timelines/components/timeline/body/helpers';
 import { TimelineNonEcsData } from '../../../../common';
 import { Ecs } from '../../../../common/ecs';
 import { useExceptionModal } from '../alerts_table/timeline_actions/use_add_exception_modal';
@@ -27,10 +25,10 @@ import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_ac
 import { AddExceptionModalWrapper } from '../alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersModal } from '../../../management/pages/event_filters/view/components/modal';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-import {
-  ACTION_INVESTIGATE_IN_TIMELINE /* ACTION_ADD_TO_CASE*/,
+/* import {
+    ACTION_ADD_TO_CASE
 } from '../alerts_table/translations';
-/* import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
 import { addToCaseActionItem } from './helpers'; */
 import { useEventFilterModal } from '../alerts_table/timeline_actions/use_event_filter_modal';
@@ -89,12 +87,16 @@ export const TakeActionDropdown = React.memo(
       setIsPopoverOpen(false);
     }, []);
 
-    const eventType = ecsData != null ? getEventType(ecsData) : null;
-
-    const { isolateHostHandler, isolateHostTitle } = useHostIsolationAction({
-      onIsolationStatusChange: onChange,
-      isolationStatus,
+    const { hostIsolationAction } = useHostIsolationAction({
+      agentStatus,
       closePopover: closePopoverHandler,
+      onIsolationStatusChange: onChange,
+      isEndpointAlert,
+      isIsolationAllowed,
+      isolationStatus,
+      isolationSupported,
+      isHostIsolationPanelOpen,
+      loadingHostIsolationStatus: loading,
     });
 
     const {
@@ -131,7 +133,7 @@ export const TakeActionDropdown = React.memo(
       closePopover: closePopoverHandler,
     });
 
-    const { handleInvestigateInTimelineAlertClick } = useInvestigateInTimeline({
+    const { investigateInTimelineAction } = useInvestigateInTimeline({
       ecsRowData: ecsData ?? null,
       nonEcsRowData: nonEcsData ?? [],
       onInvestigateInTimelineAlertClick: closePopoverHandler,
@@ -180,26 +182,8 @@ export const TakeActionDropdown = React.memo(
           items: [
             ...alertsActionItems,
             /* ...addToCaseActionItem(timelineId),*/
-            ...(isIsolationAllowed &&
-            isEndpointAlert &&
-            isolationSupported &&
-            isHostIsolationPanelOpen === false
-              ? [
-                  {
-                    name: isolateHostTitle,
-                    onClick: isolateHostHandler,
-                    disabled: loading || agentStatus === HostStatus.UNENROLLED,
-                  },
-                ]
-              : []),
-            ...(eventType === 'signal' && ecsData != null
-              ? [
-                  {
-                    name: ACTION_INVESTIGATE_IN_TIMELINE,
-                    onClick: handleInvestigateInTimelineAlertClick,
-                  },
-                ]
-              : []),
+            ...hostIsolationAction,
+            ...investigateInTimelineAction,
           ],
         },
         {
@@ -223,21 +207,7 @@ export const TakeActionDropdown = React.memo(
           ),
         },*/
       ],
-      [
-        agentStatus,
-        alertsActionItems,
-        ecsData,
-        eventType,
-        handleInvestigateInTimelineAlertClick,
-        isEndpointAlert,
-        isHostIsolationPanelOpen,
-        isIsolationAllowed,
-        isolateHostHandler,
-        isolateHostTitle,
-        isolationSupported,
-        loading,
-        statusActions,
-      ]
+      [alertsActionItems, hostIsolationAction, investigateInTimelineAction, statusActions]
     );
 
     const takeActionButton = useMemo(() => {
