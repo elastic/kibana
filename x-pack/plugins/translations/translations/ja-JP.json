@@ -696,7 +696,7 @@
     "dashboard.unsavedChangesBadge": "保存されていない変更",
     "dashboard.urlWasRemovedInSixZeroWarningMessage": "URL「dashboard/create」は6.0で廃止されました。ブックマークを更新してください。",
     "data.advancedSettings.autocompleteIgnoreTimerange": "時間範囲を使用",
-    "data.advancedSettings.autocompleteIgnoreTimerangeText": "このプロパティを無効にすると、現在の時間範囲からではなく、データセットからオートコンプリートの候補を取得します。",
+    "data.advancedSettings.autocompleteIgnoreTimerangeText": "このプロパティを無効にすると、現在の時間範囲からではなく、データセットからオートコンプリートの候補を取得します。  {learnMoreLink}",
     "data.advancedSettings.courier.batchSearchesText": "Kibana は新しい非同期検索とインフラストラクチャを使用します。\n           レガシー同期動作にフォールバックする場合は、このオプションを有効にします",
     "data.advancedSettings.courier.batchSearchesTextDeprecation": "この設定はサポートが終了し、Kibana 8.0 では削除されます。",
     "data.advancedSettings.courier.batchSearchesTitle": "同期検索を使用",
