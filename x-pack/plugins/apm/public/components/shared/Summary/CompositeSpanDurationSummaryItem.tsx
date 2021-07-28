@@ -19,23 +19,21 @@ function CompositeSpanDurationSummaryItem({ count, durationSum }: Props) {
   const avgDuration = durationSum / count;
 
   return (
-    <>
-      <EuiToolTip
-        content={i18n.translate('xpack.apm.compositeSpanDurationLabel', {
-          defaultMessage: 'Average duration',
+    <EuiToolTip
+      content={i18n.translate('xpack.apm.compositeSpanDurationLabel', {
+        defaultMessage: 'Average duration',
+      })}
+    >
+      <EuiText>
+        {i18n.translate('xpack.apm.compositeSpanCallsLabel', {
+          defaultMessage: `, {count} calls, on avg. {duration}`,
+          values: {
+            count,
+            duration: asDuration(avgDuration),
+          },
         })}
-      >
-        <EuiText>
-          {i18n.translate('xpack.apm.compositeSpanCallsLabel', {
-            defaultMessage: `{count} calls, on avg. {duration}`,
-            values: {
-              count,
-              duration: asDuration(avgDuration),
-            },
-          })}
-        </EuiText>
-      </EuiToolTip>
-    </>
+      </EuiText>
+    </EuiToolTip>
   );
 }
 

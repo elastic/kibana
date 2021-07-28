@@ -160,12 +160,12 @@ export function SpanFlyout({
           <Summary
             items={[
               <TimestampTooltip time={span.timestamp.us / 1000} />,
-              <DurationSummaryItem
-                duration={span.span.duration.us}
-                totalDuration={totalDuration}
-                parentType="transaction"
-              />,
               <>
+                <DurationSummaryItem
+                  duration={span.span.duration.us}
+                  totalDuration={totalDuration}
+                  parentType="transaction"
+                />
                 {span.span.composite && (
                   <CompositeSpanDurationSummaryItem
                     count={span.span.composite.count}
