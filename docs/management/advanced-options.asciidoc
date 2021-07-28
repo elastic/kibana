@@ -1,51 +1,48 @@
 [[advanced-options]]
 == Advanced Settings
 
-The *Advanced Settings* UI enables you to edit settings that control the
-behavior of Kibana. For example, you can change the format used to display dates,
-specify the default index pattern, and set the precision for displayed decimal
-values.
+*Advanced Settings* control the behavior of {kib}. For example, you can change the format used to display dates,
+specify the default index pattern, and set the precision for displayed decimal values.
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
-. Scroll or search for the setting you want to modify.
-. Enter a new value for the setting.
-. Click *Save changes*.
+. Scroll or search for the setting.
+. Make your change, then click *Save changes*.
 
 [float]
 === Required permissions
 
 The `Advanced Settings` {kib} privilege is required to access *Advanced Settings*.
 
-To add the privilege, open the menu, then click *Stack Management > Roles*.
-
-
-[float]
-[[settings-read-only-access]]
-=== [xpack]#Read only access#
-When you have insufficient privileges to edit advanced settings, the following
-indicator in Kibana will be displayed. The buttons to edit settings won't be
-visible. For more information on granting access to Kibana, see
-<<xpack-security-authorization>>.
+When you have insufficient privileges to edit advanced settings, the edit options are not visible, and the following
+indicator is displayed:
 
 [role="screenshot"]
 image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in Kibana's header]
 
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
+
+For more information on granting access to {kib}, refer to <<xpack-security-authorization>>.
+
 [float]
 [[kibana-settings-reference]]
-=== Kibana settings reference
+=== {kib} settings reference
 
-WARNING: Modifying a setting can affect {kib} performance and cause problems
+WARNING: Changing a setting can affect {kib} performance and cause problems
 that are difficult to diagnose. Setting a property value to a blank field
 reverts to the default behavior, which might not be compatible with other
-configuration settings. Deleting a custom setting removes it from {kib}
-permanently.
-
+configuration settings. Deleting a custom setting permanently removes it from {kib}.
 
 [float]
 [[kibana-general-settings]]
 ==== General
 
 [horizontal]
+[[auto-complete-use-time-tange]]`autocomplete:useTimeRange`::
+When disabled, autocompletes the suggestions from your data set instead of the time range.
+
+[[bfetch-disable-compression]]`bfetch:disableCompression`::
+When disabled, allows you to debug individual requests, but increases the response size.
+
 [[csv-quotevalues]]`csv:quoteValues`::
 Set this property to `true` to quote exported values.
 
@@ -188,6 +185,9 @@ short.
 Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
 to apply the setting.
 
+[[theme-version]]`theme:version`::
+Specifies the {kib} theme. If you change the setting, refresh the page to apply the setting. 
+
 [[timepicker-quickranges]]`timepicker:quickRanges`::
 The list of ranges to show in the Quick section of the time filter. This should
 be an array of objects, with each object containing `from`, `to` (see
@@ -205,10 +205,20 @@ The default selection in the time filter.
 The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
-[[xpack-defaultadminemail]]`xPack:defaultAdminEmail`::
-Email address for {xpack} admin operations, such as cluster alert notifications
-from *{stack-monitor-app}*.
+[float]
+[[presentation-labs]]
+==== Presentation Labs
 
+[horizontal]
+[[labs-canvas-enable-ui]]`labs:canvas:enable_ui`::
+When enabled, provides access to the experimental *Labs* features for *Canvas*.
+
+[[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
+When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard. 
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<defer-loading-panels-below-the-fold,Improve dashboard loading time>>.
+
+[[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
+When enabled, provides access to the experimental *Labs* features for *Dashboard*.
 
 [float]
 [[kibana-accessibility-settings]]
@@ -279,12 +289,29 @@ The columns that appear by default on the *Discover* page. The default is
 [[discover-samplesize]]`discover:sampleSize`::
 The number of rows to show in the *Discover* table.
 
-[[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
-The default sort direction for time-based index patterns.
+[[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
+Specifies the maximum number of fields to show in the document column of the *Discover* table.
+
+[[discover-modify-columns-on-switch]]`discover:modifyColumnsOnSwitch`::
+When enabled, removes the columns that are not in the new index pattern.
+
+[[discover-sample-size]]`discover:sampleSize`::
+Specifies the number of rows to display in the *Discover* table.
+
+[[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
+Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
+When disabled, *Discover* loads fields using the {es} search API's
+{ref}/search-fields.html#search-fields-param[`fields`] parameter.
 
 [[discover-searchonpageload]]`discover:searchOnPageLoad`::
 Controls whether a search is executed when *Discover* first loads. This setting
 does not have an effect when loading a saved search.
+
+[[discover:showMultiFields]]`discover:showMultiFields`::
+When enabled, displays multi-fields in the expanded document view.
+
+[[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
+The default sort direction for time-based index patterns.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
 Hides the "Time" column in *Discover* and in all saved searches on dashboards.
@@ -296,14 +323,9 @@ slows requests when working on big documents.
 [[doctable-legacy]]`doc_table:legacy`::
 Controls the way the document table looks and works. Set this property to `true` to revert to the legacy implementation.
 
-[[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
-Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
-When disabled, *Discover* loads fields using the {es} search API's
-{ref}/search-fields.html#search-fields-param[`fields`] parameter.
-
 [float]
 [[kibana-ml-settings]]
-==== Machine learning
+==== Machine Learning
 
 [horizontal]
 [[ml-anomalydetection-results-enabletimedefaults]]`ml:anomalyDetection:results:enableTimeDefaults`::
@@ -316,7 +338,6 @@ Sets the default time filter for viewing {anomaly-job} results. This setting
 must contain `from` and `to` values (see
 {ref}/common-options.html#date-math[accepted formats]). It is ignored unless
 `ml:anomalyDetection:results:enableTimeDefaults` is enabled.
-
 
 [float]
 [[kibana-notification-settings]]
@@ -343,6 +364,16 @@ default value is 5000.
 The duration, in milliseconds, for warning notification displays. The default
 value is 10000.
 
+[float]
+[[observability-advanced-settings]]
+==== Observability
+
+[horizontal]
+[[apm-enable-service-overview]]`apm:enableServiceOverview`::
+When enabled, displays the *Overview* tab for services in *APM*.
+
+[[observability-enable-inspect-es-queries]]`observability:enableInspectEsQueries`::
+When enabled, allows you to inspect {es} queries in API responses.
 
 [float]
 [[kibana-reporting-settings]]
@@ -351,7 +382,6 @@ value is 10000.
 [horizontal]
 [[xpackreporting-custompdflogo]]`xpackReporting:customPdfLogo`::
 A custom image to use in the footer of the PDF.
-
 
 [float]
 [[kibana-rollups-settings]]
@@ -411,7 +441,7 @@ completion.
 
 [float]
 [[kibana-siem-settings]]
-==== Security solution
+==== Security Solution
 
 [horizontal]
 [[securitysolution-defaultanomalyscore]]`securitySolution:defaultAnomalyScore`::
@@ -421,19 +451,22 @@ The threshold above which {ml} job anomalies are displayed in the {security-app}
 A comma-delimited list of {es} indices from which the {security-app} collects
 events.
 
+[[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
+the security news feed on the Security *Overview* page.
+
 [[securitysolution-ipreputationlinks]]`securitySolution:ipReputationLinks`::
 A JSON array containing links for verifying the reputation of an IP address. The
 links are displayed on {security-guide}/network-page-overview.html[IP detail]
 pages.
-
-[[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
-the security news feed on the Security *Overview* page.
 
 [[securitysolution-newsfeedurl]]`securitySolution:newsFeedUrl`::
 The URL from which the security news feed content is retrieved.
 
 [[securitysolution-refreshintervaldefaults]]`securitySolution:refreshIntervalDefaults`::
 The default refresh interval for the Security time filter, in milliseconds.
+
+[[security-solution-rules-table-refresh]]`securitySolution:rulesTableRefresh`::
+The default period of time in the Security time filter.
 
 [[securitysolution-timedefaults]]`securitySolution:timeDefaults`::
 The default period of time in the Security time filter.
@@ -481,19 +514,11 @@ Shows the Timelion tutorial to users when they first open the Timelion app.
 Used for calculating automatic intervals in visualizations, this is the number
 of buckets to try to represent.
 
-
 [float]
 [[kibana-visualization-settings]]
 ==== Visualization
 
 [horizontal]
-[[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
-**The legacy XY charts are deprecated and will not be supported as of 7.16.**
-The visualize editor uses a new XY charts library with improved performance, color palettes, fill capacity, and more. Enable this option if you prefer to use the legacy charts library.
-
-[[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
-The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use to the legacy charts library.
-
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.
@@ -516,14 +541,22 @@ The maximum geoHash precision displayed in tile maps. 7 is high, 10 is very high
 and 12 is the maximum. For more information, refer to
 {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Cell dimensions at the equator].
 
+[[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
+**The legacy XY charts are deprecated and will not be supported as of 7.16.**
+The visualize editor uses a new XY charts library with improved performance, color palettes, fill capacity, and more. Enable this option if you prefer to use the legacy charts library.
+
+[[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
+The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use to the legacy charts library.
+
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
 
-
 [float]
 [[kibana-telemetry-settings]]
-==== Usage data
+==== Usage Data
 
-Helps improve the Elastic Stack by providing usage statistics for
+[horizontal]
+[[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
+When enabled, helps improve the Elastic Stack by providing usage statistics for
 basic features. This data will not be shared outside of Elastic.
