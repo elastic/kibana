@@ -48,7 +48,6 @@ describe('aggregation utils', () => {
       ]);
     });
 
-    // TODO identify these results derived from the array of percentiles are usable with the ES correlation aggregation
     it('returns expectation and ranges adjusted when percentiles have equal values', async () => {
       const { expectations, ranges } = computeExpectationsAndRanges([
         5000,
