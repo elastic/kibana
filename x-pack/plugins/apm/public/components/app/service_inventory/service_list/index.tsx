@@ -28,12 +28,13 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { truncate, unit } from '../../../../utils/style';
-import { AgentIcon } from '../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 
@@ -74,8 +75,10 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 ];
 
 export function getServiceColumns({
+  query,
   showTransactionTypeColumn,
 }: {
+  query: Record<string, string | undefined>;
   showTransactionTypeColumn: boolean;
 }): Array<ITableColumn<ServiceListItem>> {
   return [
@@ -109,23 +112,11 @@ export function getServiceColumns({
             id="service-name-tooltip"
             anchorClassName="apmServiceList__serviceNameTooltip"
           >
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {agentName && (
-                <EuiFlexItem grow={false}>
-                  <AgentIcon agentName={agentName} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem className="apmServiceList__serviceNameContainer">
-                <AppLink
-                  data-test-subj="apmServiceListAppLink"
-                  serviceName={serviceName}
-                  transactionType={transactionType}
-                  className="eui-textTruncate"
-                >
-                  {formatString(serviceName)}
-                </AppLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ServiceLink
+              agentName={agentName}
+              query={query}
+              serviceName={serviceName}
+            />
           </EuiToolTip>
         </ToolTipWrapper>
       ),
@@ -223,9 +214,11 @@ export function ServiceList({ items, noItemsMessage }: Props) {
       transactionType !== TRANSACTION_PAGE_LOAD
   );
 
+  const { query } = useApmParams('/services');
+
   const serviceColumns = useMemo(
-    () => getServiceColumns({ showTransactionTypeColumn }),
-    [showTransactionTypeColumn]
+    () => getServiceColumns({ query, showTransactionTypeColumn }),
+    [query, showTransactionTypeColumn]
   );
 
   const columns = displayHealthStatus
