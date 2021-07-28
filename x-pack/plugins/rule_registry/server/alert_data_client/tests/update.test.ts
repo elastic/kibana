@@ -56,9 +56,9 @@ describe('update()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                  'kibana.alert.owner': 'apm',
+                  'kibana.alert.status': 'open',
+                  'kibana.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -106,7 +106,7 @@ describe('update()', () => {
         Object {
           "body": Object {
             "doc": Object {
-              "kibana.rac.alert.status": "closed",
+              "kibana.alert.status": "closed",
             },
           },
           "id": "1",
@@ -142,9 +142,9 @@ describe('update()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                  'kibana.alert.owner': 'apm',
+                  'kibana.alert.status': 'open',
+                  'kibana.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -235,9 +235,9 @@ describe('update()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                  'kibana.alert.owner': 'apm',
+                  'kibana.alert.status': 'open',
+                  'kibana.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -295,9 +295,9 @@ describe('update()', () => {
                   _source: {
                     'rule.id': 'apm.error_rate',
                     message: 'hello world 1',
-                    'kibana.rac.alert.owner': 'apm',
-                    'kibana.rac.alert.status': 'open',
-                    'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                    'kibana.alert.owner': 'apm',
+                    'kibana.alert.status': 'open',
+                    'kibana.alert.space_ids': ['test_default_space_id'],
                   },
                 },
               ],

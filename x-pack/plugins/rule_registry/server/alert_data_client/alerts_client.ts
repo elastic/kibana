@@ -29,7 +29,7 @@ import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '../ut
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
   { [K in Props]-?: NonNullable<Obj[K]> };
-type AlertType = NonNullableProps<ParsedTechnicalFields, 'rule.id' | 'kibana.rac.alert.owner'>;
+type AlertType = NonNullableProps<ParsedTechnicalFields, 'rule.id' | 'kibana.alert.owner'>;
 
 const isValidAlert = (source?: ParsedTechnicalFields): source is AlertType => {
   return source?.[RULE_ID] != null && source?.[OWNER] != null;

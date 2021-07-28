@@ -23,27 +23,27 @@ const theme = ({
 } as unknown) as EuiTheme;
 const alert: Alert = {
   'rule.id': ['apm.transaction_duration'],
-  'kibana.rac.alert.evaluation.value': [2057657.39],
+  'kibana.alert.evaluation.value': [2057657.39],
   'service.name': ['frontend-rum'],
   'rule.name': ['Latency threshold | frontend-rum'],
-  'kibana.rac.alert.duration.us': [62879000],
-  'kibana.rac.alert.status': ['open'],
+  'kibana.alert.duration.us': [62879000],
+  'kibana.alert.status': ['open'],
   tags: ['apm', 'service.name:frontend-rum'],
   'transaction.type': ['page-load'],
-  'kibana.rac.alert.producer': ['apm'],
-  'kibana.rac.alert.uuid': ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
+  'kibana.alert.producer': ['apm'],
+  'kibana.alert.uuid': ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
   'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
   'event.action': ['active'],
   '@timestamp': ['2021-06-01T16:16:05.183Z'],
-  'kibana.rac.alert.id': ['apm.transaction_duration_All'],
+  'kibana.alert.id': ['apm.transaction_duration_All'],
   'processor.event': ['transaction'],
-  'kibana.rac.alert.evaluation.threshold': [500000],
-  'kibana.rac.alert.start': ['2021-06-01T16:15:02.304Z'],
+  'kibana.alert.evaluation.threshold': [500000],
+  'kibana.alert.start': ['2021-06-01T16:15:02.304Z'],
   'event.kind': ['state'],
   'rule.category': ['Latency threshold'],
 };
 const chartStartTime = new Date(
-  alert['kibana.rac.alert.start']![0] as string
+  alert['kibana.alert.start']![0] as string
 ).getTime();
 const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({
   link: '/',

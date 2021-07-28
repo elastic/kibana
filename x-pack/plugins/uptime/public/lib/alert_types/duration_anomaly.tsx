@@ -40,7 +40,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
       dateRangeEnd:
-        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end']!,
+        fields['kibana.alert.status'] === 'open' ? 'now' : fields['kibana.alert.end']!,
       dateRangeStart: moment(new Date(fields['anomaly.start']!)).subtract('5', 'm').toISOString(),
     }),
   }),

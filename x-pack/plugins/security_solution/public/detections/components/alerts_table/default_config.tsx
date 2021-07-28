@@ -134,14 +134,14 @@ export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => 
       negate: false,
       disabled: false,
       type: 'phrase',
-      key: 'kibana.rac.alert.status',
+      key: 'kibana.alert.status',
       params: {
         query: status,
       },
     },
     query: {
       term: {
-        'kibana.rac.alert.status': status,
+        'kibana.alert.status': status,
       },
     },
   },
@@ -159,28 +159,28 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.rac.rule.building_block_type',
+            key: 'kibana.rule.building_block_type',
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.rac.rule.building_block_type' },
+          exists: { field: 'kibana.rule.building_block_type' },
         },
       ];
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.id': 'kibana.rac.alert.id',
+  'alert.id': 'kibana.alert.id',
   'event.kind': 'event.kind',
-  'alert.start': 'kibana.rac.alert.start',
-  'alert.uuid': 'kibana.rac.alert.uuid',
+  'alert.start': 'kibana.alert.start',
+  'alert.uuid': 'kibana.alert.uuid',
   'event.action': 'event.action',
-  'alert.status': 'kibana.rac.alert.status',
-  'alert.duration.us': 'kibana.rac.alert.duration.us',
+  'alert.status': 'kibana.alert.status',
+  'alert.duration.us': 'kibana.alert.duration.us',
   'rule.uuid': 'rule.uuid',
   'rule.id': 'rule.id',
   'rule.name': 'rule.name',
   'rule.category': 'rule.category',
-  producer: 'kibana.rac.alert.producer',
+  producer: 'kibana.alert.producer',
   tags: 'tags',
 };
 

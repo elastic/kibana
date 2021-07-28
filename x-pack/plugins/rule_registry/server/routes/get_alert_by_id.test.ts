@@ -18,7 +18,7 @@ const getMockAlert = (): ParsedTechnicalFields => ({
   'kibana.consumers': [],
   'kibana.version': '7.13.0',
   'rule.id': 'apm.error_rate',
-  'kibana.rac.alert.owner': 'apm',
+  'kibana.alert.owner': 'apm',
   'kibana.alert.status': 'open',
   'kibana.alert.rule.risk_score': 20,
   'kibana.alert.rule.severity': 'warning',

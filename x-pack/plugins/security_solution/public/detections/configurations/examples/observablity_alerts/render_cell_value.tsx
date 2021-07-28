@@ -48,11 +48,11 @@ export const RenderCellValue: React.FC<
     })?.reduce((x) => x[0]) ?? '';
 
   switch (columnId) {
-    case 'kibana.rac.alert.status':
+    case 'kibana.alert.status':
       return (
         <Status data-test-subj="alert-status" status={random(0, 1) ? 'recovered' : 'active'} />
       );
-    case 'kibana.rac.alert.duration.us':
+    case 'kibana.alert.duration.us':
       return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
     case 'signal.rule.severity':
       return <Severity data-test-subj="rule-severity" severity={value} />;

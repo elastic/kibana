@@ -59,9 +59,9 @@ describe('get()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                  'kibana.alert.owner': 'apm',
+                  'kibana.alert.status': 'open',
+                  'kibana.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -73,11 +73,11 @@ describe('get()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_version": "WzM2MiwyXQ==",
-        "kibana.rac.alert.owner": "apm",
-        "kibana.rac.alert.space_ids": Array [
+        "kibana.alert.owner": "apm",
+        "kibana.alert.space_ids": Array [
           "test_default_space_id",
         ],
-        "kibana.rac.alert.status": "open",
+        "kibana.alert.status": "open",
         "message": "hello world 1",
         "rule.id": "apm.error_rate",
       }
@@ -140,9 +140,9 @@ describe('get()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                  'kibana.alert.owner': 'apm',
+                  'kibana.alert.status': 'open',
+                  'kibana.alert.space_ids': ['test_default_space_id'],
                 },
               },
             ],
@@ -202,9 +202,9 @@ describe('get()', () => {
                   _source: {
                     'rule.id': 'apm.error_rate',
                     message: 'hello world 1',
-                    'kibana.rac.alert.owner': 'apm',
-                    'kibana.rac.alert.status': 'open',
-                    'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                    'kibana.alert.owner': 'apm',
+                    'kibana.alert.status': 'open',
+                    'kibana.alert.space_ids': ['test_default_space_id'],
                   },
                 },
               ],
@@ -227,11 +227,11 @@ describe('get()', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "_version": "WzM2MiwyXQ==",
-          "kibana.rac.alert.owner": "apm",
-          "kibana.rac.alert.space_ids": Array [
+          "kibana.alert.owner": "apm",
+          "kibana.alert.space_ids": Array [
             "test_default_space_id",
           ],
-          "kibana.rac.alert.status": "open",
+          "kibana.alert.status": "open",
           "message": "hello world 1",
           "rule.id": "apm.error_rate",
         }

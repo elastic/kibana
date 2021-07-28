@@ -178,27 +178,27 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(alertDocuments.length).toBe(2);
 
         expect(
-          alertDocuments.every((doc) => doc['kibana.rac.alert.status'] === 'open')
+          alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')
         ).toBeTruthy();
 
         expect(
-          alertDocuments.every((doc) => doc['kibana.rac.alert.duration.us'] === 0)
+          alertDocuments.every((doc) => doc['kibana.alert.duration.us'] === 0)
         ).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc['event.action'] === 'open')).toBeTruthy();
 
-        expect(documents.map((doc) => omit(doc, 'kibana.rac.alert.uuid'))).toMatchInlineSnapshot(`
+        expect(documents.map((doc) => omit(doc, 'kibana.alert.uuid'))).toMatchInlineSnapshot(`
           Array [
             Object {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
               "event.kind": "signal",
-              "kibana.rac.alert.duration.us": 0,
-              "kibana.rac.alert.id": "opbeans-java",
-              "kibana.rac.alert.owner": "consumer",
-              "kibana.rac.alert.producer": "producer",
-              "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.rac.alert.status": "open",
+              "kibana.alert.duration.us": 0,
+              "kibana.alert.id": "opbeans-java",
+              "kibana.alert.owner": "consumer",
+              "kibana.alert.producer": "producer",
+              "kibana.alert.start": "2021-06-16T09:01:00.000Z",
+              "kibana.alert.status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
@@ -215,12 +215,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
               "event.kind": "signal",
-              "kibana.rac.alert.duration.us": 0,
-              "kibana.rac.alert.id": "opbeans-node",
-              "kibana.rac.alert.owner": "consumer",
-              "kibana.rac.alert.producer": "producer",
-              "kibana.rac.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.rac.alert.status": "open",
+              "kibana.alert.duration.us": 0,
+              "kibana.alert.id": "opbeans-node",
+              "kibana.alert.owner": "consumer",
+              "kibana.alert.producer": "producer",
+              "kibana.alert.start": "2021-06-16T09:01:00.000Z",
+              "kibana.alert.status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
@@ -285,11 +285,11 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(alertDocuments.length).toBe(2);
 
         expect(
-          alertDocuments.every((doc) => doc['kibana.rac.alert.status'] === 'open')
+          alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')
         ).toBeTruthy();
         expect(alertDocuments.every((doc) => doc['event.action'] === 'active')).toBeTruthy();
 
-        expect(alertDocuments.every((doc) => doc['kibana.rac.alert.duration.us'] > 0)).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc['kibana.alert.duration.us'] > 0)).toBeTruthy();
       });
     });
 
@@ -364,10 +364,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         );
 
         expect(opbeansJavaAlertDoc['event.action']).toBe('active');
-        expect(opbeansJavaAlertDoc['kibana.rac.alert.status']).toBe('open');
+        expect(opbeansJavaAlertDoc['kibana.alert.status']).toBe('open');
 
         expect(opbeansNodeAlertDoc['event.action']).toBe('close');
-        expect(opbeansNodeAlertDoc['kibana.rac.alert.status']).toBe('closed');
+        expect(opbeansNodeAlertDoc['kibana.alert.status']).toBe('closed');
       });
     });
   });

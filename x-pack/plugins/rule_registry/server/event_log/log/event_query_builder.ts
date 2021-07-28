@@ -83,7 +83,7 @@ export class EventQueryBuilder<TEvent> implements IEventQueryBuilder<TEvent> {
 
     if (this.loggerName) {
       result.push({
-        term: { 'kibana.rac.event_log.logger_name': this.loggerName },
+        term: { 'kibana.event_log.logger_name': this.loggerName },
       });
     }
 

@@ -22,7 +22,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.STATUS,
-    id: 'kibana.rac.alert.status',
+    id: 'kibana.alert.status',
     initialWidth: 74,
   },
   {
@@ -34,7 +34,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERT_DURATION,
-    id: 'kibana.rac.alert.duration.us',
+    id: 'kibana.alert.duration.us',
     initialWidth: 116,
   },
   {
