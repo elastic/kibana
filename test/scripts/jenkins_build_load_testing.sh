@@ -80,7 +80,7 @@ nohup ./metricbeat > metricbeat.log 2>&1 &
 popd
 
 echo " -> Running gatling load testing"
-GATLING_SIMULATIONS="${simulations}"
+export GATLING_SIMULATIONS="$simulations"
 node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
   --config test/load/config.ts;
