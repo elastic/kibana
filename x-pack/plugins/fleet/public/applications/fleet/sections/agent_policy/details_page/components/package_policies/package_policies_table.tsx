@@ -16,6 +16,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
@@ -89,24 +91,20 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        render: (value: string) => (
-          <span className="eui-textTruncate" title={value}>
-            {value}
-          </span>
-        ),
-      },
-      {
-        field: 'description',
-        name: i18n.translate(
-          'xpack.fleet.policyDetails.packagePoliciesTable.descriptionColumnTitle',
-          {
-            defaultMessage: 'Description',
-          }
-        ),
-        render: (value: string) => (
-          <span className="eui-textTruncate" title={value}>
-            {value}
-          </span>
+        render: (value: string, { description }) => (
+          <>
+            <span className="eui-textTruncate" title={value}>
+              {value}
+            </span>
+            {description ? (
+              <span>
+                &nbsp;
+                <EuiToolTip content={description}>
+                  <EuiIcon type="help" />
+                </EuiToolTip>
+              </span>
+            ) : null}
+          </>
         ),
       },
       {
