@@ -116,18 +116,14 @@ export class TaskRunner<
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes,
+      attributes: { apiKey },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
       alertId,
       { namespace }
     );
 
-    if (!attributes.hasOwnProperty('apiKey')) {
-      throw new Error('apiKey does not exist');
-    }
-
-    return attributes.apiKey;
+    return apiKey;
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
