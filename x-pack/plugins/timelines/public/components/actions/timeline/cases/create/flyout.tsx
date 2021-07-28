@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
-import * as i18n from '../../translations';
-import { useKibana } from '../../../common/lib/kibana';
-import { Case } from '../../../../../cases/common';
-import { APP_ID } from '../../../../common/constants';
+import * as i18n from '../translations';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { Case } from '../../../../../../../cases/common';
+import type { TimelinesStartServices } from '../../../../../types';
 
 export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
+  useInsertTimeline?: Function;
+  appId: string;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -50,8 +52,18 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   afterCaseCreated,
   onCloseFlyout,
   onSuccess,
+  appId,
 }) => {
-  const { cases } = useKibana().services;
+  const { cases } = useKibana<TimelinesStartServices>().services;
+  const createCaseProps = useMemo(() => {
+    return {
+      afterCaseCreated,
+      onCancel: onCloseFlyout,
+      onSuccess,
+      withSteps: false,
+      owner: [appId],
+    };
+  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId]);
   return (
     <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
       <EuiFlyoutHeader hasBorder>
@@ -60,15 +72,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        <FormWrapper>
-          {cases.getCreateCase({
-            afterCaseCreated,
-            onCancel: onCloseFlyout,
-            onSuccess,
-            withSteps: false,
-            owner: [APP_ID],
-          })}
-        </FormWrapper>
+        <FormWrapper>{cases.getCreateCase(createCaseProps)}</FormWrapper>
       </StyledEuiFlyoutBody>
     </StyledFlyout>
   );

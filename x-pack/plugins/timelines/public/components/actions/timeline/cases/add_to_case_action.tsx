@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import React, { memo, useState, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -16,28 +17,52 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { Case, CaseStatuses, StatusAll } from '../../../../../cases/common';
-import { APP_ID } from '../../../../common/constants';
-import { Ecs } from '../../../../common/ecs';
-import { SecurityPageName } from '../../../app/types';
-import {
-  getCaseDetailsUrl,
-  getCreateCaseUrl,
-  useFormatUrl,
-} from '../../../common/components/link_to';
-import { useStateToaster } from '../../../common/components/toasters';
-import { useControl } from '../../../common/hooks/use_control';
-import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
-import { CreateCaseFlyout } from '../create/flyout';
+import { Case, CaseStatuses, StatusAll } from '../../../../../../cases/common';
+import { Ecs } from '../../../../../common/ecs';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { TimelinesStartServices } from '../../../../types';
+import { ActionIconItem } from '../../action_icon_item';
+import { CreateCaseFlyout } from './create/flyout';
 import { createUpdateSuccessToaster } from './helpers';
 import * as i18n from './translations';
 
-interface AddToCaseActionProps {
+export interface AddToCaseActionProps {
   ariaLabel?: string;
   ecsRowData: Ecs;
+  useInsertTimeline?: Function;
+  casePermissions: {
+    crud: boolean;
+    read: boolean;
+  } | null;
+  appId: string;
+}
+interface UseControlsReturn {
+  isControlOpen: boolean;
+  openControl: () => void;
+  closeControl: () => void;
 }
 
+const appendSearch = (search?: string) =>
+  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
+
+const getCreateCaseUrl = (search?: string | null) => `/create${appendSearch(search ?? undefined)}`;
+
+const getCaseDetailsUrl = ({
+  id,
+  search,
+  subCaseId,
+}: {
+  id: string;
+  search?: string | null;
+  subCaseId?: string;
+}) => {
+  if (subCaseId) {
+    return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(subCaseId)}${appendSearch(
+      search ?? undefined
+    )}`;
+  }
+  return `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
+};
 interface PostCommentArg {
   caseId: string;
   data: {
@@ -54,23 +79,31 @@ interface PostCommentArg {
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   ecsRowData,
+  useInsertTimeline,
+  casePermissions,
+  appId,
 }) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
   const rule = ecsRowData.signal?.rule;
-
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
     cases,
-  } = useKibana().services;
-  const [, dispatchToaster] = useStateToaster();
+    notifications: { toasts },
+  } = useKibana<TimelinesStartServices>().services;
+
+  const useControl = (): UseControlsReturn => {
+    const [isControlOpen, setIsControlOpen] = useState<boolean>(false);
+    const openControl = useCallback(() => setIsControlOpen(true), []);
+    const closeControl = useCallback(() => setIsControlOpen(false), []);
+
+    return { isControlOpen, openControl, closeControl };
+  };
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const userPermissions = useGetUserCasesPermissions();
-
   const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
-  const userCanCrud = userPermissions?.crud ?? false;
+  const userCanCrud = casePermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
   const tooltipContext = userCanCrud
     ? isEventSupported
@@ -80,13 +113,19 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const onViewCaseClick = useCallback(
     (id) => {
-      navigateToApp(APP_ID, {
-        deepLinkId: SecurityPageName.case,
+      navigateToApp(appId, {
+        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
         path: getCaseDetailsUrl({ id }),
       });
     },
-    [navigateToApp]
+    [navigateToApp, appId]
   );
+  const currentSearch = useLocation().search;
+  const urlSearch = useMemo(() => currentSearch, [currentSearch]);
+  const createCaseUrl = useMemo(() => getUrlForApp('cases') + getCreateCaseUrl(urlSearch), [
+    getUrlForApp,
+    urlSearch,
+  ]);
 
   const {
     isControlOpen: isCreateCaseFlyoutOpen,
@@ -112,35 +151,31 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
-            owner: APP_ID,
+            owner: appId,
           },
           updateCase,
         });
       }
     },
-    [closeCaseFlyoutOpen, eventId, eventIndex, rule]
+    [closeCaseFlyoutOpen, eventId, eventIndex, rule, appId]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
       closeCaseFlyoutOpen();
-      return dispatchToaster({
-        type: 'addToaster',
-        toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
-      });
+      createUpdateSuccessToaster(toasts, theCase, onViewCaseClick);
     },
-    [closeCaseFlyoutOpen, dispatchToaster, onViewCaseClick]
+    [closeCaseFlyoutOpen, onViewCaseClick, toasts]
   );
 
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
-        deepLinkId: SecurityPageName.case,
+      return navigateToApp(appId, {
+        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
         path: getCreateCaseUrl(urlSearch),
       });
     },
-    [navigateToApp, urlSearch]
+    [navigateToApp, urlSearch, appId]
   );
   const [isAllCaseModalOpen, openAllCaseModal] = useState(false);
 
@@ -208,6 +243,40 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     [ariaLabel, isDisabled, openPopover, tooltipContext]
   );
 
+  const getAllCasesSelectorModalProps = useMemo(() => {
+    return {
+      alertData: {
+        alertId: eventId,
+        index: eventIndex ?? '',
+        rule: {
+          id: rule?.id != null ? rule.id[0] : null,
+          name: rule?.name != null ? rule.name[0] : null,
+        },
+        owner: appId,
+      },
+      createCaseNavigation: {
+        href: createCaseUrl,
+        onClick: goToCreateCase,
+      },
+      hiddenStatuses: [CaseStatuses.closed, StatusAll],
+      onRowClick: onCaseClicked,
+      updateCase: onCaseSuccess,
+      userCanCrud: casePermissions?.crud ?? false,
+      owner: [appId],
+    };
+  }, [
+    casePermissions?.crud,
+    onCaseSuccess,
+    onCaseClicked,
+    createCaseUrl,
+    goToCreateCase,
+    eventId,
+    eventIndex,
+    rule?.id,
+    rule?.name,
+    appId,
+  ]);
+
   return (
     <>
       {userCanCrud && (
@@ -230,31 +299,16 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           afterCaseCreated={attachAlertToCase}
           onCloseFlyout={closeCaseFlyoutOpen}
           onSuccess={onCaseSuccess}
+          useInsertTimeline={useInsertTimeline}
+          appId={appId}
         />
       )}
-      {isAllCaseModalOpen &&
-        cases.getAllCasesSelectorModal({
-          alertData: {
-            alertId: eventId,
-            index: eventIndex ?? '',
-            rule: {
-              id: rule?.id != null ? rule.id[0] : null,
-              name: rule?.name != null ? rule.name[0] : null,
-            },
-            owner: APP_ID,
-          },
-          createCaseNavigation: {
-            href: formatUrl(getCreateCaseUrl()),
-            onClick: goToCreateCase,
-          },
-          hiddenStatuses: [CaseStatuses.closed, StatusAll],
-          onRowClick: onCaseClicked,
-          updateCase: onCaseSuccess,
-          userCanCrud: userPermissions?.crud ?? false,
-          owner: [APP_ID],
-        })}
+      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 };
 
 export const AddToCaseAction = memo(AddToCaseActionComponent);
+
+// eslint-disable-next-line import/no-default-export
+export default AddToCaseAction;
