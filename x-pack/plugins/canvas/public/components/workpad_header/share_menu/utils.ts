@@ -15,7 +15,7 @@ export interface CanvasWorkpadSharingData {
   pageCount: number;
 }
 
-// TODO: import this type of the same name from the Reporting plugin
+// TODO: get the correct type from Reporting plugin. See https://github.com/elastic/kibana/issues/107085
 type JobParamsPDF = BaseParams & { relativeUrls: string[] };
 
 export function getPdfJobParams(
