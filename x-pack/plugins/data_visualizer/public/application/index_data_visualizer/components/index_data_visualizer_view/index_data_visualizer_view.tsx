@@ -174,12 +174,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         from: globalState.time.from,
         to: globalState.time.to,
       });
+      setLastRefresh(Date.now());
     }
   }, [globalState, timefilter]);
 
   useEffect(() => {
     if (globalState?.refreshInterval !== undefined) {
       timefilter.setRefreshInterval(globalState.refreshInterval);
+      setLastRefresh(Date.now());
     }
   }, [globalState, timefilter]);
 
