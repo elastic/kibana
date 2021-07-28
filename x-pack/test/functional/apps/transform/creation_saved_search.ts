@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function () {
+    this.tags(['pete']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -64,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'batch',
             progress: '100',
           },
@@ -101,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'latest',
             mode: 'batch',
             progress: '100',
           },
@@ -279,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.expected.row.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

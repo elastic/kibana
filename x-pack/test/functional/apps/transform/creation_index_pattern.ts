@@ -149,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'batch',
             progress: '100',
           },
@@ -326,6 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'batch',
             progress: '100',
           },
@@ -365,6 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'latest',
             mode: 'batch',
             progress: '100',
           },
@@ -578,6 +581,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.expected.row.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
