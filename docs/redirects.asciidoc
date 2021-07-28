@@ -7,6 +7,16 @@
 The following pages have moved or been deleted.
 
 --
+[role="exclude",id="configuring-tls-browser-kib"]
+== Encrypt traffic between the browser and {kib}
+
+See {ref}/security-basic-setup-https.html[Set up basic security for the Elastic Stack].
+
+[role="exclude",id="configuring-tls-kib-es"]
+== Encrypt traffic between {kib} and {es}
+
+See {ref}/security-basic-setup-https.html[Set up basic security for the Elastic Stack].
+
 [role="exclude",id="monitoring-xpack-kibana"]
 == Configuring monitoring in {kib}
 
