@@ -16,6 +16,7 @@ import {
 } from '../../../../../alerting/server/mocks';
 import { LifecycleAlertServices } from '../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
+import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/server/utils/create_lifecycle_rule_executor_mock';
 import { InfraSources } from '../../sources';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
@@ -450,11 +451,7 @@ const mockLibs: any = {
   }),
   configuration: createMockStaticConfiguration({}),
   metricsRules: {
-    createLifecycleRuleExecutor: (executor: any) => async (options) =>
-      await executor({
-        params: options.params,
-        services: options.services,
-      }),
+    createLifecycleRuleExecutor: createLifecycleRuleExecutorMock,
   },
 };
 

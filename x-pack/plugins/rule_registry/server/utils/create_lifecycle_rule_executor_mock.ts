@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export const createLifecycleRuleExecutorMock = async (executor: any) => {
+export const createLifecycleRuleExecutorMock = (executor: any) => async (options) =>
   await executor({
-    services: {
-      alertWithLifecycle: () => {}, // jest.fn
-    },
+    params: options.params,
+    services: options.services,
   });
-};
