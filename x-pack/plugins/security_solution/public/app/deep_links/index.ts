@@ -215,7 +215,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
           defaultMessage: 'External Alerts',
         }),
-        path: `${HOSTS_PATH}/alerts`,
+        path: `${HOSTS_PATH}/externalAlerts`,
       },
     ],
     premium: [
