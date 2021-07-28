@@ -27,7 +27,7 @@ import { satisfies } from 'semver';
 
 import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
-import { Form, getUseField, Field } from '../../shared_imports';
+import { Form, getUseField, Field, useFormData } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import {
@@ -36,6 +36,7 @@ import {
 } from './use_scheduled_query_group_query_form';
 import { ManageIntegrationLink } from '../../components/manage_integration_link';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import { ECSMappingEditorField } from './ecs_mapping_editor_field';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -75,6 +76,11 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   );
 
   const { submit, setFieldValue, reset } = form;
+
+  const [{ query }] = useFormData({
+    form,
+    watch: ['query'],
+  });
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
@@ -182,6 +188,15 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <CommonUseField
+                  path="ecs_mapping"
+                  component={ECSMappingEditorField}
+                  query={query}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </Form>
           {!isFieldSupported ? (
             <EuiCallOut
