@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
-import { mockAppIndexPattern, mockUseValuesList, mockUxSeries, render } from '../../rtl_helpers';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
+import { mockUxSeries, mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
+import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
   const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
 
   const mockSeries = { ...mockUxSeries, filters };
 
-  it('renders', async function () {
+  it('render', async () => {
     const initSeries = { filters };
     mockAppIndexPattern();
 
@@ -32,12 +32,11 @@ describe('FilterExpanded', function () {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Browser Family')).toBeInTheDocument();
+      screen.getByText('Browser Family');
     });
   });
 
-  it('calls goBack on click', async () => {
-    const goBack = jest.fn();
+  it('should call go back on click', async function () {
     const initSeries = { filters };
 
     render(
@@ -51,11 +50,8 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    fireEvent.click(screen.getByText('Browser Family'));
-
     await waitFor(() => {
-      expect(goBack).toHaveBeenCalledTimes(1);
-      expect(goBack).toHaveBeenCalledWith();
+      fireEvent.click(screen.getByText('Browser Family'));
     });
   });
 
@@ -89,7 +85,7 @@ describe('FilterExpanded', function () {
     });
   });
 
-  it('should filter display values', async function () {
+  it('filters display values', async () => {
     const initSeries = { filters };
 
     mockUseValuesList([
@@ -108,13 +104,15 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    fireEvent.click(screen.getByText('Browser Family'));
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Browser Family'));
 
-    expect(screen.queryByText('Firefox')).toBeTruthy();
+      expect(screen.queryByText('Firefox')).toBeTruthy();
 
-    fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
+      fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
 
-    expect(screen.queryByText('Firefox')).toBeFalsy();
-    expect(screen.getByText('Chrome')).toBeTruthy();
+      expect(screen.queryByText('Firefox')).toBeFalsy();
+      expect(screen.getByText('Chrome')).toBeTruthy();
+    });
   });
 });
