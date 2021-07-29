@@ -1,6 +1,7 @@
 
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-field-types"
 PKG_REQUIRE_NAME = "@kbn/field-types"
@@ -26,7 +27,7 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md"
 ]
 
-SRC_DEPS = [
+RUNTIME_DEPS = [
   "@npm//jest-styled-components",
   "@npm//node-forge",
 ]
@@ -39,9 +40,14 @@ TYPES_DEPS = [
   "@npm//@types/testing-library__jest-dom",
   "@npm//resize-observer-polyfill",
   "@npm//@emotion/react",
+  "@npm//jest-styled-components",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+   name = "target",
+   srcs = SRCS,
+   build_pkg_name = package_name(),
+ )
 
 ts_config(
   name = "tsconfig",
@@ -52,14 +58,15 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
-  incremental = True,
-  out_dir = "target",
+  emit_declaration_only = True,
+  incremental = False,
+  out_dir = "target_types",
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
@@ -68,7 +75,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc"],
+  deps = RUNTIME_DEPS + [":target", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

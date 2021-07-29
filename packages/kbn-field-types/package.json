@@ -4,5 +4,5 @@
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "main": "./target/index.js",
-  "types": "./target/index.d.ts"
+  "types": "./target_types/index.d.ts"
 }
