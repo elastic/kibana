@@ -21,7 +21,7 @@ import {
   ActionVariables,
 } from '../../../../../../triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../alerting/common';
-import { useKibana } from '../../../../common/lib/kibana';
+import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
 interface Props {
@@ -137,7 +137,7 @@ export const RuleActionsField: React.FC<Props> = ({
 
   useEffect(() => {
     (async function () {
-      const actionTypes = await loadActionTypes({ http });
+      const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
       const supportedTypes = getSupportedActions(actionTypes, hasErrorOnCreationCaseAction);
       setSupportedActionTypes(supportedTypes);
     })();

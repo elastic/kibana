@@ -86,6 +86,7 @@ const FormattedFieldValueComponent: React.FC<{
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        isDraggable={isDraggable}
         tooltipContent={null}
         value={`${value}`}
       >
@@ -214,6 +215,7 @@ const FormattedFieldValueComponent: React.FC<{
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        isDraggable={isDraggable}
         value={`${value}`}
         tooltipContent={
           fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME

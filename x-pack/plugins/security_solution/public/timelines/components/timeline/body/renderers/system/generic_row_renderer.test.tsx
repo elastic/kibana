@@ -118,6 +118,7 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields,
         data: system,
+        isDraggable: true,
         timelineId: 'test',
       });
 
@@ -147,6 +148,7 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: system,
+        isDraggable: true,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -180,6 +182,7 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields,
         data: systemFile,
+        isDraggable: true,
         timelineId: 'test',
       });
 
@@ -208,6 +211,7 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: systemFile,
+        isDraggable: true,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -239,6 +243,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileCreationMalwarePreventionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -266,6 +271,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileCreationMalwareDetectionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -295,6 +301,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFilesEncryptedRansomwarePreventionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -324,6 +331,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFilesEncryptedRansomwareDetectionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -353,6 +361,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileModificationMalwarePreventionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -382,6 +391,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileModificationMalwareDetectionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -409,6 +419,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileRenameMalwarePreventionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -436,6 +447,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileRenameMalwareDetectionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -465,6 +477,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointProcessExecutionMalwarePreventionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -494,6 +507,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointProcessExecutionMalwareDetectionAlert,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -521,6 +535,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessStartRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointProcessExecEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -546,6 +561,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessStartRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointProcessForkEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -571,6 +587,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessStartRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointProcessStartEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -599,6 +616,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -624,6 +642,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessEndRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointProcessEndEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -652,6 +671,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessTerminationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameTerminationEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -680,6 +700,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -710,6 +731,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -740,6 +762,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -765,6 +788,7 @@ describe('GenericRowRenderer', () => {
             endpointFileCreationRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileCreationEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -793,6 +817,7 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -818,6 +843,7 @@ describe('GenericRowRenderer', () => {
             endpointFileDeletionRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileDeletionEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -843,6 +869,7 @@ describe('GenericRowRenderer', () => {
             endpointFileModificationRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileModificationEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -868,6 +895,7 @@ describe('GenericRowRenderer', () => {
             endpointFileOverwriteRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileOverwriteEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -893,6 +921,7 @@ describe('GenericRowRenderer', () => {
             endpointFileRenameRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointFileRenameEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -921,6 +950,7 @@ describe('GenericRowRenderer', () => {
             endgameFileDeleteEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileDeleteEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -949,6 +979,7 @@ describe('GenericRowRenderer', () => {
             fileCreatedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: fimFileCreatedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -975,6 +1006,7 @@ describe('GenericRowRenderer', () => {
             fileDeletedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: fimFileDeletedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1003,6 +1035,7 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1033,6 +1066,7 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1063,6 +1097,7 @@ describe('GenericRowRenderer', () => {
             fileCreatedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: fimFileCreatedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1090,6 +1125,7 @@ describe('GenericRowRenderer', () => {
             endpointConnectionAcceptedRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointNetworkConnectionAcceptedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1118,6 +1154,7 @@ describe('GenericRowRenderer', () => {
               endpointRegistryModificationRowRenderer.renderRow({
                 browserFields: mockBrowserFields,
                 data: mockEndpointRegistryModificationEvent,
+                isDraggable: true,
                 timelineId: 'test',
               })}
           </TestProviders>
@@ -1145,6 +1182,7 @@ describe('GenericRowRenderer', () => {
               endpointLibraryLoadRowRenderer.renderRow({
                 browserFields: mockBrowserFields,
                 data: mockEndpointLibraryLoadEvent,
+                isDraggable: true,
                 timelineId: 'test',
               })}
           </TestProviders>
@@ -1171,6 +1209,7 @@ describe('GenericRowRenderer', () => {
             endpointHttpRequestEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointNetworkHttpRequestEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1199,6 +1238,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv4ConnectionAcceptEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1227,6 +1267,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv6ConnectionAcceptEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv6ConnectionAcceptEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1252,6 +1293,7 @@ describe('GenericRowRenderer', () => {
             endpointDisconnectReceivedRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointDisconnectReceivedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1280,6 +1322,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv4DisconnectReceivedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv4DisconnectReceivedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1308,6 +1351,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv6DisconnectReceivedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv6DisconnectReceivedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1336,6 +1380,7 @@ describe('GenericRowRenderer', () => {
             socketOpenedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: socketOpenedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1364,6 +1409,7 @@ describe('GenericRowRenderer', () => {
             socketClosedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: socketClosedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1392,6 +1438,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv4ConnectionAcceptEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1413,6 +1460,7 @@ describe('GenericRowRenderer', () => {
             securityLogOnRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointSecurityLogOnSuccessEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1434,6 +1482,7 @@ describe('GenericRowRenderer', () => {
             securityLogOnRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointSecurityLogOnFailureEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1458,6 +1507,7 @@ describe('GenericRowRenderer', () => {
             userLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: userLogonEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1482,6 +1532,7 @@ describe('GenericRowRenderer', () => {
             adminLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: adminLogonEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1506,6 +1557,7 @@ describe('GenericRowRenderer', () => {
             explicitUserLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: explicitUserLogonEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1527,6 +1579,7 @@ describe('GenericRowRenderer', () => {
             securityLogOffRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointSecurityLogOffEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1551,6 +1604,7 @@ describe('GenericRowRenderer', () => {
             userLogoffEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: userLogoffEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1575,6 +1629,7 @@ describe('GenericRowRenderer', () => {
             userLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: userLogonEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1594,6 +1649,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointNetworkLookupRequestedEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1613,6 +1669,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: mockEndpointNetworkLookupResultEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1636,6 +1693,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: requestEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1659,6 +1717,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: dnsEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1688,6 +1747,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: requestEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -1715,6 +1775,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: requestEvent,
+              isDraggable: true,
               timelineId: 'test',
             })}
         </TestProviders>

@@ -24,6 +24,7 @@ exports[`threatMatchRowRenderer #renderRow renders correctly against snapshot 1`
           }
         }
         eventId="1"
+        isDraggable={true}
       />
     </styled.div>
   </RowRendererContainer>

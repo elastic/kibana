@@ -28,12 +28,12 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { truncate, unit } from '../../../../utils/style';
-import { AgentIcon } from '../../../shared/agent_icon';
+import { unit } from '../../../../utils/style';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 
@@ -47,19 +47,10 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = euiStyled(ServiceOrTransactionsOverviewLink)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM}
-  ${truncate('100%')};
-`;
-
 const ToolTipWrapper = euiStyled.span`
   width: 100%;
   .apmServiceList__serviceNameTooltip {
     width: 100%;
-    .apmServiceList__serviceNameContainer {
-      // removes 24px referent to the icon placed on the left side of the text.
-      width: calc(100% - 24px);
-    }
   }
 `;
 
@@ -71,9 +62,11 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 ];
 
 export function getServiceColumns({
+  query,
   showTransactionTypeColumn,
   comparisonData,
 }: {
+  query: Record<string, string | undefined>;
   showTransactionTypeColumn: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
@@ -100,31 +93,19 @@ export function getServiceColumns({
       }),
       width: '40%',
       sortable: true,
-      render: (_, { serviceName, agentName, transactionType }) => (
-        <ToolTipWrapper>
+      render: (_, { serviceName, agentName }) => (
+        <ToolTipWrapper data-test-subj="apmServiceListAppLink">
           <EuiToolTip
             delay="long"
             content={formatString(serviceName)}
             id="service-name-tooltip"
             anchorClassName="apmServiceList__serviceNameTooltip"
           >
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {agentName && (
-                <EuiFlexItem grow={false}>
-                  <AgentIcon agentName={agentName} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem className="apmServiceList__serviceNameContainer">
-                <AppLink
-                  data-test-subj="apmServiceListAppLink"
-                  serviceName={serviceName}
-                  transactionType={transactionType}
-                  className="eui-textTruncate"
-                >
-                  {formatString(serviceName)}
-                </AppLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ServiceLink
+              agentName={agentName}
+              query={query}
+              serviceName={serviceName}
+            />
           </EuiToolTip>
         </ToolTipWrapper>
       ),
@@ -242,9 +223,12 @@ export function ServiceList({
       transactionType !== TRANSACTION_PAGE_LOAD
   );
 
+  const { query } = useApmParams('/services');
+
   const serviceColumns = useMemo(
-    () => getServiceColumns({ showTransactionTypeColumn, comparisonData }),
-    [showTransactionTypeColumn, comparisonData]
+    () =>
+      getServiceColumns({ query, showTransactionTypeColumn, comparisonData }),
+    [query, showTransactionTypeColumn, comparisonData]
   );
 
   const columns = displayHealthStatus
