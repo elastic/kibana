@@ -23,7 +23,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { connectorIDReferenceName, pushConnectorIDReferenceName } from '..';
+import { connectorIdReferenceName, pushConnectorIdReferenceName } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { getNoneCaseConnector } from '../../common';
@@ -67,7 +67,7 @@ const createReferences = ({
     ? [
         {
           id: connector.id,
-          name: connectorIDReferenceName,
+          name: connectorIdReferenceName,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]
@@ -76,7 +76,7 @@ const createReferences = ({
     ? [
         {
           id: externalService.connector_id,
-          name: pushConnectorIDReferenceName,
+          name: pushConnectorIdReferenceName,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]
@@ -266,17 +266,17 @@ describe('CasesService', () => {
         ).toMatchInlineSnapshot(`"200"`);
 
         expect(res.saved_objects[1].attributes.connector).toMatchInlineSnapshot(`
-        Object {
-          "fields": Object {
-            "issueType": "bug",
-            "parent": "2",
-            "priority": "high",
-          },
-          "id": "2",
-          "name": ".jira",
-          "type": ".jira",
-        }
-      `);
+                  Object {
+                    "fields": Object {
+                      "issueType": "bug",
+                      "parent": "2",
+                      "priority": "high",
+                    },
+                    "id": "2",
+                    "name": ".jira",
+                    "type": ".jira",
+                  }
+              `);
         expect(
           res.saved_objects[0].attributes.external_service?.connector_id
         ).toMatchInlineSnapshot(`"100"`);
@@ -395,7 +395,7 @@ describe('CasesService', () => {
               "references": Array [
                 Object {
                   "id": "1",
-                  "name": "connectorID",
+                  "name": "connectorId",
                   "type": "action",
                 },
               ],
@@ -439,7 +439,7 @@ describe('CasesService', () => {
               "references": Array [
                 Object {
                   "id": "100",
-                  "name": "pushConnectorID",
+                  "name": "pushConnectorId",
                   "type": "action",
                 },
               ],
@@ -807,12 +807,12 @@ describe('CasesService', () => {
             "references": Array [
               Object {
                 "id": "1",
-                "name": "connectorID",
+                "name": "connectorId",
                 "type": "action",
               },
               Object {
                 "id": "100",
-                "name": "pushConnectorID",
+                "name": "pushConnectorId",
                 "type": "action",
               },
             ],
@@ -859,12 +859,12 @@ describe('CasesService', () => {
             "references": Array [
               Object {
                 "id": "1",
-                "name": "connectorID",
+                "name": "connectorId",
                 "type": "action",
               },
               Object {
                 "id": "100",
-                "name": "pushConnectorID",
+                "name": "pushConnectorId",
                 "type": "action",
               },
             ],
@@ -940,7 +940,7 @@ describe('CasesService', () => {
             "references": Array [
               Object {
                 "id": "100",
-                "name": "pushConnectorID",
+                "name": "pushConnectorId",
                 "type": "action",
               },
             ],
@@ -1172,7 +1172,7 @@ describe('CasesService', () => {
             references: [
               {
                 id: '1',
-                name: connectorIDReferenceName,
+                name: connectorIdReferenceName,
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],

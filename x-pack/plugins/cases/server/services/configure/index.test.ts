@@ -20,12 +20,12 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { connectorIDReferenceName, ESCaseConnector } from '..';
+import { connectorIdReferenceName } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { CaseConfigureService, ESCasesConfigureAttributes } from '.';
 import { getNoneCaseConnector } from '../../common';
-import { createESConnector, createJiraConnector } from '../test_utils';
+import { createESConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,
@@ -56,14 +56,14 @@ const createConfigPostParams = (connector: CaseConnector): CasesConfigureAttribu
 });
 
 const createUpdateConfigSO = (
-  connector?: ESCaseConnector
+  connector?: ESCaseConnectorWithId
 ): SavedObjectsUpdateResponse<ESCasesConfigureAttributes> => {
   const references: SavedObjectReference[] =
     connector && connector.id !== 'none'
       ? [
           {
             id: connector.id,
-            name: connectorIDReferenceName,
+            name: connectorIdReferenceName,
             type: ACTION_SAVED_OBJECT_TYPE,
           },
         ]
@@ -82,12 +82,14 @@ const createUpdateConfigSO = (
   };
 };
 
-const createConfigSO = (connector?: ESCaseConnector): SavedObject<ESCasesConfigureAttributes> => {
+const createConfigSO = (
+  connector?: ESCaseConnectorWithId
+): SavedObject<ESCasesConfigureAttributes> => {
   const references: SavedObjectReference[] = connector
     ? [
         {
           id: connector.id,
-          name: connectorIDReferenceName,
+          name: connectorIdReferenceName,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]
@@ -113,11 +115,11 @@ const createConfigSO = (connector?: ESCaseConnector): SavedObject<ESCasesConfigu
 };
 
 const createConfigSOPromise = (
-  connector?: ESCaseConnector
+  connector?: ESCaseConnectorWithId
 ): Promise<SavedObject<ESCasesConfigureAttributes>> => Promise.resolve(createConfigSO(connector));
 
 const createConfigFindSO = (
-  connector?: ESCaseConnector
+  connector?: ESCaseConnectorWithId
 ): SavedObjectsFindResult<ESCasesConfigureAttributes> => ({
   ...createConfigSO(connector),
   score: 0,
@@ -233,7 +235,7 @@ describe('CaseConfigureService', () => {
               "references": Array [
                 Object {
                   "id": "1",
-                  "name": "connectorID",
+                  "name": "connectorId",
                   "type": "action",
                 },
               ],
@@ -451,7 +453,7 @@ describe('CaseConfigureService', () => {
             "references": Array [
               Object {
                 "id": "1",
-                "name": "connectorID",
+                "name": "connectorId",
                 "type": "action",
               },
             ],
@@ -498,7 +500,7 @@ describe('CaseConfigureService', () => {
             "references": Array [
               Object {
                 "id": "1",
-                "name": "connectorID",
+                "name": "connectorId",
                 "type": "action",
               },
             ],
@@ -647,7 +649,7 @@ describe('CaseConfigureService', () => {
             references: [
               {
                 id: '1',
-                name: connectorIDReferenceName,
+                name: connectorIdReferenceName,
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],

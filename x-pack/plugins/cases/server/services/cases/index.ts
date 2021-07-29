@@ -60,11 +60,12 @@ import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
 import {
-  transformArrayResponseToExternalModel,
   transformSavedObjectToExternalModel,
   transformAttributesToESModel,
   transformUpdateResponseToExternalModel,
   transformUpdateResponsesToExternalModels,
+  transformBulkResponseToExternalModel,
+  transformFindResponseToExternalModel,
 } from './transform';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
@@ -230,7 +231,7 @@ const transformNewSubCase = ({
  * The type represents how the external services portion of the object will be layed out when stored in ES. The external_service will have its
  * connector_id field removed and placed within the references field.
  */
-export type ExternalServicesWithoutConnectorID = Omit<
+export type ExternalServicesWithoutConnectorId = Omit<
   rt.TypeOf<typeof CaseExternalServiceBasicRt>,
   'connector_id'
 >;
@@ -243,7 +244,7 @@ export type ExternalServicesWithoutConnectorID = Omit<
  */
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> & {
   connector: ESCaseConnector;
-  external_service: ExternalServicesWithoutConnectorID | null;
+  external_service: ExternalServicesWithoutConnectorId | null;
 };
 
 export class CasesService {
@@ -797,7 +798,7 @@ export class CasesService {
       const cases = await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
-      return transformArrayResponseToExternalModel(cases);
+      return transformBulkResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;
@@ -815,7 +816,7 @@ export class CasesService {
         ...options,
         type: CASE_SAVED_OBJECT,
       });
-      return transformArrayResponseToExternalModel(cases);
+      return transformFindResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
       throw error;

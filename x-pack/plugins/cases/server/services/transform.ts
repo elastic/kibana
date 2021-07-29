@@ -11,7 +11,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 import { getNoneCaseConnector } from '../common';
 import { ESCaseConnector, ESConnectorFields } from '.';
 
-export function findConnectorIDReference(
+export function findConnectorIdReference(
   name: string,
   references?: SavedObjectReference[]
 ): SavedObjectReference | undefined {
@@ -23,13 +23,13 @@ export function transformESConnector(
   references: SavedObjectReference[] | undefined,
   referenceName: string
 ): CaseConnector | undefined {
-  const connectorIDRef = findConnectorIDReference(referenceName, references);
-  return formatStoredConnectorFields(connector, connectorIDRef?.id);
+  const connectorIdRef = findConnectorIdReference(referenceName, references);
+  return formatStoredConnectorFields(connector, connectorIdRef?.id);
 }
 
 function formatStoredConnectorFields(
   connector?: ESCaseConnector,
-  connectorID?: string
+  connectorId?: string
 ): CaseConnector | undefined {
   if (!connector) {
     return;
@@ -38,7 +38,7 @@ function formatStoredConnectorFields(
   // if the connector is valid, but we can't find it's ID in the reference, then it must be malformed
   // or it was a none connector which doesn't have a reference (a none connector doesn't point to any actual connector
   // saved object)
-  if (!connectorID) {
+  if (!connectorId) {
     return getNoneCaseConnector();
   }
 
@@ -57,7 +57,7 @@ function formatStoredConnectorFields(
   } as ConnectorTypeFields;
 
   return {
-    id: connectorID,
+    id: connectorId,
     name: connector.name,
     ...connectorTypeField,
   };

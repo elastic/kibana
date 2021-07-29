@@ -16,11 +16,11 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { ESCaseAttributes, ExternalServicesWithoutConnectorID } from '.';
-import { connectorIDReferenceName, pushConnectorIDReferenceName } from '..';
+import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from '.';
+import { connectorIdReferenceName, pushConnectorIdReferenceName } from '..';
 import { CaseAttributes, CaseFullExternalService, noneConnectorId } from '../../../common';
 import {
-  findConnectorIDReference,
+  findConnectorIdReference,
   transformFieldsToESModel,
   transformESConnectorOrUseDefault,
   transformESConnector,
@@ -47,7 +47,7 @@ export function transformUpdateResponseToExternalModel(
     // if the saved object had an error the attributes field will not exist
     connector,
     updatedCase.references,
-    connectorIDReferenceName
+    connectorIdReferenceName
   );
 
   let externalService: CaseFullExternalService | null | undefined;
@@ -90,11 +90,11 @@ export function transformAttributesToESModel(
   const { connector, external_service, ...restAttributes } = caseAttributes;
 
   let transformedAttributes: Partial<ESCaseAttributes> = { ...restAttributes };
-  let pushConnectorID: string | undefined | null;
+  let pushConnectorId: string | undefined | null;
 
   if (external_service) {
-    let restExternalService: ExternalServicesWithoutConnectorID | null | undefined;
-    ({ connector_id: pushConnectorID, ...restExternalService } = external_service);
+    let restExternalService: ExternalServicesWithoutConnectorId | null | undefined;
+    ({ connector_id: pushConnectorId, ...restExternalService } = external_service);
     transformedAttributes = {
       ...transformedAttributes,
       external_service: restExternalService,
@@ -116,20 +116,20 @@ export function transformAttributesToESModel(
 
   return {
     attributes: transformedAttributes,
-    references: buildReferences(connector?.id, pushConnectorID),
+    references: buildReferences(connector?.id, pushConnectorId),
   };
 }
 
 function buildReferences(
-  connectorID?: string,
-  pushConnectorID?: string | null
+  connectorId?: string,
+  pushConnectorId?: string | null
 ): SavedObjectReference[] | undefined {
   const connectorRef =
-    connectorID && connectorID !== noneConnectorId
-      ? [{ id: connectorID, name: connectorIDReferenceName, type: ACTION_SAVED_OBJECT_TYPE }]
+    connectorId && connectorId !== noneConnectorId
+      ? [{ id: connectorId, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE }]
       : [];
-  const pushConnectorRef = pushConnectorID
-    ? [{ id: pushConnectorID, name: pushConnectorIDReferenceName, type: ACTION_SAVED_OBJECT_TYPE }]
+  const pushConnectorRef = pushConnectorId
+    ? [{ id: pushConnectorId, name: pushConnectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE }]
     : [];
 
   const references = [...connectorRef, ...pushConnectorRef];
@@ -137,15 +137,32 @@ function buildReferences(
   return references.length > 0 ? references : undefined;
 }
 
-export function transformArrayResponseToExternalModel(
-  response: SavedObjectsFindResponse<ESCaseAttributes>
-): SavedObjectsFindResponse<CaseAttributes>;
-export function transformArrayResponseToExternalModel(
+/**
+ * Until Kibana uses typescript 4.3 or higher we'll have to keep these functions separate instead of using an overload
+ * definition like this:
+ *
+ * export function transformArrayResponseToExternalModel(
+ *  response: SavedObjectsBulkResponse<ESCaseAttributes> | SavedObjectsFindResponse<ESCaseAttributes>
+ * ): SavedObjectsBulkResponse<CaseAttributes> | SavedObjectsFindResponse<CaseAttributes> {
+ *
+ * See this issue for more details: https://stackoverflow.com/questions/49510832/typescript-how-to-map-over-union-array-type
+ */
+
+export function transformBulkResponseToExternalModel(
   response: SavedObjectsBulkResponse<ESCaseAttributes>
-): SavedObjectsBulkResponse<CaseAttributes>;
-export function transformArrayResponseToExternalModel(
-  response: SavedObjectsBulkResponse<ESCaseAttributes> | SavedObjectsFindResponse<ESCaseAttributes>
-): SavedObjectsBulkResponse<CaseAttributes> | SavedObjectsFindResponse<CaseAttributes> {
+): SavedObjectsBulkResponse<CaseAttributes> {
+  return {
+    ...response,
+    saved_objects: response.saved_objects.map((so) => ({
+      ...so,
+      ...transformSavedObjectToExternalModel(so),
+    })),
+  };
+}
+
+export function transformFindResponseToExternalModel(
+  response: SavedObjectsFindResponse<ESCaseAttributes>
+): SavedObjectsFindResponse<CaseAttributes> {
   return {
     ...response,
     saved_objects: response.saved_objects.map((so) => ({
@@ -162,7 +179,7 @@ export function transformSavedObjectToExternalModel(
     // if the saved object had an error the attributes field will not exist
     caseSavedObject.attributes?.connector,
     caseSavedObject.references,
-    connectorIDReferenceName
+    connectorIdReferenceName
   );
 
   const externalService = transformESExternalService(
@@ -184,10 +201,10 @@ export function transformSavedObjectToExternalModel(
 function transformESExternalService(
   // this type needs to match that of CaseFullExternalService except that it does not include the connector_id, see: x-pack/plugins/cases/common/api/cases/case.ts
   // that's why it can be null here
-  externalService: ExternalServicesWithoutConnectorID | null | undefined,
+  externalService: ExternalServicesWithoutConnectorId | null | undefined,
   references: SavedObjectReference[] | undefined
 ): CaseFullExternalService | null {
-  const connectorIDRef = findConnectorIDReference(pushConnectorIDReferenceName, references);
+  const connectorIdRef = findConnectorIdReference(pushConnectorIdReferenceName, references);
 
   if (!externalService) {
     return null;
@@ -195,6 +212,6 @@ function transformESExternalService(
 
   return {
     ...externalService,
-    connector_id: connectorIDRef?.id ?? null,
+    connector_id: connectorIdRef?.id ?? null,
   };
 }

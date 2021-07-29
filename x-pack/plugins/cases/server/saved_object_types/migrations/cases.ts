@@ -14,9 +14,9 @@ import {
   SavedObjectReference,
 } from '../../../../../../src/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { ESConnectorFields, pushConnectorIDReferenceName } from '../../services';
+import { ESConnectorFields, pushConnectorIdReferenceName } from '../../services';
 import { ConnectorTypes, CaseType } from '../../../common';
-import { transformConnector } from './utils';
+import { transformConnectorIdToReference } from './utils';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -46,7 +46,7 @@ interface ConnectorIdFields {
   external_service?: { connector_id?: string | null } | null;
 }
 
-const transformPushConnector = (
+const transformPushConnectorIdToReference = (
   external_service?: { connector_id?: string | null } | null
 ): { transformedPushConnector: object; references: SavedObjectReference[] } => {
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
@@ -57,7 +57,7 @@ const transformPushConnector = (
           {
             id: pushConnectorId,
             type: ACTION_SAVED_OBJECT_TYPE,
-            name: pushConnectorIDReferenceName,
+            name: pushConnectorIdReferenceName,
           },
         ]
       : [];
@@ -79,11 +79,14 @@ export const caseConnectorIdMigration = (
   // removing the id field since it will be stored in the references instead
   const { connector, external_service, ...restAttributes } = doc.attributes;
 
-  const { transformedConnector, references: connectorReferences } = transformConnector(connector);
-
-  const { transformedPushConnector, references: pushConnectorReferences } = transformPushConnector(
-    external_service
+  const { transformedConnector, references: connectorReferences } = transformConnectorIdToReference(
+    connector
   );
+
+  const {
+    transformedPushConnector,
+    references: pushConnectorReferences,
+  } = transformPushConnectorIdToReference(external_service);
 
   const { references = [] } = doc;
 

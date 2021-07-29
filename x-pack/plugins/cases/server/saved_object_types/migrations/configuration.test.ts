@@ -13,7 +13,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 import { getNoneCaseConnector } from '../../common';
-import { connectorIDReferenceName } from '../../services';
+import { connectorIdReferenceName } from '../../services';
 import { ESCaseConnectorWithId } from '../../services/test_utils';
 import { ESCasesConfigureAttributes } from '../../services/configure';
 import { configureConnectorIdMigration } from './configuration';
@@ -83,7 +83,7 @@ describe('7.15.0 connector ID migration', () => {
     ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
 
     expect(migratedConnector.references).toEqual([
-      { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: connectorIDReferenceName },
+      { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: connectorIdReferenceName },
     ]);
     expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
   });

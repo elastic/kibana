@@ -644,7 +644,7 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient 
   return configure;
 };
 
-type ExternalServicesWithoutConnectorID = Omit<
+type ExternalServicesWithoutConnectorId = Omit<
   rt.TypeOf<typeof CaseExternalServiceBasicRt>,
   'connector_id'
 >;
@@ -655,7 +655,7 @@ type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> &
     type: ConnectorTypes;
     fields: ESConnectorFields | null;
   };
-  external_service: ExternalServicesWithoutConnectorID | null;
+  external_service: ExternalServicesWithoutConnectorId | null;
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {

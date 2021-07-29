@@ -52,9 +52,6 @@ export const caseSavedObjectType: SavedObjectsType = {
       },
       connector: {
         properties: {
-          id: {
-            type: 'keyword',
-          },
           name: {
             type: 'text',
           },
@@ -90,9 +87,6 @@ export const caseSavedObjectType: SavedObjectsType = {
                 type: 'keyword',
               },
             },
-          },
-          connector_id: {
-            type: 'keyword',
           },
           connector_name: {
             type: 'keyword',

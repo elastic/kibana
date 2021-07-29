@@ -22,7 +22,7 @@ import {
   noneConnectorId,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { connectorIDReferenceName, ESCaseConnector } from '..';
+import { connectorIdReferenceName, ESCaseConnector } from '..';
 import {
   transformFieldsToESModel,
   transformESConnector,
@@ -168,7 +168,7 @@ function transformUpdateResponseToExternalModel(
   const transformedConnector = transformESConnector(
     connector,
     updatedConfiguration.references,
-    connectorIDReferenceName
+    connectorIdReferenceName
   );
 
   return {
@@ -188,7 +188,7 @@ function transformToExternalModel(
     // if the saved object had an error the attributes field will not exist
     configuration.attributes?.connector,
     configuration.references,
-    connectorIDReferenceName
+    connectorIdReferenceName
   );
 
   return {
@@ -252,7 +252,7 @@ function buildReferences(id?: string): SavedObjectReference[] | undefined {
     ? [
         {
           id,
-          name: connectorIDReferenceName,
+          name: connectorIdReferenceName,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]

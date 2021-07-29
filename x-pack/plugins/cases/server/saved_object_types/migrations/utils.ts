@@ -8,9 +8,9 @@
 import { SavedObjectReference } from '../../../../../../src/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { getNoneCaseConnector } from '../../common';
-import { connectorIDReferenceName } from '../../services';
+import { connectorIdReferenceName } from '../../services';
 
-export const transformConnector = (connector?: {
+export const transformConnectorIdToReference = (connector?: {
   id?: string;
 }): { transformedConnector: object; references: SavedObjectReference[] } => {
   const { id: connectorId, ...restConnector } = connector ?? {};
@@ -22,7 +22,7 @@ export const transformConnector = (connector?: {
             id: connectorId,
             type: ACTION_SAVED_OBJECT_TYPE,
 
-            name: connectorIDReferenceName,
+            name: connectorIdReferenceName,
           },
         ]
       : [];

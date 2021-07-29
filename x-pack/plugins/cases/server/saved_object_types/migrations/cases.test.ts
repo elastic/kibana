@@ -16,14 +16,14 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 import { getNoneCaseConnector } from '../../common';
-import { ESCaseConnector } from '../../services';
+import { ESCaseConnectorWithId } from '../../services/test_utils';
 import { caseConnectorIdMigration } from './cases';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_case = ({
   connector,
   externalService,
-}: { connector?: ESCaseConnector; externalService?: CaseFullExternalService } = {}) => ({
+}: { connector?: ESCaseConnectorWithId; externalService?: CaseFullExternalService } = {}) => ({
   type: CASE_SAVED_OBJECT,
   id: '1',
   attributes: {
@@ -98,7 +98,7 @@ describe('7.15.0 connector ID migration', () => {
         fields: null,
         name: ConnectorTypes.jira,
         type: ConnectorTypes.jira,
-      } as ESCaseConnector,
+      } as ESCaseConnectorWithId,
     });
 
     const migratedConnector = caseConnectorIdMigration(
@@ -187,7 +187,7 @@ describe('7.15.0 connector ID migration', () => {
       Array [
         Object {
           "id": "123",
-          "name": "connectorID",
+          "name": "connectorId",
           "type": "action",
         },
       ]
@@ -235,7 +235,7 @@ describe('7.15.0 connector ID migration', () => {
       Array [
         Object {
           "id": "100",
-          "name": "pushConnectorID",
+          "name": "pushConnectorId",
           "type": "action",
         },
       ]
