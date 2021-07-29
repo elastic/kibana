@@ -12,7 +12,7 @@ import { MetricExpressionParams } from '../../../../plugins/infra/server/lib/ale
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
-  const client = getService('legacyEs');
+  const client = getService('es');
   const index = 'test-index';
   const getSearchParams = (aggType: string) =>
     ({
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
             '@timestamp',
             timeframe
           );
-          const result = await client.search({
+          const { body: result } = await client.search({
             index,
             body: searchBody,
           });
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
-        const result = await client.search({
+        const { body: result } = await client.search({
           index,
           body: searchBody,
         });
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
             timeframe,
             'agent.id'
           );
-          const result = await client.search({
+          const { body: result } = await client.search({
             index,
             body: searchBody,
           });
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
-        const result = await client.search({
+        const { body: result } = await client.search({
           index,
           body: searchBody,
         });
