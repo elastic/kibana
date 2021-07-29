@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock, notificationServiceMock, uiSettingsServiceMock } from 'src/core/public/mocks';
+import {
+  httpServiceMock,
+  notificationServiceMock,
+  uiSettingsServiceMock,
+} from 'src/core/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent, Props } from './reporting_panel_content';
-
-const coreSetup = coreMock.createSetup();
-const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0-test');
 
 describe('ReportingPanelContent', () => {
   const props: Partial<Props> = {
@@ -23,9 +24,20 @@ describe('ReportingPanelContent', () => {
     objectType: 'noice_object',
     title: 'ultimate_title',
   };
+  const toasts = notificationServiceMock.createSetupContract().toasts;
+  const http = httpServiceMock.createSetupContract();
+  const uiSettings = uiSettingsServiceMock.createSetupContract();
+  let apiClient: ReportingAPIClient;
 
   beforeEach(() => {
     props.layoutId = 'super_cool_layout_id_X';
+    uiSettings.get.mockImplementation((key: string) => {
+      switch (key) {
+        case 'dateFormat:tz':
+          return 'Mars';
+      }
+    });
+    apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0-test');
   });
 
   const mountComponent = (newProps: Partial<Props>) =>
@@ -38,8 +50,8 @@ describe('ReportingPanelContent', () => {
         layoutId={props.layoutId}
         getJobParams={() => jobParams}
         apiClient={apiClient}
-        toasts={notificationServiceMock.createSetupContract().toasts}
-        uiSettings={uiSettingsServiceMock.createSetupContract()}
+        toasts={toasts}
+        uiSettings={uiSettings}
         {...props}
         {...newProps}
       />
@@ -74,16 +86,14 @@ describe('ReportingPanelContent', () => {
       const wrapper = mountComponent({ requiresSavedState: false });
       wrapper.update();
       expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_X%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
+        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_X%2CbrowserTimezone%3AMars%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
       );
 
-      // force the prop to update
-      props.layoutId = 'super_cool_layout_id_Y';
-      jobParams.appState = 'very_cool_app_state_Y';
-      wrapper.setProps({ layoutId: 'super_cool_layout_id_Y' });
+      jobParams.appState = 'very_NOT_cool_app_state_Y';
+      wrapper.setProps({ layoutId: 'super_cool_layout_id_Y' }); // update the component internal state
       wrapper.update();
       expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_Y%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
+        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_NOT_cool_app_state_Y%2CbrowserTimezone%3AMars%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
       );
     });
   });

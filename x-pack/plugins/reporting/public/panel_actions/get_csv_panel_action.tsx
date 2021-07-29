@@ -117,6 +117,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     // TODO: create a helper utility in Reporting. This is repeated in a few places.
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
     const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
+    // FIXME: apiClient.decorate
     const immediateJobParams: JobParamsDownloadCSV = {
       searchSource,
       columns,

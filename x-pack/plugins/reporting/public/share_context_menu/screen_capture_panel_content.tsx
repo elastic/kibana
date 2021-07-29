@@ -37,8 +37,8 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     super(props);
 
     this.state = {
-      usePrintLayout: false,
-      useCanvasLayout: false,
+      usePrintLayout: props.layoutOption === 'print',
+      useCanvasLayout: props.layoutOption === 'canvas',
     };
   }
 
@@ -46,7 +46,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return (
       <ReportingPanelContent
         {...this.props}
-        layoutId={this.getLayout().id}
+        layoutId={this.props.layoutOption}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}
       />

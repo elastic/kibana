@@ -32,7 +32,7 @@ export interface Props {
   reportType: string;
 
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
-  layoutId: string | undefined;
+  layoutId?: string;
   objectId?: string;
   getJobParams: () => BaseParams;
   options?: ReactElement<any> | null;
@@ -44,7 +44,7 @@ export interface Props {
 interface State {
   isStale: boolean;
   absoluteUrl: string;
-  layoutId: string;
+  layoutId?: string;
   objectType: string;
 }
 
@@ -60,7 +60,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.state = {
       isStale: false,
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
-      layoutId: '',
+      layoutId: this.props.layoutId,
       objectType,
     };
   }
