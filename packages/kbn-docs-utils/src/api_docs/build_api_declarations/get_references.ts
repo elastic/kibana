@@ -38,7 +38,7 @@ export function getReferences({ node, plugins, currentPluginId, log }: Opts): Ap
     if (refPlugin && refPlugin.manifest.id !== currentPluginId) {
       refs.push({
         plugin: refPlugin.manifest.id,
-        link: getSourceForNode(ref),
+        path: getSourceForNode(ref),
       });
     }
   });

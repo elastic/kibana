@@ -130,7 +130,7 @@ export function runBuildApiDocsCli() {
         ]);
 
         const getLink = (d: ApiDeclaration) =>
-          `https://github.com/elastic/kibana/tree/master/${d.source.path}#L${d.source.lineNumber}`;
+          `https://github.com/elastic/kibana/tree/master/${d.path}#:~:text=${d.label}`;
 
         if (collectReferences && pluginFilter === plugin.manifest.id) {
           if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
