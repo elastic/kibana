@@ -125,7 +125,10 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
     }
 
     try {
-      const res = convertKueryToEsQuery(inputValue, indexPattern);
+      const res = convertKueryToEsQuery(
+        inputValue,
+        indexPattern as IndexPattern
+      );
       if (!res) {
         return;
       }
