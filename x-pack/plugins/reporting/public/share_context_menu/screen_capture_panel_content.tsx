@@ -9,7 +9,7 @@ import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { getDefaultLayoutSelectors } from '../../common';
-import { BaseParams, LayoutParams } from '../../common/types';
+import { LayoutParams } from '../../common/types';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
 export interface Props extends ReportingPanelProps {
@@ -130,7 +130,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return { id: 'preserve_layout', dimensions, selectors };
   };
 
-  private getJobParams = (): Required<BaseParams> => {
+  private getJobParams = () => {
     return {
       ...this.props.getJobParams(),
       layout: this.getLayout(),

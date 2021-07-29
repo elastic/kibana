@@ -6,10 +6,10 @@
  */
 
 import { UNVERSIONED_VERSION } from '../../common/constants';
-import type { DecoratedBaseParams } from '../../common/types';
+import type { BaseParams } from '../../common/types';
 import type { LevelLogger } from './';
 
-export function checkParamsVersion(jobParams: DecoratedBaseParams, logger: LevelLogger) {
+export function checkParamsVersion(jobParams: BaseParams, logger: LevelLogger) {
   if (jobParams.version) {
     logger.debug(`Using reporting job params v${jobParams.version}`);
     return jobParams.version;

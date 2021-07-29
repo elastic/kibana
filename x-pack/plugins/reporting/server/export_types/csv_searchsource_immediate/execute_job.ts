@@ -35,7 +35,6 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   return async function runTask(_jobId, immediateJobParams, context, req) {
     const job = {
       objectType: 'immediate-search',
-      version: reporting.getKibanaVersion(),
       ...immediateJobParams,
     };
 

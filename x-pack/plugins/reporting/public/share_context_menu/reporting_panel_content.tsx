@@ -34,13 +34,13 @@ export interface ReportingPanelProps {
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
   layoutId?: string;
   objectId?: string;
-  getJobParams: () => BaseParams;
+  getJobParams: () => Omit<BaseParams, 'browserTimezone' | 'version'>;
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
 }
 
-type Props = ReportingPanelProps & { intl: InjectedIntl };
+export type Props = ReportingPanelProps & { intl: InjectedIntl };
 
 interface State {
   isStale: boolean;

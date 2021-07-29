@@ -6,7 +6,7 @@
  */
 
 import type { SearchSourceFields } from 'src/plugins/data/common';
-import type { DecoratedBaseParams, BasePayload } from '../../types';
+import type { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
@@ -15,5 +15,5 @@ interface BaseParamsCSV {
   columns?: string[];
 }
 
-export type JobParamsCSV = BaseParamsCSV & DecoratedBaseParams;
+export type JobParamsCSV = BaseParamsCSV & BaseParams;
 export type TaskPayloadCSV = BaseParamsCSV & BasePayload;

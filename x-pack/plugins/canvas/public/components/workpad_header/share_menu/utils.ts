@@ -7,7 +7,6 @@
 
 import { IBasePath } from 'kibana/public';
 import rison from 'rison-node';
-import { BaseParams } from '../../../../../reporting/common/types';
 import { CanvasWorkpad } from '../../../../types';
 
 export interface CanvasWorkpadSharingData {
@@ -15,13 +14,10 @@ export interface CanvasWorkpadSharingData {
   pageCount: number;
 }
 
-// TODO: get the correct type from Reporting plugin. See https://github.com/elastic/kibana/issues/107085
-type JobParamsPDF = BaseParams & { relativeUrls: string[] };
-
 export function getPdfJobParams(
   { workpad: { id, name: title, width, height }, pageCount }: CanvasWorkpadSharingData,
   basePath: IBasePath
-): JobParamsPDF {
+) {
   const urlPrefix = basePath.get().replace(basePath.serverBasePath, ''); // for Spaces prefix, which is included in basePath.get()
   const canvasEntry = `${urlPrefix}/app/canvas#`;
 

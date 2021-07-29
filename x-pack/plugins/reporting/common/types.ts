@@ -64,7 +64,7 @@ export interface ReportSource {
   payload: {
     headers: string; // encrypted headers
     isDeprecated?: boolean; // set to true when the export type is being phased out
-  } & DecoratedBaseParams;
+  } & BaseParams;
   meta: { objectType: string; layout?: string }; // for telemetry
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
@@ -101,16 +101,9 @@ export interface BaseParams {
   layout?: LayoutParams;
   objectType: string;
   title: string;
-}
-
-/*
- * Job Params are defined by the application, and on the client side, are decorated by the Reporting service.
- * These are required for handling additional formatting or state migrations
- */
-export type DecoratedBaseParams = BaseParams & {
   browserTimezone: string; // to format dates in the user's time zone
   version: string; // to handle any state migrations
-};
+}
 
 export type JobId = string;
 

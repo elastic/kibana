@@ -19,7 +19,6 @@ import {
 } from '../../../common/constants';
 import {
   BaseParams,
-  DecoratedBaseParams,
   DownloadReportFn,
   JobId,
   ManagementLinkFn,
@@ -139,7 +138,7 @@ export class ReportingAPIClient implements IReportingAPI {
     return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
   }
 
-  public async createReportingJob(exportType: string, jobParams: DecoratedBaseParams) {
+  public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const risonObject: RisonObject = jobParams as Record<string, any>;
     const jobParamsRison = rison.encode(risonObject);
     const resp: { job: ReportApiJSON } = await this.http.post(
@@ -157,11 +156,13 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(resp.job);
   }
 
-  public async createImmediateReport(params: DecoratedBaseParams) {
+  public async createImmediateReport(params: BaseParams) {
     return this.http.post(`${API_GENERATE_IMMEDIATE}`, { body: JSON.stringify(params) });
   }
 
-  public getDecoratedJobParams<T extends BaseParams>(baseParams: T): DecoratedBaseParams {
+  public getDecoratedJobParams<T extends Omit<BaseParams, 'browserTimezone' | 'version'>>(
+    baseParams: T
+  ): BaseParams {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
     // to the export API.

@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import rison from 'rison-node';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { DecoratedBaseParams } from '../types';
+import { BaseParams } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
@@ -67,7 +67,7 @@ export function registerGenerateFromJobParams(
       let jobParams;
 
       try {
-        jobParams = rison.decode(jobParamsRison) as DecoratedBaseParams | null;
+        jobParams = rison.decode(jobParamsRison) as BaseParams | null;
         if (!jobParams) {
           return res.customError({
             statusCode: 400,

@@ -16,7 +16,7 @@ import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { DecoratedBaseParams, TaskRunResult } from '../common/types';
+import { BaseParams, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
@@ -56,17 +56,17 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export { DecoratedBaseParams };
+export { BaseParams };
 
 // base params decorated with encrypted headers that come into runJob functions
-export interface BasePayload extends DecoratedBaseParams {
+export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
 }
 
 // default fn type for CreateJobFnFactory
-export type CreateJobFn<JobParamsType = DecoratedBaseParams, JobPayloadType = BasePayload> = (
+export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   request: KibanaRequest<any, any, any, any>

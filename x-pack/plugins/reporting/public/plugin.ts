@@ -196,7 +196,7 @@ export class ReportingPublicPlugin
 
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
     );
 
     const reportingStart = this.getContract(core);

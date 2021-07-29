@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { coreMock } from 'src/core/public/mocks';
-import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 
@@ -22,7 +21,7 @@ uiSettings.get.mockImplementation((key: string) => {
 });
 const apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0');
 
-const getJobParamsDefault: () => BaseParams = () => ({
+const getJobParamsDefault = () => ({
   objectType: 'test-object-type',
   title: 'Test Report Title',
   browserTimezone: 'America/New_York',

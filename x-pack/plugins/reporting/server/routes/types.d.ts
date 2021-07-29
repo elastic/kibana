@@ -7,7 +7,7 @@
 
 import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 import type {
-  DecoratedBaseParams,
+  BaseParams,
   BasePayload,
   ReportingUser,
   ReportingRequestHandlerContext,
@@ -16,7 +16,7 @@ import type {
 export type HandlerFunction = (
   user: ReportingUser,
   exportType: string,
-  jobParams: DecoratedBaseParams,
+  jobParams: BaseParams,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest,
   res: KibanaResponseFactory

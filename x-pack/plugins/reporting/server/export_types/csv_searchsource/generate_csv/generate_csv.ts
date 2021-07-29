@@ -68,7 +68,7 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: JobParamsCSV,
+    private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfig,
     private clients: Clients,
     private dependencies: Dependencies,
@@ -219,7 +219,6 @@ export class CsvGenerator {
    */
   private generateHeader(
     columns: string[],
-    table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
@@ -357,7 +356,7 @@ export class CsvGenerator {
 
         if (first) {
           first = false;
-          this.generateHeader(columns, table, builder, settings);
+          this.generateHeader(columns, builder, settings);
         }
 
         if (table.rows.length < 1) {

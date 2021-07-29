@@ -6,7 +6,7 @@
  */
 
 import { LayoutParams } from '../../lib/layouts';
-import { DecoratedBaseParams, BasePayload } from '../../types';
+import { BaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPDF {
   layout: LayoutParams;
@@ -15,7 +15,7 @@ interface BaseParamsPDF {
 }
 
 // Job params: structure of incoming user request data, after being parsed from RISON
-export type JobParamsPDF = BaseParamsPDF & DecoratedBaseParams;
+export type JobParamsPDF = BaseParamsPDF & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
 export type TaskPayloadPDF = BaseParamsPDF & BasePayload;
