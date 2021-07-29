@@ -25,6 +25,7 @@ import {
   getAnnotationFieldValue,
   EsAggregationResult,
 } from '../../../common/types/annotations';
+import { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
@@ -61,7 +62,7 @@ export interface GetParams {
 
 export interface GetResponse {
   success: true;
-  annotations: Record<string, Annotations>;
+  annotations: Record<JobId, Annotations>;
   aggregations: EsAggregationResult;
 }
 
@@ -118,7 +119,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     detectorIndex,
     entities,
     event,
-  }: IndexAnnotationArgs) {
+  }: IndexAnnotationArgs): Promise<GetResponse> {
     const obj: GetResponse = {
       success: true,
       annotations: {},

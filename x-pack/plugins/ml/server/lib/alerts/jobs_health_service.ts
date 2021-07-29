@@ -24,6 +24,10 @@ import {
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
+import { AnnotationService } from '../../models/annotation_service/annotation';
+import { annotationServiceProvider } from '../../models/annotation_service';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { isPopulatedObject } from '../../../common';
 
 interface TestResult {
   name: string;
@@ -35,6 +39,7 @@ type TestsResults = TestResult[];
 export function jobsHealthServiceProvider(
   mlClient: MlClient,
   datafeedsService: DatafeedsService,
+  annotationService: AnnotationService,
   logger: Logger
 ) {
   /**
@@ -155,11 +160,43 @@ export function jobsHealthServiceProvider(
         });
     },
     /**
+     * Returns annotations about delayed data
+     * @param jobIds
+     * @param timeInterval
+     * @param previousStartedAt
+     */
+    async getDelayedDataReport(
+      jobIds: string[],
+      timeInterval: string | null,
+      previousStartedAt: Date | null
+    ): Promise<any> {
+      const currentTimestamp = Date.now();
+
+      let earliestMs = null;
+
+      if (timeInterval) {
+        earliestMs = currentTimestamp - parseInterval(timeInterval)!.asMilliseconds();
+      } else if (previousStartedAt) {
+        earliestMs = previousStartedAt.getTime();
+      }
+
+      const { annotations } = await annotationService.getAnnotations({
+        jobIds,
+        maxAnnotations: 10,
+        earliestMs,
+        latestMs: currentTimestamp,
+        event: 'delayed_data',
+      });
+
+      return annotations;
+    },
+    /**
      * Retrieves report grouped by test.
      */
     async getTestsResults(
       ruleInstanceName: string,
-      { testsConfig, includeJobs, excludeJobs }: AnomalyDetectionJobsHealthRuleParams
+      { testsConfig, includeJobs, excludeJobs }: AnomalyDetectionJobsHealthRuleParams,
+      previousStartedAt: Date | null
     ): Promise<TestsResults> {
       const config = getResultJobsHealthRuleConfig(testsConfig);
 
@@ -178,7 +215,7 @@ export function jobsHealthServiceProvider(
         const response = await this.getNotStartedDatafeeds(jobIds);
         if (response && response.length > 0) {
           results.push({
-            name: HEALTH_CHECK_NAMES.datafeed,
+            name: HEALTH_CHECK_NAMES.datafeed.name,
             context: {
               results: response,
               message: i18n.translate(
@@ -200,7 +237,7 @@ export function jobsHealthServiceProvider(
           }, 0);
 
           results.push({
-            name: HEALTH_CHECK_NAMES.mml,
+            name: HEALTH_CHECK_NAMES.mml.name,
             context: {
               results: response,
               message:
@@ -221,6 +258,33 @@ export function jobsHealthServiceProvider(
                         values: { jobsCount: response.length },
                       }
                     ),
+            },
+          });
+        }
+      }
+
+      if (config.delayedData.enabled) {
+        const response = await this.getDelayedDataReport(
+          jobIds,
+          config.delayedData.timeInterval,
+          previousStartedAt
+        );
+
+        if (isPopulatedObject(response)) {
+          const jobsCount = Object.keys(response).length;
+
+          results.push({
+            name: HEALTH_CHECK_NAMES.datafeed.name,
+            context: {
+              results: Object.keys(response).map((v) => ({ job_id: v })),
+              message: i18n.translate(
+                'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage',
+                {
+                  defaultMessage:
+                    '{jobsCount, plural, one {# job is} other {# jobs are}} suffering from delayed data.',
+                  values: { jobsCount },
+                }
+              ),
             },
           });
         }
@@ -251,6 +315,7 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
+                annotationServiceProvider(scopedClient),
                 logger
               ).getTestsResults(...args)
             );

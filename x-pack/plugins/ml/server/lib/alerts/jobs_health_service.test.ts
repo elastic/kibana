@@ -10,6 +10,7 @@ import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { Logger } from 'kibana/server';
 import { MlClient } from '../ml_client';
 import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
+import { AnnotationService } from '../../models/annotation_service/annotation';
 
 describe('JobsHealthService', () => {
   const mlClient = ({
@@ -91,6 +92,18 @@ describe('JobsHealthService', () => {
     }),
   } as unknown) as jest.Mocked<DatafeedsService>;
 
+  const annotationService = ({
+    getAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
+      return Promise.resolve(
+        jobIds.map((j) => {
+          return {
+            [j]: {},
+          };
+        })
+      );
+    }),
+  } as unknown) as jest.Mocked<AnnotationService>;
+
   const logger = ({
     warn: jest.fn(),
     info: jest.fn(),
@@ -100,6 +113,7 @@ describe('JobsHealthService', () => {
   const jobHealthService: JobsHealthService = jobsHealthServiceProvider(
     mlClient,
     datafeedsService,
+    annotationService,
     logger
   );
 
@@ -111,38 +125,50 @@ describe('JobsHealthService', () => {
 
   test('returns empty results when no jobs provided', async () => {
     // act
-    const executionResult = await jobHealthService.getTestsResults('testRule', {
-      testsConfig: null,
-      includeJobs: {
-        jobIds: ['*'],
-        groupIds: [],
+    const executionResult = await jobHealthService.getTestsResults(
+      'testRule',
+      {
+        testsConfig: null,
+        includeJobs: {
+          jobIds: ['*'],
+          groupIds: [],
+        },
+        excludeJobs: null,
       },
-      excludeJobs: null,
-    });
+      null
+    );
     expect(logger.warn).toHaveBeenCalledWith('Rule "testRule" does not have associated jobs.');
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
     expect(executionResult).toEqual([]);
   });
 
   test('returns empty results and does not perform datafeed check when test is disabled', async () => {
-    const executionResult = await jobHealthService.getTestsResults('testRule', {
-      testsConfig: {
-        datafeed: {
-          enabled: false,
+    const executionResult = await jobHealthService.getTestsResults(
+      'testRule',
+      {
+        testsConfig: {
+          datafeed: {
+            enabled: false,
+          },
+          behindRealtime: null,
+          delayedData: {
+            enabled: false,
+            docsCount: null,
+            timeInterval: null,
+          },
+          errorMessages: null,
+          mml: {
+            enabled: false,
+          },
         },
-        behindRealtime: null,
-        delayedData: null,
-        errorMessages: null,
-        mml: {
-          enabled: false,
+        includeJobs: {
+          jobIds: ['test_job_01'],
+          groupIds: [],
         },
+        excludeJobs: null,
       },
-      includeJobs: {
-        jobIds: ['test_job_01'],
-        groupIds: [],
-      },
-      excludeJobs: null,
-    });
+      null
+    );
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(`Performing health checks for job IDs: test_job_01`);
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
@@ -150,17 +176,21 @@ describe('JobsHealthService', () => {
   });
 
   test('returns results based on provided selection', async () => {
-    const executionResult = await jobHealthService.getTestsResults('testRule_03', {
-      testsConfig: null,
-      includeJobs: {
-        jobIds: [],
-        groupIds: ['test_group'],
+    const executionResult = await jobHealthService.getTestsResults(
+      'testRule_03',
+      {
+        testsConfig: null,
+        includeJobs: {
+          jobIds: [],
+          groupIds: ['test_group'],
+        },
+        excludeJobs: {
+          jobIds: ['test_job_03'],
+          groupIds: [],
+        },
       },
-      excludeJobs: {
-        jobIds: ['test_job_03'],
-        groupIds: [],
-      },
-    });
+      null
+    );
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(
       `Performing health checks for job IDs: test_job_01, test_job_02`

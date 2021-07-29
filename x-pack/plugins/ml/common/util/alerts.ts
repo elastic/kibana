@@ -71,7 +71,7 @@ export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig)
     delayedData: {
       enabled: config?.delayedData?.enabled ?? true,
       docsCount: config?.delayedData?.docsCount ?? 0,
-      timeInterval: config?.delayedData?.timeInterval,
+      timeInterval: config?.delayedData?.timeInterval ?? null,
     },
     behindRealtime: {
       enabled: config?.behindRealtime?.enabled ?? true,
