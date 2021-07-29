@@ -32,6 +32,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                     [ALERT_ID]: event.id,
                   },
                 ]),
+                refresh,
               });
               return response;
             } else {
