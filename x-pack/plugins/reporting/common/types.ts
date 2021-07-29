@@ -50,7 +50,6 @@ export interface TaskRunResult {
   size: number;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
-  needs_sorting?: boolean;
   warnings?: string[];
 }
 
@@ -121,8 +120,10 @@ export type JobStatus =
   | 'processing' // Report job has been claimed and is executing
   | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
+// payload for retrieving the error message of a failed job
 export interface JobContent {
-  content: string;
+  content: TaskRunResult['content'];
+  content_type: false;
 }
 
 /*

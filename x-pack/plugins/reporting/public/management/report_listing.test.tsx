@@ -23,7 +23,7 @@ import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context
 import { Job } from '../lib/job';
 import { InternalApiClientClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import { KibanaContextProvider } from '../shared_imports';
-import { Props, ReportListing } from './report_listing';
+import { ListingProps as Props, ReportListing } from '.';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {

@@ -56,6 +56,7 @@ describe('threatMatchRowRenderer', () => {
       const children = threatMatchRowRenderer.renderRow({
         browserFields: {},
         data: threatMatchData,
+        isDraggable: true,
         timelineId: 'test',
       });
       const wrapper = shallow(<span>{children}</span>);

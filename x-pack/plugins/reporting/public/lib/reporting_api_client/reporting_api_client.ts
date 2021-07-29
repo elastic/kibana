@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import rison, { RisonObject } from 'rison-node';
@@ -27,11 +28,6 @@ import {
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
-export interface JobContent {
-  content: string;
-  content_type: boolean;
-}
-
 export interface DiagnoseResponse {
   help: string[];
   success: boolean;
@@ -50,7 +46,7 @@ interface IReportingAPI {
   deleteReport(jobId: string): Promise<void>;
   list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
   total(): Promise<number>;
-  getError(jobId: string): Promise<JobContent>;
+  getError(jobId: string): Promise<string>;
   getInfo(jobId: string): Promise<Job>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
 
@@ -112,8 +108,16 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async getError(jobId: string) {
-    return await this.http.get(`${API_LIST_URL}/output/${jobId}`, {
-      asSystemRequest: true,
+    const job = await this.getInfo(jobId);
+
+    if (job.warnings?.[0]) {
+      // the error message of a failed report is a singular string in the warnings array
+      return job.warnings[0];
+    }
+
+    return i18n.translate('xpack.reporting.apiClient.unknownError', {
+      defaultMessage: `Report job {job} failed: Unknown error.`,
+      values: { job: jobId },
     });
   }
 
