@@ -154,7 +154,9 @@ describe('InlineEditableTableLogic', () => {
 
     describe('setFormErrors', () => {
       it('sets formErrors', () => {
-        const formErrors = {};
+        const formErrors = {
+          bar: 'I am an error',
+        };
         const logic = mountLogic();
         logic.actions.setFormErrors(formErrors);
         expect(logicValuesWithoutSelectors(logic)).toEqual({

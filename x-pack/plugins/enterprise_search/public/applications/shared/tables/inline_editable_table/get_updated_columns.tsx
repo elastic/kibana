@@ -33,16 +33,13 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
   uneditableItems,
 }: GetUpdatedColumnProps<Item>): Array<Column<Item>> => {
   return [
-    // TODO
     ...columns.map((column) => {
       const newColumn: Column<Item> = {
         name: column.name,
-        // TODO render: (value, item: Item) => {
         render: (item: Item) => {
           if (isActivelyEditing(item)) {
             return <EditingColumn column={column} isLoading={isLoading} />;
           }
-          // TODO return column.render(value, item);
           return column.render(item);
         },
       };

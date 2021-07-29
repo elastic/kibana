@@ -110,6 +110,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
       {
         doneEditing: () => ({}),
         setEditingItemValue: () => ({}),
+        setFormErrors: (_, { formErrors }) => formErrors,
       },
     ],
   }),

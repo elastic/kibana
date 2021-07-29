@@ -92,6 +92,11 @@ export const Library: React.FC = () => {
     },
   ];
 
+  const [items, setItems] = useState([
+    { id: 1, foo: 'foo1', bar: '10' },
+    { id: 2, foo: 'foo2', bar: '10' },
+  ]);
+
   return (
     <>
       <SetPageChrome trail={['Library']} />
@@ -362,21 +367,55 @@ export const Library: React.FC = () => {
           <EuiSpacer />
 
           <InlineEditableTable
-            items={[{ id: 1 }, { id: 2 }]}
+            items={items}
             instanceId="MyInstance"
-            title="Some Title"
+            title="My table"
             columns={[
               {
                 field: 'foo',
                 name: 'Foo',
-                render: (item) => <div>{item.id}</div>,
-                editingRender: (item) => <div>Editing: {item.id}</div>,
+                render: (item) => <div>{item.foo}</div>,
+                editingRender: (item, onChange) => (
+                  <input type="text" value={item.foo} onChange={(e) => onChange(e.target.value)} />
+                ),
+              },
+              {
+                field: 'bar',
+                name: 'Bar (Must be a number)',
+                render: (item) => <div>{item.bar}</div>,
+                editingRender: (item, onChange) => (
+                  <input type="text" value={item.bar} onChange={(e) => onChange(e.target.value)} />
+                ),
               },
             ]}
-            // TODO Don't drill these
-            onAdd={() => {}}
-            onDelete={() => {}}
-            onUpdate={() => {}}
+            onAdd={(item) => {
+              setItems([...items, item]);
+            }}
+            onDelete={(item) => {
+              setItems(items.filter((i) => i.id !== item.id));
+            }}
+            onUpdate={(item, onSuccess) => {
+              setItems(
+                items.map((i) => {
+                  if (item.id === i.id) return item;
+                  return i;
+                })
+              );
+              onSuccess();
+            }}
+            validateItem={(item) => {
+              let isValidNumber = false;
+              const num = parseInt(item.bar, 10);
+              if (!isNaN(num)) isValidNumber = true;
+
+              if (isValidNumber) return {};
+              return {
+                bar: 'Bar must be a valid number',
+              };
+            }}
+            onReorder={(newItems) => {
+              setItems(newItems);
+            }}
           />
           <EuiSpacer />
 
