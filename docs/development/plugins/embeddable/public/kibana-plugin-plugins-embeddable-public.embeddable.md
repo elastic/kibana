@@ -20,6 +20,7 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [deferEmbeddableLoad](./kibana-plugin-plugins-embeddable-public.embeddable.deferembeddableload.md) |  | <code>boolean</code> |  |
 |  [fatalError](./kibana-plugin-plugins-embeddable-public.embeddable.fatalerror.md) |  | <code>Error</code> |  |
 |  [id](./kibana-plugin-plugins-embeddable-public.embeddable.id.md) |  | <code>string</code> |  |
 |  [input](./kibana-plugin-plugins-embeddable-public.embeddable.input.md) |  | <code>TEmbeddableInput</code> |  |

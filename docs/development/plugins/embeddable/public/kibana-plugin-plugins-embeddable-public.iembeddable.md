@@ -14,6 +14,7 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [deferEmbeddableLoad](./kibana-plugin-plugins-embeddable-public.iembeddable.deferembeddableload.md) | <code>boolean</code> | If set to true, defer embeddable load tells the container that this embeddable type isn't completely loaded when the constructor returns. This embeddable will have to manually call setChildLoaded on its parent when all of its initial output is finalized. For instance, after loading a saved object. |
 |  [enhancements](./kibana-plugin-plugins-embeddable-public.iembeddable.enhancements.md) | <code>object</code> | Extra abilities added to Embeddable by <code>*_enhanced</code> plugins. |
 |  [fatalError](./kibana-plugin-plugins-embeddable-public.iembeddable.fatalerror.md) | <code>Error</code> | If this embeddable has encountered a fatal error, that error will be stored here |
 |  [id](./kibana-plugin-plugins-embeddable-public.iembeddable.id.md) | <code>string</code> | A unique identifier for this embeddable. Mainly only used by containers to map their Panel States to a child embeddable instance. |

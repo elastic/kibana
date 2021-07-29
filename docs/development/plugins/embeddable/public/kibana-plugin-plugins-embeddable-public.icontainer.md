@@ -18,6 +18,7 @@ export interface IContainer<Inherited extends {} = {}, I extends ContainerInput<
 |  [getChild(id)](./kibana-plugin-plugins-embeddable-public.icontainer.getchild.md) | Returns the child embeddable with the given id. |
 |  [getInputForChild(id)](./kibana-plugin-plugins-embeddable-public.icontainer.getinputforchild.md) | Returns the input for the given child. Uses a combination of explicit input for the child stored on the parent and derived/inherited input taken from the container itself. |
 |  [removeEmbeddable(embeddableId)](./kibana-plugin-plugins-embeddable-public.icontainer.removeembeddable.md) | Removes the embeddable with the given id. |
+|  [setChildLoaded(embeddable)](./kibana-plugin-plugins-embeddable-public.icontainer.setchildloaded.md) | Embeddables which have deferEmbeddableLoad set to true need to manually call setChildLoaded on their parent container to communicate when they have finished loading. |
 |  [untilEmbeddableLoaded(id)](./kibana-plugin-plugins-embeddable-public.icontainer.untilembeddableloaded.md) | Call if you want to wait until an embeddable with that id has finished loading. |
 |  [updateInputForChild(id, changes)](./kibana-plugin-plugins-embeddable-public.icontainer.updateinputforchild.md) | Changes the input for a given child. Note, this will override any inherited state taken from the container itself. |
 
