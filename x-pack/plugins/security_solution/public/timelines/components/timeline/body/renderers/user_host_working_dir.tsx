@@ -14,13 +14,12 @@ import { HostWorkingDir } from './host_working_dir';
 interface Props {
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
-  hostName: string | null | undefined;
-  hostNameSeparator?: string;
   userDomain: string | null | undefined;
   userDomainField?: string;
   userName: string | null | undefined;
   userNameField?: string;
+  hostName: string | null | undefined;
+  hostNameSeparator?: string;
   workingDirectory: string | null | undefined;
 }
 
@@ -30,7 +29,6 @@ export const UserHostWorkingDir = React.memo<Props>(
     eventId,
     hostName,
     hostNameSeparator = '@',
-    isDraggable,
     userDomain,
     userDomainField = 'user.domain',
     userName,
@@ -44,7 +42,6 @@ export const UserHostWorkingDir = React.memo<Props>(
             contextId={contextId}
             eventId={eventId}
             field={userNameField}
-            isDraggable={isDraggable}
             value={userName}
             iconType="user"
           />
@@ -64,7 +61,6 @@ export const UserHostWorkingDir = React.memo<Props>(
                 contextId={contextId}
                 eventId={eventId}
                 field={userDomainField}
-                isDraggable={isDraggable}
                 value={userDomain}
               />
             </TokensFlexItem>
@@ -80,7 +76,6 @@ export const UserHostWorkingDir = React.memo<Props>(
           contextId={contextId}
           eventId={eventId}
           hostName={hostName}
-          isDraggable={isDraggable}
           workingDirectory={workingDirectory}
         />
       </>

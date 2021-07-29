@@ -20,7 +20,6 @@ interface Props {
   fileName: string | null | undefined;
   filePath: string | null | undefined;
   fileExtOriginalPath: string | null | undefined;
-  isDraggable?: boolean;
 }
 
 export const FileDraggable = React.memo<Props>(
@@ -32,7 +31,6 @@ export const FileDraggable = React.memo<Props>(
     fileExtOriginalPath,
     fileName,
     filePath,
-    isDraggable,
   }) => {
     if (
       isNillEmptyOrNotFinite(fileName) &&
@@ -54,7 +52,6 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="file.name"
-              isDraggable={isDraggable}
               value={fileName}
               iconType="document"
             />
@@ -65,7 +62,6 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_name"
-              isDraggable={isDraggable}
               value={endgameFileName}
               iconType="document"
             />
@@ -84,7 +80,6 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="file.path"
-              isDraggable={isDraggable}
               value={filePath}
               iconType="document"
             />
@@ -95,7 +90,6 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_path"
-              isDraggable={isDraggable}
               value={endgameFilePath}
               iconType="document"
             />
@@ -112,7 +106,6 @@ export const FileDraggable = React.memo<Props>(
                 contextId={contextId}
                 eventId={eventId}
                 field="file.Ext.original.path"
-                isDraggable={isDraggable}
                 value={fileExtOriginalPath}
                 iconType="document"
               />

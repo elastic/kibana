@@ -20,7 +20,6 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 
 export interface DefaultDraggableType {
   id: string;
-  isDraggable?: boolean;
   field: string;
   value?: string | null;
   name?: string | null;
@@ -80,7 +79,6 @@ Content.displayName = 'Content';
  * that's only displayed when the specified value is non-`null`.
  *
  * @param id - a unique draggable id, which typically follows the format `${contextId}-${eventId}-${field}-${value}`
- * @param isDraggable - optional prop to disable drag & drop and  it will defaulted to true
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
  * @param name - defaulting to `field`, this optional human readable name is used by the `DataProvider` that represents the data
@@ -90,17 +88,7 @@ Content.displayName = 'Content';
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
-  ({
-    id,
-    isDraggable = true,
-    field,
-    value,
-    name,
-    children,
-    timelineId,
-    tooltipContent,
-    queryValue,
-  }) => {
+  ({ id, field, value, name, children, timelineId, tooltipContent, queryValue }) => {
     const dataProviderProp: DataProvider = useMemo(
       () => ({
         and: [],
@@ -137,7 +125,6 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     return (
       <DraggableWrapper
         dataProvider={dataProviderProp}
-        isDraggable={isDraggable}
         render={renderCallback}
         timelineId={timelineId}
       />
@@ -168,7 +155,6 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
  * @param iconType -the (optional) type of icon e.g. `snowflake` to display on the badge
- * @param isDraggable
  * @param name - defaulting to `field`, this optional human readable name is used by the `DataProvider` that represents the data
  * @param color - defaults to `hollow`, optionally overwrite the color of the badge icon
  * @param children - defaults to displaying `value`, this allows an arbitrary visualization to be displayed in lieu of the default behavior
@@ -182,7 +168,6 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   field,
   value,
   iconType,
-  isDraggable,
   name,
   color = 'hollow',
   children,
@@ -192,7 +177,6 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   value != null ? (
     <DefaultDraggable
       id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
-      isDraggable={isDraggable}
       field={field}
       name={name}
       value={value}

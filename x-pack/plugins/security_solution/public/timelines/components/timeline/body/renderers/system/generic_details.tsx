@@ -27,7 +27,6 @@ interface Props {
   contextId: string;
   hostName: string | null | undefined;
   id: string;
-  isDraggable?: boolean;
   message: string | null | undefined;
   outcome: string | null | undefined;
   packageName: string | null | undefined;
@@ -49,7 +48,6 @@ export const SystemGenericLine = React.memo<Props>(
     contextId,
     hostName,
     id,
-    isDraggable,
     message,
     outcome,
     packageName,
@@ -70,10 +68,9 @@ export const SystemGenericLine = React.memo<Props>(
         <UserHostWorkingDir
           contextId={contextId}
           eventId={id}
-          hostName={hostName}
-          isDraggable={isDraggable}
           userDomain={userDomain}
           userName={userName}
+          hostName={hostName}
           workingDirectory={workingDirectory}
         />
         <TokensFlexItem grow={false} component="span">
@@ -85,7 +82,6 @@ export const SystemGenericLine = React.memo<Props>(
             endgamePid={undefined}
             endgameProcessName={undefined}
             eventId={id}
-            isDraggable={isDraggable}
             processPid={processPid}
             processName={processName}
             processExecutable={processExecutable}
@@ -101,7 +97,6 @@ export const SystemGenericLine = React.memo<Props>(
             contextId={contextId}
             eventId={id}
             field="event.outcome"
-            isDraggable={isDraggable}
             queryValue={outcome}
             value={outcome}
           />
@@ -109,14 +104,12 @@ export const SystemGenericLine = React.memo<Props>(
         <AuthSsh
           contextId={contextId}
           eventId={id}
-          isDraggable={isDraggable}
           sshSignature={sshSignature}
           sshMethod={sshMethod}
         />
         <Package
           contextId={contextId}
           eventId={id}
-          isDraggable={isDraggable}
           packageName={packageName}
           packageSummary={packageSummary}
           packageVersion={packageVersion}
@@ -142,15 +135,14 @@ SystemGenericLine.displayName = 'SystemGenericLine';
 
 interface GenericDetailsProps {
   browserFields: BrowserFields;
-  contextId: string;
   data: Ecs;
-  isDraggable?: boolean;
+  contextId: string;
   text: string;
   timelineId: string;
 }
 
 export const SystemGenericDetails = React.memo<GenericDetailsProps>(
-  ({ contextId, data, isDraggable, text, timelineId }) => {
+  ({ data, contextId, text, timelineId }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -173,7 +165,6 @@ export const SystemGenericDetails = React.memo<GenericDetailsProps>(
           contextId={contextId}
           hostName={hostName}
           id={id}
-          isDraggable={isDraggable}
           message={message}
           outcome={outcome}
           packageName={packageName}
@@ -190,7 +181,7 @@ export const SystemGenericDetails = React.memo<GenericDetailsProps>(
           workingDirectory={workingDirectory}
         />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+        <NetflowRenderer data={data} timelineId={timelineId} />
       </Details>
     );
   }

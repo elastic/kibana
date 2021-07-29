@@ -23,7 +23,6 @@ const RegistryExampleComponent: React.FC = () => {
       {registryRowRenderer.renderRow({
         browserFields: {},
         data: mockEndpointRegistryModificationEvent,
-        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

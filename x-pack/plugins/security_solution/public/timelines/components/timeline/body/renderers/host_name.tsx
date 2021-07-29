@@ -93,7 +93,6 @@ const HostNameComponent: React.FC<Props> = ({
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        isDraggable={isDraggable}
         tooltipContent={fieldName}
         value={hostName}
       >

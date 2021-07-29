@@ -12,11 +12,7 @@ import type { ToggleDetailPanel } from './actions';
 import { TGridPersistInput, TimelineById, TimelineId } from './types';
 import type { TGridModel, TGridModelSettings } from './model';
 
-import type {
-  ColumnHeaderOptions,
-  DataProvider,
-  SortColumnTimeline,
-} from '../../../common/types/timeline';
+import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types/timeline';
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -424,36 +420,4 @@ export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
     : {
         [expandedTabType]: {},
       };
-};
-
-export const addProviderToTimelineHelper = (
-  id: string,
-  provider: DataProvider,
-  timelineById: TimelineById
-): TimelineById => {
-  const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex((p) => p.id === provider.id);
-
-  if (alreadyExistsAtIndex > -1 && !isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)) {
-    provider.id = `${provider.id}-${
-      timeline.dataProviders.filter((p) => p.id === provider.id).length
-    }`;
-  }
-
-  const dataProviders =
-    alreadyExistsAtIndex > -1 && isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)
-      ? [
-          ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
-          provider,
-          ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
-        ]
-      : [...timeline.dataProviders, provider];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders,
-    },
-  };
 };

@@ -20,7 +20,6 @@ export interface NetflowProps {
   eventId: string;
   eventEnd?: string[] | null;
   eventStart?: string[] | null;
-  isDraggable?: boolean;
   networkBytes?: string[] | null;
   networkCommunityId?: string[] | null;
   networkDirection?: string[] | null;

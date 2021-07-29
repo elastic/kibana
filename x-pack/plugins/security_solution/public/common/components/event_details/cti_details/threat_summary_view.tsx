@@ -63,7 +63,6 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
           key={key}
           contextId={key}
           eventId={eventId}
-          isDraggable={false}
           fieldName={fieldName || 'unknown'}
           value={value}
         />

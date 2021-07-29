@@ -15,7 +15,6 @@ export interface GeoFieldsProps {
   destinationGeoRegionName?: string[] | null;
   destinationGeoCityName?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;
   sourceGeoCountryIsoCode?: string[] | null;
@@ -38,7 +37,6 @@ export interface SourceDestinationProps {
   destinationPort?: string[] | null;
   direction?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   networkBytes?: string[] | null;
   networkCommunityId?: string[] | null;
   networkDirection?: string[] | null;
@@ -65,7 +63,6 @@ export interface SourceDestinationIpProps {
   destinationIp?: string[] | null;
   destinationPort?: Array<number | string | null> | null;
   eventId: string;
-  isDraggable?: boolean;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;
   sourceGeoCountryIsoCode?: string[] | null;
@@ -88,7 +85,6 @@ export interface SourceDestinationWithArrowsProps {
   destinationPackets?: string[] | null;
   destinationPort?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   sourceBytes?: string[] | null;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;

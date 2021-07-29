@@ -56,7 +56,6 @@ export const locationRenderer = (
                 id={`location-renderer-default-draggable-${IpOverviewId}-${
                   contextID ? `${contextID}-` : ''
                 }${fieldName}`}
-                isDraggable={false}
                 field={fieldName}
                 value={locationValue}
               />
@@ -85,7 +84,6 @@ export const autonomousSystemRenderer = (
           id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }${flowTarget}.as.organization.name`}
-          isDraggable={false}
           field={`${flowTarget}.as.organization.name`}
           value={as.organization.name}
         />
@@ -96,7 +94,6 @@ export const autonomousSystemRenderer = (
           id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }${flowTarget}.as.number`}
-          isDraggable={false}
           field={`${flowTarget}.as.number`}
           value={`${as.number}`}
         />
@@ -126,7 +123,6 @@ export const hostIdRenderer = ({
           id={`host-id-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }host-id`}
-          isDraggable={false}
           field="host.id"
           value={host.id[0]}
         >
@@ -158,7 +154,6 @@ export const hostNameRenderer = (
       id={`host-name-renderer-default-draggable-${IpOverviewId}-${
         contextID ? `${contextID}-` : ''
       }host-name`}
-      isDraggable={false}
       field={'host.name'}
       value={host.name[0]}
     >
@@ -209,7 +204,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable id={id} isDraggable={false} field={attrName} value={rowItem}>
+            <DefaultDraggable id={id} field={attrName} value={rowItem}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
           )}

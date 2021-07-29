@@ -37,7 +37,6 @@ export const Netflow = React.memo<NetflowProps>(
     eventId,
     eventEnd,
     eventStart,
-    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -83,7 +82,6 @@ export const Netflow = React.memo<NetflowProps>(
           eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
-          isDraggable={isDraggable}
           networkBytes={networkBytes}
           networkCommunityId={networkCommunityId}
           networkDirection={networkDirection}
@@ -107,7 +105,6 @@ export const Netflow = React.memo<NetflowProps>(
         <Fingerprints
           contextId={contextId}
           eventId={eventId}
-          isDraggable={isDraggable}
           tlsClientCertificateFingerprintSha1={tlsClientCertificateFingerprintSha1}
           tlsFingerprintsJa3Hash={tlsFingerprintsJa3Hash}
           tlsServerCertificateFingerprintSha1={tlsServerCertificateFingerprintSha1}

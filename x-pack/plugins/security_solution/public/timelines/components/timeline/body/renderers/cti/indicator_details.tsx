@@ -26,7 +26,6 @@ interface IndicatorDetailsProps {
   indicatorProvider: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
-  isDraggable?: boolean;
 }
 
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
@@ -36,7 +35,6 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   indicatorProvider,
   indicatorReference,
   indicatorType,
-  isDraggable,
 }) => (
   <EuiFlexGroup
     alignItems="flexStart"
@@ -53,7 +51,6 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
           data-test-subj="threat-match-indicator-details-indicator-type"
           eventId={eventId}
           field={INDICATOR_MATCHED_TYPE}
-          isDraggable={isDraggable}
           value={indicatorType}
         />
       </EuiFlexItem>
@@ -74,7 +71,6 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             data-test-subj="threat-match-indicator-details-indicator-dataset"
             eventId={eventId}
             field={INDICATOR_DATASET}
-            isDraggable={isDraggable}
             value={indicatorDataset}
           />
         </EuiFlexItem>
@@ -96,7 +92,6 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             data-test-subj="threat-match-indicator-details-indicator-provider"
             eventId={eventId}
             field={INDICATOR_PROVIDER}
-            isDraggable={isDraggable}
             value={indicatorProvider}
           />
         </EuiFlexItem>
@@ -113,7 +108,6 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             data-test-subj="threat-match-indicator-details-indicator-reference"
             eventId={eventId}
             fieldName={INDICATOR_REFERENCE}
-            isDraggable={isDraggable}
             value={indicatorReference}
           />
         </EuiFlexItem>

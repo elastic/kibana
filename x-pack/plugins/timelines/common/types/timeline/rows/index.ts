@@ -15,12 +15,10 @@ export interface RowRenderer {
   renderRow: ({
     browserFields,
     data,
-    isDraggable,
     timelineId,
   }: {
     browserFields: BrowserFields;
     data: Ecs;
-    isDraggable: boolean;
     timelineId: string;
   }) => React.ReactNode;
 }

@@ -55,7 +55,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields,
         data: auditd,
-        isDraggable: true,
         timelineId: 'test',
       });
 
@@ -85,7 +84,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditd,
-        isDraggable: true,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -119,7 +117,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields,
         data: auditdFile,
-        isDraggable: true,
         timelineId: 'test',
       });
 
@@ -149,7 +146,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditdFile,
-        isDraggable: true,
         timelineId: 'test',
       });
       const wrapper = mount(

@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback, useState, useRef } from 'react';
+import { getDraggableId } from '@kbn/securitysolution-t-grid';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EventFieldsData } from '../types';
-import { useGetTimelineId } from '../../drag_and_drop/use_get_timeline_id_from_dom';
+import { useGetTimelineId } from '../../drag_and_drop/draggable_wrapper_hover_content';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { BrowserField } from '../../../containers/source';
 
@@ -65,10 +66,11 @@ export const ActionCell: React.FC<Props> = React.memo(
       });
     }, []);
 
+    const draggableIds = actionCellConfig?.idList.map((id) => getDraggableId(id));
     return (
       <HoverActions
         dataType={data.type}
-        dataProvider={actionCellConfig?.dataProvider}
+        draggableIds={draggableIds?.length ? draggableIds : undefined}
         field={data.field}
         goGetTimelineId={setGoGetTimelineId}
         isObjectArray={data.isObjectArray}

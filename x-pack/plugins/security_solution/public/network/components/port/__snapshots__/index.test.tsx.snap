@@ -5,7 +5,6 @@ exports[`Port renders correctly against snapshot 1`] = `
   data-test-subj="port"
   field="destination.port"
   id="port-default-draggable-test-abcd-destination.port-443"
-  isDraggable={true}
   tooltipContent="destination.port"
   value="443"
 >

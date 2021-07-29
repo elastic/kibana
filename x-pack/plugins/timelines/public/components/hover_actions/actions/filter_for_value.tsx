@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import { EuiButtonIcon, EuiButtonIconPropsForButton, EuiToolTip } from '@elastic/eui';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
 import { HoverActionComponentProps, FilterValueFnArgs } from './types';
@@ -19,50 +17,34 @@ export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.fil
 });
 export const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';
 
-export type FilterForValueProps = HoverActionComponentProps & FilterValueFnArgs;
+export const filterForValueFn = ({
+  field,
+  value,
+  filterManager,
+  onFilterAdded,
+}: FilterValueFnArgs): void => {
+  const makeFilter = (currentVal: string | null | undefined) =>
+    currentVal?.length === 0 ? createFilter(field, undefined) : createFilter(field, currentVal);
+  const filters = Array.isArray(value)
+    ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
+    : makeFilter(value);
 
-const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
-  ({
-    closePopOver,
-    defaultFocusedButtonRef,
-    field,
-    filterManager,
-    keyboardEvent,
-    onFilterAdded,
-    ownFocus,
-    showTooltip = false,
-    value,
-  }) => {
-    const filterForValueFn = useCallback(() => {
-      const makeFilter = (currentVal: string | null | undefined) =>
-        currentVal?.length === 0 ? createFilter(field, undefined) : createFilter(field, currentVal);
-      const filters = Array.isArray(value)
-        ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
-        : makeFilter(value);
+  const activeFilterManager = filterManager;
 
-      const activeFilterManager = filterManager;
+  if (activeFilterManager != null) {
+    activeFilterManager.addFilters(filters);
+    if (onFilterAdded != null) {
+      onFilterAdded();
+    }
+  }
+};
 
-      if (activeFilterManager != null) {
-        activeFilterManager.addFilters(filters);
-        if (onFilterAdded != null) {
-          onFilterAdded();
-        }
-      }
-      if (closePopOver != null) {
-        closePopOver();
-      }
-    }, [closePopOver, field, filterManager, onFilterAdded, value]);
+export interface FilterForValueProps extends HoverActionComponentProps {
+  defaultFocusedButtonRef: EuiButtonIconPropsForButton['buttonRef'];
+}
 
-    useEffect(() => {
-      if (!ownFocus) {
-        return;
-      }
-      if (keyboardEvent?.key === FILTER_FOR_VALUE_KEYBOARD_SHORTCUT) {
-        stopPropagationAndPreventDefault(keyboardEvent);
-        filterForValueFn();
-      }
-    }, [filterForValueFn, keyboardEvent, ownFocus]);
-
+export const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
+  ({ defaultFocusedButtonRef, field, onClick, ownFocus, showTooltip = false, value }) => {
     return showTooltip ? (
       <EuiToolTip
         content={
@@ -84,7 +66,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
           data-test-subj="filter-for-value"
           iconSize="s"
           iconType="plusInCircle"
-          onClick={filterForValueFn}
+          onClick={onClick}
         />
       </EuiToolTip>
     ) : (
@@ -95,13 +77,10 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
         data-test-subj="filter-for-value"
         iconSize="s"
         iconType="plusInCircle"
-        onClick={filterForValueFn}
+        onClick={onClick}
       />
     );
   }
 );
 
 FilterForValueButton.displayName = 'FilterForValueButton';
-
-// eslint-disable-next-line import/no-default-export
-export { FilterForValueButton as default };

@@ -23,7 +23,6 @@ const SystemFimExampleComponent: React.FC = () => {
       {systemFimRowRenderer.renderRow({
         browserFields: {},
         data: mockEndgameFileCreateEvent,
-        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

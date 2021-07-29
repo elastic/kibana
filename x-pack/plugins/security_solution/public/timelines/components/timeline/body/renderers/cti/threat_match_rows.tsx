@@ -20,7 +20,7 @@ const SpacedContainer = styled.div`
   margin: ${({ theme }) => theme.eui.paddingSizes.s} 0;
 `;
 
-export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, timelineId }) => {
+export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) => {
   const indicators = get(data, 'threat.indicator') as Fields[];
   const eventId = get(data, ID_FIELD_NAME);
 
@@ -31,12 +31,7 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, t
           const contextId = `threat-match-row-${timelineId}-${eventId}-${index}`;
           return (
             <Fragment key={contextId}>
-              <ThreatMatchRow
-                contextId={contextId}
-                data={indicator}
-                eventId={eventId}
-                isDraggable={isDraggable}
-              />
+              <ThreatMatchRow contextId={contextId} data={indicator} eventId={eventId} />
               {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
             </Fragment>
           );

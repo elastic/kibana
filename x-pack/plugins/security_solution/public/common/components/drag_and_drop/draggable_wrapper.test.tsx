@@ -42,11 +42,7 @@ describe('DraggableWrapper', () => {
       const wrapper = shallow(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -58,11 +54,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -74,27 +66,19 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(false);
     });
 
     test('it renders hover actions when the mouse is over the text of draggable wrapper', async () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -104,7 +88,7 @@ describe('DraggableWrapper', () => {
         wrapper.update();
         jest.runAllTimers();
         wrapper.update();
-        expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
       });
     });
   });
@@ -114,12 +98,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-              truncate
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -133,11 +112,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );

@@ -43,6 +43,62 @@ describe('get_anomalies_network_table_columns', () => {
     expect(columns.some((col) => col.name === i18n.NETWORK_NAME)).toEqual(false);
   });
 
+  test('on network page, we should escape the draggable id', () => {
+    const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
+    const column = columns.find((col) => col.name === i18n.SCORE) as Columns<
+      string,
+      AnomaliesByNetwork
+    >;
+    const anomaly: AnomaliesByNetwork = {
+      type: 'source.ip',
+      ip: '127.0.0.1',
+      anomaly: {
+        detectorIndex: 0,
+        entityName: 'entity-name-1',
+        entityValue: 'entity-value-1',
+        influencers: [],
+        jobId: 'job-1',
+        rowId: 'row-1',
+        severity: 100,
+        time: new Date('01/01/2000').valueOf(),
+        source: {
+          job_id: 'job-1',
+          result_type: 'result-1',
+          probability: 50,
+          multi_bucket_impact: 0,
+          record_score: 0,
+          initial_record_score: 0,
+          bucket_span: 0,
+          detector_index: 0,
+          is_interim: true,
+          timestamp: new Date('01/01/2000').valueOf(),
+          by_field_name: 'some field name',
+          by_field_value: 'some field value',
+          partition_field_name: 'partition field name',
+          partition_field_value: 'partition field value',
+          function: 'function-1',
+          function_description: 'description-1',
+          typical: [5, 3],
+          actual: [7, 4],
+          influencers: [],
+        },
+      },
+    };
+    if (column != null && column.render != null) {
+      const wrapper = mount(<TestProviders>{column.render('', anomaly)}</TestProviders>);
+      expect(
+        wrapper
+          .find(
+            '[draggableId="draggableId.content.anomalies-network-table-severity-127_0_0_1-entity-name-1-entity-value-1-100-job-1"]'
+          )
+          .first()
+          .exists()
+      ).toBe(true);
+    } else {
+      expect(column).not.toBe(null);
+    }
+  });
+
   test('on network page, undefined influencers should turn into an empty column string', () => {
     const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
     const column = columns.find((col) => col.name === i18n.INFLUENCED_BY) as Columns<

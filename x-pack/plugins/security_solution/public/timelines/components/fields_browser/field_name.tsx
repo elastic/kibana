@@ -11,9 +11,11 @@ import styled from 'styled-components';
 
 import { OnUpdateColumns } from '../timeline/events';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { useGetTimelineId } from '../../../common/components/drag_and_drop/use_get_timeline_id_from_dom';
+import {
+  DraggableWrapperHoverContent,
+  useGetTimelineId,
+} from '../../../common/components/drag_and_drop/draggable_wrapper_hover_content';
 import { ColumnHeaderOptions } from '../../../../common';
-import { HoverActions } from '../../../common/components/hover_actions';
 
 /**
  * The name of a (draggable) field
@@ -110,10 +112,9 @@ export const FieldName = React.memo<{
 
     const hoverContent = useMemo(
       () => (
-        <HoverActions
+        <DraggableWrapperHoverContent
           closePopOver={handleClosePopOverTrigger}
           field={fieldId}
-          isObjectArray={false}
           ownFocus={hoverActionsOwnFocus}
           showTopN={showTopN}
           toggleTopN={toggleTopN}
