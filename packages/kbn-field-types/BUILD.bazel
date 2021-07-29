@@ -44,7 +44,7 @@ TYPES_DEPS = [
 ]
 
 jsts_transpiler(
-   name = "target",
+   name = "target_node",
    srcs = SRCS,
    build_pkg_name = package_name(),
  )
@@ -75,7 +75,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
