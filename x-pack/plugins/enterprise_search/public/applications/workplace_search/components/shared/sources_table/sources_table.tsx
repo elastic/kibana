@@ -32,7 +32,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         <EuiTableHeaderCell>{STATUS_HEADER}</EuiTableHeaderCell>
         <EuiTableHeaderCell>{DOCUMENTS_HEADER}</EuiTableHeaderCell>
         {onSearchableToggle && <EuiTableHeaderCell>{SEARCHABLE_HEADER}</EuiTableHeaderCell>}
-        <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>
+        {isOrganization && <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>}
       </EuiTableHeader>
       <EuiTableBody>
         {sources.map((source) => (
