@@ -27,14 +27,19 @@ const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
 
+let destroyFn: () => void;
+
+const encode = (input: EmbeddableInput) => btoa(JSON.stringify(input));
+const decode = (serializedInput: string) => JSON.parse(atob(serializedInput));
+
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
-  return (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
+  return (embeddableObject: IEmbeddable) => {
     return (
       <div
         className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
           <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
@@ -55,11 +60,17 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
-      const uniqueId = handlers.getElementId();
-
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
+
+      const uniqueId = handlers.getElementId();
+      const serializedInput = handlers.getInput();
+
+      const embeddableInput =
+        isByValueEnabled && serializedInput !== ''
+          ? { ...decode(serializedInput), ...input }
+          : input;
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
@@ -72,7 +83,7 @@ export const embeddableRendererFactory = (
         }
 
         const embeddablePromise = factory
-          .createFromSavedObject(input.id, input)
+          .createFromSavedObject(input.id, embeddableInput)
           .then((embeddable) => {
             embeddablesRegistry[uniqueId] = embeddable;
             return embeddable;
@@ -94,29 +105,25 @@ export const embeddableRendererFactory = (
             isByValueEnabled
           );
 
+          if (isByValueEnabled) {
+            handlers.setInput(encode(updatedInput));
+          }
+
           if (updatedExpression) {
             handlers.onEmbeddableInputChange(updatedExpression);
           }
         });
 
-        ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-          handlers.done()
-        );
+        ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
 
-        handlers.onResize(() => {
-          ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-            handlers.done()
-          );
-        });
-
-        handlers.onDestroy(() => {
+        destroyFn = () => {
           subscription.unsubscribe();
           handlers.onEmbeddableDestroyed();
 
           delete embeddablesRegistry[uniqueId];
 
           return ReactDOM.unmountComponentAtNode(domNode);
-        });
+        };
       } else {
         const embeddable = embeddablesRegistry[uniqueId];
 
@@ -124,6 +131,10 @@ export const embeddableRendererFactory = (
           embeddable.updateInput(input);
           embeddable.reload();
         }
+      }
+
+      if (destroyFn) {
+        handlers.onDestroy(destroyFn);
       }
     },
   });

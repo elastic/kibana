@@ -21,6 +21,7 @@ export const WorkpadElementSchema = schema.object({
   filter: schema.maybe(schema.nullable(schema.string())),
   id: schema.string(),
   position: PositionSchema,
+  input: schema.maybe(schema.nullable(schema.string())),
 });
 
 export const WorkpadPageSchema = schema.object({

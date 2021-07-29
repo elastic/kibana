@@ -11,7 +11,7 @@ import {
   IInterpreterRenderHandlers,
 } from 'src/plugins/expressions/public';
 // @ts-expect-error untyped local
-import { setFilter } from '../state/actions/elements';
+import { setFilter, setInput } from '../state/actions/elements';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
 
@@ -39,6 +39,9 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
   getFilter() {
     return '';
   },
+  getInput() {
+    return '';
+  },
 
   onComplete(fn: () => void) {
     this.done = fn;
@@ -57,6 +60,7 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
 
   resize(_size: { height: number; width: number }) {},
   setFilter() {},
+  setInput() {},
 });
 
 export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers =>
@@ -90,6 +94,9 @@ export const createDispatchedHandlerFactory = (
           case 'setFilter':
             this.setFilter(event.data);
             break;
+          case 'setInput':
+            this.setInput(event.data);
+            break;
           case 'onComplete':
             this.onComplete(event.data);
             break;
@@ -112,6 +119,16 @@ export const createDispatchedHandlerFactory = (
         return element.filter || '';
       },
 
+      setInput(input: string) {
+        if (input && element.input !== input) {
+          dispatch(setInput(input, element.id, true));
+        }
+      },
+
+      getInput() {
+        return element.input || '';
+      },
+
       onComplete(fn: () => void) {
         completeFn = fn;
       },
@@ -119,7 +136,9 @@ export const createDispatchedHandlerFactory = (
       getElementId: () => element.id,
 
       onEmbeddableInputChange(embeddableExpression: string) {
-        dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));
+        if (embeddableExpression && element.expression !== embeddableExpression) {
+          dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));
+        }
       },
 
       onEmbeddableDestroyed() {

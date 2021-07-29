@@ -81,11 +81,12 @@ const trimPosition = ({ left, top, width, height, angle, parent }) => ({
   parent,
 });
 
-const trimElement = ({ id, position, expression, filter }) => ({
+const trimElement = ({ id, position, expression, filter, input }) => ({
   id,
   position: trimPosition(position),
   ...(position.type !== 'group' && { expression }),
   ...(filter !== void 0 && { filter }),
+  ...(input !== void 0 && { input }),
 });
 
 const getPageWithElementId = (workpad, elementId) => {
@@ -111,6 +112,11 @@ export const elementsReducer = handleActions(
       const { filter, elementId } = payload;
       const pageId = getPageWithElementId(workpadState, elementId);
       return assignNodeProperties(workpadState, pageId, elementId, { filter });
+    },
+    [actions.setInput]: (workpadState, { payload }) => {
+      const { input, elementId } = payload;
+      const pageId = getPageWithElementId(workpadState, elementId);
+      return assignNodeProperties(workpadState, pageId, elementId, { input });
     },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>
       payload.repositionedElements.reduce(

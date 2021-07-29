@@ -19,7 +19,8 @@ export interface CanvasElement {
   position: ElementPosition;
   type: 'element';
   expression: string;
-  filter: string;
+  filter?: string;
+  input?: string;
 }
 
 export interface CanvasGroup {

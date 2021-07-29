@@ -233,7 +233,13 @@ export const InteractivePage = compose(
     const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map((shape) => {
       const element = elementLookup.get(shape.id);
       return element
-        ? { ...shape, width: shape.a * 2, height: shape.b * 2, filter: element.filter }
+        ? {
+            ...shape,
+            width: shape.a * 2,
+            height: shape.b * 2,
+            filter: element.filter,
+            input: element.input,
+          }
         : shape;
     });
     return { elements: elementsToRender };
