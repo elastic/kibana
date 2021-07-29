@@ -287,7 +287,7 @@ export const getXyVisualization = ({
           groupLabel: getAxisName(label, { isHorizontal }),
           accessors: config.map(({ forAccessor, color }) => ({
             columnId: forAccessor,
-            color,
+            color: mappedAccessors.find(({ columnId }) => columnId === forAccessor)?.color,
             triggerIcon: 'color',
           })),
           filterOperations: isNumericMetric,

@@ -818,19 +818,45 @@ export function XYChart({
         if (!thresholdLayer.yConfig) {
           return [];
         }
-        const columnToLabelMap: Record<string, string> = thresholdLayer.columnToLabel
-          ? JSON.parse(thresholdLayer.columnToLabel)
+        const { columnToLabel, palette, yConfig: yConfigs, layerId } = thresholdLayer;
+        const columnToLabelMap: Record<string, string> = columnToLabel
+          ? JSON.parse(columnToLabel)
           : {};
-        const table = data.tables[thresholdLayer.layerId];
-        return thresholdLayer.yConfig.map((yConfig) => {
+        const table = data.tables[layerId];
+        const colorAssignment = colorAssignments[palette.name];
+
+        return yConfigs.map((yConfig) => {
           const formatter = formatFactory(
             table?.columns.find((column) => column.id === yConfig.forAccessor)?.meta?.params || {
               id: 'number',
             }
           );
+
+          const seriesLayers: SeriesLayer[] = [
+            {
+              name: columnToLabelMap[yConfig.forAccessor],
+              totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+              rankAtDepth: colorAssignment.getRank(
+                thresholdLayer,
+                String(yConfig.forAccessor),
+                String(yConfig.forAccessor)
+              ),
+            },
+          ];
+          const defaultColor = paletteService.get(palette.name).getCategoricalColor(
+            seriesLayers,
+            {
+              maxDepth: 1,
+              behindText: false,
+              totalSeries: colorAssignment.totalSeriesCount,
+              syncColors,
+            },
+            palette.params
+          );
+
           const props = {
-            id: `${thresholdLayer.layerId}-${yConfig.forAccessor}`,
-            key: `${thresholdLayer.layerId}-${yConfig.forAccessor}`,
+            id: `${layerId}-${yConfig.forAccessor}`,
+            key: `${layerId}-${yConfig.forAccessor}`,
             groupId:
               yConfig.axisMode === 'bottom'
                 ? undefined
@@ -844,7 +870,7 @@ export function XYChart({
             return (
               <RectAnnotation
                 {...props}
-                dataValues={data.tables[thresholdLayer.layerId].rows.map((row) => {
+                dataValues={data.tables[layerId].rows.map((row) => {
                   if (yConfig.axisMode === 'bottom') {
                     return {
                       coordinates: {
@@ -871,8 +897,8 @@ export function XYChart({
                 style={{
                   // TODO add line mode here
                   strokeWidth: yConfig.lineWidth || 1,
-                  stroke: yConfig.color || '#f00',
-                  fill: yConfig.color || '#f00',
+                  stroke: (yConfig.color || defaultColor) ?? '#f00',
+                  fill: (yConfig.color || defaultColor) ?? '#f00',
                   dash:
                     yConfig.lineStyle === 'dashed'
                       ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
@@ -887,7 +913,7 @@ export function XYChart({
           return (
             <LineAnnotation
               {...props}
-              dataValues={data.tables[thresholdLayer.layerId].rows.map((row) => ({
+              dataValues={data.tables[layerId].rows.map((row) => ({
                 dataValue: row[yConfig.forAccessor],
                 header: columnToLabelMap[yConfig.forAccessor],
                 details: formatter.convert(row[yConfig.forAccessor]),
@@ -901,7 +927,7 @@ export function XYChart({
                 line: {
                   // TODO add line mode here
                   strokeWidth: yConfig.lineWidth || 1,
-                  stroke: yConfig.color || '#f00',
+                  stroke: (yConfig.color || defaultColor) ?? '#f00',
                   dash:
                     yConfig.lineStyle === 'dashed'
                       ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
