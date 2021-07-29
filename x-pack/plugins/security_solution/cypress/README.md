@@ -2,10 +2,41 @@
 
 The `security_solution/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
+Currently with Cypress you can develop `functional` tests and coming soon `CCS` and `Upgrade` functional tests.
+
+If you are still having doubts, questions or queries, please feel free to ping our Cypress champions Gloria Hornero (@Glo) and Patryk Kopycinsky (@patryk.kopycinski).
+
 ## Table of Contents
+
+[**How to add a new Cypress test**](#how-to-add-a-new-cypress-test)
 
 [**Running the tests**](#running-the-tests)
 
+[**Debugging your test**](#debugging-your-test)
+
+[**Folder structure**](#folder-structure)
+
+[**Test data**](#test-data)
+
+[**Development Best Practices**](#development-best-practices)
+
+[**Test Artifacts**](#test-artifacts)
+
+[**Linting**](#linting)
+
+
+## How to add a new Cypress test
+
+Before adding a new test please ask yourself the following question: `Can I test this behaviour with the unit or API tests?` if the answer is `Yes I can`, 
+then, please add the test there since Cypress is not the best place for it :) 
+
+If the answer is `No, I can't` then this is the best place to start.
+
+First of all please take a look to the [**Development Best Practices**](#development-best-practices) seection.
+Then check check [**Folder structure**](#folder-structure) section to know where is the best place to put your test, [**Test data**](#test-data) section if you need to create any type
+of data for your test, [**Running the tests**](#running-the-tests) to know how to execute the tests and [**Debugging your test**](#debugging-your-test) to debug your test if needed.
+
+Please, before open a PR with the new test, please make sure that the test fail. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ## Running the tests
 
@@ -170,7 +201,7 @@ node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solut
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
-CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run
+CYPRESS_base_url=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> CYPRESS_protocol=<httpOrHttps> CYPRESS_hostname=<kibanaInstanceHostName> CYPRESS_configport=<kibanaPort> CYPRESS_KIBANA_URL=<kbnUrl> yarn  cypress:run
 ```
 
 #### Custom Target + Headless (Firefox)
@@ -188,7 +219,7 @@ node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solut
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
-CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run:firefox
+CYPRESS_base_url=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> CYPRESS_protocol=<httpOrHttps> CYPRESS_hostname=<kibanaInstanceHostName> CYPRESS_configport=<kibanaPort> CYPRESS_KIBANA_URL=<kbnUrl> yarn cypress:run:firefox
 ```
 
 #### CCS Custom Target + Headless
@@ -220,6 +251,10 @@ yarn cypress:run:ccs
 Similar sequence, just ending with `yarn cypress:open:ccs`, can be used for interactive test running via Cypress UI.
 
 Appending `--browser firefox` to the `yarn cypress:run:ccs` command above will run the tests on Firefox instead of Chrome.
+
+## Debugging your test
+In order to be able to debug any Cypress test you need to open Cypress on visual mode. [Here](https://docs.cypress.io/guides/guides/debugging)
+you can find an extended guide about how to proceed.
 
 ## Folder Structure
 
@@ -357,6 +392,9 @@ export const unmappedCCSRule: CustomRule = {
 Similar approach should be used in defining all index patterns, rules, and queries to be applied on remote data.
 
 ## Development Best Practices
+
+### Make sure your test fails
+Before open a PR with the new test, please make sure that the test fail. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ### Clean up the state 
 
