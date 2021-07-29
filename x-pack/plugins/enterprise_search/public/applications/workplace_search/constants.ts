@@ -819,3 +819,10 @@ export const SEARCHABLE_HEADER = i18n.translate(
     defaultMessage: 'Searchable',
   }
 );
+
+export const PLATINUM_FEATURE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.platinumFeature',
+  {
+    defaultMessage: 'Platinum feature',
+  }
+);
