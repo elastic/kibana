@@ -85,11 +85,18 @@ export function getMigrations(
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
+  const migrationSecurityRules714 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    pipeMigrations(removeNullAuthorFromSecurityRules)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
+    '7.14.0': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.13.0'),
   };
 }
 
@@ -427,6 +434,34 @@ function removeNullsFromSecurityRules(
             : Array.isArray(params.machineLearningJobId)
             ? params.machineLearningJobId
             : [params.machineLearningJobId],
+      },
+    },
+  };
+}
+
+/**
+ * The author field was introduced later and was not part of the original rules. We overlooked
+ * the filling in the author field as an empty array in an earlier upgrade routine from
+ * 'removeNullsFromSecurityRules' during the 7.13.0 upgrade. Since we don't change earlier migrations,
+ * but rather only move forward with the "arrow of time" we are going to upgrade and fix
+ * it if it is missing for anyone in 7.14.0 and above release. Earlier releases if we want to fix them,
+ * would have to be modified as a "7.13.1", etc... if we want to fix it there.
+ * @param doc The document that is not migrated and contains a "null" or "undefined" author field
+ * @returns The document with the author field fleshed in.
+ */
+function removeNullAuthorFromSecurityRules(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { params },
+  } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      params: {
+        ...params,
+        author: params.author != null ? params.author : [],
       },
     },
   };

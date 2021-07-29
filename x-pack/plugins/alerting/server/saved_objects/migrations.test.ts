@@ -970,6 +970,26 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('7.14.0', () => {
+    test('security solution author field is migrated to array', () => {
+      const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
+      const alert = getMockData({
+        alertTypeId: 'siem.signals',
+        params: {},
+      });
+
+      expect(migration714(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          params: {
+            author: [],
+          },
+        },
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
