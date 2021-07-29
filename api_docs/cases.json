@@ -4749,7 +4749,7 @@
         "label": "ACTION_TYPES_URL",
         "description": [],
         "signature": [
-          "\"/api/actions/list_action_types\""
+          "\"/api/actions/connector_types\""
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
