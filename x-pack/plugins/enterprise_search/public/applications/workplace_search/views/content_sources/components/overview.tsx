@@ -51,6 +51,7 @@ import {
 } from '../../../routes';
 import {
   SOURCES_NO_CONTENT_TITLE,
+  SOURCE_OVERVIEW_TITLE,
   CONTENT_SUMMARY_TITLE,
   CONTENT_TYPE_HEADER,
   ITEMS_HEADER,
@@ -454,7 +455,7 @@ export const Overview: React.FC = () => {
 
   return (
     <SourceLayout pageViewTelemetry="source_overview">
-      <ViewContentHeader title="Source overview" />
+      <ViewContentHeader title={SOURCE_OVERVIEW_TITLE} />
 
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem grow={8}>
