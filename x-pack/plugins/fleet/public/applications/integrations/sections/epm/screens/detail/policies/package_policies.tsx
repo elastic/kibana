@@ -223,6 +223,12 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                     iconType="plusInCircle"
                     onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
                     data-test-subj="addAgentButton"
+                    aria-label={i18n.translate(
+                      'xpack.fleet.epm.packageDetails.integrationList.addAgent',
+                      {
+                        defaultMessage: 'Add Agent',
+                      }
+                    )}
                   />
                 </EuiToolTip>
               )}
@@ -267,6 +273,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
               viewDataStep={viewDataStep}
+              showAddAgent={true}
             />
           );
         },

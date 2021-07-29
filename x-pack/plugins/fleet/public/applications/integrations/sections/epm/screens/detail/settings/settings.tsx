@@ -53,7 +53,7 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
     pkgkey: `${name}-${version}`,
   });
   return (
-    <EuiLink href={`#${settingsPath}`}>
+    <EuiLink href={settingsPath}>
       <FormattedMessage
         id="xpack.fleet.integrations.settings.packageLatestVersionLink"
         defaultMessage="latest version"

@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiCommentProps,
+  EuiToken,
+} from '@elastic/eui';
+import React, { useContext } from 'react';
 import classNames from 'classnames';
+import { ThemeContext } from 'styled-components';
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -22,9 +30,8 @@ import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
-import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { UserActionCopyLink } from './user_action_copy_link';
-import { UserActionMarkdown } from './user_action_markdown';
+import { ContentWrapper } from './user_action_markdown';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
@@ -32,11 +39,13 @@ import * as i18n from './translations';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CasesNavigation } from '../links';
 import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
+import { MarkdownRenderer } from '../markdown_editor';
 
 interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
+
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
 export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
@@ -366,16 +375,28 @@ export const getGeneratedAlertsAttachment = ({
   ),
 });
 
+const ActionIcon = React.memo<{
+  actionType: string;
+}>(({ actionType }) => {
+  const theme = useContext(ThemeContext);
+  return (
+    <EuiToken
+      style={{ marginTop: '8px' }}
+      iconType={actionType === 'isolate' ? 'lock' : 'lockOpen'}
+      size="m"
+      shape="circle"
+      color={theme.eui.euiColorLightestShade}
+      data-test-subj="endpoint-action-icon"
+    />
+  );
+});
+
 export const getActionAttachment = ({
   comment,
   userCanCrud,
   isLoadingIds,
   getCaseDetailHrefWithCommentId,
   actionsNavigation,
-  manageMarkdownEditIds,
-  handleManageMarkdownEditId,
-  handleManageQuote,
-  handleSaveComment,
   action,
 }: {
   comment: Comment & CommentRequestActionsType;
@@ -383,10 +404,6 @@ export const getActionAttachment = ({
   isLoadingIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   actionsNavigation?: ActionsNavigation;
-  manageMarkdownEditIds: string[];
-  handleManageMarkdownEditId: (id: string) => void;
-  handleManageQuote: (id: string) => void;
-  handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
   action: CaseUserActions;
 }): EuiCommentProps => ({
   username: (
@@ -395,9 +412,7 @@ export const getActionAttachment = ({
       fullName={comment.createdBy.fullName}
     />
   ),
-  className: classNames({
-    isEdit: manageMarkdownEditIds.includes(comment.id),
-  }),
+  className: classNames('comment-action', { 'empty-comment': comment.comment.trim().length === 0 }),
   event: (
     <HostIsolationCommentEvent
       type={comment.actions.type}
@@ -408,30 +423,17 @@ export const getActionAttachment = ({
   ),
   'data-test-subj': 'endpoint-action',
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
+  timelineIcon: <ActionIcon actionType={comment.actions.type} />,
   actions: (
-    <UserActionContentToolbar
-      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+    <UserActionCopyLink
       id={comment.id}
-      editLabel={i18n.EDIT_COMMENT}
-      quoteLabel={i18n.QUOTE}
-      userCanCrud={userCanCrud}
-      isLoading={isLoadingIds.includes(comment.id)}
-      onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-      onQuote={handleManageQuote.bind(null, comment.comment)}
+      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
     />
   ),
-  children: (
-    <UserActionMarkdown
-      id={comment.id}
-      content={comment.comment}
-      isEditable={manageMarkdownEditIds.includes(comment.id)}
-      onChangeEditable={handleManageMarkdownEditId}
-      onSaveContent={handleSaveComment.bind(null, {
-        id: comment.id,
-        version: comment.version,
-      })}
-    />
+  children: comment.comment.trim().length > 0 && (
+    <ContentWrapper data-test-subj="user-action-markdown">
+      <MarkdownRenderer>{comment.comment}</MarkdownRenderer>
+    </ContentWrapper>
   ),
 });
 

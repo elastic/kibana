@@ -17,8 +17,14 @@ import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
 } from '../../types';
-import type { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
+import type {
+  CreatePackagePolicyResponse,
+  DeletePackagePoliciesResponse,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
+} from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const getPackagePoliciesHandler: RequestHandler<
@@ -168,6 +174,41 @@ export const deletePackagePolicyHandler: RequestHandler<
     return response.ok({
       body,
     });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const upgradePackagePolicyHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  try {
+    if (request.body.dryRun) {
+      const body: UpgradePackagePolicyDryRunResponse = [];
+
+      for (const id of request.body.packagePolicyIds) {
+        const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+        body.push(result);
+      }
+      return response.ok({
+        body,
+      });
+    } else {
+      const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+        soClient,
+        esClient,
+        request.body.packagePolicyIds,
+        { user }
+      );
+      return response.ok({
+        body,
+      });
+    }
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

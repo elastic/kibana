@@ -15,14 +15,15 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import {
+import type {
   Visualization,
   OperationMetadata,
   VisualizationType,
   AccessorConfig,
   DatasourcePublicAPI,
 } from '../types';
-import { State, SeriesType, visualizationTypes, XYLayerConfig, XYState } from './types';
+import { State, visualizationTypes, XYState } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';

@@ -8,6 +8,7 @@
 
 import Path from 'path';
 
+import chalk from 'chalk';
 import 'core-js/features/string/repeat';
 import dedent from 'dedent';
 
@@ -116,7 +117,7 @@ export function getHelpForAllCommands({
         : '';
 
       return [
-        dedent(command.usage || '') || command.name,
+        chalk.bold.whiteBright.bgBlack(` ${dedent(command.usage || '') || command.name} `),
         `  ${indent(dedent(command.description || 'Runs a dev task'), 2)}`,
         ...([indent(options, 2)] || []),
       ].join('\n');

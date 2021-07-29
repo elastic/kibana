@@ -119,14 +119,12 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
     test('reports expected values to the action context', async () => {
-      const now = 1577858400000;
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
       expect(action.reason).toContain('current value is 1');
       expect(action.reason).toContain('threshold of 0.75');
       expect(action.reason).toContain('test.metric.1');
-      expect(action.timestamp).toBe(new Date(now).toISOString());
     });
   });
 
@@ -204,7 +202,7 @@ describe('The metric threshold alert type', () => {
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
       const instanceID = '*';
-      await execute(Comparator.LT_OR_EQ, [1.0], [3.0]);
+      await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
@@ -223,7 +221,7 @@ describe('The metric threshold alert type', () => {
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
       expect(reasons[0]).toContain('current value is 1');
-      expect(reasons[1]).toContain('current value is 3.5');
+      expect(reasons[1]).toContain('current value is 3');
       expect(reasons[0]).toContain('threshold of 1');
       expect(reasons[1]).toContain('threshold of 3');
     });
@@ -247,9 +245,9 @@ describe('The metric threshold alert type', () => {
         },
       });
     test('alerts based on the doc_count value instead of the aggregatedValue', async () => {
-      await execute(Comparator.GT, [2]);
+      await execute(Comparator.GT, [0.9]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      await execute(Comparator.LT, [1.5]);
+      await execute(Comparator.LT, [0.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
   });
@@ -428,7 +426,6 @@ describe('The metric threshold alert type', () => {
         },
       });
     test('reports values converted from decimals to percentages to the action context', async () => {
-      const now = 1577858400000;
       await execute();
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
@@ -436,7 +433,6 @@ describe('The metric threshold alert type', () => {
       expect(action.reason).toContain('threshold of 75%');
       expect(action.threshold.condition0[0]).toBe('75%');
       expect(action.value.condition0).toBe('100%');
-      expect(action.timestamp).toBe(new Date(now).toISOString());
     });
   });
 });
@@ -460,7 +456,8 @@ const executor = createMetricThresholdExecutor(mockLibs);
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
-  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
+  const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
+  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
   const metric = params?.body.query.bool.filter[1]?.exists.field;
   if (params?.body.aggs.groupings) {
     if (params?.body.aggs.groupings.composite.after) {
@@ -470,25 +467,27 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
     }
     if (metric === 'test.metric.2') {
       return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.alternateCompositeResponse
+        mocks.alternateCompositeResponse(from)
       );
     }
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.basicCompositeResponse
+      mocks.basicCompositeResponse(from)
     );
   }
   if (metric === 'test.metric.2') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricResponse
+      mocks.alternateMetricResponse(from)
     );
   } else if (metric === 'test.metric.3') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValue_max
+      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValueMax
         ? mocks.emptyRateResponse
         : mocks.emptyMetricResponse
     );
   }
-  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse);
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(
+    mocks.basicMetricResponse(from)
+  );
 });
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')

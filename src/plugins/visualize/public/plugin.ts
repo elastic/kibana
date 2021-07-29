@@ -215,6 +215,7 @@ export class VisualizePlugin
         const { renderApp } = await import('./application');
         const unmount = renderApp(params, services);
         return () => {
+          data.search.session.clear();
           params.element.classList.remove('visAppWrapper');
           unlistenParentHistory();
           unmount();

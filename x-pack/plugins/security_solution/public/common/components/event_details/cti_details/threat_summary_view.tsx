@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 
 import * as i18n from './translations';
-import { StyledEuiInMemoryTable } from '../summary_view';
+import { Indent, StyledEuiInMemoryTable } from '../summary_view';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers } from './helpers';
@@ -32,17 +32,18 @@ export interface ThreatSummaryItem {
 }
 
 const RightMargin = styled.span`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
+  min-width: 30px;
 `;
 
 const EnrichmentTitle: React.FC<ThreatSummaryItem['title']> = ({ title, type }) => (
   <>
     <RightMargin>
-      <EnrichmentIcon type={type} />
+      <EuiTitle size="xxxs">
+        <h5>{title}</h5>
+      </EuiTitle>
     </RightMargin>
-    <EuiTitle size="xxs">
-      <h5>{title}</h5>
-    </EuiTitle>
+    <EnrichmentIcon type={type} />
   </>
 );
 
@@ -130,12 +131,14 @@ const ThreatSummaryViewComponent: React.FC<{
   timelineId: string;
   eventId: string;
 }> = ({ enrichments, timelineId, eventId }) => (
-  <StyledEuiInMemoryTable
-    columns={columns}
-    compressed
-    data-test-subj="threat-summary-view"
-    items={buildThreatSummaryItems(enrichments, timelineId, eventId)}
-  />
+  <Indent>
+    <StyledEuiInMemoryTable
+      columns={columns}
+      compressed
+      data-test-subj="threat-summary-view"
+      items={buildThreatSummaryItems(enrichments, timelineId, eventId)}
+    />
+  </Indent>
 );
 
 export const ThreatSummaryView = React.memo(ThreatSummaryViewComponent);

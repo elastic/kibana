@@ -14,8 +14,6 @@ import type {
   AgentPolicy,
   Installation,
   Output,
-  NewPackagePolicyInput,
-  NewPackagePolicyInputStream,
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfigurationError,
@@ -32,16 +30,14 @@ import { getInstallation } from './epm/packages';
 import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
+import type { InputsOverride } from './package_policy';
+import { overridePackageInputs } from './package_policy';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
-  nonFatalErrors?: PreconfigurationError[];
+  nonFatalErrors: PreconfigurationError[];
 }
-
-export type InputsOverride = Partial<NewPackagePolicyInput> & {
-  vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
-};
 
 export async function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
@@ -283,130 +279,5 @@ async function addPreconfiguredPolicyPackages(
       description,
       (policy) => overridePackageInputs(policy, inputs)
     );
-  }
-}
-
-function overridePackageInputs(
-  basePackagePolicy: NewPackagePolicy,
-  inputsOverride?: InputsOverride[]
-) {
-  if (!inputsOverride) return basePackagePolicy;
-
-  const inputs = [...basePackagePolicy.inputs];
-  const packageName = basePackagePolicy.package!.name;
-
-  for (const override of inputsOverride) {
-    const originalInput = inputs.find((i) => i.type === override.type);
-    if (!originalInput) {
-      const e = {
-        error: new Error(
-          i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
-            defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
-            values: {
-              inputType: override.type,
-              packageName,
-            },
-          })
-        ),
-        package: { name: packageName, version: basePackagePolicy.package!.version },
-      };
-      throw e;
-    }
-
-    if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
-    if (typeof override.keep_enabled !== 'undefined')
-      originalInput.keep_enabled = override.keep_enabled;
-
-    if (override.vars) {
-      try {
-        deepMergeVars(override, originalInput);
-      } catch (e) {
-        const err = {
-          error: new Error(
-            i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
-              defaultMessage:
-                'Var {varName} does not exist on {inputType} of package {packageName}',
-              values: {
-                varName: e.message,
-                inputType: override.type,
-                packageName,
-              },
-            })
-          ),
-          package: { name: packageName, version: basePackagePolicy.package!.version },
-        };
-        throw err;
-      }
-    }
-
-    if (override.streams) {
-      for (const stream of override.streams) {
-        const originalStream = originalInput.streams.find(
-          (s) => s.data_stream.dataset === stream.data_stream.dataset
-        );
-        if (!originalStream) {
-          const e = {
-            error: new Error(
-              i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
-                defaultMessage:
-                  'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
-                values: {
-                  streamSet: stream.data_stream.dataset,
-                  inputType: override.type,
-                  packageName,
-                },
-              })
-            ),
-            package: { name: packageName, version: basePackagePolicy.package!.version },
-          };
-          throw e;
-        }
-
-        if (typeof stream.enabled !== 'undefined') originalStream.enabled = stream.enabled;
-
-        if (stream.vars) {
-          try {
-            deepMergeVars(stream as InputsOverride, originalStream);
-          } catch (e) {
-            const err = {
-              error: new Error(
-                i18n.translate('xpack.fleet.packagePolicyStreamVarOverrideError', {
-                  defaultMessage:
-                    'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
-                  values: {
-                    varName: e.message,
-                    streamSet: stream.data_stream.dataset,
-                    inputType: override.type,
-                    packageName,
-                  },
-                })
-              ),
-              package: { name: packageName, version: basePackagePolicy.package!.version },
-            };
-            throw err;
-          }
-        }
-      }
-    }
-  }
-
-  return { ...basePackagePolicy, inputs };
-}
-
-function deepMergeVars(
-  override: InputsOverride,
-  original: NewPackagePolicyInput | NewPackagePolicyInputStream
-) {
-  for (const { name, ...val } of override.vars!) {
-    if (!original.vars || !Reflect.has(original.vars, name)) {
-      throw new Error(name);
-    }
-    const originalVar = original.vars[name];
-    const newVar =
-      // If a single value was passed in to a multi field, ensure it gets converted to a multi
-      Array.isArray(originalVar.value) && !Array.isArray(val.value)
-        ? { ...val, value: [val.value] }
-        : val;
-    Reflect.set(original.vars, name, { ...originalVar, ...newVar });
   }
 }

@@ -55,26 +55,6 @@ export const RendererStrings = {
         defaultMessage: 'Renders an embeddable Saved Object from other parts of Kibana',
       }),
   },
-  error: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.error.displayName', {
-        defaultMessage: 'Error information',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.error.helpDescription', {
-        defaultMessage: 'Render error data in a way that is helpful to users',
-      }),
-  },
-  image: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.image.displayName', {
-        defaultMessage: 'Image',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.image.helpDescription', {
-        defaultMessage: 'Render an image',
-      }),
-  },
   markdown: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.markdown.displayName', {
@@ -87,16 +67,6 @@ export const RendererStrings = {
           HTML,
           MARKDOWN,
         },
-      }),
-  },
-  metric: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.metric.displayName', {
-        defaultMessage: 'Metric',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.metric.helpDescription', {
-        defaultMessage: 'Render a number over a label',
       }),
   },
   pie: {
@@ -127,26 +97,6 @@ export const RendererStrings = {
     getHelpDescription: () =>
       i18n.translate('xpack.canvas.renderer.progress.helpDescription', {
         defaultMessage: 'Render a progress indicator that reveals a percentage of an element',
-      }),
-  },
-  repeatImage: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.repeatImage.displayName', {
-        defaultMessage: 'Image repeat',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.repeatImage.helpDescription', {
-        defaultMessage: 'Repeat an image a given number of times',
-      }),
-  },
-  shape: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.shape.displayName', {
-        defaultMessage: 'Shape',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.shape.helpDescription', {
-        defaultMessage: 'Render a basic shape',
       }),
   },
   table: {

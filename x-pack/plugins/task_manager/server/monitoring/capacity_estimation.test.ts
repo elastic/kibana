@@ -835,6 +835,30 @@ function mockStats(
   runtime: Partial<Required<RawMonitoringStats['stats']>['runtime']['value']> = {}
 ): CapacityEstimationParams {
   return {
+    ephemeral: {
+      status: HealthStatus.OK,
+      timestamp: new Date().toISOString(),
+      value: {
+        load: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+        executionsPerCycle: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+        queuedTasks: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+      },
+    },
     configuration: {
       status: HealthStatus.OK,
       timestamp: new Date().toISOString(),
