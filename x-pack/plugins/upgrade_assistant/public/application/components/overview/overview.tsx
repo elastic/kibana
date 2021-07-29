@@ -27,7 +27,6 @@ import type { DocLinksStart } from 'src/core/public';
 
 import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
-import { LatestMinorBanner } from '../latest_minor_banner';
 import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
@@ -270,10 +269,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
       <EuiPageContentBody>
         <>
-          {/* Remove this in last minor of the current major (e.g., 7.15) */}
-          <LatestMinorBanner />
-
-          <EuiSpacer size="xl" />
+          <EuiSpacer size="m" />
 
           <EuiSteps
             steps={[getResolveStep({ history }), getObserveStep({ docLinks }), getUpgradeStep()]}
