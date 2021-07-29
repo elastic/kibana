@@ -10,9 +10,10 @@ import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../common/alerting/logs/log_th
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/inventory_metric_threshold/types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/metric_threshold/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 
 export const METRICS_FEATURE = {
-  id: 'infrastructure',
+  id: METRICS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
     defaultMessage: 'Metrics',
   }),
@@ -34,7 +35,12 @@ export const METRICS_FEATURE = {
         read: ['index-pattern'],
       },
       alerting: {
-        all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        rule: {
+          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        },
+        alert: {
+          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -50,7 +56,12 @@ export const METRICS_FEATURE = {
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       alerting: {
-        read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        rule: {
+          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        },
+        alert: {
+          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -61,7 +72,7 @@ export const METRICS_FEATURE = {
 };
 
 export const LOGS_FEATURE = {
-  id: 'logs',
+  id: LOGS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
     defaultMessage: 'Logs',
   }),
@@ -83,7 +94,12 @@ export const LOGS_FEATURE = {
         read: [],
       },
       alerting: {
-        all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        rule: {
+          all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        },
+        alert: {
+          all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -95,7 +111,12 @@ export const LOGS_FEATURE = {
       catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       alerting: {
-        read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        rule: {
+          read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        },
+        alert: {
+          read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],

@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { DashboardContainerInput } from './dashboard_container';
+import { DashboardContainerInput } from '../..';
 import { DashboardContainerFactory } from './dashboard_container_factory';
 import { EmbeddableRenderer } from '../../services/embeddable';
 

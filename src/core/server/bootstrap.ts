@@ -11,18 +11,10 @@ import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
-interface KibanaFeatures {
-  // Indicates whether we can run Kibana in dev mode in which Kibana is run as
-  // a child process together with optimizer "worker" processes that are
-  // orchestrated by a parent process (dev mode only feature).
-  isCliDevModeSupported: boolean;
-}
-
 interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
   applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
-  features: KibanaFeatures;
 }
 
 /**
@@ -30,12 +22,7 @@ interface BootstrapArgs {
  * @internal
  * @param param0 - options
  */
-export async function bootstrap({
-  configs,
-  cliArgs,
-  applyConfigOverrides,
-  features,
-}: BootstrapArgs) {
+export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   if (cliArgs.optimize) {
     // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
     return;
@@ -52,7 +39,6 @@ export async function bootstrap({
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevCliParent: cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild,
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
@@ -60,22 +46,22 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService, env, onRootShutdown);
 
-  process.on('SIGHUP', () => reloadLoggingConfig());
+  process.on('SIGHUP', () => reloadConfiguration());
 
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
   process.on('message', (msg) => {
-    if (!msg || msg.reloadLoggingConfig !== true) {
+    if (!msg || msg.reloadConfiguration !== true) {
       return;
     }
 
-    reloadLoggingConfig();
+    reloadConfiguration();
   });
 
-  function reloadLoggingConfig() {
+  function reloadConfiguration(reason = 'SIGHUP signal received') {
     const cliLogger = root.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
+    cliLogger.info(`Reloading Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
 
     try {
       rawConfigService.reloadConfig();
@@ -83,7 +69,7 @@ export async function bootstrap({
       return shutdown(err);
     }
 
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
+    cliLogger.info(`Reloaded Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
   }
 
   process.on('SIGINT', () => shutdown());
@@ -95,8 +81,30 @@ export async function bootstrap({
   }
 
   try {
+    const { preboot } = await root.preboot();
+
+    // If setup is on hold then preboot server is supposed to serve user requests and we can let
+    // dev parent process know that we are ready for dev mode.
+    const isSetupOnHold = preboot.isSetupOnHold();
+    if (process.send && isSetupOnHold) {
+      process.send(['SERVER_LISTENING']);
+    }
+
+    if (isSetupOnHold) {
+      root.logger.get().info('Holding setup until preboot stage is completed.');
+      const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
+      if (shouldReloadConfig) {
+        await reloadConfiguration('configuration might have changed during preboot stage');
+      }
+    }
+
     await root.setup();
     await root.start();
+
+    // Notify parent process if we haven't done that yet during preboot stage.
+    if (process.send && !isSetupOnHold) {
+      process.send(['SERVER_LISTENING']);
+    }
   } catch (err) {
     await shutdown(err);
   }

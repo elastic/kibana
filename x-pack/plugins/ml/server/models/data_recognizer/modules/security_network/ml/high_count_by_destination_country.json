@@ -1,0 +1,35 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "Security: Network - looks for an unusually large spike in network activity to one destination country in the network logs. This could be due to unusually large amounts of reconnaissance or enumeration traffic. Data exfiltration activity may also produce such a surge in traffic to a destination country which does not normally appear in network traffic or business work-flows. Malware instances and persistence mechanisms may communicate with command-and-control (C2) infrastructure in their country of origin, which may be an unusual destination country for the source network.",
+  "groups": [
+    "security",
+    "network"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_non_zero_count by \"destination.geo.country_name\"",
+        "function": "high_non_zero_count",
+        "by_field_name": "destination.geo.country_name",
+        "detector_index": 0
+      }
+    ],
+    "influencers": [
+      "destination.geo.country_name",
+      "destination.as.organization.name",
+      "source.ip",
+      "destination.ip"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-network"
+  }
+}

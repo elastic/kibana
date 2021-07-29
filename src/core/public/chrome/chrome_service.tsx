@@ -24,7 +24,6 @@ import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 import {
   ChromeBadge,
   ChromeBrand,
@@ -35,10 +34,14 @@ import {
   ChromeUserBanner,
 } from './types';
 
+export type { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
+
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
+const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
+  kibanaVersion: string;
 }
 
 interface StartDeps {
@@ -115,6 +118,16 @@ export class ChromeService {
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
+    const getKbnVersionClass = () => {
+      // we assume that the version is valid and has the form 'X.X.X'
+      // strip out `SNAPSHOT` and reformat to 'X-X-X'
+      const formattedVersionClass = this.params.kibanaVersion
+        .replace(SNAPSHOT_REGEX, '')
+        .split('.')
+        .join('-');
+      return `kbnVersion-${formattedVersionClass}`;
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!]).pipe(
       map(([headerBanner, isVisible]) => {
@@ -122,6 +135,7 @@ export class ChromeService {
           'kbnBody',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
+          getKbnVersionClass(),
         ];
       })
     );

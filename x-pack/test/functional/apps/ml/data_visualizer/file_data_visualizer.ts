@@ -223,6 +223,7 @@ export default function ({ getService }: FtrProviderContext) {
               fieldRow.docCountFormatted,
               fieldRow.topValuesCount,
               false,
+              false,
               false
             );
           }
@@ -269,6 +270,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('imports the file');
           await ml.dataVisualizerFileBased.startImportAndWaitForProcessing();
+
+          await ml.testExecution.logTestStep('creates filebeat config');
+          await ml.dataVisualizerFileBased.selectCreateFilebeatConfig();
+
+          await ml.testExecution.logTestStep('closes filebeat config');
+          await ml.dataVisualizerFileBased.closeCreateFilebeatConfig();
         });
       });
     }

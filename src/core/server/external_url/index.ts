@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { ExternalUrlConfig, IExternalUrlConfig, IExternalUrlPolicy } from './external_url_config';
-export { ExternalUrlConfigType, config } from './config';
+export { ExternalUrlConfig } from './external_url_config';
+export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url_config';
+export { config } from './config';
+export type { ExternalUrlConfigType } from './config';

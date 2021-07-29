@@ -9,7 +9,7 @@
 export { TimefilterService, TimefilterSetup } from './timefilter_service';
 
 export * from './types';
-export { Timefilter, TimefilterContract } from './timefilter';
+export { Timefilter, TimefilterContract, AutoRefreshDoneFn } from './timefilter';
 export { TimeHistory, TimeHistoryContract } from './time_history';
 export { changeTimeFilter, convertRangeFilterToTimeRangeString } from './lib/change_time_filter';
 export { extractTimeFilter, extractTimeRange } from './lib/extract_time_filter';

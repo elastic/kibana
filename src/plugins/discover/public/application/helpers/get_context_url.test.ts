@@ -12,19 +12,32 @@ const filterManager = ({
   getGlobalFilters: () => [],
   getAppFilters: () => [],
 } as unknown) as FilterManager;
+const addBasePath = (path: string) => `/base${path}`;
 
 describe('Get context url', () => {
   test('returning a valid context url', async () => {
-    const url = await getContextUrl('docId', 'ipId', ['test1', 'test2'], filterManager);
+    const url = await getContextUrl(
+      'docId',
+      'ipId',
+      ['test1', 'test2'],
+      filterManager,
+      addBasePath
+    );
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
+      `"/base/app/discover#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
     );
   });
 
   test('returning a valid context url when docId contains whitespace', async () => {
-    const url = await getContextUrl('doc Id', 'ipId', ['test1', 'test2'], filterManager);
+    const url = await getContextUrl(
+      'doc Id',
+      'ipId',
+      ['test1', 'test2'],
+      filterManager,
+      addBasePath
+    );
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/doc%20Id?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
+      `"/base/app/discover#/context/ipId/doc%20Id?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
     );
   });
 });

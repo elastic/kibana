@@ -21,7 +21,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('canvas/filter');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/filter');
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-b5618217-56d2-47fa-b756-1be2306cda68/page/1',

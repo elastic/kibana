@@ -5,7 +5,10 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+
+    // the plugin contains some heavy json files
+    "resolveJsonModule": false,
   },
   "include": [
     "../../../typings/**/*",
@@ -19,13 +22,6 @@
     "storybook/**/*",
     "tasks/mocks/*",
     "types/**/*",
-    "**/*.json",
-  ],
-  "exclude": [
-      // these files are too large and upset tsc, so we exclude them
-     "server/sample_data/*.json",
-     "canvas_plugin_src/functions/server/demodata/*.json",
-     "shareable_runtime/test/workpads/*.json",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
@@ -35,6 +31,12 @@
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/expressions/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_error/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_image/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_metric/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_repeat_image/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_reveal_image/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_shape/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/inspector/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },

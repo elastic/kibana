@@ -26,12 +26,13 @@ export function mapNodesInfo(
   clusterStats?: ElasticsearchModifiedSource,
   nodesShardCount?: { nodes: { [nodeId: string]: { shardCount: number } } }
 ) {
-  const clusterState = clusterStats?.cluster_state ?? { nodes: {} };
+  const clusterState =
+    clusterStats?.cluster_state ?? clusterStats?.elasticsearch?.cluster?.stats?.state;
 
   return nodeHits.reduce((prev, node) => {
     const sourceNode = node._source.source_node || node._source.elasticsearch?.node;
 
-    const calculatedNodeType = calculateNodeType(sourceNode, clusterState.master_node);
+    const calculatedNodeType = calculateNodeType(sourceNode, clusterState?.master_node);
     const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(
       sourceNode,
       calculatedNodeType
@@ -40,13 +41,13 @@ export function mapNodesInfo(
     if (!uuid) {
       return prev;
     }
-    const isOnline = !isUndefined(clusterState.nodes ? clusterState.nodes[uuid] : undefined);
+    const isOnline = !isUndefined(clusterState?.nodes ? clusterState.nodes[uuid] : undefined);
 
     return {
       ...prev,
       [uuid]: {
         name: sourceNode?.name,
-        transport_address: sourceNode?.transport_address,
+        transport_address: node._source.service?.address ?? sourceNode?.transport_address,
         type: nodeType,
         isOnline,
         nodeTypeLabel,

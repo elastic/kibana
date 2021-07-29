@@ -6,78 +6,97 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
-  WorkloadAggregation,
+  TaskTypeAggregation,
+  WorkloadAggregationResponse,
+  ScheduleDensityHistogram,
   createWorkloadAggregator,
   padBuckets,
   estimateRecurringTaskScheduling,
 } from './workload_statistics';
 import { ConcreteTaskInstance } from '../task';
-import { AggregationResultOf, ESSearchResponse } from '../../../../typings/elasticsearch';
+
 import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
 import { of, Subject } from 'rxjs';
 import { sleep } from '../test_utils';
+import { estypes } from '@elastic/elasticsearch';
 
-type MockESResult = ESSearchResponse<
-  ConcreteTaskInstance,
-  {
-    body: WorkloadAggregation;
-  }
->;
+type ResponseWithAggs = Omit<estypes.SearchResponse<ConcreteTaskInstance>, 'aggregations'> & {
+  aggregations: WorkloadAggregationResponse;
+};
+
+const asApiResponse = (body: ResponseWithAggs) =>
+  elasticsearchServiceMock
+    .createSuccessTransportRequestPromise(body as estypes.SearchResponse<ConcreteTaskInstance>)
+    .then((res) => res.body as ResponseWithAggs);
 
 describe('Workload Statistics Aggregator', () => {
   test('queries the Task Store at a fixed interval for the current workload', async () => {
     const taskStore = taskStoreMock.create({});
-    taskStore.aggregate.mockResolvedValue({
-      hits: {
-        hits: [],
-        max_score: 0,
-        total: { value: 0, relation: 'eq' },
-      },
-      took: 1,
-      timed_out: false,
-      _shards: {
-        total: 1,
-        successful: 1,
-        skipped: 1,
-        failed: 0,
-      },
-      aggregations: {
-        taskType: {
-          buckets: [],
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
+    taskStore.aggregate.mockResolvedValue(
+      asApiResponse({
+        hits: {
+          hits: [],
+          max_score: 0,
+          total: { value: 0, relation: 'eq' },
         },
-        schedule: {
-          buckets: [],
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
+        took: 1,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 1,
+          failed: 0,
         },
-        idleTasks: {
-          doc_count: 0,
-          overdue: {
+        aggregations: {
+          taskType: {
+            buckets: [],
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+          },
+          schedule: {
+            buckets: [],
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+          },
+          nonRecurringTasks: {
+            doc_count: 13,
+          },
+          ownerIds: {
+            value: 1,
+          },
+          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
+          // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
+          // @ts-expect-error
+          idleTasks: {
             doc_count: 0,
-          },
-          scheduleDensity: {
-            buckets: [
-              {
-                key: '2020-10-02T15:18:37.274Z-2020-10-02T15:19:36.274Z',
-                from: 1.601651917274e12,
-                from_as_string: '2020-10-02T15:18:37.274Z',
-                to: 1.601651976274e12,
-                to_as_string: '2020-10-02T15:19:36.274Z',
+            overdue: {
+              doc_count: 0,
+              nonRecurring: {
                 doc_count: 0,
-                histogram: {
-                  buckets: [],
-                },
               },
-            ],
+            },
+            scheduleDensity: {
+              buckets: [
+                {
+                  key: '2020-10-02T15:18:37.274Z-2020-10-02T15:19:36.274Z',
+                  from: 1.601651917274e12,
+                  from_as_string: '2020-10-02T15:18:37.274Z',
+                  to: 1.601651976274e12,
+                  to_as_string: '2020-10-02T15:19:36.274Z',
+                  doc_count: 0,
+                  histogram: {
+                    buckets: [],
+                  },
+                },
+              ],
+            },
           },
         },
-      },
-    } as MockESResult);
+      })
+    );
 
     const workloadAggregator = createWorkloadAggregator(
       taskStore,
@@ -92,7 +111,7 @@ describe('Workload Statistics Aggregator', () => {
         expect(taskStore.aggregate).toHaveBeenCalledWith({
           aggs: {
             taskType: {
-              terms: { field: 'task.taskType' },
+              terms: { size: 100, field: 'task.taskType' },
               aggs: {
                 status: {
                   terms: { field: 'task.status' },
@@ -102,6 +121,14 @@ describe('Workload Statistics Aggregator', () => {
             schedule: {
               terms: {
                 field: 'task.schedule.interval',
+              },
+            },
+            nonRecurringTasks: {
+              missing: { field: 'task.schedule' },
+            },
+            ownerIds: {
+              cardinality: {
+                field: 'task.ownerId',
               },
             },
             idleTasks: {
@@ -136,6 +163,11 @@ describe('Workload Statistics Aggregator', () => {
                       'task.runAt': { lt: 'now' },
                     },
                   },
+                  aggs: {
+                    nonRecurring: {
+                      missing: { field: 'task.schedule' },
+                    },
+                  },
                 },
               },
             },
@@ -146,8 +178,8 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
-  const mockAggregatedResult: () => MockESResult = () =>
-    ({
+  const mockAggregatedResult = () =>
+    asApiResponse({
       hits: {
         hits: [],
         max_score: 0,
@@ -228,10 +260,22 @@ describe('Workload Statistics Aggregator', () => {
             },
           ],
         },
+        nonRecurringTasks: {
+          doc_count: 13,
+        },
+        ownerIds: {
+          value: 1,
+        },
+        // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
+        // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
+        // @ts-expect-error
         idleTasks: {
           doc_count: 13,
           overdue: {
             doc_count: 6,
+            nonRecurring: {
+              doc_count: 6,
+            },
           },
           scheduleDensity: {
             buckets: [
@@ -240,7 +284,7 @@ describe('Workload Statistics Aggregator', () => {
           },
         },
       },
-    } as MockESResult);
+    });
 
   test('returns a summary of the workload by task type', async () => {
     const taskStore = taskStoreMock.create({});
@@ -440,16 +484,20 @@ describe('Workload Statistics Aggregator', () => {
     const taskStore = taskStoreMock.create({});
     taskStore.aggregate
       .mockResolvedValueOnce(
-        setTaskTypeCount(mockAggregatedResult(), 'alerting_telemetry', {
-          idle: 2,
-        })
+        mockAggregatedResult().then((res) =>
+          setTaskTypeCount(res, 'alerting_telemetry', {
+            idle: 2,
+          })
+        )
       )
       .mockRejectedValueOnce(new Error('Elasticsearch has gone poof'))
       .mockResolvedValueOnce(
-        setTaskTypeCount(mockAggregatedResult(), 'alerting_telemetry', {
-          idle: 1,
-          failed: 1,
-        })
+        mockAggregatedResult().then((res) =>
+          setTaskTypeCount(res, 'alerting_telemetry', {
+            idle: 1,
+            failed: 1,
+          })
+        )
       );
     const logger = loggingSystemMock.create().get();
     const workloadAggregator = createWorkloadAggregator(taskStore, of(true), 10, 3000, logger);
@@ -479,6 +527,115 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
+  test('returns an estimate of the workload by task type', async () => {
+    // poll every 3 seconds
+    const pollingIntervalInSeconds = 3;
+
+    const taskStore = taskStoreMock.create({});
+    taskStore.aggregate.mockResolvedValue(
+      asApiResponse({
+        hits: {
+          hits: [],
+          max_score: 0,
+          total: { value: 4, relation: 'eq' },
+        },
+        took: 1,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 1,
+          failed: 0,
+        },
+        aggregations: {
+          schedule: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              // repeats each cycle
+              {
+                key: `${pollingIntervalInSeconds}s`,
+                doc_count: 1,
+              },
+              {
+                key: `10s`, // 6 times per minute
+                doc_count: 20,
+              },
+              {
+                key: `60s`, // 1 times per minute
+                doc_count: 10,
+              },
+              {
+                key: '15m', // 4 times per hour
+                doc_count: 90,
+              },
+              {
+                key: '720m', // 2 times per day
+                doc_count: 10,
+              },
+              {
+                key: '3h', // 8 times per day
+                doc_count: 100,
+              },
+            ],
+          },
+          taskType: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          nonRecurringTasks: {
+            doc_count: 13,
+          },
+          ownerIds: {
+            value: 3,
+          },
+          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+          // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
+          // @ts-expect-error
+          idleTasks: {
+            doc_count: 13,
+            overdue: {
+              doc_count: 6,
+              nonRecurring: {
+                doc_count: 0,
+              },
+            },
+            scheduleDensity: {
+              buckets: [
+                mockHistogram(0, 7 * 3000 + 500, 60 * 1000, 3000, [2, 2, 5, 0, 0, 0, 0, 0, 0, 1]),
+              ],
+            },
+          },
+        },
+      })
+    );
+
+    const workloadAggregator = createWorkloadAggregator(
+      taskStore,
+      of(true),
+      10,
+      pollingIntervalInSeconds * 1000,
+      loggingSystemMock.create().get()
+    );
+
+    return new Promise<void>((resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+
+        expect(result.value).toMatchObject({
+          capacity_requirements: {
+            // these are buckets of required capacity, rather than aggregated requirmenets.
+            per_minute: 150,
+            per_hour: 360,
+            per_day: 820,
+          },
+        });
+        resolve();
+      });
+    });
+  });
+
   test('recovery after errors occurrs at the next interval', async () => {
     const refreshInterval = 1000;
 
@@ -502,7 +659,7 @@ describe('Workload Statistics Aggregator', () => {
           reject(new Error(`Elasticsearch is still poof`));
         }
 
-        return setTaskTypeCount(mockAggregatedResult(), 'alerting_telemetry', {
+        return setTaskTypeCount(await mockAggregatedResult(), 'alerting_telemetry', {
           idle: 2,
         });
       });
@@ -635,6 +792,7 @@ describe('padBuckets', () => {
         to: 1601668108128,
         to_as_string: '2020-10-02T19:48:28.128Z',
         doc_count: 0,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [],
         },
@@ -651,6 +809,7 @@ describe('padBuckets', () => {
         to: 1601668076000,
         to_as_string: '2020-10-02T19:47:56.000Z',
         doc_count: 3,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -728,6 +887,7 @@ describe('padBuckets', () => {
         to: 1601671213000,
         to_as_string: '2020-10-02T20:40:13.000Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -757,6 +917,7 @@ describe('padBuckets', () => {
         to: 1601671245793,
         to_as_string: '2020-10-02T20:40:45.793Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -786,6 +947,7 @@ describe('padBuckets', () => {
         to: 1612260572161,
         to_as_string: '2021-02-02T10:09:32.161Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -898,16 +1060,12 @@ describe('padBuckets', () => {
 });
 
 function setTaskTypeCount(
-  { aggregations }: MockESResult,
+  { aggregations, ...rest }: ResponseWithAggs,
   taskType: string,
   status: Record<string, number>
 ) {
-  const taskTypes = aggregations!.taskType as AggregationResultOf<
-    WorkloadAggregation['aggs']['taskType'],
-    {}
-  >;
   const buckets = [
-    ...taskTypes.buckets.filter(({ key }) => key !== taskType),
+    ...(aggregations.taskType as TaskTypeAggregation).buckets.filter(({ key }) => key !== taskType),
     {
       key: taskType,
       doc_count: Object.values(status).reduce((sum, count) => sum + count, 0),
@@ -920,9 +1078,14 @@ function setTaskTypeCount(
       },
     },
   ];
-  return ({
+  return {
+    ...rest,
     hits: {
-      total: { value: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0) },
+      ...rest.hits,
+      total: {
+        value: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
+        relation: 'eq' as estypes.SearchTotalHitsRelation,
+      },
     },
     aggregations: {
       ...aggregations,
@@ -931,7 +1094,7 @@ function setTaskTypeCount(
         buckets,
       },
     },
-  } as {}) as MockESResult;
+  };
 }
 
 /** *
@@ -951,7 +1114,7 @@ function mockHistogram(
   to: number,
   interval: number,
   foundBuckets: Array<number | undefined>
-) {
+): ScheduleDensityHistogram {
   const now = Date.now();
   const fromDate = new Date(now + from);
   const toDate = new Date(now + to);

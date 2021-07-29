@@ -7,73 +7,112 @@
  */
 
 import { get } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
-import { unset } from '@kbn/std';
-import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
+import {
+  ConfigDeprecation,
+  AddConfigDeprecation,
+  ConfigDeprecationFactory,
+  DeprecatedConfigDetails,
+  ConfigDeprecationCommand,
+} from './types';
 
 const _rename = (
   config: Record<string, any>,
   rootPath: string,
-  log: ConfigDeprecationLogger,
+  addDeprecation: AddConfigDeprecation,
   oldKey: string,
   newKey: string,
-  silent?: boolean
-) => {
+  details?: Partial<DeprecatedConfigDetails>
+): void | ConfigDeprecationCommand => {
   const fullOldPath = getPath(rootPath, oldKey);
   const oldValue = get(config, fullOldPath);
   if (oldValue === undefined) {
-    return config;
+    return;
   }
-
-  unset(config, fullOldPath);
 
   const fullNewPath = getPath(rootPath, newKey);
   const newValue = get(config, fullNewPath);
   if (newValue === undefined) {
-    set(config, fullNewPath, oldValue);
-
-    if (!silent) {
-      log(`"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`);
-    }
+    addDeprecation({
+      message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`,
+      correctiveActions: {
+        manualSteps: [
+          `Replace "${fullOldPath}" with "${fullNewPath}" in the Kibana config file, CLI flag, or environment variable (in Docker only).`,
+        ],
+      },
+      ...details,
+    });
+    return {
+      set: [{ path: fullNewPath, value: oldValue }],
+      unset: [{ path: fullOldPath }],
+    };
   } else {
-    if (!silent) {
-      log(
-        `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`
-      );
-    }
+    addDeprecation({
+      message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`,
+      correctiveActions: {
+        manualSteps: [
+          `Make sure "${fullNewPath}" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).`,
+          `Remove "${fullOldPath}" from the config.`,
+        ],
+      },
+      ...details,
+    });
   }
-  return config;
+
+  return {
+    unset: [{ path: fullOldPath }],
+  };
 };
 
 const _unused = (
   config: Record<string, any>,
   rootPath: string,
-  log: ConfigDeprecationLogger,
-  unusedKey: string
-) => {
+  addDeprecation: AddConfigDeprecation,
+  unusedKey: string,
+  details?: Partial<DeprecatedConfigDetails>
+): void | ConfigDeprecationCommand => {
   const fullPath = getPath(rootPath, unusedKey);
   if (get(config, fullPath) === undefined) {
-    return config;
+    return;
   }
-  unset(config, fullPath);
-  log(`${fullPath} is deprecated and is no longer used`);
-  return config;
+  addDeprecation({
+    message: `${fullPath} is deprecated and is no longer used`,
+    correctiveActions: {
+      manualSteps: [
+        `Remove "${fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only)`,
+      ],
+    },
+    ...details,
+  });
+  return {
+    unset: [{ path: fullPath }],
+  };
 };
 
-const rename = (oldKey: string, newKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _rename(config, rootPath, log, oldKey, newKey);
+const rename = (
+  oldKey: string,
+  newKey: string,
+  details?: Partial<DeprecatedConfigDetails>
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _rename(config, rootPath, addDeprecation, oldKey, newKey, details);
 
-const renameFromRoot = (oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation => (
-  config,
-  rootPath,
-  log
-) => _rename(config, '', log, oldKey, newKey, silent);
+const renameFromRoot = (
+  oldKey: string,
+  newKey: string,
+  details?: Partial<DeprecatedConfigDetails>
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _rename(config, '', addDeprecation, oldKey, newKey, details);
 
-const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, rootPath, log, unusedKey);
+const unused = (
+  unusedKey: string,
+  details?: Partial<DeprecatedConfigDetails>
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _unused(config, rootPath, addDeprecation, unusedKey, details);
 
-const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, '', log, unusedKey);
+const unusedFromRoot = (
+  unusedKey: string,
+  details?: Partial<DeprecatedConfigDetails>
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _unused(config, '', addDeprecation, unusedKey, details);
 
 const getPath = (rootPath: string, subPath: string) =>
   rootPath !== '' ? `${rootPath}.${subPath}` : subPath;

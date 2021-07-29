@@ -12,21 +12,21 @@ import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/p
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-
-import { createVisTypeXyVisFn } from './xy_vis_fn';
 import {
   setDataActions,
   setFormatService,
   setThemeService,
-  setTimefilter,
   setUISettings,
   setDocLinks,
   setPalettesService,
   setTrackUiMetric,
 } from './services';
+
 import { visTypesDefinitions } from './vis_types';
-import { LEGACY_CHARTS_LIBRARY } from '../common';
+import { LEGACY_CHARTS_LIBRARY } from '../common/';
 import { xyVisRenderer } from './vis_renderer';
+
+import * as expressionFunctions from './expression_functions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
@@ -67,8 +67,18 @@ export class VisTypeXyPlugin
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
       setPalettesService(charts.palettes);
-      [createVisTypeXyVisFn].forEach(expressions.registerFunction);
+
       expressions.registerRenderer(xyVisRenderer);
+      expressions.registerFunction(expressionFunctions.visTypeXyVisFn);
+      expressions.registerFunction(expressionFunctions.categoryAxis);
+      expressions.registerFunction(expressionFunctions.timeMarker);
+      expressions.registerFunction(expressionFunctions.valueAxis);
+      expressions.registerFunction(expressionFunctions.seriesParam);
+      expressions.registerFunction(expressionFunctions.thresholdLine);
+      expressions.registerFunction(expressionFunctions.label);
+      expressions.registerFunction(expressionFunctions.visScale);
+      expressions.registerFunction(expressionFunctions.xyDimension);
+
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }
 
@@ -80,7 +90,6 @@ export class VisTypeXyPlugin
   public start(core: CoreStart, { data }: VisTypeXyPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
-    setTimefilter(data.query.timefilter.timefilter);
     setDocLinks(core.docLinks);
 
     return {};

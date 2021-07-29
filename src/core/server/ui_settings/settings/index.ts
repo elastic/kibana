@@ -15,14 +15,20 @@ import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
 
-export const getCoreSettings = (): Record<string, UiSettingsParams> => {
+interface GetCoreSettingsOptions {
+  isDist?: boolean;
+}
+
+export const getCoreSettings = (
+  options?: GetCoreSettingsOptions
+): Record<string, UiSettingsParams> => {
   return {
     ...getAccessibilitySettings(),
     ...getDateFormatSettings(),
     ...getMiscUiSettings(),
     ...getNavigationSettings(),
     ...getNotificationsSettings(),
-    ...getThemeSettings(),
+    ...getThemeSettings(options),
     ...getStateSettings(),
   };
 };

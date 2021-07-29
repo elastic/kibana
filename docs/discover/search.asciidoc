@@ -1,13 +1,15 @@
 [[search]]
-== Search data
-Many Kibana apps embed a query bar for real-time search, including
-*Discover* and *Dashboard*.
+== Search your data
+
+You can search your data in any app that has a query bar, or by clicking on
+elements in a visualization.  A search matches indices in the current
+<<index-patterns, index pattern>> and in the current <<set-time-filter,time frame>>.
+
 
 [float]
-=== Search your data
+=== Search with KQL
 
-To search the indices that match the current <<index-patterns, index pattern>>,
-enter your search criteria in the query bar. By default, you'll use
+By default, you search using
 {kib}'s <<kuery-query, standard query language>> (KQL), which
 features autocomplete and a simple, easy-to-use syntax. If you prefer to use
 {kib}'s legacy query
@@ -21,32 +23,17 @@ JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
 [float]
 [[autorefresh]]
 === Refresh search results
-As more documents are added to the indices you're searching, the search results
-shown in *Discover*, and used to display visualizations, get stale. Using the
-time filter, you can
+As more documents are added to the indices you're searching, the search results get stale.
+Using the time filter, you can
 configure a refresh interval to periodically resubmit your searches to
 retrieve the latest results.
 
 [role="screenshot"]
-image::images/autorefresh-interval.png[Image showing what refresh interval option looks like. The configurable time interval is located in the dropdown]
+image::images/autorefresh-interval.png[Refresh interval option in time filter. The configurable time interval is located in the dropdown.]
 
 You can also manually refresh the search results by
 clicking the *Refresh* button.
 
-[float]
-=== Searching large amounts of data
-
-Sometimes you want to search through large amounts of data no matter how long
-the search takes.  While this might not happen often, there are times
-that long-running queries are required.  Consider a threat hunting scenario
-where you need to search through years of data.
-
-If you run a query, and the run time gets close to the
-timeout, you're presented the option to ignore the timeout.  This enables you to
-run queries with large amounts of data to completion.
-
-By default, a query times out after 30 seconds.
-The timeout is in place to avoid unintentional load on the cluster.
 
 
 include::kuery.asciidoc[]
@@ -123,7 +110,7 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 ==== Save a search
 To save the current search:
 
-. Click *Save* in the Kibana toolbar.
+. Click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
 
 To import, export, and delete saved searches, open the main menu,
@@ -132,7 +119,7 @@ then click *Stack Management > Saved Objects*.
 ==== Open a saved search
 To load a saved search into Discover:
 
-. Click *Open* in the Kibana toolbar.
+. Click *Open* in the toolbar.
 . Select the search you want to open.
 
 If the saved search is associated with a different index pattern than is currently
@@ -211,3 +198,5 @@ To completely delete a query:
 image::discover/images/saved-query-management-component-delete-query-button.png["Example of the saved query management popover when a query is hovered over and we are about to delete a query",width="80%"]
 
 You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.
+
+include::search-sessions.asciidoc[]

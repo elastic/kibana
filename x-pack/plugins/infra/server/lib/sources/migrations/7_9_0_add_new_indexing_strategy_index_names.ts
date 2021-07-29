@@ -6,11 +6,15 @@
  */
 
 import { SavedObjectMigrationFn } from 'src/core/server';
-import { InfraSourceConfiguration } from '../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
+
+type SevenNineZeroSourceConfig = Omit<InfraSourceConfiguration, 'logIndices'> & {
+  logAlias: string;
+};
 
 export const addNewIndexingStrategyIndexNames: SavedObjectMigrationFn<
-  InfraSourceConfiguration,
-  InfraSourceConfiguration
+  SevenNineZeroSourceConfig,
+  SevenNineZeroSourceConfig
 > = (sourceConfigurationDocument) => {
   const oldLogAliasSegments = sourceConfigurationDocument.attributes.logAlias.split(',');
   const oldMetricAliasSegments = sourceConfigurationDocument.attributes.metricAlias.split(',');

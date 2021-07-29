@@ -10,7 +10,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 
+import { useParams } from 'react-router-dom';
 import * as i18n from '../translations';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 interface Props {
   title?: string | null;
@@ -24,6 +26,12 @@ export const DELETE_TIMELINE_MODAL_WIDTH = 600; // px
  * Renders a modal that confirms deletion of a timeline
  */
 export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDelete }) => {
+  const { tabName } = useParams<{ tabName: TimelineType }>();
+  const warning =
+    tabName === TimelineType.template
+      ? i18n.DELETE_TIMELINE_TEMPLATE_WARNING
+      : i18n.DELETE_TIMELINE_WARNING;
+
   const getTitle = useCallback(() => {
     const trimmedTitle = title != null ? title.trim() : '';
     const titleResult = !isEmpty(trimmedTitle) ? trimmedTitle : i18n.UNTITLED_TIMELINE;
@@ -48,7 +56,7 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
       onConfirm={onDelete}
       title={getTitle()}
     >
-      <div data-test-subj="warning">{i18n.DELETE_WARNING}</div>
+      <div data-test-subj="warning">{warning}</div>
     </EuiConfirmModal>
   );
 });

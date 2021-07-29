@@ -9,10 +9,12 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiComboBox, EuiFieldText } from '@elastic/eui';
+import { EuiComboBox, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { AttributeSelector, AttributeName } from './attribute_selector';
-import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
+import { AttributeName } from '../types';
+
+import { AttributeSelector } from './attribute_selector';
+import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL, REQUIRED_LABEL } from './constants';
 
 const handleAttributeSelectorChange = jest.fn();
 const handleAttributeValueChange = jest.fn();
@@ -21,6 +23,7 @@ const handleAuthProviderChange = jest.fn();
 const baseProps = {
   attributeName: 'username' as AttributeName,
   attributeValue: 'Something',
+  attributeValueInvalid: false,
   attributes: ['a', 'b', 'c'],
   availableAuthProviders: ['ees_saml', 'kbn_saml'],
   selectedAuthProviders: ['ees_saml'],
@@ -37,14 +40,6 @@ describe('AttributeSelector', () => {
     const wrapper = shallow(<AttributeSelector {...baseProps} />);
 
     expect(wrapper.find('[data-test-subj="AttributeSelector"]').exists()).toBe(true);
-  });
-
-  it('renders disabled panel with className', () => {
-    const wrapper = shallow(<AttributeSelector {...baseProps} disabled />);
-
-    expect(wrapper.find('[data-test-subj="AttributeSelector"]').prop('className')).toEqual(
-      'euiPanel--disabled'
-    );
   });
 
   describe('Auth Providers', () => {
@@ -120,6 +115,14 @@ describe('AttributeSelector', () => {
       expect(handleAuthProviderChange).toHaveBeenCalledWith(['kbn_saml']);
     });
 
+    it('should call the "handleAuthProviderChange" prop with fallback when a value not present', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} />);
+      const select = findAuthProvidersSelect(wrapper);
+      select.simulate('change', [{ label: 'kbn_saml' }]);
+
+      expect(handleAuthProviderChange).toHaveBeenCalledWith(['']);
+    });
+
     it('should call the "handleAttributeSelectorChange" prop when a value is selected', () => {
       const wrapper = shallow(<AttributeSelector {...baseProps} />);
       const select = wrapper.find('[data-test-subj="ExternalAttributeSelect"]');
@@ -162,6 +165,13 @@ describe('AttributeSelector', () => {
         'kbn_saml',
         baseProps.elasticsearchRoles[0]
       );
+    });
+
+    it('shows helpText when attributeValueInvalid', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} attributeValueInvalid />);
+      const formRow = wrapper.find(EuiFormRow).at(2);
+
+      expect(formRow.prop('helpText')).toEqual(REQUIRED_LABEL);
     });
   });
 });

@@ -21,8 +21,8 @@ const NetworkTimingsType = t.type({
 });
 
 const CertificateDataType = t.partial({
-  validFrom: t.number,
-  validTo: t.number,
+  validFrom: t.string,
+  validTo: t.string,
   issuer: t.string,
   subjectName: t.string,
 });
@@ -35,16 +35,16 @@ const NetworkEventType = t.intersection([
     url: t.string,
   }),
   t.partial({
-    bytesDownloadedCompressed: t.number,
     certificates: CertificateDataType,
     ip: t.string,
     method: t.string,
     status: t.number,
     mimeType: t.string,
-    requestStartTime: t.number,
     responseHeaders: t.record(t.string, t.string),
     requestHeaders: t.record(t.string, t.string),
     timings: NetworkTimingsType,
+    transferSize: t.number,
+    resourceSize: t.number,
   }),
 ]);
 
@@ -55,6 +55,7 @@ export type NetworkEvent = t.TypeOf<typeof NetworkEventType>;
 export const SyntheticsNetworkEventsApiResponseType = t.type({
   events: t.array(NetworkEventType),
   total: t.number,
+  isWaterfallSupported: t.boolean,
 });
 
 export type SyntheticsNetworkEventsApiResponse = t.TypeOf<

@@ -9,7 +9,22 @@ exports[`is rendered 1`] = `
     height={250}
     language="loglang"
     onChange={[Function]}
-    options={Object {}}
+    options={
+      Object {
+        "matchBrackets": "never",
+        "minimap": Object {
+          "enabled": false,
+        },
+        "renderLineHighlight": "none",
+        "scrollBeyondLastLine": false,
+        "scrollbar": Object {
+          "useShadows": false,
+        },
+        "wordBasedSuggestions": false,
+        "wordWrap": "on",
+        "wrappingIndent": "indent",
+      }
+    }
     overrideServices={Object {}}
     theme="euiColors"
     value="
@@ -25,6 +40,7 @@ exports[`is rendered 1`] = `
     nodeType="div"
     onResize={[Function]}
     querySelector={null}
+    refreshMode="debounce"
     refreshRate={1000}
     skipOnMount={false}
     targetDomEl={null}

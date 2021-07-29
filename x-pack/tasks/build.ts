@@ -76,6 +76,7 @@ async function copySourceAndBabelify() {
           '**/node_modules/**',
           '**/public/**/*.{js,ts,tsx,json}',
           '**/{__tests__,__mocks__,__snapshots__}/**',
+          'plugins/*/target/**',
           'plugins/canvas/shareable_runtime/test/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
         ],
@@ -94,12 +95,16 @@ async function copySourceAndBabelify() {
 }
 
 async function buildCanvasShareableRuntime() {
-  await execa(process.execPath, ['plugins/canvas/scripts/shareable_runtime'], {
-    cwd: XPACK_DIR,
-    stdio: ['ignore', 'inherit', 'inherit'],
-    // @ts-ignore Incorrect @types - execa supports `buffer`
-    buffer: false,
-  });
+  await execa(
+    process.execPath,
+    ['--preserve-symlinks', 'plugins/canvas/scripts/shareable_runtime'],
+    {
+      cwd: XPACK_DIR,
+      stdio: ['ignore', 'inherit', 'inherit'],
+      // @ts-ignore Incorrect @types - execa supports `buffer`
+      buffer: false,
+    }
+  );
 }
 
 async function generateNoticeText() {

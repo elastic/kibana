@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
+import type { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 
 export class SubFeaturePrivilegeGroup {

@@ -5,39 +5,52 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClient } from 'kibana/server';
+import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
+
+import type { FleetConfigType } from '../../common/types';
 import * as AgentService from '../services/agents';
 import { isFleetServerSetup } from '../services/fleet_server';
 
 export interface AgentUsage {
-  total: number;
-  online: number;
-  error: number;
+  total_enrolled: number;
+  healthy: number;
+  unhealthy: number;
   offline: number;
+  total_all_statuses: number;
+  updating: number;
 }
 
 export const getAgentUsage = async (
+  config: FleetConfigType,
   soClient?: SavedObjectsClient,
   esClient?: ElasticsearchClient
 ): Promise<AgentUsage> => {
   // TODO: unsure if this case is possible at all.
   if (!soClient || !esClient || !(await isFleetServerSetup())) {
     return {
-      total: 0,
-      online: 0,
-      error: 0,
+      total_enrolled: 0,
+      healthy: 0,
+      unhealthy: 0,
       offline: 0,
+      total_all_statuses: 0,
+      updating: 0,
     };
   }
 
-  const { total, online, error, offline } = await AgentService.getAgentStatusForAgentPolicy(
-    soClient,
-    esClient
-  );
-  return {
+  const {
     total,
+    inactive,
     online,
     error,
     offline,
+    updating,
+  } = await AgentService.getAgentStatusForAgentPolicy(soClient, esClient);
+  return {
+    total_enrolled: total,
+    healthy: online,
+    unhealthy: error,
+    offline,
+    total_all_statuses: total + inactive,
+    updating,
   };
 };

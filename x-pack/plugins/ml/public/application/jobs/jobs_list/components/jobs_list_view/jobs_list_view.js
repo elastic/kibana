@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEqual, debounce } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -42,6 +42,11 @@ import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/cons
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
 let deletingJobsRefreshTimeout = null;
+
+const filterJobsDebounce = debounce((jobsSummaryList, filterClauses, callback) => {
+  const ss = filterJobs(jobsSummaryList, filterClauses);
+  callback(ss);
+}, 500);
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsListView extends Component {
@@ -118,6 +123,9 @@ export class JobsListView extends Component {
       delete itemIdToExpandedRowMap[jobId];
       this.setState({ itemIdToExpandedRowMap });
     } else {
+      // Only show clear notifications button if job has warning icon due to auditMessage
+      const expandedJob = this.state.jobsSummaryList.filter((job) => job.id === jobId);
+      const showClearButton = expandedJob.length > 0 && expandedJob[0].auditMessage !== undefined;
       let itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
 
       if (this.state.fullJobsList[jobId] !== undefined) {
@@ -129,6 +137,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
+            showClearButton={showClearButton}
           />
         );
       } else {
@@ -139,6 +148,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
+            showClearButton={showClearButton}
           />
         );
       }
@@ -162,6 +172,7 @@ export class JobsListView extends Component {
                     removeYourself={this.removeUpdateFunction}
                     showFullDetails={this.props.isManagementTable !== true}
                     refreshJobList={this.onRefreshClick}
+                    showClearButton={showClearButton}
                   />
                 );
               }
@@ -221,7 +232,7 @@ export class JobsListView extends Component {
 
   refreshSelectedJobs() {
     const selectedJobsIds = this.state.selectedJobs.map((j) => j.id);
-    const filteredJobIds = this.state.filteredJobsSummaryList.map((j) => j.id);
+    const filteredJobIds = (this.state.filteredJobsSummaryList ?? []).map((j) => j.id);
 
     // refresh the jobs stored as selected
     // only select those which are also in the filtered list
@@ -232,9 +243,17 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
-  setFilters = (query) => {
-    const filterClauses = (query && query.ast && query.ast.clauses) || [];
-    const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+  setFilters = async (query) => {
+    if (query === null) {
+      this.setState(
+        { filteredJobsSummaryList: this.state.jobsSummaryList, filterClauses: [] },
+        () => {
+          this.refreshSelectedJobs();
+        }
+      );
+
+      return;
+    }
 
     this.props.onJobsViewStateUpdate(
       {
@@ -244,11 +263,30 @@ export class JobsListView extends Component {
       this._isFiltersSet === false
     );
 
-    this._isFiltersSet = true;
+    const filterClauses = (query && query.ast && query.ast.clauses) || [];
 
-    this.setState({ filteredJobsSummaryList, filterClauses }, () => {
-      this.refreshSelectedJobs();
-    });
+    if (filterClauses.length === 0) {
+      this.setState({ filteredJobsSummaryList: this.state.jobsSummaryList, filterClauses }, () => {
+        this.refreshSelectedJobs();
+      });
+      return;
+    }
+
+    if (this._isFiltersSet === true) {
+      filterJobsDebounce(this.state.jobsSummaryList, filterClauses, (jobsSummaryList) => {
+        this.setState({ filteredJobsSummaryList: jobsSummaryList, filterClauses }, () => {
+          this.refreshSelectedJobs();
+        });
+      });
+    } else {
+      // first use after page load, do not debounce.
+      const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+      this.setState({ filteredJobsSummaryList, filterClauses }, () => {
+        this.refreshSelectedJobs();
+      });
+    }
+
+    this._isFiltersSet = true;
   };
 
   onRefreshClick = () => {
@@ -521,6 +559,7 @@ export class JobsListView extends Component {
               <JobListMlAnomalyAlertFlyout
                 setShowFunction={this.setShowCreateAlertFlyoutFunction}
                 unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
+                onSave={this.onRefreshClick}
               />
             </div>
           </EuiPageContent>

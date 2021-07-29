@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
@@ -25,7 +25,8 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { PANEL_TYPES } from '../../../../common/panel_types';
+import { PANEL_TYPES } from '../../../../common/enums';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -61,6 +62,7 @@ const getAggWithOptions = (field = {}, fieldTypesRestriction) => {
           },
         ];
       case KBN_FIELD_TYPES.STRING:
+      case KBN_FIELD_TYPES.DATE:
         return [
           {
             label: i18n.translate('visTypeTimeseries.topHit.aggWithOptions.concatenate', {
@@ -90,44 +92,57 @@ const getOrderOptions = () => [
   },
 ];
 
+const AGG_WITH_KEY = 'agg_with';
 const ORDER_DATE_RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
+
+const getModelDefaults = () => ({
+  size: 1,
+  order: 'desc',
+  [AGG_WITH_KEY]: 'noop',
+});
 
 const TopHitAggUi = (props) => {
   const { fields, series, panel } = props;
-  const defaults = {
-    size: 1,
-    agg_with: 'noop',
-    order: 'desc',
-  };
-  const model = { ...defaults, ...props.model };
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const model = useMemo(() => ({ ...getModelDefaults(), ...props.model }), [props.model]);
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   const aggWithOptionsRestrictFields = [
     PANEL_TYPES.TABLE,
     PANEL_TYPES.METRIC,
     PANEL_TYPES.MARKDOWN,
   ].includes(panel.type)
-    ? [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING]
+    ? [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING, KBN_FIELD_TYPES.DATE]
     : [KBN_FIELD_TYPES.NUMBER];
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-
-  const field = fields[indexPattern].find((f) => f.name === model.field);
+  const fieldsSelector = getIndexPatternKey(indexPattern);
+  const field = fields?.[fieldsSelector]?.find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
   const htmlId = htmlIdGenerator();
 
   const selectedAggWithOption = aggWithOptions.find((option) => {
-    return model.agg_with === option.value;
+    return model[AGG_WITH_KEY] === option.value;
   });
 
   const selectedOrderOption = orderOptions.find((option) => {
     return model.order === option.value;
   });
+
+  useEffect(() => {
+    const defaultFn = aggWithOptions?.[0]?.value;
+    const aggWith = model[AGG_WITH_KEY];
+    if (aggWith && defaultFn && aggWith !== defaultFn && !selectedAggWithOption) {
+      handleChange({
+        [AGG_WITH_KEY]: defaultFn,
+      });
+    }
+  }, [model, selectedAggWithOption, aggWithOptions, handleChange]);
 
   return (
     <AggRow
@@ -156,21 +171,17 @@ const TopHitAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={aggWithOptionsRestrictFields}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={aggWithOptionsRestrictFields}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -197,7 +208,7 @@ const TopHitAggUi = (props) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            id={htmlId('agg_with')}
+            id={htmlId(AGG_WITH_KEY)}
             label={
               <FormattedMessage
                 id="visTypeTimeseries.topHit.aggregateWithLabel"
@@ -215,29 +226,27 @@ const TopHitAggUi = (props) => {
               )}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
-              onChange={handleSelectChange('agg_with')}
+              onChange={handleSelectChange(AGG_WITH_KEY)}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="topHitAggregateWithComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('order_by')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.topHit.orderByLabel"
                 defaultMessage="Order by"
               />
             }
-          >
-            <FieldSelect
-              restrict={ORDER_DATE_RESTRICT_FIELDS}
-              value={model.order_by}
-              onChange={handleSelectChange('order_by')}
-              indexPattern={indexPattern}
-              fields={fields}
-            />
-          </EuiFormRow>
+            restrict={ORDER_DATE_RESTRICT_FIELDS}
+            value={model.order_by}
+            onChange={handleSelectChange('order_by')}
+            indexPattern={indexPattern}
+            fields={fields}
+            data-test-subj="topHitOrderByFieldSelect"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow

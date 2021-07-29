@@ -87,6 +87,7 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
 
   if (!isVisible) {
@@ -98,8 +99,7 @@ export function Header({
     );
   }
 
-  const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
-  const navId = htmlIdGenerator()();
+  const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
   const Breadcrumbs = (
@@ -160,19 +160,41 @@ export function Header({
           <EuiHeader position="fixed" className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-                <EuiHeaderSectionItemButton
-                  data-test-subj="toggleNavButton"
-                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                    defaultMessage: 'Toggle primary navigation',
-                  })}
-                  onClick={() => setIsNavOpen(!isNavOpen)}
-                  aria-expanded={isNavOpen}
-                  aria-pressed={isNavOpen}
-                  aria-controls={navId}
-                  ref={toggleCollapsibleNavRef}
-                >
-                  <EuiIcon type="menu" size="m" />
-                </EuiHeaderSectionItemButton>
+                <CollapsibleNav
+                  appId$={application.currentAppId$}
+                  id={navId}
+                  isLocked={isLocked}
+                  navLinks$={observables.navLinks$}
+                  recentlyAccessed$={observables.recentlyAccessed$}
+                  isNavOpen={isNavOpen}
+                  homeHref={homeHref}
+                  basePath={basePath}
+                  navigateToApp={application.navigateToApp}
+                  navigateToUrl={application.navigateToUrl}
+                  onIsLockedUpdate={onIsLockedUpdate}
+                  closeNav={() => {
+                    setIsNavOpen(false);
+                    if (toggleCollapsibleNavRef.current) {
+                      toggleCollapsibleNavRef.current.focus();
+                    }
+                  }}
+                  customNavLink$={observables.customNavLink$}
+                  button={
+                    <EuiHeaderSectionItemButton
+                      data-test-subj="toggleNavButton"
+                      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                        defaultMessage: 'Toggle primary navigation',
+                      })}
+                      onClick={() => setIsNavOpen(!isNavOpen)}
+                      aria-expanded={isNavOpen}
+                      aria-pressed={isNavOpen}
+                      aria-controls={navId}
+                      ref={toggleCollapsibleNavRef}
+                    >
+                      <EuiIcon type="menu" size="m" />
+                    </EuiHeaderSectionItemButton>
+                  }
+                />
               </EuiHeaderSectionItem>
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
@@ -205,27 +227,6 @@ export function Header({
             </EuiHeaderSection>
           </EuiHeader>
         </div>
-
-        <CollapsibleNav
-          appId$={application.currentAppId$}
-          id={navId}
-          isLocked={isLocked}
-          navLinks$={observables.navLinks$}
-          recentlyAccessed$={observables.recentlyAccessed$}
-          isNavOpen={isNavOpen}
-          homeHref={homeHref}
-          basePath={basePath}
-          navigateToApp={application.navigateToApp}
-          navigateToUrl={application.navigateToUrl}
-          onIsLockedUpdate={onIsLockedUpdate}
-          closeNav={() => {
-            setIsNavOpen(false);
-            if (toggleCollapsibleNavRef.current) {
-              toggleCollapsibleNavRef.current.focus();
-            }
-          }}
-          customNavLink$={observables.customNavLink$}
-        />
       </header>
     </>
   );

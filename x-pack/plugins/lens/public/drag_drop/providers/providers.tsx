@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { EuiScreenReaderOnly, EuiPortal } from '@elastic/eui';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   DropIdentifier,
@@ -103,25 +103,23 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
       >
         {children}
       </ChildDragDropProvider>
-      <EuiPortal>
-        <EuiScreenReaderOnly>
-          <div>
-            <p aria-live="assertive" aria-atomic={true}>
-              {a11yMessageState}
-            </p>
-            <p id={`lnsDragDrop-keyboardInstructionsWithReorder`}>
-              {i18n.translate('xpack.lens.dragDrop.keyboardInstructionsReorder', {
-                defaultMessage: `Press space or enter to start dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
-              })}
-            </p>
-            <p id={`lnsDragDrop-keyboardInstructions`}>
-              {i18n.translate('xpack.lens.dragDrop.keyboardInstructions', {
-                defaultMessage: `Press space or enter to start dragging. When dragging, use the left/right arrow keys to move between drop targets. Press space or enter again to finish.`,
-              })}
-            </p>
-          </div>
-        </EuiScreenReaderOnly>
-      </EuiPortal>
+      <EuiScreenReaderOnly>
+        <div>
+          <p aria-live="assertive" aria-atomic={true}>
+            {a11yMessageState}
+          </p>
+          <p id={`lnsDragDrop-keyboardInstructionsWithReorder`}>
+            {i18n.translate('xpack.lens.dragDrop.keyboardInstructionsReorder', {
+              defaultMessage: `Press space or enter to start dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
+            })}
+          </p>
+          <p id={`lnsDragDrop-keyboardInstructions`}>
+            {i18n.translate('xpack.lens.dragDrop.keyboardInstructions', {
+              defaultMessage: `Press space or enter to start dragging. When dragging, use the left/right arrow keys to move between drop targets. Press space or enter again to finish.`,
+            })}
+          </p>
+        </div>
+      </EuiScreenReaderOnly>
     </div>
   );
 }
@@ -137,11 +135,31 @@ export function nextValidDropTarget(
     return;
   }
 
-  const filteredTargets = Object.entries(dropTargetsByOrder).filter(
-    ([, dropTarget]) => dropTarget && filterElements(dropTarget)
+  const filteredTargets: Array<[string, DropIdentifier | undefined]> = Object.entries(
+    dropTargetsByOrder
+  ).filter(([, dropTarget]) => {
+    return dropTarget && filterElements(dropTarget);
+  });
+
+  // filter out secondary targets
+  const uniqueIdTargets = filteredTargets.reduce(
+    (
+      acc: Array<[string, DropIdentifier | undefined]>,
+      current: [string, DropIdentifier | undefined]
+    ) => {
+      const [, currentDropTarget] = current;
+      if (!currentDropTarget) {
+        return acc;
+      }
+      if (acc.find(([, target]) => target?.id === currentDropTarget.id)) {
+        return acc;
+      }
+      return [...acc, current];
+    },
+    []
   );
 
-  const nextDropTargets = [...filteredTargets, draggingOrder].sort(([orderA], [orderB]) => {
+  const nextDropTargets = [...uniqueIdTargets, draggingOrder].sort(([orderA], [orderB]) => {
     const parsedOrderA = orderA.split(',').map((v) => Number(v));
     const parsedOrderB = orderB.split(',').map((v) => Number(v));
 

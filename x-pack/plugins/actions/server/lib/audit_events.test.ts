@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EventOutcome } from '../../../security/server/audit';
 import { ConnectorAuditAction, connectorAuditEvent } from './audit_events';
 
 describe('#connectorAuditEvent', () => {
@@ -13,7 +12,7 @@ describe('#connectorAuditEvent', () => {
     expect(
       connectorAuditEvent({
         action: ConnectorAuditAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'action', id: 'ACTION_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -21,9 +20,13 @@ describe('#connectorAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "connector_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "unknown",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -47,9 +50,13 @@ describe('#connectorAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "connector_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -77,9 +84,13 @@ describe('#connectorAuditEvent', () => {
         },
         "event": Object {
           "action": "connector_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "failure",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {

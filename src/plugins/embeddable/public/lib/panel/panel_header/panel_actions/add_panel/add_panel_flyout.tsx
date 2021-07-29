@@ -9,15 +9,17 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ReactElement } from 'react';
-import { CoreSetup } from 'src/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { CoreSetup, SavedObjectAttributes, SimpleSavedObject } from 'src/core/public';
 
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { EmbeddableFactory, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
 import { SavedObjectEmbeddableInput } from '../../../../embeddables';
+import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 interface Props {
   onClose: () => void;
@@ -26,6 +28,8 @@ interface Props {
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
+  showCreateNewMenu?: boolean;
+  reportUiCounter?: UsageCollectionStart['reportUiCounter'];
 }
 
 interface State {
@@ -83,7 +87,12 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     }
   };
 
-  public onAddPanel = async (savedObjectId: string, savedObjectType: string, name: string) => {
+  public onAddPanel = async (
+    savedObjectId: string,
+    savedObjectType: string,
+    name: string,
+    so: SimpleSavedObject<SavedObjectAttributes>
+  ) => {
     const factoryForSavedObjectType = [...this.props.getAllFactories()].find(
       (factory) =>
         factory.savedObjectMetaData && factory.savedObjectMetaData.type === savedObjectType
@@ -97,8 +106,26 @@ export class AddPanelFlyout extends React.Component<Props, State> {
       { savedObjectId }
     );
 
+    this.doTelemetryForAddEvent(this.props.container.type, factoryForSavedObjectType, so);
+
     this.showToast(name);
   };
+
+  private doTelemetryForAddEvent(
+    appName: string,
+    factoryForSavedObjectType: EmbeddableFactory,
+    so: SimpleSavedObject<SavedObjectAttributes>
+  ) {
+    const { reportUiCounter } = this.props;
+
+    if (reportUiCounter) {
+      const type = factoryForSavedObjectType.savedObjectMetaData?.getSavedObjectSubType
+        ? factoryForSavedObjectType.savedObjectMetaData.getSavedObjectSubType(so)
+        : factoryForSavedObjectType.type;
+
+      reportUiCounter(appName, METRIC_TYPE.CLICK, `${type}:add`);
+    }
+  }
 
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
@@ -134,7 +161,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           defaultMessage: 'No matching objects found.',
         })}
       >
-        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        {this.props.showCreateNewMenu ? (
+          <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        ) : null}
       </SavedObjectFinder>
     );
 

@@ -8,7 +8,7 @@
 import { SavedObjectAttribute } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
-import { AlertActionParam, IntervalSchedule } from '../../../../../alerts/common';
+import { AlertActionParam, IntervalSchedule } from '../../../../../alerting/common';
 import { Alert, AlertAction } from '../../../types';
 
 export type InitialAlert = Partial<Alert> &
@@ -157,7 +157,7 @@ export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
       if (
         index === undefined ||
         alert.actions[index] == null ||
-        isEqual(alert.actions[index][key], value)
+        (!!alert.actions[index][key] && isEqual(alert.actions[index][key], value))
       ) {
         return state;
       } else {

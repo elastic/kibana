@@ -1,0 +1,102 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+
+PKG_BASE_NAME = "kbn-analytics"
+PKG_REQUIRE_NAME = "@kbn/analytics"
+
+SOURCE_FILES = glob(
+  [
+    "src/**/*.ts",
+  ],
+)
+
+SRCS = SOURCE_FILES
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "package.json"
+]
+
+SRC_DEPS = [
+  "@npm//moment-timezone",
+  "@npm//tslib",
+]
+
+TYPES_DEPS = [
+  "@npm//@types/moment-timezone",
+  "@npm//@types/node",
+]
+
+DEPS = SRC_DEPS + TYPES_DEPS
+
+ts_config(
+  name = "tsconfig",
+  src = "tsconfig.json",
+  deps = [
+    "//:tsconfig.base.json",
+  ],
+)
+
+ts_config(
+  name = "tsconfig_browser",
+  src = "tsconfig.browser.json",
+  deps = [
+    "//:tsconfig.base.json",
+    "//:tsconfig.browser.json",
+  ],
+)
+
+ts_project(
+  name = "tsc",
+  args = ['--pretty'],
+  srcs = SRCS,
+  deps = DEPS,
+  declaration = True,
+  declaration_dir = "target_types",
+  declaration_map = True,
+  incremental = True,
+  out_dir = "target_node",
+  source_map = True,
+  root_dir = "src",
+  tsconfig = ":tsconfig",
+)
+
+ts_project(
+  name = "tsc_browser",
+  args = ['--pretty'],
+  srcs = SRCS,
+  deps = DEPS,
+  declaration = False,
+  incremental = True,
+  out_dir = "target_web",
+  source_map = True,
+  root_dir = "src",
+  tsconfig = ":tsconfig_browser",
+)
+
+js_library(
+  name = PKG_BASE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = DEPS + [":tsc", ":tsc_browser"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [
+    ":%s" % PKG_BASE_NAME,
+  ]
+)
+
+filegroup(
+  name = "build",
+  srcs = [
+    ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)

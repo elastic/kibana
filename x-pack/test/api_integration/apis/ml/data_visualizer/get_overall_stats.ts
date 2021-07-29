@@ -52,6 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
           aggregatableNotExistsFields: [{ fieldName: 'sourcetype', existsInDocs: false }],
           nonAggregatableExistsFields: [{ fieldName: 'type', existsInDocs: true, stats: {} }],
           nonAggregatableNotExistsFields: [],
+          errors: [],
         },
       },
     },
@@ -98,6 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
           aggregatableNotExistsFields: [{ fieldName: 'sourcetype', existsInDocs: false }],
           nonAggregatableExistsFields: [{ fieldName: 'type', existsInDocs: true, stats: {} }],
           nonAggregatableNotExistsFields: [],
+          errors: [],
         },
       },
     },
@@ -123,16 +125,17 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
+  // Move these tests to file_data_visualizer plugin
   describe('get_overall_stats', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
         const { body } = await supertest
-          .post(`/api/ml/data_visualizer/get_overall_stats/${testData.index}`)
+          .post(`/internal/data_visualizer/get_overall_stats/${testData.index}`)
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody)
@@ -142,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql(testData.expected.responseBody);
         } else {
           expect(body.error).to.eql(testData.expected.responseBody.error);
-          expect(body.message).to.eql(testData.expected.responseBody.message);
+          expect(body.message).to.contain(testData.expected.responseBody.message);
         }
       });
     }

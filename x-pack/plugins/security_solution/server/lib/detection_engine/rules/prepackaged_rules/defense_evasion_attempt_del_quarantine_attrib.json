@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Attempt to Remove File Quarantine Attribute",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.args : \"xattr\" and\n  (\n    (process.args : \"com.apple.quarantine\" and process.args : (\"-d\", \"-w\")) or\n    (process.args : \"-c\" and process.command_line :\n      (\n        \"/bin/bash -c xattr -c *\",\n        \"/bin/zsh -c xattr -c *\",\n        \"/bin/sh -c xattr -c *\"\n      )\n    )\n  )\n",
   "references": [

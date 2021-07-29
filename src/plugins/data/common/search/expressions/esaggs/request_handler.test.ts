@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { from } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { Filter } from '../../../es_query';
 import type { IndexPattern } from '../../../index_patterns';
-import type { IAggConfig, IAggConfigs } from '../../aggs';
+import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
-import { searchSourceCommonMock } from '../../search_source/mocks';
+import { searchSourceCommonMock, searchSourceInstanceMock } from '../../search_source/mocks';
 
 import { handleRequest, RequestHandlerParams } from './request_handler';
 
@@ -20,12 +21,21 @@ jest.mock('../../tabify', () => ({
 }));
 
 import { tabifyAggResponse } from '../../tabify';
+import { of } from 'rxjs';
+import { toArray } from 'rxjs/operators';
 
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<RequestHandlerParams>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    searchSourceInstanceMock.fetch$ = jest.fn().mockReturnValue(
+      of({
+        rawResponse: {},
+      })
+    );
+
     mockParams = {
       abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
       aggs: ({
@@ -33,11 +43,12 @@ describe('esaggs expression function - public', () => {
         setTimeRange: jest.fn(),
         toDsl: jest.fn().mockReturnValue({ aggs: {} }),
         onSearchRequestStart: jest.fn(),
+        setTimeFields: jest.fn(),
+        setForceNow: jest.fn(),
       } as unknown) as jest.Mocked<IAggConfigs>,
       filters: undefined,
       indexPattern: ({ id: 'logstash-*' } as unknown) as jest.Mocked<IndexPattern>,
       inspectorAdapters: {},
-      metricsAtAllLevels: false,
       partialRows: false,
       query: undefined,
       searchSessionId: 'abc123',
@@ -48,7 +59,7 @@ describe('esaggs expression function - public', () => {
   });
 
   test('should create a new search source instance', async () => {
-    await handleRequest(mockParams);
+    await handleRequest(mockParams).toPromise();
     expect(mockParams.searchSourceService.create).toHaveBeenCalledTimes(1);
   });
 
@@ -56,7 +67,7 @@ describe('esaggs expression function - public', () => {
     let searchSource: MockedKeys<ISearchSource>;
 
     beforeEach(async () => {
-      await handleRequest(mockParams);
+      await handleRequest(mockParams).toPromise();
       searchSource = await mockParams.searchSourceService.create();
     });
 
@@ -75,21 +86,7 @@ describe('esaggs expression function - public', () => {
 
     test('setField(aggs)', async () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect(typeof (searchSource.setField as jest.Mock).mock.calls[2][1]).toBe('function');
-      expect((searchSource.setField as jest.Mock).mock.calls[2][1]()).toEqual(
-        mockParams.aggs.toDsl()
-      );
-      expect(mockParams.aggs.toDsl).toHaveBeenCalledWith(mockParams.metricsAtAllLevels);
-
-      // make sure param is passed through
-      jest.clearAllMocks();
-      await handleRequest({
-        ...mockParams,
-        metricsAtAllLevels: true,
-      });
-      searchSource = await mockParams.searchSourceService.create();
-      (searchSource.setField as jest.Mock).mock.calls[2][1]();
-      expect(mockParams.aggs.toDsl).toHaveBeenCalledWith(true);
+      expect((searchSource.setField as jest.Mock).mock.calls[2][1]).toEqual(mockParams.aggs);
     });
 
     test('setField(filter)', async () => {
@@ -105,7 +102,7 @@ describe('esaggs expression function - public', () => {
       await handleRequest({
         ...mockParams,
         filters: mockFilters,
-      });
+      }).toPromise();
       searchSource = await mockParams.searchSourceService.create();
       expect((searchSource.setField as jest.Mock).mock.calls[3]).toEqual(['filter', mockFilters]);
     });
@@ -123,45 +120,33 @@ describe('esaggs expression function - public', () => {
       await handleRequest({
         ...mockParams,
         query: mockQuery,
-      });
+      }).toPromise();
       searchSource = await mockParams.searchSourceService.create();
       expect((searchSource.setField as jest.Mock).mock.calls[4]).toEqual(['query', mockQuery]);
     });
   });
 
   test('calls searchSource.fetch', async () => {
-    await handleRequest(mockParams);
+    await handleRequest(mockParams).toPromise();
     const searchSource = await mockParams.searchSourceService.create();
-    expect(searchSource.fetch).toHaveBeenCalledWith({
+
+    expect(searchSource.fetch$).toHaveBeenCalledWith({
       abortSignal: mockParams.abortSignal,
       sessionId: mockParams.searchSessionId,
+      inspector: {
+        title: 'Data',
+        description: 'This request queries Elasticsearch to fetch the data for the visualization.',
+        adapter: undefined,
+      },
     });
   });
 
-  test('calls agg.postFlightRequest if it exiests and agg is enabled', async () => {
-    mockParams.aggs.aggs[0].enabled = true;
-    await handleRequest(mockParams);
-    expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(1);
-
-    // ensure it works if the function doesn't exist
-    jest.clearAllMocks();
-    mockParams.aggs.aggs[0] = ({ type: { name: 'count' } } as unknown) as IAggConfig;
-    expect(async () => await handleRequest(mockParams)).not.toThrowError();
-  });
-
-  test('should skip agg.postFlightRequest call if the agg is disabled', async () => {
-    mockParams.aggs.aggs[0].enabled = false;
-    await handleRequest(mockParams);
-    expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(0);
-  });
-
   test('tabifies response data', async () => {
-    await handleRequest(mockParams);
+    await handleRequest(mockParams).toPromise();
     expect(tabifyAggResponse).toHaveBeenCalledWith(
       mockParams.aggs,
       {},
       {
-        metricsAtAllLevels: mockParams.metricsAtAllLevels,
         partialRows: mockParams.partialRows,
         timeRange: mockParams.timeRange,
       }
@@ -172,7 +157,7 @@ describe('esaggs expression function - public', () => {
     await handleRequest({
       ...mockParams,
       timeRange: { from: '2020-12-01', to: '2020-12-31' },
-    });
+    }).toPromise();
     expect((tabifyAggResponse as jest.Mock).mock.calls[0][2].timeRange).toMatchInlineSnapshot(`
       Object {
         "from": "2020-12-01T05:00:00.000Z",
@@ -183,5 +168,30 @@ describe('esaggs expression function - public', () => {
         "to": "2020-12-31T05:00:00.000Z",
       }
     `);
+  });
+
+  test('returns partial results', async () => {
+    const searchSource = await mockParams.searchSourceService.create();
+
+    (searchSource.fetch$ as jest.MockedFunction<typeof searchSource.fetch$>).mockReturnValue(
+      from([
+        {
+          rawResponse: {},
+        },
+        {
+          rawResponse: {},
+        },
+      ]) as ReturnType<typeof searchSource.fetch$>
+    );
+
+    const result = await handleRequest({
+      ...mockParams,
+      query: { query: 'foo', language: 'bar' },
+    })
+      .pipe(toArray())
+      .toPromise();
+
+    expect(result).toHaveLength(2);
+    expect(tabifyAggResponse).toHaveBeenCalledTimes(2);
   });
 });

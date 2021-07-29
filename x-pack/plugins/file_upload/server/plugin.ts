@@ -5,18 +5,48 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-
-interface SetupDeps {
-  usageCollection: UsageCollectionSetup;
-}
+import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '../common';
+import { setupCapabilities } from './capabilities';
+import { StartDeps, SetupDeps } from './types';
 
 export class FileUploadPlugin implements Plugin {
-  async setup(coreSetup: CoreSetup, plugins: SetupDeps) {
-    fileUploadRoutes(coreSetup.http.createRouter());
+  private readonly _logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this._logger = initializerContext.logger.get();
+  }
+
+  setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
+    fileUploadRoutes(coreSetup, this._logger);
+
+    setupCapabilities(coreSetup);
+
+    coreSetup.uiSettings.register({
+      [UI_SETTING_MAX_FILE_SIZE]: {
+        name: i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.name', {
+          defaultMessage: 'Maximum file upload size',
+        }),
+        value: MAX_FILE_SIZE,
+        description: i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.description', {
+          defaultMessage:
+            'Sets the file size limit when importing files. The highest supported value for this setting is 1GB.',
+        }),
+        schema: schema.string({
+          validate: (value) => {
+            if (!/^\d+[mg][b]$/i.test(value)) {
+              return i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.error', {
+                defaultMessage: 'Should be a valid data size. e.g. 200MB, 1GB',
+              });
+            }
+          },
+        }),
+      },
+    });
 
     initFileUploadTelemetry(coreSetup, plugins.usageCollection);
   }

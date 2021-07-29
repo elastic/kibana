@@ -7,6 +7,7 @@
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
@@ -20,6 +21,7 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 export async function fetchAndTransformGcMetrics({
   environment,
@@ -29,6 +31,7 @@ export async function fetchAndTransformGcMetrics({
   serviceNodeName,
   chartBase,
   fieldName,
+  operationName,
 }: {
   environment?: string;
   kuery?: string;
@@ -37,6 +40,7 @@ export async function fetchAndTransformGcMetrics({
   serviceNodeName?: string;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
+  operationName: string;
 }) {
   const { start, end, apmEventClient, config } = setup;
 
@@ -62,7 +66,7 @@ export async function fetchAndTransformGcMetrics({
           filter: [
             ...projection.body.query.bool.filter,
             { exists: { field: fieldName } },
-            { term: { [AGENT_NAME]: 'java' } },
+            { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
         },
       },
@@ -73,11 +77,11 @@ export async function fetchAndTransformGcMetrics({
           },
           aggs: {
             timeseries: {
-              date_histogram: getMetricsDateHistogramParams(
+              date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                config['xpack.apm.metricsInterval']
-              ),
+                metricsInterval: config['xpack.apm.metricsInterval'],
+              }),
               aggs: {
                 // get the max value
                 max: {
@@ -107,7 +111,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(operationName, params);
 
   const { aggregations } = response;
 
@@ -126,10 +130,9 @@ export async function fetchAndTransformGcMetrics({
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
-      const y =
-        bucketValue !== null && bucketValue !== undefined && bucket.value
-          ? round(bucketValue * (60 / bucketSize), 1)
-          : null;
+      const y = isFiniteNumber(bucketValue)
+        ? round(bucketValue * (60 / bucketSize), 1)
+        : null;
 
       return {
         y,

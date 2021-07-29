@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/utils';
-
-import {
+import type { KibanaRequest } from 'src/core/server';
+import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
-  KibanaRequest,
 } from 'src/core/server';
-import {
+
+import type { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
-import { SecurityPluginStart } from '../../../security/server';
-import { FleetConfigType } from '../../common';
-import { ExternalCallback, ExternalCallbacksStorage } from '../types';
-import { FleetAppContext } from '../plugin';
-import { CloudSetup } from '../../../cloud/server';
+
+import type { SecurityPluginStart } from '../../../security/server';
+import type { FleetConfigType } from '../../common';
+import type { ExternalCallback, ExternalCallbacksStorage } from '../types';
+import type { FleetAppContext } from '../plugin';
+import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private security: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
@@ -42,7 +45,8 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
-  public async start(appContext: FleetAppContext) {
+  public start(appContext: FleetAppContext) {
+    this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
@@ -57,7 +61,7 @@ class AppContextService {
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
-      const initialValue = await this.config$.pipe(first()).toPromise();
+      const initialValue = appContext.configInitialValue;
       this.configSubject$ = new BehaviorSubject(initialValue);
       this.config$.subscribe(this.configSubject$);
     }
@@ -65,6 +69,13 @@ class AppContextService {
 
   public stop() {
     this.externalCallbacks.clear();
+  }
+
+  public getData() {
+    if (!this.data) {
+      throw new Error('Data start service not set.');
+    }
+    return this.data;
   }
 
   public getEncryptedSavedObjects() {

@@ -30,7 +30,7 @@ import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
-import { SectionLoading } from '../../';
+import { InlineLoading } from '../../';
 import { StepProps } from './';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -46,11 +46,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const {
     error: errorLoadingRepositories,
     isLoading: isLoadingRepositories,
-    data: { repositories, managedRepository } = {
+    data: { repositories } = {
       repositories: [],
-      managedRepository: {
-        name: undefined,
-      },
     },
     resendRequest: reloadRepositories,
   } = useLoadRepositories();
@@ -119,16 +116,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
           onChange={(e) => {
-            updatePolicy(
-              {
-                name: e.target.value,
-              },
-              {
-                managedRepository,
-                isEditing,
-                policyName: policy.name,
-              }
-            );
+            updatePolicy({
+              name: e.target.value,
+            });
           }}
           placeholder={i18n.translate(
             'xpack.snapshotRestore.policyForm.stepLogistics.namePlaceholder',
@@ -184,12 +174,12 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const renderRepositorySelect = () => {
     if (isLoadingRepositories) {
       return (
-        <SectionLoading inline={true}>
+        <InlineLoading>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.loadingRepositoriesDescription"
             defaultMessage="Loading repositories…"
           />
-        </SectionLoading>
+        </InlineLoading>
       );
     }
 
@@ -251,16 +241,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       );
     } else {
       if (!policy.repository) {
-        updatePolicy(
-          {
-            repository: repositories[0].name,
-          },
-          {
-            managedRepository,
-            isEditing,
-            policyName: policy.name,
-          }
-        );
+        updatePolicy({
+          repository: repositories[0].name,
+        });
       }
     }
 
@@ -286,16 +269,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         value={!doesRepositoryExist ? '' : policy.repository}
         onBlur={() => setTouched({ ...touched, repository: true })}
         onChange={(e) => {
-          updatePolicy(
-            {
-              repository: e.target.value,
-            },
-            {
-              managedRepository,
-              isEditing,
-              policyName: policy.name,
-            }
-          );
+          updatePolicy({
+            repository: e.target.value,
+          });
         }}
         fullWidth
         data-test-subj="repositorySelect"
@@ -354,16 +330,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultValue={policy.snapshotName}
           fullWidth
           onChange={(e) => {
-            updatePolicy(
-              {
-                snapshotName: e.target.value,
-              },
-              {
-                managedRepository,
-                isEditing,
-                policyName: policy.name,
-              }
-            );
+            updatePolicy({
+              snapshotName: e.target.value,
+            });
           }}
           onBlur={() => setTouched({ ...touched, snapshotName: true })}
           placeholder={i18n.translate(
@@ -433,16 +402,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               defaultValue={policy.schedule}
               fullWidth
               onChange={(e) => {
-                updatePolicy(
-                  {
-                    schedule: e.target.value,
-                  },
-                  {
-                    managedRepository,
-                    isEditing,
-                    policyName: policy.name,
-                  }
-                );
+                updatePolicy({
+                  schedule: e.target.value,
+                });
               }}
               onBlur={() => setTouched({ ...touched, schedule: true })}
               placeholder={DEFAULT_POLICY_SCHEDULE}
@@ -456,16 +418,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiLink
               onClick={() => {
                 setIsAdvancedCronVisible(false);
-                updatePolicy(
-                  {
-                    schedule: simpleCron.expression,
-                  },
-                  {
-                    managedRepository,
-                    isEditing,
-                    policyName: policy.name,
-                  }
-                );
+                updatePolicy({
+                  schedule: simpleCron.expression,
+                });
               }}
               data-test-subj="showBasicCronLink"
             >
@@ -493,16 +448,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 frequency,
               });
               setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-              updatePolicy(
-                {
-                  schedule: expression,
-                },
-                {
-                  managedRepository,
-                  isEditing,
-                  policyName: policy.name,
-                }
-              );
+              updatePolicy({
+                schedule: expression,
+              });
             }}
           />
 

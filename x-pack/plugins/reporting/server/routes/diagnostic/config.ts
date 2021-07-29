@@ -28,7 +28,7 @@ const numberToByteSizeValue = (value: number | ByteSizeValue) => {
 export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
-  const { router, elasticsearch } = setupDeps;
+  const { router } = setupDeps;
 
   router.post(
     {
@@ -37,13 +37,13 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
     },
     userHandler(async (user, context, req, res) => {
       const warnings = [];
-      const { callAsInternalUser } = elasticsearch.legacy.client;
+      const { asInternalUser: elasticsearchClient } = await reporting.getEsClient();
       const config = reporting.getConfig();
 
-      const elasticClusterSettingsResponse = await callAsInternalUser('cluster.getSettings', {
-        includeDefaults: true,
+      const { body: clusterSettings } = await elasticsearchClient.cluster.getSettings({
+        include_defaults: true,
       });
-      const { persistent, transient, defaults: defaultSettings } = elasticClusterSettingsResponse;
+      const { persistent, transient, defaults: defaultSettings } = clusterSettings;
       const elasticClusterSettings = defaults({}, persistent, transient, defaultSettings);
 
       const elasticSearchMaxContent = get(

@@ -8,7 +8,7 @@
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { HostItem, HostsFields } from '../common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import { CursorType, Direction, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 
 export interface HostsEdges {
@@ -25,4 +25,10 @@ export interface HostsStrategyResponse extends IEsSearchResponse {
 
 export interface HostsRequestOptions extends RequestOptionsPaginated<HostsFields> {
   defaultIndex: string[];
+}
+
+export interface HostsSortField {
+  field: HostsFields;
+
+  direction: Direction;
 }

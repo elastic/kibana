@@ -1,0 +1,340 @@
+{
+  "id": "urlForwarding",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "urlForwarding",
+        "id": "def-public.UrlForwardingPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "UrlForwardingPlugin",
+        "description": [],
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 22
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "urlForwarding",
+            "id": "def-public.UrlForwardingPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<{}, { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+              {
+                "pluginId": "urlForwarding",
+                "scope": "public",
+                "docId": "kibUrlForwardingPluginApi",
+                "section": "def-public.ForwardDefinition",
+                "text": "ForwardDefinition"
+              },
+              "[]; }>) => { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
+            ],
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "urlForwarding",
+                "id": "def-public.UrlForwardingPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<{}, { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+                  {
+                    "pluginId": "urlForwarding",
+                    "scope": "public",
+                    "docId": "kibUrlForwardingPluginApi",
+                    "section": "def-public.ForwardDefinition",
+                    "text": "ForwardDefinition"
+                  },
+                  "[]; }>"
+                ],
+                "source": {
+                  "path": "src/plugins/url_forwarding/public/plugin.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "urlForwarding",
+            "id": "def-public.UrlForwardingPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ application, http: { basePath }, uiSettings }: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", { kibanaLegacy }: { kibanaLegacy: { dashboardConfig: ",
+              "DashboardConfig",
+              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }; }) => { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+              {
+                "pluginId": "urlForwarding",
+                "scope": "public",
+                "docId": "kibUrlForwardingPluginApi",
+                "section": "def-public.ForwardDefinition",
+                "text": "ForwardDefinition"
+              },
+              "[]; }"
+            ],
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 74
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "urlForwarding",
+                "id": "def-public.UrlForwardingPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ application, http: { basePath }, uiSettings }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/url_forwarding/public/plugin.ts",
+                  "lineNumber": 75
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "urlForwarding",
+                "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy",
+                "type": "Object",
+                "tags": [],
+                "label": "{ kibanaLegacy }",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/url_forwarding/public/plugin.ts",
+                  "lineNumber": 76
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "urlForwarding",
+                    "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy.kibanaLegacy",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "kibanaLegacy",
+                    "description": [],
+                    "signature": [
+                      "{ dashboardConfig: ",
+                      "DashboardConfig",
+                      "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+                    ],
+                    "source": {
+                      "path": "src/plugins/url_forwarding/public/plugin.ts",
+                      "lineNumber": 76
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "urlForwarding",
+            "id": "def-public.UrlForwardingPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 115
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "urlForwarding",
+        "id": "def-public.ForwardDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ForwardDefinition",
+        "description": [],
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 16
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "urlForwarding",
+            "id": "def-public.ForwardDefinition.legacyAppId",
+            "type": "string",
+            "tags": [],
+            "label": "legacyAppId",
+            "description": [],
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "urlForwarding",
+            "id": "def-public.ForwardDefinition.newAppId",
+            "type": "string",
+            "tags": [],
+            "label": "newAppId",
+            "description": [],
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "urlForwarding",
+            "id": "def-public.ForwardDefinition.rewritePath",
+            "type": "Function",
+            "tags": [],
+            "label": "rewritePath",
+            "description": [],
+            "signature": [
+              "(legacyPath: string) => string"
+            ],
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "urlForwarding",
+                "id": "def-public.legacyPath",
+                "type": "string",
+                "tags": [],
+                "label": "legacyPath",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/url_forwarding/public/plugin.ts",
+                  "lineNumber": 19
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "urlForwarding",
+        "id": "def-public.UrlForwardingSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "UrlForwardingSetup",
+        "description": [],
+        "signature": [
+          "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
+        ],
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 122
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "urlForwarding",
+        "id": "def-public.UrlForwardingStart",
+        "type": "Type",
+        "tags": [],
+        "label": "UrlForwardingStart",
+        "description": [],
+        "signature": [
+          "{ navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+          {
+            "pluginId": "urlForwarding",
+            "scope": "public",
+            "docId": "kibUrlForwardingPluginApi",
+            "section": "def-public.ForwardDefinition",
+            "text": "ForwardDefinition"
+          },
+          "[]; }"
+        ],
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 123
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

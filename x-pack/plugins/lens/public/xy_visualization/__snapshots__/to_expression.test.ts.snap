@@ -27,8 +27,14 @@ Object {
             "type": "expression",
           },
         ],
+        "curveType": Array [
+          "LINEAR",
+        ],
         "description": Array [
           "",
+        ],
+        "fillOpacity": Array [
+          0.3,
         ],
         "fittingFunction": Array [
           "Carry",
@@ -49,6 +55,31 @@ Object {
                   ],
                 },
                 "function": "lens_xy_gridlinesConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "hideEndzones": Array [
+          true,
+        ],
+        "labelsOrientation": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    0,
+                  ],
+                  "yLeft": Array [
+                    -90,
+                  ],
+                  "yRight": Array [
+                    -45,
+                  ],
+                },
+                "function": "lens_xy_labelsOrientationConfig",
                 "type": "function",
               },
             ],
@@ -105,6 +136,9 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
+                  "floatingColumns": Array [],
+                  "horizontalAlignment": Array [],
+                  "isInside": Array [],
                   "isVisible": Array [
                     true,
                   ],
@@ -112,6 +146,7 @@ Object {
                     "bottom",
                   ],
                   "showSingleSeries": Array [],
+                  "verticalAlignment": Array [],
                 },
                 "function": "lens_xy_legendConfig",
                 "type": "function",
@@ -148,8 +183,51 @@ Object {
         "valueLabels": Array [
           "hide",
         ],
+        "valuesInLegend": Array [
+          false,
+        ],
         "xTitle": Array [
           "",
+        ],
+        "yLeftExtent": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "lowerBound": Array [],
+                  "mode": Array [
+                    "full",
+                  ],
+                  "upperBound": Array [],
+                },
+                "function": "lens_xy_axisExtentConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "yRightExtent": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "lowerBound": Array [
+                    123,
+                  ],
+                  "mode": Array [
+                    "custom",
+                  ],
+                  "upperBound": Array [
+                    456,
+                  ],
+                },
+                "function": "lens_xy_axisExtentConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
         "yRightTitle": Array [
           "",

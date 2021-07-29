@@ -69,9 +69,9 @@ export async function getAlertInstanceSummary(
   } catch (e) {
     toasts.addDanger({
       title: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertInstanceSummaryMessage',
+        'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertsMessage',
         {
-          defaultMessage: 'Unable to load alert instance summary: {message}',
+          defaultMessage: 'Unable to load alerts: {message}',
           values: {
             message: e.message,
           },

@@ -15,6 +15,7 @@ import { IndexPattern } from './types';
 import { FieldItem } from './field_item';
 import { FieldsAccordion, FieldsAccordionProps, FieldItemSharedProps } from './fields_accordion';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 describe('Fields Accordion', () => {
   let defaultProps: FieldsAccordionProps;
@@ -76,6 +77,7 @@ describe('Fields Accordion', () => {
       groupIndex: 0,
       dropOntoWorkspace: () => {},
       hasSuggestionForField: () => false,
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
   });
 

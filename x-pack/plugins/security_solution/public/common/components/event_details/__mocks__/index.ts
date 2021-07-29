@@ -406,6 +406,7 @@ export const mockAlertDetailsData = [
     field: 'signal.rule.index',
     values: [
       'apm-*-transaction*',
+      'traces-apm*',
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
@@ -415,6 +416,7 @@ export const mockAlertDetailsData = [
     ],
     originalValue: [
       'apm-*-transaction*',
+      'traces-apm*',
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
@@ -654,5 +656,17 @@ export const mockAlertDetailsData = [
     field: 'fields.agent.version',
     values: ['7.10.0'],
     originalValue: ['7.10.0'],
+  },
+  {
+    category: 'threat',
+    field: 'threat.indicator',
+    values: [`{"first_seen":"2021-03-25T18:17:00.000Z"}`],
+    originalValue: [`{"first_seen":"2021-03-25T18:17:00.000Z"}`],
+  },
+  {
+    category: 'threat',
+    field: 'threat.indicator.matched',
+    values: `["file", "url"]`,
+    originalValue: ['file', 'url'],
   },
 ];

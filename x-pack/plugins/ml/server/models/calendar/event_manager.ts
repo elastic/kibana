@@ -5,16 +5,11 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { MlClient } from '../../lib/ml_client';
 
-export interface CalendarEvent {
-  calendar_id?: string;
-  event_id?: string;
-  description: string;
-  start_time: number;
-  end_time: number;
-}
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 export class EventManager {
   private _mlClient: MlClient;
@@ -39,7 +34,7 @@ export class EventManager {
     return body.events;
   }
 
-  async addEvents(calendarId: string, events: CalendarEvent[]) {
+  async addEvents(calendarId: string, events: ScheduledEvent[]) {
     const body = { events };
 
     return await this._mlClient.postCalendarEvents({
@@ -55,7 +50,7 @@ export class EventManager {
     });
   }
 
-  isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {
+  isEqual(ev1: ScheduledEvent, ev2: ScheduledEvent) {
     return (
       ev1.event_id === ev2.event_id &&
       ev1.description === ev2.description &&

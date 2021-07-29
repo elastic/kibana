@@ -4,16 +4,8 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "private": "true",
   "main": "target/index.js",
+  "types": "target/index.d.ts",
   "kibana": {
     "devOnly": true
-  },
-  "scripts": {
-    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
-    "kbn:watch": "rm -rf target && ../../node_modules/.bin/tsc --watch"
-  },
-  "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/test": "link:../kbn-test",
-    "@kbn/utils": "link:../kbn-utils"
   }
 }

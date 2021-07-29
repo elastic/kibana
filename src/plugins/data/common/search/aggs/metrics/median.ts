@@ -27,6 +27,7 @@ export const getMedianMetricAgg = () => {
     expressionName: aggMedianFnName,
     dslName: 'percentiles',
     title: medianTitle,
+    valueType: 'number',
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.medianLabel', {
         defaultMessage: 'Median {field}',
@@ -41,14 +42,11 @@ export const getMedianMetricAgg = () => {
         name: 'field',
         type: 'field',
         filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.HISTOGRAM],
-        write(agg, output) {
-          output.params.field = agg.getParam('field').name;
-          output.params.percents = [50];
-        },
       },
+      { name: 'percents', default: [50], shouldShow: () => false, serialize: () => undefined },
     ],
     getValue(agg, bucket) {
-      return bucket[agg.id].values['50.0'];
+      return bucket[agg.id]?.values['50.0'];
     },
   });
 };

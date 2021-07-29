@@ -12,17 +12,13 @@ import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
 import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import {
-  SerializedFilterQuery,
-  State,
-  inputsModel,
-  inputsSelectors,
-} from '../../../../common/store';
+import { State, inputsModel, inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
+import { SerializedFilterQuery } from '../../../../../common/types/timeline';
 
 interface OwnProps {
   filterManager: FilterManager;

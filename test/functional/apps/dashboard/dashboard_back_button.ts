@@ -17,7 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard back button', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('dashboard/current/kibana');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { ThresholdMetActionGroupId } from '../../../common/alert_types';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../alerts/server';
+} from '../../../../../../src/core/types/elasticsearch';
+import { AlertServices } from '../../../../alerting/server';
 
-export function alertingEsClient<TParams extends ESSearchRequest>(
-  services: AlertServices<
-    AlertInstanceState,
-    AlertInstanceContext,
-    ThresholdMetActionGroupId
-  >,
-  params: TParams
-): Promise<ESSearchResponse<unknown, TParams>> {
-  return services.callCluster('search', {
+export async function alertingEsClient<TParams extends ESSearchRequest>({
+  scopedClusterClient,
+  params,
+}: {
+  scopedClusterClient: AlertServices<
+    never,
+    never,
+    never
+  >['scopedClusterClient'];
+  params: TParams;
+}): Promise<ESSearchResponse<unknown, TParams>> {
+  const response = await scopedClusterClient.asCurrentUser.search({
     ...params,
     ignore_unavailable: true,
   });
+
+  return (response.body as unknown) as ESSearchResponse<unknown, TParams>;
 }

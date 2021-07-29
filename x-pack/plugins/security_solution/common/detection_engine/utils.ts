@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import { EntriesArray } from '../shared_imports';
-import { Type } from './schemas/common/schemas';
+import { isEmpty } from 'lodash';
 
-export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
+import type {
+  EntriesArray,
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
+import { JobStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
+
+export const hasLargeValueItem = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+) => {
+  return exceptionItems.some((exceptionItem) => hasLargeValueList(exceptionItem.entries));
 };
 
 export const hasNestedEntry = (entries: EntriesArray): boolean => {
@@ -32,3 +43,26 @@ export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
+
+export const normalizeThresholdField = (
+  thresholdField: string | string[] | null | undefined
+): string[] => {
+  return Array.isArray(thresholdField)
+    ? thresholdField
+    : isEmpty(thresholdField)
+    ? []
+    : [thresholdField!];
+};
+
+export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
+  return {
+    ...threshold,
+    field: normalizeThresholdField(threshold.field),
+  };
+};
+
+export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
+  Array.isArray(value) ? value : [value];
+
+export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
+  value === 'partial failure' ? 'warning' : value != null ? value : null;

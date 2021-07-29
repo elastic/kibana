@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`tests loading base.yml: base.yml 1`] = `
+exports[`EPM template tests loading base.yml: base.yml 1`] = `
 {
   "priority": 200,
   "index_patterns": [
@@ -20,12 +20,12 @@ exports[`tests loading base.yml: base.yml 1`] = `
         },
         "refresh_interval": "5s",
         "number_of_shards": "1",
+        "number_of_routing_shards": "30",
         "query": {
           "default_field": [
-            "message"
+            "long.nested.foo"
           ]
-        },
-        "number_of_routing_shards": "30"
+        }
       }
     },
     "mappings": {
@@ -86,6 +86,10 @@ exports[`tests loading base.yml: base.yml 1`] = `
         },
         "validarray": {
           "type": "integer"
+        },
+        "cycle_type": {
+          "type": "constant_keyword",
+          "value": "bicycle"
         }
       },
       "_meta": {
@@ -98,7 +102,9 @@ exports[`tests loading base.yml: base.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "nginx"
@@ -109,7 +115,7 @@ exports[`tests loading base.yml: base.yml 1`] = `
 }
 `;
 
-exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
+exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 {
   "priority": 200,
   "index_patterns": [
@@ -129,12 +135,17 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
         },
         "refresh_interval": "5s",
         "number_of_shards": "1",
+        "number_of_routing_shards": "30",
         "query": {
           "default_field": [
-            "message"
+            "coredns.id",
+            "coredns.query.class",
+            "coredns.query.name",
+            "coredns.query.type",
+            "coredns.response.code",
+            "coredns.response.flags"
           ]
-        },
-        "number_of_routing_shards": "30"
+        }
       }
     },
     "mappings": {
@@ -207,7 +218,9 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "coredns"
@@ -218,7 +231,7 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 }
 `;
 
-exports[`tests loading system.yml: system.yml 1`] = `
+exports[`EPM template tests loading system.yml: system.yml 1`] = `
 {
   "priority": 200,
   "index_patterns": [
@@ -238,12 +251,45 @@ exports[`tests loading system.yml: system.yml 1`] = `
         },
         "refresh_interval": "5s",
         "number_of_shards": "1",
+        "number_of_routing_shards": "30",
         "query": {
           "default_field": [
-            "message"
+            "system.diskio.name",
+            "system.diskio.serial_number",
+            "system.filesystem.device_name",
+            "system.filesystem.type",
+            "system.filesystem.mount_point",
+            "system.network.name",
+            "system.process.state",
+            "system.process.cmdline",
+            "system.process.cgroup.id",
+            "system.process.cgroup.path",
+            "system.process.cgroup.cpu.id",
+            "system.process.cgroup.cpu.path",
+            "system.process.cgroup.cpuacct.id",
+            "system.process.cgroup.cpuacct.path",
+            "system.process.cgroup.memory.id",
+            "system.process.cgroup.memory.path",
+            "system.process.cgroup.blkio.id",
+            "system.process.cgroup.blkio.path",
+            "system.raid.name",
+            "system.raid.status",
+            "system.raid.level",
+            "system.raid.sync_action",
+            "system.socket.remote.host",
+            "system.socket.remote.etld_plus_one",
+            "system.socket.remote.host_error",
+            "system.socket.process.cmdline",
+            "system.users.id",
+            "system.users.seat",
+            "system.users.path",
+            "system.users.type",
+            "system.users.service",
+            "system.users.state",
+            "system.users.scope",
+            "system.users.remote_host"
           ]
-        },
-        "number_of_routing_shards": "30"
+        }
       }
     },
     "mappings": {
@@ -1700,7 +1746,9 @@ exports[`tests loading system.yml: system.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "system"

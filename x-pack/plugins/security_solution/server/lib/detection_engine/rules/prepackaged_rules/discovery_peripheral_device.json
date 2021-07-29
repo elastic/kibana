@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Peripheral Device Discovery",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"fsutil.exe\" or process.pe.original_file_name == \"fsutil.exe\") and \n  process.args : \"fsinfo\" and process.args : \"drives\"\n",
   "risk_score": 21,

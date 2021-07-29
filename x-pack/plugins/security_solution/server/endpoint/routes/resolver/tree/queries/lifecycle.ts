@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
+import { JsonObject, JsonValue } from '@kbn/common-utils';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
 interface LifecycleParams {
@@ -93,7 +91,7 @@ export class LifecycleQuery {
       return [];
     }
 
-    const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
+    const response = await client.asCurrentUser.search({
       body: this.query(validNodes),
       index: this.indexPatterns,
     });
@@ -106,6 +104,7 @@ export class LifecycleQuery {
      *
      * So the schema fields are flattened ('process.parent.entity_id')
      */
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     return response.body.hits.hits.map((hit) => hit.fields);
   }
 }

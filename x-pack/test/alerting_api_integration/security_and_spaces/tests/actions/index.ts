@@ -23,6 +23,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
     loadTestFile(require.resolve('./builtin_action_types/pagerduty'));
+    loadTestFile(require.resolve('./builtin_action_types/swimlane'));
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow'));
     loadTestFile(require.resolve('./builtin_action_types/jira'));
@@ -34,7 +35,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./list_action_types'));
+    loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
   });
 }

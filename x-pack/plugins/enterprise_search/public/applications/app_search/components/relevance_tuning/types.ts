@@ -29,26 +29,38 @@ export enum BoostOperation {
   Add = 'add',
   Multiply = 'multiply',
 }
-
-export interface BaseBoost {
+export interface Boost {
+  type: BoostType;
   operation?: BoostOperation;
   function?: BoostFunction;
-}
-
-// A boost that comes from the server, before we normalize it has a much looser schema
-export interface RawBoost extends BaseBoost {
-  type: BoostType;
   newBoost?: boolean;
   center?: string | number;
-  value?: string | number | boolean | object | Array<string | number | boolean | object>;
   factor: number;
-}
-
-// We normalize raw boosts to make them safer and easier to work with
-export interface Boost extends RawBoost {
   value?: string[];
 }
 
+// A boost that comes from the server, before we normalize it has a much looser schema
+export interface RawBoost extends Omit<Boost, 'value'> {
+  value?: string | number | boolean | object | Array<string | number | boolean | object>;
+}
+
+export interface ValueBoost extends Boost {
+  value: string[];
+  operation: undefined;
+  function: undefined;
+}
+
+export interface FunctionalBoost extends Boost {
+  value: undefined;
+  operation: BoostOperation;
+  function: FunctionalBoostFunction;
+}
+
+export interface ProximityBoost extends Boost {
+  value: undefined;
+  operation: undefined;
+  function: ProximityBoostFunction;
+}
 export interface SearchField {
   weight: number;
 }
@@ -57,4 +69,5 @@ export interface SearchSettings {
   boosts: Record<string, Boost[]>;
   search_fields: Record<string, SearchField>;
   result_fields?: object;
+  precision: number;
 }

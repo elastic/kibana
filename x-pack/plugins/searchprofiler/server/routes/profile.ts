@@ -33,16 +33,15 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         body: { query, index },
       } = request;
 
-      const parsed = {
-        // Activate profiler mode for this query.
-        profile: true,
-        ...query,
-      };
-
       const body = {
         index,
-        body: JSON.stringify(parsed, null, 2),
+        body: {
+          // Activate profiler mode for this query.
+          profile: true,
+          ...query,
+        },
       };
+
       try {
         const client = ctx.core.elasticsearch.client.asCurrentUser;
         const resp = await client.search(body);

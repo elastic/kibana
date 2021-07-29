@@ -9,104 +9,77 @@ import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration';
+import { createApmApiSupertest } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
-  const supertestRead = getService('supertestAsApmReadUser');
-  const supertestWrite = getService('supertestAsApmWriteUser');
+  const supertestRead = createApmApiSupertest(getService('supertestAsApmReadUser'));
+  const supertestWrite = createApmApiSupertest(getService('supertestAsApmWriteUser'));
+
   const log = getService('log');
 
   const archiveName = 'apm_8.0.0';
 
   function getServices() {
-    return supertestRead
-      .get(`/api/apm/settings/agent-configuration/services`)
-      .set('kbn-xsrf', 'foo');
+    return supertestRead({
+      endpoint: 'GET /api/apm/settings/agent-configuration/services',
+    });
   }
 
-  function getEnvironments(serviceName: string) {
-    return supertestRead
-      .get(`/api/apm/settings/agent-configuration/environments?serviceName=${serviceName}`)
-      .set('kbn-xsrf', 'foo');
+  async function getEnvironments(serviceName: string) {
+    return supertestRead({
+      endpoint: 'GET /api/apm/settings/agent-configuration/environments',
+      params: { query: { serviceName } },
+    });
   }
 
   function getAgentName(serviceName: string) {
-    return supertestRead
-      .get(`/api/apm/settings/agent-configuration/agent_name?serviceName=${serviceName}`)
-      .set('kbn-xsrf', 'foo');
+    return supertestRead({
+      endpoint: 'GET /api/apm/settings/agent-configuration/agent_name',
+      params: { query: { serviceName } },
+    });
   }
 
   function searchConfigurations(configuration: AgentConfigSearchParams) {
-    return supertestRead
-      .post(`/api/apm/settings/agent-configuration/search`)
-      .send(configuration)
-      .set('kbn-xsrf', 'foo');
+    return supertestRead({
+      endpoint: 'POST /api/apm/settings/agent-configuration/search',
+      params: { body: configuration },
+    });
   }
 
   function getAllConfigurations() {
-    return supertestRead.get(`/api/apm/settings/agent-configuration`).set('kbn-xsrf', 'foo');
+    return supertestRead({ endpoint: 'GET /api/apm/settings/agent-configuration' });
   }
 
-  async function createConfiguration(config: AgentConfigurationIntake, { user = 'write' } = {}) {
-    log.debug('creating configuration', config.service);
+  function createConfiguration(configuration: AgentConfigurationIntake, { user = 'write' } = {}) {
+    log.debug('creating configuration', configuration.service);
     const supertestClient = user === 'read' ? supertestRead : supertestWrite;
 
-    const res = await supertestClient
-      .put(`/api/apm/settings/agent-configuration`)
-      .send(config)
-      .set('kbn-xsrf', 'foo');
-
-    throwOnError(res);
-
-    return res;
+    return supertestClient({
+      endpoint: 'PUT /api/apm/settings/agent-configuration',
+      params: { body: configuration },
+    });
   }
 
-  async function updateConfiguration(config: AgentConfigurationIntake, { user = 'write' } = {}) {
+  function updateConfiguration(config: AgentConfigurationIntake, { user = 'write' } = {}) {
     log.debug('updating configuration', config.service);
     const supertestClient = user === 'read' ? supertestRead : supertestWrite;
 
-    const res = await supertestClient
-      .put(`/api/apm/settings/agent-configuration?overwrite=true`)
-      .send(config)
-      .set('kbn-xsrf', 'foo');
-
-    throwOnError(res);
-
-    return res;
+    return supertestClient({
+      endpoint: 'PUT /api/apm/settings/agent-configuration',
+      params: { query: { overwrite: true }, body: config },
+    });
   }
 
-  async function deleteConfiguration(
-    { service }: AgentConfigurationIntake,
-    { user = 'write' } = {}
-  ) {
+  function deleteConfiguration({ service }: AgentConfigurationIntake, { user = 'write' } = {}) {
     log.debug('deleting configuration', service);
     const supertestClient = user === 'read' ? supertestRead : supertestWrite;
 
-    const res = await supertestClient
-      .delete(`/api/apm/settings/agent-configuration`)
-      .send({ service })
-      .set('kbn-xsrf', 'foo');
-
-    throwOnError(res);
-
-    return res;
-  }
-
-  function throwOnError(res: any) {
-    const { statusCode, req, body } = res;
-    if (statusCode !== 200) {
-      const e = new Error(`
-      Endpoint: ${req.method} ${req.path}
-      Service: ${JSON.stringify(res.request._data.service)}
-      Status code: ${statusCode}
-      Response: ${body.message}`);
-
-      // @ts-ignore
-      e.res = res;
-
-      throw e;
-    }
+    return supertestClient({
+      endpoint: 'DELETE /api/apm/settings/agent-configuration',
+      params: { body: { service } },
+    });
   }
 
   registry.when(
@@ -115,56 +88,35 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     () => {
       it('handles the empty state for services', async () => {
         const { body } = await getServices();
-        expect(body).to.eql(['ALL_OPTION_VALUE']);
+        expect(body.serviceNames).to.eql(['ALL_OPTION_VALUE']);
       });
 
       it('handles the empty state for environments', async () => {
         const { body } = await getEnvironments('myservice');
-        expect(body).to.eql([{ name: 'ALL_OPTION_VALUE', alreadyConfigured: false }]);
+        expect(body.environments).to.eql([{ name: 'ALL_OPTION_VALUE', alreadyConfigured: false }]);
       });
 
-      it('handles the empty state for agent names', async () => {
+      it('handles the empty state for agent name', async () => {
         const { body } = await getAgentName('myservice');
-        expect(body).to.eql({});
+        expect(body.agentName).to.eql(undefined);
       });
 
       describe('as a read-only user', () => {
         const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
-        it('throws when attempting to create config', async () => {
-          try {
-            await createConfiguration(newConfig, { user: 'read' });
-
-            // ensure that `createConfiguration` throws
-            expect(true).to.be(false);
-          } catch (e) {
-            expect(e.res.statusCode).to.be(403);
-          }
+        it('does not allow creating config', async () => {
+          await expectStatusCode(() => createConfiguration(newConfig, { user: 'read' }), 403);
         });
 
         describe('when a configuration already exists', () => {
           before(async () => createConfiguration(newConfig));
           after(async () => deleteConfiguration(newConfig));
 
-          it('throws when attempting to update config', async () => {
-            try {
-              await updateConfiguration(newConfig, { user: 'read' });
-
-              // ensure that `updateConfiguration` throws
-              expect(true).to.be(false);
-            } catch (e) {
-              expect(e.res.statusCode).to.be(403);
-            }
+          it('does not allow updating the config', async () => {
+            await expectStatusCode(() => updateConfiguration(newConfig, { user: 'read' }), 403);
           });
 
-          it('throws when attempting to delete config', async () => {
-            try {
-              await deleteConfiguration(newConfig, { user: 'read' });
-
-              // ensure that `deleteConfiguration` throws
-              expect(true).to.be(false);
-            } catch (e) {
-              expect(e.res.statusCode).to.be(403);
-            }
+          it('does not allow deleting the config', async () => {
+            await expectStatusCode(() => deleteConfiguration(newConfig, { user: 'read' }), 403);
           });
         });
       });
@@ -182,18 +134,19 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         it('can create and delete config', async () => {
           // assert that config does not exist
-          const res1 = await searchConfigurations(searchParams);
-          expect(res1.status).to.equal(404);
+          await expectStatusCode(() => searchConfigurations(searchParams), 404);
 
-          // assert that config was created
+          // create config
           await createConfiguration(newConfig);
-          const res2 = await searchConfigurations(searchParams);
-          expect(res2.status).to.equal(200);
+
+          // assert that config now exists
+          await expectStatusCode(() => searchConfigurations(searchParams), 200);
+
+          // delete config
+          await deleteConfiguration(newConfig);
 
           // assert that config was deleted
-          await deleteConfiguration(newConfig);
-          const res3 = await searchConfigurations(searchParams);
-          expect(res3.status).to.equal(404);
+          await expectStatusCode(() => searchConfigurations(searchParams), 404);
         });
 
         describe('when a configuration exists', () => {
@@ -209,8 +162,9 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
           it('can list the config', async () => {
             const { status, body } = await getAllConfigurations();
+
             expect(status).to.equal(200);
-            expect(omitTimestamp(body)).to.eql([
+            expect(omitTimestamp(body.configurations)).to.eql([
               {
                 service: {},
                 settings: { transaction_sample_rate: '0.55' },
@@ -295,7 +249,9 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         it('can list all configs', async () => {
           const { status, body } = await getAllConfigurations();
           expect(status).to.equal(200);
-          expect(orderBy(omitTimestamp(body), ['settings.transaction_sample_rate'])).to.eql([
+          expect(
+            orderBy(omitTimestamp(body.configurations), ['settings.transaction_sample_rate'])
+          ).to.eql([
             {
               service: {},
               settings: { transaction_sample_rate: '0.1' },
@@ -351,7 +307,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           service: { name: 'myservice', environment: 'production' },
           settings: { transaction_sample_rate: '0.9' },
         };
-        let etag: string;
+        let etag: string | undefined;
 
         before(async () => {
           log.debug('creating agent configuration');
@@ -391,7 +347,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
               service: { name: 'myservice', environment: 'development' },
             });
 
-            return body._source.applied_by_agent;
+            return !!body._source.applied_by_agent;
           }
 
           // wait until `applied_by_agent` has been updated in elasticsearch
@@ -415,7 +371,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
               service: { name: 'myservice', environment: 'production' },
             });
 
-            return body._source.applied_by_agent;
+            return !!body._source.applied_by_agent;
           }
 
           // wait until `applied_by_agent` has been updated in elasticsearch
@@ -432,47 +388,57 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       it('returns all services', async () => {
         const { body } = await getServices();
         expectSnapshot(body).toMatchInline(`
-          Array [
-            "ALL_OPTION_VALUE",
-            "kibana",
-            "kibana-frontend",
-            "opbeans-dotnet",
-            "opbeans-go",
-            "opbeans-java",
-            "opbeans-node",
-            "opbeans-python",
-            "opbeans-ruby",
-            "opbeans-rum",
-          ]
+          Object {
+            "serviceNames": Array [
+              "ALL_OPTION_VALUE",
+              "auditbeat",
+              "kibana",
+              "kibana-frontend",
+              "opbeans-dotnet",
+              "opbeans-go",
+              "opbeans-java",
+              "opbeans-node",
+              "opbeans-python",
+              "opbeans-ruby",
+              "opbeans-rum",
+            ],
+          }
         `);
       });
 
       it('returns the environments, all unconfigured', async () => {
         const { body } = await getEnvironments('opbeans-node');
+        const { environments } = body;
 
-        expect(body.map((item: { name: string }) => item.name)).to.contain('ALL_OPTION_VALUE');
+        expect(environments.map((item: { name: string }) => item.name)).to.contain(
+          'ALL_OPTION_VALUE'
+        );
 
         expect(
-          body.every((item: { alreadyConfigured: boolean }) => item.alreadyConfigured === false)
+          environments.every(
+            (item: { alreadyConfigured: boolean }) => item.alreadyConfigured === false
+          )
         ).to.be(true);
 
         expectSnapshot(body).toMatchInline(`
-          Array [
-            Object {
-              "alreadyConfigured": false,
-              "name": "ALL_OPTION_VALUE",
-            },
-            Object {
-              "alreadyConfigured": false,
-              "name": "testing",
-            },
-          ]
+          Object {
+            "environments": Array [
+              Object {
+                "alreadyConfigured": false,
+                "name": "ALL_OPTION_VALUE",
+              },
+              Object {
+                "alreadyConfigured": false,
+                "name": "testing",
+              },
+            ],
+          }
         `);
       });
 
-      it('returns the agent names', async () => {
+      it('returns the agent name', async () => {
         const { body } = await getAgentName('opbeans-node');
-        expect(body).to.eql({ agentName: 'nodejs' });
+        expect(body.agentName).to.eql('nodejs');
       });
     }
   );
@@ -493,4 +459,18 @@ async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolea
 
 function omitTimestamp(configs: AgentConfigurationIntake[]) {
   return configs.map((config: AgentConfigurationIntake) => omit(config, '@timestamp'));
+}
+
+async function expectStatusCode(
+  fn: () => Promise<{
+    status: number;
+  }>,
+  statusCode: number
+) {
+  try {
+    const res = await fn();
+    expect(res.status).to.be(statusCode);
+  } catch (e) {
+    expect(e.res.status).to.be(statusCode);
+  }
 }

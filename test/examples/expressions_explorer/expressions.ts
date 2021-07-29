@@ -22,7 +22,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionResult');
         expect(text).to.be(
-          '{\n "type": "error",\n "error": {\n  "message": "Function markdown could not be found.",\n  "name": "fn not found"\n }\n}'
+          '{\n "type": "render",\n "as": "markdown_vis",\n "value": {\n  "visType": "markdown",\n  "visParams": {\n   "markdown": "## expressions explorer",\n   "openLinksInNewTab": false,\n   "fontSize": 12\n  }\n }\n}'
         );
       });
     });
@@ -30,7 +30,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('renders expression', async () => {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionRender');
-        expect(text).to.be('Function markdown could not be found.');
+        expect(text).to.be('expressions explorer rendering');
       });
     });
 

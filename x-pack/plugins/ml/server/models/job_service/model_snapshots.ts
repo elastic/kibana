@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import { IScopedClusterClient } from 'kibana/server';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider } from './datafeeds';
 import { FormCalendar, CalendarManager } from '../calendar';
@@ -20,8 +21,8 @@ export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
 
-export function modelSnapshotProvider(mlClient: MlClient) {
-  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
+export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: MlClient) {
+  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(client, mlClient);
 
   async function revertModelSnapshot(
     jobId: string,
@@ -29,7 +30,7 @@ export function modelSnapshotProvider(mlClient: MlClient) {
     replay: boolean,
     end?: number,
     deleteInterveningResults: boolean = true,
-    calendarEvents?: [{ start: number; end: number; description: string }]
+    calendarEvents?: Array<{ start: number; end: number; description: string }>
   ) {
     let datafeedId = `datafeed-${jobId}`;
     // ensure job exists
@@ -72,8 +73,9 @@ export function modelSnapshotProvider(mlClient: MlClient) {
     if (replay && model.snapshot_id === snapshotId && snapshot.model_snapshots.length) {
       // create calendar before starting restarting the datafeed
       if (calendarEvents !== undefined && calendarEvents.length) {
+        const calendarId = String(Date.now());
         const calendar: FormCalendar = {
-          calendarId: String(Date.now()),
+          calendarId,
           job_ids: [jobId],
           description: i18n.translate(
             'xpack.ml.models.jobService.revertModelSnapshot.autoCreatedCalendar.description',
@@ -82,16 +84,17 @@ export function modelSnapshotProvider(mlClient: MlClient) {
             }
           ),
           events: calendarEvents.map((s) => ({
+            calendar_id: calendarId,
             description: s.description,
-            start_time: s.start,
-            end_time: s.end,
+            start_time: `${s.start}`,
+            end_time: `${s.end}`,
           })),
         };
         const cm = new CalendarManager(mlClient);
         await cm.newCalendar(calendar);
       }
 
-      forceStartDatafeeds([datafeedId], snapshot.model_snapshots[0].latest_record_time_stamp, end);
+      forceStartDatafeeds([datafeedId], +snapshot.model_snapshots[0].latest_record_time_stamp, end);
     }
 
     return { success: true };

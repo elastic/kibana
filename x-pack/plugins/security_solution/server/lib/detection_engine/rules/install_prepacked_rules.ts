@@ -6,17 +6,17 @@
  */
 
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { Alert, AlertTypeParams } from '../../../../../alerts/common';
-import { AlertsClient } from '../../../../../alerts/server';
+import { SanitizedAlert, AlertTypeParams } from '../../../../../alerting/common';
+import { RulesClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
 
 export const installPrepackagedRules = (
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
-): Array<Promise<Alert<AlertTypeParams>>> =>
-  rules.reduce<Array<Promise<Alert<AlertTypeParams>>>>((acc, rule) => {
+): Array<Promise<SanitizedAlert<AlertTypeParams>>> =>
+  rules.reduce<Array<Promise<SanitizedAlert<AlertTypeParams>>>>((acc, rule) => {
     const {
       anomaly_threshold: anomalyThreshold,
       author,
@@ -70,7 +70,7 @@ export const installPrepackagedRules = (
     return [
       ...acc,
       createRules({
-        alertsClient,
+        rulesClient,
         anomalyThreshold,
         author,
         buildingBlockType,

@@ -43,4 +43,9 @@ describe('getDisplayedColumns', () => {
       ]
     `);
   });
+  test('returns the same instance of ["_source"] over multiple calls', async () => {
+    const result = getDisplayedColumns([], indexPatternWithTimefieldMock);
+    const result2 = getDisplayedColumns([], indexPatternWithTimefieldMock);
+    expect(result).toBe(result2);
+  });
 });

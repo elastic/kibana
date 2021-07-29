@@ -23,7 +23,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
   const htmlId = htmlIdGenerator();
   const yesNoOption = (
     <YesNo
-      disabled={Boolean(panel.ignore_global_filter)}
+      disabled={panel.ignore_global_filter}
       value={model.ignore_global_filter}
       name="ignore_global_filter"
       onChange={onChange}
@@ -52,6 +52,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
             }}
             onChange={(filter) => onChange({ filter })}
             indexPatterns={[indexPatternForQuery]}
+            data-test-subj="seriesConfigQueryBar"
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -90,5 +91,5 @@ SeriesConfigQueryBarWithIgnoreGlobalFilter.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };

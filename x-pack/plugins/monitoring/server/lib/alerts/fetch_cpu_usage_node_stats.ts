@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
@@ -23,7 +24,7 @@ interface ClusterBucketESResponse {
 }
 
 export async function fetchCpuUsageNodeStats(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   startMs: number,
@@ -33,10 +34,9 @@ export async function fetchCpuUsageNodeStats(
   // Using pure MS didn't seem to work well with the date_histogram interval
   // but minutes does
   const intervalInMinutes = moment.duration(endMs - startMs).asMinutes();
-  const filterPath = ['aggregations'];
   const params = {
     index,
-    filterPath,
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -119,14 +119,14 @@ export async function fetchCpuUsageNodeStats(
                     usage_deriv: {
                       derivative: {
                         buckets_path: 'average_usage',
-                        gap_policy: 'skip',
+                        gap_policy: 'skip' as const,
                         unit: NORMALIZED_DERIVATIVE_UNIT,
                       },
                     },
                     periods_deriv: {
                       derivative: {
                         buckets_path: 'average_periods',
-                        gap_policy: 'skip',
+                        gap_policy: 'skip' as const,
                         unit: NORMALIZED_DERIVATIVE_UNIT,
                       },
                     },
@@ -140,7 +140,7 @@ export async function fetchCpuUsageNodeStats(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: AlertCpuUsageNodeStats[] = [];
   const clusterBuckets = get(
     response,

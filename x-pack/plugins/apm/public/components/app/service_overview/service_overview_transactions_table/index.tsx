@@ -15,22 +15,22 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
 
-interface Props {
-  serviceName: string;
-}
-
+type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 const INITIAL_STATE = {
-  transactionGroups: [],
+  transactionGroups: [] as ApiResponse['transactionGroups'],
   isAggregationAccurate: true,
   requestId: '',
+  transactionGroupsTotalItems: 0,
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
@@ -41,7 +41,7 @@ const DEFAULT_SORT = {
   field: 'impact' as const,
 };
 
-export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
+export function ServiceOverviewTransactionsTable() {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -54,11 +54,27 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   });
 
   const { pageIndex, sort } = tableOptions;
+  const { direction, field } = sort;
 
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: { environment, kuery, start, end, latencyAggregationType },
+    urlParams: {
+      start,
+      end,
+      latencyAggregationType,
+      comparisonType,
+      comparisonEnabled,
+      environment,
+      kuery,
+    },
   } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -67,7 +83,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics',
+          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -80,12 +96,22 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           },
         },
       }).then((response) => {
+        const currentPageTransactionGroups = orderBy(
+          response.transactionGroups,
+          field,
+          direction
+        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
         return {
-          requestId: uuid(),
           ...response,
+          // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
+          requestId: uuid(),
+          transactionGroupsTotalItems: response.transactionGroups.length,
+          transactionGroups: currentPageTransactionGroups,
         };
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -94,27 +120,25 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       end,
       transactionType,
       latencyAggregationType,
+      pageIndex,
+      direction,
+      field,
+      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
+      comparisonType,
+      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
+      comparisonEnabled,
     ]
   );
 
-  const { transactionGroups, requestId } = data;
-  const currentPageTransactionGroups = orderBy(
-    transactionGroups,
-    sort.field,
-    sort.direction
-  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
-
-  const transactionNames = JSON.stringify(
-    currentPageTransactionGroups.map(({ name }) => name).sort()
-  );
+  const { transactionGroups, requestId, transactionGroupsTotalItems } = data;
 
   const {
-    data: transactionGroupComparisonStatistics,
-    status: transactionGroupComparisonStatisticsStatus,
+    data: transactionGroupDetailedStatistics,
+    status: transactionGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (
-        currentPageTransactionGroups.length &&
+        transactionGroupsTotalItems &&
         start &&
         end &&
         transactionType &&
@@ -122,7 +146,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics',
+            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -133,40 +157,38 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               numBuckets: 20,
               transactionType,
               latencyAggregationType,
-              transactionNames,
+              transactionNames: JSON.stringify(
+                transactionGroups.map(({ name }) => name).sort()
+              ),
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
       }
     },
-    // only fetches statistics when requestId changes or transaction names changes
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, transactionNames],
+    [requestId],
     { preservePreviousData: false }
   );
 
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionGroupComparisonStatistics,
+    transactionGroupDetailedStatistics,
+    comparisonEnabled,
   });
 
   const isLoading =
     status === FETCH_STATUS.LOADING ||
-    transactionGroupComparisonStatisticsStatus === FETCH_STATUS.LOADING;
+    transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,
     pageSize: PAGE_SIZE,
-    totalItemCount: transactionGroups.length,
+    totalItemCount: transactionGroupsTotalItems,
     hidePerPageOptions: true,
-  };
-
-  const sorting = {
-    sort: {
-      field: sort.field,
-      direction: sort.direction,
-    },
   };
 
   return (
@@ -189,6 +211,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
             <TransactionOverviewLink
               serviceName={serviceName}
               latencyAggregationType={latencyAggregationType}
+              transactionType={transactionType}
             >
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',
@@ -204,14 +227,14 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <ServiceOverviewTableContainer
-              isEmptyAndLoading={transactionGroups.length === 0 && isLoading}
+              isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable
                 loading={isLoading}
-                items={currentPageTransactionGroups}
+                items={transactionGroups}
                 columns={columns}
                 pagination={pagination}
-                sorting={sorting}
+                sorting={{ sort: { field, direction } }}
                 onChange={(newTableOptions: {
                   page?: {
                     index: number;

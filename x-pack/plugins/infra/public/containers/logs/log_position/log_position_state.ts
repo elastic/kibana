@@ -21,6 +21,7 @@ interface DateRange {
   startTimestamp: number;
   endTimestamp: number;
   timestampsLastUpdate: number;
+  lastCompleteDateRangeExpressionUpdate: number;
 }
 
 interface VisiblePositions {
@@ -46,6 +47,7 @@ export interface LogPositionStateParams {
   startTimestamp: number | null;
   endTimestamp: number | null;
   timestampsLastUpdate: number;
+  lastCompleteDateRangeExpressionUpdate: number;
 }
 
 export interface LogPositionCallbacks {
@@ -121,6 +123,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     startTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.startDateExpression)!,
     endTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.endDateExpression, 'up')!,
     timestampsLastUpdate: Date.now(),
+    lastCompleteDateRangeExpressionUpdate: Date.now(),
   });
 
   useEffect(() => {
@@ -171,12 +174,18 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         jumpToTargetPosition(null);
       }
 
-      setDateRange({
+      setDateRange((prevState) => ({
         ...newDateRange,
         startTimestamp: nextStartTimestamp,
         endTimestamp: nextEndTimestamp,
         timestampsLastUpdate: Date.now(),
-      });
+        // NOTE: Complete refers to the last time an update was requested with both expressions. These require a full refresh (unless streaming). Timerange expansion
+        // and pagination however do not.
+        lastCompleteDateRangeExpressionUpdate:
+          'startDateExpression' in newDateRange && 'endDateExpression' in newDateRange
+            ? Date.now()
+            : prevState.lastCompleteDateRangeExpressionUpdate,
+      }));
     },
     [setDateRange, dateRange, targetPosition]
   );

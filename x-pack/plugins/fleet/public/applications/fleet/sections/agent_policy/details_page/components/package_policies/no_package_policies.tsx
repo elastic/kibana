@@ -8,10 +8,12 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { useCapabilities, useLink } from '../../../../../hooks';
+
+import { useCapabilities, useStartServices } from '../../../../../hooks';
+import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
-  const { getHref } = useLink();
+  const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
 
   return (
@@ -35,7 +37,12 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
         <EuiButton
           isDisabled={!hasWriteCapabilities}
           fill
-          href={getHref('add_integration_from_policy', { policyId })}
+          onClick={() =>
+            application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+              path: pagePathGetters.integrations_all()[1],
+              state: { forAgentPolicyId: policyId },
+            })
+          }
         >
           <FormattedMessage
             id="xpack.fleet.policyDetailsPackagePolicies.createFirstButtonText"

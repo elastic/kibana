@@ -9,8 +9,13 @@ import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { TimelineTabs, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
+import {
+  RowRenderer,
+  TimelineTabs,
+  TimelineId,
+  TimelineType,
+} from '../../../../../common/types/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -20,6 +25,7 @@ import {
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
+import { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,
@@ -46,21 +52,41 @@ const NotesTabContent = lazy(() => import('../notes_tab_content'));
 const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 
 interface BasicTimelineTab {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  setTimelineFullScreen?: (fullScreen: boolean) => void;
+  timelineFullScreen?: boolean;
   timelineId: TimelineId;
   timelineType: TimelineType;
   graphEventId?: string;
 }
 
-const QueryTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const QueryTab: React.FC<{
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <QueryTabContent timelineId={timelineId} />
+    <QueryTabContent
+      renderCellValue={renderCellValue}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+    />
   </Suspense>
 ));
 QueryTab.displayName = 'QueryTab';
 
-const EqlTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const EqlTab: React.FC<{
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <EqlTabContent timelineId={timelineId} />
+    <EqlTabContent
+      renderCellValue={renderCellValue}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+    />
   </Suspense>
 ));
 EqlTab.displayName = 'EqlTab';
@@ -79,9 +105,17 @@ const NotesTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => 
 ));
 NotesTab.displayName = 'NotesTab';
 
-const PinnedTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const PinnedTab: React.FC<{
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <PinnedTabContent timelineId={timelineId} />
+    <PinnedTabContent
+      renderCellValue={renderCellValue}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+    />
   </Suspense>
 ));
 PinnedTab.displayName = 'PinnedTab';
@@ -89,7 +123,7 @@ PinnedTab.displayName = 'PinnedTab';
 type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
-  ({ activeTimelineTab, timelineId, timelineType }) => {
+  ({ activeTimelineTab, renderCellValue, rowRenderers, timelineId, timelineType }) => {
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -116,18 +150,42 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
      */
     return (
       <>
-        <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
-          <QueryTab timelineId={timelineId} />
+        <HideShowContainer
+          $isVisible={TimelineTabs.query === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.query}`}
+        >
+          <QueryTab
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+          />
         </HideShowContainer>
-        <HideShowContainer $isVisible={TimelineTabs.pinned === activeTimelineTab}>
-          <PinnedTab timelineId={timelineId} />
+        <HideShowContainer
+          $isVisible={TimelineTabs.pinned === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
+        >
+          <PinnedTab
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+          />
         </HideShowContainer>
         {timelineType === TimelineType.default && (
-          <HideShowContainer $isVisible={TimelineTabs.eql === activeTimelineTab}>
-            <EqlTab timelineId={timelineId} />
+          <HideShowContainer
+            $isVisible={TimelineTabs.eql === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.eql}`}
+          >
+            <EqlTab
+              renderCellValue={renderCellValue}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+            />
           </HideShowContainer>
         )}
-        <HideShowContainer $isVisible={isGraphOrNotesTabs}>
+        <HideShowContainer
+          $isVisible={isGraphOrNotesTabs}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
+        >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
       </>
@@ -158,7 +216,10 @@ const StyledEuiTab = styled(EuiTab)`
 `;
 
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({
+  renderCellValue,
+  rowRenderers,
   timelineId,
+  timelineFullScreen,
   timelineType,
   graphEventId,
 }) => {
@@ -232,68 +293,73 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   return (
     <>
-      <EuiTabs>
-        <StyledEuiTab
-          data-test-subj={`timelineTabs-${TimelineTabs.query}`}
-          onClick={setQueryAsActiveTab}
-          isSelected={activeTab === TimelineTabs.query}
-          disabled={false}
-          key={TimelineTabs.query}
-        >
-          <span>{i18n.QUERY_TAB}</span>
-          {showTimeline && <TimelineEventsCountBadge />}
-        </StyledEuiTab>
-        {timelineType === TimelineType.default && (
+      {!timelineFullScreen && (
+        <EuiTabs>
           <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
-            onClick={setEqlAsActiveTab}
-            isSelected={activeTab === TimelineTabs.eql}
+            data-test-subj={`timelineTabs-${TimelineTabs.query}`}
+            onClick={setQueryAsActiveTab}
+            isSelected={activeTab === TimelineTabs.query}
             disabled={false}
-            key={TimelineTabs.eql}
+            key={TimelineTabs.query}
           >
-            <span>{i18n.EQL_TAB}</span>
-            {showTimeline && <EqlEventsCountBadge />}
+            <span>{i18n.QUERY_TAB}</span>
+            {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-        )}
-        <EuiTab
-          data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
-          onClick={setGraphAsActiveTab}
-          isSelected={activeTab === TimelineTabs.graph}
-          disabled={!graphEventId}
-          key={TimelineTabs.graph}
-        >
-          {i18n.ANALYZER_TAB}
-        </EuiTab>
-        <StyledEuiTab
-          data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
-          onClick={setNotesAsActiveTab}
-          isSelected={activeTab === TimelineTabs.notes}
-          disabled={false}
-          key={TimelineTabs.notes}
-        >
-          <span>{i18n.NOTES_TAB}</span>
-          {showTimeline && numberOfNotes > 0 && (
-            <div>
-              <CountBadge>{numberOfNotes}</CountBadge>
-            </div>
+          {timelineType === TimelineType.default && (
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
+              onClick={setEqlAsActiveTab}
+              isSelected={activeTab === TimelineTabs.eql}
+              disabled={false}
+              key={TimelineTabs.eql}
+            >
+              <span>{i18n.EQL_TAB}</span>
+              {showTimeline && <EqlEventsCountBadge />}
+            </StyledEuiTab>
           )}
-        </StyledEuiTab>
-        <StyledEuiTab
-          data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
-          onClick={setPinnedAsActiveTab}
-          isSelected={activeTab === TimelineTabs.pinned}
-          key={TimelineTabs.pinned}
-        >
-          <span>{i18n.PINNED_TAB}</span>
-          {showTimeline && numberOfPinnedEvents > 0 && (
-            <div>
-              <CountBadge>{numberOfPinnedEvents}</CountBadge>
-            </div>
-          )}
-        </StyledEuiTab>
-      </EuiTabs>
+          <EuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
+            onClick={setGraphAsActiveTab}
+            isSelected={activeTab === TimelineTabs.graph}
+            disabled={!graphEventId}
+            key={TimelineTabs.graph}
+          >
+            {i18n.ANALYZER_TAB}
+          </EuiTab>
+          <StyledEuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
+            onClick={setNotesAsActiveTab}
+            isSelected={activeTab === TimelineTabs.notes}
+            disabled={false}
+            key={TimelineTabs.notes}
+          >
+            <span>{i18n.NOTES_TAB}</span>
+            {showTimeline && numberOfNotes > 0 && (
+              <div>
+                <CountBadge>{numberOfNotes}</CountBadge>
+              </div>
+            )}
+          </StyledEuiTab>
+          <StyledEuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
+            onClick={setPinnedAsActiveTab}
+            isSelected={activeTab === TimelineTabs.pinned}
+            key={TimelineTabs.pinned}
+          >
+            <span>{i18n.PINNED_TAB}</span>
+            {showTimeline && numberOfPinnedEvents > 0 && (
+              <div>
+                <CountBadge>{numberOfPinnedEvents}</CountBadge>
+              </div>
+            )}
+          </StyledEuiTab>
+        </EuiTabs>
+      )}
+
       <ActiveTimelineTab
         activeTimelineTab={activeTab}
+        renderCellValue={renderCellValue}
+        rowRenderers={rowRenderers}
         timelineId={timelineId}
         timelineType={timelineType}
       />

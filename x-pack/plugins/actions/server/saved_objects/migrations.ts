@@ -6,6 +6,7 @@
  */
 
 import {
+  LogMeta,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
@@ -13,31 +14,58 @@ import {
 } from '../../../../../src/core/server';
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+
+interface ActionsLogMeta extends LogMeta {
+  migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
+}
 
 type ActionMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ) => SavedObjectUnsanitizedDoc<RawAction>;
 
+function createEsoMigration(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAction, RawAction>,
+  migrationFunc: ActionMigration
+) {
+  return encryptedSavedObjects.createMigration<RawAction, RawAction>({
+    isMigrationNeededPredicate,
+    migration: migrationFunc,
+    shouldMigrateIfDecryptionFails: true, // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
+  });
+}
+
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsTen = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
+      doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
+      doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
-  const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsEleven = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.isCaseOwned ||
-      !!doc.attributes.config?.incidentConfiguration ||
+      doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
+      doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
       doc.attributes.actionTypeId === '.webhook',
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
+  );
+
+  const migrationActionsFourteen = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
+    pipeMigrations(addisMissingSecretsField)
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
+    '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
   };
 }
 
@@ -49,12 +77,16 @@ function executeMigrationWithErrorHandling(
     try {
       return migrationFunc(doc, context);
     } catch (ex) {
-      context.log.error(
+      context.log.error<ActionsLogMeta>(
         `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
-        { actionDocument: doc }
+        {
+          migrations: {
+            actionDocument: doc,
+          },
+        }
       );
+      throw ex;
     }
-    return doc;
   };
 }
 
@@ -104,7 +136,7 @@ const addHasAuthConfigurationObject = (
   if (doc.attributes.actionTypeId !== '.email' && doc.attributes.actionTypeId !== '.webhook') {
     return doc;
   }
-  const hasAuth = !!doc.attributes.secrets.user || !!doc.attributes.secrets.password;
+  const hasAuth = !!doc.attributes.secrets?.user || !!doc.attributes.secrets?.password;
   return {
     ...doc,
     attributes: {
@@ -113,6 +145,18 @@ const addHasAuthConfigurationObject = (
         ...doc.attributes.config,
         hasAuth,
       },
+    },
+  };
+};
+
+const addisMissingSecretsField = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> => {
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      isMissingSecrets: false,
     },
   };
 };

@@ -8,7 +8,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Browser Child Process",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : (\"Google Chrome\", \"Google Chrome Helper*\", \"firefox\", \"Opera\", \"Safari\", \"com.apple.WebKit.WebContent\", \"Microsoft Edge\") and\n  process.name : (\"sh\", \"bash\", \"dash\", \"ksh\", \"tcsh\", \"zsh\", \"curl\", \"wget\", \"python*\", \"perl*\", \"php*\", \"osascript\", \"pwsh\") and \n  process.command_line != null and \n  not process.args : \n    ( \n      \"/Library/Application Support/Microsoft/MAU*/Microsoft AutoUpdate.app/Contents/MacOS/msupdate\", \n      \"hw.model\", \n      \"IOPlatformExpertDevice\", \n      \"/Volumes/Google Chrome/Google Chrome.app/Contents/Frameworks/*/Resources/install.sh\",\n      \"--defaults-torrc\", \n      \"Chrome.app\", \n      \"Framework.framework/Versions/*/Resources/keystone_promote_preflight.sh\", \n      \"/Users/*/Library/Application Support/Google/Chrome/recovery/*/ChromeRecovery\", \n      \"$DISPLAY\", \n      \"GIO_LAUNCHED_DESKTOP_FILE_PID=$$\"\n    )\n",
   "references": [

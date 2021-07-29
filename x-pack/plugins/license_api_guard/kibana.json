@@ -1,0 +1,8 @@
+{
+  "id": "licenseApiGuard",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "licenseApiGuard"],
+  "server": true,
+  "ui": false
+}

@@ -28,7 +28,7 @@ export declare class IndexPatternField implements IFieldType
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[] &#124; undefined</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
 |  [isMapped](./kibana-plugin-plugins-data-public.indexpatternfield.ismapped.md) |  | <code>boolean &#124; undefined</code> | Is the field part of the index mapping? |
-|  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string &#124; undefined</code> | Script field language |
+|  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>&quot;painless&quot; &#124; &quot;expression&quot; &#124; &quot;mustache&quot; &#124; &quot;java&quot; &#124; undefined</code> | Script field language |
 |  [name](./kibana-plugin-plugins-data-public.indexpatternfield.name.md) |  | <code>string</code> |  |
 |  [readFromDocValues](./kibana-plugin-plugins-data-public.indexpatternfield.readfromdocvalues.md) |  | <code>boolean</code> |  |
 |  [runtimeField](./kibana-plugin-plugins-data-public.indexpatternfield.runtimefield.md) |  | <code>RuntimeField &#124; undefined</code> |  |
@@ -37,7 +37,7 @@ export declare class IndexPatternField implements IFieldType
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.indexpatternfield.sortable.md) |  | <code>boolean</code> |  |
 |  [spec](./kibana-plugin-plugins-data-public.indexpatternfield.spec.md) |  | <code>FieldSpec</code> |  |
-|  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>import(&quot;../types&quot;).IFieldSubType &#124; undefined</code> |  |
+|  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>import(&quot;@kbn/es-query&quot;).IFieldSubType &#124; undefined</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpatternfield.type.md) |  | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-public.indexpatternfield.visualizable.md) |  | <code>boolean</code> |  |
 

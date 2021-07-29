@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { RequestParams } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { estypes } from '@elastic/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRequestHandlerContext } from '../../../../routes/typings';
+import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../src/core/types/elasticsearch';
 import {
   callAsyncWithDebug,
   getDebugBody,
@@ -21,35 +20,41 @@ import {
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
-export type APMIndexDocumentParams<T> = RequestParams.Index<T>;
+export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
 export type APMInternalClient = ReturnType<typeof createInternalESClient>;
 
 export function createInternalESClient({
   context,
+  debug,
   request,
-}: {
-  context: APMRequestHandlerContext;
-  request: KibanaRequest;
-}) {
+}: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
   const { asInternalUser } = context.core.elasticsearch.client;
 
-  function callEs<T extends { body: any }>({
-    cb,
-    operationName,
-    params,
-  }: {
-    operationName: string;
-    cb: () => TransportRequestPromise<T>;
-    params: Record<string, any>;
-  }) {
+  function callEs<T extends { body: any }>(
+    operationName: string,
+    {
+      cb,
+      requestType,
+      params,
+    }: {
+      requestType: string;
+      cb: () => TransportRequestPromise<T>;
+      params: Record<string, any>;
+    }
+  ) {
     return callAsyncWithDebug({
       cb: () => unwrapEsResponse(cancelEsRequestOnAbort(cb(), request)),
       getDebugMessage: () => ({
         title: getDebugTitle(request),
-        body: getDebugBody(params, operationName),
+        body: getDebugBody({ params, requestType, operationName }),
       }),
-      debug: context.params.query._debug,
+      debug,
+      isCalledWithInternalUser: true,
+      request,
+      requestType,
+      requestParams: params,
+      operationName,
     });
   }
 
@@ -58,31 +63,38 @@ export function createInternalESClient({
       TDocument = unknown,
       TSearchRequest extends ESSearchRequest = ESSearchRequest
     >(
+      operationName: string,
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
-      return callEs({
-        operationName: 'search',
+      return callEs(operationName, {
+        requestType: 'search',
         cb: () => asInternalUser.search(params),
         params,
       });
     },
-    index: <T>(params: APMIndexDocumentParams<T>) => {
-      return callEs({
-        operationName: 'index',
+    index: <T>(operationName: string, params: APMIndexDocumentParams<T>) => {
+      return callEs(operationName, {
+        requestType: 'index',
         cb: () => asInternalUser.index(params),
         params,
       });
     },
-    delete: (params: RequestParams.Delete): Promise<{ result: string }> => {
-      return callEs({
-        operationName: 'delete',
+    delete: (
+      operationName: string,
+      params: estypes.DeleteRequest
+    ): Promise<{ result: string }> => {
+      return callEs(operationName, {
+        requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
-    indicesCreate: (params: RequestParams.IndicesCreate) => {
-      return callEs({
-        operationName: 'indices.create',
+    indicesCreate: (
+      operationName: string,
+      params: estypes.IndicesCreateRequest
+    ) => {
+      return callEs(operationName, {
+        requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),
         params,
       });

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { DslQuery, EsQueryConfig } from 'src/plugins/data/common';
+import { DslQuery, EsQueryConfig } from '@kbn/es-query';
 
 import { Filter, Query, esQuery } from '../../../../../../src/plugins/data/server';
+
+import { escapeQuotes } from './escape_query';
 
 export interface GetQueryFilterOptions {
   filter: string;
@@ -41,7 +43,10 @@ export const getQueryFilterWithListId = ({
   filter,
   listId,
 }: GetQueryFilterWithListIdOptions): GetQueryFilterReturn => {
+  const escapedListId = escapeQuotes(listId);
   const filterWithListId =
-    filter.trim() !== '' ? `list_id: ${listId} AND (${filter})` : `list_id: ${listId}`;
+    filter.trim() !== ''
+      ? `list_id: "${escapedListId}" AND (${filter})`
+      : `list_id: "${escapedListId}"`;
   return getQueryFilter({ filter: filterWithListId });
 };

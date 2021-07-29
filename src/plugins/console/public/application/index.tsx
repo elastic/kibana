@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup } from 'src/core/public';
+import { HttpSetup, NotificationsSetup, I18nStart } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings } from '../services';
@@ -20,7 +20,7 @@ import { createApi, createEsHostService } from './lib';
 export interface BootDependencies {
   http: HttpSetup;
   docLinkVersion: string;
-  I18nContext: any;
+  I18nContext: I18nStart['Context'];
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;

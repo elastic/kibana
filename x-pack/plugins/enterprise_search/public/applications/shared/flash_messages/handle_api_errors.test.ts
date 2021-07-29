@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import '../../__mocks__/kibana_logic.mock';
+import '../../__mocks__/kea_logic/kibana_logic.mock';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-import { flashAPIErrors } from './handle_api_errors';
+import { flashAPIErrors, getErrorsFromHttpResponse } from './handle_api_errors';
 
 describe('flashAPIErrors', () => {
   const mockHttpError = {
@@ -68,10 +68,29 @@ describe('flashAPIErrors', () => {
     try {
       flashAPIErrors(Error('whatever') as any);
     } catch (e) {
-      expect(e.message).toEqual('whatever');
       expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
-        { type: 'error', message: 'An unexpected error occurred' },
+        { type: 'error', message: expect.any(String) },
       ]);
     }
+  });
+});
+
+describe('getErrorsFromHttpResponse', () => {
+  it('should return errors from the response if present', () => {
+    expect(
+      getErrorsFromHttpResponse({
+        body: { attributes: { errors: ['first error', 'second error'] } },
+      } as any)
+    ).toEqual(['first error', 'second error']);
+  });
+
+  it('should return a message from the responnse if no errors', () => {
+    expect(getErrorsFromHttpResponse({ body: { message: 'test message' } } as any)).toEqual([
+      'test message',
+    ]);
+  });
+
+  it('should return the a default message otherwise', () => {
+    expect(getErrorsFromHttpResponse({} as any)).toEqual([expect.any(String)]);
   });
 });

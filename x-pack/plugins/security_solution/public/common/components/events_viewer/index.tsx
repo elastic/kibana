@@ -10,23 +10,36 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
+import { isEmpty } from 'lodash/fp';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { TimelineId } from '../../../../common/types/timeline';
+import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
-import { EventsViewer } from './events_viewer';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
+import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import { useKibana } from '../../lib/kibana';
+import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { EventsViewer } from './events_viewer';
+import * as i18n from './translations';
 
-const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
+const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
+const leadingControlColumns: ControlColumnProps[] = [
+  {
+    ...defaultControlColumn,
+    // eslint-disable-next-line react/display-name
+    headerCellRender: () => <>{i18n.ACTIONS}</>,
+  },
+];
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
-  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
   flex: 1 1 auto;
   display: flex;
   width: 100%;
@@ -38,9 +51,12 @@ export interface OwnProps {
   id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
+  showTotalCount?: boolean;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
@@ -67,8 +83,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   pageFilters,
-  query,
   onRuleChange,
+  query,
+  renderCellValue,
+  rowRenderers,
   start,
   scopeId,
   showCheckboxes,
@@ -77,6 +95,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
 }) => {
+  const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
     docValueFields,
@@ -84,8 +103,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     selectedPatterns,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
-  const { globalFullScreen } = useGlobalFullScreen();
-
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  // TODO: Once we are past experimental phase this code should be removed
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -105,35 +125,73 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
+  const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          <EventsViewer
-            browserFields={browserFields}
-            columns={columns}
-            docValueFields={docValueFields}
-            id={id}
-            dataProviders={dataProviders!}
-            deletedEventIds={deletedEventIds}
-            end={end}
-            isLoadingIndexPattern={isLoadingIndexPattern}
-            filters={globalFilters}
-            headerFilterGroup={headerFilterGroup}
-            indexNames={selectedPatterns}
-            indexPattern={indexPattern}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            query={query}
-            onRuleChange={onRuleChange}
-            start={start}
-            sort={sort}
-            utilityBar={utilityBar}
-            graphEventId={graphEventId}
-          />
+          {tGridEnabled ? (
+            timelinesUi.getTGrid<'embedded'>({
+              type: 'embedded',
+              browserFields,
+              columns,
+              dataProviders: dataProviders!,
+              deletedEventIds,
+              docValueFields,
+              end,
+              filters: globalFilters,
+              globalFullScreen,
+              headerFilterGroup,
+              id,
+              indexNames: selectedPatterns,
+              indexPattern,
+              isLive,
+              isLoadingIndexPattern,
+              itemsPerPage,
+              itemsPerPageOptions: itemsPerPageOptions!,
+              kqlMode,
+              query,
+              onRuleChange,
+              renderCellValue,
+              rowRenderers,
+              setGlobalFullScreen,
+              start,
+              sort,
+              utilityBar,
+              graphEventId,
+              leadingControlColumns,
+              trailingControlColumns,
+            })
+          ) : (
+            <EventsViewer
+              browserFields={browserFields}
+              columns={columns}
+              docValueFields={docValueFields}
+              id={id}
+              dataProviders={dataProviders!}
+              deletedEventIds={deletedEventIds}
+              end={end}
+              isLoadingIndexPattern={isLoadingIndexPattern}
+              filters={globalFilters}
+              headerFilterGroup={headerFilterGroup}
+              indexNames={selectedPatterns}
+              indexPattern={indexPattern}
+              isLive={isLive}
+              itemsPerPage={itemsPerPage!}
+              itemsPerPageOptions={itemsPerPageOptions!}
+              kqlMode={kqlMode}
+              query={query}
+              onRuleChange={onRuleChange}
+              renderCellValue={renderCellValue}
+              rowRenderers={rowRenderers}
+              start={start}
+              sort={sort}
+              showTotalCount={isEmpty(graphEventId) ? true : false}
+              utilityBar={utilityBar}
+              graphEventId={graphEventId}
+            />
+          )}
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
@@ -201,6 +259,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
+    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       prevProps.scopeId === nextProps.scopeId &&
@@ -215,6 +274,8 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       prevProps.kqlMode === nextProps.kqlMode &&
       deepEqual(prevProps.query, nextProps.query) &&
+      prevProps.renderCellValue === nextProps.renderCellValue &&
+      prevProps.rowRenderers === nextProps.rowRenderers &&
       deepEqual(prevProps.sort, nextProps.sort) &&
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&

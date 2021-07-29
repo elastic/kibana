@@ -9,21 +9,17 @@
 import './json_code_editor.scss';
 
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { monaco, XJsonLang } from '@kbn/monaco';
-import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '../../../../../kibana_react/public';
-import { DocViewRenderProps } from '../../../application/doc_views/doc_views_types';
+import { monaco } from '@kbn/monaco';
+import { JsonCodeEditorCommon } from './json_code_editor_common';
 
-const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
-  defaultMessage: 'Read only JSON view of an elasticsearch document',
-});
-const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel', {
-  defaultMessage: 'Copy to clipboard',
-});
+interface JsonCodeEditorProps {
+  json: Record<string, unknown>;
+  width?: string | number;
+  hasLineNumbers?: boolean;
+}
 
-export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
-  const jsonValue = JSON.stringify(hit, null, 2);
+export const JsonCodeEditor = ({ json, width, hasLineNumbers }: JsonCodeEditorProps) => {
+  const jsonValue = JSON.stringify(json, null, 2);
 
   // setting editor height based on lines height and count to stretch and fit its content
   const setEditorCalculatedHeight = useCallback((editor) => {
@@ -42,43 +38,11 @@ export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
   }, []);
 
   return (
-    <EuiFlexGroup className="dscJsonCodeEditor" direction="column" gutterSize="s">
-      <EuiFlexItem grow={true}>
-        <EuiSpacer size="s" />
-        <div className="eui-textRight">
-          <EuiCopy textToCopy={jsonValue}>
-            {(copy) => (
-              <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
-                {copyToClipboardLabel}
-              </EuiButtonEmpty>
-            )}
-          </EuiCopy>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <CodeEditor
-          languageId={XJsonLang.ID}
-          value={jsonValue}
-          onChange={() => {}}
-          editorDidMount={setEditorCalculatedHeight}
-          aria-label={codeEditorAriaLabel}
-          options={{
-            automaticLayout: true,
-            fontSize: 12,
-            minimap: {
-              enabled: false,
-            },
-            overviewRulerBorder: false,
-            readOnly: true,
-            scrollbar: {
-              alwaysConsumeMouseWheel: false,
-            },
-            scrollBeyondLastLine: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <JsonCodeEditorCommon
+      jsonValue={jsonValue}
+      width={width}
+      hasLineNumbers={hasLineNumbers}
+      onEditorDidMount={setEditorCalculatedHeight}
+    />
   );
 };

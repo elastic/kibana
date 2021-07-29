@@ -28,7 +28,10 @@ import { UserEcs } from './user';
 import { WinlogEcs } from './winlog';
 import { ProcessEcs } from './process';
 import { SystemEcs } from './system';
+import { ThreatEcs } from './threat';
 import { Ransomware } from './ransomware';
+import { MemoryProtection } from './memory_protection';
+import { Target } from './target_type';
 
 export interface Ecs {
   _id: string;
@@ -58,7 +61,11 @@ export interface Ecs {
   process?: ProcessEcs;
   file?: FileEcs;
   system?: SystemEcs;
+  threat?: ThreatEcs;
   // This should be temporary
   eql?: { parentId: string; sequenceNumber: string };
   Ransomware?: Ransomware;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Memory_protection?: MemoryProtection;
+  Target?: Target;
 }

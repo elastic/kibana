@@ -9,6 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { EDIT_BUTTON_LABEL } from '../../../../../shared/constants';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -17,7 +18,7 @@ import { ENGINE_ANALYTICS_QUERY_DETAIL_PATH, ENGINE_CURATION_PATH } from '../../
 import { generateEnginePath, EngineLogic } from '../../../engine';
 import { Query, RecentQuery } from '../../types';
 
-import { InlineTagsList } from './inline_tags_list';
+import { TagsList, TagsCount } from './tags';
 
 /**
  * Shared columns / column properties between separate analytics tables
@@ -49,7 +50,7 @@ export const TERM_COLUMN_PROPS = {
 };
 
 export const ACTIONS_COLUMN = {
-  width: '120px',
+  width: '90px',
   actions: [
     {
       name: i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.viewAction', {
@@ -71,15 +72,13 @@ export const ACTIONS_COLUMN = {
       'data-test-subj': 'AnalyticsTableViewQueryButton',
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.editAction', {
-        defaultMessage: 'Edit',
-      }),
+      name: EDIT_BUTTON_LABEL,
       description: i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.analytics.table.editTooltip',
-        { defaultMessage: 'Edit query' }
+        { defaultMessage: 'Manage curation' }
       ),
       type: 'icon',
-      icon: 'pencil',
+      icon: 'package',
       onClick: async (item: Query | RecentQuery) => {
         const { http } = HttpLogic.values;
         const { navigateToUrl } = KibanaLogic.values;
@@ -101,13 +100,20 @@ export const ACTIONS_COLUMN = {
   ],
 };
 
-export const TAGS_COLUMN = {
+export const TAGS_COLUMN_PROPS = {
   field: 'tags',
   name: i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.tagsColumn', {
     defaultMessage: 'Analytics tags',
   }),
   truncateText: true,
-  render: (tags: Query['tags']) => <InlineTagsList tags={tags} />,
+};
+export const TAGS_LIST_COLUMN = {
+  ...TAGS_COLUMN_PROPS,
+  render: (tags: Query['tags']) => <TagsList tags={tags} />,
+};
+export const TAGS_COUNT_COLUMN = {
+  ...TAGS_COLUMN_PROPS,
+  render: (tags: Query['tags']) => <TagsCount tags={tags} />,
 };
 
 export const COUNT_COLUMN_PROPS = {

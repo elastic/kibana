@@ -209,6 +209,44 @@ describe('data telemetry collection tasks', () => {
     });
   });
 
+  describe('host', () => {
+    const task = tasks.find((t) => t.name === 'host');
+
+    it('returns a map of host provider data', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        aggregations: {
+          platform: {
+            buckets: [
+              { doc_count: 1, key: 'linux' },
+              { doc_count: 1, key: 'windows' },
+              { doc_count: 1, key: 'macos' },
+            ],
+          },
+        },
+      });
+
+      expect(await task?.executor({ indices, search } as any)).toEqual({
+        host: {
+          os: { platform: ['linux', 'windows', 'macos'] },
+        },
+      });
+    });
+
+    describe('with no results', () => {
+      it('returns an empty map', async () => {
+        const search = jest.fn().mockResolvedValueOnce({});
+
+        expect(await task?.executor({ indices, search } as any)).toEqual({
+          host: {
+            os: {
+              platform: [],
+            },
+          },
+        });
+      });
+    });
+  });
+
   describe('processor_events', () => {
     const task = tasks.find((t) => t.name === 'processor_events');
 

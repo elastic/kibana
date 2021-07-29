@@ -12,7 +12,6 @@ import { ReactElement } from 'react';
 import { FeaturesPluginStart } from '../../features/public';
 import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
   ManagementAppMountParams,
@@ -23,26 +22,33 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
-import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+import type { SpacesPluginStart } from '../../spaces/public';
+
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
-import { AlertAddProps } from './application/sections/alert_form/alert_add';
-import { AlertEditProps } from './application/sections/alert_form/alert_edit';
+
+import type {
+  ActionTypeModel,
+  AlertAddProps,
+  AlertEditProps,
+  AlertTypeModel,
+  ConnectorAddFlyoutProps,
+  ConnectorEditFlyoutProps,
+} from './types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
+  ruleTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
+  ruleTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps>;
@@ -50,10 +56,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorEditFlyoutProps>;
   getAddAlertFlyout: (
-    props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+    props: Omit<AlertAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<AlertAddProps>;
   getEditAlertFlyout: (
-    props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+    props: Omit<AlertEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<AlertEditProps>;
 }
 
@@ -65,7 +71,8 @@ interface PluginsSetup {
 interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  alerts?: AlertingStart;
+  alerting?: AlertingStart;
+  spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
 }
@@ -79,24 +86,24 @@ export class Plugin
       PluginsStart
     > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  private ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
 
   constructor() {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    this.alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    this.ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
-    const alertTypeRegistry = this.alertTypeRegistry;
+    const ruleTypeRegistry = this.ruleTypeRegistry;
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-      defaultMessage: 'Alerts and Actions',
+      defaultMessage: 'Rules and Connectors',
     });
     const featureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.displayDescription',
       {
-        defaultMessage: 'Detect conditions using alerts, and take actions using connectors.',
+        defaultMessage: 'Detect conditions using rules, and take actions using connectors.',
       }
     );
 
@@ -139,13 +146,14 @@ export class Plugin
           ...coreStart,
           data: pluginsStart.data,
           charts: pluginsStart.charts,
-          alerts: pluginsStart.alerts,
+          alerting: pluginsStart.alerting,
+          spaces: pluginsStart.spaces,
           element: params.element,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
           actionTypeRegistry,
-          alertTypeRegistry,
+          ruleTypeRegistry,
           kibanaFeatures,
         });
       },
@@ -157,14 +165,14 @@ export class Plugin
 
     return {
       actionTypeRegistry: this.actionTypeRegistry,
-      alertTypeRegistry: this.alertTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
     };
   }
 
   public start(): TriggersAndActionsUIPublicPluginStart {
     return {
       actionTypeRegistry: this.actionTypeRegistry,
-      alertTypeRegistry: this.alertTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
       getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
       },
@@ -175,21 +183,21 @@ export class Plugin
         });
       },
       getAddAlertFlyout: (
-        props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+        props: Omit<AlertAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
       ) => {
         return getAddAlertFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
-          alertTypeRegistry: this.alertTypeRegistry,
+          ruleTypeRegistry: this.ruleTypeRegistry,
         });
       },
       getEditAlertFlyout: (
-        props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+        props: Omit<AlertEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
       ) => {
         return getEditAlertFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
-          alertTypeRegistry: this.alertTypeRegistry,
+          ruleTypeRegistry: this.ruleTypeRegistry,
         });
       },
     };

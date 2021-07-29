@@ -7,7 +7,6 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
@@ -16,34 +15,38 @@ import {
   getCreateRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { DetectionEngineHeaderPage } from '../../../components/detection_engine_header_page';
-import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ReadOnlyRulesCallOut } from '../../../components/callouts/read_only_rules_callout';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
   redirectToDetections,
-  userHasNoPermissions,
+  userHasPermissions,
 } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
+import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
+import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
+import { APP_ID } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 
 type Func = () => Promise<void>;
 
 const RulesPageComponent: React.FC = () => {
-  const history = useHistory();
   const [showImportModal, setShowImportModal] = useState(false);
   const [showValueListsModal, setShowValueListsModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
+  const { navigateToApp } = useKibana().services.application;
+
   const [
     {
       loading: userInfoLoading,
@@ -92,7 +95,7 @@ const RulesPageComponent: React.FC = () => {
     timelinesNotInstalled,
     timelinesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
@@ -122,15 +125,15 @@ const RulesPageComponent: React.FC = () => {
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getCreateRuleUrl());
+      navigateToApp(APP_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
     },
-    [history]
+    [navigateToApp]
   );
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading,
         onClick: handleCreatePrePackagedRules,
       }),
     [canUserCRUD, getLoadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
@@ -139,7 +142,7 @@ const RulesPageComponent: React.FC = () => {
   const reloadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getReloadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading,
         onClick: handleCreatePrePackagedRules,
       }),
     [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
@@ -153,14 +156,18 @@ const RulesPageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
   }
 
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
-      <ReadOnlyRulesCallOut />
+      <MissingPrivilegesCallOut />
+      <MlJobCompatibilityCallout />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}
@@ -180,15 +187,8 @@ const RulesPageComponent: React.FC = () => {
         subtitle={i18n.INITIAL_PROMPT_TEXT}
         title={i18n.IMPORT_RULE}
       />
-      <WrapperPage>
-        <DetectionEngineHeaderPage
-          backOptions={{
-            href: getDetectionEngineUrl(),
-            text: i18n.BACK_TO_DETECTIONS,
-            pageId: SecurityPageName.detections,
-          }}
-          title={i18n.PAGE_TITLE}
-        >
+      <SecuritySolutionPageWrapper>
+        <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
             {loadPrebuiltRulesAndTemplatesButton && (
               <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
@@ -211,7 +211,7 @@ const RulesPageComponent: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                isDisabled={!userHasPermissions(canUserCRUD) || loading}
                 onClick={() => {
                   setShowImportModal(true);
                 }}
@@ -226,7 +226,7 @@ const RulesPageComponent: React.FC = () => {
                 onClick={goToNewRule}
                 href={formatUrl(getCreateRuleUrl())}
                 iconType="plusInCircle"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                isDisabled={!userHasPermissions(canUserCRUD) || loading}
               >
                 {i18n.ADD_NEW_RULE}
               </LinkButton>
@@ -248,7 +248,7 @@ const RulesPageComponent: React.FC = () => {
           data-test-subj="all-rules"
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-          hasNoPermissions={userHasNoPermissions(canUserCRUD)}
+          hasPermissions={userHasPermissions(canUserCRUD)}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
@@ -256,9 +256,9 @@ const RulesPageComponent: React.FC = () => {
           rulesNotUpdated={rulesNotUpdated}
           setRefreshRulesData={handleSetRefreshRulesData}
         />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.detections} />
+      <SpyRoute pageName={SecurityPageName.rules} />
     </>
   );
 };

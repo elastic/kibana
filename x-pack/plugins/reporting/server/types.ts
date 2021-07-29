@@ -8,17 +8,19 @@
 import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { BaseParams } from '../common/types';
+import { BaseParams, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
-import { ReportTaskParams, TaskRunResult } from './lib/tasks';
+import { ReportTaskParams } from './lib/tasks';
 
 /*
  * Plugin Contract
@@ -29,15 +31,21 @@ export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface ReportingStartDeps {
   data: DataPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
-export type ReportingStart = object;
-export type ReportingSetup = object;
+export interface ReportingSetup {
+  usesUiCapabilities: () => boolean;
+}
+
+export type ReportingStart = ReportingSetup;
 
 /*
  * Internal Types
@@ -54,6 +62,7 @@ export { BaseParams };
 export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
+  isDeprecated?: boolean;
 }
 
 // default fn type for CreateJobFnFactory
@@ -80,13 +89,16 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   logger: LevelLogger
 ) => RunTaskFnType;
 
-export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnType = RunTaskFn> {
+export interface ExportTypeDefinition<
+  CreateJobFnType = CreateJobFn | null,
+  RunTaskFnType = RunTaskFn
+> {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
@@ -94,8 +106,9 @@ export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnTy
 /**
  * @internal
  */
-export interface ReportingRequestHandlerContext extends RequestHandlerContext {
+export interface ReportingRequestHandlerContext {
   reporting: ReportingStart | null;
+  core: RequestHandlerContext['core'];
 }
 
 /**

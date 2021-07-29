@@ -6,6 +6,7 @@
  */
 
 import { isEqual, keyBy, mapValues } from 'lodash';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { pickKeys } from '../../../../common/utils/pick_keys';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -20,7 +21,8 @@ import {
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -37,104 +39,100 @@ export const getDestinationMap = ({
   return withApmSpan('get_service_destination_map', async () => {
     const { start, end, apmEventClient } = setup;
 
-    const response = await withApmSpan('get_exit_span_samples', async () =>
-      apmEventClient.search({
-        apm: {
-          events: [ProcessorEvent.span],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SERVICE_NAME]: serviceName } },
-                { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
-            },
+    const response = await apmEventClient.search('get_exit_span_samples', {
+      apm: {
+        events: [ProcessorEvent.span],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ],
           },
-          aggs: {
-            connections: {
-              composite: {
-                size: 1000,
-                sources: [
-                  {
-                    [SPAN_DESTINATION_SERVICE_RESOURCE]: {
-                      terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-                    },
+        },
+        aggs: {
+          connections: {
+            composite: {
+              size: 1000,
+              sources: asMutableArray([
+                {
+                  [SPAN_DESTINATION_SERVICE_RESOURCE]: {
+                    terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
                   },
-                  // make sure we get samples for both successful
-                  // and failed calls
-                  { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
-                ],
-              },
-              aggs: {
-                sample: {
-                  top_metrics: {
-                    metrics: [
-                      { field: SPAN_TYPE },
-                      { field: SPAN_SUBTYPE },
-                      { field: SPAN_ID },
-                    ] as const,
-                    sort: {
-                      '@timestamp': 'desc',
+                },
+                // make sure we get samples for both successful
+                // and failed calls
+                { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
+              ] as const),
+            },
+            aggs: {
+              sample: {
+                top_hits: {
+                  size: 1,
+                  _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
+                  sort: [
+                    {
+                      '@timestamp': 'desc' as const,
                     },
-                  },
+                  ],
                 },
               },
             },
           },
         },
-      })
-    );
+      },
+    });
 
     const outgoingConnections =
       response.aggregations?.connections.buckets.map((bucket) => {
-        const fieldValues = bucket.sample.top[0].metrics;
+        const sample = bucket.sample.hits.hits[0]._source;
 
         return {
           [SPAN_DESTINATION_SERVICE_RESOURCE]: String(
             bucket.key[SPAN_DESTINATION_SERVICE_RESOURCE]
           ),
-          [SPAN_ID]: (fieldValues[SPAN_ID] ?? '') as string,
-          [SPAN_TYPE]: (fieldValues[SPAN_TYPE] ?? '') as string,
-          [SPAN_SUBTYPE]: (fieldValues[SPAN_SUBTYPE] ?? '') as string,
+          [SPAN_ID]: sample.span.id,
+          [SPAN_TYPE]: sample.span.type,
+          [SPAN_SUBTYPE]: sample.span.subtype,
         };
       }) ?? [];
 
-    const transactionResponse = await withApmSpan(
+    const transactionResponse = await apmEventClient.search(
       'get_transactions_for_exit_spans',
-      () =>
-        apmEventClient.search({
-          apm: {
-            events: [ProcessorEvent.transaction],
-          },
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      [PARENT_ID]: outgoingConnections.map(
-                        (connection) => connection[SPAN_ID]
-                      ),
-                    },
+      {
+        apm: {
+          events: [ProcessorEvent.transaction],
+        },
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    [PARENT_ID]: outgoingConnections.map(
+                      (connection) => connection[SPAN_ID]
+                    ),
                   },
-                  ...rangeQuery(start, end),
-                ],
-              },
+                },
+                ...rangeQuery(start, end),
+              ],
             },
-            size: outgoingConnections.length,
-            docvalue_fields: [
-              SERVICE_NAME,
-              SERVICE_ENVIRONMENT,
-              AGENT_NAME,
-              PARENT_ID,
-            ] as const,
-            _source: false,
           },
-        })
+          size: outgoingConnections.length,
+          docvalue_fields: asMutableArray([
+            SERVICE_NAME,
+            SERVICE_ENVIRONMENT,
+            AGENT_NAME,
+            PARENT_ID,
+          ] as const),
+          _source: false,
+        },
+      }
     );
 
     const incomingConnections = transactionResponse.hits.hits.map((hit) => ({

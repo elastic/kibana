@@ -17,6 +17,33 @@ export function findLayerById(state: MapState, layerId: string): LayerDescriptor
   return state.layerList.find(({ id }) => layerId === id);
 }
 
+export function clearLayerProp(
+  state: MapState,
+  layerId: string,
+  propName: keyof LayerDescriptor
+): MapState {
+  if (!layerId) {
+    return state;
+  }
+
+  const { layerList } = state;
+  const layerIdx = getLayerIndex(layerList, layerId);
+  if (layerIdx === -1) {
+    return state;
+  }
+
+  const updatedLayer = {
+    ...layerList[layerIdx],
+  };
+  delete updatedLayer[propName];
+  const updatedList = [
+    ...layerList.slice(0, layerIdx),
+    updatedLayer,
+    ...layerList.slice(layerIdx + 1),
+  ];
+  return { ...state, layerList: updatedList };
+}
+
 export function updateLayerInList(
   state: MapState,
   layerId: string,

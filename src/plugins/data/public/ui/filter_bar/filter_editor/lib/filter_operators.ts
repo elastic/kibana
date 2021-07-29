@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FILTERS } from '../../../../../common/es_query/filters';
+import { FILTERS } from '@kbn/es-query';
 
 export interface Operator {
   message: string;
@@ -56,7 +56,7 @@ export const isBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: false,
-  fieldTypes: ['number', 'date', 'ip'],
+  fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
 };
 
 export const isNotBetweenOperator = {
@@ -65,7 +65,7 @@ export const isNotBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: true,
-  fieldTypes: ['number', 'date', 'ip'],
+  fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
 };
 
 export const existsOperator = {

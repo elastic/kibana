@@ -8,3 +8,5 @@
 
 export { IndexPatternCreationConfig, IndexPatternCreationOption } from './config';
 export { IndexPatternCreationManager } from './manager';
+// @ts-ignore
+export { RollupIndexPatternCreationConfig } from './rollup_creation_config';

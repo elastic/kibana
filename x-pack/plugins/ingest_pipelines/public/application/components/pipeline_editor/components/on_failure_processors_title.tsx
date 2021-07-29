@@ -32,9 +32,7 @@ export const OnFailureProcessorsTitle: FunctionComponent = () => {
           values={{
             learnMoreLink: (
               <EuiLink
-                href={
-                  services.documentation.getEsDocsBasePath() + '/handling-failure-in-pipelines.html'
-                }
+                href={services.documentation.getHandlingFailureUrl()}
                 target="_blank"
                 external
               >

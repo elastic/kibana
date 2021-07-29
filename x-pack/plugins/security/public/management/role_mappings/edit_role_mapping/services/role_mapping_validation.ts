@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RoleMapping } from '../../../../../common/model';
+
+import type { RoleMapping } from '../../../../../common/model';
 import { generateRulesFromRaw } from '../../model';
 
 interface ValidationResult {

@@ -114,11 +114,35 @@ export type MalwareProtectionOSes = KeysByValueCriteria<
   { malware: ProtectionFields }
 >;
 
+/** Returns an array of the policy OSes that have a memory protection field */
+export type MemoryProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { memory_protection: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a behavior protection field */
+export type BehaviorProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { behavior_protection: ProtectionFields }
+>;
+
 /** Returns an array of the policy OSes that have a ransomware protection field */
 export type RansomwareProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
   { ransomware: ProtectionFields }
 >;
+
+export type PolicyProtection =
+  | keyof Pick<
+      UIPolicyConfig['windows'],
+      'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
+    >
+  | keyof Pick<UIPolicyConfig['mac'], 'malware'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware'>;
+
+export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+
+export type LinuxPolicyProtection = keyof Pick<UIPolicyConfig['linux'], 'malware'>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

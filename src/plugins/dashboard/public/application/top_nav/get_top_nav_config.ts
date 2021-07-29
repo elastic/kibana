@@ -26,16 +26,20 @@ export function getTopNavConfig(
     isNewDashboard: boolean;
     isDirty: boolean;
     isSaveInProgress?: boolean;
+    isLabsEnabled?: boolean;
   }
 ) {
+  const labs = options.isLabsEnabled ? [getLabsConfig(actions[TopNavIds.LABS])] : [];
   switch (dashboardMode) {
     case ViewMode.VIEW:
       return options.hideWriteControls
         ? [
+            ...labs,
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
           ]
         : [
+            ...labs,
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
@@ -44,13 +48,21 @@ export function getTopNavConfig(
     case ViewMode.EDIT:
       const disableButton = options.isSaveInProgress;
       const navItems: TopNavMenuData[] = [
+        ...labs,
         getOptionsConfig(actions[TopNavIds.OPTIONS], disableButton),
         getShareConfig(actions[TopNavIds.SHARE], disableButton),
-        getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], disableButton),
-        getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton),
       ];
       if (!options.isNewDashboard) {
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], disableButton));
         navItems.push(getQuickSave(actions[TopNavIds.QUICK_SAVE], disableButton, options.isDirty));
+      } else {
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], true));
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
       }
       return navItems;
     default:
@@ -80,6 +92,20 @@ function getFullScreenConfig(action: NavAction) {
       defaultMessage: 'Full Screen Mode',
     }),
     testId: 'dashboardFullScreenMode',
+    run: action,
+  };
+}
+
+function getLabsConfig(action: NavAction) {
+  return {
+    id: 'labs',
+    label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
+      defaultMessage: 'labs',
+    }),
+    description: i18n.translate('dashboard.topNav.labsConfigDescription', {
+      defaultMessage: 'Labs',
+    }),
+    testId: 'dashboardLabs',
     run: action,
   };
 }
@@ -151,7 +177,7 @@ function getViewConfig(action: NavAction, disableButton?: boolean) {
     disableButton,
     id: 'cancel',
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'Return',
+      defaultMessage: 'Switch to view mode',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Switch to view-only mode',

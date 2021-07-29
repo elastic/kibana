@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SearchResponse7 } from '../../../ml/common';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { EsIndex } from '../types/es_index';
+import { isPopulatedObject } from '../shared_imports';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
 // the code of '@kbn/config-schema' but just its types, otherwise the client side code will
@@ -18,6 +19,7 @@ import type { DeleteTransformsResponseSchema } from './delete_transforms';
 import type { StartTransformsResponseSchema } from './start_transforms';
 import type { StopTransformsResponseSchema } from './stop_transforms';
 import type {
+  GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
   PostTransformsPreviewResponseSchema,
   PutTransformsResponseSchema,
@@ -25,91 +27,104 @@ import type {
 import type { GetTransformsStatsResponseSchema } from './transforms_stats';
 import type { PostTransformsUpdateResponseSchema } from './update_transforms';
 
-const isBasicObject = (arg: any) => {
-  return typeof arg === 'object' && arg !== null;
-};
-
 const isGenericResponseSchema = <T>(arg: any): arg is T => {
-  return (
-    isBasicObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'count') &&
-    {}.hasOwnProperty.call(arg, 'transforms') &&
-    Array.isArray(arg.transforms)
-  );
+  return isPopulatedObject(arg, ['count', 'transforms']) && Array.isArray(arg.transforms);
 };
 
-export const isGetTransformsResponseSchema = (arg: any): arg is GetTransformsResponseSchema => {
+export const isGetTransformNodesResponseSchema = (
+  arg: unknown
+): arg is GetTransformNodesResponseSchema => {
+  return isPopulatedObject(arg, ['count']) && typeof arg.count === 'number';
+};
+
+export const isGetTransformsResponseSchema = (arg: unknown): arg is GetTransformsResponseSchema => {
   return isGenericResponseSchema<GetTransformsResponseSchema>(arg);
 };
 
 export const isGetTransformsStatsResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is GetTransformsStatsResponseSchema => {
   return isGenericResponseSchema<GetTransformsStatsResponseSchema>(arg);
 };
 
 export const isDeleteTransformsResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is DeleteTransformsResponseSchema => {
   return (
-    isBasicObject(arg) &&
-    Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'transformDeleted')))
+    isPopulatedObject(arg) &&
+    Object.values(arg).every((d) => isPopulatedObject(d, ['transformDeleted']))
   );
 };
 
-export const isEsIndices = (arg: any): arg is EsIndex[] => {
+export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
   return Array.isArray(arg);
 };
 
-export const isEsSearchResponse = (arg: any): arg is SearchResponse7 => {
-  return isBasicObject(arg) && {}.hasOwnProperty.call(arg, 'hits');
+export const isEsSearchResponse = (arg: unknown): arg is estypes.SearchResponse => {
+  return isPopulatedObject(arg, ['hits']);
 };
 
-export const isFieldHistogramsResponseSchema = (arg: any): arg is FieldHistogramsResponseSchema => {
+type SearchResponseWithAggregations = Required<Pick<estypes.SearchResponse, 'aggregations'>> &
+  estypes.SearchResponse;
+export const isEsSearchResponseWithAggregations = (
+  arg: unknown
+): arg is SearchResponseWithAggregations => {
+  return isEsSearchResponse(arg) && {}.hasOwnProperty.call(arg, 'aggregations');
+};
+
+export const isMultiBucketAggregate = <TBucket = unknown>(
+  arg: unknown
+): arg is estypes.AggregationsMultiBucketAggregate<TBucket> => {
+  return isPopulatedObject(arg, ['buckets']);
+};
+
+export const isFieldHistogramsResponseSchema = (
+  arg: unknown
+): arg is FieldHistogramsResponseSchema => {
   return Array.isArray(arg);
 };
 
 export const isGetTransformsAuditMessagesResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is GetTransformsAuditMessagesResponseSchema => {
   return Array.isArray(arg);
 };
 
 export const isPostTransformsPreviewResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is PostTransformsPreviewResponseSchema => {
   return (
-    isBasicObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'generated_dest_index') &&
-    {}.hasOwnProperty.call(arg, 'preview') &&
+    isPopulatedObject(arg, ['generated_dest_index', 'preview']) &&
     typeof arg.generated_dest_index !== undefined &&
     Array.isArray(arg.preview)
   );
 };
 
 export const isPostTransformsUpdateResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is PostTransformsUpdateResponseSchema => {
-  return isBasicObject(arg) && {}.hasOwnProperty.call(arg, 'id') && typeof arg.id === 'string';
+  return isPopulatedObject(arg, ['id']) && typeof arg.id === 'string';
 };
 
-export const isPutTransformsResponseSchema = (arg: any): arg is PutTransformsResponseSchema => {
+export const isPutTransformsResponseSchema = (arg: unknown): arg is PutTransformsResponseSchema => {
   return (
-    isBasicObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'transformsCreated') &&
-    {}.hasOwnProperty.call(arg, 'errors') &&
+    isPopulatedObject(arg, ['transformsCreated', 'errors']) &&
     Array.isArray(arg.transformsCreated) &&
     Array.isArray(arg.errors)
   );
 };
 
-const isGenericSuccessResponseSchema = (arg: any) =>
-  isBasicObject(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
+const isGenericSuccessResponseSchema = (arg: unknown) =>
+  isPopulatedObject(arg) && Object.values(arg).every((d) => isPopulatedObject(d, ['success']));
 
-export const isStartTransformsResponseSchema = (arg: any): arg is StartTransformsResponseSchema => {
+export const isStartTransformsResponseSchema = (
+  arg: unknown
+): arg is StartTransformsResponseSchema => {
   return isGenericSuccessResponseSchema(arg);
 };
 
-export const isStopTransformsResponseSchema = (arg: any): arg is StopTransformsResponseSchema => {
+export const isStopTransformsResponseSchema = (
+  arg: unknown
+): arg is StopTransformsResponseSchema => {
   return isGenericSuccessResponseSchema(arg);
 };

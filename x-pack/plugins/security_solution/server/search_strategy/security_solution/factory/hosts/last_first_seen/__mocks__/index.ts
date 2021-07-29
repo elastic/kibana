@@ -6,6 +6,7 @@
  */
 
 import {
+  Direction,
   HostFirstLastSeenRequestOptions,
   HostsQueries,
 } from '../../../../../../../common/search_strategy';
@@ -13,6 +14,7 @@ import {
 export const mockOptions: HostFirstLastSeenRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -23,7 +25,7 @@ export const mockOptions: HostFirstLastSeenRequestOptions = {
   docValueFields: [],
   factoryQueryType: HostsQueries.firstOrLastSeen,
   hostName: 'siem-kibana',
-  order: 'asc',
+  order: Direction.asc,
 };
 
 export const mockSearchStrategyFirstSeenResponse = {
@@ -125,6 +127,7 @@ export const formattedSearchStrategyFirstResponse = {
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -141,7 +144,7 @@ export const formattedSearchStrategyFirstResponse = {
             sort: [
               {
                 '@timestamp': {
-                  order: 'asc',
+                  order: Direction.asc,
                 },
               },
             ],
@@ -190,6 +193,7 @@ export const formattedSearchStrategyLastResponse = {
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -206,7 +210,7 @@ export const formattedSearchStrategyLastResponse = {
             sort: [
               {
                 '@timestamp': {
-                  order: 'desc',
+                  order: Direction.desc,
                 },
               },
             ],
@@ -224,6 +228,7 @@ export const expectedDsl = {
   allowNoIndices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -237,6 +242,6 @@ export const expectedDsl = {
     _source: ['@timestamp'],
     query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
     size: 1,
-    sort: [{ '@timestamp': { order: 'asc' } }],
+    sort: [{ '@timestamp': { order: Direction.asc } }],
   },
 };

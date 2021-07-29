@@ -6,7 +6,9 @@
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { GlobalTimeArgs } from '../../containers/use_global_time';
@@ -18,6 +20,9 @@ import { TimelineEventsType } from '../../../../common/types/timeline';
 
 import { TopNOption } from './helpers';
 import * as i18n from './translations';
+import { getIndicesSelector, IndicesSelector } from './selectors';
+import { State } from '../../store';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
   width: 600px;
@@ -46,10 +51,9 @@ const TopNContent = styled.div`
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
   defaultView: TimelineEventsType;
-  field: string;
+  field: AlertsStackByField;
   filters: Filter[];
   indexPattern: IIndexPattern;
-  indexNames: string[];
   options: TopNOption[];
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
@@ -67,7 +71,6 @@ const TopNComponent: React.FC<Props> = ({
   field,
   from,
   indexPattern,
-  indexNames,
   options,
   query,
   setAbsoluteRangeDatePickerTarget,
@@ -80,6 +83,11 @@ const TopNComponent: React.FC<Props> = ({
   const onViewSelected = useCallback((value: string) => setView(value as TimelineEventsType), [
     setView,
   ]);
+  const indicesSelector = useMemo(getIndicesSelector, []);
+  const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
+    (state) => indicesSelector(state),
+    deepEqual
+  );
 
   useEffect(() => {
     setView(defaultView);
@@ -116,26 +124,25 @@ const TopNComponent: React.FC<Props> = ({
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexNames={indexNames}
+            indexNames={view === 'raw' ? rawIndices : allIndices}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
+            toggleTopN={toggleTopN}
             timelineId={timelineId}
             to={to}
           />
         ) : (
           <SignalsByCategory
+            combinedQueries={combinedQueries}
             filters={filters}
-            from={from}
             headerChildren={headerChildren}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            setQuery={setQuery}
             timelineId={timelineId}
-            to={to}
           />
         )}
       </TopNContent>

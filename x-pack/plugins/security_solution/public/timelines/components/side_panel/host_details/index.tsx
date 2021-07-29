@@ -28,32 +28,32 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
     display: flex;
     flex: 1;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: hidden;
 
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow-x: hidden;
       overflow-y: scroll;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
+      margin-bottom: 64px; // account for firefox, which doesn't seem to respect the bottom padding
+      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 0px`};
     }
   }
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex: 0;
-`;
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex: 1 0 0;
-    overflow-y: scroll;
-    overflow-x: hidden;
-  }
+  flex: 1 0 auto;
 `;
 
 const StyledEuiFlexButtonWrapper = styled(EuiFlexItem)`
   align-self: flex-start;
+  flex: 1 0 auto;
+`;
+
+const StyledPanelContent = styled.div`
+  display: block;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
 `;
 
 interface HostDetailsProps {
@@ -107,9 +107,9 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <ExpandableHostDetailsPageLink hostName={hostName} />
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
-        <StyledEuiFlexItem grow={true}>
+        <StyledPanelContent>
           <ExpandableHostDetails contextID={contextID} hostName={hostName} />
-        </StyledEuiFlexItem>
+        </StyledPanelContent>
       </>
     );
   }

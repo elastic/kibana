@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
-import { Toolbar } from '../../../components/eui';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -21,6 +20,7 @@ import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 export const LogsToolbar = () => {
   const { derivedIndexPattern } = useLogSourceContext();
@@ -54,57 +54,54 @@ export const LogsToolbar = () => {
   } = useContext(LogPositionState.Context);
 
   return (
-    <Toolbar>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem>
+    <div>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="l" wrap>
+        <QueryBarFlexItem>
           <QueryStringInput
             disableLanguageSwitcher={true}
             iconType="search"
             indexPatterns={[derivedIndexPattern]}
             isInvalid={!isFilterQueryDraftValid}
-            onChange={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                setLogFilterQueryDraft(expression.query);
-              }
+            onChange={(query: Query) => {
+              setSurroundingLogsId(null);
+              setLogFilterQueryDraft(query);
             }}
-            onSubmit={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                applyLogFilterQuery(expression.query);
-              }
+            onSubmit={(query: Query) => {
+              setSurroundingLogsId(null);
+              applyLogFilterQuery(query);
             }}
             placeholder={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder', {
               defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
             })}
-            query={{
-              query: filterQueryDraft?.expression ?? '',
-              language: filterQueryDraft?.kind ?? 'kuery',
-            }}
+            query={filterQueryDraft}
           />
-        </EuiFlexItem>
+        </QueryBarFlexItem>
         <EuiFlexItem grow={false}>
-          <LogCustomizationMenu>
-            <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
-            <LogTextScaleControls
-              availableTextScales={availableTextScales}
-              textScale={textScale}
-              setTextScale={setTextScale}
-            />
-          </LogCustomizationMenu>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LogHighlightsMenu
-            onChange={setHighlightTerms}
-            isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
-            activeHighlights={
-              highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
-            }
-            goToPreviousHighlight={goToPreviousHighlight}
-            goToNextHighlight={goToNextHighlight}
-            hasPreviousHighlight={hasPreviousHighlight}
-            hasNextHighlight={hasNextHighlight}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <LogCustomizationMenu>
+                <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
+                <LogTextScaleControls
+                  availableTextScales={availableTextScales}
+                  textScale={textScale}
+                  setTextScale={setTextScale}
+                />
+              </LogCustomizationMenu>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <LogHighlightsMenu
+                onChange={setHighlightTerms}
+                isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
+                activeHighlights={
+                  highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
+                }
+                goToPreviousHighlight={goToPreviousHighlight}
+                goToNextHighlight={goToNextHighlight}
+                hasPreviousHighlight={hasPreviousHighlight}
+                hasNextHighlight={hasNextHighlight}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogDatepicker
@@ -117,6 +114,16 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Toolbar>
+    </div>
   );
 };
+
+const QueryBarFlexItem = euiStyled(EuiFlexItem)`
+  @media (min-width: 1200px) {
+    flex: 0 0 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+`;

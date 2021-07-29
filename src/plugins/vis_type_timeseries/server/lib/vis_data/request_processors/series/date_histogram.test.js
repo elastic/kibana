@@ -8,6 +8,7 @@
 
 import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { UI_SETTINGS } from '../../../../../../data/common';
 
 describe('dateHistogram(req, panel, series)', () => {
@@ -16,14 +17,14 @@ describe('dateHistogram(req, panel, series)', () => {
   let req;
   let capabilities;
   let config;
-  let indexPatternObject;
+  let indexPattern;
   let uiSettings;
+  let buildSeriesMetaParams;
 
   beforeEach(() => {
     req = {
-      payload: {
+      body: {
         timerange: {
-          timezone: 'UTC',
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
@@ -33,17 +34,30 @@ describe('dateHistogram(req, panel, series)', () => {
       index_pattern: '*',
       time_field: '@timestamp',
       interval: '10s',
+      id: 'panelId',
     };
     series = { id: 'test' };
     config = {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    indexPatternObject = {};
-    capabilities = new DefaultSearchCapabilities(req);
+    indexPattern = {};
+    capabilities = new DefaultSearchCapabilities({ timezone: 'UTC', maxBucketsLimit: 2000 });
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
+    buildSeriesMetaParams = jest.fn(async () => {
+      return getIntervalAndTimefield(
+        panel,
+        indexPattern,
+        {
+          min: '2017-01-01T00:00:00Z',
+          max: '2017-01-01T01:00:00Z',
+          maxBuckets: 1000,
+        },
+        series
+      );
+    });
   });
 
   test('calls next when finished', async () => {
@@ -54,9 +68,10 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(next.mock.calls.length).toEqual(1);
@@ -69,9 +84,10 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(doc).toEqual({
@@ -92,10 +108,10 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            bucketSize: 10,
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -110,9 +126,10 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(doc).toEqual({
@@ -133,10 +150,10 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            bucketSize: 10,
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -154,9 +171,10 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(doc).toEqual({
@@ -177,10 +195,10 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            bucketSize: 20,
             intervalString: '20s',
             timeField: 'timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -188,8 +206,11 @@ describe('dateHistogram(req, panel, series)', () => {
   });
 
   describe('dateHistogram for entire time range mode', () => {
-    test('should ignore entire range mode for timeseries', async () => {
+    beforeEach(() => {
       panel.time_range_mode = 'entire_time_range';
+    });
+
+    test('should ignore entire range mode for timeseries', async () => {
       panel.type = 'timeseries';
 
       const next = (doc) => doc;
@@ -198,17 +219,22 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
-        uiSettings
+        uiSettings,
+        buildSeriesMetaParams
       )(next)({});
 
       expect(doc.aggs.test.aggs.timeseries.auto_date_histogram).toBeUndefined();
       expect(doc.aggs.test.aggs.timeseries.date_histogram).toBeDefined();
     });
 
-    test('should returns valid date histogram for entire range mode', async () => {
-      panel.time_range_mode = 'entire_time_range';
+    test('should set meta values', async () => {
+      // set 15 minutes (=== 900000ms) interval;
+      req.body.timerange = {
+        min: '2021-01-01T00:00:00Z',
+        max: '2021-01-01T00:15:00Z',
+      };
 
       const next = (doc) => doc;
       const doc = await dateHistogram(
@@ -216,9 +242,34 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
-        uiSettings
+        uiSettings,
+        buildSeriesMetaParams
+      )(next)({});
+
+      expect(doc.aggs.test.meta).toMatchInlineSnapshot(`
+        Object {
+          "index": undefined,
+          "intervalString": "900000ms",
+          "panelId": "panelId",
+          "seriesId": "test",
+          "timeField": "@timestamp",
+        }
+      `);
+    });
+
+    test('should returns valid date histogram for entire range mode', async () => {
+      const next = (doc) => doc;
+      const doc = await dateHistogram(
+        req,
+        panel,
+        series,
+        config,
+        indexPattern,
+        capabilities,
+        uiSettings,
+        buildSeriesMetaParams
       )(next)({});
 
       expect(doc).toEqual({
@@ -235,8 +286,8 @@ describe('dateHistogram(req, panel, series)', () => {
             meta: {
               timeField: '@timestamp',
               seriesId: 'test',
-              bucketSize: 10,
-              intervalString: '10s',
+              intervalString: '3600000ms',
+              panelId: 'panelId',
             },
           },
         },

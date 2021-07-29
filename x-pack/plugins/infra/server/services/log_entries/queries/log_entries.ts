@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestParams } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
 import {
   LogEntryAfterCursor,
@@ -20,8 +20,6 @@ import {
 } from '../../../utils/elasticsearch_runtime_types';
 import { createSortClause, createTimeRangeFilterClauses } from './common';
 
-const CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
-
 export const createGetLogEntriesQuery = (
   logEntriesIndex: string,
   startTimestamp: number,
@@ -31,12 +29,12 @@ export const createGetLogEntriesQuery = (
   timestampField: string,
   tiebreakerField: string,
   fields: string[],
+  runtimeMappings?: estypes.MappingRuntimeFields,
   query?: JsonObject,
   highlightTerm?: string
-): RequestParams.AsyncSearchSubmit<Record<string, any>> => {
+): estypes.AsyncSearchSubmitRequest => {
   const sortDirection = getSortDirection(cursor);
   const highlightQuery = createHighlightQuery(highlightTerm, fields);
-  const fieldsWithContext = createFieldsWithContext(fields);
 
   return {
     index: logEntriesIndex,
@@ -54,7 +52,9 @@ export const createGetLogEntriesQuery = (
           ],
         },
       },
-      fields: fieldsWithContext,
+      fields,
+      // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
+      runtime_mappings: runtimeMappings,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
       ...createSearchAfterClause(cursor),
@@ -120,16 +120,13 @@ const createHighlightQuery = (
   }
 };
 
-const createFieldsWithContext = (fields: string[]): string[] =>
-  Array.from(new Set([...fields, ...CONTEXT_FIELDS]));
-
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,
   rt.type({
-    fields: rt.record(rt.string, jsonArrayRT),
     sort: rt.tuple([rt.number, rt.number]),
   }),
   rt.partial({
+    fields: rt.record(rt.string, jsonArrayRT),
     highlight: rt.record(rt.string, rt.array(rt.string)),
   }),
 ]);

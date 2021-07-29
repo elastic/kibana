@@ -11,26 +11,24 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
-
 import {
   arrayIndexToAriaIndex,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   isTab,
   onKeyDownFocusHandler,
-} from '../accessibility/helpers';
+} from '../../../../../timelines/public';
+
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
@@ -44,13 +42,11 @@ const TableWrapper = styled.div`
   display: flex;
   flex: 1;
   overflow: hidden;
-
   > div {
     display: flex;
     flex-direction: column;
     flex: 1;
     overflow: hidden;
-
     > .euiFlexGroup:first-of-type {
       flex: 0;
     }
@@ -61,21 +57,79 @@ const TableWrapper = styled.div`
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   flex: 1;
   overflow: auto;
-
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
   }
-
   &::-webkit-scrollbar-thumb {
     background-clip: content-box;
     background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
     border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
   }
-
   &::-webkit-scrollbar-corner,
   &::-webkit-scrollbar-track {
     background-color: transparent;
+  }
+
+  .eventFieldsTable__fieldIcon {
+    padding-top: ${({ theme }) => parseFloat(theme.eui.euiSizeXS) * 1.5}px;
+  }
+
+  .eventFieldsTable__fieldName {
+    line-height: ${({ theme }) => theme.eui.euiLineHeight};
+    padding: ${({ theme }) => theme.eui.euiSizeXS};
+  }
+
+  // TODO: Use this logic from discover
+  /* .eventFieldsTable__multiFieldBadge {
+    font: ${({ theme }) => theme.eui.euiFont};
+  } */
+
+  .eventFieldsTable__tableRow {
+    font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+    font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+
+    .eventFieldsTable__hoverActionButtons {
+      &:focus-within {
+        .timelines__hoverActionButton,
+        .securitySolution__hoverActionButton {
+          opacity: 1;
+        }
+      }
+    }
+    &:hover {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+    .timelines__hoverActionButton,
+    .securitySolution__hoverActionButton {
+      // TODO: Using this logic from discover
+      /* @include euiBreakpoint('m', 'l', 'xl') {
+        opacity: 0;
+      } */
+      opacity: 0;
+      &:focus {
+        opacity: 1;
+      }
+    }
+  }
+
+  .eventFieldsTable__actionCell,
+  .eventFieldsTable__fieldNameCell {
+    align-items: flex-start;
+    padding: ${({ theme }) => theme.eui.euiSizeXS};
+  }
+
+  .eventFieldsTable__fieldValue {
+    display: inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    line-height: ${({ theme }) => theme.eui.euiLineHeight};
+    color: ${({ theme }) => theme.eui.euiColorFullShade};
+    vertical-align: top;
   }
 `;
 
@@ -83,10 +137,6 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
  * This callback, invoked via `EuiInMemoryTable`'s `rowProps, assigns
  * attributes to every `<tr>`.
  */
-const getAriaRowindex = (timelineEventsDetailsItem: TimelineEventsDetailsItem) =>
-  timelineEventsDetailsItem.ariaRowindex != null
-    ? { 'data-rowindex': timelineEventsDetailsItem.ariaRowindex }
-    : {};
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
@@ -108,7 +158,6 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const columnHeaders = useDeepEqualSelector((state) => {
       const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
-
       return getColumnHeaders(columns, browserFields);
     });
 
@@ -146,6 +195,15 @@ export const EventFieldsBrowser = React.memo<Props>(
       },
       [columnHeaders, dispatch, timelineId]
     );
+
+    const onSetRowProps = useCallback(({ ariaRowindex, field }: TimelineEventsDetailsItem) => {
+      const rowIndex = ariaRowindex != null ? { 'data-rowindex': ariaRowindex } : {};
+      return {
+        ...rowIndex,
+        className: 'eventFieldsTable__tableRow',
+        'data-test-subj': `event-fields-table-row-${field}`,
+      };
+    }, []);
 
     const onUpdateColumns = useCallback(
       (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
@@ -221,7 +279,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           items={items}
           columns={columns}
           pagination={false}
-          rowProps={getAriaRowindex}
+          rowProps={onSetRowProps}
           search={search}
           sorting={false}
         />

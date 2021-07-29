@@ -8,13 +8,15 @@
 import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
+import { kibanaPackageJson } from '@kbn/utils';
+
 import { KibanaRequest, Logger } from 'src/core/server';
 
 import { stripTrailingSlash } from '../../common/strip_slashes';
 import { InitialAppData } from '../../common/types';
 import { ConfigType } from '../index';
 
-import { Access } from './check_access';
+import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
 interface Params {
   request: KibanaRequest;
@@ -22,7 +24,6 @@ interface Params {
   log: Logger;
 }
 interface Return extends InitialAppData {
-  access?: Access;
   publicUrl?: string;
 }
 
@@ -55,11 +56,16 @@ export const callEnterpriseSearchConfigAPI = async ({
 
   try {
     const enterpriseSearchUrl = encodeURI(`${config.host}${ENDPOINT}`);
-    const response = await fetch(enterpriseSearchUrl, {
+    const options = {
       headers: { Authorization: request.headers.authorization as string },
       signal: controller.signal,
-    });
+      agent: entSearchHttpAgent.getHttpAgent(),
+    };
+
+    const response = await fetch(enterpriseSearchUrl, options);
     const data = await response.json();
+
+    warnMismatchedVersions(data?.version?.number, log);
 
     return {
       access: {
@@ -69,7 +75,10 @@ export const callEnterpriseSearchConfigAPI = async ({
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,
       ilmEnabled: !!data?.settings?.ilm_enabled,
-      isFederatedAuth: !!data?.settings?.is_federated_auth, // i.e., not standard auth
+      searchOAuth: {
+        clientId: data?.settings?.search_oauth?.client_id,
+        redirectUrl: data?.settings?.search_oauth?.redirect_url,
+      },
       configuredLimits: {
         appSearch: {
           engine: {
@@ -136,5 +145,15 @@ export const callEnterpriseSearchConfigAPI = async ({
   } finally {
     clearTimeout(warningTimeout);
     clearTimeout(timeout);
+  }
+};
+
+export const warnMismatchedVersions = (enterpriseSearchVersion: string, log: Logger) => {
+  const kibanaVersion = kibanaPackageJson.version;
+
+  if (enterpriseSearchVersion !== kibanaVersion) {
+    log.warn(
+      `Your Kibana instance (v${kibanaVersion}) is not the same version as your Enterprise Search instance (v${enterpriseSearchVersion}), which may cause unexpected behavior. Use matching versions for the best experience.`
+    );
   }
 };

@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+export { NavLinksService } from './nav_links_service';
 
-export { ChromeNavLink, ChromeNavLinkUpdateableFields } from './nav_link';
-export { ChromeNavLinks, NavLinksService } from './nav_links_service';
+export type { ChromeNavLink } from './nav_link';
+export type { ChromeNavLinks } from './nav_links_service';

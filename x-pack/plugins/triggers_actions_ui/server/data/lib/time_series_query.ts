@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { Logger } from 'kibana/server';
-import { LegacyScopedClusterClient } from '../../../../../../src/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { Logger, ElasticsearchClient } from 'kibana/server';
+import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
@@ -16,14 +16,14 @@ export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
-  callCluster: LegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, callCluster, query: queryParams } = params;
+  const { logger, esClient, query: queryParams } = params;
   const {
     index,
     timeWindowSize,
@@ -59,9 +59,8 @@ export async function timeSeriesQuery(
       },
       // aggs: {...}, filled in below
     },
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: [404],
+    ignore_unavailable: true,
+    allow_no_indices: true,
   };
 
   // add the aggregations
@@ -127,20 +126,19 @@ export async function timeSeriesQuery(
     };
   }
 
-  let esResult: SearchResponse<unknown>;
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
-
+  let esResult: estypes.SearchResponse<unknown>;
   // note there are some commented out console.log()'s below, which are left
   // in, as they are VERY useful when debugging these queries; debug logging
   // isn't as nice since it's a single long JSON line.
 
   // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
-    esResult = await callCluster('search', esQuery);
+    esResult = (await esClient.search(esQuery, { ignore: [404] })).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
-    logger.warn(`${logPrefix} error: ${err.message}`);
+    logger.warn(`${logPrefix} error: ${getEsErrorMessage(err)}`);
     return { results: [] };
   }
 
@@ -149,16 +147,16 @@ export async function timeSeriesQuery(
   return getResultFromEs(isCountAgg, isGroupAgg, esResult);
 }
 
-function getResultFromEs(
+export function getResultFromEs(
   isCountAgg: boolean,
   isGroupAgg: boolean,
-  esResult: SearchResponse<unknown>
+  esResult: estypes.SearchResponse<unknown>
 ): TimeSeriesResult {
   const aggregations = esResult?.aggregations || {};
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
-  if (!isGroupAgg) {
-    const dateAgg = aggregations.dateAgg || {};
+  if (!isGroupAgg && aggregations.dateAgg) {
+    const dateAgg = aggregations.dateAgg;
 
     aggregations.groupAgg = {
       buckets: [{ key: 'all documents', dateAgg }],
@@ -167,6 +165,7 @@ function getResultFromEs(
     delete aggregations.dateAgg;
   }
 
+  // @ts-expect-error specify aggregations type explicitly
   const groupBuckets = aggregations.groupAgg?.buckets || [];
   const result: TimeSeriesResult = {
     results: [],

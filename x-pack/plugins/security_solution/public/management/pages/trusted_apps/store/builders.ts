@@ -28,6 +28,7 @@ export const defaultNewTrustedApp = (): NewTrustedApp => ({
   os: OperatingSystem.WINDOWS,
   entries: [defaultConditionEntry()],
   description: '',
+  effectScope: { type: 'global' },
 });
 
 export const initialDeletionDialogState = (): TrustedAppsListPageState['deletionDialog'] => ({
@@ -48,11 +49,15 @@ export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
   },
   deletionDialog: initialDeletionDialogState(),
   creationDialog: initialCreationDialogState(),
+  policies: { type: 'UninitialisedResourceState' },
   location: {
     page_index: MANAGEMENT_DEFAULT_PAGE,
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     show: undefined,
+    id: undefined,
     view_type: 'grid',
+    filter: '',
   },
   active: false,
+  forceRefresh: false,
 });

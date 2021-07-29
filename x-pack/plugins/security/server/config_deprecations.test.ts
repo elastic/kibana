@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
-import { securityConfigDeprecationProvider } from './config_deprecations';
 import { cloneDeep } from 'lodash';
+
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+
+import { securityConfigDeprecationProvider } from './config_deprecations';
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
+  const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
       path: 'xpack.security',
     })),
-    (msg) => deprecationMessages.push(msg)
+    () => ({ message }) => deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -163,6 +165,68 @@ describe('Config Deprecations', () => {
     `);
   });
 
+  it('warns when using the legacy audit logger', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            enabled: true,
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender).not.toBeDefined();
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
+      ]
+    `);
+  });
+
+  it('does not warn when using the ECS audit logger', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            enabled: true,
+            appender: {
+              type: 'file',
+              fileName: './audit.log',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('does not warn about using the legacy logger when using the ECS audit logger, even when using the deprecated ECS appender config', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            enabled: true,
+            appender: {
+              type: 'file',
+              path: './audit.log',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender.path).not.toBeDefined();
+    expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+      ]
+    `);
+  });
+
   it(`warns that 'authorization.legacyFallback.enabled' is unused`, () => {
     const config = {
       xpack: {
@@ -241,7 +305,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \`xpack.security.authc.providers\` as an array of provider types is deprecated. Use extended \`object\` format instead.",
+        "Defining \\"xpack.security.authc.providers\\" as an array of provider types is deprecated. Use extended \\"object\\" format instead.",
       ]
     `);
   });
@@ -260,7 +324,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \`xpack.security.authc.providers\` as an array of provider types is deprecated. Use extended \`object\` format instead.",
+        "Defining \\"xpack.security.authc.providers\\" as an array of provider types is deprecated. Use extended \\"object\\" format instead.",
         "Enabling both \`basic\` and \`token\` authentication providers in \`xpack.security.authc.providers\` is deprecated. Login page will only use \`token\` provider.",
       ]
     `);

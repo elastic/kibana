@@ -12,7 +12,14 @@ import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_
 
 describe('Discover grid columns ', function () {
   it('returns eui grid columns without time column', async () => {
-    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, false, false);
+    const actual = getEuiGridColumns(
+      ['extension', 'message'],
+      {},
+      indexPatternMock,
+      false,
+      false,
+      true
+    );
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -54,6 +61,7 @@ describe('Discover grid columns ', function () {
       {},
       indexPatternWithTimefieldMock,
       false,
+      true,
       true
     );
     expect(actual).toMatchInlineSnapshot(`
@@ -64,11 +72,14 @@ describe('Discover grid columns ', function () {
             "showMoveLeft": false,
             "showMoveRight": false,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+            [Function],
+          ],
           "display": undefined,
           "id": "extension",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
         Object {
           "actions": Object {
@@ -80,7 +91,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "message",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
       ]
     `);
@@ -91,7 +102,8 @@ describe('Discover grid columns ', function () {
       {},
       indexPatternWithTimefieldMock,
       true,
-      false
+      false,
+      true
     );
     expect(actual).toMatchInlineSnapshot(`
       Array [
@@ -101,12 +113,15 @@ describe('Discover grid columns ', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+            [Function],
+          ],
           "display": "Time (timestamp)",
           "id": "timestamp",
           "initialWidth": 180,
-          "isSortable": false,
-          "schema": "kibana-json",
+          "isSortable": true,
+          "schema": "datetime",
         },
         Object {
           "actions": Object {
@@ -117,11 +132,14 @@ describe('Discover grid columns ', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+            [Function],
+          ],
           "display": undefined,
           "id": "extension",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
         Object {
           "actions": Object {
@@ -136,7 +154,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "message",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
       ]
     `);

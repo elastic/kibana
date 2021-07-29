@@ -13,6 +13,7 @@ import {
   APP_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -29,9 +30,16 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_TRANSFORMS,
+  DEFAULT_TRANSFORMS_SETTING,
 } from '../common/constants';
+import { transformConfigSchema } from '../common/transforms/types';
+import { ExperimentalFeatures } from '../common/experimental_features';
 
-export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
+export const initUiSettings = (
+  uiSettings: CoreSetup['uiSettings'],
+  experimentalFeatures: ExperimentalFeatures
+) => {
   uiSettings.register({
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
@@ -81,7 +89,9 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       }),
       sensitive: true,
 
-      value: DEFAULT_INDEX_PATTERN,
+      value: experimentalFeatures.uebaEnabled
+        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
+        : DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
@@ -181,5 +191,25 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         })
       ),
     },
+    // TODO: Remove this check once the experimental flag is removed
+    ...(experimentalFeatures.metricsEntitiesEnabled
+      ? {
+          [DEFAULT_TRANSFORMS]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
+              defaultMessage: 'Default transforms to use',
+            }),
+            value: DEFAULT_TRANSFORMS_SETTING,
+            type: 'json',
+            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
+              // TODO: Add a hyperlink to documentation about this feature
+              defaultMessage: 'Experimental: Enable an application cache through transforms',
+            }),
+            sensitive: true,
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: transformConfigSchema,
+          },
+        }
+      : {}),
   });
 };

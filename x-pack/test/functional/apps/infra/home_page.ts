@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
-const COMMON_REQUEST_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['common', 'infraHome']);
-  const supertest = getService('supertest');
+  const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75724
+  // Failing: See https://github.com/elastic/kibana/issues/106650
   describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('without metrics present', () => {
-      before(async () => await esArchiver.unload('infra/metrics_and_logs'));
+      before(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
       it('renders an empty data prompt', async () => {
         await pageObjects.common.navigateToApp('infraOps');
@@ -39,59 +36,85 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('with metrics present', () => {
       before(async () => {
-        await esArchiver.load('infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-      after(async () => await esArchiver.unload('infra/metrics_and_logs'));
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
-      it('renders the waffle map for dates with data', async () => {
+      it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.getWaffleMapTooltips();
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
+    });
 
-      it('records telemetry for hosts', async () => {
+    describe('alerts flyouts', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.waitForLoading();
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraHome.getWaffleMap();
+      });
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
-        const resp = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set(COMMON_REQUEST_HEADERS)
-          .set('Accept', 'application/json')
-          .send({
-            unencrypted: true,
-          })
-          .expect(200)
-          .then((res: any) => res.body);
-
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_hosts
-        ).to.be.greaterThan(0);
+      it('should open and close inventory alert flyout', async () => {
+        await pageObjects.infraHome.openInventoryAlertFlyout();
+        await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('records telemetry for docker', async () => {
+      it('should open and close inventory alert flyout', async () => {
+        await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
+        await pageObjects.infraHome.closeAlertFlyout();
+      });
+
+      it('should open and close alerts popover using button', async () => {
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverOpened();
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverClosed();
+      });
+    });
+
+    describe('Saved Views', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      it('should have save and load controls', async () => {
+        await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.goToDocker();
+        await pageObjects.infraSavedViews.getSavedViewsButton();
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+      });
 
-        const resp = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set(COMMON_REQUEST_HEADERS)
-          .set('Accept', 'application/json')
-          .send({
-            unencrypted: true,
-          })
-          .expect(200)
-          .then((res: any) => res.body);
+      it('should open popover', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        await pageObjects.infraSavedViews.closeSavedViewsPopover();
+      });
 
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_docker
-        ).to.be.greaterThan(0);
+      it('should create new saved view and load it', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        await pageObjects.infraSavedViews.clickSaveNewViewButton();
+        await pageObjects.infraSavedViews.getCreateSavedViewModal();
+        await pageObjects.infraSavedViews.createNewSavedView('view1');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
+      });
+
+      it('should new views should be listed in the load views list', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        await pageObjects.infraSavedViews.clickLoadViewButton();
+        await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
+        await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
       });
     });
   });

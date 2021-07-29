@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
+import type { EuiCheckboxProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import { KibanaFeature } from '../../../../features/public';
+import { featuresPluginMock } from '../../../../features/public/mocks';
+import type { SpacesManager } from '../../spaces_manager';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
-import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { featuresPluginMock } from '../../../../features/public/mocks';
-import { KibanaFeature } from '../../../../features/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../../src/core/public';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
@@ -46,7 +48,13 @@ featuresStart.getFeatures.mockResolvedValue([
 ]);
 
 describe('ManageSpacePage', () => {
-  const getUrlForApp = (appId: string) => appId;
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: { reload: jest.fn() },
+      writable: true,
+    });
+  });
+
   const history = scopedHistoryMock.create();
 
   it('allows a space to be created', async () => {
@@ -59,7 +67,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -89,8 +96,9 @@ describe('ManageSpacePage', () => {
       id: 'new-space-name',
       name: 'New Space Name',
       description: 'some description',
-      color: undefined,
-      initials: undefined,
+      initials: 'NS',
+      color: '#AA6556',
+      imageUrl: '',
       disabledFeatures: [],
     });
   });
@@ -120,7 +128,6 @@ describe('ManageSpacePage', () => {
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -152,8 +159,9 @@ describe('ManageSpacePage', () => {
       id: 'existing-space',
       name: 'New Space Name',
       description: 'some description',
-      color: '#aabbcc',
+      color: '#AABBCC',
       initials: 'AB',
+      imageUrl: '',
       disabledFeatures: ['feature-1'],
     });
   });
@@ -172,7 +180,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -209,7 +216,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -270,7 +276,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},

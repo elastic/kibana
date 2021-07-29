@@ -258,6 +258,11 @@ export interface TaskInstance {
   state: Record<string, any>;
 
   /**
+   * The serialized traceparent string of the current APM transaction or span.
+   */
+  traceparent?: string;
+
+  /**
    * The id of the user who scheduled this task.
    */
   user?: string;
@@ -358,12 +363,20 @@ export interface ConcreteTaskInstance extends TaskInstance {
   ownerId: string | null;
 }
 
+/**
+ * A task instance that has an id and is ready for storage.
+ */
+export type EphemeralTask = Pick<ConcreteTaskInstance, 'taskType' | 'params' | 'state' | 'scope'>;
+export type EphemeralTaskInstance = EphemeralTask &
+  Pick<ConcreteTaskInstance, 'id' | 'scheduledAt' | 'startedAt' | 'runAt' | 'status' | 'ownerId'>;
+
 export type SerializedConcreteTaskInstance = Omit<
   ConcreteTaskInstance,
   'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
 > & {
   state: string;
   params: string;
+  traceparent: string;
   scheduledAt: string;
   startedAt: string | null;
   retryAt: string | null;

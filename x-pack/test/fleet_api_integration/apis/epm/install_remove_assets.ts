@@ -87,6 +87,40 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(resMetricsTemplate.statusCode).equal(404);
       });
+      it('should have uninstalled the component templates', async function () {
+        const resMappings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@mappings`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resMappings.statusCode).equal(404);
+
+        const resSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@settings`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resSettings.statusCode).equal(404);
+
+        const resUserSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@custom`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resUserSettings.statusCode).equal(404);
+      });
       it('should have uninstalled the pipelines', async function () {
         const res = await es.transport.request(
           {
@@ -328,17 +362,22 @@ const expectAssetsInstalled = ({
     });
     expect(resPipeline2.statusCode).equal(200);
   });
-  it('should have installed the template components', async function () {
-    const res = await es.transport.request({
+  it('should have installed the component templates', async function () {
+    const resMappings = await es.transport.request({
       method: 'GET',
-      path: `/_component_template/${logsTemplateName}-mappings`,
+      path: `/_component_template/${logsTemplateName}@mappings`,
     });
-    expect(res.statusCode).equal(200);
+    expect(resMappings.statusCode).equal(200);
     const resSettings = await es.transport.request({
       method: 'GET',
-      path: `/_component_template/${logsTemplateName}-settings`,
+      path: `/_component_template/${logsTemplateName}@settings`,
     });
     expect(resSettings.statusCode).equal(200);
+    const resUserSettings = await es.transport.request({
+      method: 'GET',
+      path: `/_component_template/${logsTemplateName}@custom`,
+    });
+    expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the transform components', async function () {
     const res = await es.transport.request({
@@ -394,6 +433,16 @@ const expectAssetsInstalled = ({
       id: 'sample_lens',
     });
     expect(resLens.id).equal('sample_lens');
+    const resMlModule = await kibanaServer.savedObjects.get({
+      type: 'ml-module',
+      id: 'sample_ml_module',
+    });
+    expect(resMlModule.id).equal('sample_ml_module');
+    const resSecurityRule = await kibanaServer.savedObjects.get({
+      type: 'security-rule',
+      id: 'sample_security_rule',
+    });
+    expect(resSecurityRule.id).equal('sample_security_rule');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
@@ -460,8 +509,16 @@ const expectAssetsInstalled = ({
           type: 'lens',
         },
         {
+          id: 'sample_ml_module',
+          type: 'ml-module',
+        },
+        {
           id: 'sample_search',
           type: 'search',
+        },
+        {
+          id: 'sample_security_rule',
+          type: 'security-rule',
         },
         {
           id: 'sample_visualization',
@@ -469,6 +526,22 @@ const expectAssetsInstalled = ({
         },
       ],
       installed_es: [
+        {
+          id: 'logs-all_assets.test_logs@mappings',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-all_assets.test_logs@settings',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-all_assets.test_logs@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics@custom',
+          type: 'component_template',
+        },
         {
           id: 'logs-all_assets.test_logs-all_assets',
           type: 'data_stream_ilm_policy',
@@ -526,7 +599,9 @@ const expectAssetsInstalled = ({
         { id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43', type: 'epm-packages-assets' },
         { id: '318959c9-997b-5a14-b328-9fc7355b4b74', type: 'epm-packages-assets' },
         { id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197', type: 'epm-packages-assets' },
+        { id: '4c758d70-ecf1-56b3-b704-6d8374841b34', type: 'epm-packages-assets' },
         { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
+        { id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2', type: 'epm-packages-assets' },
         { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
         { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },
       ],

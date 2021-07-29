@@ -8,10 +8,14 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';
-import { DashboardAppServices, DashboardRedirect } from '../types';
-import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
+import { DashboardAppServices, DashboardRedirect } from '../../types';
+import {
+  getDashboardBreadcrumb,
+  dashboardListingTable,
+  noItemsStrings,
+} from '../../dashboard_strings';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
@@ -43,13 +47,13 @@ export const DashboardListing = ({
       savedObjectsClient,
       savedObjectsTagging,
       dashboardCapabilities,
-      dashboardPanelStorage,
+      dashboardSessionStorage,
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
-    dashboardPanelStorage.getDashboardIdsWithUnsavedChanges()
+    dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
   // Set breadcrumbs useEffect
@@ -99,21 +103,21 @@ export const DashboardListing = ({
   );
 
   const createItem = useCallback(() => {
-    if (!dashboardPanelStorage.dashboardHasUnsavedEdits()) {
+    if (!dashboardSessionStorage.dashboardHasUnsavedEdits()) {
       redirectTo({ destination: 'dashboard' });
     } else {
       confirmCreateWithUnsaved(
         core.overlays,
         () => {
-          dashboardPanelStorage.clearPanels();
+          dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
         },
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardPanelStorage, redirectTo, core.overlays]);
+  }, [dashboardSessionStorage, redirectTo, core.overlays]);
 
-  const noItemsFragment = useMemo(
+  const emptyPrompt = useMemo(
     () => getNoItemsMessage(hideWriteControls, core.application, createItem),
     [createItem, core.application, hideWriteControls]
   );
@@ -140,11 +144,11 @@ export const DashboardListing = ({
 
   const deleteItems = useCallback(
     (dashboards: Array<{ id: string }>) => {
-      dashboards.map((d) => dashboardPanelStorage.clearPanels(d.id));
-      setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
+      dashboards.map((d) => dashboardSessionStorage.clearState(d.id));
+      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
       return savedDashboards.delete(dashboards.map((d) => d.id));
     },
-    [savedDashboards, dashboardPanelStorage]
+    [savedDashboards, dashboardSessionStorage]
   );
 
   const editItem = useCallback(
@@ -181,7 +185,7 @@ export const DashboardListing = ({
       tableCaption={getTableCaption()}
       entityName={getEntityName()}
       {...{
-        noItemsFragment,
+        emptyPrompt,
         searchFilters,
         listingLimit,
         tableColumns,
@@ -191,7 +195,7 @@ export const DashboardListing = ({
         redirectTo={redirectTo}
         unsavedDashboardIds={unsavedDashboardIds}
         refreshUnsavedDashboards={() =>
-          setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges())
+          setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
         }
       />
     </TableListView>
@@ -241,80 +245,52 @@ const getNoItemsMessage = (
 ) => {
   if (hideWriteControls) {
     return (
-      <div>
-        <EuiEmptyPrompt
-          iconType="dashboardApp"
-          title={
-            <h1 id="dashboardListingHeading">
-              <FormattedMessage
-                id="dashboard.listing.noItemsMessage"
-                defaultMessage="Looks like you don't have any dashboards."
-              />
-            </h1>
-          }
-        />
-      </div>
+      <EuiEmptyPrompt
+        iconType="glasses"
+        title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadonlyTitle()}</h1>}
+        body={<p>{noItemsStrings.getReadonlyBody()}</p>}
+      />
     );
   }
 
   return (
-    <div>
-      <EuiEmptyPrompt
-        iconType="dashboardApp"
-        title={
-          <h1 id="dashboardListingHeading">
+    <EuiEmptyPrompt
+      iconType="dashboardApp"
+      title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadEditTitle()}</h1>}
+      body={
+        <>
+          <p>{noItemsStrings.getReadEditDashboardDescription()}</p>
+          <p>
             <FormattedMessage
-              id="dashboard.listing.createNewDashboard.title"
-              defaultMessage="Create your first dashboard"
+              id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+              defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+              values={{
+                sampleDataInstallLink: (
+                  <EuiLink
+                    onClick={() =>
+                      application.navigateToApp('home', {
+                        path: '#/tutorial_directory/sampleData',
+                      })
+                    }
+                  >
+                    {noItemsStrings.getSampleDataLinkText()}
+                  </EuiLink>
+                ),
+              }}
             />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                values={{
-                  sampleDataInstallLink: (
-                    <EuiLink
-                      onClick={() =>
-                        application.navigateToApp('home', {
-                          path: '#/tutorial_directory/sampleData',
-                        })
-                      }
-                    >
-                      <FormattedMessage
-                        id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                        defaultMessage="Install some sample data"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            onClick={createItem}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createDashboardPromptButton"
-          >
-            <FormattedMessage
-              id="dashboard.listing.createNewDashboard.createButtonLabel"
-              defaultMessage="Create new dashboard"
-            />
-          </EuiButton>
-        }
-      />
-    </div>
+          </p>
+        </>
+      }
+      actions={
+        <EuiButton
+          onClick={createItem}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="createDashboardPromptButton"
+        >
+          {noItemsStrings.getCreateNewDashboardText()}
+        </EuiButton>
+      }
+    />
   );
 };

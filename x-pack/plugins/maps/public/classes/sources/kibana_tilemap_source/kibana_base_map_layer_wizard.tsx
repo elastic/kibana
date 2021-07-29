@@ -13,7 +13,7 @@ import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
-import { getKibanaTileMap } from '../../../meta';
+import { getKibanaTileMap } from '../../../util';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {

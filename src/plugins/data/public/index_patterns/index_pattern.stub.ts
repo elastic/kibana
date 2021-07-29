@@ -9,6 +9,7 @@
 import sinon from 'sinon';
 
 import { CoreSetup } from 'src/core/public';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { IFieldType, FieldSpec } from '../../common/index_patterns';
 import { IndexPattern, indexPatterns, KBN_FIELD_TYPES, fieldList } from '../';
 import { getFieldFormatsRegistry } from '../test_utils';
@@ -51,6 +52,7 @@ export class StubIndexPattern {
   _reindexFields: Function;
   stubSetFieldFormat: Function;
   fields?: FieldSpec[];
+  setFieldFormat: (fieldName: string, format: SerializedFieldFormat) => void;
 
   constructor(
     pattern: string,
@@ -73,6 +75,10 @@ export class StubIndexPattern {
     this.getSourceFiltering = sinon.stub();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
+
+    this.setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
+      this.fieldFormatMap[fieldName] = format;
+    };
 
     this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
     this.flattenHit = indexPatterns.flattenHitWrapper(

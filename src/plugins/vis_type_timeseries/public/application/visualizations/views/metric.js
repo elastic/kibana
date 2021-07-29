@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 
-import { getLastValue } from '../../../../common/get_last_value';
+import { getLastValue } from '../../../../common/last_value_utils';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 export class Metric extends Component {
@@ -58,7 +58,8 @@ export class Metric extends Component {
     const { metric, secondary } = this.props;
     const { scale, translateX, translateY } = this.state;
     const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
-    const primaryValue = primaryFormatter(getLastValue(metric && metric.data));
+    const primaryValue = primaryFormatter(getLastValue(metric?.data));
+
     const styles = reactcss(
       {
         default: {
@@ -120,7 +121,6 @@ export class Metric extends Component {
     if (this.props.reversed) {
       className += ' tvbVisMetric--reversed';
     }
-
     return (
       <div className={className} style={styles.container}>
         <div ref={(el) => (this.resize = el)} className="tvbVisMetric__resize">

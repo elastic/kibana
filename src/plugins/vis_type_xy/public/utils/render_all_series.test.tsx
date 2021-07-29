@@ -15,6 +15,7 @@ import {
   getVisConfig,
   getVisConfigPercentiles,
   getPercentilesData,
+  getVisConfigMutipleYaxis,
 } from './render_all_series.test.mocks';
 import { SeriesParam, VisConfig } from '../types';
 
@@ -30,6 +31,7 @@ const defaultSeriesParams = [
     mode: 'stacked',
     show: true,
     showCircles: true,
+    circlesRadius: 3,
     type: 'area',
     valueAxis: 'ValueAxis-1',
   },
@@ -96,6 +98,22 @@ describe('renderAllSeries', function () {
   it('renders the correct yAccessors for not percentile aggs', () => {
     const renderSeries = getAllSeries(getVisConfig(), defaultSeriesParams, defaultData);
     const wrapper = shallow(<div>{renderSeries}</div>);
+    expect(wrapper.find(AreaSeries).prop('yAccessors')).toEqual(['col-1-3']);
+  });
+
+  it('renders the correct yAccessors for multiple yAxis', () => {
+    const mutipleYAxisConfig = getVisConfigMutipleYaxis();
+    const renderMutipleYAxisSeries = renderAllSeries(
+      mutipleYAxisConfig,
+      defaultSeriesParams as SeriesParam[],
+      defaultData,
+      jest.fn(),
+      jest.fn(),
+      'Europe/Athens',
+      'col-0-2',
+      []
+    );
+    const wrapper = shallow(<div>{renderMutipleYAxisSeries}</div>);
     expect(wrapper.find(AreaSeries).prop('yAccessors')).toEqual(['col-1-3']);
   });
 

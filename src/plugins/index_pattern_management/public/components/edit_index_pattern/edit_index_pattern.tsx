@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
-  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -145,15 +144,13 @@ export const EditIndexPattern = withRouter(
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     return (
-      <EuiPanel paddingSize={'l'}>
-        <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
-          <IndexHeader
-            indexPattern={indexPattern}
-            setDefault={setDefaultPattern}
-            deleteIndexPatternClick={removePattern}
-            defaultIndex={defaultIndex}
-          />
-          <EuiSpacer size="s" />
+      <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
+        <IndexHeader
+          indexPattern={indexPattern}
+          setDefault={setDefaultPattern}
+          deleteIndexPatternClick={removePattern}
+          defaultIndex={defaultIndex}
+        >
           {showTagsSection && (
             <EuiFlexGroup wrap>
               {Boolean(indexPattern.timeFieldName) && (
@@ -193,19 +190,19 @@ export const EditIndexPattern = withRouter(
               </EuiCallOut>
             </>
           )}
-          <EuiSpacer />
-          <Tabs
-            indexPattern={indexPattern}
-            saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
-            fields={fields}
-            history={history}
-            location={location}
-            refreshFields={() => {
-              setFields(indexPattern.getNonScriptedFields());
-            }}
-          />
-        </div>
-      </EuiPanel>
+        </IndexHeader>
+        <EuiSpacer />
+        <Tabs
+          indexPattern={indexPattern}
+          saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
+          fields={fields}
+          history={history}
+          location={location}
+          refreshFields={() => {
+            setFields(indexPattern.getNonScriptedFields());
+          }}
+        />
+      </div>
     );
   }
 );

@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
-import '../index.scss';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
-import { MapByReferenceInput, MapEmbeddableInput } from './types';
+import { MapByReferenceInput, MapEmbeddableInput, MapByValueInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
+import { extractReferences } from '../../common/migrations/references';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -61,4 +62,18 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       parent
     );
   };
+
+  extract(state: EmbeddableStateWithType) {
+    const maybeMapByValueInput = state as EmbeddableStateWithType | MapByValueInput;
+
+    if ((maybeMapByValueInput as MapByValueInput).attributes !== undefined) {
+      const { references } = extractReferences({
+        attributes: (maybeMapByValueInput as MapByValueInput).attributes,
+      });
+
+      return { state, references };
+    }
+
+    return { state, references: [] };
+  }
 }

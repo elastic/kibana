@@ -9,18 +9,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  describe('TOTO GlobalSearchBar', function () {
+  describe('GlobalSearchBar', function () {
     const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
     const esArchiver = getService('esArchiver');
     const browser = getService('browser');
 
     before(async () => {
-      await esArchiver.load('global_search/search_syntax');
+      await esArchiver.load(
+        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
+      );
       await common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('global_search/search_syntax');
+      await esArchiver.unload(
+        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
+      );
     });
 
     afterEach(async () => {

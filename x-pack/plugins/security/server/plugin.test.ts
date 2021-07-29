@@ -6,14 +6,16 @@
  */
 
 import { of } from 'rxjs';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { ConfigSchema } from './config';
-import { SecurityPlugin, PluginSetupDependencies, PluginStartDependencies } from './plugin';
 
-import { coreMock } from '../../../../src/core/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { coreMock } from 'src/core/server/mocks';
+
 import { featuresPluginMock } from '../../features/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
+import { taskManagerMock } from '../../task_manager/server/mocks';
+import { ConfigSchema } from './config';
+import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
+import { SecurityPlugin } from './plugin';
 
 describe('Security Plugin', () => {
   let plugin: SecurityPlugin;
@@ -81,6 +83,9 @@ describe('Security Plugin', () => {
               "app": AppActions {
                 "prefix": "app:version:",
               },
+              "cases": CasesActions {
+                "prefix": "cases:version:",
+              },
               "login": "login:",
               "savedObject": SavedObjectActions {
                 "prefix": "saved_object:version:",
@@ -96,6 +101,7 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -113,7 +119,7 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
-            "getType": [Function],
+            "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
           },
@@ -148,6 +154,9 @@ describe('Security Plugin', () => {
               "app": AppActions {
                 "prefix": "app:version:",
               },
+              "cases": CasesActions {
+                "prefix": "cases:version:",
+              },
               "login": "login:",
               "savedObject": SavedObjectActions {
                 "prefix": "saved_object:version:",
@@ -163,6 +172,7 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },

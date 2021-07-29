@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard saved queries', function describeIndexTests() {
     before(async function () {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
         expect(descriptionText).to.eql(
-          'SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
+          'Saved Queries\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
         );
       });
 

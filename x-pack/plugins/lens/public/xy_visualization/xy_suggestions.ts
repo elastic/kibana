@@ -16,7 +16,8 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState, visualizationTypes, XYLayerConfig } from './types';
+import { State, XYState, visualizationTypes } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -27,6 +28,8 @@ const columnSortOrder = {
   boolean: 4,
   number: 5,
   histogram: 6,
+  geo_point: 7,
+  geo_shape: 8,
 };
 
 /**
@@ -521,9 +524,15 @@ function buildSuggestion({
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction || 'None',
+    curveType: currentState?.curveType,
+    fillOpacity: currentState?.fillOpacity,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
+    hideEndzones: currentState?.hideEndzones,
+    valuesInLegend: currentState?.valuesInLegend,
+    yLeftExtent: currentState?.yLeftExtent,
+    yRightExtent: currentState?.yRightExtent,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,
       yLeft: true,
@@ -533,6 +542,11 @@ function buildSuggestion({
       x: true,
       yLeft: true,
       yRight: true,
+    },
+    labelsOrientation: currentState?.labelsOrientation || {
+      x: 0,
+      yLeft: 0,
+      yRight: 0,
     },
     gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
       x: true,

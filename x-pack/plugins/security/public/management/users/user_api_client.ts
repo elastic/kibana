@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { User, EditUser } from '../../../common/model';
+import type { HttpStart } from 'src/core/public';
+
+import type { EditUser, User } from '../../../common/model';
 
 const usersUrl = '/internal/security/users';
 

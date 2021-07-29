@@ -17,9 +17,6 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
 
-import { setAutocompleteService } from './services';
-import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
-import { EnhancedSearchInterceptor } from './search/search_interceptor';
 import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
@@ -41,7 +38,6 @@ export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
-  private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
   private config!: ConfigSchema;
   private readonly storage = new Storage(window.localStorage);
   private usageCollector?: SearchUsageCollector;
@@ -52,39 +48,21 @@ export class DataEnhancedPlugin
     core: CoreSetup<DataEnhancedStartDependencies>,
     { bfetch, data, management }: DataEnhancedSetupDependencies
   ) {
-    data.autocomplete.addQuerySuggestionProvider(
-      KUERY_LANGUAGE_NAME,
-      setupKqlQuerySuggestionProvider(core)
-    );
-
-    this.enhancedSearchInterceptor = new EnhancedSearchInterceptor({
-      bfetch,
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-      session: data.search.session,
-    });
-
-    data.__enhance({
-      search: {
-        searchInterceptor: this.enhancedSearchInterceptor,
-      },
-    });
-
     this.config = this.initializerContext.config.get<ConfigSchema>();
     if (this.config.search.sessions.enabled) {
       const sessionsConfig = this.config.search.sessions;
-      registerSearchSessionsMgmt(core, sessionsConfig, { data, management });
+      registerSearchSessionsMgmt(
+        core,
+        sessionsConfig,
+        this.initializerContext.env.packageInfo.version,
+        { data, management }
+      );
     }
 
     this.usageCollector = data.search.usageCollector;
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
-    setAutocompleteService(plugins.data.autocomplete);
-
     if (this.config.search.sessions.enabled) {
       core.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
@@ -93,7 +71,6 @@ export class DataEnhancedPlugin
               sessionService: plugins.data.search.session,
               application: core.application,
               basePath: core.http.basePath,
-              timeFilter: plugins.data.query.timefilter.timefilter,
               storage: this.storage,
               disableSaveAfterSessionCompletesTimeout: moment
                 .duration(this.config.search.sessions.notTouchedTimeout)
@@ -106,7 +83,5 @@ export class DataEnhancedPlugin
     }
   }
 
-  public stop() {
-    this.enhancedSearchInterceptor.stop();
-  }
+  public stop() {}
 }

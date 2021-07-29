@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { ValuesType } from 'utility-types';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
@@ -22,10 +16,12 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getErrorName } from '../../helpers/get_error_name';
-import { withApmSpan } from '../../../utils/with_apm_span';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export type ServiceErrorGroupItem = ValuesType<
   PromiseReturnType<typeof getServiceErrorGroups>
@@ -59,8 +55,9 @@ export async function getServiceErrorGroups({
 
     const { intervalString } = getBucketSize({ start, end, numBuckets });
 
-    const response = await withApmSpan('get_top_service_error_groups', () =>
-      apmEventClient.search({
+    const response = await apmEventClient.search(
+      'get_top_service_error_groups',
+      {
         apm: {
           events: [ProcessorEvent.error],
         },
@@ -90,11 +87,11 @@ export async function getServiceErrorGroups({
                 sample: {
                   top_hits: {
                     size: 1,
-                    _source: [
+                    _source: ([
                       ERROR_LOG_MESSAGE,
                       ERROR_EXC_MESSAGE,
                       '@timestamp',
-                    ],
+                    ] as any) as string,
                     sort: {
                       '@timestamp': 'desc',
                     },
@@ -104,15 +101,13 @@ export async function getServiceErrorGroups({
             },
           },
         },
-      })
+      }
     );
 
     const errorGroups =
       response.aggregations?.error_groups.buckets.map((bucket) => ({
         group_id: bucket.key as string,
-        name:
-          getErrorName(bucket.sample.hits.hits[0]._source) ??
-          NOT_AVAILABLE_LABEL,
+        name: getErrorName(bucket.sample.hits.hits[0]._source),
         last_seen: new Date(
           bucket.sample.hits.hits[0]?._source['@timestamp']
         ).getTime(),
@@ -139,50 +134,49 @@ export async function getServiceErrorGroups({
       (group) => group.group_id
     );
 
-    const timeseriesResponse = await withApmSpan(
+    const timeseriesResponse = await apmEventClient.search(
       'get_service_error_groups_timeseries',
-      async () =>
-        apmEventClient.search({
-          apm: {
-            events: [ProcessorEvent.error],
-          },
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
-                  { term: { [SERVICE_NAME]: serviceName } },
-                  { term: { [TRANSACTION_TYPE]: transactionType } },
-                  ...rangeQuery(start, end),
-                  ...environmentQuery(environment),
-                  ...kqlQuery(kuery),
-                ],
-              },
+      {
+        apm: {
+          events: [ProcessorEvent.error],
+        },
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
+                { term: { [SERVICE_NAME]: serviceName } },
+                { term: { [TRANSACTION_TYPE]: transactionType } },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
+              ],
             },
-            aggs: {
-              error_groups: {
-                terms: {
-                  field: ERROR_GROUP_ID,
-                  size,
-                },
-                aggs: {
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: start,
-                        max: end,
-                      },
+          },
+          aggs: {
+            error_groups: {
+              terms: {
+                field: ERROR_GROUP_ID,
+                size,
+              },
+              aggs: {
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: intervalString,
+                    min_doc_count: 0,
+                    extended_bounds: {
+                      min: start,
+                      max: end,
                     },
                   },
                 },
               },
             },
           },
-        })
+        },
+      }
     );
 
     return {

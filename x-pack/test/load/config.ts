@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { GatlingTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -23,10 +23,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testRunner: GatlingTestRunner,
 
-    esArchiver: {
-      directory: resolve(__dirname, 'es_archives'),
-    },
-
     screenshots: {
       directory: resolve(__dirname, 'screenshots'),
     },
@@ -34,6 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs')],
+      esJavaOpts: '-Xms8g -Xmx8g',
     },
 
     kbnTestServer: {

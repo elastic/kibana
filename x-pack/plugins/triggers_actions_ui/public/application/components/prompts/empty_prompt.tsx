@@ -17,7 +17,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
-          defaultMessage="Create your first alert"
+          defaultMessage="Create your first rule"
         />
       </h2>
     }
@@ -38,7 +38,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
-          defaultMessage="Create alert"
+          defaultMessage="Create rule"
         />
       </EuiButton>
     }

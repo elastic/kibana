@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, FindResult } from '../../../../../alerts/server';
+import { AlertTypeParams, FindResult } from '../../../../../alerting/server';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { FindNotificationParams } from './types';
 
@@ -18,7 +18,7 @@ export const getFilter = (filter: string | null | undefined) => {
 };
 
 export const findNotifications = async ({
-  alertsClient,
+  rulesClient,
   perPage,
   page,
   fields,
@@ -26,7 +26,7 @@ export const findNotifications = async ({
   sortField,
   sortOrder,
 }: FindNotificationParams): Promise<FindResult<AlertTypeParams>> =>
-  alertsClient.find({
+  rulesClient.find({
     options: {
       fields,
       page,

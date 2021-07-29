@@ -6,14 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { parseNext } from '../../../common/parse_next';
-import { LoginState } from '../../../common/login_state';
-import { shouldProviderUseLoginForm } from '../../../common/model';
+
+import type { RouteDefinitionParams } from '../';
 import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
-import { RouteDefinitionParams } from '..';
+import type { LoginState } from '../../../common/login_state';
+import { shouldProviderUseLoginForm } from '../../../common/model';
+import { parseNext } from '../../../common/parse_next';
 
 /**
  * Defines routes required for the Login view.

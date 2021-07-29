@@ -31,21 +31,21 @@ export const evaluateCondition = async ({
 }: ConditionParams) => {
   const getAnomalies = nodeType === 'k8s' ? getMetricK8sAnomalies : getMetricsHostsAnomalies;
 
-  const result = await getAnomalies(
-    {
+  const result = await getAnomalies({
+    context: {
       spaceId,
       mlSystem,
       mlAnomalyDetectors,
     },
-    sourceId ?? 'default',
-    threshold,
+    sourceId: sourceId ?? 'default',
+    anomalyThreshold: threshold,
     startTime,
     endTime,
     metric,
-    { field: 'anomalyScore', direction: 'desc' },
-    { pageSize: 100 },
-    influencerFilter
-  );
+    sort: { field: 'anomalyScore', direction: 'desc' },
+    pagination: { pageSize: 100 },
+    influencerFilter,
+  });
 
   return result;
 };

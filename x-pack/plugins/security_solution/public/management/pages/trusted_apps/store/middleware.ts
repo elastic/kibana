@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   Immutable,
   PostTrustedAppCreateRequest,
@@ -45,6 +46,7 @@ import {
   getLastLoadedListResourceState,
   getCurrentLocationPageIndex,
   getCurrentLocationPageSize,
+  getCurrentLocationFilter,
   needsRefreshOfListData,
   getCreationSubmissionResourceState,
   getCreationDialogFormEntry,
@@ -54,7 +56,17 @@ import {
   getListTotalItemsCount,
   trustedAppsListPageActive,
   entriesExistState,
+  policiesState,
+  isEdit,
+  isFetchingEditTrustedAppItem,
+  editItemId,
+  editingTrustedApp,
+  getListItems,
+  editItemState,
 } from './selectors';
+import { parseQueryFilterToKQL } from '../../../common/utils';
+import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import { SEARCHABLE_FIELDS } from '../constants';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -68,6 +80,7 @@ const refreshListIfNeeded = async (
   trustedAppsService: TrustedAppsService
 ) => {
   if (needsRefreshOfListData(store.getState())) {
+    store.dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: false } });
     store.dispatch(
       createTrustedAppsListResourceStateChangedAction({
         type: 'LoadingResourceState',
@@ -81,9 +94,12 @@ const refreshListIfNeeded = async (
     try {
       const pageIndex = getCurrentLocationPageIndex(store.getState());
       const pageSize = getCurrentLocationPageSize(store.getState());
+      const filter = getCurrentLocationFilter(store.getState());
+
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
+        kuery: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
       });
 
       store.dispatch(
@@ -95,6 +111,7 @@ const refreshListIfNeeded = async (
             pageSize,
             totalItemsCount: response.total,
             timestamp: Date.now(),
+            filter,
           },
         })
       );
@@ -139,9 +156,11 @@ const submitCreationIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  const submissionResourceState = getCreationSubmissionResourceState(store.getState());
-  const isValid = isCreationDialogFormValid(store.getState());
-  const entry = getCreationDialogFormEntry(store.getState());
+  const currentState = store.getState();
+  const submissionResourceState = getCreationSubmissionResourceState(currentState);
+  const isValid = isCreationDialogFormValid(currentState);
+  const entry = getCreationDialogFormEntry(currentState);
+  const editMode = isEdit(currentState);
 
   if (isStaleResourceState(submissionResourceState) && entry !== undefined && isValid) {
     store.dispatch(
@@ -152,12 +171,27 @@ const submitCreationIfNeeded = async (
     );
 
     try {
+      let responseTrustedApp: TrustedApp;
+
+      if (editMode) {
+        responseTrustedApp = (
+          await trustedAppsService.updateTrustedApp(
+            { id: editItemId(currentState)! },
+            // TODO: try to remove the cast
+            entry as PostTrustedAppCreateRequest
+          )
+        ).data;
+      } else {
+        // TODO: try to remove the cast
+        responseTrustedApp = (
+          await trustedAppsService.createTrustedApp(entry as PostTrustedAppCreateRequest)
+        ).data;
+      }
+
       store.dispatch(
         createTrustedAppCreationSubmissionResourceStateChanged({
           type: 'LoadedResourceState',
-          // TODO: try to remove the cast
-          data: (await trustedAppsService.createTrustedApp(entry as PostTrustedAppCreateRequest))
-            .data,
+          data: responseTrustedApp,
         })
       );
       store.dispatch({
@@ -268,6 +302,139 @@ const checkTrustedAppsExistIfNeeded = async (
   }
 };
 
+export const retrieveListOfPoliciesIfNeeded = async (
+  { getState, dispatch }: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const currentState = getState();
+  const currentPoliciesState = policiesState(currentState);
+  const isLoading = isLoadingResourceState(currentPoliciesState);
+  const isPageActive = trustedAppsListPageActive(currentState);
+  const isCreateFlow = isCreationDialogLocation(currentState);
+
+  if (isPageActive && isCreateFlow && !isLoading) {
+    dispatch({
+      type: 'trustedAppsPoliciesStateChanged',
+      payload: {
+        type: 'LoadingResourceState',
+        previousState: currentPoliciesState,
+      } as TrustedAppsListPageState['policies'],
+    });
+
+    try {
+      const policyList = await trustedAppsService.getPolicyList({
+        query: {
+          page: 1,
+          perPage: 1000,
+        },
+      });
+
+      dispatch({
+        type: 'trustedAppsPoliciesStateChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: policyList,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: 'trustedAppsPoliciesStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: error.body || error,
+          lastLoadedState: getLastLoadedResourceState(policiesState(getState())),
+        },
+      });
+    }
+  }
+};
+
+const fetchEditTrustedAppIfNeeded = async (
+  { getState, dispatch }: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const currentState = getState();
+  const isPageActive = trustedAppsListPageActive(currentState);
+  const isEditFlow = isEdit(currentState);
+  const isAlreadyFetching = isFetchingEditTrustedAppItem(currentState);
+  const editTrustedAppId = editItemId(currentState);
+
+  if (isPageActive && isEditFlow && !isAlreadyFetching) {
+    if (!editTrustedAppId) {
+      const errorMessage = i18n.translate(
+        'xpack.securitySolution.trustedapps.middleware.editIdMissing',
+        {
+          defaultMessage: 'No id provided',
+        }
+      );
+
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: Object.assign(new Error(errorMessage), { statusCode: 404, error: errorMessage }),
+        },
+      });
+      return;
+    }
+
+    let trustedAppForEdit = editingTrustedApp(currentState);
+
+    // If Trusted App is already loaded, then do nothing
+    if (trustedAppForEdit && trustedAppForEdit.id === editTrustedAppId) {
+      return;
+    }
+
+    // See if we can get the Trusted App record from the current list of Trusted Apps being displayed
+    trustedAppForEdit = getListItems(currentState).find((ta) => ta.id === editTrustedAppId);
+
+    try {
+      // Retrieve Trusted App record via API if it was not in the list data.
+      // This would be the case when linking from another place or using an UUID for a Trusted App
+      // that is not currently displayed on the list view.
+      if (!trustedAppForEdit) {
+        dispatch({
+          type: 'trustedAppCreationEditItemStateChanged',
+          payload: {
+            // No easy way to get around this that I can see. `previousState` does not
+            // seem to allow everything that `editItem` state can hold, so not even sure if using
+            // type guards would work here
+            // @ts-ignore
+            type: 'LoadingResourceState',
+            previousState: editItemState(currentState)!,
+          },
+        });
+
+        trustedAppForEdit = (await trustedAppsService.getTrustedApp({ id: editTrustedAppId })).data;
+      }
+
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: trustedAppForEdit,
+        },
+      });
+
+      dispatch({
+        type: 'trustedAppCreationDialogFormStateUpdated',
+        payload: {
+          entry: toUpdateTrustedApp(trustedAppForEdit),
+          isValid: true,
+        },
+      });
+    } catch (e) {
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: e,
+        },
+      });
+    }
+  }
+};
+
 export const createTrustedAppsPageMiddleware = (
   trustedAppsService: TrustedAppsService
 ): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
@@ -282,6 +449,8 @@ export const createTrustedAppsPageMiddleware = (
 
     if (action.type === 'userChangedUrl') {
       updateCreationDialogIfNeeded(store);
+      retrieveListOfPoliciesIfNeeded(store, trustedAppsService);
+      fetchEditTrustedAppIfNeeded(store, trustedAppsService);
     }
 
     if (action.type === 'trustedAppCreationDialogConfirmed') {

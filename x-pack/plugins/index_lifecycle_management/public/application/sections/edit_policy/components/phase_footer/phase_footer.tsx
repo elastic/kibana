@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiText, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { PhasesExceptDelete } from '../../../../../../common/types';
+import { PhaseExceptDelete } from '../../../../../../common/types';
 
 import { usePhaseTimings } from '../../form';
 
@@ -32,7 +32,7 @@ const keepDataLabel = i18n.translate(
 );
 
 interface Props {
-  phase: PhasesExceptDelete;
+  phase: PhaseExceptDelete;
 }
 
 export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {

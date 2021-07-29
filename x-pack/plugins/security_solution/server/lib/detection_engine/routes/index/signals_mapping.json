@@ -236,6 +236,38 @@
                   }
                 }
               },
+              "threat_mapping": {
+                "properties": {
+                  "entries": {
+                    "properties": {
+                      "field": {
+                        "type": "keyword"
+                      },
+                      "value": {
+                        "type": "keyword"
+                      },
+                      "type": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "threat_filters": {
+                "type": "object"
+              },
+              "threat_indicator_path": {
+                "type": "keyword"
+              },
+              "threat_query": {
+                "type": "keyword"
+              },
+              "threat_index": {
+                "type": "keyword"
+              },
+              "threat_language": {
+                "type": "keyword"
+              },
               "note": {
                 "type": "text"
               },
@@ -359,6 +391,9 @@
           },
           "threshold_result": {
             "properties": {
+              "from": {
+                "type": "date"
+              },
               "terms": {
                 "properties": {
                   "field": {

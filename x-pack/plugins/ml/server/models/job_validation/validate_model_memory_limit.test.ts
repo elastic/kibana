@@ -148,8 +148,7 @@ describe('ML - validateModelMemoryLimit', () => {
   it('Called with no duration or split and mml above limit', () => {
     const job = getJobConfig();
     const duration = undefined;
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '31mb';
+    job.analysis_limits!.model_memory_limit = '31mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -166,8 +165,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(10);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '20mb';
+    job.analysis_limits!.model_memory_limit = '20mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -184,8 +182,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '30mb';
+    job.analysis_limits!.model_memory_limit = '30mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -202,8 +199,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '10mb';
+    job.analysis_limits!.model_memory_limit = '10mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -220,10 +216,9 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
+    // @ts-expect-error incorrect type on purpose for test
     delete mlInfoResponse.limits.max_model_memory_limit;
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '10mb';
+    job.analysis_limits!.model_memory_limit = '10mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -239,8 +234,7 @@ describe('ML - validateModelMemoryLimit', () => {
   it('Called with no duration or split and mml above limit, no max setting', () => {
     const job = getJobConfig();
     const duration = undefined;
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '31mb';
+    job.analysis_limits!.model_memory_limit = '31mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -256,8 +250,7 @@ describe('ML - validateModelMemoryLimit', () => {
   it('Called with no duration or split and mml above limit, no max setting, above effective max mml', () => {
     const job = getJobConfig();
     const duration = undefined;
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '41mb';
+    job.analysis_limits!.model_memory_limit = '41mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -274,8 +267,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '20mb';
+    job.analysis_limits!.model_memory_limit = '20mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -292,8 +284,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '0mb';
+    job.analysis_limits!.model_memory_limit = '0mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -310,8 +301,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '10mbananas';
+    job.analysis_limits!.model_memory_limit = '10mbananas';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -328,8 +318,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '10';
+    job.analysis_limits!.model_memory_limit = '10';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -346,8 +335,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = 'mb';
+    job.analysis_limits!.model_memory_limit = 'mb';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -364,8 +352,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = 'asdf';
+    job.analysis_limits!.model_memory_limit = 'asdf';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -382,8 +369,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '1023KB';
+    job.analysis_limits!.model_memory_limit = '1023KB';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -400,8 +386,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '1024KB';
+    job.analysis_limits!.model_memory_limit = '1024KB';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -418,8 +403,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '6MB';
+    job.analysis_limits!.model_memory_limit = '6MB';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),
@@ -436,8 +420,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
-    job.analysis_limits.model_memory_limit = '20MB';
+    job.analysis_limits!.model_memory_limit = '20MB';
 
     return validateModelMemoryLimit(
       getMockMlClusterClient(),

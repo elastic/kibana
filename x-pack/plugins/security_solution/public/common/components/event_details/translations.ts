@@ -7,14 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summary', {
-  defaultMessage: 'Summary',
+export const THREAT_INTEL = i18n.translate('xpack.securitySolution.alertDetails.threatIntel', {
+  defaultMessage: 'Threat Intel',
 });
 
 export const INVESTIGATION_GUIDE = i18n.translate(
-  'xpack.securitySolution.alertDetails.summary.investigationGuide',
+  'xpack.securitySolution.alertDetails.overview.investigationGuide',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.overview', {
+  defaultMessage: 'Overview',
+});
+
+export const DUCOMENT_SUMMARY = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.documentSummary',
+  {
+    defaultMessage: 'Document Summary',
   }
 );
 
@@ -23,7 +34,7 @@ export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table',
 });
 
 export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jsonView', {
-  defaultMessage: 'JSON View',
+  defaultMessage: 'JSON',
 });
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
@@ -61,3 +72,32 @@ export const VIEW_COLUMN = (field: string) =>
     values: { field },
     defaultMessage: 'View {field} column',
   });
+
+export const NESTED_COLUMN = (field: string) =>
+  i18n.translate('xpack.securitySolution.eventDetails.nestedColumnCheckboxAriaLabel', {
+    values: { field },
+    defaultMessage:
+      'The {field} field is an object, and is broken down into nested fields which can be added as column',
+  });
+
+export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
+  defaultMessage: 'Agent status',
+});
+
+export const MULTI_FIELD_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
+  {
+    defaultMessage: 'Multi-fields can have multiple values per field',
+  }
+);
+
+export const MULTI_FIELD_BADGE = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldBadge',
+  {
+    defaultMessage: 'multi-field',
+  }
+);
+
+export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
+  defaultMessage: 'Actions',
+});

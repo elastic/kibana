@@ -20,7 +20,7 @@ import {
   YDomainRange,
 } from '@elastic/charts';
 
-import { Dimension, Scale, ThresholdLine } from './param';
+import type { Dimension, Scale, ThresholdLine } from './param';
 
 export interface Column {
   id: string | null;
@@ -116,6 +116,7 @@ export interface VisConfig {
   showValueLabel: boolean;
   enableHistogramMode: boolean;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+  fillOpacity?: number;
   detailedTooltip?: boolean;
   isVislibVis?: boolean;
 }

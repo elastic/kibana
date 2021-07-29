@@ -16,6 +16,7 @@ jest.mock('fs', () => ({
 const dynamicProps = { process: { pid: expect.any(Number) } };
 
 jest.mock('@kbn/legacy-logging', () => ({
+  ...(jest.requireActual('@kbn/legacy-logging') as any),
   setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
 }));
 
@@ -48,6 +49,7 @@ test('uses default memory buffer logger until config is provided', () => {
 
   // We shouldn't create new buffer appender for another context name.
   const anotherLogger = system.get('test', 'context2');
+  // @ts-expect-error ECS custom meta
   anotherLogger.fatal('fatal message', { some: 'value' });
 
   expect(bufferAppendSpy).toHaveBeenCalledTimes(2);
@@ -61,6 +63,7 @@ test('flushes memory buffer logger and switches to real logger once config is pr
   const logger = system.get('test', 'context');
 
   logger.trace('buffered trace message');
+  // @ts-expect-error ECS custom meta
   logger.info('buffered info message', { some: 'value' });
   logger.fatal('buffered fatal message');
 
@@ -134,6 +137,77 @@ test('uses `root` logger if context name is not specified.', async () => {
   expect(mockConsoleLog.mock.calls).toMatchSnapshot();
 });
 
+test('attaches appenders to appenders that declare refs', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: {
+        console: {
+          type: 'console',
+          layout: { type: 'pattern', pattern: '[%logger] %message %meta' },
+        },
+        file: {
+          type: 'file',
+          layout: { type: 'pattern', pattern: '[%logger] %message %meta' },
+          fileName: 'path',
+        },
+        rewrite: {
+          type: 'rewrite',
+          appenders: ['console', 'file'],
+          policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+        },
+      },
+      loggers: [{ name: 'tests', level: 'warn', appenders: ['rewrite'] }],
+    })
+  );
+
+  const testLogger = system.get('tests');
+  // @ts-expect-error ECS custom meta
+  testLogger.warn('This message goes to a test context.', { a: 'hi', b: 'remove me' });
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog.mock.calls[0][0]).toMatchInlineSnapshot(
+    `"[tests] This message goes to a test context. {\\"a\\":\\"hi\\"}"`
+  );
+
+  expect(mockStreamWrite).toHaveBeenCalledTimes(1);
+  expect(mockStreamWrite.mock.calls[0][0]).toMatchInlineSnapshot(`
+    "[tests] This message goes to a test context. {\\"a\\":\\"hi\\"}
+    "
+  `);
+});
+
+test('throws if a circular appender reference is detected', async () => {
+  expect(async () => {
+    await system.upgrade(
+      config.schema.validate({
+        appenders: {
+          console: { type: 'console', layout: { type: 'pattern' } },
+          a: {
+            type: 'rewrite',
+            appenders: ['b'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          b: {
+            type: 'rewrite',
+            appenders: ['c'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          c: {
+            type: 'rewrite',
+            appenders: ['console', 'a'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+        },
+        loggers: [{ name: 'tests', level: 'warn', appenders: ['a'] }],
+      })
+    );
+  }).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Circular appender reference detected: [b -> c -> a -> b]"`
+  );
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+});
+
 test('`stop()` disposes all appenders.', async () => {
   await system.upgrade(
     config.schema.validate({
@@ -162,6 +236,7 @@ test('asLoggerFactory() only allows to create new loggers.', async () => {
   );
 
   logger.trace('buffered trace message');
+  // @ts-expect-error ECS custom meta
   logger.info('buffered info message', { some: 'value' });
   logger.fatal('buffered fatal message');
 
@@ -394,4 +469,60 @@ test('subsequent calls to setContextConfig() for the same context name can disab
       logger: 'tests.child.grandchild',
     },
   });
+});
+
+test('buffers log records for already created appenders', async () => {
+  // a default config
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const logger = system.get('test', 'context');
+
+  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+
+  const upgradePromise = system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'all' },
+    })
+  );
+
+  logger.trace('message to the known context');
+  expect(bufferAppendSpy).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+
+  await upgradePromise;
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to the known context');
+});
+
+test('buffers log records for appenders created during config upgrade', async () => {
+  // a default config
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+
+  const upgradePromise = system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'all' },
+    })
+  );
+
+  const logger = system.get('test', 'context');
+  logger.trace('message to a new context');
+
+  expect(bufferAppendSpy).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+
+  await upgradePromise;
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to a new context');
 });

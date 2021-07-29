@@ -28,7 +28,6 @@ export enum ReindexStatus {
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
-
 export interface QueueSettings extends SavedObjectAttributes {
   /**
    * A Unix timestamp of when the reindex operation was enqueued.
@@ -92,11 +91,21 @@ export interface ReindexOperation extends SavedObjectAttributes {
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
-export enum ReindexWarning {
-  // 7.0 -> 8.0 warnings
-  apmReindex,
-
-  // 8.0 -> 9.0 warnings
+// 7.0 -> 8.0 warnings
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export interface ReindexWarning {
+  warningType: ReindexWarningTypes;
+  /**
+   * Optional metadata for deprecations
+   *
+   * @remark
+   * For example, for the "customTypeName" deprecation,
+   * we want to surface the typeName to the user.
+   * For "indexSetting" we want to surface the deprecated settings.
+   */
+  meta?: {
+    [key: string]: string | string[];
+  };
 }
 
 export enum IndexGroup {
@@ -107,13 +116,14 @@ export enum IndexGroup {
 // Telemetry types
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
-export type UIOpenOption = 'overview' | 'cluster' | 'indices';
+export type UIOpenOption = 'overview' | 'cluster' | 'indices' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
 export interface UIOpen {
   overview: boolean;
   cluster: boolean;
   indices: boolean;
+  kibana: boolean;
 }
 
 export interface UIReindex {
@@ -128,6 +138,7 @@ export interface UpgradeAssistantTelemetrySavedObject {
     overview: number;
     cluster: number;
     indices: number;
+    kibana: number;
   };
   ui_reindex: {
     close: number;
@@ -142,6 +153,7 @@ export interface UpgradeAssistantTelemetry {
     overview: number;
     cluster: number;
     indices: number;
+    kibana: number;
   };
   ui_reindex: {
     close: number;
@@ -166,6 +178,9 @@ export interface DeprecationInfo {
   message: string;
   url: string;
   details?: string;
+  _meta?: {
+    [key: string]: string;
+  };
 }
 
 export interface IndexSettingsDeprecationInfo {
@@ -177,10 +192,9 @@ export interface DeprecationAPIResponse {
   node_settings: DeprecationInfo[];
   index_settings: IndexSettingsDeprecationInfo;
 }
-export interface EnrichedDeprecationInfo extends DeprecationInfo {
-  index?: string;
-  node?: string;
-  reindex?: boolean;
+
+export interface ReindexAction {
+  type: 'reindex';
   /**
    * Indicate what blockers have been detected for calling reindex
    * against this index.
@@ -189,6 +203,21 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
    * In future this could be an array of blockers.
    */
   blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+}
+
+export interface MlAction {
+  type: 'mlSnapshot';
+  snapshotId: string;
+  jobId: string;
+}
+
+export interface IndexSettingAction {
+  type: 'indexSetting';
+  deprecatedSettings: string[];
+}
+export interface EnrichedDeprecationInfo extends DeprecationInfo {
+  index?: string;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
 }
 
 export interface UpgradeAssistantStatus {
@@ -210,4 +239,12 @@ export interface ResolveIndexResponseFromES {
     indices: string[];
   }>;
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
+}
+
+export const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
+
+export interface MlOperation extends SavedObjectAttributes {
+  nodeId: string;
+  snapshotId: string;
+  jobId: string;
 }

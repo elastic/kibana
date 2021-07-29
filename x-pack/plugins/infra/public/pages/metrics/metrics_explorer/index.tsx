@@ -9,17 +9,21 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSourceConfiguration } from '../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useTrackPageview } from '../../../../../observability/public';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+
 import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
+import { MetricsPageTemplate } from '../page_template';
+import { metricsExplorerTitle } from '../../../translations';
 
 interface MetricsExplorerPageProps {
-  source: InfraSourceConfiguration;
+  source: MetricsSourceConfigurationProperties;
   derivedIndexPattern: IIndexPattern;
 }
 
@@ -61,6 +65,12 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [loadData, shouldLoadDefault]);
 
+  useMetricsBreadcrumbs([
+    {
+      text: metricsExplorerTitle,
+    },
+  ]);
+
   return (
     <EuiErrorBoundary>
       <DocumentTitle
@@ -73,43 +83,49 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
           })
         }
       />
-      <MetricsExplorerToolbar
-        derivedIndexPattern={derivedIndexPattern}
-        timeRange={currentTimerange}
-        options={options}
-        chartOptions={chartOptions}
-        onRefresh={handleRefresh}
-        onTimeChange={handleTimeChange}
-        onGroupByChange={handleGroupByChange}
-        onFilterQuerySubmit={handleFilterQuerySubmit}
-        onMetricsChange={handleMetricsChange}
-        onAggregationChange={handleAggregationChange}
-        onChartOptionsChange={setChartOptions}
-      />
-      {error ? (
-        <NoData
-          titleText="Whoops!"
-          bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
-            defaultMessage: 'It looks like the request failed with "{message}"',
-            values: { message: error.message },
-          })}
-          onRefetch={handleRefresh}
-          refetchText="Try Again"
-        />
-      ) : (
-        <MetricsExplorerCharts
+      <MetricsPageTemplate
+        pageHeader={{
+          pageTitle: metricsExplorerTitle,
+        }}
+      >
+        <MetricsExplorerToolbar
+          derivedIndexPattern={derivedIndexPattern}
           timeRange={currentTimerange}
-          loading={loading}
-          data={data}
-          source={source}
           options={options}
           chartOptions={chartOptions}
-          onLoadMore={handleLoadMore}
-          onFilter={handleFilterQuerySubmit}
-          onRefetch={handleRefresh}
+          onRefresh={handleRefresh}
           onTimeChange={handleTimeChange}
+          onGroupByChange={handleGroupByChange}
+          onFilterQuerySubmit={handleFilterQuerySubmit}
+          onMetricsChange={handleMetricsChange}
+          onAggregationChange={handleAggregationChange}
+          onChartOptionsChange={setChartOptions}
         />
-      )}
+        {error ? (
+          <NoData
+            titleText="Whoops!"
+            bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
+              defaultMessage: 'It looks like the request failed with "{message}"',
+              values: { message: error.message },
+            })}
+            onRefetch={handleRefresh}
+            refetchText="Try Again"
+          />
+        ) : (
+          <MetricsExplorerCharts
+            timeRange={currentTimerange}
+            loading={loading}
+            data={data}
+            source={source}
+            options={options}
+            chartOptions={chartOptions}
+            onLoadMore={handleLoadMore}
+            onFilter={handleFilterQuerySubmit}
+            onRefetch={handleRefresh}
+            onTimeChange={handleTimeChange}
+          />
+        )}
+      </MetricsPageTemplate>
     </EuiErrorBoundary>
   );
 };

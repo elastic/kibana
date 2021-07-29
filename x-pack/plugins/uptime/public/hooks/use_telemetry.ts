@@ -16,6 +16,7 @@ export enum UptimePage {
   Settings = 'Settings',
   Certificates = 'Certificates',
   StepDetail = 'StepDetail',
+  SyntheticCheckStepsPage = 'SyntheticCheckStepsPage',
   NotFound = '__not-found__',
 }
 
@@ -37,6 +38,8 @@ export const useUptimeTelemetry = (page?: UptimePage) => {
       dateEnd: dateRangeEnd,
       autoRefreshEnabled: !autorefreshIsPaused,
     };
-    apiService.post(API_URLS.LOG_PAGE_VIEW, params);
+    setTimeout(() => {
+      apiService.post(API_URLS.LOG_PAGE_VIEW, params);
+    }, 100);
   }, [autorefreshInterval, autorefreshIsPaused, dateRangeEnd, dateRangeStart, page]);
 };

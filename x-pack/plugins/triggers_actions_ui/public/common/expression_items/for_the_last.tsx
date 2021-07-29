@@ -23,7 +23,7 @@ import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
-interface ForLastExpressionProps {
+export interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
@@ -129,3 +129,6 @@ export const ForLastExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ForLastExpression as default };

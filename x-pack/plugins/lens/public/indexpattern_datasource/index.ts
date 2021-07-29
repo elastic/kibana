@@ -9,11 +9,13 @@ import { CoreSetup } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { Datasource, EditorFrameSetup } from '../types';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
@@ -24,6 +26,8 @@ export interface IndexPatternDatasourceSetupPlugins {
 
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }
 
 export class IndexPatternDatasource {
@@ -31,7 +35,7 @@ export class IndexPatternDatasource {
 
   setup(
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
-    { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
+    { expressions, editorFrame, charts, data: dataSetup }: IndexPatternDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
       const {
@@ -39,22 +43,29 @@ export class IndexPatternDatasource {
         renameColumns,
         formatColumn,
         counterRate,
-        getTimeScaleFunction,
+        timeScale,
         getSuffixFormatter,
       } = await import('../async_services');
-      return core.getStartServices().then(([coreStart, { data }]) => {
-        data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
-        expressions.registerFunction(getTimeScaleFunction(data));
-        expressions.registerFunction(counterRate);
-        expressions.registerFunction(renameColumns);
-        expressions.registerFunction(formatColumn);
-        return getIndexPatternDatasource({
-          core: coreStart,
-          storage: new Storage(localStorage),
-          data,
-          charts,
-        });
-      }) as Promise<Datasource>;
+      return core
+        .getStartServices()
+        .then(([coreStart, { indexPatternFieldEditor, uiActions, data }]) => {
+          const suffixFormatter = getSuffixFormatter(data.fieldFormats.deserialize);
+          if (!dataSetup.fieldFormats.has(suffixFormatter.id)) {
+            dataSetup.fieldFormats.register([suffixFormatter]);
+          }
+          expressions.registerFunction(timeScale);
+          expressions.registerFunction(counterRate);
+          expressions.registerFunction(renameColumns);
+          expressions.registerFunction(formatColumn);
+          return getIndexPatternDatasource({
+            core: coreStart,
+            storage: new Storage(localStorage),
+            data,
+            charts,
+            indexPatternFieldEditor,
+            uiActions,
+          });
+        }) as Promise<Datasource>;
     });
   }
 }

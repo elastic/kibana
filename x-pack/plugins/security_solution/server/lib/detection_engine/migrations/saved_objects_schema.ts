@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { IsoDateString, PositiveInteger } from '../../../../common/detection_engine/schemas/types';
+import { IsoDateString, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { unionWithNullType } from '../../../../common/utility_types';
 
 const status = t.keyof({ success: null, failure: null, pending: null });
@@ -26,6 +26,12 @@ const signalsMigrationSOGeneratedAttributes = {
   createdBy: t.string,
   updated: IsoDateString,
   updatedBy: t.string,
+};
+
+const signalsMigrationSOError = {
+  statusCode: t.number,
+  error: t.string,
+  message: t.string,
 };
 
 /**
@@ -59,11 +65,14 @@ export const signalsMigrationSOAttributes = t.exact(
 );
 export type SignalsMigrationSOAttributes = t.TypeOf<typeof signalsMigrationSOAttributes>;
 
-export const signalsMigrationSO = t.type({
-  id: t.string,
-  attributes: signalsMigrationSOAttributes,
-  type: t.string,
-});
+export const signalsMigrationSO = t.intersection([
+  t.type({
+    id: t.string,
+    attributes: signalsMigrationSOAttributes,
+    type: t.string,
+  }),
+  t.partial({ error: t.type(signalsMigrationSOError) }),
+]);
 export type SignalsMigrationSO = t.TypeOf<typeof signalsMigrationSO>;
 
 export const signalsMigrationSOs = t.array(signalsMigrationSO);

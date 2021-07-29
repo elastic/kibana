@@ -1,1 +1,0 @@
-Contains the Vega visualization.

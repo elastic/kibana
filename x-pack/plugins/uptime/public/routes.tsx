@@ -6,19 +6,30 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { OverviewPage } from './components/overview/overview_container';
-import { Props as PageHeaderProps, PageHeader } from './components/common/header/page_header';
+import styled from 'styled-components';
+import { Route, Switch } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   CERTIFICATES_ROUTE,
   MONITOR_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
+  SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../common/constants';
 import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
+import { OverviewPageComponent } from './pages/overview';
+import { SyntheticsCheckSteps } from './pages/synthetics/synthetics_checks';
+import { ClientPluginsStart } from './apps/plugin';
+import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
+import { UptimeDatePicker } from './components/common/uptime_date_picker';
+import { useKibana } from '../../../../src/plugins/kibana_react/public';
+import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
+import { CertificateTitle } from './components/certificates/certificate_title';
+import { SyntheticsCallout } from './components/overview/synthetics_callout';
 
 interface RouteProps {
   path: string;
@@ -26,46 +37,71 @@ interface RouteProps {
   dataTestSubj: string;
   title: string;
   telemetryId: UptimePage;
-  headerProps?: PageHeaderProps;
+  pageHeader?: {
+    children?: JSX.Element;
+    pageTitle: string | JSX.Element;
+    rightSideItems?: JSX.Element[];
+  };
 }
 
-const baseTitle = 'Uptime - Kibana';
+const baseTitle = i18n.translate('xpack.uptime.routes.baseTitle', {
+  defaultMessage: 'Uptime - Kibana',
+});
+
+export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.heading', {
+  defaultMessage: 'Monitors',
+});
 
 const Routes: RouteProps[] = [
   {
-    title: `Monitor | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.monitorRoute.title', {
+      defaultMessage: 'Monitor | {baseTitle}',
+      values: { baseTitle },
+    }),
     path: MONITOR_ROUTE,
     component: MonitorPage,
     dataTestSubj: 'uptimeMonitorPage',
     telemetryId: UptimePage.Monitor,
-    headerProps: {
-      showDatePicker: true,
-      showMonitorTitle: true,
+    pageHeader: {
+      children: <MonitorPageTitleContent />,
+      pageTitle: <MonitorPageTitle />,
+      rightSideItems: [<UptimeDatePicker />],
     },
   },
   {
-    title: `Settings | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.settingsRoute.title', {
+      defaultMessage: `Settings | {baseTitle}`,
+      values: { baseTitle },
+    }),
     path: SETTINGS_ROUTE,
     component: SettingsPage,
     dataTestSubj: 'uptimeSettingsPage',
     telemetryId: UptimePage.Settings,
-    headerProps: {
-      showTabs: true,
+    pageHeader: {
+      pageTitle: (
+        <FormattedMessage id="xpack.uptime.settings.heading" defaultMessage="Uptime settings" />
+      ),
     },
   },
   {
-    title: `Certificates | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.certificatesRoute.title', {
+      defaultMessage: `Certificates | {baseTitle}`,
+      values: { baseTitle },
+    }),
     path: CERTIFICATES_ROUTE,
     component: CertificatesPage,
     dataTestSubj: 'uptimeCertificatesPage',
     telemetryId: UptimePage.Certificates,
-    headerProps: {
-      showCertificateRefreshBtn: true,
-      showTabs: true,
+    pageHeader: {
+      pageTitle: <CertificateTitle />,
+      rightSideItems: [<CertRefreshBtn />],
     },
   },
   {
-    title: baseTitle,
+    title: i18n.translate('xpack.uptime.stepDetailRoute.title', {
+      defaultMessage: 'Synthetics detail | {baseTitle}',
+      values: { baseTitle },
+    }),
     path: STEP_DETAIL_ROUTE,
     component: StepDetailPage,
     dataTestSubj: 'uptimeStepDetailPage',
@@ -73,13 +109,20 @@ const Routes: RouteProps[] = [
   },
   {
     title: baseTitle,
+    path: SYNTHETIC_CHECK_STEPS_ROUTE,
+    component: SyntheticsCheckSteps,
+    dataTestSubj: 'uptimeSyntheticCheckStepsPage',
+    telemetryId: UptimePage.SyntheticCheckStepsPage,
+  },
+  {
+    title: baseTitle,
     path: OVERVIEW_ROUTE,
-    component: OverviewPage,
+    component: OverviewPageComponent,
     dataTestSubj: 'uptimeOverviewPage',
     telemetryId: UptimePage.Overview,
-    headerProps: {
-      showDatePicker: true,
-      showTabs: true,
+    pageHeader: {
+      pageTitle: MONITORING_OVERVIEW_LABEL,
+      rightSideItems: [<UptimeDatePicker />],
     },
   },
 ];
@@ -97,31 +140,37 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC = () => {
+  const {
+    services: { observability },
+  } = useKibana<ClientPluginsStart>();
+  const PageTemplateComponent = observability.navigation.PageTemplate;
+
+  const StyledPageTemplateComponent = styled(PageTemplateComponent)`
+    .euiPageHeaderContent > .euiFlexGroup {
+      flex-wrap: wrap;
+    }
+  `;
+
   return (
-    <>
-      {/* Independent page header route that matches all paths and passes appropriate header props */}
-      {/* Prevents the header from being remounted on route changes */}
-      <Route
-        path={[...Routes.map((route) => route.path)]}
-        exact={true}
-        render={({ match }: RouteComponentProps) => {
-          const routeProps: RouteProps | undefined = Routes.find(
-            (route: RouteProps) => route?.path === match?.path
-          );
-          return routeProps?.headerProps && <PageHeader {...routeProps?.headerProps} />;
-        }}
-      />
-      <Switch>
-        {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
+    <Switch>
+      {Routes.map(
+        ({ title, path, component: RouteComponent, dataTestSubj, telemetryId, pageHeader }) => (
           <Route path={path} key={telemetryId} exact={true}>
             <div data-test-subj={dataTestSubj}>
+              <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <RouteComponent />
+              {pageHeader ? (
+                <StyledPageTemplateComponent pageHeader={pageHeader}>
+                  <RouteComponent />
+                </StyledPageTemplateComponent>
+              ) : (
+                <RouteComponent />
+              )}
             </div>
           </Route>
-        ))}
-        <Route component={NotFoundPage} />
-      </Switch>
-    </>
+        )
+      )}
+      <Route component={NotFoundPage} />
+    </Switch>
   );
 };

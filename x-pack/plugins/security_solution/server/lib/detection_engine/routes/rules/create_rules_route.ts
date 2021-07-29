@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -12,20 +14,19 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
-import { getIndexExists } from '../../index/get_index_exists';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  ruleDataClient?: RuleDataClient | null // TODO: Use this for RAC (otherwise delete it)
 ): void => {
   router.post(
     {
@@ -44,18 +45,18 @@ export const createRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const rulesClient = context.alerting?.getRulesClient();
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
-            alertsClient,
+            rulesClient,
             ruleId: request.body.rule_id,
             id: undefined,
           });
@@ -78,7 +79,7 @@ export const createRulesRoute = (
         throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
-          clusterClient.callAsCurrentUser,
+          esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
         if (!indexExists) {
@@ -91,16 +92,13 @@ export const createRulesRoute = (
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        /**
-         * TODO: Remove this use of `as` by utilizing the proper type
-         */
-        const createdRule = (await alertsClient.create({
+        const createdRule = await rulesClient.create({
           data: internalRule,
-        })) as Alert<RuleTypeParams>;
+        });
 
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,
-          alertsClient,
+          rulesClient,
           savedObjectsClient,
           enabled: createdRule.enabled,
           actions: request.body.actions,

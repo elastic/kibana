@@ -6,7 +6,7 @@
  */
 
 import { getPieVisualization } from './visualization';
-import { PieVisualizationState } from './types';
+import type { PieVisualizationState } from '../../common/expressions';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 jest.mock('../id_generator');
@@ -17,7 +17,7 @@ const pieVisualization = getPieVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
 });
 
-function exampleState(): PieVisualizationState {
+function getExampleState(): PieVisualizationState {
   return {
     shape: 'pie',
     layers: [
@@ -38,9 +38,39 @@ function exampleState(): PieVisualizationState {
 describe('pie_visualization', () => {
   describe('#getErrorMessages', () => {
     it('returns undefined if no error is raised', () => {
-      const error = pieVisualization.getErrorMessages(exampleState());
+      const error = pieVisualization.getErrorMessages(getExampleState());
 
       expect(error).not.toBeDefined();
+    });
+  });
+  describe('#setDimension', () => {
+    it('returns expected state', () => {
+      const prevState: PieVisualizationState = {
+        layers: [
+          {
+            groups: ['a'],
+            layerId: LAYER_ID,
+            numberDisplay: 'percent',
+            categoryDisplay: 'default',
+            legendDisplay: 'default',
+            nestedLegend: false,
+            metric: undefined,
+          },
+        ],
+        shape: 'donut',
+      };
+      const setDimensionResult = pieVisualization.setDimension({
+        prevState,
+        columnId: 'x',
+        layerId: LAYER_ID,
+        groupId: 'a',
+      });
+
+      expect(setDimensionResult).toEqual(
+        expect.objectContaining({
+          shape: 'donut',
+        })
+      );
     });
   });
 });

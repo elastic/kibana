@@ -8,16 +8,14 @@
 import { DocLinksStart } from 'kibana/public';
 
 export class AsyncSearchIntroDocumentation {
-  private docsBasePath: string = '';
+  private docUrl: string = '';
 
   constructor(docs: DocLinksStart) {
-    const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docs;
-    const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
-    // TODO: There should be Kibana documentation link about Search Sessions in Kibana
-    this.docsBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
+    const { links } = docs;
+    this.docUrl = links.search.sessions;
   }
 
   public getElasticsearchDocLink() {
-    return `${this.docsBasePath}/async-search-intro.html`;
+    return `${this.docUrl}`;
   }
 }

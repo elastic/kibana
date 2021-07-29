@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 import { Query } from '../../../../../../src/plugins/data/common';
 
 export interface GeoContainmentAlertParams extends AlertTypeParams {

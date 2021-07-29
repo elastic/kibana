@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -35,6 +35,7 @@ describe('BoostItemContent', () => {
     const boost = {
       factor: 2,
       type: 'value' as BoostType,
+      value: [''],
     };
 
     const wrapper = shallow(<BoostItemContent boost={boost} index={3} name="foo" />);
@@ -85,7 +86,7 @@ describe('BoostItemContent', () => {
     expect(actions.updateBoostFactor).toHaveBeenCalledWith('foo', 3, 2);
   });
 
-  it("will delete the current boost if the 'Delete Boost' button is clicked", () => {
+  it("will delete the current boost if the 'Delete boost' button is clicked", () => {
     const boost = {
       factor: 8,
       type: 'proximity' as BoostType,

@@ -62,28 +62,28 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     it('should render kibanaBaseUrl as non-empty string since configured', async () => {
       const actionResponse = await supertest
-        .post(`${getUrlPrefix(Spaces[0].id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces[0].id)}/api/actions/connector`)
         .set('kbn-xsrf', 'test')
         .send({
           name: 'testing context variable expansion',
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           secrets: {
             webhookUrl: slackSimulatorURL,
           },
         });
       expect(actionResponse.status).to.eql(200);
       const createdAction = actionResponse.body;
-      objectRemover.add(Spaces[0].id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces[0].id, createdAction.id, 'connector', 'actions');
 
       const varsTemplate = 'kibanaBaseUrl: "{{kibanaBaseUrl}}"';
 
       const alertResponse = await supertest
-        .post(`${getUrlPrefix(Spaces[0].id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces[0].id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
             name: 'testing context variable kibanaBaseUrl',
-            alertTypeId: 'test.patternFiring',
+            rule_type_id: 'test.patternFiring',
             params: {
               pattern: { instance: [true, true] },
             },
@@ -100,7 +100,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(alertResponse.status).to.eql(200);
       const createdAlert = alertResponse.body;
-      objectRemover.add(Spaces[0].id, createdAlert.id, 'alert', 'alerts');
+      objectRemover.add(Spaces[0].id, createdAlert.id, 'rule', 'alerting');
 
       const body = await retry.try(async () =>
         waitForActionBody(slackSimulatorURL, createdAlert.id)

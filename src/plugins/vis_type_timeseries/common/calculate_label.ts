@@ -9,7 +9,8 @@
 import { includes, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { lookup } from './agg_lookup';
-import { MetricsItemsSchema, SanitizedFieldType } from './types';
+import { Metric, SanitizedFieldType } from './types';
+import { extractFieldLabel } from './fields_utils';
 
 const paths = [
   'cumulative_sum',
@@ -26,14 +27,11 @@ const paths = [
   'positive_only',
 ];
 
-export const extractFieldLabel = (fields: SanitizedFieldType[], name: string) => {
-  return fields.find((f) => f.name === name)?.label ?? name;
-};
-
 export const calculateLabel = (
-  metric: MetricsItemsSchema,
-  metrics: MetricsItemsSchema[] = [],
-  fields: SanitizedFieldType[] = []
+  metric: Metric,
+  metrics: Metric[] = [],
+  fields: SanitizedFieldType[] = [],
+  isThrowErrorOnFieldNotFound: boolean = true
 ): string => {
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
@@ -71,7 +69,7 @@ export const calculateLabel = (
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
       defaultMessage: 'Counter Rate of {field}',
-      values: { field: extractFieldLabel(fields, metric.field!) },
+      values: { field: extractFieldLabel(fields, metric.field!, isThrowErrorOnFieldNotFound) },
     });
   }
   if (metric.type === 'static') {
@@ -115,7 +113,7 @@ export const calculateLabel = (
     defaultMessage: '{lookupMetricType} of {metricField}',
     values: {
       lookupMetricType: lookup[metric.type],
-      metricField: extractFieldLabel(fields, metric.field!),
+      metricField: extractFieldLabel(fields, metric.field!, isThrowErrorOnFieldNotFound),
     },
   });
 };

@@ -25,7 +25,6 @@ import { ColorPicker } from '../../../../../charts/public';
 
 interface Props {
   item: LegendItem;
-  legendId: string;
   selected: boolean;
   canFilter: boolean;
   anchorPosition: EuiPopoverProps['anchorPosition'];
@@ -39,7 +38,6 @@ interface Props {
 
 const VisLegendItemComponent = ({
   item,
-  legendId,
   selected,
   canFilter,
   anchorPosition,
@@ -150,7 +148,6 @@ const VisLegendItemComponent = ({
       {canFilter && renderFilterBar()}
 
       <ColorPicker
-        id={legendId}
         label={item.label}
         color={getColor(item.label)}
         onChange={(c, e) => setColor(item.label, c, e)}

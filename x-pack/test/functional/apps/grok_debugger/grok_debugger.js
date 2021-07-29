@@ -11,11 +11,11 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
 
   const PageObjects = getPageObjects(['grokDebugger']);
-  // https://github.com/elastic/kibana/issues/84440
+  // FLAKY: https://github.com/elastic/kibana/issues/84440
   describe.skip('grok debugger app', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       // Increase window height to ensure "Simulate" button is shown above the
       // fold. Otherwise it can't be clicked by the browser driver.
       await browser.setWindowSize(1600, 1000);

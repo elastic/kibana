@@ -15,7 +15,7 @@ import { RouteDependencies } from '../../../types';
 export const registerFetchRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
@@ -23,16 +23,18 @@ export const registerFetchRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+
       try {
         const {
-          follower_indices: followerIndices,
-        } = await context.crossClusterReplication!.client.callAsCurrentUser('ccr.info', {
-          id: '_all',
-        });
+          body: { follower_indices: followerIndices },
+        } = await client.asCurrentUser.ccr.followInfo({ index: '_all' });
 
         const {
-          follow_stats: { indices: followerIndicesStats },
-        } = await context.crossClusterReplication!.client.callAsCurrentUser('ccr.stats');
+          body: {
+            follow_stats: { indices: followerIndicesStats },
+          },
+        } = await client.asCurrentUser.ccr.stats();
 
         const followerIndicesStatsMap = followerIndicesStats.reduce((map: any, stats: any) => {
           map[stats.index] = stats;
@@ -51,12 +53,8 @@ export const registerFetchRoute = ({
             indices: deserializeListFollowerIndices(collatedFollowerIndices),
           },
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

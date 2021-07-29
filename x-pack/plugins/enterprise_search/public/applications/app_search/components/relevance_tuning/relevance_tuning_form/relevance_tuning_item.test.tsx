@@ -9,22 +9,22 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
-import { BoostIcon } from '../boost_icon';
+import { BoostIcon, ValueBadge } from '../components';
 import { Boost, BoostType, SearchField } from '../types';
-import { ValueBadge } from '../value_badge';
 
 import { RelevanceTuningItem } from './relevance_tuning_item';
 
 describe('RelevanceTuningItem', () => {
   const props = {
     name: 'foo',
-    type: 'text' as SchemaTypes,
+    type: SchemaType.Text,
     boosts: [
       {
         factor: 2,
         type: BoostType.Value,
+        value: [''],
       },
     ],
     field: {
@@ -54,6 +54,7 @@ describe('RelevanceTuningItem', () => {
           {
             factor: 2,
             type: BoostType.Value,
+            value: [''],
           },
           {
             factor: 3,

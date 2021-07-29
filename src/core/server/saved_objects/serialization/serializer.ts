@@ -39,14 +39,35 @@ export class SavedObjectsSerializer {
    * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
   public isRawSavedObject(doc: SavedObjectsRawDoc, options: SavedObjectsRawDocParseOptions = {}) {
+    try {
+      this.checkIsRawSavedObject(doc, options);
+      return true;
+    } catch (error) {
+      // do nothing
+    }
+    return false;
+  }
+
+  private checkIsRawSavedObject(
+    doc: SavedObjectsRawDoc,
+    options: SavedObjectsRawDocParseOptions = {}
+  ) {
     const { namespaceTreatment = 'strict' } = options;
     const { _id, _source } = doc;
     const { type, namespace } = _source;
     if (!type) {
-      return false;
+      throw new Error(`Raw document '${_id}' is missing _source.type field`);
     }
-    const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id, namespaceTreatment);
-    return idMatchesPrefix && _source.hasOwnProperty(type);
+    const { idMatchesPrefix, prefix } = this.parseIdPrefix(
+      namespace,
+      type,
+      _id,
+      namespaceTreatment
+    );
+    if (!idMatchesPrefix) {
+      throw new Error(`Raw document '${_id}' does not start with expected prefix '${prefix}'`);
+    }
+    return idMatchesPrefix;
   }
 
   /**
@@ -55,10 +76,12 @@ export class SavedObjectsSerializer {
    * @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
    * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
-  public rawToSavedObject(
+  public rawToSavedObject<T = unknown>(
     doc: SavedObjectsRawDoc,
     options: SavedObjectsRawDocParseOptions = {}
-  ): SavedObjectSanitizedDoc {
+  ): SavedObjectSanitizedDoc<T> {
+    this.checkIsRawSavedObject(doc, options); // throws a descriptive error if the document is not a saved object
+
     const { namespaceTreatment = 'strict' } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
     const {

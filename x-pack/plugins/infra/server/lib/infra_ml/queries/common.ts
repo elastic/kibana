@@ -22,6 +22,14 @@ export const createJobIdFilters = (jobId: string) => [
   },
 ];
 
+export const createJobIdsQuery = (query: string) => [
+  {
+    wildcard: {
+      job_id: `*${query}*`,
+    },
+  },
+];
+
 export const createJobIdsFilters = (jobIds: string[]) => [
   {
     terms: {

@@ -7,9 +7,33 @@
 
 import datemath from '@elastic/datemath';
 
-export function getAbsoluteTime(range: string, opts = {}) {
+export function getAbsoluteTime(range: string, opts: Parameters<typeof datemath.parse>[1] = {}) {
   const parsed = datemath.parse(range, opts);
   if (parsed) {
     return parsed.valueOf();
   }
+}
+
+export function getAbsoluteDateRange({
+  rangeFrom,
+  rangeTo,
+}: {
+  rangeFrom?: string;
+  rangeTo?: string;
+}) {
+  if (!rangeFrom || !rangeTo) {
+    return { start: undefined, end: undefined };
+  }
+
+  const absoluteStart = getAbsoluteTime(rangeFrom);
+  const absoluteEnd = getAbsoluteTime(rangeTo, { roundUp: true });
+
+  if (!absoluteStart || !absoluteEnd) {
+    throw new Error('Could not parse date range');
+  }
+
+  return {
+    start: new Date(absoluteStart).toISOString(),
+    end: new Date(absoluteEnd).toISOString(),
+  };
 }

@@ -25,16 +25,22 @@ export declare enum ES_FIELD_TYPES
 |  BYTE | <code>&quot;byte&quot;</code> |  |
 |  DATE | <code>&quot;date&quot;</code> |  |
 |  DATE\_NANOS | <code>&quot;date_nanos&quot;</code> |  |
+|  DATE\_RANGE | <code>&quot;date_range&quot;</code> |  |
 |  DOUBLE | <code>&quot;double&quot;</code> |  |
+|  DOUBLE\_RANGE | <code>&quot;double_range&quot;</code> |  |
 |  FLOAT | <code>&quot;float&quot;</code> |  |
+|  FLOAT\_RANGE | <code>&quot;float_range&quot;</code> |  |
 |  GEO\_POINT | <code>&quot;geo_point&quot;</code> |  |
 |  GEO\_SHAPE | <code>&quot;geo_shape&quot;</code> |  |
 |  HALF\_FLOAT | <code>&quot;half_float&quot;</code> |  |
 |  HISTOGRAM | <code>&quot;histogram&quot;</code> |  |
 |  INTEGER | <code>&quot;integer&quot;</code> |  |
+|  INTEGER\_RANGE | <code>&quot;integer_range&quot;</code> |  |
 |  IP | <code>&quot;ip&quot;</code> |  |
+|  IP\_RANGE | <code>&quot;ip_range&quot;</code> |  |
 |  KEYWORD | <code>&quot;keyword&quot;</code> |  |
 |  LONG | <code>&quot;long&quot;</code> |  |
+|  LONG\_RANGE | <code>&quot;long_range&quot;</code> |  |
 |  MURMUR3 | <code>&quot;murmur3&quot;</code> |  |
 |  NESTED | <code>&quot;nested&quot;</code> |  |
 |  OBJECT | <code>&quot;object&quot;</code> |  |
@@ -44,4 +50,5 @@ export declare enum ES_FIELD_TYPES
 |  TEXT | <code>&quot;text&quot;</code> |  |
 |  TOKEN\_COUNT | <code>&quot;token_count&quot;</code> |  |
 |  UNSIGNED\_LONG | <code>&quot;unsigned_long&quot;</code> |  |
+|  VERSION | <code>&quot;version&quot;</code> |  |
 

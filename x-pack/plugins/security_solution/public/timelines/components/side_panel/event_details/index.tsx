@@ -5,16 +5,38 @@
  * 2.0.
  */
 
-import { some } from 'lodash/fp';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import { find, some } from 'lodash/fp';
+import {
+  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
+import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
+import {
+  ISOLATE_HOST,
+  UNISOLATE_HOST,
+} from '../../../../detections/components/host_isolation/translations';
+import { ALERT_DETAILS } from './translations';
+import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_isolate_privileges';
+import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
+import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
+import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { TimelineEventsDetailsItem } from '../../../../../common';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -25,10 +47,24 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
+      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 50px`};
     }
   }
 `;
+
+const getFieldValue = (
+  {
+    category,
+    field,
+  }: {
+    category: string;
+    field: string;
+  },
+  data: TimelineEventsDetailsItem[] | null
+) => {
+  const currentField = find({ category, field }, data)?.values;
+  return currentField && currentField.length > 0 ? currentField[0] : '';
+};
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -56,7 +92,98 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
+  const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
+
+  const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
+    'isolateHost'
+  );
+
+  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(
+    false
+  );
+
+  const showAlertDetails = useCallback(() => {
+    setIsHostIsolationPanel(false);
+    setIsIsolateActionSuccessBannerVisible(false);
+  }, []);
+
+  const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
+  const showHostIsolationPanel = useCallback((action) => {
+    if (action === 'isolateHost' || action === 'unisolateHost') {
+      setIsHostIsolationPanel(true);
+      setIsolateAction(action);
+    }
+  }, []);
+
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
+
+  const isEndpointAlert = useMemo(() => {
+    return endpointAlertCheck({ data: detailsData || [] });
+  }, [detailsData]);
+
+  const ruleName = useMemo(
+    () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
+    [detailsData]
+  );
+
+  const agentId = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+    [detailsData]
+  );
+
+  const hostOsFamily = useMemo(
+    () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
+    [detailsData]
+  );
+
+  const agentVersion = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.version' }, detailsData),
+    [detailsData]
+  );
+
+  const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [
+    detailsData,
+  ]);
+
+  const hostName = useMemo(
+    () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
+    [detailsData]
+  );
+
+  const isolationSupported = isIsolationSupported({
+    osName: hostOsFamily,
+    version: agentVersion,
+  });
+
+  const backToAlertDetailsLink = useMemo(() => {
+    return (
+      <>
+        <EuiButtonEmpty
+          iconType="arrowLeft"
+          iconSide="left"
+          flush="left"
+          onClick={() => showAlertDetails()}
+        >
+          <EuiText size="xs">
+            <p>{ALERT_DETAILS}</p>
+          </EuiText>
+        </EuiButtonEmpty>
+        <EuiTitle>
+          <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>
+        </EuiTitle>
+      </>
+    );
+  }, [showAlertDetails, isolateAction]);
+
+  const caseDetailsRefresh = useWithCaseDetailsRefresh();
+
+  const handleIsolationActionSuccess = useCallback(() => {
+    setIsIsolateActionSuccessBannerVisible(true);
+    // If a case details refresh ref is defined, then refresh actions and comments
+    if (caseDetailsRefresh) {
+      caseDetailsRefresh.refreshUserActionsAndComments();
+    }
+  }, [caseDetailsRefresh]);
 
   if (!expandedEvent?.eventId) {
     return null;
@@ -65,25 +192,58 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   return isFlyoutView ? (
     <>
       <EuiFlyoutHeader hasBorder>
-        <ExpandableEventTitle isAlert={isAlert} loading={loading} />
+        {isHostIsolationPanelOpen ? (
+          backToAlertDetailsLink
+        ) : (
+          <ExpandableEventTitle isAlert={isAlert} loading={loading} ruleName={ruleName} />
+        )}
       </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody>
-        <ExpandableEvent
-          browserFields={browserFields}
-          detailsData={detailsData}
-          event={expandedEvent}
-          isAlert={isAlert}
-          loading={loading}
-          timelineId={timelineId}
-          timelineTabType="flyout"
+      {isIsolateActionSuccessBannerVisible && (
+        <EndpointIsolateSuccess
+          hostName={hostName}
+          alertId={alertId}
+          isolateAction={isolateAction}
         />
+      )}
+      <StyledEuiFlyoutBody>
+        {isHostIsolationPanelOpen ? (
+          <HostIsolationPanel
+            details={detailsData}
+            cancelCallback={showAlertDetails}
+            successCallback={handleIsolationActionSuccess}
+            isolateAction={isolateAction}
+          />
+        ) : (
+          <ExpandableEvent
+            browserFields={browserFields}
+            detailsData={detailsData}
+            event={expandedEvent}
+            isAlert={isAlert}
+            loading={loading}
+            timelineId={timelineId}
+            timelineTabType="flyout"
+          />
+        )}
       </StyledEuiFlyoutBody>
+      {isIsolationAllowed &&
+        isEndpointAlert &&
+        isolationSupported &&
+        isHostIsolationPanelOpen === false && (
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        )}
     </>
   ) : (
     <>
       <ExpandableEventTitle
         isAlert={isAlert}
         loading={loading}
+        ruleName={ruleName}
         handleOnEventClosed={handleOnEventClosed}
       />
       <EuiSpacer size="m" />

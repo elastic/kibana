@@ -6,8 +6,7 @@
  */
 
 import './toolbar.scss';
-import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -16,12 +15,12 @@ import {
   EuiRange,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { Position } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { Position } from '@elastic/charts';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState, SharedPieLayerState } from './types';
+import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
+import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
 
 const numberOptions: Array<{
@@ -125,7 +124,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     return null;
   }
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
@@ -183,12 +182,12 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         >
           <DecimalPlaceSlider
             value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={(value) =>
+            setValue={(value) => {
               setState({
                 ...state,
                 layers: [{ ...layer, percentDecimals: value }],
-              })
-            }
+              });
+            }}
           />
         </EuiFormRow>
       </ToolbarPopover>
@@ -233,19 +232,23 @@ const DecimalPlaceSlider = ({
   value: number;
   setValue: (value: number) => void;
 }) => {
-  const [localValue, setLocalValue] = useState(value);
-  useDebounce(() => setValue(localValue), 256, [localValue]);
-
+  const { inputValue, handleInputChange } = useDebouncedValue(
+    {
+      value,
+      onChange: setValue,
+    },
+    { allowFalsyValue: true }
+  );
   return (
     <EuiRange
       data-test-subj="indexPattern-dimension-formatDecimals"
-      value={localValue}
+      value={inputValue}
       min={0}
       max={10}
       showInput
       compressed
       onChange={(e) => {
-        setLocalValue(Number(e.currentTarget.value));
+        handleInputChange(Number(e.currentTarget.value));
       }}
     />
   );

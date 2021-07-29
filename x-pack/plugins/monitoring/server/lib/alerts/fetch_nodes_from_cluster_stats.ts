@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 
@@ -23,20 +24,20 @@ function formatNode(
 }
 
 export async function fetchNodesFromClusterStats(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string
 ): Promise<AlertClusterStatsNodes[]> {
   const params = {
     index,
-    filterPath: ['aggregations.clusters.buckets'],
+    filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       sort: [
         {
           timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+            order: 'desc' as const,
+            unmapped_type: 'long' as const,
           },
         },
       ],
@@ -70,8 +71,8 @@ export async function fetchNodesFromClusterStats(
                 sort: [
                   {
                     timestamp: {
-                      order: 'desc',
-                      unmapped_type: 'long',
+                      order: 'desc' as const,
+                      unmapped_type: 'long' as const,
                     },
                   },
                 ],
@@ -87,9 +88,13 @@ export async function fetchNodesFromClusterStats(
     },
   };
 
-  const response = await callCluster('search', params);
-  const nodes = [];
-  const clusterBuckets = response.aggregations.clusters.buckets;
+  const { body: response } = await esClient.search(params);
+  const nodes: AlertClusterStatsNodes[] = [];
+  // @ts-expect-error declare type for aggregations explicitly
+  const clusterBuckets = response.aggregations?.clusters?.buckets;
+  if (!clusterBuckets?.length) {
+    return nodes;
+  }
   for (const clusterBucket of clusterBuckets) {
     const clusterUuid = clusterBucket.key;
     const hits = clusterBucket.top.hits.hits;

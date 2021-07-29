@@ -15,12 +15,20 @@ export const plugin = (initContext: PluginInitializerContext) => new TaskManager
 export {
   TaskInstance,
   ConcreteTaskInstance,
+  EphemeralTask,
   TaskRunCreatorFunction,
   TaskStatus,
   RunContext,
 } from './task';
 
-export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
+export { asInterval } from './lib/intervals';
+export {
+  isUnrecoverableError,
+  throwUnrecoverableError,
+  isEphemeralTaskRejectedDueToCapacityError,
+} from './task_running';
+export { RunNowResult } from './task_scheduling';
+export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 
 export {
   TaskManagerPlugin as TaskManager,
@@ -31,19 +39,31 @@ export {
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
   deprecations: () => [
-    (settings, fromPath, log) => {
+    (settings, fromPath, addDeprecation) => {
       const taskManager = get(settings, fromPath);
       if (taskManager?.index) {
-        log(
-          `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
-        );
+        addDeprecation({
+          documentationUrl: 'https://ela.st/kbn-remove-legacy-multitenancy',
+          message: `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
+          correctiveActions: {
+            manualSteps: [
+              `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
+              `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
+            ],
+          },
+        });
       }
       if (taskManager?.max_workers > MAX_WORKERS_LIMIT) {
-        log(
-          `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated. Values greater than ${MAX_WORKERS_LIMIT} will not be supported starting in 8.0.`
-        );
+        addDeprecation({
+          message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated. Values greater than ${MAX_WORKERS_LIMIT} will not be supported starting in 8.0.`,
+          correctiveActions: {
+            manualSteps: [
+              `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +
+                `Replace "${fromPath}.max_workers: ${taskManager?.max_workers}" with (${MAX_WORKERS_LIMIT}).`,
+            ],
+          },
+        });
       }
-      return settings;
     },
   ],
 };

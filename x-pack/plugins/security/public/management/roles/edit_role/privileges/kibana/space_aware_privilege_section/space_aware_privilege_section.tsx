@@ -9,24 +9,28 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiErrorBoundary,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../../../../spaces/public';
-import { Role, isRoleReserved } from '../../../../../../../common/model';
-import { RoleValidator } from '../../../validate_role';
-import { PrivilegeSpaceTable } from './privilege_space_table';
-import { PrivilegeSpaceForm } from './privilege_space_form';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import { isRoleReserved } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
+import type { RoleValidator } from '../../../validate_role';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
-import { KibanaPrivileges } from '../../../../model';
+import { PrivilegeSpaceForm } from './privilege_space_form';
+import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
@@ -37,6 +41,7 @@ interface Props {
   canCustomizeSubFeaturePrivileges: boolean;
   validator: RoleValidator;
   uiCapabilities: Capabilities;
+  spacesApiUi: SpacesApiUi;
 }
 
 interface State {
@@ -194,7 +199,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       <EuiButton
         color="primary"
         onClick={this.addSpacePrivilege}
-        iconType={'plusInCircleFilled'}
+        iconType={'plusInCircle'}
         data-test-subj={'addSpacePrivilegeButton'}
         isDisabled={!hasAvailableSpaces || !this.props.editable}
       >
@@ -215,6 +220,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
         spaces={this.getDisplaySpaces()}
         kibanaPrivileges={this.props.kibanaPrivileges}
         canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
+        spacesApiUi={this.props.spacesApiUi}
       />
     );
 

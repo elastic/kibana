@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   ScaleType,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Position,
   Axis,
   BarSeries,
@@ -68,6 +68,10 @@ export const CriterionPreview: React.FC<Props> = ({
     const criteria = field && comparator && value ? [{ field, comparator, value }] : [];
     const params = {
       criteria,
+      count: {
+        comparator: alertParams.count.comparator,
+        value: alertParams.count.value,
+      },
       timeSize: alertParams.timeSize,
       timeUnit: alertParams.timeUnit,
       groupBy: alertParams.groupBy,
@@ -78,7 +82,14 @@ export const CriterionPreview: React.FC<Props> = ({
     } catch (error) {
       return null;
     }
-  }, [alertParams.timeSize, alertParams.timeUnit, alertParams.groupBy, chartCriterion]);
+  }, [
+    alertParams.timeSize,
+    alertParams.timeUnit,
+    alertParams.groupBy,
+    alertParams.count.comparator,
+    alertParams.count.value,
+    chartCriterion,
+  ]);
 
   // Check for the existence of properties that are necessary for a meaningful chart.
   if (chartAlertParams === null || chartAlertParams.criteria.length === 0) return null;
@@ -238,7 +249,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           {showThreshold && threshold && threshold.value ? (
             <LineAnnotation
               id={`threshold-line`}
-              domainType={AnnotationDomainTypes.YDomain}
+              domainType={AnnotationDomainType.YDomain}
               dataValues={[{ dataValue: threshold.value }]}
               style={{
                 line: {

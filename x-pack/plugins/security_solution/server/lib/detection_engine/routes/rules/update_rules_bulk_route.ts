@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { updateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
@@ -39,11 +39,11 @@ export const updateRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
-      if (!siemClient || !alertsClient) {
+      if (!siemClient || !rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -71,7 +71,7 @@ export const updateRulesBulkRoute = (
             throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const rule = await updateRules({
-              alertsClient,
+              rulesClient,
               savedObjectsClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               ruleUpdate: payloadRule,
@@ -79,7 +79,7 @@ export const updateRulesBulkRoute = (
             if (rule != null) {
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: rule.id,
-                alertsClient,
+                rulesClient,
                 savedObjectsClient,
                 enabled: payloadRule.enabled ?? true,
                 actions: payloadRule.actions,

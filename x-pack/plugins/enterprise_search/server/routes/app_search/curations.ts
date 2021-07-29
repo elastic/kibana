@@ -31,6 +31,23 @@ export function registerCurationsRoutes({
     })
   );
 
+  router.post(
+    {
+      path: '/api/app_search/engines/{engineName}/curations',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+        body: schema.object({
+          queries: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/collection',
+    })
+  );
+
   router.delete(
     {
       path: '/api/app_search/engines/{engineName}/curations/{curationId}',
@@ -38,6 +55,45 @@ export function registerCurationsRoutes({
         params: schema.object({
           engineName: schema.string(),
           curationId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.get(
+    {
+      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        query: schema.object({
+          skip_record_analytics: schema.string(),
+        }),
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+        body: schema.object({
+          query: schema.string(),
+          queries: schema.arrayOf(schema.string()),
+          promoted: schema.arrayOf(schema.string()),
+          hidden: schema.arrayOf(schema.string()),
         }),
       },
     },

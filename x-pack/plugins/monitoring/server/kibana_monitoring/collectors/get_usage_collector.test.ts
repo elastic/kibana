@@ -59,7 +59,8 @@ jest.mock('./lib/fetch_license_type', () => ({
 }));
 
 describe('getMonitoringUsageCollector', () => {
-  const esClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const esClient = elasticsearchServiceMock.createClusterClient();
+  const getEsClient = () => esClient;
   const config: any = {
     ui: {
       ccs: {
@@ -72,7 +73,7 @@ describe('getMonitoringUsageCollector', () => {
     const usageCollection: any = {
       makeUsageCollector: jest.fn(),
     };
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
 
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
 
@@ -122,7 +123,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
@@ -149,7 +150,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
@@ -169,7 +170,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 

@@ -23,7 +23,7 @@ import {
   CreateIndexPatternWizardWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
-import { IndexPatternManagmentContext, MlCardState } from '../types';
+import { IndexPatternManagmentContext } from '../types';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -37,8 +37,7 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
-  params: ManagementAppMountParams,
-  getMlCardState: () => MlCardState
+  params: ManagementAppMountParams
 ) {
   const [
     { chrome, application, uiSettings, notifications, overlays, http, docLinks },
@@ -63,7 +62,6 @@ export async function mountManagementSection(
     indexPatternFieldEditor,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
-    getMlCardState,
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
   };
 

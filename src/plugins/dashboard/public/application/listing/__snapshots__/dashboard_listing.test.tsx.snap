@@ -25,6 +25,50 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create new dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              You can combine data views from any Kibana app into one dashboard and see everything in one place.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Install some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -32,68 +76,6 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     initialFilter="\\"search by title\\""
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -126,24 +108,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -168,6 +133,23 @@ exports[`after fetch hideWriteControls 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    emptyPrompt={
+      <EuiEmptyPrompt
+        body={
+          <p>
+            There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.
+          </p>
+        }
+        iconType="glasses"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            No dashboards to view
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -175,24 +157,6 @@ exports[`after fetch hideWriteControls 1`] = `
     initialFilter=""
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Looks like you don't have any dashboards."
-                id="dashboard.listing.noItemsMessage"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -225,24 +189,7 @@ exports[`after fetch hideWriteControls 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -271,6 +218,50 @@ exports[`after fetch initialFilter 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create new dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              You can combine data views from any Kibana app into one dashboard and see everything in one place.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Install some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -278,68 +269,6 @@ exports[`after fetch initialFilter 1`] = `
     initialFilter="testFilter"
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -372,24 +301,7 @@ exports[`after fetch initialFilter 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -417,6 +329,50 @@ exports[`after fetch renders all table rows 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create new dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              You can combine data views from any Kibana app into one dashboard and see everything in one place.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Install some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -424,68 +380,6 @@ exports[`after fetch renders all table rows 1`] = `
     initialFilter=""
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -518,24 +412,7 @@ exports[`after fetch renders all table rows 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -563,6 +440,50 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create new dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              You can combine data views from any Kibana app into one dashboard and see everything in one place.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Install some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -570,68 +491,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     initialFilter=""
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -664,24 +523,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -709,6 +551,50 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create new dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              You can combine data views from any Kibana app into one dashboard and see everything in one place.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Install some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -716,68 +602,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     initialFilter=""
     initialPageSize={20}
     listingLimit={1}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -810,23 +634,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;

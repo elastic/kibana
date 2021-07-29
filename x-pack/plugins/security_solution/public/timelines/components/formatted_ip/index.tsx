@@ -33,6 +33,9 @@ import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
 import { StatefulEventContext } from '../timeline/body/events/stateful_event_context';
 import { LinkAnchor } from '../../../common/components/links';
+import { SecurityPageName } from '../../../app/types';
+import { useFormatUrl, getNetworkDetailsUrl } from '../../../common/components/link_to';
+import { encodeIpv6 } from '../../../common/lib/helpers';
 
 const getUniqueId = ({
   contextId,
@@ -82,9 +85,10 @@ const NonDecoratedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, truncate, value }) => {
+}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value }) => {
   const key = useMemo(
     () =>
       `non-decorated-ip-draggable-wrapper-${getUniqueId({
@@ -101,19 +105,29 @@ const NonDecoratedIpComponent: React.FC<{
     [contextId, eventId, fieldName, value]
   );
 
+  const content = useMemo(
+    () =>
+      typeof value !== 'object'
+        ? getOrEmptyTagFromValue(value)
+        : getOrEmptyTagFromValue(tryStringify(value)),
+    [value]
+  );
+
   const render = useCallback(
     (dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
         </DragEffects>
-      ) : typeof value !== 'object' ? (
-        getOrEmptyTagFromValue(value)
       ) : (
-        getOrEmptyTagFromValue(tryStringify(value))
+        content
       ),
-    [value]
+    [content]
   );
+
+  if (!isDraggable) {
+    return content;
+  }
 
   return (
     <DraggableWrapper
@@ -136,6 +150,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   contextId,
   eventId,
   fieldName,
+  isDraggable,
   truncate,
 }) => {
   const key = `address-links-draggable-wrapper-${getUniqueId({
@@ -152,11 +167,13 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
 
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
+  const { formatUrl } = useFormatUrl(SecurityPageName.network);
+  const isInTimelineContext = address && eventContext?.tabType && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
-      if (address && eventContext?.timelineID && eventContext?.tabType) {
+      if (eventContext && isInTimelineContext) {
         const { tabType, timelineID } = eventContext;
         const updatedExpandedDetail: TimelineExpandedDetailType = {
           panelView: 'networkDetail',
@@ -181,7 +198,24 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         }
       }
     },
-    [dispatch, eventContext, address, fieldName]
+    [eventContext, isInTimelineContext, address, fieldName, dispatch]
+  );
+
+  const content = useMemo(
+    () => (
+      <Content field={fieldName} tooltipContent={fieldName}>
+        <LinkAnchor
+          href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(address))))}
+          data-test-subj="network-details"
+          // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+          // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the IP Overview page
+          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+        >
+          {address}
+        </LinkAnchor>
+      </Content>
+    ),
+    [address, fieldName, formatUrl, isInTimelineContext, openNetworkDetailsSidePanel]
   );
 
   const render = useCallback(
@@ -191,18 +225,14 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           <Provider dataProvider={dataProviderProp} />
         </DragEffects>
       ) : (
-        <Content field={fieldName} tooltipContent={address}>
-          <LinkAnchor
-            href="#"
-            data-test-subj="network-details"
-            onClick={openNetworkDetailsSidePanel}
-          >
-            {address}
-          </LinkAnchor>
-        </Content>
+        content
       ),
-    [address, dataProviderProp, openNetworkDetailsSidePanel, fieldName]
+    [dataProviderProp, content]
   );
+
+  if (!isDraggable) {
+    return content;
+  }
 
   return (
     <DraggableWrapper
@@ -221,6 +251,7 @@ interface AddressLinksProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   truncate?: boolean;
 }
 
@@ -229,6 +260,7 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   contextId,
   eventId,
   fieldName,
+  isDraggable,
   truncate,
 }) => {
   const uniqAddresses = useMemo(() => uniq(addresses), [addresses]);
@@ -242,10 +274,11 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
           contextId={contextId}
           eventId={eventId}
           fieldName={fieldName}
+          isDraggable={isDraggable}
           truncate={truncate}
         />
       )),
-    [contextId, eventId, fieldName, truncate, uniqAddresses]
+    [contextId, eventId, fieldName, isDraggable, truncate, uniqAddresses]
   );
 
   return <>{content}</>;
@@ -257,6 +290,7 @@ const AddressLinks = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.addresses, nextProps.addresses)
 );
@@ -265,9 +299,10 @@ const FormattedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, truncate, value }) => {
+}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value }) => {
   if (isString(value) && !isEmpty(value)) {
     try {
       const addresses = JSON.parse(value);
@@ -278,6 +313,7 @@ const FormattedIpComponent: React.FC<{
             contextId={contextId}
             eventId={eventId}
             fieldName={fieldName}
+            isDraggable={isDraggable}
             truncate={truncate}
           />
         );
@@ -292,6 +328,7 @@ const FormattedIpComponent: React.FC<{
         addresses={[value]}
         contextId={contextId}
         eventId={eventId}
+        isDraggable={isDraggable}
         fieldName={fieldName}
         truncate={truncate}
       />
@@ -302,6 +339,7 @@ const FormattedIpComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        isDraggable={isDraggable}
         truncate={truncate}
         value={value}
       />
@@ -315,6 +353,7 @@ export const FormattedIp = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.value, nextProps.value)
 );

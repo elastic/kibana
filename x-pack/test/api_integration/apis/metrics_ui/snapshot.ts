@@ -33,8 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('waffle nodes', () => {
     describe('6.6.0', () => {
       const { min, max } = DATES['6.6.0'].docker;
-      before(() => esArchiver.load('infra/6.6.0/docker'));
-      after(() => esArchiver.unload('infra/6.6.0/docker'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
 
       it('should basically work', async () => {
         const resp = fetchSnapshot({
@@ -80,8 +80,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('8.0.0', () => {
       const { min, max } = DATES['8.0.0'].logs_and_metrics;
-      before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
-      after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
+      before(() =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
+      after(() =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
 
       it("should use the id for the label when the name doesn't exist", async () => {
         const resp = fetchSnapshot({
@@ -151,8 +155,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('7.0.0', () => {
       const { min, max } = DATES['7.0.0'].hosts;
-      before(() => esArchiver.load('infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('infra/7.0.0/hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('should basically work', async () => {
         const resp = fetchSnapshot({
@@ -183,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.002794444444444445,
+                avg: 0.003341666666666667,
               },
             ]);
           }
@@ -218,7 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metrics');
             expect(firstNode.metrics[0]).to.have.property('timeseries');
-            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(58);
+            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(56);
             const rows = firstNode.metrics[0].timeseries?.rows;
             const rowInterval = (rows?.[1]?.timestamp || 0) - (rows?.[0]?.timestamp || 0);
             expect(rowInterval).to.equal(10000);
@@ -253,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metrics');
             expect(firstNode.metrics[0]).to.have.property('timeseries');
-            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(7);
+            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(5);
           }
         });
       });
@@ -294,7 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'custom_0',
               value: 0.0016,
               max: 0.0018333333333333333,
-              avg: 0.0013666666666666669,
+              avg: 0.00165,
             },
           ]);
         }
@@ -385,7 +389,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.002794444444444445,
+                avg: 0.003341666666666667,
               },
             ]);
             const secondNode = nodes[1] as any;
@@ -399,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'cpu',
                 value: 0.0032,
                 max: 0.0038333333333333336,
-                avg: 0.002794444444444445,
+                avg: 0.003341666666666667,
               },
             ]);
           }

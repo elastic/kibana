@@ -43,17 +43,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.eql({
           elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 },
-          kibanaSavedObjectsLoaded: 20,
+          kibanaSavedObjectsLoaded: 11,
         });
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
-        const { body: resp } = await es.search({
+        const { body: resp } = await es.search<{ timestamp: string }>({
           index: 'kibana_sample_data_flights',
         });
 
         const doc = resp.hits.hits[0];
-        const docMilliseconds = Date.parse(doc._source.timestamp);
+        const docMilliseconds = Date.parse(doc._source!.timestamp);
         const nowMilliseconds = Date.now();
         const delta = Math.abs(nowMilliseconds - docMilliseconds);
         expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 4);
@@ -66,12 +66,12 @@ export default function ({ getService }: FtrProviderContext) {
             .post(`/api/sample_data/flights?now=${nowString}`)
             .set('kbn-xsrf', 'kibana');
 
-          const { body: resp } = await es.search({
+          const { body: resp } = await es.search<{ timestamp: string }>({
             index: 'kibana_sample_data_flights',
           });
 
           const doc = resp.hits.hits[0];
-          const docMilliseconds = Date.parse(doc._source.timestamp);
+          const docMilliseconds = Date.parse(doc._source!.timestamp);
           const nowMilliseconds = Date.parse(nowString);
           const delta = Math.abs(nowMilliseconds - docMilliseconds);
           expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 4);

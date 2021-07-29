@@ -13,13 +13,14 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
+
+import { AppStateService } from './app_state';
 import type { ConfigType } from './config';
-import {
-  InsecureClusterService,
+import type {
   InsecureClusterServiceSetup,
   InsecureClusterServiceStart,
 } from './insecure_cluster_service';
-import { AppStateService } from './app_state';
+import { InsecureClusterService } from './insecure_cluster_service';
 
 export interface SecurityOssPluginSetup {
   insecureCluster: InsecureClusterServiceSetup;

@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import styled from 'styled-components';
 
 import { EuiStat, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -14,6 +15,12 @@ import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { TimelineKpiStrategyResponse } from '../../../../../common/search_strategy';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import * as i18n from './translations';
+
+const NoWrapEuiStat = styled(EuiStat)`
+  & .euiStat__description {
+    white-space: nowrap;
+  }
+`;
 
 export const TimelineKPIs = React.memo(
   ({ kpis, isLoading }: { kpis: TimelineKpiStrategyResponse | null; isLoading: boolean }) => {
@@ -40,9 +47,9 @@ export const TimelineKPIs = React.memo(
     }, [kpis, defaultNumberFormat]);
     return (
       <EuiFlexGroup wrap data-test-subj="siem-timeline-kpis">
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip position="left" content={formattedKpiToolTips.process}>
-            <EuiStat
+            <NoWrapEuiStat
               data-test-subj="siem-timeline-process-kpi"
               title={formattedKpis.process}
               description={i18n.PROCESS_KPI_TITLE}
@@ -51,9 +58,9 @@ export const TimelineKPIs = React.memo(
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip position="left" content={formattedKpiToolTips.user}>
-            <EuiStat
+            <NoWrapEuiStat
               data-test-subj="siem-timeline-user-kpi"
               title={formattedKpis.user}
               description={i18n.USER_KPI_TITLE}
@@ -62,9 +69,9 @@ export const TimelineKPIs = React.memo(
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip position="left" content={formattedKpiToolTips.host}>
-            <EuiStat
+            <NoWrapEuiStat
               data-test-subj="siem-timeline-host-kpi"
               title={formattedKpis.host}
               description={i18n.HOST_KPI_TITLE}
@@ -73,9 +80,9 @@ export const TimelineKPIs = React.memo(
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip position="left" content={formattedKpiToolTips.sourceIp}>
-            <EuiStat
+            <NoWrapEuiStat
               data-test-subj="siem-timeline-source-ip-kpi"
               title={formattedKpis.sourceIp}
               description={i18n.SOURCE_IP_KPI_TITLE}
@@ -84,9 +91,9 @@ export const TimelineKPIs = React.memo(
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 100 }}>
+        <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
           <EuiToolTip position="left" content={formattedKpiToolTips.destinationIp}>
-            <EuiStat
+            <NoWrapEuiStat
               data-test-subj="siem-timeline-destination-ip-kpi"
               title={formattedKpis.destinationIp}
               description={i18n.DESTINATION_IP_KPI_TITLE}

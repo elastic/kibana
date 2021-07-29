@@ -14,6 +14,7 @@ export interface RestoreSettings {
   indexSettings?: string;
   ignoreIndexSettings?: string[];
   ignoreUnavailable?: boolean;
+  includeAliases?: boolean;
 }
 
 export interface RestoreSettingsEs {
@@ -25,6 +26,7 @@ export interface RestoreSettingsEs {
   index_settings?: { [key: string]: any };
   ignore_index_settings?: string[];
   ignore_unavailable?: boolean;
+  include_aliases?: boolean;
 }
 
 export interface SnapshotRestore {

@@ -13,6 +13,8 @@ import dateMath from '@elastic/datemath';
 import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { RuntimeMappings } from '../../../../common/types/fields';
 
 export interface TimeRange {
   from: number;
@@ -25,10 +27,12 @@ export async function setFullTimeRange(
 ): Promise<GetTimeFieldRangeResponse> {
   try {
     const timefilter = getTimefilter();
+    const runtimeMappings = indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
     const resp = await ml.getTimeFieldRange({
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
       query,
+      ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
     });
     timefilter.setTime({
       from: moment(resp.start.epoch).toISOString(),

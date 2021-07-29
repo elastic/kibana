@@ -6,17 +6,16 @@
  */
 
 import uuid from 'uuid';
-import { LegacyAPICaller } from 'kibana/server';
-
-import { transformListItemToElasticQuery } from '../utils';
-import {
-  CreateEsBulkTypeSchema,
+import { ElasticsearchClient } from 'kibana/server';
+import type {
   DeserializerOrUndefined,
-  IndexEsListItemSchema,
   MetaOrUndefined,
   SerializerOrUndefined,
   Type,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { transformListItemToElasticQuery } from '../utils';
+import { CreateEsBulkTypeSchema, IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemsBulkOptions {
   deserializer: DeserializerOrUndefined;
@@ -24,7 +23,7 @@ export interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -38,7 +37,7 @@ export const createListItemsBulk = async ({
   deserializer,
   serializer,
   value,
-  callCluster,
+  esClient,
   listItemIndex,
   user,
   meta,
@@ -82,7 +81,7 @@ export const createListItemsBulk = async ({
     []
   );
   try {
-    await callCluster('bulk', {
+    await esClient.bulk({
       body,
       index: listItemIndex,
       refresh: 'wait_for',

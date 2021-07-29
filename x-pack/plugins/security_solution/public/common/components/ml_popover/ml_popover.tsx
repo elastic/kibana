@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiHeaderSectionItemButton,
+  EuiCallOut,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Dispatch, useCallback, useReducer, useState } from 'react';
@@ -27,6 +33,10 @@ import { useSecurityJobs } from './hooks/use_security_jobs';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 15px;
 `;
 
 PopoverContentsDiv.displayName = 'PopoverContentsDiv';
@@ -111,14 +121,19 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButtonEmpty
+          <EuiHeaderSectionItemButton
+            aria-expanded={isPopoverOpen}
+            aria-haspopup="true"
+            aria-label={i18n.ML_JOB_SETTINGS}
+            color="primary"
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            textProps={{ style: { fontSize: '1rem' } }}
           >
             {i18n.ML_JOB_SETTINGS}
-          </EuiButtonEmpty>
+          </EuiHeaderSectionItemButton>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -134,7 +149,11 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButtonEmpty
+          <EuiHeaderSectionItemButton
+            aria-expanded={isPopoverOpen}
+            aria-haspopup="true"
+            aria-label={i18n.ML_JOB_SETTINGS}
+            color="primary"
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
@@ -142,9 +161,10 @@ export const MlPopover = React.memo(() => {
               setIsPopoverOpen(!isPopoverOpen);
               dispatch({ type: 'refresh' });
             }}
+            textProps={{ style: { fontSize: '1rem' } }}
           >
             {i18n.ML_JOB_SETTINGS}
-          </EuiButtonEmpty>
+          </EuiHeaderSectionItemButton>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}

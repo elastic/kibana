@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Security Software Discovery using WMIC",
   "query": "process where event.type in (\"start\", \"process_started\") and\n   (process.name:\"wmic.exe\" or process.pe.original_file_name:\"wmic.exe\") and\n    process.args:\"/namespace:\\\\\\\\root\\\\SecurityCenter2\" and process.args:\"Get\"\n",
   "risk_score": 47,

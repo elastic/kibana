@@ -148,7 +148,7 @@ export const ACCESS_TOKEN_LABEL = i18n.translate(
 );
 
 export const ID_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.id.label', {
-  defaultMessage: 'ID',
+  defaultMessage: 'Source Identifier',
 });
 
 export const LEARN_CUSTOM_FEATURES_BUTTON = i18n.translate(
@@ -257,6 +257,13 @@ export const READY_TEXT = i18n.translate(
   }
 );
 
+export const SOURCE_SETTINGS_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.heading',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const SOURCE_SETTINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.settings.title',
   {
@@ -295,14 +302,36 @@ export const SOURCE_CONFIG_LINK = i18n.translate(
 export const SOURCE_REMOVE_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.remove.title',
   {
-    defaultMessage: 'Remove this source',
+    defaultMessage: 'Remove this content source',
   }
 );
 
 export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  'xpack.enterpriseSearch.workplaceSearch.sources.remove.description',
   {
-    defaultMessage: 'Edit content source connector settings to change.',
+    defaultMessage: 'This action cannot be undone.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsTitle',
+  {
+    defaultMessage: 'Sync Diagnostics',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsDescription',
+  {
+    defaultMessage:
+      'Retrieve relevant diagnostics data for troubleshooting active synchronization processes.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsButton',
+  {
+    defaultMessage: 'Download diagnostics data',
   }
 );
 
@@ -339,35 +368,6 @@ export const PRIVATE_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.private.link',
   {
     defaultMessage: 'Add a private content source',
-  }
-);
-
-export const PRIVATE_CAN_CREATE_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.title',
-  {
-    defaultMessage: 'Manage private content sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.title',
-  {
-    defaultMessage: 'Review Group Sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.description',
-  {
-    defaultMessage: 'Review the status of all sources shared with your Group.',
-  }
-);
-
-export const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.description',
-  {
-    defaultMessage:
-      'Review the status of all connected private sources, and manage private sources for your account.',
   }
 );
 
@@ -470,3 +470,10 @@ export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
       'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
   }
 );
+
+export const PERSONAL_DASHBOARD_SOURCE_ERROR = (error: string) =>
+  i18n.translate('xpack.enterpriseSearch.workplaceSearch.personalDashboardSourceError', {
+    defaultMessage:
+      'Could not connect the source, reach out to your admin for help. Error message: {error}',
+    values: { error },
+  });

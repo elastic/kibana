@@ -25,8 +25,9 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { FIELD_TYPES } from '../../../../common/field_types';
+import { KBN_FIELD_TYPES } from '../../../../../data/public';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
@@ -75,10 +76,11 @@ export const SplitByTermsUI = ({
       }),
     },
   ];
+  const fieldsSelector = getIndexPatternKey(indexPattern);
   const selectedDirectionOption = dirOptions.find((option) => {
     return model.terms_direction === option.value;
   });
-  const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
+  const selectedField = find(fields[fieldsSelector], ({ name }) => name === model.terms_field);
   const selectedFieldType = get(selectedField, 'type');
 
   if (
@@ -110,8 +112,7 @@ export const SplitByTermsUI = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('by')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.splits.terms.byLabel"
@@ -119,21 +120,18 @@ export const SplitByTermsUI = ({
                 description="This labels a field selector allowing the user to chose 'by' which field to group."
               />
             }
-          >
-            <FieldSelect
-              data-test-subj="groupByField"
-              indexPattern={indexPattern}
-              onChange={handleSelectChange('terms_field')}
-              value={model.terms_field}
-              fields={fields}
-              uiRestrictions={uiRestrictions}
-              type={'terms'}
-            />
-          </EuiFormRow>
+            data-test-subj="groupByField"
+            indexPattern={indexPattern}
+            onChange={handleSelectChange('terms_field')}
+            value={model.terms_field}
+            fields={fields}
+            uiRestrictions={uiRestrictions}
+            type={'terms'}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {selectedFieldType === FIELD_TYPES.STRING && (
+      {selectedFieldType === KBN_FIELD_TYPES.STRING && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
@@ -148,6 +146,7 @@ export const SplitByTermsUI = ({
               <EuiFieldText
                 value={model.terms_include}
                 onChange={handleTextChange('terms_include')}
+                data-test-subj="groupByInclude"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -164,6 +163,7 @@ export const SplitByTermsUI = ({
               <EuiFieldText
                 value={model.terms_exclude}
                 onChange={handleTextChange('terms_exclude')}
+                data-test-subj="groupByExclude"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -202,7 +202,7 @@ export const SplitByTermsUI = ({
               metrics={metrics}
               clearable={false}
               additionalOptions={[defaultCount, terms]}
-              fields={fields[indexPattern]}
+              fields={fields[fieldsSelector]}
               onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
               value={model.terms_order_by}
@@ -237,7 +237,7 @@ SplitByTermsUI.propTypes = {
   intl: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   fields: PropTypes.object,
   uiRestrictions: PropTypes.object,
   seriesQuantity: PropTypes.object,

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ListArraySchema } from '@kbn/securitysolution-io-ts-list-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { ListArraySchema, SearchEsListSchema } from '../../../common/schemas';
-
-import { encodeHitVersion } from './encode_hit_version';
+import { SearchEsListSchema } from '../../schemas/elastic_response';
 
 export interface TransformElasticToListOptions {
-  response: SearchResponse<SearchEsListSchema>;
+  response: estypes.SearchResponse<SearchEsListSchema>;
 }
 
 export const transformElasticToList = ({
   response,
 }: TransformElasticToListOptions): ListArraySchema => {
+  // @ts-expect-error created_at is incompatible
   return response.hits.hits.map((hit) => {
     return {
       _version: encodeHitVersion(hit),

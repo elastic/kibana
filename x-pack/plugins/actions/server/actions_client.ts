@@ -6,18 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
 } from '../../../../src/core/server';
-import { AuditLogger, EventOutcome } from '../../security/server';
+import { AuditLogger } from '../../security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
@@ -40,6 +41,7 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
+import { RunNowResult } from '../../task_manager/server';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -56,38 +58,40 @@ interface Action extends ActionUpdate {
   actionTypeId: string;
 }
 
-interface CreateOptions {
+export interface CreateOptions {
   action: Action;
 }
 
 interface ConstructorOptions {
   defaultKibanaIndex: string;
-  scopedClusterClient: ILegacyScopedClusterClient;
+  scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer;
+  executionEnqueuer: ExecutionEnqueuer<void>;
+  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
 }
 
-interface UpdateOptions {
+export interface UpdateOptions {
   id: string;
   action: ActionUpdate;
 }
 
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
-  private readonly scopedClusterClient: ILegacyScopedClusterClient;
+  private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
-  private readonly executionEnqueuer: ExecutionEnqueuer;
+  private readonly executionEnqueuer: ExecutionEnqueuer<void>;
+  private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
 
   constructor({
@@ -98,6 +102,7 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
+    ephemeralExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
@@ -109,6 +114,7 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
+    this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
@@ -145,7 +151,7 @@ export class ActionsClient {
       connectorAuditEvent({
         action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -154,6 +160,7 @@ export class ActionsClient {
       {
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -163,6 +170,7 @@ export class ActionsClient {
     return {
       id: result.id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -217,7 +225,7 @@ export class ActionsClient {
       connectorAuditEvent({
         action: ConnectorAuditAction.UPDATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -227,6 +235,7 @@ export class ActionsClient {
         ...attributes,
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -244,6 +253,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
+      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
@@ -298,6 +308,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -451,7 +462,7 @@ export class ActionsClient {
     this.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'action', id },
       })
     );
@@ -463,6 +474,7 @@ export class ActionsClient {
     actionId,
     params,
     source,
+    relatedSavedObjects,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
@@ -470,7 +482,13 @@ export class ActionsClient {
     ) {
       await this.authorization.ensureAuthorized('execute');
     }
-    return this.actionExecutor.execute({ actionId, params, source, request: this.request });
+    return this.actionExecutor.execute({
+      actionId,
+      params,
+      source,
+      request: this.request,
+      relatedSavedObjects,
+    });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
@@ -482,6 +500,17 @@ export class ActionsClient {
       await this.authorization.ensureAuthorized('execute');
     }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
+  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
+    const { source } = options;
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {
@@ -506,10 +535,10 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
 
 async function injectExtraFindData(
   defaultKibanaIndex: string,
-  scopedClusterClient: ILegacyScopedClusterClient,
+  scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, unknown> = {};
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {
@@ -543,7 +572,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const aggregationResult = await scopedClusterClient.callAsInternalUser('search', {
+  const { body: aggregationResult } = await scopedClusterClient.asInternalUser.search({
     index: defaultKibanaIndex,
     body: {
       aggs,
@@ -555,6 +584,7 @@ async function injectExtraFindData(
   });
   return actionResults.map((actionResult) => ({
     ...actionResult,
+    // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));
 }

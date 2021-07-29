@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
 
 import { getListItemByValues } from './get_list_item_by_values';
@@ -16,7 +16,7 @@ export interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
 }
 
@@ -24,11 +24,11 @@ export const deleteListItemByValue = async ({
   listId,
   value,
   type,
-  callCluster,
+  esClient,
   listItemIndex,
 }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
   const listItems = await getListItemByValues({
-    callCluster,
+    esClient,
     listId,
     listItemIndex,
     type,
@@ -40,7 +40,7 @@ export const deleteListItemByValue = async ({
     type,
     value: values,
   });
-  await callCluster('deleteByQuery', {
+  await esClient.deleteByQuery({
     body: {
       query: {
         bool: {
@@ -49,7 +49,7 @@ export const deleteListItemByValue = async ({
       },
     },
     index: listItemIndex,
-    refresh: 'wait_for',
+    refresh: false,
   });
   return listItems;
 };

@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from '@kbn/test/jest';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getListMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
@@ -29,21 +27,19 @@ describe('ErrorCallout', () => {
 
   it('it renders error details', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ErrorCallout
-          http={mockKibanaHttpService}
-          errorInfo={{
-            reason: 'error reason',
-            code: 500,
-            details: null,
-            listListId: null,
-          }}
-          rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-          onCancel={jest.fn()}
-          onSuccess={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <ErrorCallout
+        http={mockKibanaHttpService}
+        errorInfo={{
+          reason: 'error reason',
+          code: 500,
+          details: null,
+          listListId: null,
+        }}
+        rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
+        onCancel={jest.fn()}
+        onSuccess={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     expect(
@@ -57,21 +53,19 @@ describe('ErrorCallout', () => {
   it('it invokes "onCancel" when cancel button clicked', () => {
     const mockOnCancel = jest.fn();
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ErrorCallout
-          http={mockKibanaHttpService}
-          errorInfo={{
-            reason: 'error reason',
-            code: 500,
-            details: null,
-            listListId: null,
-          }}
-          rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-          onCancel={mockOnCancel}
-          onSuccess={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <ErrorCallout
+        http={mockKibanaHttpService}
+        errorInfo={{
+          reason: 'error reason',
+          code: 500,
+          details: null,
+          listListId: null,
+        }}
+        rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
+        onCancel={mockOnCancel}
+        onSuccess={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     wrapper.find('[data-test-subj="errorCalloutCancelButton"]').at(0).simulate('click');
@@ -81,21 +75,19 @@ describe('ErrorCallout', () => {
 
   it('it does not render status code if not available', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ErrorCallout
-          http={mockKibanaHttpService}
-          errorInfo={{
-            reason: 'not found',
-            code: null,
-            details: 'list of id "some_uuid" not found',
-            listListId: null,
-          }}
-          rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-          onCancel={jest.fn()}
-          onSuccess={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <ErrorCallout
+        http={mockKibanaHttpService}
+        errorInfo={{
+          reason: 'not found',
+          code: null,
+          details: 'list of id "some_uuid" not found',
+          listListId: null,
+        }}
+        rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
+        onCancel={jest.fn()}
+        onSuccess={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     expect(
@@ -109,21 +101,19 @@ describe('ErrorCallout', () => {
 
   it('it renders specific missing exceptions list error', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ErrorCallout
-          http={mockKibanaHttpService}
-          errorInfo={{
-            reason: 'not found',
-            code: 404,
-            details: 'list of id "some_uuid" not found',
-            listListId: null,
-          }}
-          rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-          onCancel={jest.fn()}
-          onSuccess={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <ErrorCallout
+        http={mockKibanaHttpService}
+        errorInfo={{
+          reason: 'not found',
+          code: 404,
+          details: 'list of id "some_uuid" not found',
+          listListId: null,
+        }}
+        rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
+        onCancel={jest.fn()}
+        onSuccess={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     expect(
@@ -137,21 +127,19 @@ describe('ErrorCallout', () => {
 
   it('it dissasociates list from rule when remove exception list clicked ', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ErrorCallout
-          http={mockKibanaHttpService}
-          errorInfo={{
-            reason: 'not found',
-            code: 404,
-            details: 'list of id "some_uuid" not found',
-            listListId: null,
-          }}
-          rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-          onCancel={jest.fn()}
-          onSuccess={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <ErrorCallout
+        http={mockKibanaHttpService}
+        errorInfo={{
+          reason: 'not found',
+          code: 404,
+          details: 'list of id "some_uuid" not found',
+          listListId: null,
+        }}
+        rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
+        onCancel={jest.fn()}
+        onSuccess={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     wrapper.find('[data-test-subj="errorCalloutDissasociateButton"]').at(0).simulate('click');

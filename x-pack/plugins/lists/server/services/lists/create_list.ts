@@ -6,23 +6,22 @@
  */
 
 import uuid from 'uuid';
-import { CreateDocumentResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
-
-import { encodeHitVersion } from '../utils/encode_hit_version';
-import {
+import { ElasticsearchClient } from 'kibana/server';
+import type {
   Description,
   DeserializerOrUndefined,
   IdOrUndefined,
   Immutable,
-  IndexEsListSchema,
   ListSchema,
   MetaOrUndefined,
   Name,
   SerializerOrUndefined,
   Type,
-  Version,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { Version } from '@kbn/securitysolution-io-ts-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
+
+import { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {
   id: IdOrUndefined;
@@ -31,7 +30,7 @@ export interface CreateListOptions {
   type: Type;
   name: Name;
   description: Description;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -48,7 +47,7 @@ export const createList = async ({
   name,
   type,
   description,
-  callCluster,
+  esClient,
   listIndex,
   user,
   meta,
@@ -73,7 +72,7 @@ export const createList = async ({
     updated_by: user,
     version,
   };
-  const response = await callCluster<CreateDocumentResponse>('index', {
+  const { body: response } = await esClient.index({
     body,
     id,
     index: listIndex,

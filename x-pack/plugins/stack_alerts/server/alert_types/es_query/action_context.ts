@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerts/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
 import { EsQueryAlertParams } from './alert_type_params';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 // alert type context provided to actions
 
@@ -29,7 +29,7 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
   // threshold conditions
   conditions: string;
   // query matches
-  hits: ESSearchHit[];
+  hits: estypes.SearchHit[];
 }
 
 export function addMessages(

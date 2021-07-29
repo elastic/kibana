@@ -11,148 +11,22 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import type { IAggType } from 'src/plugins/data/public';
-import type {
-  DatatableColumnMeta,
-  ExpressionFunctionDefinition,
-  ExpressionRenderDefinition,
-} from 'src/plugins/expressions';
-import { getSortingCriteria } from './sorting';
-
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { IUiSettingsClient } from 'kibana/public';
+import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { DatatableComponent } from './components/table_basic';
-import { ColumnState } from './visualization';
 
-import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
-import type { DatatableRender } from './components/types';
+import type { ILensInterpreterRenderHandlers } from '../types';
+import type { FormatFactory } from '../../common';
+import { DatatableProps } from '../../common/expressions';
 
-interface Args {
-  title: string;
-  description?: string;
-  columns: Array<ColumnState & { type: 'lens_datatable_column' }>;
-  sortingColumnId: string | undefined;
-  sortingDirection: 'asc' | 'desc' | 'none';
-}
-
-export interface DatatableProps {
-  data: LensMultiTable;
-  args: Args;
-}
-
-function isRange(meta: { params?: { id?: string } } | undefined) {
-  return meta?.params?.id === 'range';
-}
-
-export const getDatatable = ({
-  formatFactory,
-}: {
-  formatFactory: FormatFactory;
-}): ExpressionFunctionDefinition<'lens_datatable', LensMultiTable, Args, DatatableRender> => ({
-  name: 'lens_datatable',
-  type: 'render',
-  inputTypes: ['lens_multitable'],
-  help: i18n.translate('xpack.lens.datatable.expressionHelpLabel', {
-    defaultMessage: 'Datatable renderer',
-  }),
-  args: {
-    title: {
-      types: ['string'],
-      help: i18n.translate('xpack.lens.datatable.titleLabel', {
-        defaultMessage: 'Title',
-      }),
-    },
-    description: {
-      types: ['string'],
-      help: '',
-    },
-    columns: {
-      types: ['lens_datatable_column'],
-      help: '',
-      multi: true,
-    },
-    sortingColumnId: {
-      types: ['string'],
-      help: '',
-    },
-    sortingDirection: {
-      types: ['string'],
-      help: '',
-    },
-  },
-  fn(data, args, context) {
-    // do the sorting at this level to propagate it also at CSV download
-    const [firstTable] = Object.values(data.tables);
-    const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
-    const formatters: Record<string, ReturnType<FormatFactory>> = {};
-
-    firstTable.columns.forEach((column) => {
-      formatters[column.id] = formatFactory(column.meta?.params);
-    });
-    const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
-
-    const columnsReverseLookup = firstTable.columns.reduce<
-      Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-    >((memo, { id, name, meta }, i) => {
-      memo[id] = { name, index: i, meta };
-      return memo;
-    }, {});
-
-    if (sortBy && sortDirection !== 'none') {
-      // Sort on raw values for these types, while use the formatted value for the rest
-      const sortingCriteria = getSortingCriteria(
-        isRange(columnsReverseLookup[sortBy]?.meta)
-          ? 'range'
-          : columnsReverseLookup[sortBy]?.meta?.type,
-        sortBy,
-        formatters[sortBy],
-        sortDirection
-      );
-      // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = (firstTable.rows || [])
-        .slice()
-        .sort(sortingCriteria);
-      // replace also the local copy
-      firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
-    }
-    return {
-      type: 'render',
-      as: 'lens_datatable_renderer',
-      value: {
-        data,
-        args,
-      },
-    };
-  },
-});
-
-type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };
-
-export const datatableColumn: ExpressionFunctionDefinition<
-  'lens_datatable_column',
-  null,
-  ColumnState,
-  DatatableColumnResult
-> = {
-  name: 'lens_datatable_column',
-  aliases: [],
-  type: 'lens_datatable_column',
-  help: '',
-  inputTypes: ['null'],
-  args: {
-    columnId: { types: ['string'], help: '' },
-    alignment: { types: ['string'], help: '' },
-    hidden: { types: ['boolean'], help: '' },
-    width: { types: ['number'], help: '' },
-  },
-  fn: function fn(input: unknown, args: ColumnState) {
-    return {
-      type: 'lens_datatable_column',
-      ...args,
-    };
-  },
-};
+export { datatableColumn, getDatatable } from '../../common/expressions';
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;
   getType: Promise<(name: string) => IAggType>;
+  paletteService: PaletteRegistry;
+  uiSettings: IUiSettingsClient;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -203,8 +77,10 @@ export const getDatatableRenderer = (dependencies: {
           formatFactory={dependencies.formatFactory}
           dispatchEvent={handlers.event}
           renderMode={handlers.getRenderMode()}
+          paletteService={dependencies.paletteService}
           getType={resolvedGetType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+          uiSettings={dependencies.uiSettings}
         />
       </I18nProvider>,
       domNode,

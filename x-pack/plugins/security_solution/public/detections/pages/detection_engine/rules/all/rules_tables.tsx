@@ -15,7 +15,6 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import uuid from 'uuid';
 import { debounce } from 'lodash/fp';
 import { History } from 'history';
 
@@ -25,7 +24,6 @@ import {
   CreatePreBuiltRules,
   FilterOptions,
   Rule,
-  exportRules,
   RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
 
@@ -36,7 +34,6 @@ import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
-import { GenericDownloader } from '../../../../../common/components/generic_downloader';
 import { AllRulesTables, SortingType } from '../../../../components/rules/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
@@ -50,9 +47,12 @@ import { hasMlAdminPermissions } from '../../../../../../common/machine_learning
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
-import { LastUpdatedAt } from '../../../../../common/components/last_updated';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { AllRulesTabs } from '.';
+import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
+import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
+import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -60,7 +60,7 @@ interface RulesTableProps {
   history: History;
   formatUrl: FormatUrl;
   createPrePackagedRules: CreatePreBuiltRules | null;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: () => Promise<void>;
@@ -85,7 +85,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     history,
     formatUrl,
     createPrePackagedRules,
-    hasNoPermissions,
+    hasPermissions,
     loading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
@@ -103,10 +103,11 @@ export const RulesTables = React.memo<RulesTableProps>(
         application: {
           capabilities: { actions },
         },
+        timelines,
       },
     } = useKibana();
 
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable>(null);
 
     const [defaultAutoRefreshSetting] = useUiSetting$<{
       on: boolean;
@@ -115,14 +116,12 @@ export const RulesTables = React.memo<RulesTableProps>(
     }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
 
     const rulesTable = useRulesTable({
-      tableRef,
       initialStateOverride: {
         isRefreshOn: defaultAutoRefreshSetting.on,
       },
     });
 
     const {
-      exportRuleIds,
       filterOptions,
       loadingRuleIds,
       loadingRulesAction,
@@ -133,12 +132,12 @@ export const RulesTables = React.memo<RulesTableProps>(
       showIdleModal,
       isRefreshOn,
       isRefreshing,
+      isAllSelected,
     } = rulesTable.state;
 
     const {
       dispatch,
       updateOptions,
-      actionStopped,
       setShowIdleModal,
       setLastRefreshDate,
       setAutoRefreshOn,
@@ -149,6 +148,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
+    const { navigateToApp } = useKibana().services.application;
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -186,9 +186,24 @@ export const RulesTables = React.memo<RulesTableProps>(
       actions,
     ]);
 
+    const [
+      isDeleteConfirmationVisible,
+      showDeleteConfirmation,
+      hideDeleteConfirmation,
+    ] = useBoolState();
+
+    const [confirmDeletion, handleDeletionConfirm, handleDeletionCancel] = useAsyncConfirmation({
+      onInit: showDeleteConfirmation,
+      onFinish: hideDeleteConfirmation,
+    });
+
+    const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
+    const hasPagination = pagination.total > pagination.perPage;
+
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element[] => {
         return getBatchItems({
+          isAllSelected,
           closePopover,
           dispatch,
           dispatchToaster,
@@ -199,9 +214,13 @@ export const RulesTables = React.memo<RulesTableProps>(
           reFetchRules,
           refetchPrePackagedRulesStatus,
           rules,
+          filterQuery: convertRulesFilterToKQL(filterOptions),
+          confirmDeletion,
+          selectedItemsCount,
         });
       },
       [
+        isAllSelected,
         dispatch,
         dispatchToaster,
         hasMlPermissions,
@@ -211,6 +230,9 @@ export const RulesTables = React.memo<RulesTableProps>(
         rules,
         selectedRuleIds,
         hasActionsPrivileges,
+        filterOptions,
+        confirmDeletion,
+        selectedItemsCount,
       ]
     );
 
@@ -219,7 +241,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         pageIndex: pagination.page - 1,
         pageSize: pagination.perPage,
         totalItemCount: pagination.total,
-        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300, 400, 500],
+        pageSizeOptions: [5, 10, 20, 50, 100],
       }),
       [pagination]
     );
@@ -252,12 +274,13 @@ export const RulesTables = React.memo<RulesTableProps>(
         formatUrl,
         history,
         hasMlPermissions,
-        hasNoPermissions,
+        hasPermissions,
         loadingRuleIds:
           loadingRulesAction != null &&
           (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
             ? loadingRuleIds
             : [],
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges: hasActionsPrivileges,
@@ -268,16 +291,17 @@ export const RulesTables = React.memo<RulesTableProps>(
       formatUrl,
       refetchPrePackagedRulesStatus,
       hasActionsPrivileges,
-      hasNoPermissions,
+      hasPermissions,
       hasMlPermissions,
       history,
       loadingRuleIds,
       loadingRulesAction,
+      navigateToApp,
       reFetchRules,
     ]);
 
-    const monitoringColumns = useMemo(() => getMonitoringColumns(history, formatUrl), [
-      history,
+    const monitoringColumns = useMemo(() => getMonitoringColumns(navigateToApp, formatUrl), [
+      navigateToApp,
       formatUrl,
     ]);
 
@@ -299,14 +323,42 @@ export const RulesTables = React.memo<RulesTableProps>(
       }
     }, [createPrePackagedRules, reFetchRules, refetchPrePackagedRulesStatus]);
 
+    const isSelectAllCalled = useRef(false);
+
+    // Synchronize selectedRuleIds with EuiBasicTable's selected rows
+    useValueChanged((ruleIds) => {
+      if (tableRef.current?.changeSelection != null) {
+        tableRef.current.setSelection(rules.filter((rule) => ruleIds.includes(rule.id)));
+      }
+    }, selectedRuleIds);
+
     const euiBasicTableSelectionProps = useMemo(
       () => ({
         selectable: (item: Rule) => !loadingRuleIds.includes(item.id),
-        onSelectionChange: (selected: Rule[]) =>
-          dispatch({ type: 'selectedRuleIds', ids: selected.map((r) => r.id) }),
+        onSelectionChange: (selected: Rule[]) => {
+          /**
+           * EuiBasicTable doesn't provide declarative API to control selected rows.
+           * This limitation requires us to synchronize selection state manually using setSelection().
+           * But it creates a chain reaction when the user clicks Select All:
+           * selectAll() -> setSelection() -> onSelectionChange() -> setSelection().
+           * To break the chain we should check whether the onSelectionChange was triggered
+           * by the Select All action or not.
+           *
+           */
+          if (isSelectAllCalled.current) {
+            isSelectAllCalled.current = false;
+          } else {
+            dispatch({ type: 'selectedRuleIds', ids: selected.map(({ id }) => id) });
+          }
+        },
       }),
       [loadingRuleIds, dispatch]
     );
+
+    const toggleSelectAll = useCallback(() => {
+      isSelectAllCalled.current = true;
+      dispatch({ type: 'setIsAllSelected', isAllSelected: !isAllSelected });
+    }, [dispatch, isAllSelected]);
 
     const refreshTable = useCallback(
       async (mode: 'auto' | 'manual' = 'manual'): Promise<void> => {
@@ -397,22 +449,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
 
-    const handleGenericDownloaderSuccess = useCallback(
-      (exportCount) => {
-        actionStopped();
-        dispatchToaster({
-          type: 'addToaster',
-          toast: {
-            id: uuid.v4(),
-            title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
-            color: 'success',
-            iconType: 'check',
-          },
-        });
-      },
-      [actionStopped, dispatchToaster]
-    );
-
     return (
       <>
         <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
@@ -421,13 +457,6 @@ export const RulesTables = React.memo<RulesTableProps>(
         <EuiWindowEvent event="keydown" handler={debounceResetIdleTimer} />
         <EuiWindowEvent event="scroll" handler={debounceResetIdleTimer} />
         <EuiWindowEvent event="load" handler={debounceResetIdleTimer} />
-        <GenericDownloader
-          filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-          ids={exportRuleIds}
-          onExportSuccess={handleGenericDownloaderSuccess}
-          exportSelectedData={exportRules}
-        />
-
         <Panel
           loading={loading || isLoadingRules || isLoadingRulesStatuses}
           data-test-subj="allRulesPanel"
@@ -447,12 +476,10 @@ export const RulesTables = React.memo<RulesTableProps>(
               split
               growLeftSplit={false}
               title={i18n.ALL_RULES}
-              subtitle={
-                <LastUpdatedAt
-                  showUpdating={loading || isLoadingRules || isLoadingRulesStatuses}
-                  updatedAt={lastUpdated}
-                />
-              }
+              subtitle={timelines.getLastUpdated({
+                showUpdating: loading || isLoadingRules || isLoadingRulesStatuses,
+                updatedAt: lastUpdated,
+              })}
             >
               {shouldShowRulesTable && (
                 <RulesTableFilters
@@ -474,7 +501,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               <PrePackagedRulesPrompt
                 createPrePackagedRules={handleCreatePrePackagedRules}
                 loading={loadingCreatePrePackagedRules}
-                userHasNoPermissions={hasNoPermissions}
+                userHasPermissions={hasPermissions}
               />
             )}
             {initLoading && (
@@ -492,22 +519,39 @@ export const RulesTables = React.memo<RulesTableProps>(
                 <p>{i18n.REFRESH_PROMPT_BODY}</p>
               </EuiConfirmModal>
             )}
+            {isDeleteConfirmationVisible && (
+              <EuiConfirmModal
+                title={i18n.DELETE_CONFIRMATION_TITLE}
+                onCancel={handleDeletionCancel}
+                onConfirm={handleDeletionConfirm}
+                confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
+                cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
+                buttonColor="danger"
+                defaultFocusedButton="confirm"
+                data-test-subj="allRulesDeleteConfirmationModal"
+              >
+                <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
+              </EuiConfirmModal>
+            )}
             {shouldShowRulesTable && (
               <>
                 <AllRulesUtilityBar
-                  userHasNoPermissions={hasNoPermissions}
+                  canBulkEdit={hasPermissions}
+                  hasPagination={hasPagination}
                   paginationTotal={pagination.total ?? 0}
-                  numberSelectedItems={selectedRuleIds.length}
+                  numberSelectedItems={selectedItemsCount}
                   onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
                   onRefresh={handleManualRefresh}
                   isAutoRefreshOn={isRefreshOn}
                   onRefreshSwitch={handleAutoRefreshSwitch}
+                  isAllSelected={isAllSelected}
+                  onToggleSelectAll={toggleSelectAll}
                   showBulkActions
                 />
                 <AllRulesTables
                   selectedTab={selectedTab}
                   euiBasicTableSelectionProps={euiBasicTableSelectionProps}
-                  hasNoPermissions={hasNoPermissions}
+                  hasPermissions={hasPermissions}
                   monitoringColumns={monitoringColumns}
                   pagination={paginationMemo}
                   rules={rules}

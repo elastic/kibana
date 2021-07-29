@@ -6,9 +6,8 @@
  */
 
 import { createRulesSchema, CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
-import { exactCheck } from '../../../exact_check';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 import {
   getCreateSavedQueryRulesSchemaMock,
@@ -618,7 +617,7 @@ describe('create rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of threat that are missing "technique"', () => {
+  test('You can send in an array of threat that are missing "technique"', () => {
     const payload = {
       ...getCreateRulesSchemaMock(),
       threat: [
@@ -636,10 +635,8 @@ describe('create rules schema', () => {
     const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,technique"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
   });
 
   test('You can optionally send in an array of false positives', () => {

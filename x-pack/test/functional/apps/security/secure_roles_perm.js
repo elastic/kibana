@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
     'monitoring',
     'discover',
     'common',
-    'reporting',
+    'share',
     'header',
   ]);
   const log = getService('log');
@@ -27,9 +27,9 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('security/discover');
+      await esArchiver.load('x-pack/test/functional/es_archives/security/discover');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
@@ -59,13 +59,13 @@ export default function ({ getService, getPageObjects }) {
         confirm_password: 'changeme',
         full_name: 'RashmiFirst RashmiLast',
         email: 'rashmi@myEmail.com',
-        roles: ['logstash_reader', 'kibana_admin'],
+        roles: ['logstash_reader'],
       });
       log.debug('After Add user: , userObj.userName');
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       log.debug('roles: ', users.Rashmi.roles);
-      expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_admin']);
+      expect(users.Rashmi.roles).to.eql(['logstash_reader']);
       expect(users.Rashmi.fullname).to.eql('RashmiFirst RashmiLast');
       expect(users.Rashmi.reserved).to.be(false);
       await PageObjects.security.forceLogout();
@@ -77,14 +77,12 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.missingOrFail('users');
     });
 
-    it('Kibana User navigating to Discover and trying to generate CSV gets - Authorization Error ', async function () {
+    it('Kibana User navigating to Discover sees the generate CSV button', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.loadSavedSearch('A Saved Search');
-      log.debug('click Reporting button');
-      await PageObjects.reporting.openCsvReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
-      const queueReportError = await PageObjects.reporting.getQueueReportError();
-      expect(queueReportError).to.be(true);
+      log.debug('click Top Nav Share button');
+      await PageObjects.share.clickShareTopNavButton();
+      await testSubjects.existOrFail('sharePanel-CSVReports');
     });
 
     after(async function () {

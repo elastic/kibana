@@ -7,21 +7,21 @@
 
 import 'brace';
 import 'brace/mode/json';
-
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test/target/jest/utils/stub_web_worker';
+import '@kbn/test/target_node/jest/utils/stub_web_worker';
 
+import { EuiCodeEditor } from '@elastic/eui';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test/jest';
-import { JSONRuleEditor } from './json_rule_editor';
-import { EuiCodeEditor } from '@elastic/eui';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { AllRule, AnyRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../model';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
+import { JSONRuleEditor } from './json_rule_editor';
 
 describe('JSONRuleEditor', () => {
   const renderView = (props: React.ComponentProps<typeof JSONRuleEditor>) => {

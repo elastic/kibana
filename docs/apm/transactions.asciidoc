@@ -22,11 +22,21 @@ Visualize response codes: `2xx`, `3xx`, `4xx`, etc.
 Useful for determining if more responses than usual are being served with a particular response code.
 Like in the latency graph, you can zoom in on anomalies to further investigate them.
 
+[[transaction-error-rate]]
 *Error rate*::
-Visualize the total number of transactions with errors divided by the total number of transactions.
-The error rate value is based on the `event.outcome` field and is the relative number of failed transactions.
-Any unexpected increases, decreases, or irregular patterns can be investigated further
-with the <<errors,errors overview>>.
+The error rate represents the percentage of failed transactions from the perspective of the selected service.
+It's useful for visualizing unexpected increases, decreases, or irregular patterns in a service's transactions.
++
+[TIP]
+====
+HTTP **transactions** from the HTTP server perspective do not consider a `4xx` status code (client error) as a failure
+because the failure was caused by the caller, not the HTTP server. Thus, there will be no increase in error rate.
+
+HTTP **spans** from the client perspective however, are considered failures if the HTTP status code is ≥ 400.
+These spans will increase the error rate.
+
+If there is no HTTP status, both transactions and spans are considered successful unless an error is reported.
+====
 
 *Average duration by span type*::
 Visualize where your application is spending most of its time.
@@ -90,22 +100,22 @@ the selected transaction group.
 image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]
 
 [[transaction-duration-distribution]]
-==== Transactions duration distribution
+==== Latency distribution
 
-This chart plots all transaction durations for the given time period.
+A plot of all transaction durations for the given time period.
 The screenshot below shows a typical distribution,
 and indicates most of our requests were served quickly -- awesome!
-It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
+It's the requests on the right, the ones taking longer than average, that we probably need to focus on.
 
 [role="screenshot"]
-image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
+image::apm/images/apm-transaction-duration-dist.png[Example view of latency distribution graph]
 
-Select a transaction duration _bucket_ to display up to ten trace samples.
+Select a latency duration _bucket_ to display up to ten trace samples.
 
 [[transaction-trace-sample]]
 ==== Trace sample
 
-Trace samples are based on the _bucket_ selection in the *Transactions duration distribution* chart;
+Trace samples are based on the _bucket_ selection in the *Latency distribution* chart;
 update the samples by selecting a new _bucket_.
 The number of requests per bucket is displayed when hovering over the graph,
 and the selected bucket is highlighted to stand out.

@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { loggerMock, MockedLogger } from '@kbn/logging/target/mocks';
+export { loggerMock } from '@kbn/logging/target/mocks';
+export type { MockedLogger } from '@kbn/logging/target/mocks';

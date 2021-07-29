@@ -10,19 +10,22 @@ import { statSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 export function list(pluginDir, logger) {
-  readdirSync(pluginDir).forEach((name) => {
-    const stat = statSync(join(pluginDir, name));
+  const plugins = readdirSync(pluginDir)
+    .map((name) => [name, statSync(join(pluginDir, name))])
+    .filter(([name, stat]) => stat.isDirectory() && name[0] !== '.');
 
-    if (stat.isDirectory() && name[0] !== '.') {
-      try {
-        const packagePath = join(pluginDir, name, 'kibana.json');
-        const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
-        logger.log(pkg.id + '@' + pkg.version);
-      } catch (e) {
-        throw new Error('Unable to read kibana.json file for plugin ' + name);
-      }
+  if (plugins.length === 0) {
+    logger.log('No plugins installed.');
+    return;
+  }
+
+  plugins.forEach(([name]) => {
+    try {
+      const packagePath = join(pluginDir, name, 'kibana.json');
+      const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
+      logger.log(pkg.id + '@' + pkg.version);
+    } catch (e) {
+      throw new Error('Unable to read kibana.json file for plugin ' + name);
     }
   });
-
-  logger.log(''); //intentional blank line for aesthetics
 }

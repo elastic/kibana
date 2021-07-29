@@ -8,14 +8,15 @@
 
 import { SpacesOssPlugin } from './plugin';
 
-export {
+export type {
   SpacesOssPluginSetup,
   SpacesOssPluginStart,
   SpacesAvailableStartContract,
   SpacesUnavailableStartContract,
 } from './types';
 
-export {
+export type {
+  LazyComponentFn,
   SpacesApi,
   SpacesApiUi,
   SpacesApiUiComponent,
@@ -24,6 +25,7 @@ export {
   ShareToSpaceSavedObjectTarget,
   SpaceListProps,
   LegacyUrlConflictProps,
+  SpaceAvatarProps,
 } from './api';
 
 export const plugin = () => new SpacesOssPlugin();

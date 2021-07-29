@@ -1,0 +1,95 @@
+{
+  "id": "apmOss",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "apmOss",
+        "id": "def-server.APMOSSConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "APMOSSConfig",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
+        ],
+        "source": {
+          "path": "src/plugins/apm_oss/server/index.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "apmOss",
+      "id": "def-server.APMOSSPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "APMOSSPluginSetup",
+      "description": [],
+      "source": {
+        "path": "src/plugins/apm_oss/server/plugin.ts",
+        "lineNumber": 27
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "apmOss",
+          "id": "def-server.APMOSSPluginSetup.config",
+          "type": "Object",
+          "tags": [],
+          "label": "config",
+          "description": [],
+          "signature": [
+            "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
+          ],
+          "source": {
+            "path": "src/plugins/apm_oss/server/plugin.ts",
+            "lineNumber": 28
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "apmOss",
+          "id": "def-server.APMOSSPluginSetup.config$",
+          "type": "Object",
+          "tags": [],
+          "label": "config$",
+          "description": [],
+          "signature": [
+            "Observable",
+            "<Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>>"
+          ],
+          "source": {
+            "path": "src/plugins/apm_oss/server/plugin.ts",
+            "lineNumber": 29
+          },
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

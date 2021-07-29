@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
+import { AnyAction, Reducer } from 'redux';
 import {
   PluginSetup,
   PluginStart,
@@ -16,6 +18,7 @@ import {
   StartServices,
   AppObservableLibs,
   SubPlugins,
+  StartedSubPlugins,
 } from './types';
 import {
   AppMountParameters,
@@ -33,52 +36,46 @@ import { KibanaServices } from './common/lib/kibana/services';
 
 import {
   APP_ID,
-  APP_ICON_SOLUTION,
-  APP_DETECTIONS_PATH,
-  APP_HOSTS_PATH,
+  OVERVIEW_PATH,
   APP_OVERVIEW_PATH,
-  APP_NETWORK_PATH,
-  APP_TIMELINES_PATH,
-  APP_MANAGEMENT_PATH,
-  APP_CASES_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
+  DEFAULT_ALERTS_INDEX,
+  APP_ICON_SOLUTION,
 } from '../common/constants';
 
-import { SecurityPageName } from './app/types';
-import { registerSearchLinks, getSearchDeepLinksAndKeywords } from './app/search';
+import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
 import { manageOldSiemRoutes } from './helpers';
-import {
-  OVERVIEW,
-  HOSTS,
-  NETWORK,
-  TIMELINES,
-  DETECTION_ENGINE,
-  CASE,
-  ADMINISTRATION,
-} from './app/home/translations';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
-import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
+import { SecuritySolutionUiConfigType } from './common/types';
+
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
+import type { TimelineState } from '../../timelines/public';
+import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
-  private kibanaVersion: string;
+  readonly kibanaVersion: string;
+  private config: SecuritySolutionUiConfigType;
+  readonly experimentalFeatures: ExperimentalFeatures;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
-  private detectionsUpdater$ = new Subject<AppUpdater>();
-  private hostsUpdater$ = new Subject<AppUpdater>();
-  private networkUpdater$ = new Subject<AppUpdater>();
-  private caseUpdater$ = new Subject<AppUpdater>();
+  private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
   private licensingSubscription: Subscription | null = null;
@@ -150,169 +147,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      exactRoute: true,
       id: APP_ID,
       title: APP_NAME,
       appRoute: APP_PATH,
+      category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
-      mount: async () => {
-        const [{ application }] = await core.getStartServices();
-        application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
-        return () => true;
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.overview}`,
-      title: OVERVIEW,
-      order: 9000,
+      searchable: true,
+      defaultPath: OVERVIEW_PATH,
+      updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_OVERVIEW_PATH,
+      deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
-        const { overview: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
-
+        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.detections}`,
-      title: DETECTION_ENGINE,
-      order: 9001,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_DETECTIONS_PATH,
-      updater$: this.detectionsUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { detections: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
-
-        return renderApp({
-          ...composeLibs(coreStart),
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.hosts}`,
-      title: HOSTS,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_HOSTS_PATH,
-      updater$: this.hostsUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { hosts: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
-        return renderApp({
-          ...composeLibs(coreStart),
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.network}`,
-      title: NETWORK,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_NETWORK_PATH,
-      updater$: this.networkUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { network: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
-        return renderApp({
-          ...composeLibs(coreStart),
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.timelines}`,
-      title: TIMELINES,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_TIMELINES_PATH,
-      meta: getSearchDeepLinksAndKeywords(SecurityPageName.timelines),
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { timelines: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
-        return renderApp({
-          ...composeLibs(coreStart),
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.case}`,
-      title: CASE,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_CASES_PATH,
-      updater$: this.caseUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { cases: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
-        return renderApp({
-          ...composeLibs(coreStart),
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.administration}`,
-      title: ADMINISTRATION,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_MANAGEMENT_PATH,
-      meta: getSearchDeepLinksAndKeywords(SecurityPageName.administration),
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { management: managementSubPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
-        return renderApp({
-          ...composeLibs(coreStart),
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
+          store: await this.store(coreStart, startPlugins, subPlugins),
+          usageCollection: plugins.usageCollection,
+          subPlugins,
         });
       },
     });
@@ -328,8 +182,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
-
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
 
     return {
       resolver: async () => {
@@ -353,40 +205,53 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        component: getLazyEndpointPolicyEditExtension(core, plugins),
+        Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
-        component: LazyEndpointPolicyCreateExtension,
+        Component: LazyEndpointPolicyCreateExtension,
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-detail-custom',
-        component: getLazyEndpointPackageCustomExtension(core, plugins),
+        Component: getLazyEndpointPackageCustomExtension(core, plugins),
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-detail-assets',
+        Component: LazyEndpointCustomAssetsExtension,
       });
     }
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
     /**
-     * Register searchDeepLinks and pass an appUpdater for each subPlugin, to change searchDeepLinks as needed when licensing changes.
+     * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
      */
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          registerSearchLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
-          registerSearchLinks(
-            SecurityPageName.detections,
-            this.detectionsUpdater$,
-            currentLicense.type
-          );
-          registerSearchLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
-          registerSearchLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
+          this.appUpdater$.next(() => ({
+            navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+            deepLinks: getDeepLinks(
+              this.experimentalFeatures,
+              currentLicense.type,
+              core.application.capabilities
+            ),
+          }));
         }
       });
+    } else {
+      updateGlobalNavigation({
+        capabilities: core.application.capabilities,
+        updater$: this.appUpdater$,
+        enableExperimental: this.experimentalFeatures,
+      });
     }
+
     return {};
   }
 
@@ -434,10 +299,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
-        detections: new subPluginClasses.Detections(),
+        alerts: new subPluginClasses.Detections(),
+        rules: new subPluginClasses.Rules(),
+        exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
+        ...(this.experimentalFeatures.uebaEnabled ? { ueba: new subPluginClasses.Ueba() } : {}),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -447,31 +315,52 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
+   * All started subPlugins.
+   */
+  private async startSubPlugins(
+    storage: Storage,
+    core: CoreStart,
+    plugins: StartPlugins
+  ): Promise<StartedSubPlugins> {
+    const subPlugins = await this.subPlugins();
+    return {
+      overview: subPlugins.overview.start(),
+      alerts: subPlugins.alerts.start(storage),
+      rules: subPlugins.rules.start(storage),
+      exceptions: subPlugins.exceptions.start(storage),
+      cases: subPlugins.cases.start(),
+      hosts: subPlugins.hosts.start(storage),
+      network: subPlugins.network.start(storage),
+      ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+        ? { ueba: subPlugins.ueba.start(storage) }
+        : {}),
+      timelines: subPlugins.timelines.start(),
+      management: subPlugins.management.start(core, plugins),
+    };
+  }
+
+  /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */
-  private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
+  private async store(
+    coreStart: CoreStart,
+    startPlugins: StartPlugins,
+    subPlugins: StartedSubPlugins
+  ): Promise<SecurityAppStore> {
     if (!this._store) {
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
-        { composeLibs, createStore, createInitialState },
+        { createStore, createInitialState },
         kibanaIndexPatterns,
-        {
-          detections: detectionsSubPlugin,
-          hosts: hostsSubPlugin,
-          network: networkSubPlugin,
-          timelines: timelinesSubPlugin,
-          management: managementSubPlugin,
-        },
         configIndexPatterns,
       ] = await Promise.all([
         this.lazyApplicationDependencies(),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
-        this.subPlugins(),
         startPlugins.data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
             {
-              strategy: 'securitySolutionIndexFields',
+              strategy: 'indexFields',
             }
           )
           .toPromise(),
@@ -479,60 +368,81 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       let signal: { name: string | null } = { name: null };
       try {
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        // TODO: Once we are past experimental phase this code should be removed
+        // TODO: This currently prevents TGrid from refreshing
+        if (this.experimentalFeatures.ruleRegistryEnabled) {
+          signal = { name: DEFAULT_ALERTS_INDEX };
+        } else {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
 
-      const { apolloClient } = composeLibs(coreStart);
-      const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
+      const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
-
-      const detectionsStart = detectionsSubPlugin.start(this.storage);
-      const hostsStart = hostsSubPlugin.start(this.storage);
-      const networkStart = networkSubPlugin.start(this.storage);
-      const timelinesStart = timelinesSubPlugin.start();
-      const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
       const timelineInitialState = {
         timeline: {
-          ...timelinesStart.store.initialState.timeline!,
+          ...subPlugins.timelines.store.initialState.timeline!,
           timelineById: {
-            ...timelinesStart.store.initialState.timeline!.timelineById,
-            ...detectionsStart.storageTimelines!.timelineById,
-            ...hostsStart.storageTimelines!.timelineById,
-            ...networkStart.storageTimelines!.timelineById,
+            ...subPlugins.timelines.store.initialState.timeline!.timelineById,
+            ...subPlugins.alerts.storageTimelines!.timelineById,
+            ...subPlugins.rules.storageTimelines!.timelineById,
+            ...subPlugins.exceptions.storageTimelines!.timelineById,
+            ...subPlugins.hosts.storageTimelines!.timelineById,
+            ...subPlugins.network.storageTimelines!.timelineById,
+            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+              ? subPlugins.ueba.storageTimelines!.timelineById
+              : {}),
           },
         },
       };
 
+      const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
+      const timelineReducer = (reduceReducers(
+        timelineInitialState.timeline,
+        tGridReducer,
+        subPlugins.timelines.store.reducer.timeline
+      ) as unknown) as Reducer<TimelineState, AnyAction>;
+
       this._store = createStore(
         createInitialState(
           {
-            ...hostsStart.store.initialState,
-            ...networkStart.store.initialState,
+            ...subPlugins.hosts.store.initialState,
+            ...subPlugins.network.store.initialState,
+            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+              ? subPlugins.ueba.store.initialState
+              : {}),
             ...timelineInitialState,
-            ...managementSubPluginStart.store.initialState,
+            ...subPlugins.management.store.initialState,
           },
           {
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
+            enableExperimental: this.experimentalFeatures,
           }
         ),
         {
-          ...hostsStart.store.reducer,
-          ...networkStart.store.reducer,
-          ...timelinesStart.store.reducer,
-          ...managementSubPluginStart.store.reducer,
+          ...subPlugins.hosts.store.reducer,
+          ...subPlugins.network.store.reducer,
+          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+            ? subPlugins.ueba.store.reducer
+            : {}),
+          timeline: timelineReducer,
+          ...subPlugins.management.store.reducer,
+          ...tGridReducer,
         },
-        libs$.pipe(pluck('apolloClient')),
         libs$.pipe(pluck('kibana')),
         this.storage,
-        [...(managementSubPluginStart.store.middleware ?? [])]
+        [...(subPlugins.management.store.middleware ?? [])]
       );
+      if (startPlugins.timelines) {
+        startPlugins.timelines.setTGridEmbeddedStore(this._store);
+      }
     }
     return this._store;
   }

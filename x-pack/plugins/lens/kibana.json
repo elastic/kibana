@@ -8,6 +8,7 @@
     "data",
     "charts",
     "expressions",
+    "inspector",
     "navigation",
     "urlForwarding",
     "visualizations",
@@ -15,7 +16,8 @@
     "uiActions",
     "embeddable",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "indexPatternFieldEditor"
   ],
   "optionalPlugins": [
     "usageCollection",
@@ -35,5 +37,10 @@
     "kibanaUtils",
     "kibanaReact",
     "embeddable"
-  ]
+  ],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana."
 }

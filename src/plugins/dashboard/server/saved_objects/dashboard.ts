@@ -61,5 +61,5 @@ export const createDashboardSavedObjectType = ({
       version: { type: 'integer' },
     },
   },
-  migrations: createDashboardSavedObjectTypeMigrations(migrationDeps),
+  migrations: () => createDashboardSavedObjectTypeMigrations(migrationDeps),
 });

@@ -7,8 +7,10 @@
 
 import * as mocks from './test_mocks';
 import { Comparator, Aggregators, MetricExpressionParams } from './types';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { previewMetricThresholdAlert } from './preview_metric_threshold_alert';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('Previewing the metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
@@ -163,21 +165,33 @@ describe('Previewing the metric threshold alert type', () => {
 });
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
+
+services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
+  const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
+  const metric = params?.body.query.bool.filter[1]?.exists.field;
+  if (params?.body.aggs.groupings) {
+    if (params?.body.aggs.groupings.composite.after) {
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        mocks.compositeEndResponse
+      );
     }
-    return mocks.basicCompositePreviewResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.basicCompositePreviewResponse(from)
+    );
   }
   if (metric === 'test.metric.2') {
-    return mocks.alternateMetricPreviewResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.alternateMetricPreviewResponse(from)
+    );
   }
   if (metric === 'test.metric.3') {
-    return mocks.repeatingMetricPreviewResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.repeatingMetricPreviewResponse(from)
+    );
   }
-  return mocks.basicMetricPreviewResponse;
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(
+    mocks.basicMetricPreviewResponse(from)
+  );
 });
 
 const baseCriterion = {
@@ -197,7 +211,7 @@ const config = {
 } as any;
 
 const baseParams = {
-  callCluster: services.callCluster,
+  esClient: services.scopedClusterClient.asCurrentUser,
   params: {
     criteria: [baseCriterion],
     groupBy: undefined,

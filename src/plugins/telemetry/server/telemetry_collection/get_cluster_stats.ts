@@ -21,6 +21,8 @@ export async function getClusterStats(esClient: ElasticsearchClient) {
 
 /**
  * Get the cluster uuids from the connected cluster.
+ * @internal only used externally by the X-Pack Telemetry extension
+ * @param esClient Scoped Elasticsearch client
  */
 export const getClusterUuids: ClusterDetailsGetter = async ({ esClient }) => {
   const { body } = await esClient.cluster.stats({ timeout: TIMEOUT });

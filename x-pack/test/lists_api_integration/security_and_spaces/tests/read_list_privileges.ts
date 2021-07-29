@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
+import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
 import { getReadPrivilegeMock } from '../../../../plugins/lists/server/routes/read_privileges_route.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { LIST_PRIVILEGES_URL } from '../../../../plugins/lists/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

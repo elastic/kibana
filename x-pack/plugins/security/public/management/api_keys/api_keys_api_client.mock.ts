@@ -10,5 +10,6 @@ export const apiKeysAPIClientMock = {
     checkPrivileges: jest.fn(),
     getApiKeys: jest.fn(),
     invalidateApiKeys: jest.fn(),
+    createApiKey: jest.fn(),
   }),
 };

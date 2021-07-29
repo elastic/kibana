@@ -99,7 +99,7 @@ export const DEFAULT_CHART_OPTIONS: MetricsExplorerChartOptions = {
 export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   {
     aggregation: 'avg',
-    field: 'system.cpu.user.pct',
+    field: 'system.cpu.total.norm.pct',
     color: Color.color0,
   },
   {
@@ -163,10 +163,7 @@ export const useMetricsExplorerOptions = () => {
     'MetricsExplorerOptions',
     DEFAULT_OPTIONS
   );
-  const [currentTimerange, setTimeRange] = useStateWithLocalStorage<MetricsExplorerTimeOptions>(
-    'MetricsExplorerTimeRange',
-    defaultTimeRange
-  );
+  const [currentTimerange, setTimeRange] = useState<MetricsExplorerTimeOptions>(defaultTimeRange);
 
   useSyncKibanaTimeFilterTime(TIME_DEFAULTS, {
     from: currentTimerange.from,

@@ -155,8 +155,8 @@ function fetchPipelineVertexTimeSeriesStats(
   const params = {
     index: logstashIndexPattern,
     size: 0,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'aggregations.timeseries.buckets.key',
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.events_in_total',
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.events_out_total',
@@ -200,7 +200,7 @@ export function getPipelineVertexStatsAggregation(
   end = version.lastSeen;
 
   const query = createQuery({
-    type: 'logstash_stats',
+    types: ['stats', 'logstash_stats'],
     start,
     end,
     metric: LogstashMetric.getMetricFields(),

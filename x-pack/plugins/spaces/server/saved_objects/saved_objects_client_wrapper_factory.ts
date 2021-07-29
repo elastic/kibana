@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
 } from 'src/core/server';
+
+import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 export function spacesSavedObjectsClientWrapperFactory(
   getSpacesService: () => SpacesServiceStart

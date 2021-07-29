@@ -11,23 +11,19 @@ import React from 'react';
 // TODO: extend from EUI's EuiProgress prop interface
 export interface ImpactBarProps extends Record<string, unknown> {
   value: number;
-  size?: 'l' | 'm';
+  size?: 's' | 'l' | 'm';
   max?: number;
+  color?: string;
 }
 
 export function ImpactBar({
   value,
-  size = 'l',
+  size = 'm',
   max = 100,
+  color = 'primary',
   ...rest
 }: ImpactBarProps) {
   return (
-    <EuiProgress
-      size={size}
-      value={value}
-      max={max}
-      color="primary"
-      {...rest}
-    />
+    <EuiProgress size={size} value={value} max={max} color={color} {...rest} />
   );
 }

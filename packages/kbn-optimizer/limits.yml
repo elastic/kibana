@@ -1,41 +1,40 @@
 pageLoadAssetSize:
   advancedSettings: 27596
-  alerts: 106936
+  alerting: 106936
   apm: 64385
   apmOss: 18996
-  beatsManagement: 188135
-  bfetch: 41874
+  bfetch: 51874
   canvas: 1066647
-  charts: 195358
+  charts: 95000
   cloud: 21076
   console: 46091
-  core: 692106
+  core: 432925
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 1319839
+  data: 900000
   dataEnhanced: 50420
   devTools: 38637
-  discover: 105145
+  discover: 99999
   discoverEnhanced: 42730
   embeddable: 312874
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   esUiShared: 326654
   expressions: 224136
-  features: 31211
-  globalSearch: 43548
-  globalSearchBar: 62888
+  features: 21723
+  globalSearch: 29696
+  globalSearchBar: 50403
   globalSearchProviders: 25554
   graph: 31504
   grokdebugger: 26779
-  home: 41661
+  home: 30182
   indexLifecycleManagement: 107090
   indexManagement: 140608
   indexPatternManagement: 28222
   infra: 184320
-  fleet: 415829
+  fleet: 465774
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -45,13 +44,12 @@ pageLoadAssetSize:
   kibanaUtils: 198829
   lens: 96624
   licenseManagement: 41817
-  licensing: 39008
-  lists: 202261
+  licensing: 29004
+  lists: 22900
   logstash: 53548
   management: 46112
-  maps: 183610
-  mapsLegacy: 116817
-  mapsLegacyLicensing: 20214
+  maps: 80000
+  mapsLegacy: 87859
   ml: 82187
   monitoring: 80000
   navigation: 37269
@@ -67,18 +65,18 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 189428
+  security: 95864
   securityOss: 30806
-  securitySolution: 283440
+  securitySolution: 217673
   share: 99061
   snapshotRestore: 79032
-  spaces: 387915
-  telemetry: 91832
-  telemetryManagementSection: 52443
+  spaces: 57868
+  telemetry: 51957
+  telemetryManagementSection: 38586
   tileMap: 65337
   timelion: 29920
   transform: 41007
-  triggersActionsUi: 186732
+  triggersActionsUi: 100000
   uiActions: 97717
   uiActionsEnhanced: 313011
   upgradeAssistant: 81241
@@ -92,18 +90,31 @@ pageLoadAssetSize:
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
-  visTypeTimeseries: 155203
+  visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 113478
-  visualizations: 295025
+  visualizations: 90000
   visualize: 57431
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 28545
+  presentationUtil: 94301
   spacesOss: 18817
   indexPatternFieldEditor: 90489
   osquery: 107090
   fileUpload: 25664
+  dataVisualizer: 27530
   banners: 17946
+  mapsEms: 26072
+  timelines: 330000
+  screenshotMode: 17856
+  visTypePie: 35583
+  expressionRevealImage: 25675
+  cases: 144442
+  expressionError: 22127
+  expressionRepeatImage: 22341
+  expressionImage: 19288
+  expressionMetric: 22238
+  expressionShape: 30033
+  userSetup: 18532

@@ -18,7 +18,11 @@ import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -38,6 +42,8 @@ const testProps = {
   end: to,
   indexNames: [],
   id: TimelineId.test,
+  renderCellValue: DefaultCellRenderer,
+  rowRenderers: defaultRowRenderers,
   scopeId: SourcererScopeName.default,
   start: from,
 };
@@ -56,7 +62,9 @@ describe('StatefulEventsViewer', () => {
     await waitFor(() => {
       wrapper.update();
 
-      expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+      expect(wrapper.text()).toMatchInlineSnapshot(
+        `"Showing: 12 events1 fields sorted@timestamp1event.severityevent.categoryevent.actionhost.namesource.ipdestination.ipdestination.bytesuser.name_idmessage0 of 12 events123"`
+      );
     });
   });
 

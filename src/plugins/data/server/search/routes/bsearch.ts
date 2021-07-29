@@ -8,19 +8,21 @@
 
 import { catchError, first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import type { ExecutionContextSetup } from 'src/core/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  ISearchOptions,
+  ISearchOptionsSerializable,
 } from '../../../common/search';
 import { ISearchStart } from '../types';
 
 export function registerBsearchRoute(
   bfetch: BfetchServerSetup,
-  getScoped: ISearchStart['asScoped']
+  getScoped: ISearchStart['asScoped'],
+  executionContextService: ExecutionContextSetup
 ): void {
   bfetch.addBatchProcessingRoute<
-    { request: IKibanaSearchRequest; options?: ISearchOptions },
+    { request: IKibanaSearchRequest; options?: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >('/internal/bsearch', (request) => {
     return {
@@ -30,8 +32,11 @@ export function registerBsearchRoute(
        */
       onBatchItem: async ({ request: requestData, options }) => {
         const search = getScoped(request);
+        const { executionContext, ...restOptions } = options || {};
+        if (executionContext) executionContextService.set(executionContext);
+
         return search
-          .search(requestData, options)
+          .search(requestData, restOptions)
           .pipe(
             first(),
             catchError((err) => {

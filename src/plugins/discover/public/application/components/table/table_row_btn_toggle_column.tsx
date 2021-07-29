@@ -15,9 +15,15 @@ export interface Props {
   active: boolean;
   disabled?: boolean;
   onClick: () => void;
+  fieldname: string;
 }
 
-export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
+export function DocViewTableRowBtnToggleColumn({
+  onClick,
+  active,
+  disabled = false,
+  fieldname = '',
+}: Props) {
   if (disabled) {
     return (
       <EuiButtonIcon
@@ -48,7 +54,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         aria-pressed={active}
         onClick={onClick}
         className="kbnDocViewer__actionButton"
-        data-test-subj="toggleColumnButton"
+        data-test-subj={`toggleColumnButton_${fieldname}`}
         iconType={'listAdd'}
         iconSize={'s'}
       />

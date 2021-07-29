@@ -7,24 +7,9 @@
  */
 
 import { toArray } from 'lodash';
-import { SerializedFieldFormat } from '../../../../../expressions/common/types';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
-
-export interface Dimension {
-  accessor: number;
-  format: {
-    id?: string;
-    params?: SerializedFieldFormat<object>;
-  };
-}
-
-export interface Dimensions {
-  metric: Dimension;
-  buckets?: Dimension[];
-  splitRow?: Dimension[];
-  splitColumn?: Dimension[];
-}
+import type { Dimensions } from '../../../../../vis_type_pie/public';
 
 interface Slice {
   name: string;

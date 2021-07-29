@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Shortcut File Written or Modified for Persistence",
   "query": "file where event.type != \"deletion\" and\n  user.domain != \"NT AUTHORITY\" and\n  file.path : (\"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\", \n               \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\StartUp\\\\*\") and\n  process.name : (\"cmd.exe\",\n                  \"powershell.exe\",\n                  \"wmic.exe\",\n                  \"mshta.exe\",\n                  \"pwsh.exe\",\n                  \"cscript.exe\",\n                  \"wscript.exe\",\n                  \"regsvr32.exe\",\n                  \"RegAsm.exe\",\n                  \"rundll32.exe\",\n                  \"EQNEDT32.EXE\",\n                  \"WINWORD.EXE\",\n                  \"EXCEL.EXE\",\n                  \"POWERPNT.EXE\",\n                  \"MSPUB.EXE\",\n                  \"MSACCESS.EXE\",\n                  \"iexplore.exe\",\n                  \"InstallUtil.exe\")\n",
   "risk_score": 47,

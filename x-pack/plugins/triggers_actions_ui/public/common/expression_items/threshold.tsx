@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
@@ -22,7 +22,7 @@ import { Comparator } from '../types';
 import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
-interface ThresholdExpressionProps {
+export interface ThresholdExpressionProps {
   thresholdComparator: string;
   errors: IErrorObject;
   onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
@@ -175,3 +175,6 @@ export const ThresholdExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ThresholdExpression as default };

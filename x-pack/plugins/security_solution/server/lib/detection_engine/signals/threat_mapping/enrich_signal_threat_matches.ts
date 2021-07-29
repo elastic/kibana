@@ -6,7 +6,7 @@
  */
 
 import { get, isObject } from 'lodash';
-import { DEFAULT_INDICATOR_PATH } from '../../../../../common/constants';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
@@ -57,11 +57,18 @@ export const buildMatchedIndicator = ({
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
     }
     const atomic = get(matchedThreat?._source, query.value) as unknown;
-    const type = get(indicator, 'type') as unknown;
+    const event = get(matchedThreat?._source, 'event') as unknown;
 
     return {
       ...indicator,
-      matched: { atomic, field: query.field, type },
+      event,
+      matched: {
+        atomic,
+        field: query.field,
+        id: query.id,
+        index: query.index,
+        type: ENRICHMENT_TYPES.IndicatorMatchRule,
+      },
     };
   });
 
@@ -92,13 +99,17 @@ export const enrichSignalThreatMatches = async (
     if (!isObject(threat)) {
       throw new Error(`Expected threat field to be an object, but found: ${threat}`);
     }
-    const existingIndicatorValue = get(signalHit._source, DEFAULT_INDICATOR_PATH) ?? [];
+    // We are not using INDICATOR_DESTINATION_PATH here because the code above
+    // and below make assumptions about its current value, 'threat.indicator',
+    // and making this code dynamic on an arbitrary path would introduce several
+    // new issues.
+    const existingIndicatorValue = get(signalHit._source, 'threat.indicator') ?? [];
     const existingIndicators = [existingIndicatorValue].flat(); // ensure indicators is an array
 
     return {
       ...signalHit,
       _source: {
-        ...signalHit._source,
+        ...signalHit._source!,
         threat: {
           ...threat,
           indicator: [...existingIndicators, ...matchedIndicators[i]],

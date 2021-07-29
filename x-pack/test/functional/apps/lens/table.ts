@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const find = getService('find');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   describe('lens datatable', () => {
     it('should able to sort a table by a column', async () => {
@@ -23,27 +24,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       // Sort by number
       await PageObjects.lens.changeTableSortingBy(2, 'ascending');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
       // Now sort by IP
       await PageObjects.lens.changeTableSortingBy(0, 'ascending');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('78.83.247.30');
       // Change the sorting
       await PageObjects.lens.changeTableSortingBy(0, 'descending');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
       // Remove the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'none');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
+      await retry.try(async () => {
+        await PageObjects.lens.changeTableSortingBy(0, 'none');
+        await PageObjects.lens.waitForVisualization();
+        expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
+      });
     });
 
     it('should able to use filters cell actions in table', async () => {
       const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
       await retry.try(async () => {
         await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.waitForVisualization();
         expect(
           await find.existsByCssSelector(
             `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
@@ -57,16 +60,99 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_column > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_column > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
+    });
+
+    it('should allow to transpose columns', async () => {
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsDatatable_rows > lns-dimensionTrigger',
+        'lnsDatatable_columns > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
+      expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
+        '169.228.188.120 › Average of bytes'
+      );
+      expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal(
+        '78.83.247.30 › Average of bytes'
+      );
+      expect(await PageObjects.lens.getDatatableHeaderText(3)).to.equal(
+        '226.82.228.233 › Average of bytes'
+      );
+    });
+
+    it('should allow to sort by transposed columns', async () => {
+      await PageObjects.lens.changeTableSortingBy(2, 'ascending');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
+    });
+
+    it('should show dynamic coloring feature for numeric columns', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await PageObjects.lens.setTableDynamicColoring('text');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be(undefined);
+      expect(styleObj.color).to.be('rgb(133, 189, 177)');
+    });
+
+    it('should allow to color cell background rather than text', async () => {
+      await PageObjects.lens.setTableDynamicColoring('cell');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(133, 189, 177)');
+      // should also set text color when in cell mode
+      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+    });
+
+    it('should open the palette panel to customize the palette look', async () => {
+      await PageObjects.lens.openPalettePanel('lnsDatatable');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.changePaletteTo('temperature');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+    });
+
+    it('tweak the color stops numeric value', async () => {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '30', {
+        clearWithKeyboard: true,
+      });
+      // when clicking on another row will trigger a sorting + update
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_stop_value_1');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // pick a cell without color as is below the range
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(3, 3);
+      expect(styleObj['background-color']).to.be(undefined);
+      // should also set text color when in cell mode
+      expect(styleObj.color).to.be(undefined);
+    });
+
+    it('should allow the user to reverse the palette', async () => {
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
+      expect(styleObj['background-color']).to.be('rgb(168, 191, 218)');
+      // should also set text color when in cell mode
+      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      await PageObjects.lens.closePalettePanel();
+    });
+
+    it('should allow to show a summary table for metric columns', async () => {
+      await PageObjects.lens.setTableSummaryRowFunction('sum');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.assertExactText(
+        '[data-test-subj="lnsDataTable-footer-169.228.188.120-›-Average-of-bytes"]',
+        'Sum: 18,994'
+      );
     });
   });
 }

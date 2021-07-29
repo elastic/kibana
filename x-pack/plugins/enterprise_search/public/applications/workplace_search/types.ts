@@ -22,6 +22,8 @@ export interface Meta {
   page: MetaPage;
 }
 
+export type Role = 'admin' | 'user';
+
 export interface Group {
   id: string;
   name: string;
@@ -94,7 +96,7 @@ export interface ContentSource {
 export interface SourceContentItem {
   id: string;
   last_updated: string;
-  [key: string]: string;
+  [key: string]: string | CustomAPIFieldValue;
 }
 
 export interface ContentSourceDetails extends ContentSource {
@@ -104,9 +106,10 @@ export interface ContentSourceDetails extends ContentSource {
   isFederatedSource: boolean;
   searchable: boolean;
   supportedByLicense: boolean;
-  errorReason: number;
+  errorReason: string | null;
   allowsReauth: boolean;
   boost: number;
+  activities: SourceActivity[];
 }
 
 interface DescriptionList {
@@ -183,8 +186,25 @@ export interface CustomSource {
   id: string;
 }
 
+// https://www.elastic.co/guide/en/workplace-search/current/workplace-search-custom-sources-api.html#_schema_data_types
+type CustomAPIString = string | string[];
+type CustomAPINumber = number | number[];
+type CustomAPIDate = string | string[];
+type CustomAPIGeolocation = string | string[] | number[] | number[][];
+
+export type CustomAPIFieldValue =
+  | CustomAPIString
+  | CustomAPINumber
+  | CustomAPIDate
+  | CustomAPIGeolocation;
+
 export interface Result {
-  [key: string]: string | string[];
+  content_source_id: string;
+  last_updated: string;
+  external_id: string;
+  updated_at: string;
+  source: string;
+  [key: string]: CustomAPIFieldValue;
 }
 
 export interface OptionValue {
@@ -201,6 +221,10 @@ export interface SearchResultConfig {
   titleField: string | null;
   subtitleField: string | null;
   descriptionField: string | null;
+  typeField: string | null;
+  mediaTypeField: string | null;
+  createdByField: string | null;
+  updatedByField: string | null;
   urlField: string | null;
   color: string;
   detailFields: DetailField[];

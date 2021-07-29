@@ -7,19 +7,21 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
-import { SearchBar } from '../../../../components';
-import { AGENTS_INDEX, AGENT_SAVED_OBJECT_TYPE } from '../../../../constants';
-import { useConfig } from '../../../../hooks';
+
+import type { AgentPolicy } from '../../../../types';
+import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
+import { AGENTS_INDEX } from '../../../../constants';
 
 const statusFilters = [
   {
@@ -77,7 +79,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   showUpgradeable,
   onShowUpgradeableChange,
 }) => {
-  const config = useConfig();
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
+
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -98,6 +101,15 @@ export const SearchAndFilterBar: React.FunctionComponent<{
 
   return (
     <>
+      {isEnrollmentFlyoutOpen ? (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            agentPolicies={agentPolicies}
+            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+          />
+        </EuiPortal>
+      ) : null}
+
       {/* Search and filter bar */}
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={4}>
@@ -111,13 +123,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                     onSubmitSearch(newSearch);
                   }
                 }}
-                {...(config.agents.fleetServerEnabled
-                  ? {
-                      indexPattern: AGENTS_INDEX,
-                    }
-                  : {
-                      fieldPrefix: AGENT_SAVED_OBJECT_TYPE,
-                    })}
+                indexPattern={AGENTS_INDEX}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
@@ -130,7 +136,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       onClick={() => setIsStatutsFilterOpen(!isStatusFilterOpen)}
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
-                      numActiveFilters={selectedStatus.length}
                       disabled={agentPolicies.length === 0}
                     >
                       <FormattedMessage
@@ -213,6 +218,15 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   />
                 </EuiFilterButton>
               </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                fill
+                iconType="plusInCircle"
+                onClick={() => setIsEnrollmentFlyoutOpen(true)}
+              >
+                <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

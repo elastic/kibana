@@ -23,6 +23,7 @@ const isXPhaseField = (phase: keyof Phases) => (fieldPath: string): boolean =>
 const isHotPhaseField = isXPhaseField('hot');
 const isWarmPhaseField = isXPhaseField('warm');
 const isColdPhaseField = isXPhaseField('cold');
+const isFrozenPhaseField = isXPhaseField('frozen');
 const isDeletePhaseField = isXPhaseField('delete');
 
 const determineFieldPhase = (fieldPath: string): keyof Phases | 'other' => {
@@ -34,6 +35,9 @@ const determineFieldPhase = (fieldPath: string): keyof Phases | 'other' => {
   }
   if (isColdPhaseField(fieldPath)) {
     return 'cold';
+  }
+  if (isFrozenPhaseField(fieldPath)) {
+    return 'frozen';
   }
   if (isDeletePhaseField(fieldPath)) {
     return 'delete';

@@ -6,13 +6,12 @@
  */
 
 import {
-  sampleRuleAlertParams,
   sampleDocNoSortId,
-  sampleRuleGuid,
   sampleIdGuid,
   sampleDocWithAncestors,
   sampleRuleSO,
   sampleWrappedSignalHit,
+  expectedRule,
 } from './__mocks__/es_results';
 import {
   buildBulkBody,
@@ -22,8 +21,13 @@ import {
   objectArrayIntersection,
 } from './build_bulk_body';
 import { SignalHit, SignalSourceHit } from './types';
-import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
+import { getQueryRuleParams, getThresholdRuleParams } from '../schemas/rule_schemas.mock';
+
+// This allows us to not have to use ts-expect-error with delete in the code.
+type SignalHitOptionalTimestamp = Omit<SignalHit, '@timestamp'> & {
+  '@timestamp'?: SignalHit['@timestamp'];
+};
 
 describe('buildBulkBody', () => {
   beforeEach(() => {
@@ -31,32 +35,15 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds well-defined body', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     delete doc._source.source;
-    const fakeSignalSourceHit = buildBulkBody({
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
       doc,
-      ruleParams: {
-        ...sampleParams,
-        threshold: {
-          field: ['host.name'],
-          value: 100,
-        },
-      },
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -89,59 +76,22 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
-          threshold: {
-            field: ['host.name'],
-            value: 100,
-          },
-          throttle: 'no_actions',
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
-          version: 1,
-          created_at: fakeSignalSourceHit.signal.rule?.created_at,
-          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('bulk body builds well-defined body with threshold results', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getThresholdRuleParams());
     const baseDoc = sampleDocNoSortId();
-    const doc: SignalSourceHit = {
+    const doc: SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } = {
       ...baseDoc,
       _source: {
         ...baseDoc._source,
@@ -156,29 +106,12 @@ describe('buildBulkBody', () => {
       },
     };
     delete doc._source.source;
-    const fakeSignalSourceHit = buildBulkBody({
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
       doc,
-      ruleParams: {
-        ...sampleParams,
-        threshold: {
-          field: [],
-          value: 4,
-        },
-      },
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -211,48 +144,22 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
         rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
+          ...expectedRule(),
+          filters: undefined,
+          type: 'threshold',
           threshold: {
-            field: [],
-            value: 4,
+            field: ['host.id'],
+            value: 5,
+            cardinality: [
+              {
+                field: 'source.ip',
+                value: 11,
+              },
+            ],
           },
-          throttle: 'no_actions',
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
-          version: 1,
-          created_at: fakeSignalSourceHit.signal.rule?.created_at,
-          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          exceptions_list: getListArrayMock(),
         },
         threshold_result: {
           terms: [
@@ -264,12 +171,15 @@ describe('buildBulkBody', () => {
         },
         depth: 1,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('bulk body builds original_event if it exists on the event to begin with', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     delete doc._source.source;
     doc._source.event = {
@@ -278,23 +188,12 @@ describe('buildBulkBody', () => {
       dataset: 'socket',
       kind: 'event',
     };
-    const fakeSignalSourceHit = buildBulkBody({
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
       doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -336,53 +235,20 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
-          version: 1,
-          created_at: fakeSignalSourceHit.signal.rule?.created_at,
-          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          throttle: 'no_actions',
-          threat: [],
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     delete doc._source.source;
     doc._source.event = {
@@ -390,23 +256,12 @@ describe('buildBulkBody', () => {
       module: 'system',
       dataset: 'socket',
     };
-    const fakeSignalSourceHit = buildBulkBody({
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
       doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -447,75 +302,31 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          threat: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
-          version: 1,
-          created_at: fakeSignalSourceHit.signal.rule?.created_at,
-          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          throttle: 'no_actions',
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     delete doc._source.source;
     doc._source.event = {
       kind: 'event',
     };
-    const fakeSignalSourceHit = buildBulkBody({
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
       doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -551,53 +362,20 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
-          version: 1,
-          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          created_at: fakeSignalSourceHit.signal.rule?.created_at,
-          throttle: 'no_actions',
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('bulk body builds "original_signal" if it exists already as a numeric', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
     delete sampleDoc._source.source;
     const doc = ({
@@ -607,21 +385,11 @@ describe('buildBulkBody', () => {
         signal: 123,
       },
     } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody({
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
+      ruleSO,
       doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+      'missingFields'
+    );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -654,53 +422,20 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
-          version: 1,
-          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          created_at: fakeSignalSourceHit.signal.rule?.created_at,
-          throttle: 'no_actions',
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
   test('bulk body builds "original_signal" if it exists already as an object', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
     delete sampleDoc._source.source;
     const doc = ({
@@ -710,21 +445,11 @@ describe('buildBulkBody', () => {
         signal: { child_1: { child_2: 'nested data' } },
       },
     } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody({
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
+      ruleSO,
       doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+      'missingFields'
+    );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -757,46 +482,13 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
-          version: 1,
-          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          created_at: fakeSignalSourceHit.signal.rule?.created_at,
-          throttle: 'no_actions',
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -811,10 +503,9 @@ describe('buildSignalFromSequence', () => {
     const block2 = sampleWrappedSignalHit();
     block2._source.new_key = 'new_key_value';
     const blocks = [block1, block2];
-    const ruleSO = sampleRuleSO();
-    const signal = buildSignalFromSequence(blocks, ruleSO);
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(blocks, ruleSO);
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { new_key: string } = {
       new_key: 'new_key_value',
@@ -882,43 +573,7 @@ describe('buildSignalFromSequence', () => {
           },
         ],
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'sample user',
-          updated_by: 'sample user',
-          version: 1,
-          updated_at: ruleSO.updated_at ?? '',
-          created_at: ruleSO.attributes.createdAt,
-          throttle: 'no_actions',
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 2,
         group: {
           id: '269c1f5754bff92fb8040283b687258e99b03e8b2ab1262cc20c82442e5de5ea',
@@ -933,10 +588,9 @@ describe('buildSignalFromSequence', () => {
     const block2 = sampleWrappedSignalHit();
     block2._source['@timestamp'] = '2021-05-20T22:28:46+0000';
     block2._source.someKey = 'someOtherValue';
-    const ruleSO = sampleRuleSO();
-    const signal = buildSignalFromSequence([block1, block2], ruleSO);
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence([block1, block2], ruleSO);
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> = {
       event: {
@@ -1003,43 +657,7 @@ describe('buildSignalFromSequence', () => {
           },
         ],
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'sample user',
-          updated_by: 'sample user',
-          version: 1,
-          updated_at: ruleSO.updated_at ?? '',
-          created_at: ruleSO.attributes.createdAt,
-          throttle: 'no_actions',
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 2,
         group: {
           id: '269c1f5754bff92fb8040283b687258e99b03e8b2ab1262cc20c82442e5de5ea',
@@ -1054,10 +672,15 @@ describe('buildSignalFromEvent', () => {
   test('builds a basic signal from a single event', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
     delete ancestor._source.source;
-    const ruleSO = sampleRuleSO();
-    const signal = buildSignalFromEvent(ancestor, ruleSO, true);
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const signal: SignalHitOptionalTimestamp = buildSignalFromEvent(
+      ancestor,
+      ruleSO,
+      true,
+      'missingFields'
+    );
+
     // Timestamp will potentially always be different so remove it for the test
-    // @ts-expect-error
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -1068,7 +691,7 @@ describe('buildSignalFromEvent', () => {
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
         },
-        original_time: '2020-04-20T21:27:45+0000',
+        original_time: '2020-04-20T21:27:45.000Z',
         parent: {
           id: sampleIdGuid,
           rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -1101,44 +724,11 @@ describe('buildSignalFromEvent', () => {
           },
         ],
         status: 'open',
-        rule: {
-          actions: [],
-          author: ['Elastic'],
-          building_block_type: 'default',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          rule_id: 'rule-1',
-          false_positives: [],
-          max_signals: 10000,
-          risk_score: 50,
-          risk_score_mapping: [],
-          output_index: '.siem-signals',
-          description: 'Detecting root and admin users',
-          from: 'now-6m',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          license: 'Elastic License',
-          name: 'rule-name',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://google.com'],
-          severity: 'high',
-          severity_mapping: [],
-          tags: ['some fake tag 1', 'some fake tag 2'],
-          threat: [],
-          type: 'query',
-          to: 'now',
-          note: '',
-          enabled: true,
-          created_by: 'sample user',
-          updated_by: 'sample user',
-          version: 1,
-          updated_at: ruleSO.updated_at ?? '',
-          created_at: ruleSO.attributes.createdAt,
-          throttle: 'no_actions',
-          exceptions_list: getListArrayMock(),
-        },
+        rule: expectedRule(),
         depth: 2,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(signal).toEqual(expected);

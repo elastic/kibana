@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LoginValidator, LoginValidationResult } from './validate_login';
+import type { LoginValidationResult } from './validate_login';
+import { LoginValidator } from './validate_login';
 
 function expectValid(result: LoginValidationResult) {
   expect(result.isInvalid).toBe(false);

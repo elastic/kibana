@@ -16,20 +16,24 @@ import {
   XYChartElementEvent,
   ElementClickListener,
 } from '@elastic/charts';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
-import { useUrlParams } from '../../../hooks';
+import { useMonitorId, useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
+import { createExploratoryViewUrl } from '../../../../../observability/public';
+import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
+import { monitorStatusSelector } from '../../../state/selectors';
 
 export interface PingHistogramComponentProps {
   /**
@@ -69,7 +73,15 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     chartTheme,
   } = useContext(UptimeThemeContext);
 
-  const [, updateUrlParams] = useUrlParams();
+  const monitorId = useMonitorId();
+
+  const selectedMonitor = useSelector(monitorStatusSelector);
+
+  const { basePath } = useUptimeSettingsContext();
+
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+
+  const { dateRangeStart, dateRangeEnd } = getUrlParams();
 
   let content: JSX.Element | undefined;
   if (!data?.histogram?.length) {
@@ -179,17 +191,50 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     );
   }
 
+  const pingHistogramExploratoryViewLink = createExploratoryViewUrl(
+    {
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          name: `${monitorId}-pings`,
+          dataType: 'synthetics',
+          selectedMetricField: 'summary.up',
+          time: { from: dateRangeStart, to: dateRangeEnd },
+          reportDefinitions: {
+            'monitor.name':
+              monitorId && selectedMonitor?.monitor?.name
+                ? [selectedMonitor.monitor.name]
+                : ['ALL_VALUES'],
+          },
+        },
+      ],
+    },
+    basePath
+  );
+
+  const showAnalyzeButton = false;
+
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.pingsOverTimeTitle"
-            defaultMessage="Pings over time"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.uptime.snapshot.pingsOverTimeTitle"
+                defaultMessage="Pings over time"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" href={pingHistogramExploratoryViewLink}>
+              <FormattedMessage id="xpack.uptime.pingHistogram.analyze" defaultMessage="Analyze" />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {content}
     </>
   );

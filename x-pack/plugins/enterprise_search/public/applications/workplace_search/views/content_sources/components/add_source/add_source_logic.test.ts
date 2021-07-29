@@ -10,7 +10,7 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-} from '../../../../../__mocks__';
+} from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -20,8 +20,14 @@ jest.mock('../../../../app_logic', () => ({
 }));
 import { AppLogic } from '../../../../app_logic';
 
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
+import {
+  ADD_GITHUB_PATH,
+  SOURCES_PATH,
+  PERSONAL_SOURCES_PATH,
+  getSourcesPath,
+} from '../../../../routes';
 import { CustomSource } from '../../../../types';
+import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
 import {
@@ -36,7 +42,7 @@ describe('AddSourceLogic', () => {
   const { mount } = new LogicMounter(AddSourceLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
 
   const defaultValues = {
     addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
@@ -55,10 +61,12 @@ describe('AddSourceLogic', () => {
     sourceConfigData: {} as SourceConfigData,
     sourceConnectData: {} as SourceConnectData,
     newCustomSource: {} as CustomSource,
+    oauthConfigCompleted: false,
     currentServiceType: '',
     githubOrganizations: [],
     selectedGithubOrganizationsMap: {} as OrganizationsMap,
     selectedGithubOrganizations: [],
+    preContentSourceId: '',
   };
 
   const sourceConnectData = {
@@ -182,6 +190,12 @@ describe('AddSourceLogic', () => {
       expect(AddSourceLogic.values.selectedGithubOrganizationsMap).toEqual({ foo: true });
     });
 
+    it('setPreContentSourceId', () => {
+      AddSourceLogic.actions.setPreContentSourceId('123');
+
+      expect(AddSourceLogic.values.preContentSourceId).toEqual('123');
+    });
+
     it('setButtonNotLoading', () => {
       AddSourceLogic.actions.setButtonNotLoading();
 
@@ -268,19 +282,20 @@ describe('AddSourceLogic', () => {
         const addSourceProps = { sourceIndex: 1, reAuthenticate: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReAuthenticateStep);
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
       });
     });
 
     describe('saveSourceParams', () => {
       const params = {
         code: 'code123',
-        state: '"{"state": "foo"}"',
-        session_state: 'session123',
+        session_state: 'session_state123',
+        state:
+          '{"action":"create","context":"organization","service_type":"gmail","csrf_token":"token==","index_permissions":false}',
       };
 
       const queryString =
-        'code=code123&state=%22%7B%22state%22%3A%20%22foo%22%7D%22&session_state=session123';
+        '?state=%7B%22action%22:%22create%22,%22context%22:%22organization%22,%22service_type%22:%22gmail%22,%22csrf_token%22:%22token%3D%3D%22,%22index_permissions%22:false%7D&code=code123';
 
       const response = { serviceName: 'name', indexPermissions: false, serviceType: 'zendesk' };
 
@@ -292,7 +307,7 @@ describe('AddSourceLogic', () => {
         const setAddedSourceSpy = jest.spyOn(SourcesLogic.actions, 'setAddedSource');
         const { serviceName, indexPermissions, serviceType } = response;
         http.get.mockReturnValue(Promise.resolve(response));
-        AddSourceLogic.actions.saveSourceParams(queryString);
+        AddSourceLogic.actions.saveSourceParams(queryString, params, true);
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
           query: {
             ...params,
@@ -303,15 +318,78 @@ describe('AddSourceLogic', () => {
         await nextTick();
 
         expect(setAddedSourceSpy).toHaveBeenCalledWith(serviceName, indexPermissions, serviceType);
-        expect(navigateToUrl).toHaveBeenCalledWith(
-          getSourcesPath(SOURCES_PATH, AppLogic.values.isOrganization)
+        expect(navigateToUrl).toHaveBeenCalledWith(getSourcesPath(SOURCES_PATH, true));
+      });
+
+      it('redirects to private dashboard when account context', async () => {
+        const accountQueryString =
+          '?state=%7B%22action%22:%22create%22,%22context%22:%22account%22,%22service_type%22:%22gmail%22,%22csrf_token%22:%22token%3D%3D%22,%22index_permissions%22:false%7D&code=code';
+
+        AddSourceLogic.actions.saveSourceParams(accountQueryString, params, false);
+
+        await nextTick();
+
+        expect(navigateToUrl).toHaveBeenCalledWith(getSourcesPath(SOURCES_PATH, false));
+      });
+
+      it('redirects to oauth config when preContentSourceId is present', async () => {
+        const preContentSourceId = 'id123';
+        const setPreContentSourceIdSpy = jest.spyOn(
+          AddSourceLogic.actions,
+          'setPreContentSourceId'
         );
+
+        http.get.mockReturnValue(
+          Promise.resolve({
+            ...response,
+            hasConfigureStep: true,
+            preContentSourceId,
+          })
+        );
+        AddSourceLogic.actions.saveSourceParams(queryString, params, true);
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
+          query: {
+            ...params,
+            kibana_host: '',
+          },
+        });
+
+        await nextTick();
+
+        expect(setPreContentSourceIdSpy).toHaveBeenCalledWith(preContentSourceId);
+        expect(navigateToUrl).toHaveBeenCalledWith(`${ADD_GITHUB_PATH}/configure${queryString}`);
+      });
+
+      describe('Github error edge case', () => {
+        const GITHUB_ERROR =
+          'The redirect_uri MUST match the registered callback URL for this application.';
+        const errorParams = { ...params, error_description: GITHUB_ERROR };
+        const getGithubQueryString = (context: 'organization' | 'account') =>
+          `?error=redirect_uri_mismatch&error_description=The+redirect_uri+MUST+match+the+registered+callback+URL+for+this+application.&error_uri=https%3A%2F%2Fdocs.github.com%2Fapps%2Fmanaging-oauth-apps%2Ftroubleshooting-authorization-request-errors%2F%23redirect-uri-mismatch&state=%7B%22action%22%3A%22create%22%2C%22context%22%3A%22${context}%22%2C%22service_type%22%3A%22github%22%2C%22csrf_token%22%3A%22TOKEN%3D%3D%22%2C%22index_permissions%22%3Afalse%7D`;
+
+        it('handles "organization" redirect and displays error', () => {
+          const githubQueryString = getGithubQueryString('organization');
+          AddSourceLogic.actions.saveSourceParams(githubQueryString, errorParams, true);
+
+          expect(navigateToUrl).toHaveBeenCalledWith('/');
+          expect(setErrorMessage).toHaveBeenCalledWith(GITHUB_ERROR);
+        });
+
+        it('handles "account" redirect and displays error', () => {
+          const githubQueryString = getGithubQueryString('account');
+          AddSourceLogic.actions.saveSourceParams(githubQueryString, errorParams, false);
+
+          expect(navigateToUrl).toHaveBeenCalledWith(PERSONAL_SOURCES_PATH);
+          expect(setErrorMessage).toHaveBeenCalledWith(
+            PERSONAL_DASHBOARD_SOURCE_ERROR(GITHUB_ERROR)
+          );
+        });
       });
 
       it('handles error', async () => {
         http.get.mockReturnValue(Promise.reject('this is an error'));
 
-        AddSourceLogic.actions.saveSourceParams(queryString);
+        AddSourceLogic.actions.saveSourceParams(queryString, params, true);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
@@ -413,7 +491,12 @@ describe('AddSourceLogic', () => {
           AddSourceLogic.actions.getSourceReConnectData('github');
 
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/reauth_prepare'
+            '/api/workplace_search/org/sources/github/reauth_prepare',
+            {
+              query: {
+                kibana_host: '',
+              },
+            }
           );
           await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
@@ -431,13 +514,14 @@ describe('AddSourceLogic', () => {
 
       describe('getPreContentSourceConfigData', () => {
         it('calls API and sets values', async () => {
+          mount({ preContentSourceId: '123' });
           const setPreContentSourceConfigDataSpy = jest.spyOn(
             AddSourceLogic.actions,
             'setPreContentSourceConfigData'
           );
           http.get.mockReturnValue(Promise.resolve(config));
 
-          AddSourceLogic.actions.getPreContentSourceConfigData('123');
+          AddSourceLogic.actions.getPreContentSourceConfigData();
 
           expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/pre_sources/123');
           await nextTick();
@@ -447,7 +531,7 @@ describe('AddSourceLogic', () => {
         it('handles error', async () => {
           http.get.mockReturnValue(Promise.reject('this is an error'));
 
-          AddSourceLogic.actions.getPreContentSourceConfigData('123');
+          AddSourceLogic.actions.getPreContentSourceConfigData();
           await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
@@ -602,12 +686,18 @@ describe('AddSourceLogic', () => {
         AddSourceLogic.actions.getSourceReConnectData('123');
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/reauth_prepare'
+          '/api/workplace_search/account/sources/123/reauth_prepare',
+          {
+            query: {
+              kibana_host: '',
+            },
+          }
         );
       });
 
       it('getPreContentSourceConfigData', () => {
-        AddSourceLogic.actions.getPreContentSourceConfigData('123');
+        mount({ preContentSourceId: '123' });
+        AddSourceLogic.actions.getPreContentSourceConfigData();
 
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/pre_sources/123');
       });

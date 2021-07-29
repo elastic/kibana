@@ -261,7 +261,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
-          defaultMessage="Register a repository"
+          defaultMessage="Register repository"
         />
       </EuiButton>,
     ],

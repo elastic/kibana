@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import Boom from '@hapi/boom';
+
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
+import { ElasticsearchAssetType } from '../../../types';
+import type {
   AssetReference,
   AssetType,
-  CallESAsCurrentUser,
-  ElasticsearchAssetType,
   EsAssetReference,
   KibanaAssetReference,
   Installation,
 } from '../../../types';
-import { getInstallation, savedObjectTypes } from './index';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
@@ -27,17 +26,20 @@ import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
+import { getInstallation, savedObjectTypes } from './index';
+
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
+  force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const { savedObjectsClient, pkgkey, esClient, force } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
-  if (installation.removable === false)
+  if (installation.removable === false && !force)
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
   const { total } = await packagePolicyService.list(savedObjectsClient, {
@@ -53,7 +55,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, callCluster);
+  await deleteAssets(installation, savedObjectsClient, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -62,7 +64,7 @@ export async function removeInstallation(options: {
   // recreate or delete index patterns when a package is uninstalled
   // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
   // from the registry again and reinstall the index patterns
-  await installIndexPatterns(savedObjectsClient);
+  await installIndexPatterns({ savedObjectsClient, esClient });
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
@@ -77,6 +79,7 @@ export async function removeInstallation(options: {
   return installedAssets;
 }
 
+// TODO: this is very much like deleteKibanaSavedObjectsAssets below
 function deleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
@@ -86,17 +89,22 @@ function deleteKibanaAssets(
   });
 }
 
-function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallESAsCurrentUser) {
+function deleteESAssets(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+): Array<Promise<unknown>> {
   return installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (assetType === ElasticsearchAssetType.ingestPipeline) {
-      return deletePipeline(callCluster, id);
+      return deletePipeline(esClient, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
-      return deleteTemplate(callCluster, id);
+      return deleteIndexTemplate(esClient, id);
+    } else if (assetType === ElasticsearchAssetType.componentTemplate) {
+      return deleteComponentTemplate(esClient, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
-      return deleteTransforms(callCluster, [id]);
+      return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
-      return deleteIlms(callCluster, [id]);
+      return deleteIlms(esClient, [id]);
     }
   });
 }
@@ -104,17 +112,34 @@ function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallE
 async function deleteAssets(
   { installed_es: installedEs, installed_kibana: installedKibana }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
 
-  const deletePromises: Array<Promise<unknown>> = [
-    ...deleteESAssets(installedEs, callCluster),
-    ...deleteKibanaAssets(installedKibana, savedObjectsClient),
-  ];
+  // must delete index templates first, or component templates which reference them cannot be deleted
+  // separate the assets into Index Templates and other assets
+  type Tuple = [EsAssetReference[], EsAssetReference[]];
+  const [indexTemplates, otherAssets] = installedEs.reduce<Tuple>(
+    ([indexAssetTypes, otherAssetTypes], asset) => {
+      if (asset.type === ElasticsearchAssetType.indexTemplate) {
+        indexAssetTypes.push(asset);
+      } else {
+        otherAssetTypes.push(asset);
+      }
+
+      return [indexAssetTypes, otherAssetTypes];
+    },
+    [[], []]
+  );
 
   try {
-    await Promise.all(deletePromises);
+    // must delete index templates first
+    await Promise.all(deleteESAssets(indexTemplates, esClient));
+    // then the other asset types
+    await Promise.all([
+      ...deleteESAssets(otherAssets, esClient),
+      ...deleteKibanaAssets(installedKibana, savedObjectsClient),
+    ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!savedObjectsClient.errors.isNotFoundError(err)) {
@@ -123,31 +148,29 @@ async function deleteAssets(
   }
 }
 
-async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): Promise<void> {
+async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
     try {
-      const callClusterParams: {
-        method: string;
-        path: string;
-        ignore: number[];
-      } = {
-        method: 'DELETE',
-        path: `/_index_template/${name}`,
-        ignore: [404],
-      };
-      // This uses the catch-all endpoint 'transport.request' because there is no
-      // convenience endpoint using the new _index_template API yet.
-      // The existing convenience endpoint `indices.putTemplate` only sends to _template,
-      // which does not support v2 templates.
-      // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-      await callCluster('transport.request', callClusterParams);
+      await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
     } catch {
-      throw new Error(`error deleting template ${name}`);
+      throw new Error(`error deleting index template ${name}`);
     }
   }
 }
 
+async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
+  // '*' shouldn't ever appear here, but it still would delete all templates
+  if (name && name !== '*') {
+    try {
+      await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
+    } catch (error) {
+      throw new Error(`error deleting component template ${name}`);
+    }
+  }
+}
+
+// TODO: this is very much like deleteKibanaAssets above
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
   installedRefs: AssetReference[]
@@ -165,6 +188,9 @@ export async function deleteKibanaSavedObjectsAssets(
   try {
     await Promise.all(deletePromises);
   } catch (err) {
-    logger.warn(err);
+    // in the rollback case, partial installs are likely, so missing assets are not an error
+    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+      logger.error(err);
+    }
   }
 }

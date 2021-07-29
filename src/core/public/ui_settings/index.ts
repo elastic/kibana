@@ -7,5 +7,5 @@
  */
 
 export { UiSettingsService } from './ui_settings_service';
-export { UiSettingsClient } from './ui_settings_client';
-export { UiSettingsState, IUiSettingsClient } from './types';
+export type { UiSettingsClient } from './ui_settings_client';
+export type { UiSettingsState, IUiSettingsClient } from './types';

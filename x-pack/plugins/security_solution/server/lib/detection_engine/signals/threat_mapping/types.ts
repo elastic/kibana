@@ -4,16 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SearchResponse } from 'elasticsearch';
-import { Duration } from 'moment';
-
-import { ListClient } from '../../../../../../lists/server';
-import {
-  Type,
-  LanguageOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type { estypes } from '@elastic/elasticsearch';
+import type {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
@@ -22,96 +14,85 @@ import {
   ConcurrentSearches,
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
-import { PartialFilter, RuleTypeParams } from '../../types';
+  LanguageOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerts/server';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+} from '../../../../../../alerting/server';
+import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
+import {
+  AlertAttributes,
+  BulkCreate,
+  RuleRangeTuple,
+  SearchAfterAndBulkCreateReturnType,
+  SignalsEnrichment,
+  WrapHits,
+} from '../types';
+import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
+  tuple: RuleRangeTuple;
   threatMapping: ThreatMapping;
   query: string;
   inputIndex: string[];
   type: Type;
-  filters: PartialFilter[];
+  filters: unknown[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
-  gap: Duration | null;
-  previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
-  refresh: false | 'wait_for';
-  throttle: string;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
-  name: string;
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 export interface CreateThreatSignalOptions {
+  tuple: RuleRangeTuple;
   threatMapping: ThreatMapping;
   threatEnrichment: SignalsEnrichment;
   query: string;
   inputIndex: string[];
   type: Type;
-  filters: PartialFilter[];
+  filters: unknown[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
-  gap: Duration | null;
-  previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
-  refresh: false | 'wait_for';
-  throttle: string;
   buildRuleMessage: BuildRuleMessage;
-  name: string;
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 export interface BuildThreatMappingFilterOptions {
@@ -151,7 +132,7 @@ export interface BooleanFilter {
 }
 
 export interface GetThreatListOptions {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: string;
   language: ThreatLanguageOrUndefined;
   index: string[];
@@ -159,7 +140,7 @@ export interface GetThreatListOptions {
   searchAfter: string[] | undefined;
   sortField: string | undefined;
   sortOrder: SortOrderOrUndefined;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
   buildRuleMessage: BuildRuleMessage;
@@ -167,10 +148,10 @@ export interface GetThreatListOptions {
 }
 
 export interface ThreatListCountOptions {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: string;
   language: ThreatLanguageOrUndefined;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   index: string[];
   exceptionItems: ExceptionListItemSchema[];
 }
@@ -190,7 +171,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = SearchResponse<ThreatListDoc>['hits']['hits'][number];
+export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatIndicator {
   [key: string]: unknown;
@@ -202,6 +183,7 @@ export interface SortWithTieBreaker {
 
 export interface ThreatMatchNamedQuery {
   id: string;
+  index: string;
   field: string;
   value: string;
 }
@@ -214,7 +196,7 @@ export interface BuildThreatEnrichmentOptions {
   listClient: ListClient;
   logger: Logger;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  threatFilters: PartialFilter[];
+  threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;

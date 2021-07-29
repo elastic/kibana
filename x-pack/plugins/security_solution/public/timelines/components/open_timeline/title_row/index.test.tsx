@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { EuiButtonProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { TitleRow } from '.';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: { euiSizeS: '10px', euiLineHeight: 10, euiBreakpoints: { s: '10px' }, euiSize: '10px' },
+});
 
 describe('TitleRow', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
 
   test('it renders the title', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TitleRow onAddTimelinesToFavorites={jest.fn()} selectedTimelinesCount={0} title={title} />
       </ThemeProvider>
     );
@@ -30,7 +33,7 @@ describe('TitleRow', () => {
   describe('Favorite Selected button', () => {
     test('it renders the Favorite Selected button when onAddTimelinesToFavorites is provided', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TitleRow
             onAddTimelinesToFavorites={jest.fn()}
             selectedTimelinesCount={0}
@@ -44,7 +47,7 @@ describe('TitleRow', () => {
 
     test('it does NOT render the Favorite Selected button when onAddTimelinesToFavorites is NOT provided', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TitleRow selectedTimelinesCount={0} title={title} />
         </ThemeProvider>
       );
@@ -54,7 +57,7 @@ describe('TitleRow', () => {
 
     test('it disables the Favorite Selected button when the selectedTimelinesCount is 0', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TitleRow
             onAddTimelinesToFavorites={jest.fn()}
             selectedTimelinesCount={0}
@@ -73,7 +76,7 @@ describe('TitleRow', () => {
 
     test('it enables the Favorite Selected button when the selectedTimelinesCount is greater than 0', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TitleRow
             onAddTimelinesToFavorites={jest.fn()}
             selectedTimelinesCount={3}
@@ -94,7 +97,7 @@ describe('TitleRow', () => {
       const onAddTimelinesToFavorites = jest.fn();
 
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TitleRow
             onAddTimelinesToFavorites={onAddTimelinesToFavorites}
             selectedTimelinesCount={3}

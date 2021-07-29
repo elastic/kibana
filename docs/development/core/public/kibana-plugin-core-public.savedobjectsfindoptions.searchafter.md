@@ -9,5 +9,5 @@ Use the sort values from the previous page to retrieve the next page of results.
 <b>Signature:</b>
 
 ```typescript
-searchAfter?: unknown[];
+searchAfter?: estypes.Id[];
 ```

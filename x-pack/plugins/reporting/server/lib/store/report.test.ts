@@ -18,25 +18,28 @@ describe('Class Report', () => {
       payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'cool report' },
       meta: { objectType: 'test' },
       timeout: 30000,
-      priority: 1,
     });
 
-    expect(report.toEsDocsJSON()).toMatchObject({
-      _index: '.reporting-test-index-12345',
-      _source: {
-        attempts: 0,
-        browser_type: 'browser_type_test_string',
-        completed_at: undefined,
-        created_by: 'created_by_test_string',
-        jobtype: 'test-report',
-        max_attempts: 50,
-        meta: { objectType: 'test' },
-        payload: { headers: 'payload_test_field', objectType: 'testOt' },
-        priority: 1,
-        started_at: undefined,
-        status: 'pending',
-        timeout: 30000,
-      },
+    expect(report.toReportSource()).toMatchObject({
+      attempts: 0,
+      browser_type: 'browser_type_test_string',
+      completed_at: undefined,
+      created_by: 'created_by_test_string',
+      jobtype: 'test-report',
+      max_attempts: 50,
+      meta: { objectType: 'test' },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+      started_at: undefined,
+      status: 'pending',
+      timeout: 30000,
+    });
+    expect(report.toReportTaskJSON()).toMatchObject({
+      attempts: 0,
+      created_by: 'created_by_test_string',
+      index: '.reporting-test-index-12345',
+      jobtype: 'test-report',
+      meta: { objectType: 'test' },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
     });
     expect(report.toApiJSON()).toMatchObject({
       attempts: 0,
@@ -45,9 +48,8 @@ describe('Class Report', () => {
       index: '.reporting-test-index-12345',
       jobtype: 'test-report',
       max_attempts: 50,
-      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+      payload: { objectType: 'testOt' },
       meta: { objectType: 'test' },
-      priority: 1,
       status: 'pending',
       timeout: 30000,
     });
@@ -65,7 +67,6 @@ describe('Class Report', () => {
       payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'hot report' },
       meta: { objectType: 'stange' },
       timeout: 30000,
-      priority: 1,
     });
 
     const metadata = {
@@ -76,23 +77,27 @@ describe('Class Report', () => {
     };
     report.updateWithEsDoc(metadata);
 
-    expect(report.toEsDocsJSON()).toMatchObject({
-      _id: '12342p9o387549o2345',
-      _index: '.reporting-test-update',
-      _source: {
-        attempts: 0,
-        browser_type: 'browser_type_test_string',
-        completed_at: undefined,
-        created_by: 'created_by_test_string',
-        jobtype: 'test-report',
-        max_attempts: 50,
-        meta: { objectType: 'stange' },
-        payload: { objectType: 'testOt' },
-        priority: 1,
-        started_at: undefined,
-        status: 'pending',
-        timeout: 30000,
-      },
+    expect(report.toReportSource()).toMatchObject({
+      attempts: 0,
+      browser_type: 'browser_type_test_string',
+      completed_at: undefined,
+      created_by: 'created_by_test_string',
+      jobtype: 'test-report',
+      max_attempts: 50,
+      meta: { objectType: 'stange' },
+      payload: { objectType: 'testOt' },
+      started_at: undefined,
+      status: 'pending',
+      timeout: 30000,
+    });
+    expect(report.toReportTaskJSON()).toMatchObject({
+      attempts: 0,
+      created_by: 'created_by_test_string',
+      id: '12342p9o387549o2345',
+      index: '.reporting-test-update',
+      jobtype: 'test-report',
+      meta: { objectType: 'stange' },
+      payload: { objectType: 'testOt' },
     });
     expect(report.toApiJSON()).toMatchObject({
       attempts: 0,
@@ -104,8 +109,7 @@ describe('Class Report', () => {
       jobtype: 'test-report',
       max_attempts: 50,
       meta: { objectType: 'stange' },
-      payload: { headers: 'payload_test_field', objectType: 'testOt' },
-      priority: 1,
+      payload: { objectType: 'testOt' },
       started_at: undefined,
       status: 'pending',
       timeout: 30000,
@@ -113,7 +117,7 @@ describe('Class Report', () => {
   });
 
   it('throws error if converted to task JSON before being synced with ES storage', () => {
-    const report = new Report({} as any);
+    const report = new Report({ jobtype: 'spam', payload: {} } as any);
     expect(() => report.updateWithEsDoc(report)).toThrowErrorMatchingInlineSnapshot(
       `"Report object from ES has missing fields!"`
     );

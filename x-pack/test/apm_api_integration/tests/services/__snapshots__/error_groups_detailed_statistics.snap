@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM API tests basic apm_8.0.0 Error groups detailed statistics when data is loaded returns the correct data 1`] = `
+Object {
+  "groupId": "237562dfa8b8ab4eb94f22c87e42112b",
+  "timeseries": Array [
+    Object {
+      "x": 1627373280000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373340000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373400000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373460000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373520000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373580000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373640000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373700000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373760000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373820000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373880000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627373940000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374000000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374060000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374120000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374180000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374240000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374300000,
+      "y": 1,
+    },
+    Object {
+      "x": 1627374360000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374420000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374480000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374540000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374600000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374660000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374720000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374780000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374840000,
+      "y": 1,
+    },
+    Object {
+      "x": 1627374900000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374960000,
+      "y": 1,
+    },
+    Object {
+      "x": 1627375020000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627375080000,
+      "y": 0,
+    },
+  ],
+}
+`;
+
+exports[`APM API tests basic apm_8.0.0 Error groups detailed statistics when data is loaded with previous data returns the correct data returns correct timeseries 1`] = `
+Object {
+  "groupId": "237562dfa8b8ab4eb94f22c87e42112b",
+  "timeseries": Array [
+    Object {
+      "x": 1627374180000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374240000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374300000,
+      "y": 1,
+    },
+    Object {
+      "x": 1627374360000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374420000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374480000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374540000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374600000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374660000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374720000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374780000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374840000,
+      "y": 1,
+    },
+    Object {
+      "x": 1627374900000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627374960000,
+      "y": 1,
+    },
+    Object {
+      "x": 1627375020000,
+      "y": 0,
+    },
+    Object {
+      "x": 1627375080000,
+      "y": 0,
+    },
+  ],
+}
+`;

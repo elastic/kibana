@@ -8,14 +8,21 @@
 import { LogMessageFormattingRule } from '../rule_types';
 
 const BUILTIN_GENERIC_MESSAGE_FIELDS = ['message', '@message'];
+const BUILTIN_FALLBACK_MESSAGE_FIELDS = ['log.original', 'event.original'];
 
-export const getGenericRules = (genericMessageFields: string[]) => [
-  ...Array.from(new Set([...genericMessageFields, ...BUILTIN_GENERIC_MESSAGE_FIELDS])).reduce<
-    LogMessageFormattingRule[]
-  >((genericRules, fieldName) => [...genericRules, ...createGenericRulesForField(fieldName)], []),
+export const getGenericRules = (genericMessageFields: string[]): LogMessageFormattingRule[] => [
+  ...Array.from(new Set([...genericMessageFields, ...BUILTIN_GENERIC_MESSAGE_FIELDS])).flatMap(
+    createGenericRulesForField
+  ),
+  ...BUILTIN_FALLBACK_MESSAGE_FIELDS.filter(
+    (fieldName) => !genericMessageFields.includes(fieldName)
+  ).flatMap(createFallbackRulesForField),
+];
+
+const createGenericRulesForField = (fieldName: string) => [
   {
     when: {
-      exists: ['event.dataset', 'log.original'],
+      exists: ['event.dataset', 'log.level', fieldName, 'error.stack_trace.text'],
     },
     format: [
       {
@@ -25,26 +32,25 @@ export const getGenericRules = (genericMessageFields: string[]) => [
         field: 'event.dataset',
       },
       {
+        constant: '][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
         constant: '] ',
       },
       {
-        field: 'log.original',
+        field: fieldName,
       },
-    ],
-  },
-  {
-    when: {
-      exists: ['log.original'],
-    },
-    format: [
       {
-        field: 'log.original',
+        constant: '\n',
+      },
+      {
+        field: 'error.stack_trace.text',
       },
     ],
   },
-];
-
-const createGenericRulesForField = (fieldName: string) => [
   {
     when: {
       exists: ['event.dataset', 'log.level', fieldName],
@@ -72,6 +78,31 @@ const createGenericRulesForField = (fieldName: string) => [
   },
   {
     when: {
+      exists: ['log.level', fieldName, 'error.stack_trace.text'],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+      {
+        constant: '\n',
+      },
+      {
+        field: 'error.stack_trace.text',
+      },
+    ],
+  },
+  {
+    when: {
       exists: ['log.level', fieldName],
     },
     format: [
@@ -80,6 +111,54 @@ const createGenericRulesForField = (fieldName: string) => [
       },
       {
         field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+    ],
+  },
+  {
+    when: {
+      exists: [fieldName, 'error.stack_trace.text'],
+    },
+    format: [
+      {
+        field: fieldName,
+      },
+      {
+        constant: '\n',
+      },
+      {
+        field: 'error.stack_trace.text',
+      },
+    ],
+  },
+  {
+    when: {
+      exists: [fieldName],
+    },
+    format: [
+      {
+        field: fieldName,
+      },
+    ],
+  },
+];
+
+const createFallbackRulesForField = (fieldName: string) => [
+  {
+    when: {
+      exists: ['event.dataset', fieldName],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
       },
       {
         constant: '] ',

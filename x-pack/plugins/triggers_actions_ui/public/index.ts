@@ -7,34 +7,32 @@
 
 import { Plugin } from './plugin';
 
-export { AlertAdd } from './application/sections/alert_form';
-export {
-  AlertEdit,
-  AlertConditions,
-  AlertConditionsGroup,
-  ActionGroupWithCondition,
-} from './application/sections';
-export { ActionForm } from './application/sections/action_connector_form';
-export {
+export type {
   AlertAction,
   Alert,
   AlertTypeModel,
   ActionType,
   ActionTypeRegistryContract,
-  AlertTypeRegistryContract,
+  RuleTypeRegistryContract,
   AlertTypeParamsExpressionProps,
   ValidationResult,
-  ActionVariable,
   ActionVariables,
   ActionConnector,
   IErrorObject,
   AlertFlyoutCloseReason,
+  AlertTypeParams,
 } from './types';
+
 export {
+  ActionForm,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from './application/sections/action_connector_form';
-export { loadActionTypes } from './application/lib/action_connector_api';
+
+export type { ActionGroupWithCondition } from './application/sections';
+
+export { AlertConditions, AlertConditionsGroup } from './application/sections';
+
 export * from './common';
 
 export function plugin() {
@@ -44,7 +42,8 @@ export function plugin() {
 export { Plugin };
 export * from './plugin';
 
-export { TIME_UNITS } from './application/constants';
+export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
+
+export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export { ForLastExpression } from './common/expression_items/for_the_last';
-export { TriggersAndActionsUiServices } from '../public/application/app';
+export type { TriggersAndActionsUiServices } from '../public/application/app';

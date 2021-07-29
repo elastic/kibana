@@ -13,7 +13,7 @@ import { EuiButton, EuiFormRow, EuiPanel, EuiRange, EuiSpacer } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 
 import { RelevanceTuningLogic } from '../..';
-import { Boost, BoostType } from '../../types';
+import { Boost, BoostType, FunctionalBoost, ProximityBoost, ValueBoost } from '../../types';
 
 import { FunctionalBoostForm } from './functional_boost_form';
 import { ProximityBoostForm } from './proximity_boost_form';
@@ -32,18 +32,19 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
   const getBoostForm = () => {
     switch (type) {
       case BoostType.Value:
-        return <ValueBoostForm boost={boost} index={index} name={name} />;
+        return <ValueBoostForm boost={boost as ValueBoost} index={index} name={name} />;
       case BoostType.Functional:
-        return <FunctionalBoostForm boost={boost} index={index} name={name} />;
+        return <FunctionalBoostForm boost={boost as FunctionalBoost} index={index} name={name} />;
       case BoostType.Proximity:
-        return <ProximityBoostForm boost={boost} index={index} name={name} />;
+        return <ProximityBoostForm boost={boost as ProximityBoost} index={index} name={name} />;
     }
   };
 
   return (
-    <EuiPanel hasShadow={false} className="relevanceTuningAccordionItem">
+    <EuiPanel color="subdued" paddingSize="none" className="relevanceTuningAccordionItem">
+      <EuiSpacer size="m" />
       {getBoostForm()}
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.impactLabel',
@@ -74,7 +75,7 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.deleteBoostButtonLabel',
           {
-            defaultMessage: 'Delete Boost',
+            defaultMessage: 'Delete boost',
           }
         )}
       </EuiButton>

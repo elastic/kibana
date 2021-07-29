@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import { merge } from 'lodash/fp';
+import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { LIST_PRIVILEGES_URL } from '../../common/constants';
-import { buildSiemResponse, readPrivileges, transformError } from '../siem_server_deps';
 
-import { getListClient } from './utils';
+import { buildSiemResponse, getListClient } from './utils';
 
 export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -25,16 +25,10 @@ export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
         const lists = getListClient(context);
-        const clusterPrivilegesLists = await readPrivileges(
-          clusterClient.callAsCurrentUser,
-          lists.getListIndex()
-        );
-        const clusterPrivilegesListItems = await readPrivileges(
-          clusterClient.callAsCurrentUser,
-          lists.getListItemIndex()
-        );
+        const clusterPrivilegesLists = await readPrivileges(esClient, lists.getListIndex());
+        const clusterPrivilegesListItems = await readPrivileges(esClient, lists.getListItemIndex());
         const privileges = merge(
           {
             listItems: clusterPrivilegesListItems,

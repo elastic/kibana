@@ -18,9 +18,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams> {
       defaultMessage: 'Alert when an aggregated query meets the threshold.',
     }),
     iconClass: 'alert',
-    documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/alert-types.html#alert-type-index-threshold`;
-    },
+    documentationUrl: (docLinks) => docLinks.links.alerting.indexThreshold,
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(

@@ -17,10 +17,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('calendar creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
 
       await asyncForEach(jobConfigs, async (jobConfig) => {
+        // @ts-expect-error not full interface
         await ml.api.createAnomalyDetectionJob(jobConfig);
       });
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -44,6 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
       await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
       await ml.settingsCalendar.navigateToCalendarCreationPage();
+
+      await ml.settingsCalendar.waitForFormEnabled();
 
       await ml.testExecution.logTestStep('calendar creation sets calendar to apply to all jobs');
       await ml.settingsCalendar.toggleApplyToAllJobsSwitch(true);
@@ -77,6 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
       await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
       await ml.settingsCalendar.navigateToCalendarCreationPage();
+
+      await ml.settingsCalendar.waitForFormEnabled();
 
       await ml.testExecution.logTestStep(
         'calendar creation verifies the job selection and job group section are displayed'

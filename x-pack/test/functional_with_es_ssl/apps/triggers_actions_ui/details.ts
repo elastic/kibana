@@ -27,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createActionManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAction } = await supertest
-      .post(`/api/actions/action`)
+      .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send(getTestActionData(overwrites))
       .expect(200);
@@ -42,7 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
@@ -52,11 +52,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlwaysFiringAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(
         getTestAlertData({
-          alertTypeId: 'test.always-firing',
+          rule_type_id: 'test.always-firing',
           ...overwrites,
         })
       )
@@ -93,14 +93,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function getAlertInstanceSummary(alertId: string) {
     const { body: summary } = await supertest
-      .get(`/api/alerts/alert/${alertId}/_instance_summary`)
+      .get(`/internal/alerting/rule/${encodeURIComponent(alertId)}/_alert_summary`)
       .expect(200);
     return summary;
   }
 
   async function muteAlertInstance(alertId: string, alertInstanceId: string) {
     const { body: response } = await supertest
-      .post(`/api/alerts/alert/${alertId}/alert_instance/${alertInstanceId}/_mute`)
+      .post(
+        `/api/alerting/rule/${encodeURIComponent(alertId)}/alert/${encodeURIComponent(
+          alertInstanceId
+        )}/_mute`
+      )
       .set('kbn-xsrf', 'foo')
       .expect(204);
 
@@ -132,7 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the alert details', async () => {
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(`test-alert-${testRunUuid}`);
+        expect(headingText.includes(`test-alert-${testRunUuid}`)).to.be(true);
 
         const alertType = await pageObjects.alertDetailsUI.getAlertType();
         expect(alertType).to.be(`Always Firing`);
@@ -142,23 +146,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should disable the alert', async () => {
-        const disableSwitch = await testSubjects.find('disableSwitch');
+        const enableSwitch = await testSubjects.find('enableSwitch');
 
-        const isChecked = await disableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('false');
+        const isChecked = await enableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('true');
 
-        await disableSwitch.click();
+        await enableSwitch.click();
 
-        const disableSwitchAfterDisabling = await testSubjects.find('disableSwitch');
+        const disableSwitchAfterDisabling = await testSubjects.find('enableSwitch');
         const isCheckedAfterDisabling = await disableSwitchAfterDisabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('true');
+        expect(isCheckedAfterDisabling).to.eql('false');
       });
 
       it('shouldnt allow you to mute a disabled alert', async () => {
-        const disabledDisableSwitch = await testSubjects.find('disableSwitch');
-        expect(await disabledDisableSwitch.getAttribute('aria-checked')).to.eql('true');
+        const disabledEnableSwitch = await testSubjects.find('enableSwitch');
+        expect(await disabledEnableSwitch.getAttribute('aria-checked')).to.eql('false');
 
         const muteSwitch = await testSubjects.find('muteSwitch');
         expect(await muteSwitch.getAttribute('aria-checked')).to.eql('false');
@@ -173,18 +177,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the alert', async () => {
-        const disableSwitch = await testSubjects.find('disableSwitch');
+        const enableSwitch = await testSubjects.find('enableSwitch');
 
-        const isChecked = await disableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('true');
+        const isChecked = await enableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('false');
 
-        await disableSwitch.click();
+        await enableSwitch.click();
 
-        const disableSwitchAfterReenabling = await testSubjects.find('disableSwitch');
+        const disableSwitchAfterReenabling = await testSubjects.find('enableSwitch');
         const isCheckedAfterDisabling = await disableSwitchAfterReenabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('false');
+        expect(isCheckedAfterDisabling).to.eql('true');
       });
 
       it('should mute the alert', async () => {
@@ -221,7 +225,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await createAlwaysFiringAlert({
           name: alertName,
-          alertTypeId: '.index-threshold',
+          rule_type_id: '.index-threshold',
           params: {
             aggType: 'count',
             termSize: 5,
@@ -275,7 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
 
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(updatedAlertName);
+        expect(headingText.includes(updatedAlertName)).to.be(true);
       });
 
       it('should reset alert when canceling an edit', async () => {
@@ -355,7 +359,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
@@ -372,7 +376,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
         const action = await createActionManualCleanup({
           name: `index-${testRunUuid}-${0}`,
-          actionTypeId: '.index',
+          connector_type_id: '.index',
           config: {
             index: `index-${testRunUuid}-${0}`,
           },
@@ -415,7 +419,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
@@ -480,7 +484,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.alertDetailsUI.clickViewInApp();
 
-        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
+        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Rule ${alert.id}`);
       });
 
       it('renders a disabled alert details view in app button', async () => {
@@ -526,7 +530,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
       });
@@ -552,12 +556,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const summary = await getAlertInstanceSummary(alert.id);
         const dateOnAllInstancesFromApiResponse: Record<string, string> = mapValues(
-          summary.instances,
+          summary.alerts,
           (instance) => instance.activeStartDate
         );
 
         const actionGroupNameOnAllInstancesFromApiResponse = mapValues(
-          summary.instances,
+          summary.alerts,
           (instance) => {
             const name = actionGroupNameFromId(instance.actionGroupId);
             return name ? ` (${name})` : '';
@@ -640,18 +644,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the muted inactive alert instances', async () => {
         // mute an alert instance that doesn't exist
-        await muteAlertInstance(alert.id, 'eu-east');
+        await muteAlertInstance(alert.id, 'eu/east');
 
         // refresh to see alert
         await browser.refresh();
 
         const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(
-          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
+          instancesList.filter((alertInstance) => alertInstance.instance === 'eu/east')
         ).to.eql([
           {
-            instance: 'eu-east',
-            status: 'OK',
+            instance: 'eu/east',
+            status: 'Recovered',
             start: '',
             duration: '',
           },
@@ -693,14 +697,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user unmute an inactive instance', async () => {
-        log.debug(`Ensuring eu-east is muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu-east', true);
+        log.debug(`Ensuring eu/east is muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu/east', true);
 
-        log.debug(`Unmuting eu-east`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu-east');
+        log.debug(`Unmuting eu/east`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu/east');
 
-        log.debug(`Ensuring eu-east is removed from list`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
+        log.debug(`Ensuring eu/east is removed from list`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu/east', false);
       });
     });
 
@@ -724,7 +728,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
 
@@ -749,7 +753,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(items.length).to.eql(PAGE_SIZE);
@@ -762,7 +766,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         await pageObjects.alertDetailsUI.clickPaginationNextPage();
 

@@ -17,6 +17,7 @@ import {
 } from '../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { InfraPluginSetup } from '../../infra/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginStart } from '../../spaces/server';
 
@@ -24,6 +25,7 @@ import {
   ENTERPRISE_SEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  LOGS_SOURCE_ID,
 } from '../common/constants';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -31,6 +33,7 @@ import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } 
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 
 import { checkAccess } from './lib/check_access';
+import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
 import {
   EnterpriseSearchRequestHandler,
   IEnterpriseSearchRequestHandler,
@@ -49,12 +52,13 @@ import { ConfigType } from './';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  infra: InfraPluginSetup;
 }
 
 interface PluginsStart {
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface RouteDependencies {
@@ -76,10 +80,15 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(
     { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
-    { usageCollection, security, features }: PluginsSetup
+    { usageCollection, security, features, infra }: PluginsSetup
   ) {
     const config = this.config;
     const log = this.logger;
+
+    /*
+     * Initialize config.ssl.certificateAuthorities file(s) - required for all API calls (+ access checks)
+     */
+    entSearchHttpAgent.initializeHttpAgent(config);
 
     /**
      * Register space/feature control
@@ -153,6 +162,18 @@ export class EnterpriseSearchPlugin implements Plugin {
       }
     });
     registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
+
+    /*
+     * Register logs source configuration, used by LogStream components
+     * @see https://github.com/elastic/kibana/blob/master/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     */
+    infra.defineInternalSourceConfiguration(LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: '.ent-search-*',
+      },
+    });
   }
 
   public start() {}

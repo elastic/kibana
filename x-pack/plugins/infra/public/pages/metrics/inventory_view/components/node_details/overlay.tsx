@@ -12,12 +12,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
 import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
 import { PropertiesTab } from './tabs/properties/index';
+import { AnomaliesTab } from './tabs/anomalies/anomalies';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { getNodeDetailUrl } from '../../../../link_to';
@@ -43,9 +45,13 @@ export const NodeContextPopover = ({
   openAlertFlyout,
 }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab];
+  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure?.save), [
+    uiCapabilities,
+  ]);
 
   const tabs = useMemo(() => {
     return tabConfigs.map((m) => {
@@ -53,11 +59,17 @@ export const NodeContextPopover = ({
       return {
         ...m,
         content: (
-          <TabContent node={node} nodeType={nodeType} currentTime={currentTime} options={options} />
+          <TabContent
+            onClose={onClose}
+            node={node}
+            nodeType={nodeType}
+            currentTime={currentTime}
+            options={options}
+          />
         ),
       };
     });
-  }, [tabConfigs, node, nodeType, currentTime, options]);
+  }, [tabConfigs, node, nodeType, currentTime, onClose, options]);
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -96,20 +108,22 @@ export const NodeContextPopover = ({
               </OverlayTitle>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      onClick={openAlertFlyout}
-                      size="xs"
-                      iconSide={'left'}
-                      flush="both"
-                      iconType="bell"
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.infra.nodeDetails.createAlertLink"
-                        defaultMessage="Create alert"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
+                  {canCreateAlerts && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={openAlertFlyout}
+                        size="xs"
+                        iconSide={'left'}
+                        flush="both"
+                        iconType="bell"
+                      >
+                        <FormattedMessage
+                          id="xpack.infra.infra.nodeDetails.createAlertLink"
+                          defaultMessage="Create inventory rule"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       size="xs"

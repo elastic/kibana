@@ -6,11 +6,12 @@
  */
 
 import { uniq } from 'lodash';
+
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
-import { HasPrivilegesResponse } from './types';
-
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import type { HasPrivilegesResponse } from './types';
 
 const application = 'kibana-our_application';
 
@@ -67,8 +68,8 @@ describe('#atSpace', () => {
 
     const expectedIndexPrivilegePayload = Object.entries(
       options.elasticsearchPrivileges?.index ?? {}
-    ).map(([names, indexPrivileges]) => ({
-      names,
+    ).map(([name, indexPrivileges]) => ({
+      names: [name],
       privileges: indexPrivileges,
     }));
 
@@ -77,7 +78,7 @@ describe('#atSpace', () => {
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
-        applications: [
+        application: [
           {
             application,
             resources: [`space:${options.spaceId}`],
@@ -913,8 +914,8 @@ describe('#atSpaces', () => {
 
     const expectedIndexPrivilegePayload = Object.entries(
       options.elasticsearchPrivileges?.index ?? {}
-    ).map(([names, indexPrivileges]) => ({
-      names,
+    ).map(([name, indexPrivileges]) => ({
+      names: [name],
       privileges: indexPrivileges,
     }));
 
@@ -923,7 +924,7 @@ describe('#atSpaces', () => {
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
-        applications: [
+        application: [
           {
             application,
             resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
@@ -2117,8 +2118,8 @@ describe('#globally', () => {
 
     const expectedIndexPrivilegePayload = Object.entries(
       options.elasticsearchPrivileges?.index ?? {}
-    ).map(([names, indexPrivileges]) => ({
-      names,
+    ).map(([name, indexPrivileges]) => ({
+      names: [name],
       privileges: indexPrivileges,
     }));
 
@@ -2127,7 +2128,7 @@ describe('#globally', () => {
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
-        applications: [
+        application: [
           {
             application,
             resources: [GLOBAL_RESOURCE],

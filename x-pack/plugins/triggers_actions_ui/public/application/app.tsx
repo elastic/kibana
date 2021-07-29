@@ -12,11 +12,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaFeature } from '../../../features/common';
-import { Section, routeToAlertDetails } from './constants';
-import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
+import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { PluginStartContract as AlertingStart } from '../../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../../alerting/public';
+import type { SpacesPluginStart } from '../../../spaces/public';
+
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
@@ -24,7 +26,7 @@ import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
-const TriggersActionsUIHome = lazy(async () => import('./home'));
+const TriggersActionsUIHome = lazy(() => import('./home'));
 const AlertDetailsRoute = lazy(
   () => import('./sections/alert_details/components/alert_details_route')
 );
@@ -32,11 +34,12 @@ const AlertDetailsRoute = lazy(
 export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  alerts?: AlertingStart;
+  alerting?: AlertingStart;
+  spaces?: SpacesPluginStart;
   storage?: Storage;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  alertTypeRegistry: AlertTypeRegistryContract;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
@@ -52,7 +55,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { savedObjects, uiSettings } = deps;
-  const sections: Section[] = ['alerts', 'connectors'];
+  const sections: Section[] = ['rules', 'connectors'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
@@ -78,10 +81,16 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
       />
       <Route
-        path={routeToAlertDetails}
+        path={routeToRuleDetails}
         component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
       />
-      <Redirect from={'/'} to="alerts" />
+      <Route
+        exact
+        path={legacyRouteToRuleDetails}
+        render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
+      />
+      <Redirect from={'/'} to="rules" />
+      <Redirect from={'/alerts'} to="rules" />
     </Switch>
   );
 };

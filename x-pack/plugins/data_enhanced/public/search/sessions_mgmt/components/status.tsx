@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { dateString } from '../lib/date_string';
 import { UISession } from '../types';
 import { StatusDef as StatusAttributes, TableText } from './';

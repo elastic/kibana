@@ -10,7 +10,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../typings/elasticsearch/aggregations';
+} from '../../../../../../src/core/types/elasticsearch';
 
 export const getOutcomeAggregation = () => ({
   terms: {
@@ -20,6 +20,20 @@ export const getOutcomeAggregation = () => ({
 });
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
+
+export const getTimeseriesAggregation = (
+  start: number,
+  end: number,
+  intervalString: string
+) => ({
+  date_histogram: {
+    field: '@timestamp',
+    fixed_interval: intervalString,
+    min_doc_count: 0,
+    extended_bounds: { min: start, max: end },
+  },
+  aggs: { outcomes: getOutcomeAggregation() },
+});
 
 export function calculateTransactionErrorPercentage(
   outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>

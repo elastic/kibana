@@ -17,8 +17,7 @@ const paramsSchema = schema.object({
 
 export const registerDocumentsRoute = ({
   router,
-  license,
-  lib: { isEsError },
+  lib: { handleEsError },
 }: RouteDependencies): void => {
   router.get(
     {
@@ -27,12 +26,12 @@ export const registerDocumentsRoute = ({
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+    async (ctx, req, res) => {
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const { index, id } = req.params;
 
       try {
-        const document = await callAsCurrentUser('get', { index, id });
+        const { body: document } = await clusterClient.asCurrentUser.get({ index, id });
 
         const { _id, _index, _source } = document;
 
@@ -44,15 +43,8 @@ export const registerDocumentsRoute = ({
           },
         });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

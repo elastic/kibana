@@ -92,16 +92,21 @@ export const getPageLoadDistBreakdown = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_page_load_dist_breakdown',
+    params
+  );
 
   const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 
   return pageDistBreakdowns?.map(({ key, page_dist: pageDist }) => {
     let seriesData = pageDist.values?.map(
-      ({ key: pKey, value }, index: number, arr) => {
+      ({ key: pKey, value: maybeNullValue }, index: number, arr) => {
+        // FIXME: values from percentile* aggs can be null
+        const value = maybeNullValue!;
         return {
           x: microToSec(pKey),
-          y: index === 0 ? value : value - arr[index - 1].value,
+          y: index === 0 ? value : value - arr[index - 1].value!,
         };
       }
     );

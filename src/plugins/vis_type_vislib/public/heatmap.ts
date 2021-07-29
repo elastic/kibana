@@ -29,6 +29,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   valueAxes: ValueAxis[];
   setColorRange: boolean;
   percentageMode: boolean;
+  percentageFormatPattern?: string;
   times: TimeMarker[];
 }
 
@@ -93,6 +94,8 @@ export const heatmapVisTypeDefinition: VisTypeDefinition<HeatmapVisParams> = {
           'cardinality',
           'std_dev',
           'top_hits',
+          '!filtered_metric',
+          '!single_percentile',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

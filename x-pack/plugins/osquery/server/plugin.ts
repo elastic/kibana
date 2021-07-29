@@ -17,12 +17,19 @@ import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
+import { initSavedObjects } from './saved_objects';
+import { initUsageCollectors } from './usage';
+import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
+import { ConfigType } from './config';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
+  private context: PluginInitializerContext;
+  private readonly osqueryAppContextService = new OsqueryAppContextService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get();
+    this.context = initializerContext;
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
@@ -35,10 +42,22 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     const router = core.http.createRouter();
 
-    // Register server side APIs
-    defineRoutes(router);
+    const osqueryContext: OsqueryAppContext = {
+      logFactory: this.context.logger,
+      service: this.osqueryAppContextService,
+      config: (): ConfigType => config,
+      security: plugins.security,
+    };
 
-    core.getStartServices().then(([_, depsStart]) => {
+    initSavedObjects(core.savedObjects, osqueryContext);
+    initUsageCollectors({
+      core,
+      osqueryContext,
+      usageCollection: plugins.usageCollection,
+    });
+    defineRoutes(router, osqueryContext);
+
+    core.getStartServices().then(([, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
@@ -47,10 +66,24 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('osquery: Started');
+    const registerIngestCallback = plugins.fleet?.registerExternalCallback;
+
+    this.osqueryAppContextService.start({
+      ...plugins.fleet,
+      // @ts-expect-error update types
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      config: this.config!,
+      logger: this.logger,
+      registerIngestCallback,
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.logger.debug('osquery: Stopped');
+    this.osqueryAppContextService.stop();
+  }
 }

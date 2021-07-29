@@ -2,14 +2,15 @@
 
 exports[`PageLoading should show a simple page loading component 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium"
+  class="euiPage euiPage--paddingMedium euiPage--grow"
   style="height:calc(100vh - 50px)"
 >
-  <main
-    class="euiPageBody"
+  <div
+    class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content"
+      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content"
+      role="main"
     >
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -36,6 +37,6 @@ exports[`PageLoading should show a simple page loading component 1`] = `
         </div>
       </div>
     </div>
-  </main>
+  </div>
 </div>
 `;

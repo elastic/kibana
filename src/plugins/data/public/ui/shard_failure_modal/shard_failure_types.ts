@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 export interface ShardFailureRequest {
   docvalue_fields: string[];
   _source: unknown;
@@ -24,7 +24,7 @@ export interface ShardFailure {
       type: string;
     };
     reason: string;
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     script?: string;
     script_stack?: string[];
     type: string;

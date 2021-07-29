@@ -12,12 +12,14 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
+export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
 // Monitoring Constants
 // ===================
 // Refresh aggregated monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
 export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
+export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -107,6 +109,23 @@ export const configSchema = schema.object(
       default: taskExecutionFailureThresholdSchema,
       custom: schema.recordOf(schema.string(), taskExecutionFailureThresholdSchema, {
         defaultValue: {},
+      }),
+    }),
+    monitored_stats_health_verbose_log: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      /* The amount of seconds we allow a task to delay before printing a warning server log */
+      warn_delayed_task_start_in_seconds: schema.number({
+        defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,
+      }),
+    }),
+    ephemeral_tasks: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      /* How many requests can Task Manager buffer before it rejects new requests. */
+      request_capacity: schema.number({
+        // a nice round contrived number, feel free to change as we learn how it behaves
+        defaultValue: 10,
+        min: 1,
+        max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
       }),
     }),
   },

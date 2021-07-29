@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use [ICustomClusterClient](./kibana-plugin-core-server.icustomclusterclient.md)<!-- -->.
+> Use [ICustomClusterClient](./kibana-plugin-core-server.icustomclusterclient.md)<!-- -->.  7.16
 > 
 
 Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via `asScoped(...)`<!-- -->).

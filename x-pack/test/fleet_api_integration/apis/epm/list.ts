@@ -13,6 +13,7 @@ import { setupFleetAndAgents } from '../agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
@@ -20,7 +21,13 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - list', async function () {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
     setupFleetAndAgents(providerContext);
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
 
     describe('list api tests', async () => {
       it('lists all packages from the registry', async function () {
@@ -44,6 +51,7 @@ export default function (providerContext: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchLimitedPackageList();
+
         expect(listResponse.response).to.eql(['endpoint']);
       });
     });

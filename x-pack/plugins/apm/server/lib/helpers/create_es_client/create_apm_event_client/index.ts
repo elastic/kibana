@@ -6,6 +6,7 @@
  */
 
 import { ValuesType } from 'utility-types';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import {
   ElasticsearchClient,
@@ -13,8 +14,8 @@ import {
 } from '../../../../../../../../src/core/server';
 import {
   ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../../typings/elasticsearch';
+  InferSearchResponseOf,
+} from '../../../../../../../../src/core/types/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -34,6 +35,7 @@ import { unpackProcessorEvents } from './unpack_processor_events';
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     events: ProcessorEvent[];
+    includeLegacyData?: boolean;
   };
 };
 
@@ -54,7 +56,7 @@ type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
 
 type TypedSearchResponse<
   TParams extends APMEventESSearchRequest
-> = ESSearchResponse<
+> = InferSearchResponseOf<
   TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
   ESSearchRequestOf<TParams>
 >;
@@ -78,10 +80,12 @@ export function createApmEventClient({
 }) {
   return {
     async search<TParams extends APMEventESSearchRequest>(
-      params: TParams,
-      { includeLegacyData = false } = {}
+      operationName: string,
+      params: TParams
     ): Promise<TypedSearchResponse<TParams>> {
       const withProcessorEventFilter = unpackProcessorEvents(params, indices);
+
+      const { includeLegacyData = false } = params.apm;
 
       const withPossibleLegacyDataFilter = !includeLegacyData
         ? addFilterToExcludeLegacyData(withProcessorEventFilter)
@@ -93,20 +97,31 @@ export function createApmEventClient({
         ignore_unavailable: true,
       };
 
+      // only "search" operation is currently supported
+      const requestType = 'search';
+
       return callAsyncWithDebug({
         cb: () => {
-          const searchPromise = cancelEsRequestOnAbort(
-            esClient.search(searchParams),
-            request
+          const searchPromise = withApmSpan(operationName, () =>
+            cancelEsRequestOnAbort(esClient.search(searchParams), request)
           );
 
           return unwrapEsResponse(searchPromise);
         },
         getDebugMessage: () => ({
-          body: getDebugBody(searchParams, 'search'),
+          body: getDebugBody({
+            params: searchParams,
+            requestType,
+            operationName,
+          }),
           title: getDebugTitle(request),
         }),
+        isCalledWithInternalUser: false,
         debug,
+        request,
+        requestType,
+        operationName,
+        requestParams: searchParams,
       });
     },
   };

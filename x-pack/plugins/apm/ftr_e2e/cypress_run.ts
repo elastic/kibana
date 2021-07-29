@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { cypressRunTests } from './cypress_start';
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {

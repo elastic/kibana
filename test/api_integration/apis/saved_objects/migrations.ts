@@ -15,7 +15,7 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import { ElasticsearchClient, SavedObjectsType } from 'src/core/server';
-import { SearchResponse } from '../../../../src/core/server/elasticsearch/client';
+
 import {
   DocumentMigrator,
   IndexMigrator,
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
       const mappingProperties = {
         foo: { properties: { name: { type: 'text' } } },
         bar: { properties: { mynum: { type: 'integer' } } },
-      };
+      } as const;
 
       const savedObjectTypes: SavedObjectsType[] = [
         {
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esClient.indices.putTemplate({
         name: 'migration_test_a_template',
         body: {
-          index_patterns: 'migration_test_a',
+          index_patterns: ['migration_test_a'],
           mappings: {
             dynamic: 'strict',
             properties: { baz: { type: 'text' } },
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esClient.indices.putTemplate({
         name: 'migration_a_template',
         body: {
-          index_patterns: index,
+          index_patterns: [index],
           mappings: {
             dynamic: 'strict',
             properties: { baz: { type: 'text' } },
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
       const mappingProperties = {
         foo: { properties: { name: { type: 'text' } } },
         bar: { properties: { mynum: { type: 'integer' } } },
-      };
+      } as const;
 
       let savedObjectTypes: SavedObjectsType[] = [
         {
@@ -357,7 +357,7 @@ export default ({ getService }: FtrProviderContext) => {
       const mappingProperties = {
         'fleet-agent-event': { properties: { name: { type: 'text' } } },
         bar: { properties: { mynum: { type: 'integer' } } },
-      };
+      } as const;
 
       let savedObjectTypes: SavedObjectsType[] = [
         FLEET_AGENT_EVENT_TYPE,
@@ -417,7 +417,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const mappingProperties = {
         foo: { properties: { name: { type: 'text' } } },
-      };
+      } as const;
 
       const savedObjectTypes: SavedObjectsType[] = [
         {
@@ -510,7 +510,7 @@ export default ({ getService }: FtrProviderContext) => {
         foo: { properties: { name: { type: 'text' } } },
         bar: { properties: { nomnom: { type: 'integer' } } },
         baz: { properties: { title: { type: 'keyword' } } },
-      };
+      } as const;
 
       const savedObjectTypes: SavedObjectsType[] = [
         {
@@ -574,6 +574,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: 'legacy-url-alias:spacex:foo:1',
             type: 'legacy-url-alias',
             'legacy-url-alias': {
+              sourceId: '1',
               targetId: newFooId,
               targetNamespace: 'spacex',
               targetType: 'foo',
@@ -606,6 +607,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: 'legacy-url-alias:spacex:bar:1',
             type: 'legacy-url-alias',
             'legacy-url-alias': {
+              sourceId: '1',
               targetId: newBarId,
               targetNamespace: 'spacex',
               targetType: 'bar',
@@ -675,7 +677,7 @@ async function createIndex({
     coreMigrationVersion: {
       type: 'keyword',
     },
-  };
+  } as const;
   await esClient.indices.create({
     index,
     body: { mappings: { dynamic: 'strict', properties } },
@@ -735,6 +737,7 @@ async function migrateIndex({
     mappingProperties,
     batchSize: 10,
     log: getLogMock(),
+    setStatus: () => {},
     pollInterval: 50,
     scrollDuration: '5m',
     serializer: new SavedObjectsSerializer(typeRegistry),
@@ -744,7 +747,7 @@ async function migrateIndex({
 }
 
 async function fetchDocs(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<SearchResponse<any>>({ index });
+  const { body } = await esClient.search<any>({ index });
 
   return body.hits.hits
     .map((h) => ({

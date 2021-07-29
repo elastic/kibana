@@ -30,10 +30,8 @@ export function getConnections({
   if (!paths) {
     return [];
   }
-  const isEnvironmentSelected =
-    environment && environment !== ENVIRONMENT_ALL.value;
 
-  if (serviceName || isEnvironmentSelected) {
+  if (serviceName || environment) {
     paths = paths.filter((path) => {
       return (
         path
@@ -46,7 +44,7 @@ export function getConnections({
               return false;
             }
 
-            if (!environment) {
+            if (!environment || environment === ENVIRONMENT_ALL.value) {
               return true;
             }
 

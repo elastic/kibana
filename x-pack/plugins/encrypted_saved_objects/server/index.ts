@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import type { PluginInitializerContext } from 'src/core/server';
+
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
 export { EncryptedSavedObjectTypeRegistration, EncryptionError } from './crypto';
 export { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
 export { EncryptedSavedObjectsClient } from './saved_objects';
+export type { IsMigrationNeededPredicate } from './create_migration';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>

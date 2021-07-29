@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
 
@@ -12,13 +13,13 @@ const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
 };
 
-const getTopHits = (threadType: string, order: string) => ({
+const getTopHits = (threadType: string, order: 'asc' | 'desc') => ({
   top_hits: {
     sort: [
       {
         timestamp: {
           order,
-          unmapped_type: 'long',
+          unmapped_type: 'long' as const,
         },
       },
     ],
@@ -30,7 +31,7 @@ const getTopHits = (threadType: string, order: string) => ({
 });
 
 export async function fetchThreadPoolRejectionStats(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   size: number,
@@ -40,7 +41,7 @@ export async function fetchThreadPoolRejectionStats(
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
     index,
-    filterPath: ['aggregations'],
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -80,10 +81,10 @@ export async function fetchThreadPoolRejectionStats(
               },
               aggs: {
                 most_recent: {
-                  ...getTopHits(threadType, 'desc'),
+                  ...getTopHits(threadType, 'desc' as const),
                 },
                 least_recent: {
-                  ...getTopHits(threadType, 'asc'),
+                  ...getTopHits(threadType, 'asc' as const),
                 },
               },
             },
@@ -93,11 +94,12 @@ export async function fetchThreadPoolRejectionStats(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: AlertThreadPoolRejectionsStats[] = [];
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  // @ts-expect-error declare type for aggregations explicitly
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
-  if (!clusterBuckets.length) {
+  if (!clusterBuckets?.length) {
     return stats;
   }
 

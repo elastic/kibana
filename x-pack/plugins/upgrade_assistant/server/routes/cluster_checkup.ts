@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import { API_BASE_PATH } from '../../common/constants';
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: RouteDependencies) {
-  const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
-
+export function registerClusterCheckupRoutes({ router, licensing, log }: RouteDependencies) {
   router.get(
     {
-      path: '/api/upgrade_assistant/status',
+      path: `${API_BASE_PATH}/status`,
       validate: false,
     },
     versionCheckHandlerWrapper(
@@ -31,7 +30,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
         response
       ) => {
         try {
-          const status = await getUpgradeAssistantStatus(client, isCloudEnabled);
+          const status = await getUpgradeAssistantStatus(client);
 
           const asCurrentUser = client.asCurrentUser;
           const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LoginLayout } from './licensing';
+import type { LoginLayout } from './licensing';
 
 export interface LoginSelectorProvider {
   type: string;

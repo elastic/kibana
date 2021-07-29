@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { GenericFtrProviderContext } from '@kbn/test';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { ApmServices } from './config';
 

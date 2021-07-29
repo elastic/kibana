@@ -1,25 +1,30 @@
-[[actions-and-connectors-api-delete]]
-=== Delete action API
+[[delete-connector-api]]
+=== Delete connector API
 ++++
-<titleabbrev>Delete action API</titleabbrev>
+<titleabbrev>Delete connector</titleabbrev>
 ++++
 
-Deletes an action by ID.
+Deletes an connector by ID.
 
-WARNING: When you delete an action, _it cannot be recovered_.
+WARNING: When you delete a connector, _it cannot be recovered_.
 
-[[actions-and-connectors-api-delete-request]]
+[[delete-connector-api-request]]
 ==== Request
 
-`DELETE <kibana host>:<port>/api/actions/action/<id>`
+`DELETE <kibana host>:<port>/api/actions/connector/<id>`
 
-[[actions-and-connectors-api-delete-path-params]]
+`DELETE <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
+
+[[delete-connector-api-path-params]]
 ==== Path parameters
 
 `id`::
-  (Required, string) The ID of the action.
+  (Required, string) The ID of the connector.
 
-[[actions-and-connectors-api-delete-response-codes]]
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[delete-connector-api-response-codes]]
 ==== Response code
 
 `200`::
@@ -29,7 +34,6 @@ WARNING: When you delete an action, _it cannot be recovered_.
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+$ curl -X DELETE api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
 --------------------------------------------------
 // KIBANA
-

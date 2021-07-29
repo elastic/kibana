@@ -9,7 +9,7 @@
 import { ReactNode } from 'react';
 
 /**
- * Props to provide to the {@Link TrackApplicationView} component.
+ * Props to provide to the {@link TrackApplicationView} component.
  * @public
  */
 export interface TrackApplicationViewProps {

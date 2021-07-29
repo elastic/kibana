@@ -160,14 +160,14 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const permissionField = (
     <>
-      <EuiPanel paddingSize="l">
-        <EuiTitle size="xs">
+      <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
+        <EuiTitle size="s">
           <h3>
             <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
+        <EuiText color="subdued" size="s">
           {!needsPermissions && (
             <span>
               <FormattedMessage
@@ -191,11 +191,9 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
             </span>
           )}
         </EuiText>
-        <EuiSpacer size="s" />
         {!indexPermissionsValue && (
           <>
-            <EuiSpacer size="s" />
-            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning" size="s">
+            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning">
               <p>
                 {CONNECT_NOT_SYNCED_TEXT}
                 {needsPermissions && whichDocsLink}
@@ -263,30 +261,28 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   );
 
   return (
-    <div className="step-4">
-      <form onSubmit={handleFormSubmit}>
-        <EuiFlexGroup
-          direction="row"
-          alignItems="flexStart"
-          justifyContent="spaceBetween"
-          gutterSize="xl"
-          responsive={false}
-        >
-          <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
-            <EuiPanel paddingSize="none">
-              <EuiPanel hasShadow={false} paddingSize="l">
-                {header}
-              </EuiPanel>
-              <EuiHorizontalRule margin="xs" />
-              <EuiPanel hasShadow={false} paddingSize="l">
-                <SourceFeatures features={features} name={name} objTypes={objTypes} />
-              </EuiPanel>
+    <form onSubmit={handleFormSubmit}>
+      <EuiFlexGroup
+        direction="row"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="xl"
+        responsive={false}
+      >
+        <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
+          <EuiPanel paddingSize="none" hasShadow={false} color="subdued">
+            <EuiPanel hasShadow={false} paddingSize="l" color="subdued">
+              {header}
             </EuiPanel>
-            <EuiSpacer />
-            {formFields}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </form>
-    </div>
+            <EuiHorizontalRule margin="xs" />
+            <EuiPanel hasShadow={false} paddingSize="l" color="subdued">
+              <SourceFeatures features={features} name={name} objTypes={objTypes} />
+            </EuiPanel>
+          </EuiPanel>
+          <EuiSpacer />
+          {formFields}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </form>
   );
 };

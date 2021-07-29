@@ -8,9 +8,6 @@
 export { AuditService, AuditServiceSetup, AuditLogger, LegacyAuditLogger } from './audit_service';
 export {
   AuditEvent,
-  EventCategory,
-  EventType,
-  EventOutcome,
   userLoginEvent,
   httpRequestEvent,
   savedObjectEvent,

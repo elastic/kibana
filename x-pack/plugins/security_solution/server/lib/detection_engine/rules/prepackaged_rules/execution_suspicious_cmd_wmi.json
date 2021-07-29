@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Cmd Execution via WMI",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name : \"WmiPrvSE.exe\" and process.name : \"cmd.exe\" and\n process.args : \"\\\\\\\\127.0.0.1\\\\*\" and process.args : (\"2>&1\", \"1>\")\n",
   "risk_score": 47,
@@ -21,7 +21,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Lateral Movement"
+    "Execution"
   ],
   "threat": [
     {

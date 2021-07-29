@@ -10,7 +10,8 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { validate } from '../../../../../common/validate';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
@@ -29,16 +30,15 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
-import { getIndexExists } from '../../index/get_index_exists';
 import {
   createBulkErrorObject,
   ImportRuleResponse,
   BulkError,
   isBulkError,
   isImportRegular,
-  transformError,
   buildSiemResponse,
 } from '../utils';
+
 import { patchRules } from '../../rules/patch_rules';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
@@ -76,12 +76,12 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const rulesClient = context.alerting?.getRulesClient();
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -101,7 +101,7 @@ export const importRulesRoute = (
           });
         }
         const signalsIndex = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+        const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
         if (!indexExists) {
           return siemResponse.error({
             statusCode: 400,
@@ -200,10 +200,10 @@ export const importRulesRoute = (
 
                   throwHttpError(await mlAuthz.validateRuleType(type));
 
-                  const rule = await readRules({ alertsClient, ruleId, id: undefined });
+                  const rule = await readRules({ rulesClient, ruleId, id: undefined });
                   if (rule == null) {
                     await createRules({
-                      alertsClient,
+                      rulesClient,
                       anomalyThreshold,
                       author,
                       buildingBlockType,
@@ -256,7 +256,7 @@ export const importRulesRoute = (
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null && request.query.overwrite) {
                     await patchRules({
-                      alertsClient,
+                      rulesClient,
                       author,
                       buildingBlockType,
                       savedObjectsClient,

@@ -6,20 +6,31 @@
  */
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useKibana, useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { JourneyState } from '../../../../state/reducers/journey';
-import { Ping } from '../../../../../common/runtime_types/ping';
 import { PLUGIN } from '../../../../../common/constants/plugin';
+import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
-interface Props {
-  journey: JourneyState;
-  activeStep?: Ping;
+interface ActiveStep {
+  monitor: {
+    id: string;
+    name?: string;
+  };
 }
 
-export const useMonitorBreadcrumb = ({ journey, activeStep }: Props) => {
-  const [dateFormat] = useUiSetting$<string>('dateFormat');
+interface Props {
+  details: JourneyState['details'];
+  activeStep?: ActiveStep;
+  performanceBreakDownView?: boolean;
+}
 
+export const useMonitorBreadcrumb = ({
+  details,
+  activeStep,
+  performanceBreakDownView = false,
+}: Props) => {
   const kibana = useKibana();
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
 
@@ -32,8 +43,22 @@ export const useMonitorBreadcrumb = ({ journey, activeStep }: Props) => {
           },
         ]
       : []),
-    ...(journey?.details?.timestamp
-      ? [{ text: moment(journey?.details?.timestamp).format(dateFormat) }]
+    ...(details?.journey?.monitor?.check_group
+      ? [
+          {
+            text: getShortTimeStamp(moment(details?.timestamp)),
+            href: `${appPath}/journey/${details.journey.monitor.check_group}/steps`,
+          },
+        ]
+      : []),
+    ...(performanceBreakDownView
+      ? [
+          {
+            text: i18n.translate('xpack.uptime.synthetics.performanceBreakDown.label', {
+              defaultMessage: 'Performance breakdown',
+            }),
+          },
+        ]
       : []),
   ]);
 };

@@ -8,11 +8,11 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { Visualization, OperationMetadata, AccessorConfig } from '../types';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { PieLayerState, PieVisualizationState } from './types';
+import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { DimensionEditor, PieToolbar } from './toolbar';
@@ -45,16 +45,19 @@ export const getPieVisualization = ({
       id: 'donut',
       icon: CHART_NAMES.donut.icon,
       label: CHART_NAMES.donut.label,
+      groupLabel: CHART_NAMES.donut.groupLabel,
     },
     {
       id: 'pie',
       icon: CHART_NAMES.pie.icon,
       label: CHART_NAMES.pie.label,
+      groupLabel: CHART_NAMES.pie.groupLabel,
     },
     {
       id: 'treemap',
       icon: CHART_NAMES.treemap.icon,
       label: CHART_NAMES.treemap.label,
+      groupLabel: CHART_NAMES.treemap.groupLabel,
     },
   ],
 
@@ -88,11 +91,11 @@ export const getPieVisualization = ({
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
 
-  initialize(frame, state, mainPalette) {
+  initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
         shape: 'donut',
-        layers: [newLayerState(frame.addNewLayer())],
+        layers: [newLayerState(addNewLayer())],
         palette: mainPalette,
       }
     );
@@ -123,7 +126,7 @@ export const getPieVisualization = ({
         triggerIcon: 'colorBy',
         palette: paletteService
           .get(state.palette?.name || 'default')
-          .getColors(10, state.palette?.params),
+          .getCategoricalColors(10, state.palette?.params),
       };
     }
 
@@ -193,11 +196,6 @@ export const getPieVisualization = ({
   setDimension({ prevState, layerId, columnId, groupId }) {
     return {
       ...prevState,
-
-      shape:
-        prevState.shape === 'donut' && prevState.layers.every((l) => l.groups.length === 1)
-          ? 'pie'
-          : prevState.shape,
       layers: prevState.layers.map((l) => {
         if (l.layerId !== layerId) {
           return l;
@@ -267,10 +265,15 @@ export const getPieVisualization = ({
       }
     }
     return metricColumnsWithArrayValues.map((label) => (
-      <>
-        <strong>{label}</strong> contains array values. Your visualization may not render as
-        expected.
-      </>
+      <FormattedMessage
+        key={label}
+        id="xpack.lens.pie.arrayValues"
+        defaultMessage="{label} contains array values. Your visualization may not render as
+        expected."
+        values={{
+          label: <strong>{label}</strong>,
+        }}
+      />
     ));
   },
 

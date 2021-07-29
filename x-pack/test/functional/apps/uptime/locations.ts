@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime: uptimePage } = getPageObjects(['uptime']);
   const uptime = getService('uptime');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const monitor = () => uptime.monitor;
   const MONITOR_ID = 'location-testing-id';
@@ -39,7 +39,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await makeChecksWithStatus(es, LessAvailMonitor, 5, 2, 10000, {}, 'down');
   };
 
-  describe('Observer location', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/85208
+  describe.skip('Observer location', () => {
     const start = '~ 15 minutes ago';
     const end = 'now';
 

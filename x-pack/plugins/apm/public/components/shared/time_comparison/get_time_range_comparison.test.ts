@@ -11,12 +11,23 @@ import {
 
 describe('getTimeRangeComparison', () => {
   describe('return empty object', () => {
+    it('when comparison is disabled', () => {
+      const end = '2021-01-28T15:00:00.000Z';
+      const result = getTimeRangeComparison({
+        start: undefined,
+        end,
+        comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonEnabled: false,
+      });
+      expect(result).toEqual({});
+    });
     it('when start is not defined', () => {
       const end = '2021-01-28T15:00:00.000Z';
       const result = getTimeRangeComparison({
         start: undefined,
         end,
         comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonEnabled: true,
       });
       expect(result).toEqual({});
     });
@@ -27,6 +38,7 @@ describe('getTimeRangeComparison', () => {
         start,
         end: undefined,
         comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonEnabled: true,
       });
       expect(result).toEqual({});
     });
@@ -39,11 +51,13 @@ describe('getTimeRangeComparison', () => {
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
           comparisonType: TimeRangeComparisonType.DayBefore,
+          comparisonEnabled: true,
           start,
           end,
         });
         expect(result.comparisonStart).toEqual('2021-01-27T14:45:00.000Z');
         expect(result.comparisonEnd).toEqual('2021-01-27T15:00:00.000Z');
+        expect(result.offset).toEqual('1d');
       });
     });
     describe('when a week before is selected', () => {
@@ -52,11 +66,13 @@ describe('getTimeRangeComparison', () => {
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
           comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonEnabled: true,
           start,
           end,
         });
         expect(result.comparisonStart).toEqual('2021-01-21T14:45:00.000Z');
         expect(result.comparisonEnd).toEqual('2021-01-21T15:00:00.000Z');
+        expect(result.offset).toEqual('1w');
       });
     });
     describe('when previous period is selected', () => {
@@ -67,10 +83,12 @@ describe('getTimeRangeComparison', () => {
           start,
           end,
           comparisonType: TimeRangeComparisonType.PeriodBefore,
+          comparisonEnabled: true,
         });
         expect(result).toEqual({
           comparisonStart: '2021-02-09T14:24:02.174Z',
           comparisonEnd: '2021-02-09T14:40:01.087Z',
+          offset: '958913ms',
         });
       });
     });
@@ -83,11 +101,13 @@ describe('getTimeRangeComparison', () => {
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
           comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonEnabled: true,
           start,
           end,
         });
         expect(result.comparisonStart).toEqual('2021-01-19T15:00:00.000Z');
         expect(result.comparisonEnd).toEqual('2021-01-21T15:00:00.000Z');
+        expect(result.offset).toEqual('1w');
       });
     });
   });
@@ -98,11 +118,13 @@ describe('getTimeRangeComparison', () => {
       const end = '2021-01-18T15:00:00.000Z';
       const result = getTimeRangeComparison({
         comparisonType: TimeRangeComparisonType.PeriodBefore,
+        comparisonEnabled: true,
         start,
         end,
       });
       expect(result.comparisonStart).toEqual('2021-01-02T15:00:00.000Z');
       expect(result.comparisonEnd).toEqual('2021-01-10T15:00:00.000Z');
+      expect(result.offset).toEqual('691200000ms');
     });
 
     it('uses the date difference to calculate the time range - 30 days', () => {
@@ -110,11 +132,13 @@ describe('getTimeRangeComparison', () => {
       const end = '2021-01-31T15:00:00.000Z';
       const result = getTimeRangeComparison({
         comparisonType: TimeRangeComparisonType.PeriodBefore,
+        comparisonEnabled: true,
         start,
         end,
       });
       expect(result.comparisonStart).toEqual('2020-12-02T15:00:00.000Z');
       expect(result.comparisonEnd).toEqual('2021-01-01T15:00:00.000Z');
+      expect(result.offset).toEqual('2592000000ms');
     });
   });
 });

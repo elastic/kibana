@@ -11,20 +11,22 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiPanelTo } from '../../../shared/react_router_helpers';
+import { PRODUCT_SELECTOR_CALLOUT_HEADING } from '../../constants';
 
 import CtaImage from './assets/getting_started.png';
 import './setup_guide_cta.scss';
 
 export const SetupGuideCta: React.FC = () => (
-  <EuiPanelTo to="/setup_guide" paddingSize="l" className="enterpriseSearchSetupCta">
+  <EuiPanelTo
+    to="/setup_guide"
+    paddingSize="l"
+    className="enterpriseSearchSetupCta"
+    data-test-subj="setupGuideLink"
+  >
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem className="enterpriseSearchSetupCta__text">
         <EuiTitle size="s">
-          <h2>
-            {i18n.translate('xpack.enterpriseSearch.overview.setupCta.title', {
-              defaultMessage: 'Enterprise-grade functionality for teams big and small',
-            })}
-          </h2>
+          <h2>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h2>
         </EuiTitle>
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.enterpriseSearch.overview.setupCta.description', {

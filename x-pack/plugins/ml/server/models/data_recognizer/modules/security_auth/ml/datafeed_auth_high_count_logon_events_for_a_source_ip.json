@@ -1,0 +1,26 @@
+{
+  "job_id": "auth_high_count_logon_events_for_a_source_ip",
+  "indices": [
+    "auditbeat-*",
+    "logs-*",
+    "filebeat-*",
+    "winlogbeat-*"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "authentication"
+          }
+        },
+        {
+          "term": {
+            "event.outcome": "success"
+          }
+        }
+      ]
+    }
+  }
+}

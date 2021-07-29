@@ -10,7 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
-import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
+import {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+  KibanaRequest,
+  LegacyRequest,
+} from '../http';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
@@ -24,6 +29,8 @@ export interface RenderingMetadata {
   i18n: typeof i18n.translate;
   locale: string;
   darkMode: boolean;
+  themeVersion?: string;
+  stylesheetPaths: string[];
   injectedMetadata: {
     version: string;
     buildNumber: number;
@@ -54,6 +61,12 @@ export interface RenderingMetadata {
       };
     };
   };
+}
+
+/** @internal */
+export interface RenderingPrebootDeps {
+  http: InternalHttpServicePreboot;
+  uiPlugins: UiPlugins;
 }
 
 /** @internal */
@@ -96,3 +109,6 @@ export interface InternalRenderingServiceSetup {
     options?: IRenderOptions
   ): Promise<string>;
 }
+
+/** @internal */
+export type InternalRenderingServicePreboot = InternalRenderingServiceSetup;

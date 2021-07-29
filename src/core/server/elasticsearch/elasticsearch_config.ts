@@ -7,11 +7,12 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
+import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -52,10 +53,54 @@ export const configSchema = schema.object({
     )
   ),
   password: schema.maybe(schema.string()),
-  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-    defaultValue: ['authorization'],
+  serviceAccountToken: schema.maybe(
+    schema.conditional(
+      schema.siblingRef('username'),
+      schema.never(),
+      schema.string(),
+      schema.string({
+        validate: () => {
+          return `serviceAccountToken cannot be specified when "username" is also set.`;
+        },
+      })
+    )
+  ),
+  requestHeadersWhitelist: schema.oneOf(
+    [
+      schema.string({
+        // can't use `validate` option on union types, forced to validate each individual subtypes
+        // see https://github.com/elastic/kibana/issues/64906
+        validate: (headersWhitelist) => {
+          const reservedHeaders = getReservedHeaders([headersWhitelist]);
+          if (reservedHeaders.length) {
+            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+          }
+        },
+      }),
+      schema.arrayOf(schema.string(), {
+        // can't use `validate` option on union types, forced to validate each individual subtypes
+        // see https://github.com/elastic/kibana/issues/64906
+        validate: (headersWhitelist) => {
+          const reservedHeaders = getReservedHeaders(headersWhitelist);
+          if (reservedHeaders.length) {
+            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+          }
+        },
+      }),
+    ],
+    {
+      defaultValue: ['authorization'],
+    }
+  ),
+  customHeaders: schema.recordOf(schema.string(), schema.string(), {
+    defaultValue: {},
+    validate: (customHeaders) => {
+      const reservedHeaders = getReservedHeaders(Object.keys(customHeaders));
+      if (reservedHeaders.length) {
+        return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+      }
+    },
   }),
-  customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
@@ -111,34 +156,56 @@ export const configSchema = schema.object({
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
-  (settings, fromPath, log) => {
+  (settings, fromPath, addDeprecation) => {
     const es = settings[fromPath];
     if (!es) {
-      return settings;
+      return;
     }
     if (es.username === 'elastic') {
-      log(
-        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+        correctiveActions: {
+          manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
+        },
+      });
     } else if (es.username === 'kibana') {
-      log(
-        `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+        correctiveActions: {
+          manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
+        },
+      });
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
-      log(
-        `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+        correctiveActions: {
+          manualSteps: [
+            `Set [${fromPath}.ssl.certificate] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+          ],
+        },
+      });
     } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
-      log(
-        `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+        correctiveActions: {
+          manualSteps: [
+            `Set [${fromPath}.ssl.key] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+          ],
+        },
+      });
     } else if (es.logQueries === true) {
-      log(
-        `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`,
+        correctiveActions: {
+          manualSteps: [
+            `Remove Setting [${fromPath}.logQueries] from your kibana configs`,
+            `Set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
+          ],
+        },
+      });
     }
-    return settings;
+    return;
   },
 ];
 
@@ -217,6 +284,7 @@ export class ElasticsearchConfig {
   /**
    * If Elasticsearch is protected with basic authentication, this setting provides
    * the username that the Kibana server uses to perform its administrative functions.
+   * Cannot be used in conjunction with serviceAccountToken.
    */
   public readonly username?: string;
 
@@ -225,6 +293,14 @@ export class ElasticsearchConfig {
    * the password that the Kibana server uses to perform its administrative functions.
    */
   public readonly password?: string;
+
+  /**
+   * If Elasticsearch security features are enabled, this setting provides the service account
+   * token that the Kibana server users to perform its administrative functions.
+   *
+   * This is an alternative to specifying a username and password.
+   */
+  public readonly serviceAccountToken?: string;
 
   /**
    * Set of settings configure SSL connection between Kibana and Elasticsearch that
@@ -259,6 +335,7 @@ export class ElasticsearchConfig {
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
+    this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;

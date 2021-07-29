@@ -58,7 +58,7 @@ jest.doMock('./ui_settings/ui_settings_service', () => ({
 }));
 
 export const mockEnsureValidConfiguration = jest.fn();
-jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
+jest.doMock('./config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
@@ -94,4 +94,10 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 export const mockI18nService = i18nServiceMock.create();
 jest.doMock('./i18n/i18n_service', () => ({
   I18nService: jest.fn(() => mockI18nService),
+}));
+
+import { prebootServiceMock } from './preboot/preboot_service.mock';
+export const mockPrebootService = prebootServiceMock.create();
+jest.doMock('./preboot/preboot_service', () => ({
+  PrebootService: jest.fn(() => mockPrebootService),
 }));

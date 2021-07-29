@@ -7,8 +7,12 @@
 
 import * as t from 'io-ts';
 
-import { listArray } from '../types/lists';
 import {
+  actions,
+  from,
+  risk_score,
+  machine_learning_job_id,
+  risk_score_mapping,
   threat_filters,
   threat_query,
   threat_mapping,
@@ -16,14 +20,20 @@ import {
   threat_indicator_path,
   concurrent_searches,
   items_per_search,
-} from '../types/threat_mapping';
+  threats,
+  severity_mapping,
+  severity,
+  max_signals,
+  throttle,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
+
 import {
   id,
   index,
   filters,
   event_category_override,
-  risk_score_mapping,
-  severity_mapping,
   building_block_type,
   note,
   license,
@@ -35,41 +45,32 @@ import {
   author,
   description,
   false_positives,
-  from,
   rule_id,
   immutable,
   output_index,
   query,
-  machine_learning_job_id,
-  max_signals,
-  risk_score,
-  severity,
-  threats,
   to,
   references,
-  version,
   saved_id,
   threshold,
   anomaly_threshold,
   name,
   tags,
-  actions,
   interval,
   enabled,
   updated_at,
+  updated_by,
   created_at,
+  created_by,
   job_status,
   status_date,
   last_success_at,
   last_success_message,
   last_failure_at,
   last_failure_message,
-  throttleOrNull,
-  createdByOrNull,
-  updatedByOrNull,
 } from '../common/schemas';
 
-const createSchema = <
+export const createSchema = <
   Required extends t.Props,
   Optional extends t.Props,
   Defaultable extends t.Props
@@ -117,7 +118,7 @@ const responseSchema = <
   ]);
 };
 
-const buildAPISchemas = <R extends t.Props, O extends t.Props, D extends t.Props>(
+export const buildAPISchemas = <R extends t.Props, O extends t.Props, D extends t.Props>(
   params: APIParams<R, O, D>
 ) => {
   return {
@@ -137,7 +138,7 @@ interface APIParams<
   defaultable: Defaultable;
 }
 
-const commonParams = {
+const baseParams = {
   required: {
     name,
     description,
@@ -159,12 +160,11 @@ const commonParams = {
     tags,
     interval,
     enabled,
-    throttle: throttleOrNull,
+    throttle,
     actions,
     author,
     false_positives,
     from,
-    rule_id,
     // maxSignals not used in ML rules but probably should be used
     max_signals,
     risk_score_mapping,
@@ -177,10 +177,26 @@ const commonParams = {
   },
 };
 const {
-  create: commonCreateParams,
-  patch: commonPatchParams,
-  response: commonResponseParams,
-} = buildAPISchemas(commonParams);
+  create: baseCreateParams,
+  patch: basePatchParams,
+  response: baseResponseParams,
+} = buildAPISchemas(baseParams);
+
+// "shared" types are the same across all rule types, and built from "baseParams" above
+// with some variations for each route. These intersect with type specific schemas below
+// to create the full schema for each route.
+export const sharedCreateSchema = t.intersection([
+  baseCreateParams,
+  t.exact(t.partial({ rule_id })),
+]);
+export type SharedCreateSchema = t.TypeOf<typeof sharedCreateSchema>;
+
+export const sharedUpdateSchema = t.intersection([
+  baseCreateParams,
+  t.exact(t.partial({ rule_id })),
+  t.exact(t.partial({ id })),
+]);
+export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
 
 const eqlRuleParams = {
   required: {
@@ -200,6 +216,7 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
+export { eqlCreateParams };
 
 const threatMatchRuleParams = {
   required: {
@@ -228,6 +245,7 @@ const {
   patch: threatMatchPatchParams,
   response: threatMatchResponseParams,
 } = buildAPISchemas(threatMatchRuleParams);
+export { threatMatchCreateParams };
 
 const queryRuleParams = {
   required: {
@@ -248,6 +266,8 @@ const {
   patch: queryPatchParams,
   response: queryResponseParams,
 } = buildAPISchemas(queryRuleParams);
+
+export { queryCreateParams };
 
 const savedQueryRuleParams = {
   required: {
@@ -271,6 +291,8 @@ const {
   response: savedQueryResponseParams,
 } = buildAPISchemas(savedQueryRuleParams);
 
+export { savedQueryCreateParams };
+
 const thresholdRuleParams = {
   required: {
     type: t.literal('threshold'),
@@ -292,6 +314,8 @@ const {
   response: thresholdResponseParams,
 } = buildAPISchemas(thresholdRuleParams);
 
+export { thresholdCreateParams };
+
 const machineLearningRuleParams = {
   required: {
     type: t.literal('machine_learning'),
@@ -307,6 +331,8 @@ const {
   response: machineLearningResponseParams,
 } = buildAPISchemas(machineLearningRuleParams);
 
+export { machineLearningCreateParams };
+
 const createTypeSpecific = t.union([
   eqlCreateParams,
   threatMatchCreateParams,
@@ -318,74 +344,28 @@ const createTypeSpecific = t.union([
 export type CreateTypeSpecific = t.TypeOf<typeof createTypeSpecific>;
 
 // Convenience types for building specific types of rules
-export const eqlCreateSchema = t.intersection([eqlCreateParams, commonCreateParams]);
-export type EqlCreateSchema = t.TypeOf<typeof eqlCreateSchema>;
+type CreateSchema<T> = SharedCreateSchema & T;
+export type EqlCreateSchema = CreateSchema<t.TypeOf<typeof eqlCreateParams>>;
+export type ThreatMatchCreateSchema = CreateSchema<t.TypeOf<typeof threatMatchCreateParams>>;
+export type QueryCreateSchema = CreateSchema<t.TypeOf<typeof queryCreateParams>>;
+export type SavedQueryCreateSchema = CreateSchema<t.TypeOf<typeof savedQueryCreateParams>>;
+export type ThresholdCreateSchema = CreateSchema<t.TypeOf<typeof thresholdCreateParams>>;
+export type MachineLearningCreateSchema = CreateSchema<
+  t.TypeOf<typeof machineLearningCreateParams>
+>;
 
-export const threatMatchCreateSchema = t.intersection([
-  threatMatchCreateParams,
-  commonCreateParams,
-]);
-export type ThreatMatchCreateSchema = t.TypeOf<typeof threatMatchCreateSchema>;
-
-export const queryCreateSchema = t.intersection([queryCreateParams, commonCreateParams]);
-export type QueryCreateSchema = t.TypeOf<typeof queryCreateSchema>;
-
-export const savedQueryCreateSchema = t.intersection([savedQueryCreateParams, commonCreateParams]);
-export type SavedQueryCreateSchema = t.TypeOf<typeof savedQueryCreateSchema>;
-
-export const thresholdCreateSchema = t.intersection([thresholdCreateParams, commonCreateParams]);
-export type ThresholdCreateSchema = t.TypeOf<typeof thresholdCreateSchema>;
-
-export const machineLearningCreateSchema = t.intersection([
-  machineLearningCreateParams,
-  commonCreateParams,
-]);
-export type MachineLearningCreateSchema = t.TypeOf<typeof machineLearningCreateSchema>;
-
-export const createRulesSchema = t.intersection([commonCreateParams, createTypeSpecific]);
+export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
 
-export const eqlUpdateSchema = t.intersection([
-  eqlCreateParams,
-  commonCreateParams,
-  t.exact(t.partial({ id })),
-]);
-export type EqlUpdateSchema = t.TypeOf<typeof eqlUpdateSchema>;
-
-export const threatMatchUpdateSchema = t.intersection([
-  threatMatchCreateParams,
-  commonCreateParams,
-  t.exact(t.partial({ id })),
-]);
-export type ThreatMatchUpdateSchema = t.TypeOf<typeof threatMatchUpdateSchema>;
-
-export const queryUpdateSchema = t.intersection([
-  queryCreateParams,
-  commonCreateParams,
-  t.exact(t.partial({ id })),
-]);
-export type QueryUpdateSchema = t.TypeOf<typeof queryUpdateSchema>;
-
-export const savedQueryUpdateSchema = t.intersection([
-  savedQueryCreateParams,
-  commonCreateParams,
-  t.exact(t.partial({ id })),
-]);
-export type SavedQueryUpdateSchema = t.TypeOf<typeof savedQueryUpdateSchema>;
-
-export const thresholdUpdateSchema = t.intersection([
-  thresholdCreateParams,
-  commonCreateParams,
-  t.exact(t.partial({ id })),
-]);
-export type ThresholdUpdateSchema = t.TypeOf<typeof thresholdUpdateSchema>;
-
-export const machineLearningUpdateSchema = t.intersection([
-  machineLearningCreateParams,
-  commonCreateParams,
-  t.exact(t.partial({ id })),
-]);
-export type MachineLearningUpdateSchema = t.TypeOf<typeof machineLearningUpdateSchema>;
+type UpdateSchema<T> = SharedUpdateSchema & T;
+export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
+export type ThreatMatchUpdateSchema = UpdateSchema<t.TypeOf<typeof threatMatchCreateParams>>;
+export type QueryUpdateSchema = UpdateSchema<t.TypeOf<typeof queryCreateParams>>;
+export type SavedQueryUpdateSchema = UpdateSchema<t.TypeOf<typeof savedQueryCreateParams>>;
+export type ThresholdUpdateSchema = UpdateSchema<t.TypeOf<typeof thresholdCreateParams>>;
+export type MachineLearningUpdateSchema = UpdateSchema<
+  t.TypeOf<typeof machineLearningCreateParams>
+>;
 
 const patchTypeSpecific = t.union([
   eqlPatchParams,
@@ -406,26 +386,23 @@ const responseTypeSpecific = t.union([
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
-export const updateRulesSchema = t.intersection([
-  commonCreateParams,
-  createTypeSpecific,
-  t.exact(t.partial({ id })),
-]);
+export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdateSchema]);
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
 
 export const fullPatchSchema = t.intersection([
-  commonPatchParams,
+  basePatchParams,
   patchTypeSpecific,
   t.exact(t.partial({ id })),
 ]);
 
 const responseRequiredFields = {
   id,
+  rule_id,
   immutable,
   updated_at,
-  updated_by: updatedByOrNull,
+  updated_by,
   created_at,
-  created_by: createdByOrNull,
+  created_by,
 };
 const responseOptionalFields = {
   status: job_status,
@@ -437,7 +414,7 @@ const responseOptionalFields = {
 };
 
 export const fullResponseSchema = t.intersection([
-  commonResponseParams,
+  baseResponseParams,
   responseTypeSpecific,
   t.exact(t.type(responseRequiredFields)),
   t.exact(t.partial(responseOptionalFields)),

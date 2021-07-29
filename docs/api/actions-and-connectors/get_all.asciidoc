@@ -1,28 +1,36 @@
-[[actions-and-connectors-api-get-all]]
-=== Get all actions API
+[[get-all-connectors-api]]
+=== Get all connectors API
 ++++
-<titleabbrev>Get all actions API</titleabbrev>
+<titleabbrev>Get all connectors</titleabbrev>
 ++++
 
-Retrieves all actions.
+Retrieves all connectors.
 
-[[actions-and-connectors-api-get-all-request]]
+[[get-all-connectors-api-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/actions`
+`GET <kibana host>:<port>/api/actions/connectors`
 
-[[actions-and-connectors-api-get-all-codes]]
+`GET <kibana host>:<port>/s/<space_id>/api/actions/connectors`
+
+[[get-all-connectors-api-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[get-all-connectors-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-get-all-example]]
+[[get-all-connectors-api-example]]
 ==== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/actions
+$ curl -X GET api/actions/connectors
 --------------------------------------------------
 // KIBANA
 
@@ -32,21 +40,24 @@ The API returns the following:
 --------------------------------------------------
 [
   {
-    "id": "preconfigured-mail-action",
-    "actionTypeId": ".email",
-    "name": "email: preconfigured-mail-action",
-    "isPreconfigured": true
+    "id": "preconfigured-mail-connector",
+    "connector_type_id": ".email",
+    "name": "email: preconfigured-mail-connector",
+    "is_preconfigured": true,
+    "referenced_by_count": 1
   },
   {
     "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
-    "actionTypeId": ".index",
-    "name": "my-action",
+    "connector_type_id": ".index",
+    "name": "my-connector",
     "config": {
       "index": "test-index",
       "refresh": false,
       "executionTimeField": null
     },
-    "isPreconfigured": false
+    "is_preconfigured": false,
+    "is_missing_secrets": false,
+    "referenced_by_count": 3
   }
 ]
 --------------------------------------------------

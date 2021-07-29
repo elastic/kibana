@@ -16,6 +16,7 @@ export type RenderWizardArguments = {
   mapColors: string[];
   // multi-step arguments for wizards that supply 'prerequisiteSteps'
   currentStepId: string | null;
+  isOnFinalStep: boolean;
   enableNextBtn: () => void;
   disableNextBtn: () => void;
   startStepLoading: () => void;
@@ -32,10 +33,12 @@ export type LayerWizard = {
   description: string;
   disabledReason?: string;
   getIsDisabled?: () => Promise<boolean> | boolean;
+  isBeta?: boolean;
   icon: string | FunctionComponent<any>;
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
+  showFeatureEditTools?: boolean;
 };
 
 export type LayerWizardWithMeta = LayerWizard & {
@@ -53,6 +56,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
     getIsDisabled: async () => {
       return false;
     },
+    isBeta: false,
     ...layerWizard,
   });
 }

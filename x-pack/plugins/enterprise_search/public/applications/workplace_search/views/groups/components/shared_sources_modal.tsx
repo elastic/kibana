@@ -9,6 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { GroupLogic } from '../group_logic';
@@ -53,6 +54,7 @@ export const SharedSourcesModal: React.FC = () => {
             values: { groupName: group.name },
           })}
         </p>
+        <EuiSpacer size="m" />
         <SourcesList
           contentSources={contentSources}
           filteredSources={selectedGroupSources}

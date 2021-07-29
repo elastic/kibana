@@ -26,6 +26,11 @@ import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';
 
 import { isTrainingFilter } from './is_training_filter';
 
+const AUC_VALUE_LABEL = 'AUC';
+const AUC_ROUNDING_VALUE = 100000;
+const ROC_CLASS_NAME = 'ROC';
+const BINARY_CLASSIFICATION_THRESHOLD = 2;
+
 interface RocCurveDataRow extends RocCurveItem {
   class_name: string;
 }
@@ -33,11 +38,16 @@ interface RocCurveDataRow extends RocCurveItem {
 export const useRocCurve = (
   jobConfig: DataFrameAnalyticsConfig,
   searchQuery: ResultsSearchQuery,
-  visibleColumns: string[]
+  columns: string[]
 ) => {
-  const classificationClasses = visibleColumns.filter(
+  const classificationClasses = columns.filter(
     (d) => d !== ACTUAL_CLASS_ID && d !== OTHER_CLASS_ID
   );
+
+  // For binary classification jobs we only need to get the data for one class.
+  if (classificationClasses.length <= BINARY_CLASSIFICATION_THRESHOLD) {
+    classificationClasses.splice(1);
+  }
 
   const [rocCurveData, setRocCurveData] = useState<RocCurveDataRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -83,9 +93,19 @@ export const useRocCurve = (
           isClassificationEvaluateResponse(evalData.eval)
         ) {
           const auc = evalData.eval?.classification?.auc_roc?.value || 0;
+
+          // For binary classification jobs we use the 'ROC' label,
+          // for multi-class classification the original class name.
+          const rocCurveClassLabel =
+            classificationClasses.length > BINARY_CLASSIFICATION_THRESHOLD
+              ? classificationClasses[i]
+              : ROC_CLASS_NAME;
+
           const rocCurveDataForClass = (evalData.eval?.classification?.auc_roc?.curve || []).map(
             (d) => ({
-              class_name: `${rocCurveClassName} (AUC: ${Math.round(auc * 100000) / 100000})`,
+              class_name: `${rocCurveClassLabel} (${AUC_VALUE_LABEL}: ${
+                Math.round(auc * AUC_ROUNDING_VALUE) / AUC_ROUNDING_VALUE
+              })`,
               ...d,
             })
           );
@@ -101,7 +121,18 @@ export const useRocCurve = (
     }
 
     loadRocCurveData();
-  }, [JSON.stringify([jobConfig, searchQuery, visibleColumns])]);
+  }, [JSON.stringify([jobConfig, searchQuery, columns])]);
 
-  return { rocCurveData, classificationClasses, error, isLoading };
+  return {
+    rocCurveData,
+    // To match the data that was generated for the class,
+    // for multi-class classification jobs this returns all class names,
+    // for binary classification it returns just ['ROC'].
+    classificationClasses:
+      classificationClasses.length > BINARY_CLASSIFICATION_THRESHOLD
+        ? classificationClasses
+        : [ROC_CLASS_NAME],
+    error,
+    isLoading,
+  };
 };

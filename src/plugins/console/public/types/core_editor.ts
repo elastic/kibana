@@ -21,7 +21,7 @@ export type EditorEvent =
 export type AutoCompleterFunction = (
   pos: Position,
   prefix: string,
-  callback: (...args: any[]) => void
+  callback: (...args: unknown[]) => void
 ) => void;
 
 export interface Position {
@@ -235,7 +235,7 @@ export interface CoreEditor {
    * have this backdoor to update UI in response to request range changes, for example, as the user
    * moves the cursor around
    */
-  legacyUpdateUI(opts: any): void;
+  legacyUpdateUI(opts: unknown): void;
 
   /**
    * A method to for the editor to resize, useful when, for instance, window size changes.
@@ -250,7 +250,11 @@ export interface CoreEditor {
   /**
    * Register a keyboard shortcut and provide a function to be called.
    */
-  registerKeyboardShortcut(opts: { keys: any; fn: () => void; name: string }): void;
+  registerKeyboardShortcut(opts: {
+    keys: string | { win?: string; mac?: string };
+    fn: () => void;
+    name: string;
+  }): void;
 
   /**
    * Register a completions function that will be called when the editor

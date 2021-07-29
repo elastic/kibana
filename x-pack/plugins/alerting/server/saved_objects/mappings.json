@@ -1,0 +1,115 @@
+{
+  "alert": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "alertTypeId": {
+        "type": "keyword"
+      },
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "keyword"
+          }
+        }
+      },
+      "consumer": {
+        "type": "keyword"
+      },
+      "actions": {
+        "type": "nested",
+        "properties": {
+          "group": {
+            "type": "keyword"
+          },
+          "actionRef": {
+            "type": "keyword"
+          },
+          "actionTypeId": {
+            "type": "keyword"
+          },
+          "params": {
+            "enabled": false,
+            "type": "object"
+          }
+        }
+      },
+      "params": {
+        "type": "flattened",
+        "ignore_above": 4096
+      },
+      "scheduledTaskId": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "apiKey": {
+        "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "type": "keyword"
+      },
+      "notifyWhen": {
+        "type": "keyword"
+      },
+      "muteAll": {
+        "type": "boolean"
+      },
+      "mutedInstanceIds": {
+        "type": "keyword"
+      },
+      "meta": {
+        "properties": {
+          "versionApiKeyLastmodified": {
+            "type": "keyword"
+          }
+        }
+      },
+      "executionStatus": {
+        "properties": {
+          "status": {
+            "type": "keyword"
+          },
+          "lastExecutionDate": {
+            "type": "date"
+          },
+          "error": {
+            "properties": {
+              "reason": {
+                "type": "keyword"
+              },
+              "message": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

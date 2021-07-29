@@ -30,6 +30,8 @@ export const useConfusionMatrix = (
   searchQuery: ResultsSearchQuery
 ) => {
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
+  const [overallAccuracy, setOverallAccuracy] = useState<null | number>(null);
+  const [avgRecall, setAvgRecall] = useState<null | number>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
@@ -77,6 +79,8 @@ export const useConfusionMatrix = (
           evalData.eval?.classification?.multiclass_confusion_matrix?.confusion_matrix;
         setError(null);
         setConfusionMatrixData(confusionMatrix || []);
+        setAvgRecall(evalData.eval?.classification?.recall?.avg_recall || null);
+        setOverallAccuracy(evalData.eval?.classification?.accuracy?.overall_accuracy || null);
         setIsLoading(false);
       } else {
         setIsLoading(false);
@@ -94,5 +98,5 @@ export const useConfusionMatrix = (
     loadConfusionMatrixData();
   }, [JSON.stringify([jobConfig, searchQuery])]);
 
-  return { confusionMatrixData, docsCount, error, isLoading };
+  return { avgRecall, confusionMatrixData, docsCount, error, isLoading, overallAccuracy };
 };

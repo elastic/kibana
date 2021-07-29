@@ -14,7 +14,9 @@ export const green = (x) => chalk.greenBright.bold(x);
 export const pink = (x) => chalk.bgMagenta.bold.cyan.bold(x);
 export const id = (x) => x;
 export const always = (x) => () => x; // Wraps a value in a fn. Eager evaluation if passed a fn.
+export const lazyF = (f) => () => f(); // Wraps a fn, in a fn, and executes it later.
 export const pretty = (x) => JSON.stringify(x, null, 2);
-export const reThrow = (e) => {
-  throw e;
-};
+export const flat = (xs) => xs.reduce((acc, x) => acc.concat(x), []); // Joins arrays
+export const flatMap = (f) => (xs) => xs.reduce((acc, x) => acc.concat(f(x)), []); // Joins arrays with a transformation fn.
+export const ccMark = '[CoverageIngestion]';
+export const taMark = '[TeamAssignment]';

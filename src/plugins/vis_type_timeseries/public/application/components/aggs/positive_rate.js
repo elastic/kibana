@@ -65,9 +65,9 @@ export const PositiveRateAgg = (props) => {
   const handleSelectChange = createSelectHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
-  const indexPattern =
-    (props.series.override_index_pattern && props.series.series_index_pattern) ||
-    props.panel.index_pattern;
+  const indexPattern = props.series.override_index_pattern
+    ? props.series.series_index_pattern
+    : props.panel.index_pattern;
 
   const selectedUnitOptions = UNIT_OPTIONS.filter((o) => o.value === model.unit);
 
@@ -99,27 +99,22 @@ export const PositiveRateAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.postiveRate.fieldLabel"
                 defaultMessage="Field"
               />
             }
+            fields={props.fields}
+            type={model.type}
+            restrict={[KBN_FIELD_TYPES.NUMBER]}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+            uiRestrictions={props.uiRestrictions}
             fullWidth
-          >
-            <FieldSelect
-              fields={props.fields}
-              type={model.type}
-              restrict={[KBN_FIELD_TYPES.NUMBER]}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-              uiRestrictions={props.uiRestrictions}
-              fullWidth
-            />
-          </EuiFormRow>
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow

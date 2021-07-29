@@ -41,13 +41,11 @@ export function ConnectionStatus({ isConnected, mode }) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        <span className="eui-displayBlock">{icon}</span>
+      </EuiFlexItem>
 
-          <EuiFlexItem className="remoteClustersConnectionStatus__message">
-            <EuiText size="s">{message}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexItem grow={false} className="remoteClustersConnectionStatus__message">
+        <EuiText size="s">{message}</EuiText>
       </EuiFlexItem>
 
       {!isConnected && mode === SNIFF_MODE && (

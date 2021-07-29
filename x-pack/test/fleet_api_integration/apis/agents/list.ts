@@ -68,10 +68,10 @@ export default function ({ getService }: FtrProviderContext) {
         }
       }
 
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return a 403 if a user without the superuser role try to access the APU', async () => {
@@ -100,10 +100,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return a 400 when given an invalid "kuery" value', async () => {
-      await supertest
-        .get(`/api/fleet/agents?kuery=m`) // missing saved object type
-        .expect(400);
+      await supertest.get(`/api/fleet/agents?kuery=.test%3A`).expect(400);
     });
+
+    it('should return a 200 and an empty list when given a "kuery" value with a missing saved object type', async () => {
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?kuery=m`) // missing saved object type
+        .expect(200);
+      expect(apiResponse.total).to.eql(0);
+    });
+
     it('should accept a valid "kuery" value', async () => {
       const filter = encodeURIComponent('fleet-agents.access_api_key_id : "api-key-2"');
       const { body: apiResponse } = await supertest

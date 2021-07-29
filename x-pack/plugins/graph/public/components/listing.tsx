@@ -45,7 +45,7 @@ export function Listing(props: ListingProps) {
         listingLimit={props.listingLimit}
         initialFilter={props.initialFilter}
         initialPageSize={props.initialPageSize}
-        noItemsFragment={getNoItemsMessage(
+        emptyPrompt={getNoItemsMessage(
           props.capabilities.save === false,
           props.createItem,
           props.coreStart.application
@@ -72,77 +72,73 @@ function getNoItemsMessage(
 ) {
   if (hideWriteControls) {
     return (
-      <div>
-        <EuiEmptyPrompt
-          iconType="graphApp"
-          title={
-            <h1 id="graphListingHeading">
-              <FormattedMessage
-                id="xpack.graph.listing.noItemsMessage"
-                defaultMessage="Looks like you don't have any graphs."
-              />
-            </h1>
-          }
-        />
-      </div>
+      <EuiEmptyPrompt
+        iconType="graphApp"
+        title={
+          <h1 id="graphListingHeading">
+            <FormattedMessage
+              id="xpack.graph.listing.noItemsMessage"
+              defaultMessage="Looks like you don't have any graphs."
+            />
+          </h1>
+        }
+      />
     );
   }
 
   const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
 
   return (
-    <div>
-      <EuiEmptyPrompt
-        iconType="graphApp"
-        title={
-          <h1 id="graphListingHeading">
+    <EuiEmptyPrompt
+      iconType="graphApp"
+      title={
+        <h1 id="graphListingHeading">
+          <FormattedMessage
+            id="xpack.graph.listing.createNewGraph.title"
+            defaultMessage="Create your first graph"
+          />
+        </h1>
+      }
+      body={
+        <Fragment>
+          <p>
             <FormattedMessage
-              id="xpack.graph.listing.createNewGraph.title"
-              defaultMessage="Create your first graph"
+              id="xpack.graph.listing.createNewGraph.combineDataViewFromKibanaAppDescription"
+              defaultMessage="Discover patterns and relationships in your Elasticsearch indices."
             />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.graph.listing.createNewGraph.combineDataViewFromKibanaAppDescription"
-                defaultMessage="Discover patterns and relationships in your Elasticsearch indices."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.graph.listing.createNewGraph.newToKibanaDescription"
-                defaultMessage="New to Kibana? Get started with {sampleDataInstallLink}."
-                values={{
-                  sampleDataInstallLink: (
-                    <EuiLink href={sampleDataUrl}>
-                      <FormattedMessage
-                        id="xpack.graph.listing.createNewGraph.sampleDataInstallLinkText"
-                        defaultMessage="sample data"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            onClick={createItem}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="graphCreateGraphPromptButton"
-          >
+          </p>
+          <p>
             <FormattedMessage
-              id="xpack.graph.listing.createNewGraph.createButtonLabel"
-              defaultMessage="Create graph"
+              id="xpack.graph.listing.createNewGraph.newToKibanaDescription"
+              defaultMessage="New to Kibana? Get started with {sampleDataInstallLink}."
+              values={{
+                sampleDataInstallLink: (
+                  <EuiLink href={sampleDataUrl}>
+                    <FormattedMessage
+                      id="xpack.graph.listing.createNewGraph.sampleDataInstallLinkText"
+                      defaultMessage="sample data"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
-          </EuiButton>
-        }
-      />
-    </div>
+          </p>
+        </Fragment>
+      }
+      actions={
+        <EuiButton
+          onClick={createItem}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="graphCreateGraphPromptButton"
+        >
+          <FormattedMessage
+            id="xpack.graph.listing.createNewGraph.createButtonLabel"
+            defaultMessage="Create graph"
+          />
+        </EuiButton>
+      }
+    />
   );
 }
 

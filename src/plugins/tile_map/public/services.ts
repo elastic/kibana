@@ -11,7 +11,7 @@ import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { SharePluginStart } from '../../share/public';
-import { TmsLayer } from '../../maps_legacy/public';
+import { TmsLayer } from '../../maps_ems/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
 

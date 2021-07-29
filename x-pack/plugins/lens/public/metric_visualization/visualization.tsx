@@ -10,7 +10,7 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import { MetricState } from './types';
+import type { MetricState } from '../../common/expressions';
 
 const toExpression = (
   state: MetricState,
@@ -52,6 +52,10 @@ export const metricVisualization: Visualization<MetricState> = {
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
+      groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
+        defaultMessage: 'Tabular and single value',
+      }),
+      sortPriority: 1,
     },
   ],
 
@@ -81,10 +85,10 @@ export const metricVisualization: Visualization<MetricState> = {
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(addNewLayer, state) {
     return (
       state || {
-        layerId: frame.addNewLayer(),
+        layerId: addNewLayer(),
         accessor: undefined,
       }
     );

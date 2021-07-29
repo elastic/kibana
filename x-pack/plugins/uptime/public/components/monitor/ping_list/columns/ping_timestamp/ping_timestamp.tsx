@@ -8,18 +8,19 @@
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
-import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import {
+  isScreenshotImageBlob,
+  isScreenshotRef,
+  ScreenshotRefImageData,
+} from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
-import { NavButtons } from './nav_buttons';
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
 import { StepImagePopover } from './step_image_popover';
 import { formatCaptionContent } from './translations';
-import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 
 const StepDiv = styled.div`
   figure.euiImage {
@@ -27,25 +28,16 @@ const StepDiv = styled.div`
       display: none;
     }
   }
-
-  position: relative;
-  div.stepArrows {
-    display: none;
-  }
-  :hover {
-    div.stepArrows {
-      display: flex;
-    }
-  }
 `;
 
 interface Props {
-  timestamp: string;
-  ping: Ping;
+  checkGroup?: string;
+  label?: string;
+  initialStepNo?: number;
 }
 
-export const PingTimestamp = ({ timestamp, ping }: Props) => {
-  const [stepNumber, setStepNumber] = useState(1);
+export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) => {
+  const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
   const [stepImages, setStepImages] = useState<string[]>([]);
@@ -54,7 +46,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const imgPath = `${basePath}/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNumber}`;
+  const imgPath = `${basePath}/api/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -67,27 +59,49 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       return getJourneyScreenshot(imgPath);
   }, [intersection?.intersectionRatio, stepNumber]);
 
+  const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);
   useEffect(() => {
-    if (data) {
+    if (isScreenshotRef(data)) {
+      setScreenshotRef(data);
+    } else if (isScreenshotImageBlob(data)) {
       setStepImages((prevState) => [...prevState, data?.src]);
     }
   }, [data]);
 
-  const imgSrc = stepImages?.[stepNumber - 1] ?? data?.src;
+  let imgSrc;
+  if (isScreenshotImageBlob(data)) {
+    imgSrc = stepImages?.[stepNumber - 1] ?? data.src;
+  }
 
   const captionContent = formatCaptionContent(stepNumber, data?.maxSteps);
+
+  const [numberOfCaptions, setNumberOfCaptions] = useState(0);
 
   const ImageCaption = (
     <StepImageCaption
       captionContent={captionContent}
       imgSrc={imgSrc}
+      imgRef={screenshotRef}
       maxSteps={data?.maxSteps}
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
-      timestamp={timestamp}
       isLoading={status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING}
+      label={label}
+      onVisible={(val) => setNumberOfCaptions((prevVal) => (val ? prevVal + 1 : prevVal - 1))}
     />
   );
+
+  useEffect(() => {
+    // This is a hack to get state if image is in full screen, we should refactor
+    // it once eui image exposes it's full screen state
+    // we are checking if number of captions are 2, that means
+    // image is in full screen mode since caption is also rendered on
+    // full screen image
+    // we dont want to change image displayed in thumbnail
+    if (numberOfCaptions === 1 && stepNumber !== initialStepNo) {
+      setStepNumber(initialStepNo);
+    }
+  }, [numberOfCaptions, initialStepNo, stepNumber]);
 
   return (
     <EuiFlexGroup alignItems="center">
@@ -97,30 +111,26 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           onMouseLeave={() => setIsImagePopoverOpen(false)}
           ref={intersectionRef}
         >
-          {imgSrc ? (
+          {(imgSrc || screenshotRef) && (
             <StepImagePopover
               captionContent={captionContent}
               imageCaption={ImageCaption}
               imgSrc={imgSrc}
+              imgRef={screenshotRef}
               isImagePopoverOpen={isImagePopoverOpen}
             />
-          ) : (
+          )}
+          {!imgSrc && !screenshotRef && (
             <NoImageDisplay
               imageCaption={ImageCaption}
               isLoading={status === FETCH_STATUS.LOADING}
               isPending={status === FETCH_STATUS.PENDING}
             />
           )}
-          <NavButtons
-            maxSteps={data?.maxSteps}
-            setIsImagePopoverOpen={setIsImagePopoverOpen}
-            setStepNumber={setStepNumber}
-            stepNumber={stepNumber}
-          />
         </StepDiv>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
+        <span className="eui-textNoWrap">{label}</span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

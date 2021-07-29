@@ -28,10 +28,10 @@ describe('Color Format', () => {
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>99</span>');
       expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">100</span></span>'
+        '<span ng-non-bindable><span style="color:blue;background-color:yellow">100</span></span>'
       );
       expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">150</span></span>'
+        '<span ng-non-bindable><span style="color:blue;background-color:yellow">150</span></span>'
       );
       expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>151</span>');
     });
@@ -74,22 +74,22 @@ describe('Color Format', () => {
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>B</span>');
       expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AAA</span></span>'
+        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AAA</span></span>'
       );
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AB</span></span>'
+        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AB</span></span>'
       );
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>a</span>');
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>B</span>');
       expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AAA</span></span>'
+        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AAA</span></span>'
       );
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AB</span></span>'
+        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AB</span></span>'
       );
       expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AB &lt;</span></span>'
+        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AB &lt;</span></span>'
       );
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>a</span>');
     });

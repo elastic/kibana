@@ -5,15 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'src/core/public';
-import {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementRecord,
-} from '../../../../../src/plugins/saved_objects_management/public';
-import { CopySavedObjectsToSpaceFlyout } from './components';
-import { SpacesManager } from '../spaces_manager';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+
+import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
+import type { PluginsStart } from '../plugin';
+import { SuspenseErrorBoundary } from '../suspense_error_boundary';
+import type { CopyToSpaceFlyoutProps } from './components';
+import { getCopyToSpaceFlyoutComponent } from './components';
+
+const LazyCopyToSpaceFlyout = lazy(() =>
+  getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
+);
+
+interface WrapperProps {
+  getStartServices: StartServicesAccessor<PluginsStart>;
+  props: CopyToSpaceFlyoutProps;
+}
+
+const Wrapper = ({ getStartServices, props }: WrapperProps) => {
+  const { value: startServices = [{ notifications: undefined }] } = useAsync(getStartServices);
+  const [{ notifications }] = startServices;
+
+  if (!notifications) {
+    return null;
+  }
+
+  return (
+    <SuspenseErrorBoundary notifications={notifications}>
+      <LazyCopyToSpaceFlyout {...props} />
+    </SuspenseErrorBoundary>
+  );
+};
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
@@ -28,17 +55,14 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     icon: 'copy',
     type: 'icon',
     available: (object: SavedObjectsManagementRecord) => {
-      return object.meta.namespaceType !== 'agnostic';
+      return object.meta.namespaceType !== 'agnostic' && !object.meta.hiddenType;
     },
     onClick: (object: SavedObjectsManagementRecord) => {
       this.start(object);
     },
   };
 
-  constructor(
-    private readonly spacesManager: SpacesManager,
-    private readonly notifications: NotificationsStart
-  ) {
+  constructor(private getStartServices: StartServicesAccessor<PluginsStart>) {
     super();
   }
 
@@ -47,22 +71,18 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
 
-    const savedObjectTarget = {
-      type: this.record.type,
-      id: this.record.id,
-      namespaces: this.record.namespaces ?? [],
-      title: this.record.meta.title,
-      icon: this.record.meta.icon,
+    const props: CopyToSpaceFlyoutProps = {
+      onClose: this.onClose,
+      savedObjectTarget: {
+        type: this.record.type,
+        id: this.record.id,
+        namespaces: this.record.namespaces ?? [],
+        title: this.record.meta.title,
+        icon: this.record.meta.icon,
+      },
     };
 
-    return (
-      <CopySavedObjectsToSpaceFlyout
-        onClose={this.onClose}
-        savedObjectTarget={savedObjectTarget}
-        spacesManager={this.spacesManager}
-        toastNotifications={this.notifications.toasts}
-      />
-    );
+    return <Wrapper getStartServices={this.getStartServices} props={props} />;
   };
 
   private onClose = () => {

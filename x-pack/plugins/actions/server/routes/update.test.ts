@@ -8,16 +8,17 @@
 import { updateActionRoute } from './update';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
-import { mockHandlerArguments } from './_mock_handler_arguments';
+import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client.mock';
+import { verifyAccessAndContext } from './verify_access_and_context';
 
-jest.mock('../lib/verify_api_access.ts', () => ({
-  verifyApiAccess: jest.fn(),
+jest.mock('./verify_access_and_context.ts', () => ({
+  verifyAccessAndContext: jest.fn(),
 }));
 
 beforeEach(() => {
   jest.resetAllMocks();
+  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('updateActionRoute', () => {
@@ -29,7 +30,7 @@ describe('updateActionRoute', () => {
 
     const [config, handler] = router.put.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id}"`);
 
     const updateResult = {
       id: '1',
@@ -57,7 +58,15 @@ describe('updateActionRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: updateResult });
+    expect(await handler(context, req, res)).toEqual({
+      body: {
+        id: '1',
+        connector_type_id: 'my-action-type-id',
+        name: 'My name',
+        config: { foo: true },
+        is_preconfigured: false,
+      },
+    });
 
     expect(actionsClient.update).toHaveBeenCalledTimes(1);
     expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
@@ -116,14 +125,14 @@ describe('updateActionRoute', () => {
 
     await handler(context, req, res);
 
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 
   it('ensures the license check prevents deleting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 
@@ -159,27 +168,6 @@ describe('updateActionRoute', () => {
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
-  });
-
-  it('ensures the action type gets validated for the license', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    updateActionRoute(router, licenseState);
-
-    const [, handler] = router.put.mock.calls[0];
-
-    const actionsClient = actionsClientMock.create();
-    actionsClient.update.mockRejectedValue(new ActionTypeDisabledError('Fail', 'license_invalid'));
-
-    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: {}, body: {} }, [
-      'ok',
-      'forbidden',
-    ]);
-
-    await handler(context, req, res);
-
-    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+    expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 });

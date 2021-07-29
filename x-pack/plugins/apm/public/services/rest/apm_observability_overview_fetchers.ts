@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { mean } from 'lodash';
 import {
   ApmFetchDataResponse,
   FetchDataParams,
 } from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
-
-export { createCallApmApi } from './createCallApmApi';
 
 export const fetchObservabilityOverviewPageData = async ({
   absoluteTime,
@@ -31,7 +28,7 @@ export const fetchObservabilityOverviewPageData = async ({
     },
   });
 
-  const { serviceCount, transactionCoordinates } = data;
+  const { serviceCount, transactionPerMinute } = data;
 
   return {
     appLink: `/app/apm/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
@@ -42,23 +39,18 @@ export const fetchObservabilityOverviewPageData = async ({
       },
       transactions: {
         type: 'number',
-        value:
-          mean(
-            transactionCoordinates
-              .map(({ y }) => y)
-              .filter((y) => y && isFinite(y))
-          ) || 0,
+        value: transactionPerMinute.value || 0,
       },
     },
     series: {
       transactions: {
-        coordinates: transactionCoordinates,
+        coordinates: transactionPerMinute.timeseries,
       },
     },
   };
 };
 
-export async function hasData() {
+export async function getHasData() {
   return await callApmApi({
     endpoint: 'GET /api/apm/observability_overview/has_data',
     signal: null,

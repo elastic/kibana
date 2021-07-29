@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -20,11 +21,11 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
-  EuiFlyoutProps,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { dataTypes } from '../../../../../../../common';
-import { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 
@@ -38,6 +39,7 @@ interface Props extends EuiFlyoutProps {
 
 export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   onClose,
+  as,
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();

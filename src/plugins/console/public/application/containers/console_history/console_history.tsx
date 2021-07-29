@@ -53,7 +53,7 @@ export function ConsoleHistory({ close }: Props) {
   const selectedReq = useRef<any>(null);
 
   const describeReq = useMemo(() => {
-    const _describeReq = (req: any) => {
+    const _describeReq = (req: { endpoint: string; time: string }) => {
       const endpoint = req.endpoint;
       const date = moment(req.time);
 

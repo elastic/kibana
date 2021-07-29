@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../server/utils/queries';
+import { rangeQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 import { getEsFilter } from '../lib/rum_client/ui_filters/get_es_filter';
@@ -46,15 +46,14 @@ export function getRumPageLoadTransactionsProjection({
         ? [
             {
               wildcard: {
-                'url.full': {
-                  value: `*${urlQuery}*`,
-                },
+                'url.full': `*${urlQuery}*`,
               },
             },
           ]
         : []),
       ...getEsFilter(uiFilters),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {
@@ -92,14 +91,13 @@ export function getRumErrorsProjection({
         ? [
             {
               wildcard: {
-                'url.full': {
-                  value: `*${urlQuery}*`,
-                },
+                'url.full': `*${urlQuery}*`,
               },
             },
           ]
         : []),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {

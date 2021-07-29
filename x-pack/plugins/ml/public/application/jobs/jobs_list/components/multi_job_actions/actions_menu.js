@@ -145,7 +145,7 @@ class MultiJobActionsMenuUI extends Component {
       );
     }
 
-    if (this.canCreateMlAlerts) {
+    if (this.canCreateMlAlerts && this.props.jobs.length === 1) {
       items.push(
         <EuiContextMenuItem
           key="create alert"
@@ -159,7 +159,7 @@ class MultiJobActionsMenuUI extends Component {
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.createAlertsLabel"
-            defaultMessage="Create alert"
+            defaultMessage="Create alert rule"
           />
         </EuiContextMenuItem>
       );

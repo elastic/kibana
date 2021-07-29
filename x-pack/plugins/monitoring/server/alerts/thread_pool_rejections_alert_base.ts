@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -16,13 +17,15 @@ import {
   AlertMessageLinkToken,
   ThreadPoolRejectionsAlertParams,
   CommonAlertFilter,
+  AlertState,
+  AlertThreadPoolRejectionsStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { Alert, RawAlertInstance } from '../../../alerts/common';
+import { Alert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -33,11 +36,11 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
   protected static createActionVariables(type: string) {
     return [
       {
-        name: 'count',
+        name: 'node',
         description: i18n.translate(
-          'xpack.monitoring.alerts.threadPoolRejections.actionVariables.count',
+          'xpack.monitoring.alerts.threadPoolRejections.actionVariables.node',
           {
-            defaultMessage: 'The number of nodes reporting high thread pool {type} rejections.',
+            defaultMessage: 'The node reporting high thread pool {type} rejections.',
             values: { type },
           }
         ),
@@ -66,7 +69,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
 
   protected async fetchData(
     params: ThreadPoolRejectionsAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -78,7 +81,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     const { threshold, duration } = params;
 
     const stats = await fetchThreadPoolRejectionStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       Globals.app.config.ui.max_bucket_size,
@@ -87,11 +90,10 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     );
 
     return stats.map((stat) => {
-      const { clusterUuid, rejectionCount, ccs } = stat;
+      const { clusterUuid, ccs } = stat;
 
       return {
-        shouldFire: rejectionCount > threshold,
-        rejectionCount,
+        shouldFire: stat.rejectionCount > threshold,
         severity: AlertSeverity.Danger,
         meta: stat,
         clusterUuid,
@@ -104,14 +106,19 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     return super.filterAlertInstance(alertInstance, filters, true);
   }
 
-  protected getUiMessage(alertState: AlertThreadPoolRejectionsState): AlertMessage {
-    const { nodeName, nodeId, rejectionCount } = alertState;
+  protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
+    const {
+      nodeName,
+      nodeId,
+      type: threadPoolType,
+      rejectionCount,
+    } = item.meta as AlertThreadPoolRejectionsStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.ui.firingMessage', {
-        defaultMessage: `Node #start_link{nodeName}#end_link is reporting {rejectionCount} {type} rejections at #absolute`,
+        defaultMessage: `Node #start_link{nodeName}#end_link is reporting {rejectionCount} {threadPoolType} rejections at #absolute`,
         values: {
           nodeName,
-          type: this.threadPoolType,
+          threadPoolType,
           rejectionCount,
         },
       }),
@@ -177,20 +184,28 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
       ],
     };
   }
-
   protected executeActions(
     instance: AlertInstance,
-    alertStates: AlertThreadPoolRejectionsState[],
+    { alertStates }: { alertStates: AlertState[] },
+    item: AlertData | null,
     cluster: AlertCluster
   ) {
     const type = this.threadPoolType;
-    const count = alertStates.length;
     const { clusterName: clusterKnownName, clusterUuid } = cluster;
     const clusterName = clusterKnownName || clusterUuid;
+
+    if (alertStates.length === 0) {
+      return;
+    }
+    const firingNode = alertStates[0] as AlertThreadPoolRejectionsState;
+    const { nodeName, nodeId } = firingNode;
+    if (!firingNode || !firingNode.ui.isFiring) {
+      return;
+    }
     const shortActionText = i18n.translate(
       'xpack.monitoring.alerts.threadPoolRejections.shortAction',
       {
-        defaultMessage: 'Verify thread pool {type} rejections across affected nodes.',
+        defaultMessage: 'Verify thread pool {type} rejections for the affected node.',
         values: {
           type,
         },
@@ -200,21 +215,25 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     const fullActionText = i18n.translate(
       'xpack.monitoring.alerts.threadPoolRejections.fullAction',
       {
-        defaultMessage: 'View nodes',
+        defaultMessage: 'View node',
       }
     );
 
     const ccs = alertStates.find((state) => state.ccs)?.ccs;
-    const globalStateLink = this.createGlobalStateLink('elasticsearch/nodes', clusterUuid, ccs);
+    const globalStateLink = this.createGlobalStateLink(
+      `elasticsearch/nodes/${nodeId}`,
+      cluster.clusterUuid,
+      ccs
+    );
 
     const action = `[${fullActionText}](${globalStateLink})`;
     const internalShortMessage = i18n.translate(
       'xpack.monitoring.alerts.threadPoolRejections.firing.internalShortMessage',
       {
-        defaultMessage: `Thread pool {type} rejections alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
+        defaultMessage: `Thread pool {type} rejections alert is firing for node {nodeName} in cluster: {clusterName}. {shortActionText}`,
         values: {
-          count,
           clusterName,
+          nodeName,
           shortActionText,
           type,
         },
@@ -223,10 +242,10 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     const internalFullMessage = i18n.translate(
       'xpack.monitoring.alerts.threadPoolRejections.firing.internalFullMessage',
       {
-        defaultMessage: `Thread pool {type} rejections alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
+        defaultMessage: `Thread pool {type} rejections alert is firing for node {nodeName} in cluster: {clusterName}. {action}`,
         values: {
-          count,
           clusterName,
+          nodeName,
           action,
           type,
         },
@@ -238,7 +257,11 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
       internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
       threadPoolType: type,
       state: AlertingDefaults.ALERT_STATE.firing,
-      count,
+      /* continue to send "count" value for users before https://github.com/elastic/kibana/pull/102544 
+          see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
+          */
+      count: 1,
+      node: nodeName,
       clusterName,
       action,
       actionPlain: shortActionText,

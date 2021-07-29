@@ -17,10 +17,10 @@ import { useUrlState } from '../../utils/use_url_state';
 import { useFindSavedObject } from '../../hooks/use_find_saved_object';
 import { useCreateSavedObject } from '../../hooks/use_create_saved_object';
 import { useDeleteSavedObject } from '../../hooks/use_delete_saved_object';
-import { Source } from '../source';
+import { Source } from '../metrics_source';
 import { metricsExplorerViewSavedObjectName } from '../../../common/saved_objects/metrics_explorer_view';
 import { inventoryViewSavedObjectName } from '../../../common/saved_objects/inventory_view';
-import { useSourceConfigurationFormState } from '../../components/source_configuration/source_configuration_form_state';
+import { useSourceConfigurationFormState } from '../../pages/metrics/settings/source_configuration_form_state';
 import { useGetSavedObject } from '../../hooks/use_get_saved_object';
 import { useUpdateSavedObject } from '../../hooks/use_update_saved_object';
 
@@ -255,12 +255,21 @@ export const useSavedView = (props: Props) => {
   }, [urlState, setUrlState, currentView, defaultViewId, data]);
 
   useEffect(() => {
-    if (!currentView && !loading && data) {
+    if (!currentView && !loading && data && shouldLoadDefault) {
       const viewToSet = views.find((v) => v.id === urlState.viewId);
       if (viewToSet) setCurrentView(viewToSet);
       else loadDefaultViewIfSet();
     }
-  }, [loading, currentView, data, views, setCurrentView, loadDefaultViewIfSet, urlState.viewId]);
+  }, [
+    loading,
+    currentView,
+    data,
+    views,
+    setCurrentView,
+    loadDefaultViewIfSet,
+    urlState.viewId,
+    shouldLoadDefault,
+  ]);
 
   return {
     views,

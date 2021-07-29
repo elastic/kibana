@@ -6,19 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiSwitch,
-  EuiHorizontalRule,
-  EuiText,
-  EuiSpacer,
-  EuiIcon,
-} from '@elastic/eui';
+import { asyncScheduler } from 'rxjs';
+import React, { useEffect, useState } from 'react';
+import { EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
 import {
@@ -31,6 +21,7 @@ export type ComponentOpts = {
   item: AlertTableItem;
   onAlertChanged: () => void;
   setAlertsToDelete: React.Dispatch<React.SetStateAction<string[]>>;
+  onEditAlert: (item: AlertTableItem) => void;
 } & BulkOperationsComponentOpts;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
@@ -41,13 +32,20 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   unmuteAlert,
   muteAlert,
   setAlertsToDelete,
+  onEditAlert,
 }: ComponentOpts) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
+  const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);
+  useEffect(() => {
+    setIsDisabled(!item.enabled);
+    setIsMuted(item.muteAll);
+  }, [item.enabled, item.muteAll]);
 
   const button = (
     <EuiButtonIcon
       disabled={!item.isEditable}
-      iconType="boxesVertical"
+      iconType="boxesHorizontal"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-label={i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.popoverButtonTitle',
@@ -55,6 +53,91 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       )}
     />
   );
+
+  const panels = [
+    {
+      id: 0,
+      hasFocus: false,
+      items: [
+        {
+          disabled: !(item.isEditable && !isDisabled) || !item.enabledInLicense,
+          'data-test-subj': 'muteButton',
+          onClick: async () => {
+            const muteAll = isMuted;
+            asyncScheduler.schedule(async () => {
+              if (muteAll) {
+                await unmuteAlert({ ...item, muteAll });
+              } else {
+                await muteAlert({ ...item, muteAll });
+              }
+              onAlertChanged();
+            }, 10);
+            setIsMuted(!isMuted);
+            setIsPopoverOpen(!isPopoverOpen);
+          },
+          name: isMuted
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.unmuteTitle',
+                { defaultMessage: 'Unmute' }
+              )
+            : i18n.translate(
+                'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle',
+                { defaultMessage: 'Mute' }
+              ),
+        },
+        {
+          disabled: !item.isEditable || !item.enabledInLicense,
+          'data-test-subj': 'disableButton',
+          onClick: async () => {
+            const enabled = !isDisabled;
+            asyncScheduler.schedule(async () => {
+              if (enabled) {
+                await disableAlert({ ...item, enabled });
+              } else {
+                await enableAlert({ ...item, enabled });
+              }
+              onAlertChanged();
+            }, 10);
+            setIsDisabled(!isDisabled);
+            setIsPopoverOpen(!isPopoverOpen);
+          },
+          name: isDisabled
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle',
+                { defaultMessage: 'Enable' }
+              )
+            : i18n.translate(
+                'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.disableTitle',
+                { defaultMessage: 'Disable' }
+              ),
+        },
+        {
+          disabled: !item.isEditable,
+          'data-test-subj': 'editAlert',
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onEditAlert(item);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.editTitle',
+            { defaultMessage: 'Edit rule' }
+          ),
+        },
+        {
+          disabled: !item.isEditable,
+          'data-test-subj': 'deleteAlert',
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            setAlertsToDelete([item.id]);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteRuleTitle',
+            { defaultMessage: 'Delete rule' }
+          ),
+        },
+      ],
+    },
+  ];
 
   return (
     <EuiPopover
@@ -65,90 +148,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       panelPaddingSize="none"
       data-test-subj="collapsedItemActions"
     >
-      <EuiContextMenuPanel className="actCollapsedItemActions" hasFocus={false}>
-        <div className="actCollapsedItemActions__item">
-          <EuiSwitch
-            name="disable"
-            disabled={!item.isEditable || !item.enabledInLicense}
-            compressed
-            checked={!item.enabled}
-            data-test-subj="disableSwitch"
-            onChange={async () => {
-              if (item.enabled) {
-                await disableAlert(item);
-              } else {
-                await enableAlert(item);
-              }
-              onAlertChanged();
-            }}
-            label={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.disableTitle"
-                defaultMessage="Disable"
-              />
-            }
-          />
-          <EuiSpacer size="xs" />
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.disableHelpText"
-              defaultMessage="When disabled, the alert is not checked."
-            />
-          </EuiText>
-        </div>
-        <div className="actCollapsedItemActions__item">
-          <EuiSwitch
-            name="mute"
-            checked={item.muteAll}
-            disabled={!(item.isEditable && item.enabled) || !item.enabledInLicense}
-            compressed
-            data-test-subj="muteSwitch"
-            onChange={async () => {
-              if (item.muteAll) {
-                await unmuteAlert(item);
-              } else {
-                await muteAlert(item);
-              }
-              onAlertChanged();
-            }}
-            label={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle"
-                defaultMessage="Mute"
-              />
-            }
-          />
-          <EuiSpacer size="xs" />
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteHelpText"
-              defaultMessage="When muted, the alert is checked, but no action is performed."
-            />
-          </EuiText>
-        </div>
-        <EuiHorizontalRule margin="none" />
-        <EuiContextMenuItem
-          disabled={!item.isEditable}
-          data-test-subj="deleteAlert"
-          onClick={() => setAlertsToDelete([item.id])}
-        >
-          <div className="actCollapsedItemActions__delete">
-            <div className="actCollapsedItemActions__deleteIcon">
-              <EuiIcon color="danger" type="trash" />
-            </div>
-            <div className="actCollapsedItemActions__deleteLabel">
-              <EuiText size="s" color="danger">
-                <p>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle"
-                    defaultMessage="Delete"
-                  />
-                </p>
-              </EuiText>
-            </div>
-          </div>
-        </EuiContextMenuItem>
-      </EuiContextMenuPanel>
+      <EuiContextMenu initialPanelId={0} panels={panels} className="actCollapsedItemActions" />
     </EuiPopover>
   );
 };

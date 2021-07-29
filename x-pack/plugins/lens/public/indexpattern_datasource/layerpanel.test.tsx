@@ -165,7 +165,7 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'memory',
         },
       },

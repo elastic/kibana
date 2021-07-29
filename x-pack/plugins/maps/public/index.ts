@@ -19,6 +19,10 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
 
 export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 
-export { RenderTooltipContentParams } from './classes/tooltips/tooltip_property';
+export type { RenderTooltipContentParams } from './classes/tooltips/tooltip_property';
 
 export { MapsStartApi } from './api';
+
+export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
+
+export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';

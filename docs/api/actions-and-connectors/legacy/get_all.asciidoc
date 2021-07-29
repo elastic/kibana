@@ -1,0 +1,63 @@
+[[actions-and-connectors-legacy-api-get-all]]
+==== Legacy Get all connector API
+++++
+<titleabbrev>Legacy Get all connector</titleabbrev>
+++++
+
+deprecated::[7.13.0,Use <<get-all-connectors-api>> instead.]
+
+Retrieves all connectors.
+
+[[actions-and-connectors-legacy-api-get-all-request]]
+===== Request
+
+`GET <kibana host>:<port>/api/actions`
+
+`GET <kibana host>:<port>/s/<space_id>/api/actions`
+
+[[actions-and-connectors-legacy-api-get-all-path-params]]
+===== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[actions-and-connectors-legacy-api-get-all-codes]]
+===== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-legacy-api-get-all-example]]
+===== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": "preconfigured-mail-action",
+    "actionTypeId": ".email",
+    "name": "email: preconfigured-mail-action",
+    "isPreconfigured": true
+  },
+  {
+    "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+    "actionTypeId": ".index",
+    "name": "my-action",
+    "config": {
+      "index": "test-index",
+      "refresh": false,
+      "executionTimeField": null
+    },
+    "isPreconfigured": false,
+    "isMissingSecrets": false
+  }
+]
+--------------------------------------------------

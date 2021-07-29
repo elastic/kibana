@@ -17,6 +17,7 @@ export default function ({
   const browser = getService('browser');
 
   describe('state sync examples', function () {
+    this.tags('ciGroup2');
     before(async () => {
       await browser.setWindowSize(1300, 900);
     });

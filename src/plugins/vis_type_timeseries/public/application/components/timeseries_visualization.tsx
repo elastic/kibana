@@ -6,17 +6,31 @@
  * Side Public License, v 1.
  */
 
+import './timeseries_visualization.scss';
+
 import React, { useCallback, useEffect } from 'react';
 
+import { get } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 
-// @ts-expect-error
-import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
-import { TimeseriesVisParams } from '../../metrics_fn';
-import { TimeseriesVisData } from '../../../common/types';
+import type { TimeseriesVisData, PanelData } from '../../../common/types';
+import { isVisSeriesData } from '../../../common/vis_data_utils';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
+import { TimeseriesVisParams } from '../../types';
+import { getDataStart } from '../../services';
+import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
+import { getClickFilterData } from './lib/get_click_filter_data';
+import { X_ACCESSOR_INDEX } from '../visualizations/constants';
+import { LastValueModeIndicator } from './last_value_mode_indicator';
+import { getInterval } from './lib/get_interval';
+import { AUTO_INTERVAL } from '../../../common/constants';
+import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../../common/enums';
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -25,6 +39,8 @@ interface TimeseriesVisualizationProps {
   model: TimeseriesVisParams;
   visData: TimeseriesVisData;
   uiState: PersistedState;
+  syncColors: boolean;
+  palettesService: PaletteRegistry;
 }
 
 function TimeseriesVisualization({
@@ -34,27 +50,86 @@ function TimeseriesVisualization({
   handlers,
   uiState,
   getConfig,
+  syncColors,
+  palettesService,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
-    (gte: string, lte: string) => {
-      handlers.event({
-        name: 'applyFilter',
-        data: {
-          timeFieldName: '*',
-          filters: [
-            {
-              range: {
-                '*': {
-                  gte,
-                  lte,
+    async (gte: string, lte: string, series: PanelData[]) => {
+      const indexPatternValue = model.index_pattern || '';
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
+      let event;
+      // trigger applyFilter if no index pattern found, url drilldowns are supported only
+      // for the index pattern mode
+      if (indexPattern) {
+        const tables = indexPattern
+          ? await convertSeriesToDataTable(model, series, indexPattern)
+          : null;
+        const table = tables?.[model.series[0].id];
+
+        const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
+        event = {
+          data: {
+            table,
+            column: X_ACCESSOR_INDEX,
+            range,
+            timeFieldName: indexPattern?.timeFieldName,
+          },
+          name: 'brush',
+        };
+      } else {
+        event = {
+          name: 'applyFilter',
+          data: {
+            timeFieldName: '*',
+            filters: [
+              {
+                range: {
+                  '*': {
+                    gte,
+                    lte,
+                  },
                 },
               },
-            },
-          ],
-        },
-      });
+            ],
+          },
+        };
+      }
+
+      handlers.event(event);
     },
-    [handlers]
+    [handlers, model]
+  );
+
+  const handleFilterClick = useCallback(
+    async (series: PanelData[], points: Array<[GeometryValue, XYChartSeriesIdentifier]>) => {
+      const indexPatternValue = model.index_pattern || '';
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
+
+      // it should work only if index pattern is found
+      if (!indexPattern) return;
+
+      const tables = indexPattern
+        ? await convertSeriesToDataTable(model, series, indexPattern)
+        : null;
+
+      if (!tables) return;
+
+      const data = getClickFilterData(points, tables, model);
+
+      const event = {
+        name: 'filterBucket',
+        data: {
+          data,
+          negate: false,
+          timeFieldName: indexPattern.timeFieldName,
+        },
+      };
+
+      handlers.event(event);
+    },
+    [handlers, model]
   );
 
   const handleUiState = useCallback(
@@ -70,28 +145,44 @@ function TimeseriesVisualization({
     handlers.done();
   });
 
-  // Show the error panel
-  const error = visData[model.id]?.error;
-  if (error) {
-    return (
-      <div className={className}>
-        <ErrorComponent error={error} />
-      </div>
-    );
-  }
-
   const VisComponent = TimeseriesVisTypes[model.type];
+
+  const isLastValueMode =
+    !model.time_range_mode || model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE;
+  const shouldDisplayLastValueIndicator =
+    isLastValueMode && !model.hide_last_value_indicator && model.type !== PANEL_TYPES.TIMESERIES;
 
   if (VisComponent) {
     return (
-      <VisComponent
-        getConfig={getConfig}
-        model={model}
-        visData={visData}
-        uiState={uiState}
-        onBrush={onBrush}
-        onUiState={handleUiState}
-      />
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+        {shouldDisplayLastValueIndicator && (
+          <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
+            <LastValueModeIndicator
+              seriesData={get(
+                visData,
+                `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
+                undefined
+              )}
+              ignoreDaylightTime={model.ignore_daylight_time}
+              panelInterval={getInterval(visData, model)}
+              modelInterval={model.interval ?? AUTO_INTERVAL}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <VisComponent
+            getConfig={getConfig}
+            model={model}
+            visData={visData}
+            uiState={uiState}
+            onBrush={onBrush}
+            onFilterClick={handleFilterClick}
+            onUiState={handleUiState}
+            syncColors={syncColors}
+            palettesService={palettesService}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

@@ -10,8 +10,10 @@ import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiLink } from '@elastic/eui';
 import { createMockedIndexPattern } from '../../../mocks';
-import { FilterPopover, QueryInput } from './filter_popover';
+import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
+import { QueryInput } from '../../../query_input';
+import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
 
 jest.mock('.', () => ({
   isQueryValid: () => true,
@@ -31,13 +33,25 @@ const defaultProps = {
   ),
   initiallyOpen: true,
 };
+jest.mock('../../../../../../../../src/plugins/data/public', () => ({
+  QueryStringInput: () => {
+    return 'QueryStringInput';
+  },
+}));
 
 describe('filter popover', () => {
-  jest.mock('../../../../../../../../src/plugins/data/public', () => ({
-    QueryStringInput: () => {
-      return 'QueryStringInput';
-    },
-  }));
+  it('passes correct props to QueryStringInput', () => {
+    const instance = mount(<FilterPopover {...defaultProps} />);
+    instance.update();
+    expect(instance.find(QueryStringInput).props()).toEqual(
+      expect.objectContaining({
+        dataTestSubj: 'indexPattern-filters-queryStringInput',
+        indexPatterns: ['my-fake-index-pattern'],
+        isInvalid: false,
+        query: { language: 'kuery', query: 'bytes >= 1' },
+      })
+    );
+  });
   it('should be open if is open by creation', () => {
     const instance = mount(<FilterPopover {...defaultProps} />);
     instance.update();

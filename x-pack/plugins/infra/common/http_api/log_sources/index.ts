@@ -7,5 +7,5 @@
 
 export * from './get_log_source_configuration';
 export * from './get_log_source_status';
-export * from './log_source_configuration';
 export * from './patch_log_source_configuration';
+export * from './common';

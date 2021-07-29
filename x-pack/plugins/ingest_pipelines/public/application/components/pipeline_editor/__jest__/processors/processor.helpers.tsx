@@ -90,9 +90,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
-    async addProcessorType({ type, label }: { type: string; label: string }) {
+    async addProcessorType(type: string) {
       await act(async () => {
-        find('processorTypeSelector.input').simulate('change', [{ value: type, label }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type }]);
       });
       component.update();
     },
@@ -127,12 +127,65 @@ export const setupEnvironment = () => {
   };
 };
 
+export const getProcessorValue = (onUpdate: jest.Mock, type: string) => {
+  const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+  const { processors } = onUpdateResult.getData();
+  return processors;
+};
+
 type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'addProcessorButton'
   | 'addProcessorForm.submitButton'
+  | 'appendValueField.input'
+  | 'formatsValueField.input'
+  | 'timezoneField.input'
+  | 'outputFormatField.input'
+  | 'localeField.input'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'messageField.input'
+  | 'mockCodeEditor'
+  | 'tagField.input'
+  | 'typeSelectorField'
+  | 'dateRoundingField'
+  | 'ignoreMissingSwitch.input'
+  | 'ignoreFailureSwitch.input'
+  | 'indexNamePrefixField.input'
+  | 'indexNameFormatField.input'
+  | 'dateFormatsField.input'
+  | 'timezoneField.input'
+  | 'localeField.input'
+  | 'ifField.textarea'
   | 'targetField.input'
+  | 'targetFieldsField.input'
   | 'keepOriginalField.input'
-  | 'removeIfSuccessfulField.input';
+  | 'removeIfSuccessfulField.input'
+  | 'shapeSelectorField'
+  | 'errorDistanceField.input'
+  | 'separatorValueField.input'
+  | 'quoteValueField.input'
+  | 'emptyValueField.input'
+  | 'extractDeviceTypeSwitch.input'
+  | 'propertiesValueField'
+  | 'regexFileField.input'
+  | 'valueFieldInput'
+  | 'mediaTypeSelectorField'
+  | 'networkDirectionField.input'
+  | 'toggleCustomField'
+  | 'ignoreEmptyField.input'
+  | 'overrideField.input'
+  | 'fieldsValueField.input'
+  | 'saltValueField.input'
+  | 'methodsValueField'
+  | 'sourceIpField.input'
+  | 'sourcePortField.input'
+  | 'destinationIpField.input'
+  | 'destinationPortField.input'
+  | 'icmpTypeField.input'
+  | 'icmpCodeField.input'
+  | 'ianaField.input'
+  | 'transportField.input'
+  | 'seedField.input'
+  | 'copyFromInput'
+  | 'trimSwitch.input';

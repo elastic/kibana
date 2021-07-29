@@ -9,16 +9,22 @@
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
+import { fromRoot } from '@kbn/utils';
+import {
+  createPluginInitializerContext,
+  createPluginPrebootSetupContext,
+  InstanceInfo,
+} from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
-import { PluginManifest } from './types';
+import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '../config/mocks';
+import { PluginManifest, PluginType } from './types';
 import { Server } from '../server';
-import { fromRoot } from '../utils';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService } from '@kbn/config';
+import { PluginWrapper } from './plugin';
+import { coreMock } from '../mocks';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -26,6 +32,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     version: 'some-version',
     configPath: 'path',
     kibanaVersion: '7.0.0',
+    type: PluginType.standard,
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
@@ -115,8 +122,6 @@ describe('createPluginInitializerContext', () => {
       expect(configObject).toStrictEqual({
         kibana: {
           index: '.kibana',
-          autocompleteTerminateAfter: duration(100000),
-          autocompleteTimeout: duration(1000),
         },
         elasticsearch: {
           shardTimeout: duration(30, 's'),
@@ -143,5 +148,67 @@ describe('createPluginInitializerContext', () => {
       );
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
     });
+
+    it('should expose paths to the config files', () => {
+      coreContext = {
+        ...coreContext,
+        env: Env.createDefault(
+          REPO_ROOT,
+          getEnvOptions({
+            configs: ['/home/kibana/config/kibana.yml', '/home/kibana/config/kibana.dev.yml'],
+          })
+        ),
+      };
+      const pluginInitializerContext = createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        createPluginManifest(),
+        instanceInfo
+      );
+      expect(pluginInitializerContext.env.configs).toEqual([
+        '/home/kibana/config/kibana.yml',
+        '/home/kibana/config/kibana.dev.yml',
+      ]);
+    });
+  });
+});
+
+describe('createPluginPrebootSetupContext', () => {
+  let coreContext: CoreContext;
+  let opaqueId: symbol;
+
+  beforeEach(async () => {
+    opaqueId = Symbol();
+    coreContext = {
+      coreId: Symbol('core'),
+      env: Env.createDefault(REPO_ROOT, getEnvOptions()),
+      logger: loggingSystemMock.create(),
+      configService: configServiceMock.create(),
+    };
+  });
+
+  it('`holdSetupUntilResolved` captures plugin.name', () => {
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper({
+      path: 'some-path',
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest, {
+        uuid: 'instance-uuid',
+      }),
+    });
+
+    const corePreboot = coreMock.createInternalPreboot();
+    const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
+
+    const holdSetupPromise = Promise.resolve(undefined);
+    prebootSetupContext.preboot.holdSetupUntilResolved('some-reason', holdSetupPromise);
+
+    expect(corePreboot.preboot.holdSetupUntilResolved).toHaveBeenCalledTimes(1);
+    expect(corePreboot.preboot.holdSetupUntilResolved).toHaveBeenCalledWith(
+      'some-plugin-id',
+      'some-reason',
+      holdSetupPromise
+    );
   });
 });

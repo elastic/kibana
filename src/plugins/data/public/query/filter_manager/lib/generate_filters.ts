@@ -8,8 +8,6 @@
 
 import _ from 'lodash';
 import {
-  IFieldType,
-  IIndexPattern,
   Filter,
   isExistsFilter,
   isPhraseFilter,
@@ -19,7 +17,9 @@ import {
   buildFilter,
   FilterStateStore,
   FILTERS,
-} from '../../../../common';
+} from '@kbn/es-query';
+
+import { IFieldType, IIndexPattern } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
@@ -71,7 +71,7 @@ export function generateFilters(
   operation: string,
   index: string
 ): Filter[] {
-  values = Array.isArray(values) ? values : [values];
+  values = Array.isArray(values) ? _.uniq(values) : [values];
   const fieldObj = (_.isObject(field)
     ? field
     : {
@@ -90,6 +90,21 @@ export function generateFilters(
     if (existing) {
       updateExistingFilter(existing, negate);
       filter = existing;
+    } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
+      // When dealing with range fields, the filter type depends on the data passed in. If it's an
+      // object we assume that it's a min/max value
+      const tmpIndexPattern = { id: index } as IIndexPattern;
+
+      filter = buildFilter(
+        tmpIndexPattern,
+        fieldObj,
+        FILTERS.RANGE_FROM_VALUE,
+        false,
+        false,
+        value,
+        null,
+        FilterStateStore.APP_STATE
+      );
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
       // exists filter special case:  fieldname = '_exists' and value = fieldname

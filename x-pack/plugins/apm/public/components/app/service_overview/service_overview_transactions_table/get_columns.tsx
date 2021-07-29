@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -16,28 +16,30 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../get_latency_column_label';
 
-type TransactionGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics'>;
+type TransactionGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 type ServiceTransactionGroupItem = ValuesType<
-  TransactionGroupPrimaryStatistics['transactionGroups']
+  TransactionGroupMainStatistics['transactionGroups']
 >;
-type TransactionGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics'>;
+type TransactionGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
   latencyAggregationType,
-  transactionGroupComparisonStatistics,
+  transactionGroupDetailedStatistics,
+  comparisonEnabled,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
-  transactionGroupComparisonStatistics?: TransactionGroupComparisonStatistics;
+  transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
+  comparisonEnabled?: boolean;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -69,15 +71,20 @@ export function getColumns({
       field: 'latency',
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { latency, name }) => {
-        const timeseries =
-          transactionGroupComparisonStatistics?.[name]?.latency;
+        const currentTimeseries =
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
+        const previousTimeseries =
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
         return (
           <SparkPlot
             color="euiColorVis1"
             compact
-            series={timeseries}
+            series={currentTimeseries}
+            comparisonSeries={
+              comparisonEnabled ? previousTimeseries : undefined
+            }
             valueLabel={asMillisecondDuration(latency)}
           />
         );
@@ -90,15 +97,21 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { throughput, name }) => {
-        const timeseries =
-          transactionGroupComparisonStatistics?.[name]?.throughput;
+        const currentTimeseries =
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
+        const previousTimeseries =
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]
+            ?.throughput;
         return (
           <SparkPlot
             color="euiColorVis0"
             compact
-            series={timeseries}
+            series={currentTimeseries}
+            comparisonSeries={
+              comparisonEnabled ? previousTimeseries : undefined
+            }
             valueLabel={asTransactionRate(throughput)}
           />
         );
@@ -111,15 +124,20 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
         { defaultMessage: 'Error rate' }
       ),
-      width: px(unit * 8),
+      width: `${unit * 8}px`,
       render: (_, { errorRate, name }) => {
-        const timeseries =
-          transactionGroupComparisonStatistics?.[name]?.errorRate;
+        const currentTimeseries =
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
+        const previousTimeseries =
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
         return (
           <SparkPlot
             color="euiColorVis7"
             compact
-            series={timeseries}
+            series={currentTimeseries}
+            comparisonSeries={
+              comparisonEnabled ? previousTimeseries : undefined
+            }
             valueLabel={asPercent(errorRate, 1)}
           />
         );
@@ -132,11 +150,25 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnImpact',
         { defaultMessage: 'Impact' }
       ),
-      width: px(unit * 5),
+      width: `${unit * 5}px`,
       render: (_, { name }) => {
-        const impact =
-          transactionGroupComparisonStatistics?.[name]?.impact ?? 0;
-        return <ImpactBar value={impact} size="m" />;
+        const currentImpact =
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ??
+          0;
+        const previousImpact =
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.impact;
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <ImpactBar value={currentImpact} size="m" />
+            </EuiFlexItem>
+            {comparisonEnabled && previousImpact !== undefined && (
+              <EuiFlexItem>
+                <ImpactBar value={previousImpact} size="s" color="subdued" />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
     },
   ];

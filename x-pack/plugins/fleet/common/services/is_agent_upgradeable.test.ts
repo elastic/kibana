@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Agent } from '../types/models/agent';
+
 import { isAgentUpgradeable } from './is_agent_upgradeable';
-import { Agent } from '../types/models/agent';
 
 const getAgent = ({
   version,
@@ -82,7 +83,6 @@ const getAgent = ({
     policy_revision: 1,
     packages: ['system'],
     last_checkin: '2020-10-01T14:43:27.255Z',
-    current_error_events: [],
     status: 'online',
   };
   if (upgradeable) {

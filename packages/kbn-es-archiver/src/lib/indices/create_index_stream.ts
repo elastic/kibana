@@ -9,7 +9,8 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
@@ -18,12 +19,9 @@ import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
-  value: {
+  value: estypes.IndicesIndexState & {
     index: string;
     type: string;
-    settings: Record<string, any>;
-    mappings: Record<string, any>;
-    aliases: Record<string, any>;
   };
 }
 
@@ -33,7 +31,7 @@ export function createCreateIndexStream({
   skipExisting = false,
   log,
 }: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
   skipExisting?: boolean;
   log: ToolingLog;
@@ -66,7 +64,6 @@ export function createCreateIndexStream({
 
         await client.indices.create(
           {
-            method: 'PUT',
             index,
             body: {
               settings,

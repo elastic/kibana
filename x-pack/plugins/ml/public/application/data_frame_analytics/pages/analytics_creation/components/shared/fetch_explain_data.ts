@@ -27,6 +27,7 @@ export const fetchExplainData = async (formState: State['form']) => {
   let success = true;
   let expectedMemory = '';
   let fieldSelection: FieldSelectionItem[] = [];
+  let noDocsContainMappedFields = false;
 
   try {
     delete jobConfig.dest;
@@ -45,11 +46,19 @@ export const fetchExplainData = async (formState: State['form']) => {
     }
   }
 
+  if (
+    errorMessage.includes('status_exception') &&
+    errorMessage.includes('Unable to estimate memory usage as no documents')
+  ) {
+    noDocsContainMappedFields = true;
+  }
+
   return {
     success,
     expectedMemory,
     fieldSelection,
     errorMessage,
     errorReason,
+    noDocsContainMappedFields,
   };
 };

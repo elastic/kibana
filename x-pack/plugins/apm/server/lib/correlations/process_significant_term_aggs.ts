@@ -9,7 +9,7 @@ import { orderBy } from 'lodash';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../typings/elasticsearch/aggregations';
+} from '../../../../../../src/core/types/elasticsearch';
 
 export interface TopSigTerm {
   fieldName: string;
@@ -47,10 +47,15 @@ function getMaxImpactScore(scores: number[]) {
 export function processSignificantTermAggs({
   sigTermAggs,
 }: {
-  sigTermAggs: Record<string, SigTermAgg>;
+  sigTermAggs: Record<string, SigTermAgg | object>;
 }) {
-  const significantTerms = Object.entries(sigTermAggs).flatMap(
-    ([fieldName, agg]) => {
+  const significantTerms = Object.entries(sigTermAggs)
+    // filter entries with buckets, i.e. Significant terms aggs
+    .filter((entry): entry is [string, SigTermAgg] => {
+      const [, agg] = entry;
+      return 'buckets' in agg;
+    })
+    .flatMap(([fieldName, agg]) => {
       return agg.buckets.map((bucket) => ({
         fieldName,
         fieldValue: bucket.key,
@@ -58,8 +63,7 @@ export function processSignificantTermAggs({
         valueCount: bucket.doc_count,
         score: bucket.score,
       }));
-    }
-  );
+    });
 
   const maxImpactScore = getMaxImpactScore(
     significantTerms.map(({ score }) => score)

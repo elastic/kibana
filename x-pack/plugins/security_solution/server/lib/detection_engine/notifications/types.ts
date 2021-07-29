@@ -6,7 +6,7 @@
  */
 
 import {
-  AlertsClient,
+  RulesClient,
   PartialAlert,
   AlertType,
   AlertTypeParams,
@@ -14,8 +14,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   AlertExecutorOptions,
-} from '../../../../../alerts/server';
-import { Alert } from '../../../../../alerts/common';
+} from '../../../../../alerting/server';
+import { Alert } from '../../../../../alerting/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
@@ -25,7 +25,7 @@ export interface RuleNotificationAlertTypeParams extends AlertTypeParams {
 export type RuleNotificationAlertType = Alert<RuleNotificationAlertTypeParams>;
 
 export interface FindNotificationParams {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   perPage?: number;
   page?: number;
   sortField?: string;
@@ -45,7 +45,7 @@ export interface FindNotificationsRequestParams {
 }
 
 export interface Clients {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
 }
 
 export type UpdateNotificationParams = Omit<
@@ -73,7 +73,7 @@ export interface NotificationAlertParams {
 export type CreateNotificationParams = NotificationAlertParams & Clients;
 
 export interface ReadNotificationParams {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   id?: string | null;
   ruleAlertId?: string | null;
 }
@@ -101,12 +101,25 @@ export type NotificationExecutorOptions = AlertExecutorOptions<
 // since we are only increasing the strictness of params.
 export const isNotificationAlertExecutor = (
   obj: NotificationAlertTypeDefinition
-): obj is AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
+): obj is AlertType<
+  AlertTypeParams,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+> => {
   return true;
 };
 
 export type NotificationAlertTypeDefinition = Omit<
-  AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext, 'default'>,
+  AlertType<
+    AlertTypeParams,
+    AlertTypeParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    'default'
+  >,
   'executor'
 > & {
   executor: ({

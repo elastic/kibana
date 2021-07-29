@@ -6,26 +6,30 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../../common/types';
-import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
-import {
-  ExceptionListSoSchema,
+import type {
   FoundExceptionListItemSchema,
   Id,
+  NamespaceTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EmptyStringArrayDecoded,
+  NonEmptyStringArrayDecoded,
+} from '@kbn/securitysolution-io-ts-types';
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+  getSavedObjectTypes,
+} from '@kbn/securitysolution-list-utils';
 
-import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionListItem } from './utils';
+import { escapeQuotes } from '../utils/escape_query';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+
+import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface FindExceptionListItemsOptions {
@@ -89,7 +93,8 @@ export const getExceptionListsItemFilter = ({
   savedObjectType: SavedObjectType[];
 }): string => {
   return listId.reduce((accum, singleListId, index) => {
-    const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: ${singleListId})`;
+    const escapedListId = escapeQuotes(singleListId);
+    const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: "${escapedListId}")`;
     const listItemAppendWithFilter =
       filter[index] != null ? `(${listItemAppend} AND ${filter[index]})` : listItemAppend;
     if (accum === '') {
@@ -117,8 +122,9 @@ export const findValueListExceptionListItems = async ({
   sortField,
   sortOrder,
 }: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
+  const escapedValueListId = escapeQuotes(valueListId);
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:${valueListId}) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:${valueListId}) `,
+    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:"${escapedValueListId}") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:"${escapedValueListId}") `,
     page,
     perPage,
     sortField,

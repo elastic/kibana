@@ -7,14 +7,16 @@
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
-import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { CompleteTimeline, timeline } from './timeline';
+import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
+import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
 export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
 export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
+
+const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
 interface MitreAttackTechnique {
   name: string;
@@ -41,7 +43,7 @@ export interface CustomRule {
   customQuery?: string;
   name: string;
   description: string;
-  index?: string[];
+  index: string[];
   interval?: string;
   severity: string;
   riskScore: string;
@@ -54,6 +56,7 @@ export interface CustomRule {
   runsEvery: Interval;
   lookBack: Interval;
   timeline: CompleteTimeline;
+  maxSignals: number;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -70,12 +73,14 @@ export interface OverrideRule extends CustomRule {
 
 export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
-  indicatorMapping: string;
+  indicatorMappingField: string;
   indicatorIndexField: string;
+  type?: string;
+  atomic?: string;
 }
 
 export interface MachineLearningRule {
-  machineLearningJob: string;
+  machineLearningJobs: string[];
   anomalyScoreThreshold: string;
   name: string;
   description: string;
@@ -91,8 +96,9 @@ export interface MachineLearningRule {
   lookBack: Interval;
 }
 
-export const indexPatterns = [
+export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
+  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
@@ -101,87 +107,126 @@ export const indexPatterns = [
   'winlogbeat-*',
 ];
 
-const { tactic, technique, subtechnique } = mockThreatData;
-
-const mitre1: Mitre = {
-  tactic: `${tactic.name} (${tactic.id})`,
+const getMitre1 = (): Mitre => ({
+  tactic: `${getMockThreatData().tactic.name} (${getMockThreatData().tactic.id})`,
   techniques: [
     {
-      name: `${technique.name} (${technique.id})`,
-      subtechniques: [`${subtechnique.name} (${subtechnique.id})`],
+      name: `${getMockThreatData().technique.name} (${getMockThreatData().technique.id})`,
+      subtechniques: [
+        `${getMockThreatData().subtechnique.name} (${getMockThreatData().subtechnique.id})`,
+      ],
     },
     {
-      name: `${technique.name} (${technique.id})`,
+      name: `${getMockThreatData().technique.name} (${getMockThreatData().technique.id})`,
       subtechniques: [],
     },
   ],
-};
+});
 
-const mitre2: Mitre = {
-  tactic: `${tactic.name} (${tactic.id})`,
+const getMitre2 = (): Mitre => ({
+  tactic: `${getMockThreatData().tactic.name} (${getMockThreatData().tactic.id})`,
   techniques: [
     {
-      name: `${technique.name} (${technique.id})`,
-      subtechniques: [`${subtechnique.name} (${subtechnique.id})`],
+      name: `${getMockThreatData().technique.name} (${getMockThreatData().technique.id})`,
+      subtechniques: [
+        `${getMockThreatData().subtechnique.name} (${getMockThreatData().subtechnique.id})`,
+      ],
     },
   ],
-};
+});
 
-const severityOverride1: SeverityOverride = {
+const getSeverityOverride1 = (): SeverityOverride => ({
   sourceField: 'host.name',
   sourceValue: 'host',
-};
+});
 
-const severityOverride2: SeverityOverride = {
+const getSeverityOverride2 = (): SeverityOverride => ({
   sourceField: '@timestamp',
   sourceValue: '10/02/2020',
-};
+});
 
-const severityOverride3: SeverityOverride = {
+const getSeverityOverride3 = (): SeverityOverride => ({
   sourceField: 'host.geo.name',
   sourceValue: 'atack',
-};
+});
 
-const severityOverride4: SeverityOverride = {
+const getSeverityOverride4 = (): SeverityOverride => ({
   sourceField: 'agent.type',
   sourceValue: 'auditbeat',
-};
+});
 
-const runsEvery: Interval = {
+const getRunsEvery = (): Interval => ({
   interval: '1',
   timeType: 'Seconds',
   type: 's',
-};
+});
 
-const lookBack: Interval = {
+const getLookBack = (): Interval => ({
   interval: '17520',
   timeType: 'Hours',
   type: 'h',
-};
+});
 
-export const newRule: CustomRule = {
+export const getNewRule = (): CustomRule => ({
   customQuery: 'host.name: *',
-  index: indexPatterns,
+  index: getIndexPatterns(),
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
-  mitre: [mitre1, mitre2],
+  mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  runsEvery,
-  lookBack,
-  timeline,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
 
-export const existingRule: CustomRule = {
+export const getUnmappedRule = (): CustomRule => ({
+  customQuery: '*:*',
+  index: ['unmapped*'],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
+
+export const getUnmappedCCSRule = (): CustomRule => ({
+  customQuery: '*:*',
+  index: [`${ccsRemoteName}:unmapped*`],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
+
+export const getExistingRule = (): CustomRule => ({
   customQuery: 'host.name: *',
   name: 'Rule 1',
   description: 'Description for Rule 1',
   index: ['auditbeat-*'],
-  interval: '10s',
+  interval: '100m',
   severity: 'High',
   riskScore: '19',
   tags: ['rule1'],
@@ -189,53 +234,63 @@ export const existingRule: CustomRule = {
   falsePositivesExamples: [],
   mitre: [],
   note: 'This is my note',
-  runsEvery,
-  lookBack,
-  timeline,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  // Please do not change, or if you do, needs
+  // to be any number other than default value
+  maxSignals: 500,
+});
 
-export const newOverrideRule: OverrideRule = {
+export const getNewOverrideRule = (): OverrideRule => ({
   customQuery: 'host.name: *',
-  index: indexPatterns,
+  index: getIndexPatterns(),
   name: 'Override Rule',
   description: 'The new rule description.',
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
-  mitre: [mitre1, mitre2],
+  mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  severityOverride: [severityOverride1, severityOverride2, severityOverride3, severityOverride4],
+  severityOverride: [
+    getSeverityOverride1(),
+    getSeverityOverride2(),
+    getSeverityOverride3(),
+    getSeverityOverride4(),
+  ],
   riskOverride: 'destination.port',
   nameOverride: 'agent.type',
   timestampOverride: '@timestamp',
-  runsEvery,
-  lookBack,
-  timeline,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
 
-export const newThresholdRule: ThresholdRule = {
+export const getNewThresholdRule = (): ThresholdRule => ({
   customQuery: 'host.name: *',
-  index: indexPatterns,
+  index: getIndexPatterns(),
   name: 'Threshold Rule',
   description: 'The new rule description.',
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
-  mitre: [mitre1, mitre2],
+  mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   thresholdField: 'host.name',
   threshold: '10',
-  runsEvery,
-  lookBack,
-  timeline,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
 
-export const machineLearningRule: MachineLearningRule = {
-  machineLearningJob: 'linux_anomalous_network_service',
+export const getMachineLearningRule = (): MachineLearningRule => ({
+  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
   anomalyScoreThreshold: '20',
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
@@ -244,79 +299,86 @@ export const machineLearningRule: MachineLearningRule = {
   tags: ['ML'],
   referenceUrls: ['https://elastic.co/'],
   falsePositivesExamples: ['False1'],
-  mitre: [mitre1],
+  mitre: [getMitre1()],
   note: '# test markdown',
-  runsEvery,
-  lookBack,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+});
 
-export const eqlRule: CustomRule = {
+export const getEqlRule = (): CustomRule => ({
   customQuery: 'any where process.name == "which"',
   name: 'New EQL Rule',
-  index: indexPatterns,
+  index: getIndexPatterns(),
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
-  mitre: [mitre1, mitre2],
+  mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  runsEvery,
-  lookBack,
-  timeline,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
 
-export const eqlSequenceRule: CustomRule = {
+export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
      [any where process.name == "which"]\
      [any where process.name == "xargs"]',
   name: 'New EQL Sequence Rule',
-  index: indexPatterns,
+  index: getIndexPatterns(),
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
-  mitre: [mitre1, mitre2],
+  mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  runsEvery,
-  lookBack,
-  timeline,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
 
-export const newThreatIndicatorRule: ThreatIndicatorRule = {
+export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
-  index: ['threat-data-*'],
+  index: ['suspicious-*'],
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
-  mitre: [mitre1, mitre2],
+  mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  runsEvery,
-  lookBack,
-  indicatorIndexPattern: ['threat-indicator-*'],
-  indicatorMapping: 'agent.id',
-  indicatorIndexField: 'agent.threat',
-  timeline,
-};
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  indicatorIndexPattern: ['filebeat-*'],
+  indicatorMappingField: 'myhash.mysha256',
+  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  type: 'file',
+  atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+  timeline: getIndicatorMatchTimelineTemplate(),
+  maxSignals: 100,
+});
 
-export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
+export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
 
-export const editedRule = {
-  ...existingRule,
+export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', 'Critical'];
+
+export const getEditedRule = (): CustomRule => ({
+  ...getExistingRule(),
   severity: 'Medium',
   description: 'Edited Rule description',
-  tags: [...existingRule.tags, 'edited'],
-};
+  tags: [...getExistingRule().tags, 'edited'],
+});
 
-export const expectedExportedRule = (ruleResponse: Cypress.Response) => {
+export const expectedExportedRule = (ruleResponse: Cypress.Response): string => {
   const jsonrule = ruleResponse.body;
 
-  return `{"author":[],"actions":[],"created_at":"${jsonrule.created_at}","updated_at":"${jsonrule.updated_at}","created_by":"elastic","description":"${jsonrule.description}","enabled":false,"false_positives":[],"from":"now-17520h","id":"${jsonrule.id}","immutable":false,"index":["exceptions-*"],"interval":"10s","rule_id":"rule_testing","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":${jsonrule.risk_score},"risk_score_mapping":[],"name":"${jsonrule.name}","query":"${jsonrule.query}","references":[],"severity":"${jsonrule.severity}","severity_mapping":[],"updated_by":"elastic","tags":[],"to":"now","type":"query","threat":[],"throttle":"no_actions","version":1,"exceptions_list":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
+  return `{"id":"${jsonrule.id}","updated_at":"${jsonrule.updated_at}","updated_by":"elastic","created_at":"${jsonrule.created_at}","created_by":"elastic","name":"${jsonrule.name}","tags":[],"interval":"100m","enabled":false,"description":"${jsonrule.description}","risk_score":${jsonrule.risk_score},"severity":"${jsonrule.severity}","output_index":".siem-signals-default","author":[],"false_positives":[],"from":"now-17520h","rule_id":"rule_testing","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"threat":[],"to":"now","references":[],"version":1,"exceptions_list":[],"immutable":false,"type":"query","language":"kuery","index":["exceptions-*"],"query":"${jsonrule.query}","throttle":"no_actions","actions":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
 };

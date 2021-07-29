@@ -5,17 +5,15 @@
  * 2.0.
  */
 
+import { MANAGEMENT_PATH } from '../../../common/constants';
 import { ManagementStoreGlobalNamespace, AdministrationSubTab } from '../types';
-import { APP_ID } from '../../../common/constants';
-import { SecurityPageName } from '../../app/types';
 
 // --[ ROUTING ]---------------------------------------------------------------------------
-export const MANAGEMENT_APP_ID = `${APP_ID}:${SecurityPageName.administration}`;
-export const MANAGEMENT_ROUTING_ROOT_PATH = '';
-export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.endpoints})`;
-export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.policies})`;
-export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
-export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.trustedApps})`;
+export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.endpoints})`;
+export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
+export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.trustedApps})`;
+export const MANAGEMENT_ROUTING_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.eventFilters})`;
 
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */
@@ -26,6 +24,8 @@ export const MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE = 'policyDetails';
 export const MANAGEMENT_STORE_ENDPOINTS_NAMESPACE = 'endpoints';
 /** Namespace within the Management state where trusted apps page state is maintained */
 export const MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE = 'trustedApps';
+/** Namespace within the Management state where event filters page state is maintained */
+export const MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE = 'eventFilters';
 
 export const MANAGEMENT_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50];
 export const MANAGEMENT_DEFAULT_PAGE = 0;

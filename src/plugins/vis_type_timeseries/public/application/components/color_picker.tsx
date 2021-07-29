@@ -26,7 +26,7 @@ interface ColorProps {
 
 export interface ColorPickerProps {
   name: string;
-  value: string | null;
+  value?: string | null;
   disableTrash?: boolean;
   onChange: (props: ColorProps) => void;
 }
@@ -39,16 +39,12 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
 
   const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
     setColor(text);
-    const part: ColorProps = {};
-    part[name] = hex ? `rgba(${rgba.join(',')})` : '';
-    onChange(part);
+    onChange({ [name]: hex ? `rgba(${rgba.join(',')})` : '' });
   };
 
   const handleClear = () => {
     setColor('');
-    const part: ColorProps = {};
-    part[name] = null;
-    onChange(part);
+    onChange({ [name]: null });
   };
 
   const label = value

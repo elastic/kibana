@@ -1,16 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`IndexPatterns correctly composes runtime field 1`] = `
+FldList [
+  Object {
+    "aggregatable": true,
+    "conflictDescriptions": undefined,
+    "count": 5,
+    "customLabel": "A Runtime Field",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "lang": undefined,
+    "name": "aRuntimeField",
+    "readFromDocValues": false,
+    "script": undefined,
+    "scripted": false,
+    "searchable": true,
+    "subType": undefined,
+    "type": "string",
+  },
+]
+`;
+
 exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
   "allowNoIndex": undefined,
-  "fieldAttrs": Object {},
+  "fieldAttrs": Object {
+    "aRuntimeField": Object {
+      "count": 5,
+      "customLabel": "A Runtime Field",
+    },
+  },
   "fieldFormats": Object {
     "field": Object {},
   },
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
-  "runtimeFieldMap": Object {},
+  "runtimeFieldMap": Object {
+    "aRuntimeField": Object {
+      "script": Object {
+        "source": "emit('hello')",
+      },
+      "type": "keyword",
+    },
+  },
   "sourceFilters": Array [
     Object {
       "value": "item1",

@@ -22,6 +22,7 @@ Object {
     "events": Array [
       "transaction",
     ],
+    "includeLegacyData": true,
   },
   "body": Object {
     "query": Object {
@@ -118,7 +119,6 @@ Array [
                 "environments": Object {
                   "terms": Object {
                     "field": "service.environment",
-                    "missing": "",
                   },
                 },
                 "outcomes": Object {
@@ -132,9 +132,11 @@ Array [
                 },
                 "sample": Object {
                   "top_metrics": Object {
-                    "metrics": Object {
-                      "field": "agent.name",
-                    },
+                    "metrics": Array [
+                      Object {
+                        "field": "agent.name",
+                      },
+                    ],
                     "sort": Object {
                       "@timestamp": "desc",
                     },
@@ -170,6 +172,58 @@ Array [
               },
               "terms": Object {
                 "field": "transaction.type",
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "metric",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "environments": Object {
+              "terms": Object {
+                "field": "service.environment",
+              },
+            },
+            "latest": Object {
+              "top_metrics": Object {
+                "metrics": Array [
+                  Object {
+                    "field": "agent.name",
+                  },
+                ],
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
               },
             },
           },

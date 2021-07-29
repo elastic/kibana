@@ -7,6 +7,7 @@
 
 import React, { FC, ReactNode, memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +16,8 @@ import {
   EuiText,
   EuiShowFor,
   EuiPanel,
+  EuiTextColor,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
@@ -38,6 +41,7 @@ interface ConfigFormProps {
    * Types of supported operating systems.
    */
   supportedOss: OperatingSystem[];
+  osRestriction?: ReactNode;
   dataTestSubj?: string;
   /** React Node to be put on the right corner of the card */
   rightCorner?: ReactNode;
@@ -52,19 +56,40 @@ export const ConfigFormHeading: FC = memo(({ children }) => (
 ConfigFormHeading.displayName = 'ConfigFormHeading';
 
 export const ConfigForm: FC<ConfigFormProps> = memo(
-  ({ type, supportedOss, dataTestSubj, rightCorner, children }) => (
+  ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => (
     <EuiPanel data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
           <EuiText size="m">{type}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
-          <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
+            </EuiFlexItem>
+            {osRestriction && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="row" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiTextColor color="subdued">
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
+                        defaultMessage="Restrictions"
+                      />
+                    </EuiTextColor>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip type="iInCircle" color="subdued" content={osRestriction} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>
             </EuiFlexGroup>

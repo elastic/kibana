@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM API tests basic apm_8.0.0 Instance details when data is loaded fetch instance details return the correct data 1`] = `
+Object {
+  "@timestamp": "2021-07-27T08:08:17.707Z",
+  "agent": Object {
+    "ephemeral_id": "1f810e6f-e78a-4f49-9773-2142b9af9943",
+    "name": "java",
+    "version": "1.25.1-SNAPSHOT.UNKNOWN",
+  },
+  "cloud": Object {
+    "availability_zone": "europe-west1-c",
+    "instance": Object {
+      "id": "4295368814211072338",
+      "name": "gke-edge-oblt-gcp-edge-oblt-gcp-pool-b6b9e929-92m2",
+    },
+    "machine": Object {
+      "type": "n1-standard-4",
+    },
+    "project": Object {
+      "id": "8560181848",
+      "name": "elastic-observability",
+    },
+    "provider": "gcp",
+    "region": "europe-west1",
+  },
+  "container": Object {
+    "id": "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
+  },
+  "host": Object {
+    "architecture": "amd64",
+    "ip": "10.40.0.248",
+    "os": Object {
+      "platform": "Linux",
+    },
+  },
+  "kubernetes": Object {
+    "pod": Object {
+      "name": "opbeans-java-59f5cddddf-s9bvt",
+      "uid": "9aa1e495-4eca-49ca-bd26-2914e05a0226",
+    },
+  },
+  "service": Object {
+    "environment": "production",
+    "framework": Object {
+      "name": "Servlet API",
+    },
+    "language": Object {
+      "name": "Java",
+      "version": "11.0.11",
+    },
+    "name": "opbeans-java",
+    "node": Object {
+      "name": "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
+    },
+    "runtime": Object {
+      "name": "Java",
+      "version": "11.0.11",
+    },
+    "version": "2021-07-27 03:47:01",
+  },
+}
+`;

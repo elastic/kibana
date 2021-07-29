@@ -70,7 +70,12 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
         <React.Fragment key={i}>
           <EuiFlexItem>
             <EuiPanel paddingSize="s">
-              <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+                className="eui-fullHeight"
+              >
                 <EuiFlexItem>
                   <EuiFlexGroup
                     justifyContent="flexStart"
@@ -79,16 +84,12 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                     responsive={false}
                   >
                     <EuiFlexItem grow={false}>
-                      <SourceIcon
-                        serviceType={serviceType}
-                        name={name}
-                        className="source-card-configured__icon"
-                      />
+                      <SourceIcon serviceType={serviceType} name={name} size="l" />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s">
                         <h4>
-                          {name}&nbsp;
+                          {name}
                           {!connected &&
                             !accountContextOnly &&
                             isOrganization &&

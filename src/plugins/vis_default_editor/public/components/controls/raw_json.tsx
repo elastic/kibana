@@ -8,12 +8,12 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 
-import { EuiFormRow, EuiIconTip, EuiCodeEditor, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { XJsonLang } from '@kbn/monaco';
+import { CodeEditor } from '../../../../kibana_react/public';
 
 import { AggParamEditorProps } from '../agg_param_props';
-
-import 'brace/theme/github';
 
 function RawJsonParamEditor({
   showValidation,
@@ -23,7 +23,6 @@ function RawJsonParamEditor({
   setTouched,
 }: AggParamEditorProps<string>) {
   const [isFieldValid, setFieldValidity] = useState(true);
-  const [editorReady, setEditorReady] = useState(false);
 
   const editorTooltipText = useMemo(
     () =>
@@ -52,18 +51,22 @@ function RawJsonParamEditor({
     [jsonEditorLabelText, editorTooltipText]
   );
 
-  const onEditorValidate = useCallback(
-    (annotations: unknown[]) => {
-      // The first onValidate returned from EuiCodeEditor is a false negative
-      if (editorReady) {
-        const validity = annotations.length === 0;
-        setFieldValidity(validity);
-        setValidity(validity);
-      } else {
-        setEditorReady(true);
+  const onChange = useCallback(
+    (newValue: string) => {
+      setValue(newValue);
+      // validation for value
+      let isJsonValid = true;
+      try {
+        if (newValue) {
+          JSON.parse(newValue);
+        }
+      } catch (e) {
+        isJsonValid = false;
       }
+      setFieldValidity(isJsonValid);
+      setValidity(isJsonValid);
     },
-    [setValidity, editorReady]
+    [setValidity, setFieldValidity, setValue]
   );
 
   return (
@@ -72,22 +75,38 @@ function RawJsonParamEditor({
       isInvalid={showValidation ? !isFieldValid : false}
       fullWidth={true}
       display="rowCompressed"
+      onBlur={setTouched}
     >
       <>
-        <EuiCodeEditor
-          mode="json"
-          theme="github"
+        <CodeEditor
+          aria-label={jsonEditorLabelText}
+          aria-describedby="jsonEditorDescription"
+          languageId={XJsonLang.ID}
+          languageConfiguration={{
+            autoClosingPairs: [
+              {
+                open: '{',
+                close: '}',
+              },
+            ],
+          }}
           width="100%"
           height="250px"
           value={value}
-          onValidate={onEditorValidate}
-          setOptions={{
-            fontSize: '14px',
+          onChange={onChange}
+          options={{
+            renderValidationDecorations: value ? 'on' : 'off',
+            lineNumbers: 'on',
+            fontSize: 14,
+            minimap: {
+              enabled: false,
+            },
+            scrollBeyondLastLine: false,
+            folding: true,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
           }}
-          onChange={setValue}
-          onBlur={setTouched}
-          aria-label={jsonEditorLabelText}
-          aria-describedby="jsonEditorDescription"
         />
         <EuiScreenReaderOnly>
           <p id="jsonEditorDescription">{editorTooltipText}</p>

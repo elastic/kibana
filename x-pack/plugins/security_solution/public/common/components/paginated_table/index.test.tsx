@@ -9,12 +9,12 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { Direction } from '../../../graphql/types';
 
 import { BasicTableProps, PaginatedTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
@@ -22,8 +22,20 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+const mockTheme = getMockTheme({
+  eui: {
+    euiColorEmptyShade: '#ece',
+    euiSizeL: '10px',
+    euiBreakpoints: {
+      s: '450px',
+    },
+    paddingSizes: {
+      m: '10px',
+    },
+  },
+});
+
 describe('Paginated Table Component', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let loadPage: jest.Mock<number>;
   let updateLimitPagination: jest.Mock<number>;
   let updateActivePage: jest.Mock<number>;
@@ -36,26 +48,24 @@ describe('Paginated Table Component', () => {
   describe('rendering', () => {
     test('it renders the default load more table', () => {
       const wrapper = shallow(
-        <ThemeProvider theme={theme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={1}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
-        </ThemeProvider>
+        <PaginatedTable
+          activePage={0}
+          columns={getHostsColumns()}
+          headerCount={1}
+          headerSupplement={<p>{'My test supplement.'}</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
+          itemsPerRow={rowItems}
+          limit={1}
+          loading={false}
+          loadPage={loadPage}
+          pageOfItems={mockData.Hosts.edges}
+          showMorePagesIndicator={true}
+          totalCount={10}
+          updateActivePage={updateActivePage}
+          updateLimitPagination={(limit) => updateLimitPagination({ limit })}
+        />
       );
 
       expect(wrapper).toMatchSnapshot();
@@ -63,7 +73,7 @@ describe('Paginated Table Component', () => {
 
     test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -92,7 +102,7 @@ describe('Paginated Table Component', () => {
 
     test('it renders the over loading panel after data has been in the table ', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -119,7 +129,7 @@ describe('Paginated Table Component', () => {
 
     test('it renders the correct amount of pages and starts at activePage: 0', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -156,7 +166,7 @@ describe('Paginated Table Component', () => {
 
     test('it render popover to select new limit in table', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -184,7 +194,7 @@ describe('Paginated Table Component', () => {
 
     test('it will NOT render popover to select new limit in table if props itemsPerRow is empty', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -212,7 +222,7 @@ describe('Paginated Table Component', () => {
     test('It should render a sort icon if sorting is defined', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={sortedHosts}
@@ -241,7 +251,7 @@ describe('Paginated Table Component', () => {
 
     test('Should display toast when user reaches end of results max', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -268,7 +278,7 @@ describe('Paginated Table Component', () => {
 
     test('Should show items per row if totalCount is greater than items', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -294,7 +304,7 @@ describe('Paginated Table Component', () => {
 
     test('Should hide items per row if totalCount is less than items', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -322,7 +332,7 @@ describe('Paginated Table Component', () => {
   describe('Events', () => {
     test('should call updateActivePage with 1 when clicking to the first page', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -349,7 +359,7 @@ describe('Paginated Table Component', () => {
 
     test('Should call updateActivePage with 0 when you pick a new limit', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -405,7 +415,7 @@ describe('Paginated Table Component', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ComponentWithContext = (props: BasicTableProps<any>) => {
         return (
-          <ThemeProvider theme={theme}>
+          <ThemeProvider theme={mockTheme}>
             <PaginatedTable {...props} />
           </ThemeProvider>
         );
@@ -424,7 +434,7 @@ describe('Paginated Table Component', () => {
 
     test('Should call updateLimitPagination when you pick a new limit', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={getHostsColumns()}
@@ -455,7 +465,7 @@ describe('Paginated Table Component', () => {
     test('Should call onChange when you choose a new sort in the table', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <PaginatedTable
             activePage={0}
             columns={sortedHosts}

@@ -7,17 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
-import { getKibanaRegionList } from '../../../meta';
+import { getRegionmapLayers } from '../../../kibana_services';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/constants';
+import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
-import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
-import { LayerConfig } from '../../../../../../../src/plugins/maps_legacy/config';
+import type { LayerConfig } from '../../../../../../../src/plugins/maps_ems/public';
+import { fetchGeoJson, FORMAT_TYPE } from './fetch_geojson';
 
-export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
+const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',
 });
 
@@ -45,6 +46,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getImmutableProperties() {
+    const vectorFileMeta = await this.getVectorFileMeta();
     return [
       {
         label: getDataSourceLabel(),
@@ -56,11 +58,17 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
         }),
         value: this._descriptor.name,
       },
+      {
+        label: i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerUrlLabel', {
+          defaultMessage: 'Vector layer url',
+        }),
+        value: vectorFileMeta.url,
+      },
     ];
   }
 
   async getVectorFileMeta(): Promise<LayerConfig> {
-    const regionList: LayerConfig[] = getKibanaRegionList();
+    const regionList: LayerConfig[] = getRegionmapLayers();
     const layerConfig: LayerConfig | undefined = regionList.find(
       (regionConfig: LayerConfig) => regionConfig.name === this._descriptor.name
     );
@@ -79,11 +87,12 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const vectorFileMeta = await this.getVectorFileMeta();
-    const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: vectorFileMeta.format.type as FORMAT_TYPE,
-      featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
-      fetchUrl: vectorFileMeta.url,
-    });
+    const featureCollection = await fetchGeoJson(
+      vectorFileMeta.url,
+      vectorFileMeta.format.type as FORMAT_TYPE,
+      vectorFileMeta.meta.feature_collection_path
+    );
+
     return {
       data: featureCollection,
       meta: {},
@@ -103,8 +112,21 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     return this._descriptor.name;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
+  }
+
+  getSourceTooltipContent() {
+    return {
+      tooltipContent: i18n.translate('xpack.maps.source.kbnRegionMap.deprecationTooltipMessage', {
+        defaultMessage: `'Configured GeoJSON' layer is deprecated. 1) Use 'Upload GeoJSON' to upload '{vectorLayer}'. 2) Use Choropleth layer wizard to build a replacement layer. 3) Finally, delete this layer from your map.`,
+        values: {
+          vectorLayer: this._descriptor.name,
+        },
+      }),
+      areResultsTrimmed: false,
+      isDeprecated: true,
+    };
   }
 }
 

@@ -48,7 +48,10 @@ def call(label, Closure closure) {
 
   try {
     closure()
-  } catch (ex) {
+  } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException ex) {
+    // If the build was aborted, don't retry the step
+    throw ex
+  } catch (Exception ex) {
     if (haveReachedMaxRetries()) {
       print "Couldn't retry '${label}', have already reached the max number of retries for this build."
       throw ex

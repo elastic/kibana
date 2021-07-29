@@ -15,7 +15,7 @@ import './add_message_variables.scss';
 import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 
 import { AddMessageVariables } from './add_message_variables';
-import { ActionVariable } from '../../types';
+import { ActionVariable } from '../../../../alerting/common';
 import { templateActionVariable } from '../lib';
 
 interface Props {

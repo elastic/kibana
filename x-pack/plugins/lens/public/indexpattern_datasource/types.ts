@@ -11,6 +11,7 @@ import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/pub
 import { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
+  FieldBasedIndexPatternColumn,
   IndexPatternColumn,
   OperationType,
   IncompleteColumn,
@@ -31,6 +32,9 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './operations';
 
 export type DraggedField = DragDropIdentifier & {
@@ -57,6 +61,7 @@ export type IndexPatternField = IFieldType & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
   meta?: boolean;
+  runtime?: boolean;
 };
 
 export interface IndexPatternLayer {
@@ -85,6 +90,9 @@ export interface IndexPatternPrivateState {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
+
+  isDimensionClosePrevented?: boolean;
 }
 
 export interface IndexPatternRef {

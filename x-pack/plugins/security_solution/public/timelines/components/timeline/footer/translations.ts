@@ -43,3 +43,10 @@ export const AUTO_REFRESH_ACTIVE = i18n.translate(
     defaultMessage: 'Auto-Refresh Active',
   }
 );
+
+export const LOADING_EVENTS = i18n.translate(
+  'xpack.securitySolution.footer.loadingEventsDataLabel',
+  {
+    defaultMessage: 'Loading Events',
+  }
+);

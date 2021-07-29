@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { VisualRuleEditor } from './visual_rule_editor';
-import { findTestSubject } from '@kbn/test/jest';
-import { AnyRule, AllRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../model';
-import { RuleGroupEditor } from './rule_group_editor';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 import { FieldRuleEditor } from './field_rule_editor';
+import { RuleGroupEditor } from './rule_group_editor';
+import { VisualRuleEditor } from './visual_rule_editor';
 
 describe('VisualRuleEditor', () => {
   it('renders an empty prompt when no rules are defined', () => {

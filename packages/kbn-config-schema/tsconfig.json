@@ -2,20 +2,21 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target/types",
-    "outDir": "./target/out",
-    "stripInternal": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "outDir": "target_types",
+    "rootDir": "src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-config-schema/src",
+    "stripInternal": true,
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "./types/joi.d.ts",
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "target"
+    "types/joi.d.ts",
+    "src/**/*.ts"
   ]
 }

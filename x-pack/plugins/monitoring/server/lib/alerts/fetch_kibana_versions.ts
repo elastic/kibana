@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 
@@ -12,14 +13,14 @@ interface ESAggResponse {
 }
 
 export async function fetchKibanaVersions(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   size: number
 ): Promise<AlertVersions[]> {
   const params = {
     index,
-    filterPath: ['aggregations'],
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -69,7 +70,7 @@ export async function fetchKibanaVersions(
                     field: 'kibana_stats.kibana.version',
                     size: 1,
                     order: {
-                      latest_report: 'desc',
+                      latest_report: 'desc' as const,
                     },
                   },
                   aggs: {
@@ -88,7 +89,7 @@ export async function fetchKibanaVersions(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');
   const clusterList = get(response, 'aggregations.cluster.buckets', []) as ESAggResponse[];
   return clusterList.map((cluster) => {

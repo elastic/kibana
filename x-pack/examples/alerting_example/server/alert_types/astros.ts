@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import { AlertType } from '../../../../plugins/alerts/server';
+import { AlertType } from '../../../../plugins/alerting/server';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -41,6 +41,7 @@ function getCraftFilter(craft: string) {
 
 export const alertType: AlertType<
   { outerSpaceCapacity: number; craft: string; op: string },
+  never,
   { peopleInSpace: number },
   { craft: string },
   never,
@@ -51,6 +52,7 @@ export const alertType: AlertType<
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   defaultActionGroupId: 'default',
   recoveryActionGroup: {
     id: 'hasLandedBackOnEarth',

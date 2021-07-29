@@ -14,9 +14,9 @@ export type SortPairArr = [string, string];
 export type SortPair = SortPairArr | SortPairObj;
 export type SortInput = SortPair | SortPair[];
 
-export function isSortable(fieldName: string, indexPattern: IndexPattern) {
+export function isSortable(fieldName: string, indexPattern: IndexPattern): boolean {
   const field = indexPattern.getFieldByName(fieldName);
-  return field && field.sortable;
+  return !!(field && field.sortable);
 }
 
 function createSortObject(

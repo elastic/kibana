@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEvent, ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
@@ -17,6 +17,7 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { documentField } from './document_field';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -71,6 +72,13 @@ describe('IndexPattern Field Item', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        },
         documentField,
       ],
     } as IndexPattern;
@@ -102,6 +110,7 @@ describe('IndexPattern Field Item', () => {
       itemIndex: 0,
       dropOntoWorkspace: () => {},
       hasSuggestionForField: () => false,
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
 
     data.fieldFormats = ({
@@ -116,6 +125,26 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toEqual(
       'bytesLabel'
     );
+  });
+
+  it('should render edit field button if callback is set', () => {
+    core.http.post.mockImplementation(() => {
+      return new Promise(() => {});
+    });
+    const editFieldSpy = jest.fn();
+    const wrapper = mountWithIntl(
+      <InnerFieldItem {...defaultProps} editField={editFieldSpy} hideDetails />
+    );
+    clickField(wrapper, 'bytes');
+    wrapper.update();
+    const popoverContent = wrapper.find(EuiPopover).prop('children');
+    act(() => {
+      mountWithIntl(popoverContent as ReactElement)
+        .find('[data-test-subj="lnsFieldListPanelEdit"]')
+        .first()
+        .prop('onClick')!({} as MouseEvent);
+    });
+    expect(editFieldSpy).toHaveBeenCalledWith('bytes');
   });
 
   it('should request field stats every time the button is clicked', async () => {
@@ -135,7 +164,7 @@ describe('IndexPattern Field Item', () => {
       body: JSON.stringify({
         dslQuery: {
           bool: {
-            must: [{ match_all: {} }],
+            must: [],
             filter: [],
             should: [],
             must_not: [],
@@ -233,5 +262,26 @@ describe('IndexPattern Field Item', () => {
     expect(core.http.post).not.toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+  });
+
+  it('should not request field stats for range fields', async () => {
+    const wrapper = mountWithIntl(
+      <InnerFieldItem
+        {...defaultProps}
+        field={{
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        }}
+      />
+    );
+
+    await act(async () => {
+      clickField(wrapper, 'ip_range');
+    });
+
+    expect(core.http.post).not.toHaveBeenCalled();
   });
 });

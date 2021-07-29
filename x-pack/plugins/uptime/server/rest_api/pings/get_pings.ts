@@ -23,7 +23,7 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       size: schema.maybe(schema.number()),
       sort: schema.maybe(schema.string()),
       status: schema.maybe(schema.string()),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

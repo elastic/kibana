@@ -15,6 +15,7 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { DocValueFields } from '../../../../common/search_strategy';
+import { Threshold } from '../../../detections/components/rules/query_preview';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -65,6 +66,7 @@ export interface MatrixHistogramQueryProps {
   errorMessage: string;
   indexNames: string[];
   filterQuery?: ESQuery | string | undefined;
+  onError?: () => void;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;
     from: string;
@@ -74,16 +76,10 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
-  threshold?:
-    | {
-        field: string | string[] | undefined;
-        value: number;
-        cardinality_field?: string | undefined;
-        cardinality_value?: number | undefined;
-      }
-    | undefined;
+  threshold?: Threshold;
   skip?: boolean;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

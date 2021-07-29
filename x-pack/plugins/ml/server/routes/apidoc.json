@@ -1,6 +1,6 @@
 {
   "name": "ml_kibana_api",
-  "version": "7.11.0",
+  "version": "7.13.0",
   "description": "This is the documentation of the REST API provided by the Machine Learning Kibana plugin. Each API is experimental and can include breaking changes in any version.",
   "title": "ML Kibana API",
   "order": [
@@ -18,6 +18,8 @@
     "DeleteDataFrameAnalytics",
     "JobsExist",
     "GetDataFrameAnalyticsIdMap",
+    "AnalyticsNewJobCaps",
+    "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
     "GetOverallStats",
@@ -46,6 +48,7 @@
 
     "ResultsService",
     "GetAnomaliesTableData",
+    "GetDatafeedResultsChartData",
     "GetCategoryDefinition",
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
@@ -83,10 +86,12 @@
     "GetLookBackProgress",
     "ValidateCategoryExamples",
     "TopCategories",
+    "DatafeedPreview",
     "UpdateGroups",
     "DeletingJobTasks",
     "DeleteJobs",
     "RevertModelSnapshot",
+    "BulkCreateJobs",
 
     "Calendars",
     "PutCalendars",
@@ -117,15 +122,12 @@
     "JobAuditMessages",
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
-
+    "ClearJobAuditMessages",
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
     "ValidateCardinality",
     "ValidateJob",
-
-    "NotificationSettings",
-    "GetNotificationSettings",
 
     "DatafeedService",
     "CreateDatafeed",
@@ -147,8 +149,7 @@
     "SavedObjectsStatus",
     "SyncJobSavedObjects",
     "InitializeJobSavedObjects",
-    "AssignJobsToSpaces",
-    "RemoveJobsFromSpaces",
+    "UpdateJobsSpaces",
     "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
     "CanDeleteJob",
@@ -157,6 +158,9 @@
     "GetTrainedModel",
     "GetTrainedModelStats",
     "GetTrainedModelPipelines",
-    "DeleteTrainedModel"
+    "DeleteTrainedModel",
+
+    "Alerting",
+    "PreviewAlert"
   ]
 }

@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -15,37 +13,36 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageHeader,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  NotificationsStart,
   ApplicationStart,
   DocLinksStart,
+  NotificationsStart,
   ScopedHistory,
 } from 'src/core/public';
-import { RoleMapping, Role } from '../../../../common/model';
-import { EmptyPrompt } from './empty_prompt';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Role, RoleMapping } from '../../../../common/model';
+import { DisabledBadge, EnabledBadge } from '../../badges';
+import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
+import { RoleTableDisplay } from '../../role_table_display';
+import type { RolesAPIClient } from '../../roles';
 import {
-  NoCompatibleRealms,
   DeleteProvider,
+  NoCompatibleRealms,
   PermissionDenied,
   SectionLoading,
 } from '../components';
-import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
-import { RoleMappingsAPIClient } from '../role_mappings_api_client';
-import { RoleTableDisplay } from '../../role_table_display';
-import { RolesAPIClient } from '../../roles';
-import { EnabledBadge, DisabledBadge } from '../../badges';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import { EmptyPrompt } from './empty_prompt';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -91,7 +88,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     if (loadState === 'loadingApp') {
       return (
-        <EuiPageContent>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
           <SectionLoading>
             <FormattedMessage
               id="xpack.security.management.roleMappings.loadingRoleMappingsDescription"
@@ -108,7 +105,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       } = error;
 
       return (
-        <EuiPageContent>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
           <EuiCallOut
             title={
               <FormattedMessage
@@ -127,49 +124,42 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
       return (
-        <EuiPageContent>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
           <EmptyPrompt history={this.props.history} />
         </EuiPageContent>
       );
     }
 
     return (
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.roleMappingTitle"
-                  defaultMessage="Role Mappings"
-                />
-              </h2>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.roleMappingDescription"
-                  defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
-                  values={{
-                    learnMoreLink: (
-                      <EuiLink
-                        href={this.props.docLinks.links.security.mappingRoles}
-                        external={true}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.security.management.roleMappings.learnMoreLinkText"
-                          defaultMessage="Learn more."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.security.management.roleMappings.roleMappingTitle"
+              defaultMessage="Role Mappings"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.security.management.roleMappings.roleMappingDescription"
+              defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={this.props.docLinks.links.security.mappingRoles} external={true}>
+                    <FormattedMessage
+                      id="xpack.security.management.roleMappings.learnMoreLinkText"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+          rightSideItems={[
             <EuiButton
+              fill
+              iconType="plusInCircleFilled"
               data-test-subj="createRoleMappingButton"
               {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
             >
@@ -177,21 +167,20 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                 id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
                 defaultMessage="Create role mapping"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>
-          <Fragment>
-            {!this.state.hasCompatibleRealms && (
-              <>
-                <NoCompatibleRealms />
-                <EuiSpacer />
-              </>
-            )}
-            {this.renderTable()}
-          </Fragment>
-        </EuiPageContentBody>
-      </EuiPageContent>
+            </EuiButton>,
+          ]}
+        />
+
+        <EuiSpacer size="l" />
+
+        {!this.state.hasCompatibleRealms && (
+          <>
+            <NoCompatibleRealms />
+            <EuiSpacer />
+          </>
+        )}
+        {this.renderTable()}
+      </>
     );
   }
 

@@ -13,9 +13,10 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
-  buildOssDist: boolean;
-  buildDefaultDist: boolean;
   downloadFreshNode: boolean;
+  initialize: boolean;
+  createGenericFolders: boolean;
+  createPlatformFolders: boolean;
   createArchives: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
@@ -24,6 +25,7 @@ export interface BuildOptions {
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
+  createExamplePlugins: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
@@ -34,52 +36,66 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   const run = createRunner({
     config,
     log,
-    buildDefaultDist: options.buildDefaultDist,
-    buildOssDist: options.buildOssDist,
   });
 
   /**
    * verify, reset, and initialize the build environment
    */
-  await run(Tasks.VerifyEnv);
-  await run(Tasks.Clean);
-  await run(options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds);
-  await run(Tasks.ExtractNodeBuilds);
+  if (options.initialize) {
+    await run(Tasks.VerifyEnv);
+    await run(Tasks.Clean);
+    await run(
+      options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
+    );
+    await run(Tasks.ExtractNodeBuilds);
+  }
+
+  /**
+   * build example plugins
+   */
+  if (options.createExamplePlugins) {
+    await run(Tasks.BuildKibanaExamplePlugins);
+  }
 
   /**
    * run platform-generic build tasks
    */
-  await run(Tasks.CopySource);
-  await run(Tasks.CopyBinScripts);
-  await run(Tasks.ReplaceFavicon);
-  await run(Tasks.CreateEmptyDirsAndFiles);
-  await run(Tasks.CreateReadme);
-  await run(Tasks.BuildBazelPackages);
-  await run(Tasks.BuildPackages);
-  await run(Tasks.BuildKibanaPlatformPlugins);
-  await run(Tasks.TranspileBabel);
-  await run(Tasks.CreatePackageJson);
-  await run(Tasks.InstallDependencies);
-  await run(Tasks.CleanPackages);
-  await run(Tasks.CreateNoticeFile);
-  await run(Tasks.UpdateLicenseFile);
-  await run(Tasks.RemovePackageJsonDeps);
-  await run(Tasks.CleanTypescript);
-  await run(Tasks.CleanExtraFilesFromModules);
-  await run(Tasks.CleanEmptyFolders);
+  if (options.createGenericFolders) {
+    await run(Tasks.CopySource);
+    await run(Tasks.CopyBinScripts);
+    await run(Tasks.ReplaceFavicon);
+    await run(Tasks.CreateEmptyDirsAndFiles);
+    await run(Tasks.CreateReadme);
+    await run(Tasks.BuildBazelPackages);
+    await run(Tasks.BuildPackages);
+    await run(Tasks.BuildKibanaPlatformPlugins);
+    await run(Tasks.TranspileBabel);
+    await run(Tasks.CreatePackageJson);
+    await run(Tasks.InstallDependencies);
+    await run(Tasks.GeneratePackagesOptimizedAssets);
+    await run(Tasks.CleanPackages);
+    await run(Tasks.CreateNoticeFile);
+    await run(Tasks.UpdateLicenseFile);
+    await run(Tasks.RemovePackageJsonDeps);
+    await run(Tasks.CleanTypescript);
+    await run(Tasks.CleanExtraFilesFromModules);
+    await run(Tasks.CleanEmptyFolders);
+  }
 
   /**
    * copy generic build outputs into platform-specific build
    * directories and perform platform/architecture-specific steps
    */
-  await run(Tasks.CreateArchivesSources);
-  await run(Tasks.PatchNativeModules);
-  await run(Tasks.InstallChromium);
-  await run(Tasks.CleanExtraBinScripts);
-  await run(Tasks.CleanNodeBuilds);
+  if (options.createPlatformFolders) {
+    await run(Tasks.CreateArchivesSources);
+    await run(Tasks.PatchNativeModules);
+    await run(Tasks.InstallChromium);
+    await run(Tasks.CleanExtraBinScripts);
+    await run(Tasks.CleanNodeBuilds);
 
-  await run(Tasks.PathLength);
-  await run(Tasks.UuidVerification);
+    await run(Tasks.PathLength);
+    await run(Tasks.UuidVerification);
+  }
 
   /**
    * package platform-specific builds into archives

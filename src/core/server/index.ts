@@ -35,8 +35,9 @@ import {
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   IScopedClusterClient,
+  ElasticsearchServicePreboot,
 } from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -57,61 +58,78 @@ import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-
-// Because of #79265 we need to explicity import, then export these types for
+import { DeprecationsServiceSetup } from './deprecations';
+// Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
   CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
+  ConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
+import { PrebootServicePreboot } from './preboot';
 
-export {
+export type { PrebootServicePreboot } from './preboot';
+
+export type {
   CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
+  ConfigUsageData,
 };
 
+import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+
+export type {
+  IExecutionContextContainer,
+  KibanaServerExecutionContext,
+  KibanaExecutionContext,
+} from './execution_context';
+
 export { bootstrap } from './bootstrap';
-export {
+export type {
   Capabilities,
   CapabilitiesProvider,
   CapabilitiesSwitcher,
   ResolveCapabilitiesOptions,
 } from './capabilities';
-export {
+export type {
   ConfigPath,
   ConfigService,
   ConfigDeprecation,
   ConfigDeprecationProvider,
-  ConfigDeprecationLogger,
   ConfigDeprecationFactory,
+  AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
 } from './config';
-export {
+export type {
   IContextContainer,
   IContextProvider,
   HandlerFunction,
   HandlerContextType,
   HandlerParameters,
 } from './context';
-export { CoreId } from './core_context';
-export { CspConfig, ICspConfig } from './csp';
-export {
+export type { CoreId } from './core_context';
+
+export { CspConfig } from './csp';
+export type { ICspConfig } from './csp';
+
+export { ElasticsearchConfig } from './elasticsearch';
+export type {
   LegacyClusterClient,
   ILegacyClusterClient,
   ILegacyCustomClusterClient,
   LegacyScopedClusterClient,
   ILegacyScopedClusterClient,
-  ElasticsearchConfig,
   LegacyElasticsearchClientConfig,
   LegacyElasticsearchError,
   LegacyElasticsearchErrorHelpers,
+  ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
@@ -128,13 +146,24 @@ export {
   CountResponse,
   ShardsInfo,
   ShardsResponse,
-  Explanation,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchConfigPreboot,
 } from './elasticsearch';
-export * from './elasticsearch/legacy/api_types';
-export { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
-export {
+
+export type {
+  LegacyCallAPIOptions,
+  AssistantAPIClientParams,
+  MIGRATION_ASSISTANCE_INDEX_ACTION,
+  MIGRATION_DEPRECATION_LEVEL,
+  AssistanceAPIResponse,
+  DeprecationAPIClientParams,
+  DeprecationInfo,
+  IndexSettingsDeprecationInfo,
+  DeprecationAPIResponse,
+} from './elasticsearch/legacy/api_types';
+export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+export type {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
@@ -156,12 +185,12 @@ export {
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerInfo,
+  HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
-  KibanaRequest,
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
@@ -188,7 +217,6 @@ export {
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
-  kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
@@ -197,7 +225,6 @@ export {
   RouteConfigOptions,
   RouteConfigOptionsBody,
   RouteContentType,
-  validBodyOutput,
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidationFunction,
@@ -213,17 +240,24 @@ export {
   SafeRouteMethod,
 } from './http';
 
-export {
+export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+
+export type {
   HttpResourcesRenderOptions,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
 } from './http_resources';
 
-export { IRenderOptions } from './rendering';
-export {
+export type { IRenderOptions } from './rendering';
+export type {
   Logger,
   LoggerFactory,
+  Ecs,
+  EcsEventCategory,
+  EcsEventKind,
+  EcsEventOutcome,
+  EcsEventType,
   LogMeta,
   LogRecord,
   LogLevel,
@@ -233,8 +267,11 @@ export {
   AppenderConfigType,
 } from './logging';
 
-export {
+export { PluginType } from './plugins';
+
+export type {
   DiscoveredPlugin,
+  PrebootPlugin,
   Plugin,
   AsyncPlugin,
   PluginConfigDescriptor,
@@ -244,9 +281,18 @@ export {
   PluginManifest,
   PluginName,
   SharedGlobalConfig,
+  MakeUsageFromSchema,
 } from './plugins';
 
 export {
+  SavedObjectsClient,
+  SavedObjectsErrorHelpers,
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
+  SavedObjectsUtils,
+} from './saved_objects';
+
+export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
@@ -255,7 +301,6 @@ export {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
-  SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
@@ -263,9 +308,13 @@ export {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
-  SavedObjectsErrorHelpers,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
@@ -289,15 +338,18 @@ export {
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsResolveResponse,
-  SavedObjectsSerializer,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
-  SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -307,19 +359,15 @@ export {
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
-  SavedObjectTypeRegistry,
   ISavedObjectTypeRegistry,
   SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
-  SavedObjectsUtils,
   SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
@@ -338,7 +386,7 @@ export {
   SavedObjectsImportWarning,
 } from './saved_objects';
 
-export {
+export type {
   IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
@@ -346,14 +394,10 @@ export {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
-  ImageValidation,
   DeprecationSettings,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
 } from './ui_settings';
 
-export {
+export type {
   OpsMetrics,
   OpsOsMetrics,
   OpsServerMetrics,
@@ -362,12 +406,18 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { I18nServiceSetup } from './i18n';
+export type { I18nServiceSetup } from './i18n';
+export type {
+  DeprecationsDetails,
+  RegisterDeprecationsConfig,
+  GetDeprecationsContext,
+  DeprecationsServiceSetup,
+} from './deprecations';
 
-export { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export type { AppCategory } from '../types';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 
-export {
+export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
@@ -382,17 +432,10 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
+export { ServiceStatusLevels } from './status';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
 
-export {
-  CoreStatus,
-  ServiceStatus,
-  ServiceStatusLevel,
-  ServiceStatusLevels,
-  StatusServiceSetup,
-} from './status';
-
-export { CoreUsageDataStart } from './core_usage_data';
+export type { CoreUsageDataStart } from './core_usage_data';
 
 /**
  * Plugin specific context passed to a route handler.
@@ -436,7 +479,20 @@ export interface RequestHandlerContext {
 }
 
 /**
- * Context passed to the plugins `setup` method.
+ * Context passed to the `setup` method of `preboot` plugins.
+ * @public
+ */
+export interface CorePreboot {
+  /** {@link ElasticsearchServicePreboot} */
+  elasticsearch: ElasticsearchServicePreboot;
+  /** {@link HttpServicePreboot} */
+  http: HttpServicePreboot;
+  /** {@link PrebootServicePreboot} */
+  preboot: PrebootServicePreboot;
+}
+
+/**
+ * Context passed to the `setup` method of `standard` plugins.
  *
  * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
  *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
@@ -451,6 +507,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup & {
     /** {@link HttpResources} */
@@ -468,6 +526,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link DeprecationsServiceSetup} */
+  deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
@@ -495,6 +555,8 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */
@@ -507,10 +569,12 @@ export interface CoreStart {
   coreUsageData: CoreUsageDataStart;
 }
 
-export {
+export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  ExecutionContextSetup,
+  ExecutionContextStart,
   HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,

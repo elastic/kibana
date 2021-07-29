@@ -7,8 +7,7 @@
  */
 
 import { resolve } from 'path';
-
-import { fromRoot } from '../../core/server/utils';
+import { fromRoot } from '@kbn/utils';
 
 export function parse(command, options) {
   const settings = {

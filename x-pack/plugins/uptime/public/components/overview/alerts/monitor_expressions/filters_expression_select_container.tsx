@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { FiltersExpressionsSelect } from './filters_expression_select';
 import { overviewFiltersSelector } from '../../../../state/selectors';
-import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 
 export interface FilterExpressionsSelectProps {
   alertParams: { [key: string]: any };
@@ -20,20 +19,7 @@ export interface FilterExpressionsSelectProps {
 }
 
 export const FiltersExpressionSelectContainer: React.FC<FilterExpressionsSelectProps> = (props) => {
-  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
-    fieldName: string;
-    values: string[];
-  }>({ fieldName: '', values: [] });
-
-  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values, props.shouldUpdateUrl);
-
   const overviewFilters = useSelector(overviewFiltersSelector);
 
-  return (
-    <FiltersExpressionsSelect
-      {...overviewFilters}
-      {...props}
-      setUpdatedFieldValues={setUpdatedFieldValues}
-    />
-  );
+  return <FiltersExpressionsSelect {...overviewFilters} {...props} />;
 };

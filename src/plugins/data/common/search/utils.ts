@@ -12,7 +12,7 @@ import type { IKibanaSearchResponse } from './types';
  * @returns true if response had an error while executing in ES
  */
 export const isErrorResponse = (response?: IKibanaSearchResponse) => {
-  return !response || (!response.isRunning && response.isPartial);
+  return !response || !response.rawResponse || (!response.isRunning && response.isPartial);
 };
 
 /**

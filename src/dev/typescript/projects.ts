@@ -14,7 +14,6 @@ import { Project } from './project';
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
-  new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/drilldowns/url_drilldown/tsconfig.json'), {
@@ -22,6 +21,9 @@ export const PROJECTS = [
   }),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
     name: 'security_solution/cypress',
+  }),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/osquery/cypress/tsconfig.json'), {
+    name: 'osquery/cypress',
   }),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
     name: 'apm/cypress',
@@ -55,6 +57,9 @@ export const PROJECTS = [
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('test/interpreter_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map((path) => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('test/server_integration/__fixtures__/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
 ];
 

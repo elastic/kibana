@@ -7,15 +7,20 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
-import { DatatableVisualizationState, datatableVisualization } from './visualization';
-import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
+import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
+import {
+  Operation,
+  DataType,
+  FramePublicAPI,
+  TableSuggestionColumn,
+  VisualizationDimensionGroupConfig,
+} from '../types';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 function mockFrame(): FramePublicAPI {
   return {
     ...createMockFramePublicAPI(),
-    addNewLayer: () => 'aaa',
-    removeLayers: () => {},
     datasourceLayers: {},
     query: { query: '', language: 'lucene' },
     dateRange: {
@@ -26,10 +31,14 @@ function mockFrame(): FramePublicAPI {
   };
 }
 
+const datatableVisualization = getDatatableVisualization({
+  paletteService: chartPluginMock.createPaletteRegistry(),
+});
+
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
-      expect(datatableVisualization.initialize(mockFrame(), undefined)).toEqual({
+      expect(datatableVisualization.initialize(() => 'aaa', undefined)).toEqual({
         layerId: 'aaa',
         columns: [],
       });
@@ -40,7 +49,7 @@ describe('Datatable Visualization', () => {
         layerId: 'foo',
         columns: [{ columnId: 'saved' }],
       };
-      expect(datatableVisualization.initialize(mockFrame(), expectedState)).toEqual(expectedState);
+      expect(datatableVisualization.initialize(() => 'foo', expectedState)).toEqual(expectedState);
     });
   });
 
@@ -132,9 +141,9 @@ describe('Datatable Visualization', () => {
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(suggestions[0].state.columns).toEqual([
-        { columnId: 'col1', width: 123 },
-        { columnId: 'col2', hidden: true },
-        { columnId: 'col3' },
+        { columnId: 'col1', width: 123, isTransposed: false },
+        { columnId: 'col2', hidden: true, isTransposed: false },
+        { columnId: 'col3', isTransposed: false },
       ]);
       expect(suggestions[0].state.sorting).toEqual({
         columnId: 'col1',
@@ -226,39 +235,45 @@ describe('Datatable Visualization', () => {
           },
           frame,
         }).groups
-      ).toHaveLength(2);
+      ).toHaveLength(3);
     });
 
-    it('allows only bucket operations one category', () => {
+    it('allows only bucket operations for splitting columns and rows', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { first: datasource.publicAPIMock };
-
-      const filterOperations = datatableVisualization.getConfiguration({
+      const groups = datatableVisualization.getConfiguration({
         layerId: 'first',
         state: {
           layerId: 'first',
           columns: [],
         },
         frame,
-      }).groups[0].filterOperations;
+      }).groups;
 
-      const baseOperation: Operation = {
-        dataType: 'string',
-        isBucketed: true,
-        label: '',
-      };
-      expect(filterOperations({ ...baseOperation })).toEqual(true);
-      expect(filterOperations({ ...baseOperation, dataType: 'number' })).toEqual(true);
-      expect(filterOperations({ ...baseOperation, dataType: 'date' })).toEqual(true);
-      expect(filterOperations({ ...baseOperation, dataType: 'boolean' })).toEqual(true);
-      expect(filterOperations({ ...baseOperation, dataType: 'other' as DataType })).toEqual(true);
-      expect(filterOperations({ ...baseOperation, dataType: 'date', isBucketed: false })).toEqual(
-        false
-      );
-      expect(filterOperations({ ...baseOperation, dataType: 'number', isBucketed: false })).toEqual(
-        false
-      );
+      function testGroup(group: VisualizationDimensionGroupConfig) {
+        const baseOperation: Operation = {
+          dataType: 'string',
+          isBucketed: true,
+          label: '',
+        };
+        expect(group.filterOperations({ ...baseOperation })).toEqual(true);
+        expect(group.filterOperations({ ...baseOperation, dataType: 'number' })).toEqual(true);
+        expect(group.filterOperations({ ...baseOperation, dataType: 'date' })).toEqual(true);
+        expect(group.filterOperations({ ...baseOperation, dataType: 'boolean' })).toEqual(true);
+        expect(group.filterOperations({ ...baseOperation, dataType: 'other' as DataType })).toEqual(
+          true
+        );
+        expect(
+          group.filterOperations({ ...baseOperation, dataType: 'date', isBucketed: false })
+        ).toEqual(false);
+        expect(
+          group.filterOperations({ ...baseOperation, dataType: 'number', isBucketed: false })
+        ).toEqual(false);
+      }
+
+      testGroup(groups[0]);
+      testGroup(groups[1]);
     });
 
     it('allows only metric operations in one category', () => {
@@ -273,7 +288,7 @@ describe('Datatable Visualization', () => {
           columns: [],
         },
         frame,
-      }).groups[1].filterOperations;
+      }).groups[2].filterOperations;
 
       const baseOperation: Operation = {
         dataType: 'string',
@@ -307,7 +322,7 @@ describe('Datatable Visualization', () => {
             columns: [{ columnId: 'b' }, { columnId: 'c' }],
           },
           frame,
-        }).groups[1].accessors
+        }).groups[2].accessors
       ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
     });
   });
@@ -368,7 +383,7 @@ describe('Datatable Visualization', () => {
         })
       ).toEqual({
         layerId: 'layer1',
-        columns: [{ columnId: 'b' }, { columnId: 'c' }, { columnId: 'd' }],
+        columns: [{ columnId: 'b' }, { columnId: 'c' }, { columnId: 'd', isTransposed: false }],
       });
     });
 
@@ -382,7 +397,7 @@ describe('Datatable Visualization', () => {
         })
       ).toEqual({
         layerId: 'layer1',
-        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+        columns: [{ columnId: 'b', isTransposed: false }, { columnId: 'c' }],
       });
     });
   });
@@ -415,18 +430,28 @@ describe('Datatable Visualization', () => {
       );
       const columnArgs = buildExpression(expression).findFunction('lens_datatable_column');
       expect(columnArgs).toHaveLength(2);
-      expect(columnArgs[0].arguments).toEqual({
-        columnId: ['c'],
-        hidden: [],
-        width: [],
-        alignment: [],
-      });
-      expect(columnArgs[1].arguments).toEqual({
-        columnId: ['b'],
-        hidden: [],
-        width: [],
-        alignment: [],
-      });
+      expect(columnArgs[0].arguments).toEqual(
+        expect.objectContaining({
+          columnId: ['c'],
+          hidden: [],
+          width: [],
+          isTransposed: [],
+          transposable: [true],
+          alignment: [],
+          colorMode: ['none'],
+        })
+      );
+      expect(columnArgs[1].arguments).toEqual(
+        expect.objectContaining({
+          columnId: ['b'],
+          hidden: [],
+          width: [],
+          isTransposed: [],
+          transposable: [true],
+          alignment: [],
+          colorMode: ['none'],
+        })
+      );
     });
 
     it('returns no expression if the metric dimension is not defined', () => {

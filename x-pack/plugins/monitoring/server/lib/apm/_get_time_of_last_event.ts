@@ -30,9 +30,9 @@ export async function getTimeOfLastEvent({
   const params = {
     index: apmIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
-      _source: ['timestamp'],
+      _source: ['beats_stats.timestamp', '@timestamp'],
       sort: [
         {
           timestamp: {
@@ -60,5 +60,8 @@ export async function getTimeOfLastEvent({
   };
 
   const response = await callWithRequest(req, 'search', params);
-  return response.hits?.hits.length ? response.hits?.hits[0]?._source.timestamp : undefined;
+  return response.hits?.hits.length
+    ? response.hits?.hits[0]?._source.beats_stats?.timestamp ??
+        response.hits?.hits[0]?._source['@timestamp']
+    : undefined;
 }

@@ -10,7 +10,7 @@
 toJSON(): {
         count: number;
         script: string | undefined;
-        lang: string | undefined;
+        lang: "painless" | "expression" | "mustache" | "java" | undefined;
         conflictDescriptions: Record<string, string[]> | undefined;
         name: string;
         type: string;
@@ -19,7 +19,7 @@ toJSON(): {
         searchable: boolean;
         aggregatable: boolean;
         readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
+        subType: import("@kbn/es-query").IFieldSubType | undefined;
         customLabel: string | undefined;
     };
 ```
@@ -28,7 +28,7 @@ toJSON(): {
 `{
         count: number;
         script: string | undefined;
-        lang: string | undefined;
+        lang: "painless" | "expression" | "mustache" | "java" | undefined;
         conflictDescriptions: Record<string, string[]> | undefined;
         name: string;
         type: string;
@@ -37,7 +37,7 @@ toJSON(): {
         searchable: boolean;
         aggregatable: boolean;
         readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
+        subType: import("@kbn/es-query").IFieldSubType | undefined;
         customLabel: string | undefined;
     }`
 

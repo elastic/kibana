@@ -7,6 +7,7 @@
 
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
+// @ts-expect-error not full interface
 export const SINGLE_METRIC_JOB_CONFIG: Job = {
   job_id: `jobs_summary_fq_single_${Date.now()}`,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
@@ -26,6 +27,7 @@ export const SINGLE_METRIC_JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 export const MULTI_METRIC_JOB_CONFIG: Job = {
   job_id: `jobs_summary_fq_multi_${Date.now()}`,
   description: 'mean(responsetime) partition=airline on farequote dataset with 1h bucket span',
@@ -40,6 +42,7 @@ export const MULTI_METRIC_JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 export const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'REPLACE',
   indices: ['ft_farequote'],

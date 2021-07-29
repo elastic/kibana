@@ -22,6 +22,43 @@ import { ServiceStatus } from '../status';
 /**
  * @public
  */
+export interface ElasticsearchServicePreboot {
+  /**
+   * A limited set of Elasticsearch configuration entries.
+   *
+   * @example
+   * ```js
+   * const { hosts, credentialsSpecified } = core.elasticsearch.config;
+   * ```
+   */
+  readonly config: Readonly<ElasticsearchConfigPreboot>;
+
+  /**
+   * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
+   *
+   * @param type Unique identifier of the client
+   * @param clientConfig A config consists of Elasticsearch JS client options and
+   * valid sub-set of Elasticsearch service config.
+   * We fill all the missing properties in the `clientConfig` using the default
+   * Elasticsearch config so that we don't depend on default values set and
+   * controlled by underlying Elasticsearch JS client.
+   * We don't run validation against the passed config and expect it to be valid.
+   *
+   * @example
+   * ```js
+   * const client = elasticsearch.createClient('my-app-name', config);
+   * const data = await client.asInternalUser.search();
+   * ```
+   */
+  readonly createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient;
+}
+
+/**
+ * @public
+ */
 export interface ElasticsearchServiceSetup {
   /**
    * @deprecated
@@ -36,6 +73,7 @@ export interface ElasticsearchServiceSetup {
     readonly config$: Observable<ElasticsearchConfig>;
     /**
      * @deprecated
+     * @removeBy 7.16
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
      *
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
@@ -60,6 +98,7 @@ export interface ElasticsearchServiceSetup {
     ) => ILegacyCustomClusterClient;
 
     /**
+     * @removeBy 7.16
      * @deprecated
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.client} instead.
      *
@@ -74,6 +113,9 @@ export interface ElasticsearchServiceSetup {
     readonly client: ILegacyClusterClient;
   };
 }
+
+/** @internal */
+export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
 
 /** @internal */
 export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {
@@ -131,6 +173,9 @@ export interface ElasticsearchServiceStart {
     /**
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
      *
+     * @deprecated
+     * @removeBy 7.16
+     *
      * @param type Unique identifier of the client
      * @param clientConfig A config consists of Elasticsearch JS client options and
      * valid sub-set of Elasticsearch service config.
@@ -153,6 +198,9 @@ export interface ElasticsearchServiceStart {
     /**
      * A pre-configured {@link ILegacyClusterClient | legacy Elasticsearch client}.
      *
+     * @deprecated
+     * @removeBy 7.16
+     *
      * @example
      * ```js
      * const client = core.elasticsearch.legacy.client;
@@ -171,6 +219,7 @@ export type InternalElasticsearchServiceStart = ElasticsearchServiceStart;
 export interface ElasticsearchStatusMeta {
   warningNodes: NodesVersionCompatibility['warningNodes'];
   incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+  nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
 }
 
 /**
@@ -190,3 +239,21 @@ export interface FakeRequest {
  * See {@link KibanaRequest}.
  */
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
+
+/**
+ * A limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.
+ *
+ * @public
+ */
+export interface ElasticsearchConfigPreboot {
+  /**
+   * Hosts that the client will connect to. If sniffing is enabled, this list will
+   * be used as seeds to discover the rest of your cluster.
+   */
+  readonly hosts: string[];
+
+  /**
+   * Indicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`).
+   */
+  readonly credentialsSpecified: boolean;
+}

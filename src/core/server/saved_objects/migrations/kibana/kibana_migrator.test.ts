@@ -7,13 +7,13 @@
  */
 
 import { take } from 'rxjs/operators';
+import { estypes, errors as esErrors } from '@elastic/elasticsearch';
 
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { DocumentMigrator } from '../core/document_migrator';
 jest.mock('../core/document_migrator', () => {
   return {
@@ -105,10 +105,7 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
 
       options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
-          { statusCode: 404 }
-        )
+        elasticsearchClientMock.createSuccessTransportRequestPromise([], { statusCode: 404 })
       );
       options.client.indices.get.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
@@ -129,7 +126,8 @@ describe('KibanaMigrator', () => {
 
       options.client.cat.templates.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
+          // @ts-expect-error
+          { templates: [] } as CatTemplatesResponse,
           { statusCode: 404 }
         )
       );
@@ -155,7 +153,8 @@ describe('KibanaMigrator', () => {
 
         options.client.cat.templates.mockReturnValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { templates: [] },
+            // @ts-expect-error
+            { templates: [] } as CatTemplatesResponse,
             { statusCode: 404 }
           )
         );
@@ -193,7 +192,8 @@ describe('KibanaMigrator', () => {
 
         options.client.cat.templates.mockReturnValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { templates: [] },
+            // @ts-expect-error
+            { templates: [] } as CatTemplatesResponse,
             { statusCode: 404 }
           )
         );
@@ -229,48 +229,6 @@ describe('KibanaMigrator', () => {
         jest.clearAllMocks();
       });
 
-      it('creates a V2 migrator that initializes a new index and migrates an existing index', async () => {
-        const options = mockV2MigrationOptions();
-        const migrator = new KibanaMigrator(options);
-        const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
-        migrator.prepareMigrations();
-        await migrator.runMigrations();
-
-        // Basic assertions that we're creating and reindexing the expected indices
-        expect(options.client.indices.create).toHaveBeenCalledTimes(3);
-        expect(options.client.indices.create.mock.calls).toEqual(
-          expect.arrayContaining([
-            // LEGACY_CREATE_REINDEX_TARGET
-            expect.arrayContaining([expect.objectContaining({ index: '.my-index_pre8.2.3_001' })]),
-            // CREATE_REINDEX_TEMP
-            expect.arrayContaining([
-              expect.objectContaining({ index: '.my-index_8.2.3_reindex_temp' }),
-            ]),
-            // CREATE_NEW_TARGET
-            expect.arrayContaining([expect.objectContaining({ index: 'other-index_8.2.3_001' })]),
-          ])
-        );
-        // LEGACY_REINDEX
-        expect(options.client.reindex.mock.calls[0][0]).toEqual(
-          expect.objectContaining({
-            body: expect.objectContaining({
-              source: expect.objectContaining({ index: '.my-index' }),
-              dest: expect.objectContaining({ index: '.my-index_pre8.2.3_001' }),
-            }),
-          })
-        );
-        // REINDEX_SOURCE_TO_TEMP
-        expect(options.client.reindex.mock.calls[1][0]).toEqual(
-          expect.objectContaining({
-            body: expect.objectContaining({
-              source: expect.objectContaining({ index: '.my-index_pre8.2.3_001' }),
-              dest: expect.objectContaining({ index: '.my-index_8.2.3_reindex_temp' }),
-            }),
-          })
-        );
-        const { status } = await migratorStatus;
-        return expect(status).toEqual('completed');
-      });
       it('emits results on getMigratorResult$()', async () => {
         const options = mockV2MigrationOptions();
         const migrator = new KibanaMigrator(options);
@@ -321,9 +279,9 @@ describe('KibanaMigrator', () => {
         options.client.tasks.get.mockReturnValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise({
             completed: true,
-            error: { type: 'elatsicsearch_exception', reason: 'task failed with an error' },
+            error: { type: 'elasticsearch_exception', reason: 'task failed with an error' },
             failures: [],
-            task: { description: 'task description' },
+            task: { description: 'task description' } as any,
           })
         );
 
@@ -331,11 +289,11 @@ describe('KibanaMigrator', () => {
         migrator.prepareMigrations();
         await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(`
                 [Error: Unable to complete saved object migrations for the [.my-index] index. Error: Reindex failed with the following error:
-                {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]
+                {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
               `);
         expect(loggingSystemMock.collect(options.logger).error[0][0]).toMatchInlineSnapshot(`
           [Error: Reindex failed with the following error:
-          {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]
+          {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
         `);
       });
     });
@@ -362,19 +320,43 @@ const mockV2MigrationOptions = () => {
     )
   );
   options.client.indices.addBlock.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      acknowledged: true,
+      shards_acknowledged: true,
+      indices: [],
+    })
   );
   options.client.reindex.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ taskId: 'reindex_task_id' })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      taskId: 'reindex_task_id',
+    } as estypes.ReindexResponse)
   );
   options.client.tasks.get.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       completed: true,
       error: undefined,
       failures: [],
-      task: { description: 'task description' },
-    })
+      task: { description: 'task description' } as any,
+    } as estypes.TaskGetResponse)
   );
+
+  options.client.search = jest
+    .fn()
+    .mockImplementation(() =>
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ hits: { hits: [] } })
+    );
+
+  options.client.openPointInTime = jest
+    .fn()
+    .mockImplementation(() =>
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ id: 'pit_id' })
+    );
+
+  options.client.closePointInTime = jest
+    .fn()
+    .mockImplementation(() =>
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ succeeded: true })
+    );
 
   return options;
 };
@@ -412,12 +394,13 @@ const mockOptions = ({ enableV2 }: { enableV2: boolean } = { enableV2: false }) 
       enabled: true,
       index: '.my-index',
     } as KibanaMigratorOptions['kibanaConfig'],
-    savedObjectsConfig: {
+    soMigrationsConfig: {
       batchSize: 20,
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
       enableV2,
+      retryAttempts: 20,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
   };

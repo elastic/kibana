@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import {
-  EsAssetReference,
-  RegistryDataStream,
-  ElasticsearchAssetType,
-  InstallablePackage,
-} from '../../../../types';
-import { ArchiveEntry, getAsset, getPathParts } from '../../archive';
-import { CallESAsCurrentUser } from '../../../../types';
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import { ElasticsearchAssetType } from '../../../../types';
+import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
+import { getAsset, getPathParts } from '../../archive';
+import type { ArchiveEntry } from '../../archive';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
+import { FLEET_FINAL_PIPELINE_CONTENT, FLEET_FINAL_PIPELINE_ID } from '../../../../constants';
+
 import { deletePipelineRefs } from './remove';
 
 interface RewriteSubstitution {
@@ -27,7 +27,7 @@ interface RewriteSubstitution {
 export const installPipelines = async (
   installablePackage: InstallablePackage,
   paths: string[],
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated
@@ -74,7 +74,7 @@ export const installPipelines = async (
       acc.push(
         installPipelinesForDataStream({
           dataStream,
-          callCluster,
+          esClient,
           paths: pipelinePaths,
           pkgVersion: installablePackage.version,
         })
@@ -107,12 +107,12 @@ export function rewriteIngestPipeline(
 }
 
 export async function installPipelinesForDataStream({
-  callCluster,
+  esClient,
   pkgVersion,
   paths,
   dataStream,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   pkgVersion: string;
   paths: string[];
   dataStream: RegistryDataStream;
@@ -150,33 +150,30 @@ export async function installPipelinesForDataStream({
   });
 
   const installationPromises = pipelines.map(async (pipeline) => {
-    return installPipeline({ callCluster, pipeline });
+    return installPipeline({ esClient, pipeline });
   });
 
   return Promise.all(installationPromises);
 }
 
 async function installPipeline({
-  callCluster,
+  esClient,
   pipeline,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   pipeline: any;
 }): Promise<EsAssetReference> {
-  const callClusterParams: {
-    method: string;
-    path: string;
-    ignore: number[];
-    body: any;
-    headers?: any;
-  } = {
-    method: 'PUT',
-    path: `/_ingest/pipeline/${pipeline.nameForInstallation}`,
-    ignore: [404],
+  const esClientParams = {
+    id: pipeline.nameForInstallation,
     body: pipeline.contentForInstallation,
   };
+
+  const esClientRequestOptions: TransportRequestOptions = {
+    ignore: [404],
+  };
+
   if (pipeline.extension === 'yml') {
-    callClusterParams.headers = {
+    esClientRequestOptions.headers = {
       // pipeline is YAML
       'Content-Type': 'application/yaml',
       // but we want JSON responses (to extract error messages, status code, or other metadata)
@@ -184,13 +181,33 @@ async function installPipeline({
     };
   }
 
-  // This uses the catch-all endpoint 'transport.request' because we have to explicitly
-  // set the Content-Type header above for sending yml data. Setting the headers is not
-  // exposed in the convenience endpoint 'ingest.putPipeline' of elasticsearch-js-legacy
-  // which we could otherwise use.
-  // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-  await callCluster('transport.request', callClusterParams);
+  await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
+
   return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+}
+
+export async function ensureFleetFinalPipelineIsInstalled(esClient: ElasticsearchClient) {
+  const esClientRequestOptions: TransportRequestOptions = {
+    ignore: [404],
+  };
+  const res = await esClient.ingest.getPipeline(
+    { id: FLEET_FINAL_PIPELINE_ID },
+    esClientRequestOptions
+  );
+
+  if (res.statusCode === 404) {
+    await installPipeline({
+      esClient,
+      pipeline: {
+        nameForInstallation: FLEET_FINAL_PIPELINE_ID,
+        contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,
+        extension: 'yml',
+      },
+    });
+    return { isCreated: true };
+  }
+
+  return { isCreated: false };
 }
 
 const isDirectory = ({ path }: ArchiveEntry) => path.endsWith('/');

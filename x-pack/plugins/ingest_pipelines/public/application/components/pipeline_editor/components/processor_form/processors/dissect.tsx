@@ -22,7 +22,7 @@ import {
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { EDITOR_PX_HEIGHT, from } from './shared';
+import { EDITOR_PX_HEIGHT, from, to, isJSONStringValidator } from './shared';
 
 const { emptyField } = fieldValidators;
 
@@ -34,6 +34,8 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
       label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
         defaultMessage: 'Pattern',
       }),
+      deserializer: to.escapeBackslashes,
+      serializer: from.unescapeBackslashes,
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText"
@@ -66,6 +68,9 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
               }
             )
           ),
+        },
+        {
+          validator: isJSONStringValidator,
         },
       ],
     },

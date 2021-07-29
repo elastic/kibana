@@ -11,7 +11,6 @@ import {
   fetchOverviewFilters,
   fetchOverviewFiltersFail,
   fetchOverviewFiltersSuccess,
-  setOverviewFilters,
   GetOverviewFiltersPayload,
   OverviewFiltersPayload,
 } from '../actions';
@@ -50,11 +49,6 @@ export const overviewFiltersReducer = handleActions<OverviewFiltersState, Overvi
       ...state,
       errors: [...state.errors, action.payload],
       loading: false,
-    }),
-
-    [String(setOverviewFilters)]: (state, action: Action<OverviewFilters>) => ({
-      ...state,
-      filters: action.payload,
     }),
   },
   initialState

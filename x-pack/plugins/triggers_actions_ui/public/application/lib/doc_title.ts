@@ -16,14 +16,14 @@ export const getCurrentDocTitle = (page: string): string => {
         defaultMessage: 'Connectors',
       });
       break;
-    case 'alerts':
-      updatedTitle = i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
-        defaultMessage: 'Alerts',
+    case 'rules':
+      updatedTitle = i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
+        defaultMessage: 'Rules',
       });
       break;
     default:
       updatedTitle = i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-        defaultMessage: 'Alerts and Actions',
+        defaultMessage: 'Rules and Connectors',
       });
   }
   return updatedTitle;

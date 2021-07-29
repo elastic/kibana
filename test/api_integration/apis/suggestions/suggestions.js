@@ -8,16 +8,23 @@
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('Suggestions API', function () {
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
-      await esArchiver.load('index_patterns/basic_kibana');
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+      );
     });
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
-      await esArchiver.unload('index_patterns/basic_kibana');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
+      await kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+      );
     });
 
     it('should return 200 with special characters', () =>
@@ -37,5 +44,14 @@ export default function ({ getService }) {
           query: 'nes',
         })
         .expect(200, ['nestedValue']));
+
+    it('should return 404 if index is not found', () =>
+      supertest
+        .post('/api/kibana/suggestions/values/not_found')
+        .send({
+          field: 'baz.keyword',
+          query: '1',
+        })
+        .expect(404));
   });
 }

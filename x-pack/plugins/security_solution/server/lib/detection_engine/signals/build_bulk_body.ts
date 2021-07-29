@@ -6,77 +6,49 @@
  */
 
 import { SavedObject } from 'src/core/types';
+import { getMergeStrategy } from './source_fields_merging/strategies';
 import {
+  AlertAttributes,
   SignalSourceHit,
   SignalHit,
   Signal,
-  RuleAlertAttributes,
   BaseSignalHit,
   SignalSource,
   WrappedSignalHit,
 } from './types';
-import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
+import { buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { EqlSequence, RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
+import type { ConfigType } from '../../../config';
 
-interface BuildBulkBodyParams {
-  doc: SignalSourceHit;
-  ruleParams: RuleTypeParams;
-  id: string;
-  actions: RuleAlertAction[];
-  name: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt: string;
-  updatedBy: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
-  throttle: string;
-}
-
-// format search_after result for signals index.
-export const buildBulkBody = ({
-  doc,
-  ruleParams,
-  id,
-  name,
-  actions,
-  createdAt,
-  createdBy,
-  updatedAt,
-  updatedBy,
-  interval,
-  enabled,
-  tags,
-  throttle,
-}: BuildBulkBodyParams): SignalHit => {
-  const rule = buildRule({
-    actions,
-    ruleParams,
-    id,
-    name,
-    enabled,
-    createdAt,
-    createdBy,
-    doc,
-    updatedAt,
-    updatedBy,
-    interval,
-    tags,
-    throttle,
-  });
+/**
+ * Formats the search_after result for insertion into the signals index. We first create a
+ * "best effort" merged "fields" with the "_source" object, then build the signal object,
+ * then the event object, and finally we strip away any additional temporary data that was added
+ * such as the "threshold_result".
+ * @param ruleSO The rule saved object to build overrides
+ * @param doc The SignalSourceHit with "_source", "fields", and additional data such as "threshold_result"
+ * @returns The body that can be added to a bulk call for inserting the signal.
+ */
+export const buildBulkBody = (
+  ruleSO: SavedObject<AlertAttributes>,
+  doc: SignalSourceHit,
+  mergeStrategy: ConfigType['alertMergeStrategy']
+): SignalHit => {
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
+  const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const signal: Signal = {
-    ...buildSignal([doc], rule),
-    ...additionalSignalFields(doc),
+    ...buildSignal([mergedDoc], rule),
+    ...additionalSignalFields(mergedDoc),
   };
-  delete doc._source.threshold_result;
-  const event = buildEventTypeSignal(doc);
+  const event = buildEventTypeSignal(mergedDoc);
+  const { threshold_result: thresholdResult, ...filteredSource } = mergedDoc._source || {
+    threshold_result: null,
+  };
   const signalHit: SignalHit = {
-    ...doc._source,
+    ...filteredSource,
     '@timestamp': new Date().toISOString(),
     event,
     signal,
@@ -94,12 +66,13 @@ export const buildBulkBody = ({
  */
 export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
-  ruleSO: SavedObject<RuleAlertAttributes>,
-  outputIndex: string
+  ruleSO: SavedObject<AlertAttributes>,
+  outputIndex: string,
+  mergeStrategy: ConfigType['alertMergeStrategy']
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO, false);
+      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy);
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -135,7 +108,7 @@ export const buildSignalGroupFromSequence = (
 
 export const buildSignalFromSequence = (
   events: WrappedSignalHit[],
-  ruleSO: SavedObject<RuleAlertAttributes>
+  ruleSO: SavedObject<AlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = buildSignal(events, rule);
@@ -159,20 +132,22 @@ export const buildSignalFromSequence = (
 
 export const buildSignalFromEvent = (
   event: BaseSignalHit,
-  ruleSO: SavedObject<RuleAlertAttributes>,
-  applyOverrides: boolean
+  ruleSO: SavedObject<AlertAttributes>,
+  applyOverrides: boolean,
+  mergeStrategy: ConfigType['alertMergeStrategy']
 ): SignalHit => {
+  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event });
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, event._source)
+    ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = {
-    ...buildSignal([event], rule),
-    ...additionalSignalFields(event),
+    ...buildSignal([mergedEvent], rule),
+    ...additionalSignalFields(mergedEvent),
   };
-  const eventFields = buildEventTypeSignal(event);
+  const eventFields = buildEventTypeSignal(mergedEvent);
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
-    ...event._source,
+    ...mergedEvent._source,
     '@timestamp': new Date().toISOString(),
     event: eventFields,
     signal,

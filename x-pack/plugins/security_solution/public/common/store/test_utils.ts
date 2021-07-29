@@ -9,6 +9,10 @@ import { Dispatch } from 'redux';
 import { State, ImmutableMiddlewareFactory } from './types';
 import { AppAction } from './actions';
 
+interface WaitForActionOptions<T extends A['type'], A extends AppAction = AppAction> {
+  validate?: (action: A extends { type: T } ? A : never) => boolean;
+}
+
 /**
  * Utilities for testing Redux middleware
  */
@@ -21,7 +25,10 @@ export interface MiddlewareActionSpyHelper<S = State, A extends AppAction = AppA
    *
    * @param actionType
    */
-  waitForAction: <T extends A['type']>(actionType: T) => Promise<A extends { type: T } ? A : never>;
+  waitForAction: <T extends A['type']>(
+    actionType: T,
+    options?: WaitForActionOptions<T, A>
+  ) => Promise<A extends { type: T } ? A : never>;
   /**
    * A property holding the information around the calls that were processed by the  internal
    * `actionSpyMiddelware`. This property holds the information typically found in Jets's mocked
@@ -78,15 +85,21 @@ export const createSpyMiddleware = <
   let spyDispatch: jest.Mock<Dispatch<A>>;
 
   return {
-    waitForAction: async (actionType) => {
+    waitForAction: async (actionType, options = {}) => {
       type ResolvedAction = A extends { type: typeof actionType } ? A : never;
 
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
-      const err = new Error(`action '${actionType}' was not dispatched within the allocated time`);
+      const err = new Error(
+        `Timeout! Action '${actionType}' was not dispatched within the allocated time`
+      );
 
       return new Promise<ResolvedAction>((resolve, reject) => {
         const watch: ActionWatcher = (action) => {
           if (action.type === actionType) {
+            if (options.validate && !options.validate(action as ResolvedAction)) {
+              return;
+            }
+
             watchers.delete(watch);
             clearTimeout(timeout);
             resolve(action as ResolvedAction);
@@ -97,7 +110,10 @@ export const createSpyMiddleware = <
         const timeout = setTimeout(() => {
           watchers.delete(watch);
           reject(err);
+          // TODO: is there a way we can grab the current timeout value from jest?
+          // For now, this is using the default value (5000ms) - 500.
         }, 4500);
+
         watchers.add(watch);
       });
     },

@@ -24,7 +24,7 @@ import {
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
   API_ROOT_PATH,
-} from '../common/constants';
+} from '../common';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +33,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
+import { initIndexingRoutes } from './data_indexing/indexing_routes';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -53,9 +54,11 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger) {
+export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, logger) {
   let emsClient;
   let lastLicenseId;
+  const router = core.http.createRouter();
+  const [, { data: dataPlugin }] = await core.getStartServices();
 
   function getEMSClient() {
     const currentLicenseId = getLicenseId();
@@ -555,7 +558,6 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
     },
     async (context, request, response) => {
       const { query } = request;
-
       if (!query.indexPatternTitle) {
         logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
         return response.custom({
@@ -565,13 +567,10 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
       }
 
       try {
-        const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.getSettings',
-          {
-            index: query.indexPatternTitle,
-          }
-        );
-        const indexPatternSettings = getIndexPatternSettings(resp);
+        const resp = await context.core.elasticsearch.client.asCurrentUser.indices.getSettings({
+          index: query.indexPatternTitle,
+        });
+        const indexPatternSettings = getIndexPatternSettings(resp.body);
         return response.ok({
           body: indexPatternSettings,
         });
@@ -618,4 +617,5 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
   }
 
   initMVTRoutes({ router, logger });
+  initIndexingRoutes({ router, logger, dataPlugin });
 }

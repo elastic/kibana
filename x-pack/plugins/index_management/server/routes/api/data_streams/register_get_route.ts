@@ -91,7 +91,7 @@ const getDataStreamsStats = (client: ElasticsearchClient, name = '*') => {
 };
 
 const getDataStreamsPrivileges = (client: ElasticsearchClient, names: string[]) => {
-  return client.security.hasPrivileges<PrivilegesFromEs>({
+  return client.security.hasPrivileges({
     body: {
       index: [
         {
@@ -103,18 +103,13 @@ const getDataStreamsPrivileges = (client: ElasticsearchClient, names: string[]) 
   });
 };
 
-export function registerGetAllRoute({
-  router,
-  license,
-  lib: { handleEsError },
-  config,
-}: RouteDependencies) {
+export function registerGetAllRoute({ router, lib: { handleEsError }, config }: RouteDependencies) {
   const querySchema = schema.object({
     includeStats: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
   });
   router.get(
     { path: addBasePath('/data_streams'), validate: { query: querySchema } },
-    license.guardApiRoute(async (ctx, req, response) => {
+    async (ctx, req, response) => {
       const { asCurrentUser } = ctx.core.elasticsearch.client;
 
       const includeStats = (req.query as TypeOf<typeof querySchema>).includeStats === 'true';
@@ -143,6 +138,7 @@ export function registerGetAllRoute({
         dataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
+          // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
@@ -150,16 +146,11 @@ export function registerGetAllRoute({
       } catch (error) {
         return handleEsError({ error, response });
       }
-    })
+    }
   );
 }
 
-export function registerGetOneRoute({
-  router,
-  license,
-  lib: { handleEsError },
-  config,
-}: RouteDependencies) {
+export function registerGetOneRoute({ router, lib: { handleEsError }, config }: RouteDependencies) {
   const paramsSchema = schema.object({
     name: schema.string(),
   });
@@ -168,7 +159,7 @@ export function registerGetOneRoute({
       path: addBasePath('/data_streams/{name}'),
       validate: { params: paramsSchema },
     },
-    license.guardApiRoute(async (ctx, req, response) => {
+    async (ctx, req, response) => {
       const { name } = req.params as TypeOf<typeof paramsSchema>;
       const { asCurrentUser } = ctx.core.elasticsearch.client;
       try {
@@ -195,6 +186,7 @@ export function registerGetOneRoute({
           const enhancedDataStreams = enhanceDataStreams({
             dataStreams,
             dataStreamsStats,
+            // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);
@@ -205,6 +197,6 @@ export function registerGetOneRoute({
       } catch (error) {
         return handleEsError({ error, response });
       }
-    })
+    }
   );
 }

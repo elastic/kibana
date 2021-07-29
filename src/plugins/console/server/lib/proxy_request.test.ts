@@ -55,7 +55,7 @@ describe(`Console's send request`, () => {
     fakeRequest = {
       abort: sinon.stub(),
       on() {},
-      once(event: string, fn: any) {
+      once(event: string, fn: (v: string) => void) {
         if (event === 'response') {
           return fn('done');
         }

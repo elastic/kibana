@@ -10,7 +10,9 @@
  */
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
-import { ReindexResponseBase, SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import {
   SavedObject,
   SavedObjectsSerializer,
@@ -31,7 +33,6 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -43,18 +44,21 @@ export interface StoreOpts {
 }
 
 export interface SearchOpts {
-  sort?: string | object | object[];
-  query?: object;
+  search_after?: Array<number | string>;
   size?: number;
+  sort?: estypes.SearchSort;
+  query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
-  search_after?: unknown[];
 }
 
-export type AggregationOpts = Pick<Required<ESSearchBody>, 'aggs'> &
-  Pick<ESSearchBody, 'query' | 'size'>;
+export interface AggregationOpts {
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  query?: estypes.QueryDslQueryContainer;
+  size?: number;
+}
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
-  script?: object;
+  script?: estypes.Script;
 }
 
 export interface UpdateByQueryOpts extends SearchOpts {
@@ -304,7 +308,7 @@ export class TaskStore {
         body: {
           hits: { hits: tasks },
         },
-      } = await this.esClient.search<SearchResponse<SavedObjectsRawDoc['_source']>>({
+      } = await this.esClient.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
         body: {
@@ -315,7 +319,9 @@ export class TaskStore {
 
       return {
         docs: tasks
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map(savedObjectToConcreteTaskInstance),
@@ -330,12 +336,11 @@ export class TaskStore {
     aggs,
     query,
     size = 0,
-  }: TSearchRequest): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
-    const { body } = await this.esClient.search<
-      ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>
-    >({
+  }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
+    const { body } = await this.esClient.search<ConcreteTaskInstance>({
       index: this.index,
       ignore_unavailable: true,
+      track_total_hits: true,
       body: ensureAggregationOnlyReturnsTaskObjects({
         query,
         aggs,
@@ -355,14 +360,14 @@ export class TaskStore {
       const {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         body: { total, updated, version_conflicts },
-      } = await this.esClient.updateByQuery<UpdateDocumentByQueryResponse>({
+      } = await this.esClient.updateByQuery({
         index: this.index,
         ignore_unavailable: true,
         refresh: true,
-        max_docs,
         conflicts: 'proceed',
         body: {
           ...opts,
+          max_docs,
           query,
         },
       });
@@ -374,8 +379,8 @@ export class TaskStore {
       );
 
       return {
-        total,
-        updated,
+        total: total || 0,
+        updated: updated || 0,
         version_conflicts: conflictsCorrectedForContinuation,
       };
     } catch (e) {
@@ -393,11 +398,13 @@ export class TaskStore {
  * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
  * have for an unhealthy cluster distribution of Task Manager polling intervals
  */
+
 export function correctVersionConflictsForContinuation(
-  updated: ReindexResponseBase['updated'],
-  versionConflicts: ReindexResponseBase['version_conflicts'],
+  updated: estypes.ReindexResponse['updated'],
+  versionConflicts: estypes.ReindexResponse['version_conflicts'],
   maxDocs?: number
-) {
+): number {
+  // @ts-expect-error estypes.ReindexResponse['updated'] and estypes.ReindexResponse['version_conflicts'] can be undefined
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 

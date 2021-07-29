@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
+import { EuiHeaderSectionItemButton } from '@elastic/eui';
+import { waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { SpaceAvatar } from '../space_avatar';
-import { spacesManagerMock } from '../spaces_manager/mocks';
-import { SpacesManager } from '../spaces_manager';
-import { NavControlPopover } from './nav_control_popover';
-import { EuiHeaderSectionItemButton } from '@elastic/eui';
+import * as Rx from 'rxjs';
+
 import { mountWithIntl } from '@kbn/test/jest';
-import { waitFor } from '@testing-library/react';
+
+import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
+import type { SpacesManager } from '../spaces_manager';
+import { spacesManagerMock } from '../spaces_manager/mocks';
+import { NavControlPopover } from './nav_control_popover';
 
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
@@ -68,7 +70,7 @@ describe('NavControlPopover', () => {
     // Wait for `getSpaces` promise to resolve
     await waitFor(() => {
       wrapper.update();
-      expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
+      expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(3);
     });
   });
 });

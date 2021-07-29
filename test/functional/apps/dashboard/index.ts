@@ -15,21 +15,21 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await esArchiver.unload('logstash_functional');
-    await esArchiver.loadIfNeeded('dashboard/current/data');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await esArchiver.unload('dashboard/current/data');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
-    await esArchiver.loadIfNeeded('logstash_functional');
+    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   async function unloadLogstash() {
-    await esArchiver.unload('logstash_functional');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   describe('dashboard app', function () {
@@ -57,6 +57,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard_back_button'));
       loadTestFile(require.resolve('./dashboard_error_handling'));
       loadTestFile(require.resolve('./legacy_urls'));
+      loadTestFile(require.resolve('./saved_search_embeddable'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
@@ -94,6 +95,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./bwc_import'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));
       loadTestFile(require.resolve('./copy_panel_to'));
@@ -121,6 +123,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         await loadLogstash();
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
       });
@@ -129,6 +132,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         await unloadLogstash();
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyChartsLibrary': true,
+          'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
       });

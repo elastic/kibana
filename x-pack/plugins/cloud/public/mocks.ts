@@ -9,8 +9,11 @@ function createSetupMock() {
   return {
     cloudId: 'mock-cloud-id',
     isCloudEnabled: true,
-    resetPasswordUrl: 'reset-password-url',
-    accountUrl: 'account-url',
+    cname: 'cname',
+    baseUrl: 'base-url',
+    deploymentUrl: 'deployment-url',
+    profileUrl: 'profile-url',
+    organizationUrl: 'organization-url',
   };
 }
 

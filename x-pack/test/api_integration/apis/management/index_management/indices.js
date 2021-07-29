@@ -34,8 +34,7 @@ export default function ({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  // Failing: See https://github.com/elastic/kibana/issues/64473
-  describe.skip('indices', () => {
+  describe('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
@@ -182,7 +181,15 @@ export default function ({ getService }) {
       this.tags(['skipCloud']);
 
       it('should list all the indices with the expected properties and data enrichers', async function () {
-        const { body } = await list().expect(200);
+        // Create an index that we can assert against
+        await createIndex('test_index');
+
+        // Verify indices request
+        const { body: indices } = await list().expect(200);
+
+        // Find the "test_index" created to verify expected keys
+        const indexCreated = indices.find((index) => index.name === 'test_index');
+
         const expectedKeys = [
           'health',
           'hidden',
@@ -203,13 +210,15 @@ export default function ({ getService }) {
         // We need to sort the keys before comparing then, because race conditions
         // can cause enrichers to register in non-deterministic order.
         const sortedExpectedKeys = expectedKeys.sort();
-        const sortedReceivedKeys = Object.keys(body[0]).sort();
+        const sortedReceivedKeys = Object.keys(indexCreated).sort();
+
         expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
       });
     });
 
     describe('reload', function () {
-      describe('(not on Cloud)', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/90565
+      describe.skip('(not on Cloud)', function () {
         this.tags(['skipCloud']);
 
         it('should list all the indices with the expected properties and data enrichers', async function () {

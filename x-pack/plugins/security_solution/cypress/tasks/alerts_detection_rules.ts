@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { duplicatedRuleName } from '../objects/rule';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
@@ -31,6 +32,17 @@ import {
   RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
   rowsPerPageSelector,
   pageSelector,
+  DUPLICATE_RULE_ACTION_BTN,
+  DUPLICATE_RULE_MENU_PANEL_BTN,
+  DUPLICATE_RULE_BULK_BTN,
+  RULES_ROW,
+  SELECT_ALL_RULES_BTN,
+  MODAL_CONFIRMATION_BTN,
+  RULES_DELETE_CONFIRMATION_MODAL,
+  ACTIVATE_RULE_BULK_BTN,
+  DEACTIVATE_RULE_BULK_BTN,
+  EXPORT_RULE_BULK_BTN,
+  RULE_DETAILS_DELETE_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -43,6 +55,42 @@ export const editFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EDIT_RULE_ACTION_BTN).should('be.visible');
   cy.get(EDIT_RULE_ACTION_BTN).click();
+};
+
+export const duplicateFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+  cy.get(DUPLICATE_RULE_ACTION_BTN).should('be.visible');
+  cy.get(DUPLICATE_RULE_ACTION_BTN).click();
+};
+
+/**
+ * Duplicates the rule from the menu and does additional
+ * pipes and checking that the elements are present on the
+ * page as well as removed when doing the clicks to help reduce
+ * flake.
+ */
+export const duplicateRuleFromMenu = () => {
+  cy.get(ALL_ACTIONS).should('be.visible');
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ALL_ACTIONS).trigger('click');
+      return $el.find(DUPLICATE_RULE_MENU_PANEL_BTN);
+    })
+    .should(($el) => expect($el).to.be.visible);
+  // Because of a fade effect and fast clicking this can produce more than one click
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(($el) => $el.trigger('click'));
+};
+
+/**
+ * Check that the duplicated rule is on the table
+ * and it is deactivated (default)
+ */
+export const checkDuplicatedRule = () => {
+  cy.contains(RULE_NAME, duplicatedRuleName)
+    .parents(RULES_ROW)
+    .find(RULE_SWITCH)
+    .should('have.attr', 'aria-checked', 'false');
 };
 
 export const deleteFirstRule = () => {
@@ -58,6 +106,37 @@ export const deleteRule = () => {
 export const deleteSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DELETE_RULE_BULK_BTN).click();
+};
+
+export const deleteRuleFromDetailsPage = () => {
+  cy.get(ALL_ACTIONS).should('be.visible');
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ALL_ACTIONS).trigger('click');
+      return $el.find(RULE_DETAILS_DELETE_BTN);
+    })
+    .should(($el) => expect($el).to.be.visible);
+  cy.get(RULE_DETAILS_DELETE_BTN).pipe(($el) => $el.trigger('click'));
+};
+
+export const duplicateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+};
+
+export const activateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(ACTIVATE_RULE_BULK_BTN).click();
+};
+
+export const deactivateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DEACTIVATE_RULE_BULK_BTN).click();
+};
+
+export const exportSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(EXPORT_RULE_BULK_BTN).click();
 };
 
 export const exportFirstRule = () => {
@@ -76,7 +155,7 @@ export const goToCreateNewRule = () => {
 };
 
 export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).click({ force: true });
+  cy.get(RULE_NAME).first().click({ force: true });
 };
 
 export const loadPrebuiltDetectionRules = () => {
@@ -87,10 +166,31 @@ export const reloadDeletedRules = () => {
   cy.get(RELOAD_PREBUILT_RULES_BTN).click({ force: true });
 };
 
+/**
+ * Selects the number of rules. Since there can be missing click handlers
+ * when the page loads at first, we use a pipe and a trigger of click
+ * on it and then check to ensure that it is checked before continuing
+ * with the tests.
+ * @param numberOfRules The number of rules to click/check
+ */
 export const selectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).click({ force: true });
+    cy.get(RULE_CHECKBOX)
+      .eq(i)
+      .pipe(($el) => $el.trigger('click'))
+      .should('be.checked');
   }
+};
+
+export const selectAllRules = () => {
+  cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
+  cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
+};
+
+export const confirmRulesDelete = () => {
+  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('be.visible');
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
 };
 
 export const sortByActivatedRules = () => {
@@ -102,7 +202,8 @@ export const sortByActivatedRules = () => {
 
 export const waitForRulesTableToBeLoaded = () => {
   cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('exist');
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('not.exist');
+  // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
+  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
 export const waitForRulesTableToBeRefreshed = () => {
@@ -118,9 +219,10 @@ export const waitForRulesTableToBeAutoRefreshed = () => {
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
   cy.get(RULES_TABLE).should('exist');
+  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
-export const waitForRuleToBeActivated = () => {
+export const waitForRuleToChangeStatus = () => {
   cy.get(RULE_SWITCH_LOADER).should('exist');
   cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
@@ -152,12 +254,15 @@ export const resetAllRulesIdleModalTimeout = () => {
 
 export const changeRowsPerPageTo = (rowsCount: number) => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
-  cy.get(rowsPerPageSelector(rowsCount)).click();
+  cy.get(rowsPerPageSelector(rowsCount))
+    .pipe(($el) => $el.trigger('click'))
+    .should('not.be.visible');
+
   waitForRulesTableToBeRefreshed();
 };
 
-export const changeRowsPerPageTo300 = () => {
-  changeRowsPerPageTo(300);
+export const changeRowsPerPageTo100 = () => {
+  changeRowsPerPageTo(100);
 };
 
 export const goToPage = (pageNumber: number) => {

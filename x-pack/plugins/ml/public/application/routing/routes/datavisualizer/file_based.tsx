@@ -38,7 +38,7 @@ export const fileBasedRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver(undefined, undefined, deps.config, {
@@ -47,9 +47,10 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     checkFindFileStructurePrivilege: () =>
       checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
   });
+
   return (
     <PageLoader context={context}>
-      <FileDataVisualizerPage kibanaConfig={deps.config} />
+      <FileDataVisualizerPage />
     </PageLoader>
   );
 };

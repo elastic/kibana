@@ -18,12 +18,27 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'settings',
+    'dashboard',
+    'context',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   describe('context link in discover', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+        defaultIndex: 'logstash-*',
+      });
       await PageObjects.common.navigateToApp('discover');
 
       for (const columnName of TEST_COLUMN_NAMES) {
@@ -36,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
       }
     });
     after(async () => {
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should open the context view with the selected document as anchor', async () => {
@@ -93,6 +108,31 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.click('breadcrumb first');
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       await PageObjects.discover.waitForDocTableLoadingComplete();
+    });
+
+    it('navigates to doc view from embeddable', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      await rowActions[1].click();
+      await PageObjects.common.sleep(250);
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      await retry.waitFor('doc view being rendered', async () => {
+        return await PageObjects.discover.isShowingDocViewer();
+      });
     });
   });
 }

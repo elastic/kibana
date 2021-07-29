@@ -9,9 +9,9 @@ Returns body contents of the search request, often referred as query DSL.
 <b>Signature:</b>
 
 ```typescript
-getSearchRequestBody(): Promise<any>;
+getSearchRequestBody(): any;
 ```
 <b>Returns:</b>
 
-`Promise<any>`
+`any`
 

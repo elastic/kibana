@@ -19,10 +19,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('scroll_count', () => {
     before(async () => {
-      await esArchiver.load('management/saved_objects/scroll_count');
+      await esArchiver.load(
+        'test/api_integration/fixtures/es_archiver/management/saved_objects/scroll_count'
+      );
     });
     after(async () => {
-      await esArchiver.unload('management/saved_objects/scroll_count');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/management/saved_objects/scroll_count'
+      );
     });
 
     it('returns the count for each included types', async () => {

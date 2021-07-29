@@ -9,31 +9,24 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContent,
-  EuiTitle,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../../shared/flash_messages';
+import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { KibanaLogic } from '../../../../shared/kibana';
-import { Loading } from '../../../../shared/loading';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 
 import { ENGINE_CURATIONS_NEW_PATH, ENGINE_CURATION_PATH } from '../../../routes';
 import { FormattedDateTime } from '../../../utils/formatted_date_time';
 import { generateEnginePath } from '../../engine';
+import { AppSearchPageTemplate } from '../../layout';
 
+import { EmptyState } from '../components';
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
 import { Curation } from '../types';
-import { convertToDate } from '../utils';
+import { getCurationsBreadcrumbs, convertToDate } from '../utils';
 
 export const Curations: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
@@ -43,33 +36,35 @@ export const Curations: React.FC = () => {
     loadCurations();
   }, [meta.page.current]);
 
-  if (dataLoading && !curations.length) return <Loading />;
-
   return (
-    <>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{CURATIONS_OVERVIEW_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
-          <EuiButtonTo to={generateEnginePath(ENGINE_CURATIONS_NEW_PATH)} fill>
+    <AppSearchPageTemplate
+      pageChrome={getCurationsBreadcrumbs()}
+      pageHeader={{
+        pageTitle: CURATIONS_OVERVIEW_TITLE,
+        rightSideItems: [
+          <EuiButtonTo
+            to={generateEnginePath(ENGINE_CURATIONS_NEW_PATH)}
+            iconType="plusInCircle"
+            fill
+          >
             {CREATE_NEW_CURATION_TITLE}
-          </EuiButtonTo>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <FlashMessages />
+          </EuiButtonTo>,
+        ],
+      }}
+      isLoading={dataLoading && !curations.length}
+      isEmptyState={!curations.length}
+      emptyState={<EmptyState />}
+    >
+      <EuiPanel hasBorder>
         <CurationsTable />
-      </EuiPageContent>
-    </>
+      </EuiPanel>
+    </AppSearchPageTemplate>
   );
 };
 
 export const CurationsTable: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
-  const { onPaginate, deleteCurationSet } = useActions(CurationsLogic);
+  const { onPaginate, deleteCuration } = useActions(CurationsLogic);
 
   const columns: Array<EuiBasicTableColumn<Curation>> = [
     {
@@ -111,10 +106,7 @@ export const CurationsTable: React.FC = () => {
       width: '120px',
       actions: [
         {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.editAction',
-            { defaultMessage: 'Edit' }
-          ),
+          name: EDIT_BUTTON_LABEL,
           description: i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.table.editTooltip',
             { defaultMessage: 'Edit curation' }
@@ -130,10 +122,7 @@ export const CurationsTable: React.FC = () => {
           'data-test-subj': 'CurationsTableEditButton',
         },
         {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteAction',
-            { defaultMessage: 'Delete' }
-          ),
+          name: DELETE_BUTTON_LABEL,
           description: i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteTooltip',
             { defaultMessage: 'Delete curation' }
@@ -141,7 +130,7 @@ export const CurationsTable: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (curation: Curation) => deleteCurationSet(curation.id),
+          onClick: (curation: Curation) => deleteCuration(curation.id),
           'data-test-subj': 'CurationsTableDeleteButton',
         },
       ],
@@ -155,19 +144,6 @@ export const CurationsTable: React.FC = () => {
       responsive
       hasActions
       loading={dataLoading}
-      noItemsMessage={
-        <EuiEmptyPrompt
-          iconType="pin"
-          title={
-            <h4>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.curations.table.empty.noCurationsTitle',
-                { defaultMessage: 'No curations yet' }
-              )}
-            </h4>
-          }
-        />
-      }
       pagination={{
         ...convertMetaToPagination(meta),
         hidePerPageOptions: true,

@@ -23,6 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import {
+  Filter,
+  FieldFilter,
+  buildFilter,
+  buildCustomFilter,
+  cleanFilter,
+  getFilterParams,
+} from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -37,18 +45,10 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
+import { getIndexPatternFromFilter } from '../../../query';
 import { IIndexPattern, IFieldType } from '../../..';
-import {
-  Filter,
-  getIndexPatternFromFilter,
-  FieldFilter,
-  buildFilter,
-  buildCustomFilter,
-  cleanFilter,
-  getFilterParams,
-} from '../../../../common';
 
-interface Props {
+export interface Props {
   filter: Filter;
   indexPatterns: IIndexPattern[];
   onSubmit: (filter: Filter) => void;
@@ -85,7 +85,7 @@ class FilterEditorUI extends Component<Props, State> {
   public render() {
     return (
       <div>
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="m">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
               <FormattedMessage
@@ -333,6 +333,7 @@ class FilterEditorUI extends Component<Props, State> {
           mode="json"
           width="100%"
           height="250px"
+          data-test-subj="customEditorInput"
         />
       </EuiFormRow>
     );
@@ -415,7 +416,8 @@ class FilterEditorUI extends Component<Props, State> {
 
     if (isCustomEditorOpen) {
       try {
-        return Boolean(JSON.parse(queryDsl));
+        const queryDslJson = JSON.parse(queryDsl);
+        return Object.keys(queryDslJson).length > 0;
       } catch (e) {
         return false;
       }

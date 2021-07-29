@@ -17,7 +17,6 @@ import {
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
-  FieldFormat,
 } from 'src/plugins/data/public';
 import { CoreStart } from 'src/core/public';
 import { castEsToKbnFieldTypeName } from '../../../../data/public';
@@ -45,7 +44,6 @@ export interface FormatSelectEditorState {
   fieldTypeFormats: FieldTypeFormat[];
   fieldFormatId?: string;
   fieldFormatParams?: { [key: string]: unknown };
-  format: FieldFormat;
   kbnType: KBN_FIELD_TYPES;
 }
 
@@ -81,13 +79,8 @@ export class FormatSelectEditor extends PureComponent<
 > {
   constructor(props: FormatSelectEditorProps) {
     super(props);
-    const { fieldFormats, esTypes, value } = props;
+    const { fieldFormats, esTypes } = props;
     const kbnType = castEsToKbnFieldTypeName(esTypes[0] || 'keyword');
-
-    // get current formatter for field, provides default if none exists
-    const format = value?.id
-      ? fieldFormats.getInstance(value?.id, value?.params)
-      : fieldFormats.getDefaultInstance(kbnType, esTypes);
 
     this.state = {
       fieldTypeFormats: getFieldTypeFormatsList(
@@ -95,52 +88,38 @@ export class FormatSelectEditor extends PureComponent<
         fieldFormats.getDefaultType(kbnType, esTypes) as FieldFormatInstanceType,
         fieldFormats
       ),
-      format,
       kbnType,
     };
   }
-  onFormatChange = (formatId: string, params?: any) => {
-    const { fieldTypeFormats } = this.state;
-    const { fieldFormats, uiSettings } = this.props;
-
-    const FieldFormatClass = fieldFormats.getType(
-      formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
-    ) as FieldFormatInstanceType;
-
-    const newFormat = new FieldFormatClass(params, (key: string) => uiSettings.get(key));
-
-    this.setState(
-      {
-        fieldFormatId: formatId,
-        fieldFormatParams: params,
-        format: newFormat,
-      },
-      () => {
-        this.props.onChange(
-          formatId
-            ? {
-                id: formatId,
-                params: params || {},
-              }
-            : undefined
-        );
-      }
+  onFormatChange = (formatId: string, params?: any) =>
+    this.props.onChange(
+      formatId
+        ? {
+            id: formatId,
+            params: params || {},
+          }
+        : undefined
     );
-  };
-  onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
+
+  onFormatParamsChange = (newParams: { [key: string]: any }) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };
 
   render() {
-    const { fieldFormatEditors, onError, value } = this.props;
+    const { fieldFormatEditors, onError, value, fieldFormats, esTypes } = this.props;
     const fieldFormatId = value?.id;
     const fieldFormatParams = value?.params;
     const { kbnType } = this.state;
 
-    const { fieldTypeFormats, format } = this.state;
+    const { fieldTypeFormats } = this.state;
 
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
+
+    // get current formatter for field, provides default if none exists
+    const format = value?.id
+      ? fieldFormats.getInstance(value?.id, value?.params)
+      : fieldFormats.getDefaultInstance(kbnType, esTypes);
 
     const label = defaultFormat ? (
       <FormattedMessage

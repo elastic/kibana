@@ -10,7 +10,7 @@ import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../typings/elasticsearch';
+} from '../../../../../src/core/types/elasticsearch';
 
 export type ESClient = ReturnType<typeof getEsClient>;
 
@@ -30,11 +30,13 @@ export function getEsClient({
     auth,
   });
 
+  const originalSearch = client.search.bind(client);
+
   async function search<
     TDocument = unknown,
     TSearchRequest extends ESSearchRequest = ESSearchRequest
   >(request: TSearchRequest) {
-    const response = await client.search<TDocument>(request);
+    const response = await originalSearch<TDocument>(request);
 
     return {
       ...response,

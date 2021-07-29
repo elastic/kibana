@@ -154,7 +154,7 @@ describe('Exception viewer helpers', () => {
 
   describe('#getDescriptionListContent', () => {
     test('it returns formatted description list with os if one is specified', () => {
-      const payload = getExceptionListItemSchemaMock();
+      const payload = getExceptionListItemSchemaMock({ os_types: ['linux'] });
       payload.description = '';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
@@ -176,7 +176,7 @@ describe('Exception viewer helpers', () => {
     });
 
     test('it returns formatted description list with a description if one specified', () => {
-      const payload = getExceptionListItemSchemaMock();
+      const payload = getExceptionListItemSchemaMock({ os_types: ['linux'] });
       payload.description = 'Im a description';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
@@ -202,7 +202,7 @@ describe('Exception viewer helpers', () => {
     });
 
     test('it returns just user and date created if no other fields specified', () => {
-      const payload = getExceptionListItemSchemaMock();
+      const payload = getExceptionListItemSchemaMock({ os_types: ['linux'] });
       payload.description = '';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
@@ -221,6 +221,69 @@ describe('Exception viewer helpers', () => {
       ];
 
       expect(result).toEqual(expected);
+    });
+
+    test('it returns Modified By/On info. when `includeModified` is true', () => {
+      const result = getDescriptionListContent(
+        getExceptionListItemSchemaMock({ os_types: ['linux'] }),
+        true
+      );
+      expect(result).toEqual([
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
+        {
+          description: 'April 20th 2020 @ 15:25:31',
+          title: 'Date created',
+        },
+        {
+          description: 'some user',
+          title: 'Created by',
+        },
+        {
+          description: 'April 20th 2020 @ 15:25:31',
+          title: 'Date modified',
+        },
+        {
+          description: 'some user',
+          title: 'Modified by',
+        },
+        {
+          description: 'some description',
+          title: 'Description',
+        },
+      ]);
+    });
+
+    test('it returns Name when `includeName` is true', () => {
+      const result = getDescriptionListContent(
+        getExceptionListItemSchemaMock({ os_types: ['linux'] }),
+        false,
+        true
+      );
+      expect(result).toEqual([
+        {
+          description: 'some name',
+          title: 'Name',
+        },
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
+        {
+          description: 'April 20th 2020 @ 15:25:31',
+          title: 'Date created',
+        },
+        {
+          description: 'some user',
+          title: 'Created by',
+        },
+        {
+          description: 'some description',
+          title: 'Description',
+        },
+      ]);
     });
   });
 });

@@ -22,7 +22,7 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       autoRefreshEnabled: schema.boolean(),
       autorefreshInterval: schema.number(),
       refreshTelemetryHistory: schema.maybe(schema.boolean()),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ savedObjectsClient, uptimeEsClient, request }): Promise<any> => {
@@ -34,6 +34,7 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       uptimeEsClient,
       savedObjectsClient
     );
+    await KibanaTelemetryAdapter.countNoOfUniqueFleetManagedMonitors(uptimeEsClient);
     return KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
   },
 });

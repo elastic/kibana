@@ -19,7 +19,9 @@ export enum Timings {
 }
 
 export enum Metadata {
-  BytesDownloadedCompressed = 'bytesDownloadedCompressed',
+  Status = 'status',
+  ResourceSize = 'resourceSize',
+  TransferSize = 'transferSize',
   CertificateIssuer = 'certificateIssuer',
   CertificateIssueDate = 'certificateIssueDate',
   CertificateExpiryDate = 'certificateExpiryDate',
@@ -63,6 +65,12 @@ export const FriendlyTimingLabels = {
 };
 
 export const FriendlyFlyoutLabels = {
+  [Metadata.Status]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.status',
+    {
+      defaultMessage: 'Status',
+    }
+  ),
   [Metadata.MimeType]: i18n.translate(
     'xpack.uptime.synthetics.waterfallChart.labels.metadata.contentType',
     {
@@ -75,10 +83,16 @@ export const FriendlyFlyoutLabels = {
       defaultMessage: 'Request start',
     }
   ),
-  [Metadata.BytesDownloadedCompressed]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloadedCompressed',
+  [Metadata.ResourceSize]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.resourceSize',
     {
-      defaultMessage: 'Bytes downloaded (compressed)',
+      defaultMessage: 'Resource size',
+    }
+  ),
+  [Metadata.TransferSize]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.transferSize',
+    {
+      defaultMessage: 'Transfer size',
     }
   ),
   [Metadata.CertificateIssuer]: i18n.translate(

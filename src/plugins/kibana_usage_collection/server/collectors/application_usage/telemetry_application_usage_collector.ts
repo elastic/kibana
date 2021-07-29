@@ -11,57 +11,21 @@ import { timer } from 'rxjs';
 import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
-import { serializeKey } from './rollups';
-
 import {
   ApplicationUsageDaily,
   ApplicationUsageTotal,
-  ApplicationUsageTransactional,
   registerMappings,
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
-  SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
-import { rollDailyData, rollTotals } from './rollups';
+import { rollTotals, rollDailyData, serializeKey } from './rollups';
 import {
   ROLL_TOTAL_INDICES_INTERVAL,
   ROLL_DAILY_INDICES_INTERVAL,
   ROLL_INDICES_START,
 } from './constants';
-
-export interface ApplicationViewUsage {
-  appId: string;
-  viewId: string;
-  clicks_total: number;
-  clicks_7_days: number;
-  clicks_30_days: number;
-  clicks_90_days: number;
-  minutes_on_screen_total: number;
-  minutes_on_screen_7_days: number;
-  minutes_on_screen_30_days: number;
-  minutes_on_screen_90_days: number;
-}
-
-export interface ApplicationUsageViews {
-  [serializedKey: string]: ApplicationViewUsage;
-}
-
-export interface ApplicationUsageTelemetryReport {
-  [appId: string]: {
-    appId: string;
-    viewId: string;
-    clicks_total: number;
-    clicks_7_days: number;
-    clicks_30_days: number;
-    clicks_90_days: number;
-    minutes_on_screen_total: number;
-    minutes_on_screen_7_days: number;
-    minutes_on_screen_30_days: number;
-    minutes_on_screen_90_days: number;
-    views?: ApplicationViewUsage[];
-  };
-}
+import { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
 
 export const transformByApplicationViews = (
   report: ApplicationUsageViews
@@ -92,6 +56,21 @@ export function registerApplicationUsageCollector(
 ) {
   registerMappings(registerType);
 
+  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
+    rollTotals(logger, getSavedObjectsClient())
+  );
+
+  const dailyRollingSub = timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL).subscribe(
+    async () => {
+      const success = await rollDailyData(logger, getSavedObjectsClient());
+      // we only need to roll the transactional documents once to assure BWC
+      // once we rolling succeeds, we can stop.
+      if (success) {
+        dailyRollingSub.unsubscribe();
+      }
+    }
+  );
+
   const collector = usageCollection.makeUsageCollector<ApplicationUsageTelemetryReport | undefined>(
     {
       type: 'application_usage',
@@ -105,7 +84,6 @@ export function registerApplicationUsageCollector(
         const [
           { saved_objects: rawApplicationUsageTotals },
           { saved_objects: rawApplicationUsageDaily },
-          { saved_objects: rawApplicationUsageTransactional },
         ] = await Promise.all([
           savedObjectsClient.find<ApplicationUsageTotal>({
             type: SAVED_OBJECTS_TOTAL_TYPE,
@@ -114,10 +92,6 @@ export function registerApplicationUsageCollector(
           savedObjectsClient.find<ApplicationUsageDaily>({
             type: SAVED_OBJECTS_DAILY_TYPE,
             perPage: 10000, // We can have up to 44 apps * 91 days = 4004 docs. This limit is OK
-          }),
-          savedObjectsClient.find<ApplicationUsageTransactional>({
-            type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-            perPage: 10000, // If we have more than those, we won't report the rest (they'll be rolled up to the daily soon enough to become a problem)
           }),
         ]);
 
@@ -156,10 +130,7 @@ export function registerApplicationUsageCollector(
         const nowMinus30 = moment().subtract(30, 'days');
         const nowMinus90 = moment().subtract(90, 'days');
 
-        const applicationUsage = [
-          ...rawApplicationUsageDaily,
-          ...rawApplicationUsageTransactional,
-        ].reduce(
+        const applicationUsage = rawApplicationUsageDaily.reduce(
           (
             acc,
             {
@@ -224,11 +195,4 @@ export function registerApplicationUsageCollector(
   );
 
   usageCollection.registerCollector(collector);
-
-  timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL).subscribe(() =>
-    rollDailyData(logger, getSavedObjectsClient())
-  );
-  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
-    rollTotals(logger, getSavedObjectsClient())
-  );
 }

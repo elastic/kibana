@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { ContextService, ContextSetup } from './context_service';
-export {
+export { ContextService } from './context_service';
+export type { InternalContextPreboot, ContextSetup } from './context_service';
+export type {
   IContextContainer,
   IContextProvider,
   HandlerFunction,

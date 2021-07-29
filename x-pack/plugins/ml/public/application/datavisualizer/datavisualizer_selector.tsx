@@ -20,14 +20,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
-
 import { NavigationMenu } from '../components/navigation_menu';
-import { getMaxBytesFormatted } from './file_based/components/utils';
 import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
@@ -58,8 +55,10 @@ export const DatavisualizerSelector: FC = () => {
       licenseManagement,
       http: { basePath },
       docLinks,
+      dataVisualizer,
     },
   } = useMlKibana();
+
   const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
 
@@ -68,7 +67,12 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
-  const maxFileSize = getMaxBytesFormatted();
+  if (dataVisualizer === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('File data visualizer plugin not available');
+    return null;
+  }
+  const maxFileSize = dataVisualizer.getMaxBytesFormatted();
 
   return (
     <Fragment>
@@ -115,18 +119,6 @@ export const DatavisualizerSelector: FC = () => {
                     id="xpack.ml.datavisualizer.selector.importDataDescription"
                     defaultMessage="Import data from a log file. You can upload files up to {maxFileSize}."
                     values={{ maxFileSize }}
-                  />
-                }
-                betaBadgeLabel={i18n.translate(
-                  'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
-                  {
-                    defaultMessage: 'Experimental',
-                  }
-                )}
-                betaBadgeTooltipContent={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.experimentalBadgeTooltipLabel"
-                    defaultMessage="Experimental feature. We'd love to hear your feedback."
                   />
                 }
                 footer={

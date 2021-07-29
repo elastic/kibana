@@ -9,7 +9,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
-import { mockApplyDeprecations } from './config_service.test.mocks';
+import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
@@ -37,6 +37,7 @@ const getRawConfigProvider = (rawConfig: Record<string, any>) =>
 
 beforeEach(() => {
   logger = loggerMock.create();
+  mockApplyDeprecations.mockClear();
 });
 
 test('returns config at path as observable', async () => {
@@ -72,10 +73,10 @@ test('throws if config at path does not match schema', async () => {
     );
 
   await expect(valuesReceived).toMatchInlineSnapshot(`
-      Array [
-        [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-      ]
-  `);
+                Array [
+                  [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+                ]
+          `);
 });
 
 test('re-validate config when updated', async () => {
@@ -97,11 +98,11 @@ test('re-validate config when updated', async () => {
 
   rawConfig$.next({ key: 123 });
 
-  await expect(valuesReceived).toMatchInlineSnapshot(`
-        Array [
-          "value",
-          [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-        ]
+  expect(valuesReceived).toMatchInlineSnapshot(`
+    Array [
+      "value",
+      [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+    ]
   `);
 });
 
@@ -416,11 +417,17 @@ test('throws during validation is any schema is invalid', async () => {
 test('logs deprecation warning during validation', async () => {
   const rawConfig = getRawConfigProvider({});
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
-
-  mockApplyDeprecations.mockImplementationOnce((config, deprecations, log) => {
-    log('some deprecation message');
-    log('another deprecation message');
-    return config;
+  mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+    const addDeprecation = createAddDeprecation!('');
+    addDeprecation({
+      message: 'some deprecation message',
+      correctiveActions: { manualSteps: ['do X'] },
+    });
+    addDeprecation({
+      message: 'another deprecation message',
+      correctiveActions: { manualSteps: ['do Y'] },
+    });
+    return { config, changedPaths: mockedChangedPaths };
   });
 
   loggerMock.clear(logger);
@@ -435,6 +442,58 @@ test('logs deprecation warning during validation', async () => {
       ],
     ]
   `);
+});
+
+test('does not log warnings for silent deprecations during validation', async () => {
+  const rawConfig = getRawConfigProvider({});
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+  mockApplyDeprecations
+    .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      const addDeprecation = createAddDeprecation!('');
+      addDeprecation({
+        message: 'some deprecation message',
+        correctiveActions: { manualSteps: ['do X'] },
+        silent: true,
+      });
+      addDeprecation({
+        message: 'another deprecation message',
+        correctiveActions: { manualSteps: ['do Y'] },
+      });
+      return { config, changedPaths: mockedChangedPaths };
+    })
+    .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      const addDeprecation = createAddDeprecation!('');
+      addDeprecation({
+        message: 'I am silent',
+        silent: true,
+        correctiveActions: { manualSteps: ['do Z'] },
+      });
+      return { config, changedPaths: mockedChangedPaths };
+    });
+
+  loggerMock.clear(logger);
+  await configService.validate();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "another deprecation message",
+      ],
+    ]
+  `);
+  loggerMock.clear(logger);
+  await configService.validate();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
+});
+
+test('does not log warnings during validation if specifically requested', async () => {
+  const configService = new ConfigService(getRawConfigProvider({}), defaultEnv, logger);
+  loggerMock.clear(logger);
+
+  await configService.validate({ logDeprecations: false });
+
+  expect(mockApplyDeprecations).not.toHaveBeenCalled();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
 });
 
 describe('atPathSync', () => {
@@ -475,5 +534,62 @@ describe('atPathSync', () => {
     rawConfig$.next({ key: 'new-value' });
 
     expect(configService.atPathSync('key')).toEqual('new-value');
+  });
+});
+
+describe('getHandledDeprecatedConfigs', () => {
+  it('returns all handled deprecated configs', async () => {
+    const rawConfig = getRawConfigProvider({ base: { unused: 'unusedConfig' } });
+    const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+    configService.addDeprecationProvider('base', ({ unused }) => [unused('unused')]);
+
+    mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      deprecations.forEach((deprecation) => {
+        const addDeprecation = createAddDeprecation!(deprecation.path);
+        addDeprecation({
+          message: `some deprecation message`,
+          documentationUrl: 'some-url',
+          correctiveActions: { manualSteps: ['do X'] },
+        });
+      });
+      return { config, changedPaths: mockedChangedPaths };
+    });
+
+    await configService.validate();
+
+    expect(configService.getHandledDeprecatedConfigs()).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "base",
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "do X",
+                ],
+              },
+              "documentationUrl": "some-url",
+              "message": "some deprecation message",
+            },
+          ],
+        ],
+      ]
+    `);
+  });
+});
+
+describe('getDeprecatedConfigPath$', () => {
+  it('returns all config paths changes during deprecation', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
+    const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    await configService.setSchema('key', schema.string());
+    await configService.validate();
+
+    const deprecatedConfigPath$ = configService.getDeprecatedConfigPath$();
+    const deprecatedConfigPath = await deprecatedConfigPath$.pipe(first()).toPromise();
+    expect(deprecatedConfigPath).toEqual(mockedChangedPaths);
   });
 });

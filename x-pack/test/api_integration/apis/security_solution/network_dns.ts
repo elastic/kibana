@@ -21,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Network DNS', () => {
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('packetbeat/dns'));
-      after(() => esArchiver.unload('packetbeat/dns'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/dns'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';

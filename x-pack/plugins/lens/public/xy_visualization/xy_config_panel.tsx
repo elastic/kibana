@@ -6,54 +6,45 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useMemo, useState, memo } from 'react';
+import React, { useMemo, useState, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
+import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperSelect,
   EuiFormRow,
-  EuiText,
   htmlIdGenerator,
   EuiColorPicker,
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
-  EuiIconTip,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import {
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type {
   VisualizationLayerWidgetProps,
   VisualizationToolbarProps,
   VisualizationDimensionEditorProps,
-  FormatFactory,
+  FramePublicAPI,
 } from '../types';
-import {
-  State,
+import { State, visualizationTypes, XYState } from './types';
+import type { FormatFactory } from '../../common';
+import type {
   SeriesType,
-  visualizationTypes,
   YAxisMode,
   AxesSettingsConfig,
-  ValidLayer,
-} from './types';
-import {
-  isHorizontalChart,
-  isHorizontalSeries,
-  getSeriesColor,
-  hasHistogramSeries,
-} from './state_helpers';
+  AxisExtentConfig,
+} from '../../common/expressions';
+import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { fittingFunctionDefinitions } from './fitting_functions';
-import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
+import { LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { TooltipWrapper } from './tooltip_wrapper';
-import { getAxesConfiguration } from './axes_configuration';
-import { PalettePicker } from '../shared_components';
+import { getAxesConfiguration, GroupsConfiguration } from './axes_configuration';
+import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
-import { getSortedAccessors } from './to_expression';
+import { getScaleType, getSortedAccessors } from './to_expression';
+import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -68,7 +59,11 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   };
 }
 
-const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+const legendOptions: Array<{
+  id: string;
+  value: 'auto' | 'show' | 'hide';
+  label: string;
+}> = [
   {
     id: `xy_legend_auto`,
     value: 'auto',
@@ -89,30 +84,6 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
       defaultMessage: 'Hide',
     }),
-  },
-];
-
-const valueLabelsOptions: Array<{
-  id: string;
-  value: 'hide' | 'inside' | 'outside';
-  label: string;
-  'data-test-subj': string;
-}> = [
-  {
-    id: `value_labels_hide`,
-    value: 'hide',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
-      defaultMessage: 'Hide',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_hide',
-  },
-  {
-    id: `value_labels_inside`,
-    value: 'inside',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
-      defaultMessage: 'Show',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_inside',
   },
 ];
 
@@ -137,10 +108,13 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
           defaultMessage: 'Chart type',
         })}
         name="chartType"
-        className="eui-displayInlineBlock"
+        className="eui-displayInlineBlock lnsLayerChartSwitch"
         options={visualizationTypes
           .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
           .map((t) => ({
+            className: `lnsLayerChartSwitch__item ${
+              layer.seriesType === t.id ? 'lnsLayerChartSwitch__item-isSelected' : ''
+            }`,
             id: t.id,
             label: t.label,
             iconType: t.icon || 'empty',
@@ -159,48 +133,56 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
-function getValueLabelDisableReason({
-  isAreaPercentage,
-  isHistogramSeries,
-}: {
-  isAreaPercentage: boolean;
-  isHistogramSeries: boolean;
-}): string {
-  if (isHistogramSeries) {
-    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
-      defaultMessage: 'This setting cannot be changed on histograms.',
+const getDataBounds = function (
+  activeData: FramePublicAPI['activeData'],
+  axes: GroupsConfiguration
+) {
+  const groups: Partial<Record<string, { min: number; max: number }>> = {};
+  axes.forEach((axis) => {
+    let min = Number.MAX_VALUE;
+    let max = Number.MIN_VALUE;
+    axis.series.forEach((series) => {
+      activeData?.[series.layer]?.rows.forEach((row) => {
+        const value = row[series.accessor];
+        if (!Number.isNaN(value)) {
+          if (value < min) {
+            min = value;
+          }
+          if (value > max) {
+            max = value;
+          }
+        }
+      });
     });
-  }
-  if (isAreaPercentage) {
-    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-      defaultMessage: 'This setting cannot be changed on percentage area charts.',
-    });
-  }
-  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
+    if (min !== Number.MAX_VALUE && max !== Number.MIN_VALUE) {
+      groups[axis.groupId] = {
+        min: Math.round((min + Number.EPSILON) * 100) / 100,
+        max: Math.round((max + Number.EPSILON) * 100) / 100,
+      };
+    }
   });
+
+  return groups;
+};
+
+function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, state: XYState) {
+  return Boolean(
+    axisGroups
+      .find((group) => group.groupId === groupId)
+      ?.series.some(({ layer: layerId }) =>
+        state?.layers.find(
+          (layer) => layer.layerId === layerId && layer.seriesType.includes('percentage')
+        )
+      )
+  );
 }
+
 export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
-  const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'line'].includes(seriesType)
-  );
-
-  const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
-    ['bar', 'bar_horizontal'].includes(seriesType)
-  );
-
-  const isAreaPercentage = state?.layers.some(
-    ({ seriesType }) => seriesType === 'area_percentage_stacked'
-  );
-
-  const isHistogramSeries = Boolean(
-    hasHistogramSeries(state?.layers as ValidLayer[], frame.datasourceLayers)
-  );
-
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
-  const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
+  const axisGroups = getAxesConfiguration(state?.layers, shouldRotate, frame.activeData);
+  const dataBounds = getDataBounds(frame.activeData, axisGroups);
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
@@ -239,6 +221,25 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  const labelsOrientation = {
+    x: state?.labelsOrientation?.x ?? 0,
+    yLeft: state?.labelsOrientation?.yLeft ?? 0,
+    yRight: state?.labelsOrientation?.yRight ?? 0,
+  };
+
+  const onLabelsOrientationChange = (axis: AxesSettingsConfigKeys, orientation: number): void => {
+    const newLabelsOrientation = {
+      ...labelsOrientation,
+      ...{
+        [axis]: orientation,
+      },
+    };
+    setState({
+      ...state,
+      labelsOrientation: newLabelsOrientation,
+    });
+  };
+
   const axisTitlesVisibilitySettings = {
     x: state?.axisTitlesVisibilitySettings?.x ?? true,
     yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
@@ -260,147 +261,157 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  const nonOrdinalXAxis = state?.layers.every(
+    (layer) =>
+      !layer.xAccessor ||
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        ScaleType.Linear
+      ) !== 'ordinal'
+  );
+
+  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
+  const onChangeEndzoneVisiblity = state?.layers.every(
+    (layer) =>
+      layer.xAccessor &&
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        ScaleType.Linear
+      ) === 'time'
+  )
+    ? (checked: boolean): void => {
+        setState({
+          ...state,
+          hideEndzones: !checked,
+        });
+      }
+    : undefined;
+
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
       : !state?.legend.isVisible
       ? 'hide'
       : 'show';
-
-  const valueLabelsVisibilityMode = state?.valueLabels || 'hide';
-
-  const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
-  const isFittingEnabled = hasNonBarSeries;
-
-  const valueLabelsDisabledReason = getValueLabelDisableReason({
-    isAreaPercentage,
-    isHistogramSeries,
-  });
+  const hasBarOrAreaOnLeftAxis = Boolean(
+    axisGroups
+      .find((group) => group.groupId === 'left')
+      ?.series?.some((series) => {
+        const seriesType = state.layers.find((l) => l.layerId === series.layer)?.seriesType;
+        return seriesType?.includes('bar') || seriesType?.includes('area');
+      })
+  );
+  const setLeftExtent = useCallback(
+    (extent: AxisExtentConfig | undefined) => {
+      setState({
+        ...state,
+        yLeftExtent: extent,
+      });
+    },
+    [setState, state]
+  );
+  const hasBarOrAreaOnRightAxis = Boolean(
+    axisGroups
+      .find((group) => group.groupId === 'left')
+      ?.series?.some((series) => {
+        const seriesType = state.layers.find((l) => l.layerId === series.layer)?.seriesType;
+        return seriesType?.includes('bar') || seriesType?.includes('area');
+      })
+  );
+  const setRightExtent = useCallback(
+    (extent: AxisExtentConfig | undefined) => {
+      setState({
+        ...state,
+        yRightExtent: extent,
+      });
+    },
+    [setState, state]
+  );
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <TooltipWrapper
-            tooltipContent={valueLabelsDisabledReason}
-            condition={!isValueLabelsEnabled && !isFittingEnabled}
-          >
-            <ToolbarPopover
-              title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
-                defaultMessage: 'Values',
-              })}
-              type="values"
-              groupPosition="left"
-              buttonDataTestSubj="lnsValuesButton"
-              isDisabled={!isValueLabelsEnabled && !isFittingEnabled}
-            >
-              {isValueLabelsEnabled ? (
-                <EuiFormRow
-                  display="columnCompressed"
-                  label={
-                    <span>
-                      {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                        defaultMessage: 'Labels',
-                      })}
-                    </span>
-                  }
-                >
-                  <EuiButtonGroup
-                    isFullWidth
-                    legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                      defaultMessage: 'Labels',
-                    })}
-                    data-test-subj="lnsValueLabelsDisplay"
-                    name="valueLabelsDisplay"
-                    buttonSize="compressed"
-                    options={valueLabelsOptions}
-                    idSelected={
-                      valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!
-                        .id
-                    }
-                    onChange={(modeId) => {
-                      const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
-                      setState({ ...state, valueLabels: newMode });
-                    }}
-                  />
-                </EuiFormRow>
-              ) : null}
-              {isFittingEnabled ? (
-                <EuiFormRow
-                  display="columnCompressed"
-                  label={
-                    <>
-                      {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                        defaultMessage: 'Missing values',
-                      })}{' '}
-                      <EuiIconTip
-                        color="subdued"
-                        content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                          defaultMessage: `By default, Lens hides the gaps in the data. To fill the gap, make a selection.`,
-                        })}
-                        iconProps={{
-                          className: 'eui-alignTop',
-                        }}
-                        position="top"
-                        size="s"
-                        type="questionInCircle"
-                      />
-                    </>
-                  }
-                >
-                  <EuiSuperSelect
-                    data-test-subj="lnsMissingValuesSelect"
-                    compressed
-                    options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                      return {
-                        value: id,
-                        dropdownDisplay: (
-                          <>
-                            <strong>{title}</strong>
-                            <EuiText size="xs" color="subdued">
-                              <p>{description}</p>
-                            </EuiText>
-                          </>
-                        ),
-                        inputDisplay: title,
-                      };
-                    })}
-                    valueOfSelected={state?.fittingFunction || 'None'}
-                    onChange={(value) => setState({ ...state, fittingFunction: value })}
-                    itemLayoutAlign="top"
-                    hasDividers
-                  />
-                </EuiFormRow>
-              ) : null}
-            </ToolbarPopover>
-          </TooltipWrapper>
+          <VisualOptionsPopover
+            state={state}
+            setState={setState}
+            datasourceLayers={frame.datasourceLayers}
+          />
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
+            location={state?.legend.isInside ? 'inside' : 'outside'}
+            onLocationChange={(location) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  isInside: location === 'inside',
+                },
+              });
+            }}
             onDisplayChange={(optionId) => {
               const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
               if (newMode === 'auto') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: false,
+                  },
                 });
               } else if (newMode === 'show') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: true,
+                  },
                 });
               } else if (newMode === 'hide') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: false,
+                    showSingleSeries: false,
+                  },
                 });
               }
             }}
             position={state?.legend.position}
+            horizontalAlignment={state?.legend.horizontalAlignment}
+            verticalAlignment={state?.legend.verticalAlignment}
+            floatingColumns={state?.legend.floatingColumns}
+            onFloatingColumnsChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, floatingColumns: val },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,
                 legend: { ...state.legend, position: id as Position },
+              });
+            }}
+            onAlignmentChange={(value) => {
+              const [vertical, horizontal] = value.split('_');
+              const verticalAlignment = vertical as VerticalAlignment;
+              const horizontalAlignment = horizontal as HorizontalAlignment;
+              setState({
+                ...state,
+                legend: { ...state.legend, verticalAlignment, horizontalAlignment },
+              });
+            }}
+            renderValueInLegendSwitch={nonOrdinalXAxis}
+            valueInLegend={state?.valuesInLegend}
+            onValueInLegendChange={() => {
+              setState({
+                ...state,
+                valuesInLegend: !state.valuesInLegend,
               });
             }}
           />
@@ -434,8 +445,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               isDisabled={
                 Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
               }
+              orientation={labelsOrientation.yLeft}
+              setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+              extent={state?.yLeftExtent || { mode: 'full' }}
+              setExtent={setLeftExtent}
+              hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
+              dataBounds={dataBounds.left}
+              hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
             />
           </TooltipWrapper>
           <AxisSettingsPopover
@@ -447,8 +465,14 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.x}
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            orientation={labelsOrientation.x}
+            setOrientation={onLabelsOrientationChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+            endzonesVisible={!state?.hideEndzones}
+            setEndzoneVisibility={onChangeEndzoneVisiblity}
+            hasBarOrAreaOnAxis={false}
+            hasPercentageAxis={false}
           />
           <TooltipWrapper
             tooltipContent={
@@ -477,8 +501,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length ===
                 0
               }
+              orientation={labelsOrientation.yRight}
+              setOrientation={onLabelsOrientationChange}
+              hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+              extent={state?.yRightExtent || { mode: 'full' }}
+              setExtent={setRightExtent}
+              hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
+              dataBounds={dataBounds.right}
             />
           </TooltipWrapper>
         </EuiFlexGroup>
@@ -576,7 +607,10 @@ export function DimensionEditor(
               (yAxisConfig) => yAxisConfig.forAccessor === accessor
             );
             if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex].axisMode = newMode;
+              newYAxisConfigs[existingIndex] = {
+                ...newYAxisConfigs[existingIndex],
+                axisMode: newMode,
+              };
             } else {
               newYAxisConfigs.push({
                 forAccessor: accessor,
@@ -661,9 +695,9 @@ const ColorPicker = ({
         const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
         if (existingIndex !== -1) {
           if (text === '') {
-            delete newYConfigs[existingIndex].color;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: undefined };
           } else {
-            newYConfigs[existingIndex].color = output.hex;
+            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: output.hex };
           }
         } else {
           newYConfigs.push({

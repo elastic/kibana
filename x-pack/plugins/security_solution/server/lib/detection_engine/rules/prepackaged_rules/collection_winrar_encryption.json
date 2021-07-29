@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Encrypting Files with WinRar or 7z",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  ((process.name:\"rar.exe\" or process.code_signature.subject_name == \"win.rar GmbH\" or\n      process.pe.original_file_name == \"Command line RAR\") and\n    process.args == \"a\" and process.args : (\"-hp*\", \"-p*\", \"-dw\", \"-tb\", \"-ta\", \"/hp*\", \"/p*\", \"/dw\", \"/tb\", \"/ta\"))\n\n  or\n  (process.pe.original_file_name in (\"7z.exe\", \"7za.exe\") and\n     process.args == \"a\" and process.args : (\"-p*\", \"-sdel\"))\n\n  /* uncomment if noisy for backup software related FPs */\n  /* not process.parent.executable : (\"C:\\\\Program Files\\\\*.exe\", \"C:\\\\Program Files (x86)\\\\*.exe\") */\n",
   "references": [
@@ -24,7 +24,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Exfiltration"
+    "Collection"
   ],
   "threat": [
     {

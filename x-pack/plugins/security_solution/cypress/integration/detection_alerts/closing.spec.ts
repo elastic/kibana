@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import {
   ALERTS,
   ALERTS_COUNT,
@@ -25,23 +25,24 @@ import {
   waitForAlerts,
   waitForAlertsIndexToBeCreated,
 } from '../../tasks/alerts';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { createCustomRuleActivated, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Closing alerts', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(DETECTIONS_URL);
+    loginAndWaitForPage(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule(), '1', '100m', 100);
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(100);
+    deleteCustomRule();
   });
 
   it('Closes and opens alerts', () => {

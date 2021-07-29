@@ -1,5 +1,5 @@
 {
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "title": "Event counts from all indexes",
   "data": {
     "url": {
@@ -30,7 +30,7 @@
     "x": {
       "field": "key",
       "type": "temporal",
-      "axis": { "title": false }
+      "axis": { "title": null }
     },
     "y": {
       "field": "doc_count",

@@ -16,6 +16,30 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
+export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
+
+export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
+
+export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
+
+export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
+
+export const EMAIL_ACTION_SUBJECT_INPUT = '[data-test-subj="subjectInput"]';
+
+export const FROM_VALIDATION_ERROR = '.euiFormErrorText';
+
+export const CONNECTOR_NAME_INPUT = '[data-test-subj="nameInput"]';
+
+export const EMAIL_CONNECTOR_FROM_INPUT = '[data-test-subj="emailFromInput"]';
+
+export const EMAIL_CONNECTOR_HOST_INPUT = '[data-test-subj="emailHostInput"]';
+
+export const EMAIL_CONNECTOR_PORT_INPUT = '[data-test-subj="emailPortInput"]';
+
+export const EMAIL_CONNECTOR_USER_INPUT = '[data-test-subj="emailUserInput"]';
+
+export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInput"]';
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -25,6 +49,8 @@ export const ADD_REFERENCE_URL_BTN =
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
+
+export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
 
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
@@ -106,9 +132,8 @@ export const LOOK_BACK_INTERVAL =
 export const LOOK_BACK_TIME_TYPE =
   '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
-export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
-
-export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
+export const MACHINE_LEARNING_DROPDOWN_INPUT =
+  '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
@@ -125,6 +150,8 @@ export const MITRE_ATTACK_ADD_TACTIC_BUTTON = '[data-test-subj="addMitreAttackTa
 export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackTechnique"]';
 
 export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
+
+export const PREVIEW_HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
 
 export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 

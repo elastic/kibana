@@ -39,9 +39,9 @@ describe('Execution abortion tests', () => {
     execution.start();
     execution.cancel();
 
-    const result = await execution.result;
+    const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -57,9 +57,9 @@ describe('Execution abortion tests', () => {
     jest.advanceTimersByTime(100);
     execution.cancel();
 
-    const result = await execution.result;
+    const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -75,7 +75,7 @@ describe('Execution abortion tests', () => {
 
     execution.start();
 
-    const result = await execution.result;
+    const { result } = await execution.result.toPromise();
 
     execution.cancel();
 
@@ -130,12 +130,12 @@ describe('Execution abortion tests', () => {
       params: {},
     });
 
-    execution.start();
+    execution.start().toPromise();
 
     await waitFor(() => expect(started).toHaveBeenCalledTimes(1));
 
     execution.cancel();
-    const result = await execution.result;
+    const { result } = await execution.result.toPromise();
     expect(result).toMatchObject({
       type: 'error',
       error: {

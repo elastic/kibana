@@ -10,6 +10,7 @@ import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 
@@ -36,8 +37,14 @@ async function run() {
       bool: {
         must_not: [
           {
-            term: {
-              'service.name': 'elastic-co-frontend',
+            terms: {
+              'service.name': [
+                'elastic-co-frontend',
+                'filebeat',
+                'metricbeat',
+                'heartbeat',
+                'apm-server',
+              ],
             },
           },
         ],
@@ -116,7 +123,7 @@ async function run() {
 
   const query = {
     bool: {
-      should: should.map(({ bool }) => ({ bool })),
+      should: should.map(({ bool }) => ({ bool })) as QueryDslQueryContainer[],
       minimum_should_match: 1,
     },
   };
@@ -152,15 +159,18 @@ async function run() {
       (bucket) => bucket.key as string
     ) ?? [];
 
+  const indicesToArchive = indicesWithDocs
+    .filter((index) => !index.startsWith('.kibana'))
+    .concat('.kibana')
+    .join(',');
+
   // create the archive
   const tmpDir = path.join(__dirname, 'tmp/');
   execSync(
-    `node scripts/es_archiver save ${archiveName} ${indicesWithDocs
-      .filter((index) => !index.startsWith('.kibana'))
-      .concat('.kibana')
-      .join(
-        ','
-      )} --dir=${tmpDir} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
+    `node scripts/es_archiver save ${path.join(
+      tmpDir,
+      archiveName
+    )} ${indicesToArchive} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
       query
     )}'`,
     {
@@ -191,16 +201,10 @@ async function run() {
   fs.writeFileSync(
     configFilePath,
     `
-    /* eslint-disable import/no-default-export*/
+    /* eslint-disable-next-line*/
     export default ${JSON.stringify(newConfig, null, 2)}`,
     { encoding: 'utf-8' }
   );
-
-  // run ESLint on the generated metadata files
-  execSync('node scripts/eslint **/*/archives_metadata.ts --fix', {
-    cwd: root,
-    stdio: 'inherit',
-  });
 
   const esArchiverDir = 'fixtures/es_archiver/';
 
@@ -219,6 +223,12 @@ async function run() {
 
   // Delete tmp folder
   execSync(`rm -rf ${tmpDir}`);
+
+  // run ESLint on the generated metadata files
+  execSync('node scripts/eslint x-pack/**/*/archives_metadata.ts --fix', {
+    cwd: root,
+    stdio: 'inherit',
+  });
 }
 
 run()

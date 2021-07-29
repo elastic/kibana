@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -21,7 +22,7 @@ import {
   CommonAlertParams,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CPU_USAGE,
@@ -32,8 +33,8 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
-import { parseDuration } from '../../../alerts/common/parse_duration';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { parseDuration } from '../../../alerting/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -50,15 +51,9 @@ export class CpuUsageAlert extends BaseAlert {
       },
       actionVariables: [
         {
-          name: 'nodes',
-          description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.nodes', {
-            defaultMessage: 'The list of nodes reporting high cpu usage.',
-          }),
-        },
-        {
-          name: 'count',
-          description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.count', {
-            defaultMessage: 'The number of nodes reporting high cpu usage.',
+          name: 'node',
+          description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.node', {
+            defaultMessage: 'The node reporting high cpu usage.',
           }),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
@@ -68,7 +63,7 @@ export class CpuUsageAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -80,7 +75,7 @@ export class CpuUsageAlert extends BaseAlert {
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCpuUsageNodeStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       startMs,
@@ -169,51 +164,58 @@ export class CpuUsageAlert extends BaseAlert {
     if (alertStates.length === 0) {
       return;
     }
-
-    const firingNodes = alertStates.filter(
-      (alertState) => alertState.ui.isFiring
-    ) as AlertCpuUsageState[];
-    const firingCount = firingNodes.length;
-    if (firingCount > 0) {
-      const shortActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.shortAction', {
-        defaultMessage: 'Verify CPU levels across affected nodes.',
-      });
-      const fullActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.fullAction', {
-        defaultMessage: 'View nodes',
-      });
-      const action = `[${fullActionText}](elasticsearch/nodes)`;
-      const internalShortMessage = i18n.translate(
-        'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage',
-        {
-          defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
-          values: {
-            count: firingCount,
-            clusterName: cluster.clusterName,
-            shortActionText,
-          },
-        }
-      );
-      const internalFullMessage = i18n.translate(
-        'xpack.monitoring.alerts.cpuUsage.firing.internalFullMessage',
-        {
-          defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
-          values: {
-            count: firingCount,
-            clusterName: cluster.clusterName,
-            action,
-          },
-        }
-      );
-      instance.scheduleActions('default', {
-        internalShortMessage,
-        internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
-        state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map(({ nodeName, cpuUsage }) => `${nodeName}:${cpuUsage}`).toString(),
-        count: firingCount,
-        clusterName: cluster.clusterName,
-        action,
-        actionPlain: shortActionText,
-      });
+    const firingNode = alertStates[0] as AlertCpuUsageState;
+    if (!firingNode || !firingNode.ui.isFiring) {
+      return;
     }
+    const shortActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.shortAction', {
+      defaultMessage: 'Verify CPU level of node.',
+    });
+    const fullActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.fullAction', {
+      defaultMessage: 'View node',
+    });
+    const ccs = firingNode.ccs;
+    const globalStateLink = this.createGlobalStateLink(
+      `elasticsearch/nodes/${firingNode.nodeId}`,
+      cluster.clusterUuid,
+      ccs
+    );
+    const action = `[${fullActionText}](${globalStateLink})`;
+    const internalShortMessage = i18n.translate(
+      'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage',
+      {
+        defaultMessage: `CPU usage alert is firing for node {nodeName} in cluster: {clusterName}. {shortActionText}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          shortActionText,
+        },
+      }
+    );
+    const internalFullMessage = i18n.translate(
+      'xpack.monitoring.alerts.cpuUsage.firing.internalFullMessage',
+      {
+        defaultMessage: `CPU usage alert is firing for node {nodeName} in cluster: {clusterName}. {action}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          action,
+        },
+      }
+    );
+    instance.scheduleActions('default', {
+      internalShortMessage,
+      internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
+      state: AlertingDefaults.ALERT_STATE.firing,
+      /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544 
+        see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
+        */
+      nodes: `${firingNode.nodeName}:${firingNode.cpuUsage}`,
+      count: 1,
+      node: `${firingNode.nodeName}:${firingNode.cpuUsage}`,
+      clusterName: cluster.clusterName,
+      action,
+      actionPlain: shortActionText,
+    });
   }
 }

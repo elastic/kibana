@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementRecord,
-} from '../../../../../src/plugins/saved_objects_management/public';
-import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public';
+import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+import type { ShareToSpaceFlyoutProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
+
+interface WrapperProps {
+  spacesApiUi: SpacesApiUi;
+  props: ShareToSpaceFlyoutProps;
+}
+
+const Wrapper = ({ spacesApiUi, props }: WrapperProps) => {
+  const LazyComponent = useMemo(() => spacesApiUi.components.getShareToSpaceFlyout, [spacesApiUi]);
+
+  return <LazyComponent {...props} />;
+};
 
 export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'share_saved_objects_to_space';
@@ -29,16 +40,17 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
       const hasCapability =
         !this.actionContext ||
         !!this.actionContext.capabilities.savedObjectsManagement.shareIntoSpace;
-      return object.meta.namespaceType === 'multiple' && hasCapability;
+      const { namespaceType, hiddenType } = object.meta;
+      return namespaceType === 'multiple' && !hiddenType && hasCapability;
     },
     onClick: (object: SavedObjectsManagementRecord) => {
-      this.isDataChanged = false;
+      this.objectsToRefresh = [];
       this.start(object);
     },
   };
-  public refreshOnFinish = () => this.isDataChanged;
+  public refreshOnFinish = () => this.objectsToRefresh;
 
-  private isDataChanged: boolean = false;
+  private objectsToRefresh: Array<{ type: string; id: string }> = [];
 
   constructor(private readonly spacesApiUi: SpacesApiUi) {
     super();
@@ -49,25 +61,23 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
 
-    const savedObjectTarget = {
-      type: this.record.type,
-      id: this.record.id,
-      namespaces: this.record.namespaces ?? [],
-      title: this.record.meta.title,
-      icon: this.record.meta.icon,
+    const props: ShareToSpaceFlyoutProps = {
+      savedObjectTarget: {
+        type: this.record.type,
+        id: this.record.id,
+        namespaces: this.record.namespaces ?? [],
+        title: this.record.meta.title,
+        icon: this.record.meta.icon,
+      },
+      flyoutIcon: 'share',
+      onUpdate: (updatedObjects: Array<{ type: string; id: string }>) =>
+        (this.objectsToRefresh = [...updatedObjects]),
+      onClose: this.onClose,
+      enableCreateCopyCallout: true,
+      enableCreateNewSpaceLink: true,
     };
-    const { ShareToSpaceFlyout } = this.spacesApiUi.components;
 
-    return (
-      <ShareToSpaceFlyout
-        savedObjectTarget={savedObjectTarget}
-        flyoutIcon="share"
-        onUpdate={() => (this.isDataChanged = true)}
-        onClose={this.onClose}
-        enableCreateCopyCallout={true}
-        enableCreateNewSpaceLink={true}
-      />
-    );
+    return <Wrapper spacesApiUi={this.spacesApiUi} props={props} />;
   };
 
   private onClose = () => {

@@ -38,28 +38,21 @@ export default function ({ getService }) {
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
-        const policy = body.find((policy) => policy.name === DEFAULT_POLICY_NAME);
+        const { version, name, policy } = body.find(
+          (policy) => policy.name === DEFAULT_POLICY_NAME
+        );
 
-        // We manually set the date for deterministic test
-        const modifiedDate = '2019-04-30T14:30:00.000Z';
-        policy.modified_date = modifiedDate;
-
-        expect(policy).to.eql({
-          version: 1,
-          modified_date: modifiedDate,
-          policy: {
-            phases: {
+        expect(version).to.eql(1);
+        expect(name).to.eql(DEFAULT_POLICY_NAME);
+        expect(policy.phases).to.eql({
+          delete: {
+            min_age: '7d',
+            actions: {
               delete: {
-                min_age: '7d',
-                actions: {
-                  delete: {
-                    delete_searchable_snapshot: true,
-                  },
-                },
+                delete_searchable_snapshot: true,
               },
             },
           },
-          name: DEFAULT_POLICY_NAME,
         });
       });
 
@@ -76,7 +69,7 @@ export default function ({ getService }) {
 
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
-        expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
+        expect(fetchedPolicy.indices).to.eql([indexName]);
       });
 
       it('should add hidden indices linked to policies', async () => {
@@ -104,7 +97,7 @@ export default function ({ getService }) {
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
         // The index name is dynamically generated as .ds-<indexName>-XXX so we don't check for exact match
-        expect(fetchedPolicy.linkedIndices[0]).to.contain(indexName);
+        expect(fetchedPolicy.indices[0]).to.contain(indexName);
       });
     });
 

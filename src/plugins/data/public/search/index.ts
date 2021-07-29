@@ -12,7 +12,6 @@ export {
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
-  SearchEnhancements,
   SearchUsageCollector,
 } from './types';
 
@@ -45,6 +44,8 @@ export {
   ISessionsClient,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
 } from './session';
 export { getEsPreference } from './es_search';
 

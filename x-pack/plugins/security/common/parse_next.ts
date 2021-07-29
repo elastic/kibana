@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'url';
+
 import { NEXT_URL_QUERY_STRING_PARAMETER } from './constants';
 import { isInternalURL } from './is_internal_url';
 

@@ -22,10 +22,12 @@ import {
   esKuery,
   esQuery,
 } from '../../../../../../../../src/plugins/data/public';
+import { queryFilterToAst } from '../../../../../../../../src/plugins/data/common';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
+const OPERATION_NAME = 'filters';
 
 // references types from src/plugins/data/common/search/aggs/buckets/filters.ts
 export interface Filter {
@@ -70,14 +72,14 @@ export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
 };
 
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
-  operationType: 'filters';
+  operationType: typeof OPERATION_NAME;
   params: {
     filters: Filter[];
   };
 }
 
 export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
-  type: 'filters',
+  type: OPERATION_NAME,
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   input: 'none',
@@ -86,7 +88,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
-    if (previousColumn?.operationType === 'terms') {
+    if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
       params = {
         filters: [
           {
@@ -103,7 +105,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     return {
       label: filtersLabel,
       dataType: 'string',
-      operationType: 'filters',
+      operationType: OPERATION_NAME,
       scale: 'ordinal',
       isBucketed: true,
       params,
@@ -126,7 +128,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       id: columnId,
       enabled: true,
       schema: 'segment',
-      filters: JSON.stringify(validFilters?.length > 0 ? validFilters : [defaultFilter]),
+      filters: (validFilters?.length > 0 ? validFilters : [defaultFilter]).map(queryFilterToAst),
     }).toAst();
   },
 
@@ -138,7 +140,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
         updateColumnParam({
           layer,
           columnId,
-          paramName: 'filters',
+          paramName: OPERATION_NAME,
           value: newFilters,
         })
       );

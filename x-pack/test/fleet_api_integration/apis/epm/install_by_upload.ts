@@ -57,7 +57,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     afterEach(async () => {
       if (server) {
-        // remove the package just in case it being installed will affect other tests
+        // remove the packages just in case it being installed will affect other tests
         await deletePackage(testPkgKey);
       }
     });
@@ -70,10 +70,10 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/gzip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(23);
+      expect(res.body.response.length).to.be(26);
     });
 
-    it('should install a zip archive correctly', async function () {
+    it('should install a zip archive correctly and package info should return correctly after validation', async function () {
       const buf = fs.readFileSync(testPkgArchiveZip);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -81,7 +81,20 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(23);
+      expect(res.body.response.length).to.be(26);
+
+      const packageInfoRes = await supertest
+        .get(`/api/fleet/epm/packages/${testPkgKey}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      delete packageInfoRes.body.response.latestVersion;
+      delete packageInfoRes.body.response.savedObject.attributes.install_started_at;
+      delete packageInfoRes.body.response.savedObject.version;
+      delete packageInfoRes.body.response.savedObject.updated_at;
+      delete packageInfoRes.body.response.savedObject.coreMigrationVersion;
+
+      expectSnapshot(packageInfoRes.body.response).toMatch();
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {

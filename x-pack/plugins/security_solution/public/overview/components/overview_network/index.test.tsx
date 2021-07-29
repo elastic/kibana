@@ -11,7 +11,6 @@ import React from 'react';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -21,6 +20,7 @@ import {
 import { OverviewNetwork } from '.';
 import { createStore, State } from '../../../common/store';
 import { useNetworkOverview } from '../../containers/overview_network';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();
@@ -73,23 +73,11 @@ describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders the expected widget title', () => {
@@ -150,6 +138,9 @@ describe('OverviewNetwork', () => {
         preventDefault: jest.fn(),
       });
 
-    expect(mockNavigateToApp).toBeCalledWith('securitySolution:network', { path: '' });
+    expect(mockNavigateToApp).toBeCalledWith('securitySolution', {
+      path: '',
+      deepLinkId: SecurityPageName.network,
+    });
   });
 });

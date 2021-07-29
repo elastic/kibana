@@ -21,7 +21,7 @@ interface Props {
   setFullscreen: (fullscreen: boolean) => void;
 
   autoplayEnabled: boolean;
-  enableAutoplay: (autoplay: boolean) => void;
+  toggleAutoplay: () => void;
 
   onPageChange: (pageNumber: number) => void;
   previousPage: () => void;
@@ -39,19 +39,37 @@ export class FullscreenControl extends React.PureComponent<Props> {
     children: PropTypes.func.isRequired,
   };
 
+  /*
+    We need these instance functions because ReactShortcuts bind the handlers on it's mount, 
+    but then does no rebinding if it's props change. Using these instance functions will 
+    properly handle changes to incoming props since the instance functions are bound to the components
+    "this" context
+  */
   _toggleFullscreen = () => {
     const { setFullscreen, isFullscreen } = this.props;
     setFullscreen(!isFullscreen);
   };
 
+  toggleAutoplay = () => {
+    this.props.toggleAutoplay();
+  };
+
+  nextPage = () => {
+    this.props.nextPage();
+  };
+
+  previousPage = () => {
+    this.props.previousPage();
+  };
+
   // handle keypress events for presentation events
   _keyMap: { [key: string]: (...args: any[]) => void } = {
     REFRESH: this.props.fetchAllRenderables,
-    PREV: this.props.previousPage,
-    NEXT: this.props.nextPage,
+    PREV: this.previousPage,
+    NEXT: this.nextPage,
     FULLSCREEN: this._toggleFullscreen,
     FULLSCREEN_EXIT: this._toggleFullscreen,
-    PAGE_CYCLE_TOGGLE: () => this.props.enableAutoplay(!this.props.autoplayEnabled),
+    PAGE_CYCLE_TOGGLE: this.toggleAutoplay,
   };
 
   _keyHandler = (action: string, event: KeyboardEvent) => {

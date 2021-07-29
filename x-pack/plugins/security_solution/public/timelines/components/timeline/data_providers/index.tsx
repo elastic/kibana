@@ -9,19 +9,16 @@ import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
+import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
-import {
-  droppableTimelineProvidersPrefix,
-  IS_DRAGGING_CLASS_NAME,
-} from '../../../../common/components/drag_and_drop/helpers';
+import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 
 import { Empty } from './empty';
 import { Providers } from './providers';
-import { useManageTimeline } from '../../manage_timeline';
 import { timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
@@ -51,15 +48,17 @@ const DropTargetDataProvidersContainer = styled.div`
 const DropTargetDataProviders = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding-bottom: 2px;
   position: relative;
   border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
-  padding: 5px 0;
+  padding: ${({ theme }) => theme.eui.euiSizeXS} 0;
   margin: 2px 0 2px 0;
+  max-height: 33vh;
   min-height: 100px;
-  overflow-y: auto;
+  overflow: auto;
+  resize: vertical;
   background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
 `;
 
@@ -87,11 +86,8 @@ const getDroppableId = (id: string): string =>
  */
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
-  const { getManageTimelineById } = useManageTimeline();
-  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
-    getManageTimelineById,
-    timelineId,
-  ]);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { isLoading } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dataProviders = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders

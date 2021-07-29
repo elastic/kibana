@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract } from '../../../../alerts/server';
+import { PluginSetupContract } from '../../../../alerting/server';
 import { registerMetricThresholdAlertType } from './metric_threshold/register_metric_threshold_alert_type';
 import { registerMetricInventoryThresholdAlertType } from './inventory_metric_threshold/register_inventory_metric_threshold_alert_type';
 import { registerMetricAnomalyAlertType } from './metric_anomaly/register_metric_anomaly_alert_type';
@@ -21,10 +21,9 @@ const registerAlertTypes = (
 ) => {
   if (alertingPlugin) {
     alertingPlugin.registerType(registerMetricThresholdAlertType(libs));
-    alertingPlugin.registerType(registerMetricInventoryThresholdAlertType(libs));
     alertingPlugin.registerType(registerMetricAnomalyAlertType(libs, ml));
 
-    const registerFns = [registerLogThresholdAlertType];
+    const registerFns = [registerLogThresholdAlertType, registerMetricInventoryThresholdAlertType];
     registerFns.forEach((fn) => {
       fn(alertingPlugin, libs);
     });

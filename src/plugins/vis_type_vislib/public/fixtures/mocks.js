@@ -12,6 +12,9 @@ setFormatService({
   deserialize: () => ({
     convert: (v) => v,
   }),
+  getInstance: () => ({
+    convert: (v) => v,
+  }),
 });
 
 export const getMockUiState = () => {

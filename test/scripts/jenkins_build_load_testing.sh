@@ -12,7 +12,7 @@ cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
 if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
-  ./test/scripts/jenkins_xpack_build_plugins.sh
+    ./test/scripts/jenkins_xpack_build_plugins.sh
 fi
 
 echo " -> Configure Metricbeat monitoring"
@@ -28,9 +28,9 @@ URL=https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.11.0-li
 echo $URL
 # Downloading the Metricbeat package
 while [ 1 ]; do
-  wget -q --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 --continue --no-check-certificate --tries=3 $URL
-  if [ $? = 0 ]; then break; fi; # check return value, break if successful (0)
-  sleep 1s;
+    wget -q --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 --continue --no-check-certificate --tries=3 $URL
+    if [ $? = 0 ]; then break; fi; # check return value, break if successful (0)
+    sleep 1s;
 done;
 
 # Install Metricbeat
@@ -51,6 +51,9 @@ echo "cloud.auth: ${USER_FROM_VAULT}:${PASS_FROM_VAULT}" >> cfg/metricbeat/metri
 cp cfg/metricbeat/metricbeat.yml $KIBANA_DIR/metricbeat-install/metricbeat.yml
 # Disable system monitoring: enabled for now to have more data
 #mv $KIBANA_DIR/metricbeat-install/modules.d/system.yml $KIBANA_DIR/metricbeat-install/modules.d/system.yml.disabled
+echo " -> Building puppeteer project"
+cd puppeteer
+yarn install && yarn build
 popd
 
 # doesn't persist, also set in kibanaPipeline.groovy
@@ -58,14 +61,14 @@ export KBN_NP_PLUGINS_BUILT=true
 
 echo " -> Building and extracting default Kibana distributable for use in functional tests"
 cd "$KIBANA_DIR"
-node scripts/build --debug --no-oss
+node scripts/build --debug
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
-mkdir -p "$WORKSPACE/kibana-build-xpack"
-cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
+mkdir -p "$WORKSPACE/kibana-build"
+cp -pR install/kibana/. $WORKSPACE/kibana-build/
 
 echo " -> Setup env for tests"
 source test/scripts/jenkins_test_setup_xpack.sh
@@ -80,8 +83,11 @@ echo " -> Running gatling load testing"
 export GATLING_SIMULATIONS="$simulations"
 node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-  --config test/load/config.ts
-  
+  --config test/load/config.ts;
+
+
+echo " -> Simulations run is finished"
+
 # Show output of Metricbeat. Disabled. Enable for debug purposes
-#echo "output of metricbeat.log" 
+#echo "output of metricbeat.log"
 #cat $KIBANA_DIR/metricbeat-install/metricbeat.log

@@ -7,30 +7,40 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { flashErrorToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { ApiTokenTypes } from '../credentials/constants';
+import { ApiToken } from '../credentials/types';
 
-import { IIndexingStatus } from '../../../shared/types';
-
-import { EngineDetails } from './types';
+import { POLLING_DURATION, POLLING_ERROR_TITLE, POLLING_ERROR_TEXT } from './constants';
+import { EngineDetails, EngineTypes } from './types';
 
 interface EngineValues {
   dataLoading: boolean;
   engine: Partial<EngineDetails>;
   engineName: string;
+  isEngineEmpty: boolean;
+  isEngineSchemaEmpty: boolean;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
+  hasSchemaErrors: boolean;
   hasSchemaConflicts: boolean;
   hasUnconfirmedSchemaFields: boolean;
   engineNotFound: boolean;
+  searchKey: string;
+  intervalId: number | null;
 }
 
 interface EngineActions {
   setEngineData(engine: EngineDetails): { engine: EngineDetails };
   setEngineName(engineName: string): { engineName: string };
-  setIndexingStatus(activeReindexJob: IIndexingStatus): { activeReindexJob: IIndexingStatus };
   setEngineNotFound(notFound: boolean): { notFound: boolean };
   clearEngine(): void;
   initializeEngine(): void;
+  pollEmptyEngine(): void;
+  onPollStart(intervalId: number): { intervalId: number };
+  stopPolling(): void;
+  onPollStop(): void;
 }
 
 export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
@@ -38,10 +48,13 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   actions: {
     setEngineData: (engine) => ({ engine }),
     setEngineName: (engineName) => ({ engineName }),
-    setIndexingStatus: (activeReindexJob) => ({ activeReindexJob }),
     setEngineNotFound: (notFound) => ({ notFound }),
     clearEngine: true,
     initializeEngine: true,
+    pollEmptyEngine: true,
+    onPollStart: (intervalId) => ({ intervalId }),
+    stopPolling: true,
+    onPollStop: true,
   },
   reducers: {
     dataLoading: [
@@ -56,10 +69,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       {
         setEngineData: (_, { engine }) => engine,
         clearEngine: () => ({}),
-        setIndexingStatus: (state, { activeReindexJob }) => ({
-          ...state,
-          activeReindexJob,
-        }),
       },
     ],
     engineName: [
@@ -76,10 +85,28 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
         clearEngine: () => false,
       },
     ],
+    intervalId: [
+      null,
+      {
+        onPollStart: (_, { intervalId }) => intervalId,
+        onPollStop: () => null,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
-    isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === 'meta'],
+    isEngineEmpty: [() => [selectors.engine], (engine) => !engine.document_count],
+    isEngineSchemaEmpty: [
+      () => [selectors.engine],
+      (engine) => Object.keys(engine.schema || {}).length === 0,
+    ],
+    isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
+    // Indexed engines
+    hasSchemaErrors: [
+      () => [selectors.engine],
+      ({ activeReindexJob }) => activeReindexJob?.numDocumentsWithErrors > 0,
+    ],
+    // Meta engines
     hasSchemaConflicts: [
       () => [selectors.engine],
       (engine) => !!(engine?.schemaConflicts && Object.keys(engine.schemaConflicts).length > 0),
@@ -88,9 +115,19 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       () => [selectors.engine],
       (engine) => engine?.unconfirmedFields?.length > 0,
     ],
+    searchKey: [
+      () => [selectors.engine],
+      (engine: Partial<EngineDetails>) => {
+        const isSearchKey = (token: ApiToken) => token.type === ApiTokenTypes.Search;
+        const searchKey = (engine.apiTokens || []).find(isSearchKey);
+        return searchKey?.key || '';
+      },
+    ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeEngine: async () => {
+    initializeEngine: async (_, breakpoint) => {
+      breakpoint(); // Prevents errors if logic unmounts while fetching
+
       const { engineName } = values;
       const { http } = HttpLogic.values;
 
@@ -98,8 +135,39 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
         const response = await http.get(`/api/app_search/engines/${engineName}`);
         actions.setEngineData(response);
       } catch (error) {
-        actions.setEngineNotFound(true);
+        if (error?.response?.status >= 400 && error?.response?.status < 500) {
+          actions.setEngineNotFound(true);
+        } else {
+          flashErrorToast(POLLING_ERROR_TITLE, {
+            text: POLLING_ERROR_TEXT,
+            toastLifeTimeMs: POLLING_DURATION * 0.75,
+          });
+        }
       }
+    },
+    pollEmptyEngine: () => {
+      if (values.intervalId) return; // Ensure we only have one poll at a time
+
+      const id = window.setInterval(() => {
+        if (values.isEngineEmpty && values.isEngineSchemaEmpty) {
+          actions.initializeEngine(); // Re-fetch engine data when engine is empty
+        } else {
+          actions.stopPolling();
+        }
+      }, POLLING_DURATION);
+
+      actions.onPollStart(id);
+    },
+    stopPolling: () => {
+      if (values.intervalId !== null) {
+        clearInterval(values.intervalId);
+        actions.onPollStop();
+      }
+    },
+  }),
+  events: ({ actions }) => ({
+    beforeUnmount: () => {
+      actions.stopPolling();
     },
   }),
 });

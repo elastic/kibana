@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { combineLatest, from } from 'rxjs';
+import { map, tap, switchMap } from 'rxjs/operators';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
+import { getData } from '../services';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
@@ -18,6 +19,25 @@ import {
 import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
 import { RequestResponder } from '../../../inspector/public';
+
+const extendSearchParamsWithRuntimeFields = async (
+  requestParams: ReturnType<typeof getSearchParamsFromRequest>,
+  indexPatternString?: string
+) => {
+  if (indexPatternString) {
+    const indexPattern = (await getData().indexPatterns.find(indexPatternString)).find(
+      (index) => index.title === indexPatternString
+    );
+    const runtimeFields = indexPattern?.getComputedFields().runtimeFields;
+
+    return {
+      ...requestParams,
+      body: { ...requestParams.body, runtime_mappings: runtimeFields },
+    };
+  }
+
+  return requestParams;
+};
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
@@ -40,7 +60,7 @@ export class SearchAPI {
     return combineLatest(
       searchRequests.map((request) => {
         const requestId = request.name;
-        const params = getSearchParamsFromRequest(request, {
+        const requestParams = getSearchParamsFromRequest(request, {
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
 
@@ -49,18 +69,25 @@ export class SearchAPI {
             ...request,
             searchSessionId: this.searchSessionId,
           });
-          requestResponders[requestId].json(params.body);
+          requestResponders[requestId].json(requestParams.body);
         }
 
-        return search
-          .search({ params }, { abortSignal: this.abortSignal, sessionId: this.searchSessionId })
-          .pipe(
-            tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
-            map((data) => ({
-              name: requestId,
-              rawResponse: data.rawResponse,
-            }))
-          );
+        return from(extendSearchParamsWithRuntimeFields(requestParams, request.index)).pipe(
+          switchMap((params) =>
+            search
+              .search(
+                { params },
+                { abortSignal: this.abortSignal, sessionId: this.searchSessionId }
+              )
+              .pipe(
+                tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
+                map((data) => ({
+                  name: requestId,
+                  rawResponse: data.rawResponse,
+                }))
+              )
+          )
+        );
       })
     );
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { Unit } from '@elastic/datemath';
 import styled from 'styled-components';
 import {
@@ -20,11 +20,11 @@ import {
 } from '@elastic/eui';
 import { debounce } from 'lodash/fp';
 
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
 import { FieldValueQueryBar } from '../query_bar';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { PreviewEqlQueryHistogram } from './eql_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
 import { PreviewThresholdQueryHistogram } from './threshold_histogram';
@@ -32,6 +32,7 @@ import { formatDate } from '../../../../common/components/super_date_picker';
 import { State, queryPreviewReducer } from './reducer';
 import { isNoisy } from './helpers';
 import { PreviewCustomQueryHistogram } from './custom_histogram';
+import { FieldValueThreshold } from '../threshold_input';
 
 const Select = styled(EuiSelect)`
   width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
@@ -56,14 +57,7 @@ export const initialState: State = {
   showNonEqlHistogram: false,
 };
 
-export type Threshold =
-  | {
-      field: string | string[] | undefined;
-      value: number;
-      cardinality_field: string | undefined;
-      cardinality_value: number | undefined;
-    }
-  | undefined;
+export type Threshold = FieldValueThreshold | undefined;
 
 interface PreviewQueryProps {
   dataTestSubj: string;
@@ -124,6 +118,7 @@ export const PreviewQuery = ({
     startDate: toTime,
     filterQuery: queryFilter,
     indexNames: index,
+    includeMissingData: false,
     histogramType: MatrixHistogramType.events,
     stackByField: 'event.category',
     threshold: ruleType === 'threshold' ? threshold : undefined,
@@ -275,6 +270,16 @@ export const PreviewQuery = ({
     }
   }, [setWarnings, setShowHistogram, ruleType, handlePreviewEqlQuery, startNonEql, timeframe]);
 
+  const previewButtonDisabled = useMemo(() => {
+    return (
+      isMatrixHistogramLoading ||
+      eqlQueryLoading ||
+      isDisabled ||
+      query == null ||
+      (query != null && query.query.query === '' && query.filters.length === 0)
+    );
+  }, [eqlQueryLoading, isDisabled, isMatrixHistogramLoading, query]);
+
   return (
     <>
       <EuiFormRow
@@ -300,9 +305,7 @@ export const PreviewQuery = ({
           <EuiFlexItem grow={false}>
             <PreviewButton
               fill
-              isDisabled={
-                isMatrixHistogramLoading || eqlQueryLoading || isDisabled || query == null
-              }
+              isDisabled={previewButtonDisabled}
               onClick={handlePreviewClicked}
               data-test-subj="queryPreviewButton"
             >

@@ -98,9 +98,9 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
   }
 
   _togglePopover = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   };
 
   _closePopover = () => {
@@ -164,14 +164,14 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
         >
           {(list, search) => (
             <div style={{ width: '300px' }}>
-              <EuiPopoverTitle>{search}</EuiPopoverTitle>
+              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
               {list}
             </div>
           )}
         </EuiSelectable>
 
         <EuiSpacer size="xs" />
-        <EuiPopoverFooter>
+        <EuiPopoverFooter paddingSize="s">
           <EuiTextAlign textAlign="right">
             <EuiButton
               fill

@@ -25,7 +25,7 @@ import { ANALYTICS_STEPS } from '../../page';
 const MAX_INCLUDES_LENGTH = 5;
 
 interface Props {
-  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
+  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
   state: State;
 }
 

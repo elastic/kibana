@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import type { estypes } from '@elastic/elasticsearch';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Filter } from 'src/plugins/data/common';
 
-import { SearchResponse } from 'elasticsearch';
 import { ThreatListDoc, ThreatListItem } from './types';
 
 export const getThreatMappingMock = (): ThreatMapping => {
@@ -62,7 +61,7 @@ export const getThreatMappingMock = (): ThreatMapping => {
   ];
 };
 
-export const getThreatListSearchResponseMock = (): SearchResponse<ThreatListDoc> => ({
+export const getThreatListSearchResponseMock = (): estypes.SearchResponse<ThreatListDoc> => ({
   took: 0,
   timed_out: false,
   _shards: {

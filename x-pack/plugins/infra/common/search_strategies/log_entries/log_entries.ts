@@ -6,8 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { DslQuery } from '../../../../../../src/plugins/data/common';
-import { logSourceColumnConfigurationRT } from '../../http_api/log_sources';
+import { DslQuery } from '@kbn/es-query';
+import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
 import {
   logEntryAfterCursorRT,
   logEntryBeforeCursorRT,

@@ -7,7 +7,7 @@
 
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -21,7 +21,23 @@ export default function ({ getService }: FtrProviderContext) {
         // If you're removing a privilege, this breaks backwards compatibility
         // Roles are associated with these privileges, and we shouldn't be removing them in a minor version.
         const expected = {
+          global: ['all', 'read'],
+          space: ['all', 'read'],
           features: {
+            graph: ['all', 'read'],
+            savedObjectsTagging: ['all', 'read'],
+            canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
+            maps: ['all', 'read'],
+            fleet: ['all', 'read'],
+            actions: ['all', 'read'],
+            stackAlerts: ['all', 'read'],
+            ml: ['all', 'read'],
+            siem: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_all', 'cases_read'],
+            observabilityCases: ['all', 'read'],
+            uptime: ['all', 'read'],
+            infrastructure: ['all', 'read'],
+            logs: ['all', 'read'],
+            apm: ['all', 'read', 'minimal_all', 'minimal_read', 'alerts_all', 'alerts_read'],
             discover: [
               'all',
               'read',
@@ -29,8 +45,16 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'url_create',
               'store_search_session',
+              'generate_report',
             ],
-            visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            visualize: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'generate_report',
+            ],
             dashboard: [
               'all',
               'read',
@@ -38,28 +62,15 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'url_create',
               'store_search_session',
+              'generate_report',
+              'download_csv_report',
             ],
             dev_tools: ['all', 'read'],
             advancedSettings: ['all', 'read'],
             indexPatterns: ['all', 'read'],
             savedObjectsManagement: ['all', 'read'],
-            savedObjectsTagging: ['all', 'read'],
             timelion: ['all', 'read'],
-            graph: ['all', 'read'],
-            maps: ['all', 'read'],
-            canvas: ['all', 'read'],
-            infrastructure: ['all', 'read'],
-            logs: ['all', 'read'],
-            uptime: ['all', 'read'],
-            apm: ['all', 'read'],
-            ml: ['all', 'read'],
-            siem: ['all', 'read'],
-            fleet: ['all', 'read'],
-            stackAlerts: ['all', 'read'],
-            actions: ['all', 'read'],
           },
-          global: ['all', 'read'],
-          space: ['all', 'read'],
           reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 

@@ -3,7 +3,12 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions", "inspector"],
+  "requiredPlugins": ["data", "visualizations", "mapsEms", "expressions", "inspector"],
   "optionalPlugins": ["home","usageCollection"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "Registers the vega visualization. Is the elastic version of vega and vega-lite libraries."
 }

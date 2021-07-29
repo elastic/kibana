@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import { appContextService } from '../../../';
-import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 import { IngestManagerError } from '../../../../errors';
 import { getInstallation } from '../../packages/get';
-import { PACKAGES_SAVED_OBJECT_TYPE, EsAssetReference } from '../../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
+import type { EsAssetReference } from '../../../../../common';
 
 export const deletePreviousPipelines = async (
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   previousPkgVersion: string
@@ -27,7 +29,7 @@ export const deletePreviousPipelines = async (
       type === ElasticsearchAssetType.ingestPipeline && id.includes(previousPkgVersion)
   );
   const deletePipelinePromises = installedPipelines.map(({ type, id }) => {
-    return deletePipeline(callCluster, id);
+    return deletePipeline(esClient, id);
   });
   try {
     await Promise.all(deletePipelinePromises);
@@ -56,11 +58,11 @@ export const deletePipelineRefs = async (
     installed_es: filteredAssets,
   });
 };
-export async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<void> {
+export async function deletePipeline(esClient: ElasticsearchClient, id: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
   if (id && id !== '*') {
     try {
-      await callCluster('ingest.deletePipeline', { id });
+      await esClient.ingest.deletePipeline({ id });
     } catch (err) {
       // Only throw if error is not a 404 error. Sometimes the pipeline is already deleted, but we have
       // duplicate references to them, see https://github.com/elastic/kibana/issues/91192

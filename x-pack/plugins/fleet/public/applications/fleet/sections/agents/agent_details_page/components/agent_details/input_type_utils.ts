@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import {
   STATE_DATASET_FIELD,
   AGENT_DATASET_FILEBEAT,

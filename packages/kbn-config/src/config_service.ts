@@ -21,11 +21,21 @@ import {
   ConfigDeprecationWithContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
+  DeprecatedConfigDetails,
+  ChangedDeprecatedPaths,
 } from './deprecation';
 import { LegacyObjectToConfigAdapter } from './legacy';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
+
+/** @internal */
+export interface ConfigValidateParameters {
+  /**
+   * Indicates whether config deprecations should be logged during validation.
+   */
+  logDeprecations: boolean;
+}
 
 /** @internal */
 export class ConfigService {
@@ -35,6 +45,10 @@ export class ConfigService {
   private validated = false;
   private readonly config$: Observable<Config>;
   private lastConfig?: Config;
+  private readonly deprecatedConfigPaths = new BehaviorSubject<ChangedDeprecatedPaths>({
+    set: [],
+    unset: [],
+  });
 
   /**
    * Whenever a config if read at a path, we mark that path as 'handled'. We can
@@ -43,6 +57,7 @@ export class ConfigService {
   private readonly handledPaths: Set<ConfigPath> = new Set();
   private readonly schemas = new Map<string, Type<unknown>>();
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
+  private readonly handledDeprecatedConfigs = new Map<string, DeprecatedConfigDetails[]>();
 
   constructor(
     private readonly rawConfigProvider: RawConfigurationProvider,
@@ -55,7 +70,8 @@ export class ConfigService {
     this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
       map(([rawConfig, deprecations]) => {
         const migrated = applyDeprecations(rawConfig, deprecations);
-        return new LegacyObjectToConfigAdapter(migrated);
+        this.deprecatedConfigPaths.next(migrated.changedPaths);
+        return new LegacyObjectToConfigAdapter(migrated.config);
       }),
       tap((config) => {
         this.lastConfig = config;
@@ -92,17 +108,27 @@ export class ConfigService {
   }
 
   /**
+   * returns all handled deprecated configs
+   */
+  public getHandledDeprecatedConfigs() {
+    return [...this.handledDeprecatedConfigs.entries()];
+  }
+
+  /**
    * Validate the whole configuration and log the deprecation warnings.
    *
    * This must be done after every schemas and deprecation providers have been registered.
    */
-  public async validate() {
+  public async validate(params: ConfigValidateParameters = { logDeprecations: true }) {
     const namespaces = [...this.schemas.keys()];
     for (let i = 0; i < namespaces.length; i++) {
       await this.getValidatedConfigAtPath$(namespaces[i]).pipe(first()).toPromise();
     }
 
-    await this.logDeprecation();
+    if (params.logDeprecations) {
+      await this.logDeprecation();
+    }
+
     this.validated = true;
   }
 
@@ -182,12 +208,24 @@ export class ConfigService {
     return config.getFlattenedPaths().filter((path) => isPathHandled(path, handledPaths));
   }
 
+  public getDeprecatedConfigPath$() {
+    return this.deprecatedConfigPaths.asObservable();
+  }
+
   private async logDeprecation() {
     const rawConfig = await this.rawConfigProvider.getConfig$().pipe(take(1)).toPromise();
     const deprecations = await this.deprecations.pipe(take(1)).toPromise();
     const deprecationMessages: string[] = [];
-    const logger = (msg: string) => deprecationMessages.push(msg);
-    applyDeprecations(rawConfig, deprecations, logger);
+    const createAddDeprecation = (domainId: string) => (context: DeprecatedConfigDetails) => {
+      if (!context.silent) {
+        deprecationMessages.push(context.message);
+      }
+      const handledDeprecatedConfig = this.handledDeprecatedConfigs.get(domainId) || [];
+      handledDeprecatedConfig.push(context);
+      this.handledDeprecatedConfigs.set(domainId, handledDeprecatedConfig);
+    };
+
+    applyDeprecations(rawConfig, deprecations, createAddDeprecation);
     deprecationMessages.forEach((msg) => {
       this.deprecationLog.warn(msg);
     });

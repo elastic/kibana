@@ -9,9 +9,15 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { ChromeRecentlyAccessed } from 'kibana/public';
 import { getRecentlyAccessed } from './dependency_cache';
 
-export function addItemToRecentlyAccessed(page: string, itemId: string, url: string) {
+export function addItemToRecentlyAccessed(
+  page: string,
+  itemId: string,
+  url: string,
+  recentlyAccessedService?: ChromeRecentlyAccessed
+) {
   let pageLabel = '';
   let id = `ml-job-${itemId}`;
 
@@ -38,7 +44,6 @@ export function addItemToRecentlyAccessed(page: string, itemId: string, url: str
       return;
   }
 
-  url = url.startsWith('/') ? `/app/ml${url}` : `/app/ml/${page}/${url}`;
-  const recentlyAccessed = getRecentlyAccessed();
+  const recentlyAccessed = recentlyAccessedService ?? getRecentlyAccessed();
   recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
 }

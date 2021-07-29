@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityFeatureUsageServiceStart } from './feature_usage_service';
+import type { SecurityFeatureUsageServiceStart } from './feature_usage_service';
 
 export const securityFeatureUsageServiceMock = {
   createStartContract() {

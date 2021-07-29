@@ -1,0 +1,6 @@
+- name: upgrade apt packages
+  become: yes
+  apt:
+    name: '*'
+    state: latest
+    update_cache: yes

@@ -83,7 +83,8 @@ export class Handler {
       return function (eventPayload) {
         switch (eventType) {
           case 'brush':
-            const xRaw = _.get(eventPayload.data, 'series[0].values[0].xRaw');
+            const { xRaw } = eventPayload.data.series[0]?.values.find(({ xRaw }) => Boolean(xRaw));
+
             if (!xRaw) return; // not sure if this is possible?
             const [start, end] = eventPayload.range;
             const range = [convertToTimestamp(start), convertToTimestamp(end)];

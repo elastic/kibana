@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Direction, HostsFields } from '../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 import { HostsModel, HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
+import { Direction, HostsFields } from '../../../common/search_strategy';
 
 export const mockHostsState: HostsModel = {
   page: {
@@ -71,26 +71,26 @@ describe('Hosts redux store', () => {
   describe('#setHostsQueriesActivePageToZero', () => {
     test('set activePage to zero for all queries in hosts page  ', () => {
       expect(setHostsQueriesActivePageToZero(mockHostsState, HostsType.page)).toEqual({
-        allHosts: {
+        [HostsTableType.hosts]: {
           activePage: 0,
           direction: 'desc',
           limit: 10,
           sortField: 'lastSeen',
         },
-        anomalies: null,
-        authentications: {
+        [HostsTableType.anomalies]: null,
+        [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
         },
-        events: {
+        [HostsTableType.events]: {
           activePage: 0,
           limit: 10,
         },
-        uncommonProcesses: {
+        [HostsTableType.uncommonProcesses]: {
           activePage: 0,
           limit: 10,
         },
-        alerts: {
+        [HostsTableType.alerts]: {
           activePage: 0,
           limit: 10,
         },
@@ -99,26 +99,26 @@ describe('Hosts redux store', () => {
 
     test('set activePage to zero for all queries in host details  ', () => {
       expect(setHostsQueriesActivePageToZero(mockHostsState, HostsType.details)).toEqual({
-        allHosts: {
+        [HostsTableType.hosts]: {
           activePage: 0,
           direction: 'desc',
           limit: 10,
           sortField: 'lastSeen',
         },
-        anomalies: null,
-        authentications: {
+        [HostsTableType.anomalies]: null,
+        [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
         },
-        events: {
+        [HostsTableType.events]: {
           activePage: 0,
           limit: 10,
         },
-        uncommonProcesses: {
+        [HostsTableType.uncommonProcesses]: {
           activePage: 0,
           limit: 10,
         },
-        alerts: {
+        [HostsTableType.alerts]: {
           activePage: 0,
           limit: 10,
         },

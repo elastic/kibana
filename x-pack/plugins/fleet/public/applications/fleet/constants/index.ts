@@ -5,21 +5,4 @@
  * 2.0.
  */
 
-export {
-  PLUGIN_ID,
-  EPM_API_ROUTES,
-  AGENT_API_ROUTES,
-  SO_SEARCH_LIMIT,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  // Fleet Server index
-  AGENTS_INDEX,
-  ENROLLMENT_API_KEYS_INDEX,
-} from '../../../../common';
-
-export * from './page_paths';
-
-export const INDEX_NAME = '.kibana';
+export * from '../../../constants';

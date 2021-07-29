@@ -41,10 +41,8 @@ import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import {
-  getAggregationBucketsName,
-  getDatafeedAggregations,
-} from '../../../../../../common/util/datafeed_utils';
+import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
+import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -224,11 +222,11 @@ export class JobCreator {
   }
 
   public get description(): string {
-    return this._job_config.description;
+    return this._job_config.description ?? '';
   }
 
   public get groups(): string[] {
-    return this._job_config.groups;
+    return this._job_config.groups ?? [];
   }
 
   public set groups(groups: string[]) {
@@ -246,12 +244,20 @@ export class JobCreator {
   private _initModelPlotConfig() {
     // initialize configs to false if they are missing
     if (this._job_config.model_plot_config === undefined) {
-      this._job_config.model_plot_config = {};
+      this._job_config.model_plot_config = {
+        enabled: false,
+      };
     }
-    if (this._job_config.model_plot_config.enabled === undefined) {
+    if (
+      this._job_config.model_plot_config !== undefined &&
+      this._job_config.model_plot_config.enabled === undefined
+    ) {
       this._job_config.model_plot_config.enabled = false;
     }
-    if (this._job_config.model_plot_config.annotations_enabled === undefined) {
+    if (
+      this._job_config.model_plot_config !== undefined &&
+      this._job_config.model_plot_config.annotations_enabled === undefined
+    ) {
       this._job_config.model_plot_config.annotations_enabled = false;
     }
   }
@@ -388,6 +394,9 @@ export class JobCreator {
     // change the detector to be a non-zer or non-null count or sum.
     // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
     this._detectors.forEach((d, i) => {
+      if (this._aggs[i] === undefined) {
+        return;
+      }
       switch (this._aggs[i].id) {
         case ML_JOB_AGGREGATION.COUNT:
           d.function = this._sparseData
@@ -704,7 +713,9 @@ export class JobCreator {
   }
 
   private _extractRuntimeMappings() {
-    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap;
+    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap as
+      | RuntimeMappings
+      | undefined;
     if (runtimeFieldMap !== undefined) {
       if (this._datafeed_config.runtime_mappings === undefined) {
         this._datafeed_config.runtime_mappings = {};
@@ -776,7 +787,7 @@ export class JobCreator {
     this._aggregationFields = [];
     const aggs = getDatafeedAggregations(this._datafeed_config);
     if (aggs !== undefined) {
-      const aggBucketsName = getAggregationBucketsName(aggs);
+      const aggBucketsName = getFirstKeyInObject(aggs);
       if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
         const buckets = aggs[aggBucketsName];
         collectAggs(buckets, this._aggregationFields);

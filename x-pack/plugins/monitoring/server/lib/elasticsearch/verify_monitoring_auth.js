@@ -20,7 +20,8 @@ export async function verifyMonitoringAuth(req) {
   const xpackInfo = get(req.server.plugins.monitoring, 'info');
 
   if (xpackInfo) {
-    const security = xpackInfo.getSecurityFeature();
+    const licenseService = await xpackInfo.getLicenseService();
+    const security = licenseService.getSecurityFeature();
 
     // we only need to verify permissions if we're using X-Pack Security
     if (security.isAvailable && security.isEnabled) {
@@ -52,7 +53,7 @@ async function verifyHasPrivileges(req) {
           },
         ],
       },
-      ignoreUnavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
+      ignore_unavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
     });
   } catch (err) {
     if (

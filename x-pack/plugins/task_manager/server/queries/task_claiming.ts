@@ -11,7 +11,7 @@
 import apm from 'elastic-apm-node';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
-import { difference, partition, groupBy, mapValues, countBy, pick } from 'lodash';
+import { difference, partition, groupBy, mapValues, countBy, pick, isPlainObject } from 'lodash';
 import { some, none } from 'fp-ts/lib/Option';
 
 import { Logger } from '../../../../../src/core/server';
@@ -27,13 +27,11 @@ import {
 } from '../task_events';
 
 import {
-  asUpdateByQuery,
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
   asPinnedQuery,
   matchesClauses,
-  SortOptions,
 } from './query_clauses';
 
 import {
@@ -50,6 +48,7 @@ import {
   correctVersionConflictsForContinuation,
   TaskStore,
   UpdateByQueryResult,
+  SearchOpts,
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 
@@ -88,6 +87,9 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
 }
+export const isClaimOwnershipResult = (result: unknown): result is ClaimOwnershipResult =>
+  isPlainObject((result as ClaimOwnershipResult).stats) &&
+  Array.isArray((result as ClaimOwnershipResult).docs);
 
 enum BatchConcurrency {
   Unlimited,
@@ -375,39 +377,46 @@ export class TaskClaiming {
     // the score seems to favor newer documents rather than older documents, so
     // if there are not pinned tasks being queried, we do NOT want to sort by score
     // at all, just by runAt/retryAt.
-    const sort: SortOptions = [SortByRunAtAndRetryAt];
+    const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
     if (claimTasksById && claimTasksById.length) {
       sort.unshift('_score');
     }
 
-    const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
-    const result = await this.taskStore.updateByQuery(
-      asUpdateByQuery({
-        query: matchesClauses(
-          claimTasksById && claimTasksById.length
-            ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
-            : queryForScheduledTasks,
-          filterDownBy(InactiveTasks)
-        ),
-        update: updateFieldsAndMarkAsFailed(
-          {
-            ownerId: this.taskStore.taskManagerId,
-            retryAt: claimOwnershipUntil,
-          },
-          claimTasksById || [],
-          taskTypesToClaim,
-          taskTypesToSkip,
-          pick(this.taskMaxAttempts, taskTypesToClaim)
-        ),
-        sort,
-      }),
-      {
-        max_docs: size,
-      }
+    const apmTrans = apm.startTransaction(
+      'markAvailableTasksAsClaimed',
+      `taskManager markAvailableTasksAsClaimed`
     );
-
-    if (apmTrans) apmTrans.end();
-    return result;
+    try {
+      const result = await this.taskStore.updateByQuery(
+        {
+          query: matchesClauses(
+            claimTasksById && claimTasksById.length
+              ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
+              : queryForScheduledTasks,
+            filterDownBy(InactiveTasks)
+          ),
+          script: updateFieldsAndMarkAsFailed(
+            {
+              ownerId: this.taskStore.taskManagerId,
+              retryAt: claimOwnershipUntil,
+            },
+            claimTasksById || [],
+            taskTypesToClaim,
+            taskTypesToSkip,
+            pick(this.taskMaxAttempts, taskTypesToClaim)
+          ),
+          sort,
+        },
+        {
+          max_docs: size,
+        }
+      );
+      apmTrans?.end('success');
+      return result;
+    } catch (err) {
+      apmTrans?.end('failure');
+      throw err;
+    }
   }
 
   /**

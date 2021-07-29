@@ -17,11 +17,11 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Resolver tests for the entity route', () => {
     describe('winlogbeat tests', () => {
       before(async () => {
-        await esArchiver.load('endpoint/resolver/winlogbeat');
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
       });
 
       after(async () => {
-        await esArchiver.unload('endpoint/resolver/winlogbeat');
+        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
       });
 
       it('returns a winlogbeat sysmon event when the event matches the schema correctly', async () => {
@@ -56,11 +56,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('signals index mapping tests', () => {
       before(async () => {
-        await esArchiver.load('endpoint/resolver/signals');
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });
 
       after(async () => {
-        await esArchiver.unload('endpoint/resolver/signals');
+        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });
 
       it('returns an event even if it does not have a mapping for entity_id', async () => {

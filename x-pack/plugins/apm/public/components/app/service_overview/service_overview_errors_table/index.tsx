@@ -18,14 +18,18 @@ import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_column';
 
 interface Props {
   serviceName: string;
 }
+type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'last_seen' | 'occurrences';
@@ -36,14 +40,31 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
-const INITIAL_STATE = {
+const INITIAL_STATE_MAIN_STATISTICS: {
+  items: ErrorGroupMainStatistics['error_groups'];
+  totalItems: number;
+  requestId?: string;
+} = {
   items: [],
+  totalItems: 0,
   requestId: undefined,
+};
+
+const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
+  currentPeriod: {},
+  previousPeriod: {},
 };
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { environment, kuery, start, end },
+    urlParams: {
+      environment,
+      kuery,
+      start,
+      end,
+      comparisonType,
+      comparisonEnabled,
+    },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -57,16 +78,24 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
-  const { pageIndex, sort } = tableOptions;
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
-  const { data = INITIAL_STATE, status } = useFetcher(
+  const { pageIndex, sort } = tableOptions;
+  const { direction, field } = sort;
+
+  const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType) {
         return;
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
+          'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -78,40 +107,49 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           },
         },
       }).then((response) => {
+        const currentPageErrorGroups = orderBy(
+          response.error_groups,
+          field,
+          direction
+        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
         return {
+          // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
           requestId: uuid(),
-          items: response.error_groups,
+          items: currentPageErrorGroups,
+          totalItems: response.error_groups.length,
         };
       });
     },
-    [environment, kuery, start, end, serviceName, transactionType]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      environment,
+      kuery,
+      start,
+      end,
+      serviceName,
+      transactionType,
+      pageIndex,
+      direction,
+      field,
+      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
+      comparisonType,
+      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
+      comparisonEnabled,
+    ]
   );
 
-  const { requestId, items } = data;
-  const currentPageErrorGroups = orderBy(
-    items,
-    sort.field,
-    sort.direction
-  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+  const { requestId, items, totalItems } = data;
 
-  const groupIds = JSON.stringify(
-    currentPageErrorGroups.map(({ group_id: groupId }) => groupId).sort()
-  );
   const {
-    data: errorGroupComparisonStatistics,
-    status: errorGroupComparisonStatisticsStatus,
+    data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (
-        requestId &&
-        currentPageErrorGroups.length &&
-        start &&
-        end &&
-        transactionType
-      ) {
+      if (requestId && items.length && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
+            'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -121,21 +159,26 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               end,
               numBuckets: 20,
               transactionType,
-              groupIds,
+              groupIds: JSON.stringify(
+                items.map(({ group_id: groupId }) => groupId).sort()
+              ),
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
       }
     },
-    // only fetches agg results when requestId or group ids change
+    // only fetches agg results when requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, groupIds],
+    [requestId],
     { preservePreviousData: false }
   );
 
   const columns = getColumns({
     serviceName,
-    errorGroupComparisonStatistics: errorGroupComparisonStatistics ?? {},
+    errorGroupDetailedStatistics,
+    comparisonEnabled,
   });
 
   return (
@@ -164,22 +207,22 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         <TableFetchWrapper status={status}>
           <ServiceOverviewTableContainer
             isEmptyAndLoading={
-              items.length === 0 && status === FETCH_STATUS.LOADING
+              totalItems === 0 && status === FETCH_STATUS.LOADING
             }
           >
             <EuiBasicTable
               columns={columns}
-              items={currentPageErrorGroups}
+              items={items}
               pagination={{
                 pageIndex,
                 pageSize: PAGE_SIZE,
-                totalItemCount: items.length,
+                totalItemCount: totalItems,
                 pageSizeOptions: [PAGE_SIZE],
                 hidePerPageOptions: true,
               }}
               loading={
                 status === FETCH_STATUS.LOADING ||
-                errorGroupComparisonStatisticsStatus === FETCH_STATUS.LOADING
+                errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING
               }
               onChange={(newTableOptions: {
                 page?: {

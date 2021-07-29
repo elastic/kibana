@@ -50,7 +50,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editPath: string;
   editUrl: string;
-  editable: boolean;
+  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -111,7 +111,7 @@ export class VisualizeEmbeddable
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     attributeService?: AttributeService<
       VisualizeSavedObjectAttributes,
@@ -129,7 +129,6 @@ export class VisualizeEmbeddable
         editApp: 'visualize',
         editUrl,
         indexPatterns,
-        editable,
         visTypeName: vis.type.name,
       },
       parent
@@ -137,15 +136,25 @@ export class VisualizeEmbeddable
     this.deps = deps;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
+    this.searchSessionId = this.input.searchSessionId;
+    this.query = this.input.query;
+
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
 
+    if (this.attributeService) {
+      const isByValue = !this.inputIsRefType(initialInput);
+      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
+      this.updateOutput({ ...this.getOutput(), editable });
+    }
+
     this.subscriptions.push(
-      this.getUpdated$().subscribe(() => {
+      this.getInput$().subscribe(() => {
         const isDirty = this.handleChanges();
+
         if (isDirty && this.handler) {
           this.updateHandler();
         }
@@ -331,6 +340,14 @@ export class VisualizeEmbeddable
               data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
             };
           }
+          // do not trigger the filter click event if the filter bar is not visible
+          if (
+            triggerId === VIS_EVENT_TO_TRIGGER.filter &&
+            !this.input.id &&
+            !this.vis.type.options.showFilterBar
+          ) {
+            return;
+          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }
@@ -362,8 +379,8 @@ export class VisualizeEmbeddable
     }
   }
 
-  public reload = () => {
-    this.handleVisUpdate();
+  public reload = async () => {
+    await this.handleVisUpdate();
   };
 
   private async updateHandler() {
@@ -377,6 +394,13 @@ export class VisualizeEmbeddable
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
+      executionContext: this.deps.start().core.executionContext.create({
+        type: 'visualization',
+        name: this.vis.type.name,
+        id: this.vis.id ?? 'an_unsaved_vis',
+        description: this.vis.title ?? this.vis.type.title,
+        url: this.output.editUrl,
+      }),
     };
     if (this.abortController) {
       this.abortController.abort();
@@ -390,13 +414,13 @@ export class VisualizeEmbeddable
     });
 
     if (this.handler && !abortController.signal.aborted) {
-      this.handler.update(this.expression, expressionParams);
+      await this.handler.update(this.expression, expressionParams);
     }
   }
 
   private handleVisUpdate = async () => {
     this.handleChanges();
-    this.updateHandler();
+    await this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {
@@ -406,7 +430,7 @@ export class VisualizeEmbeddable
   };
 
   public supportedTriggers(): string[] {
-    return this.vis.type.getSupportedTriggers?.() ?? [];
+    return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useAsync, withOptionalSignal } from '../../../../shared_imports';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { getJobsSummary } from '../api/get_jobs_summary';
 
 const _getJobsSummary = withOptionalSignal(getJobsSummary);

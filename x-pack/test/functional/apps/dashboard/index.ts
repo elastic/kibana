@@ -19,5 +19,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_async_dashboard'));
     loadTestFile(require.resolve('./dashboard_lens_by_value'));
     loadTestFile(require.resolve('./dashboard_maps_by_value'));
+
+    loadTestFile(require.resolve('./migration_smoke_tests/lens_migration_smoke_test'));
+    loadTestFile(require.resolve('./migration_smoke_tests/tsvb_migration_smoke_test'));
   });
 }

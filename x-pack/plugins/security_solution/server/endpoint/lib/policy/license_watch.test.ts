@@ -11,7 +11,7 @@ import {
   loggingSystemMock,
   savedObjectsServiceMock,
 } from 'src/core/server/mocks';
-import { LicenseService } from '../../../../common/license/license';
+import { LicenseService } from '../../../../common/license';
 import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
 import { PolicyWatcher } from './license_watch';
 import { ILicense } from '../../../../../licensing/common/types';

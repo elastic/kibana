@@ -18,6 +18,7 @@ import {
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
+  emsWorldLayerId,
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
@@ -38,7 +39,7 @@ import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style
 
 // redefining APM constant to avoid making maps app depend on APM plugin
 export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
-export const APM_INDEX_PATTERN_TITLE = 'apm-*';
+export const APM_INDEX_PATTERN_TITLE = 'traces-apm*,logs-apm*,metrics-apm*,apm-*';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
@@ -182,7 +183,7 @@ export function createLayerDescriptor({
         },
       ],
       sourceDescriptor: EMSFileSource.createDescriptor({
-        id: 'world_countries',
+        id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
       }),
       style: VectorStyle.createDescriptor({

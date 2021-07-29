@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { random, times } from 'lodash';
 import expect from '@kbn/expect';
+import type { estypes } from '@elastic/elasticsearch';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -87,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
                 params: taskManagerIndexMapping.params,
                 state: taskManagerIndexMapping.state,
                 runAt: taskManagerIndexMapping.runAt,
-              },
+              } as Record<string, estypes.MappingProperty>,
             },
           },
         });
@@ -182,6 +183,20 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // function runEphemeralTaskNow(task: {
+    //   taskType: string;
+    //   params: Record<string, any>;
+    //   state: Record<string, any>;
+    // }) {
+    //   return supertest
+    //     .post('/api/sample_tasks/ephemeral_run_now')
+    //     .set('kbn-xsrf', 'xxx')
+    //     .send({ task })
+    //     .expect(200)
+    //     .then((response) => response.body);
+    // }
+
     function scheduleTaskIfNotExists(task: Partial<ConcreteTaskInstance>) {
       return supertest
         .post('/api/sample_tasks/ensure_scheduled')
@@ -224,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     it('should support middleware', async () => {
-      const historyItem = _.random(1, 100);
+      const historyItem = random(1, 100);
 
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -329,8 +344,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reschedule if task returns runAt', async () => {
-      const nextRunMilliseconds = _.random(60000, 200000);
-      const count = _.random(1, 20);
+      const nextRunMilliseconds = random(60000, 200000);
+      const count = random(1, 20);
 
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -350,7 +365,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reschedule if task has an interval', async () => {
-      const interval = _.random(5, 200);
+      const interval = random(5, 200);
       const intervalMilliseconds = interval * 60000;
 
       const originalTask = await scheduleTask({
@@ -371,7 +386,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should support the deprecated interval field', async () => {
-      const interval = _.random(5, 200);
+      const interval = random(5, 200);
       const intervalMilliseconds = interval * 60000;
 
       const originalTask = await scheduleTask({
@@ -470,7 +485,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Task Manager to use up its worker capacity
       // causing tasks to pile up
       await Promise.all(
-        _.times(DEFAULT_MAX_WORKERS + _.random(1, DEFAULT_MAX_WORKERS), () =>
+        times(DEFAULT_MAX_WORKERS + random(1, DEFAULT_MAX_WORKERS), () =>
           scheduleTask({
             taskType: 'sampleTask',
             params: {
@@ -886,5 +901,246 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
     });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('should return the resulting task state when asked to run an ephemeral task now', async () => {
+    //   const ephemeralTask = await runEphemeralTaskNow({
+    //     taskType: 'sampleTask',
+    //     params: {},
+    //     state: {},
+    //   });
+
+    //   await retry.try(async () => {
+    //     expect(
+    //       (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === ephemeralTask.id)
+    //         .length
+    //     ).to.eql(1);
+
+    //     expect(ephemeralTask.state.count).to.eql(1);
+    //   });
+
+    //   const secondEphemeralTask = await runEphemeralTaskNow({
+    //     taskType: 'sampleTask',
+    //     params: {},
+    //     // pass state from previous ephemeral run as input for the second run
+    //     state: ephemeralTask.state,
+    //   });
+
+    //   // ensure state is cumulative
+    //   expect(secondEphemeralTask.state.count).to.eql(2);
+
+    //   await retry.try(async () => {
+    //     // ensure new id is produced for second task execution
+    //     expect(
+    //       (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === ephemeralTask.id)
+    //         .length
+    //     ).to.eql(1);
+    //     expect(
+    //       (await historyDocs()).filter(
+    //         (taskDoc) => taskDoc._source.taskId === secondEphemeralTask.id
+    //       ).length
+    //     ).to.eql(1);
+    //   });
+    // });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('Epheemral task run should only run one instance of a task if its maxConcurrency is 1', async () => {
+    //   const ephemeralTaskWithSingleConcurrency: {
+    //     state: {
+    //       executions: Array<{
+    //         result: {
+    //           id: string;
+    //           state: {
+    //             timings: Array<{
+    //               start: number;
+    //               stop: number;
+    //             }>;
+    //           };
+    //         };
+    //       }>;
+    //     };
+    //   } = await runEphemeralTaskNow({
+    //     taskType: 'taskWhichExecutesOtherTasksEphemerally',
+    //     params: {
+    //       tasks: [
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //       ],
+    //     },
+    //     state: {},
+    //   });
+
+    //   ensureOverlappingTasksDontExceedThreshold(
+    //     ephemeralTaskWithSingleConcurrency.state.executions,
+    //     // make sure each task intersects with any other task
+    //     0
+    //   );
+    // });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('Ephemeral task run should only run as many instances of a task as its maxConcurrency will allow', async () => {
+    //   const ephemeralTaskWithSingleConcurrency: {
+    //     state: {
+    //       executions: Array<{
+    //         result: {
+    //           id: string;
+    //           state: {
+    //             timings: Array<{
+    //               start: number;
+    //               stop: number;
+    //             }>;
+    //           };
+    //         };
+    //       }>;
+    //     };
+    //   } = await runEphemeralTaskNow({
+    //     taskType: 'taskWhichExecutesOtherTasksEphemerally',
+    //     params: {
+    //       tasks: [
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //       ],
+    //     },
+    //     state: {},
+    //   });
+
+    //   ensureOverlappingTasksDontExceedThreshold(
+    //     ephemeralTaskWithSingleConcurrency.state.executions,
+    //     // make sure each task intersects with, at most, 1 other task
+    //     1
+    //   );
+    // });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('Ephemeral task executions cant exceed the max workes in Task Manager', async () => {
+    //   const ephemeralTaskWithSingleConcurrency: {
+    //     state: {
+    //       executions: Array<{
+    //         result: {
+    //           id: string;
+    //           state: {
+    //             timings: Array<{
+    //               start: number;
+    //               stop: number;
+    //             }>;
+    //           };
+    //         };
+    //       }>;
+    //     };
+    //   } = await runEphemeralTaskNow({
+    //     taskType: 'taskWhichExecutesOtherTasksEphemerally',
+    //     params: {
+    //       tasks: times(20, () => ({
+    //         taskType: 'timedTask',
+    //         params: { delay: 100 },
+    //         state: {},
+    //       })),
+    //     },
+    //     state: {},
+    //   });
+
+    //   ensureOverlappingTasksDontExceedThreshold(
+    //     ephemeralTaskWithSingleConcurrency.state.executions,
+    //     // make sure each task intersects with, at most, 9 other tasks (as max workes is 10)
+    //     9
+    //   );
+    // });
   });
+
+  // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+  // function ensureOverlappingTasksDontExceedThreshold(
+  //   executions: Array<{
+  //     result: {
+  //       id: string;
+  //       state: {
+  //         timings: Array<{
+  //           start: number;
+  //           stop: number;
+  //         }>;
+  //       };
+  //     };
+  //   }>,
+  //   threshold: number
+  // ) {
+  //   const executionRanges = executions.map((execution) => ({
+  //     id: execution.result.id,
+  //     range: range(
+  //       // calculate range of milliseconds
+  //       // in which the task was running (that should be good enough)
+  //       execution.result.state.timings[0].start,
+  //       execution.result.state.timings[0].stop
+  //     ),
+  //   }));
+
+  //   const intersections = new Map<string, string[]>();
+  //   for (const currentExecution of executionRanges) {
+  //     for (const executionToComparteTo of executionRanges) {
+  //       if (currentExecution.id !== executionToComparteTo.id) {
+  //         // find all executions that intersect
+  //         if (intersection(currentExecution.range, executionToComparteTo.range).length) {
+  //           intersections.set(currentExecution.id, [
+  //             ...(intersections.get(currentExecution.id) ?? []),
+  //             executionToComparteTo.id,
+  //           ]);
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   const tooManyIntersectingTasks = [...intersections.entries()].find(
+  //     // make sure each task intersects with, at most, threshold of other task
+  //     ([, intersectingTasks]) => intersectingTasks.length > threshold
+  //   );
+  //   if (tooManyIntersectingTasks) {
+  //     throw new Error(
+  //       `Invalid execution found: ${tooManyIntersectingTasks[0]} overlaps with ${tooManyIntersectingTasks[1]}`
+  //     );
+  //   }
+  // }
 }

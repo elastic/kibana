@@ -18,12 +18,19 @@ const theme = {
     euiColorVis5: 'red',
     euiColorVis7: 'black',
     euiColorVis9: 'yellow',
+    euiColorMediumShade: 'green',
   },
 } as EuiTheme;
 
 const latencyChartData = {
-  overallAvgDuration: 1,
-  latencyTimeseries: [{ x: 1, y: 10 }],
+  currentPeriod: {
+    overallAvgDuration: 1,
+    latencyTimeseries: [{ x: 1, y: 10 }],
+  },
+  previousPeriod: {
+    overallAvgDuration: 1,
+    latencyTimeseries: [{ x: 1, y: 10 }],
+  },
   anomalyTimeseries: {
     jobId: '1',
     anomalyBoundaries: [{ x: 1, y: 2, y0: 1 }],
@@ -36,69 +43,84 @@ describe('getLatencyChartSelector', () => {
     it('returns default values when data is undefined', () => {
       const latencyChart = getLatencyChartSelector({ theme });
       expect(latencyChart).toEqual({
-        latencyTimeseries: [],
+        currentPeriod: undefined,
+        previousPeriod: undefined,
         mlJobId: undefined,
         anomalyTimeseries: undefined,
       });
     });
 
     it('returns average timeseries', () => {
-      const { anomalyTimeseries, ...latencyWithouAnomaly } = latencyChartData;
+      const { anomalyTimeseries, ...latencyWithoutAnomaly } = latencyChartData;
       const latencyTimeseries = getLatencyChartSelector({
-        latencyChart: latencyWithouAnomaly as LatencyChartsResponse,
+        latencyChart: latencyWithoutAnomaly as LatencyChartsResponse,
         theme,
         latencyAggregationType: LatencyAggregationType.avg,
       });
       expect(latencyTimeseries).toEqual({
-        latencyTimeseries: [
-          {
-            title: 'Average',
-            data: [{ x: 1, y: 10 }],
-            legendValue: '1 μs',
-            type: 'linemark',
-            color: 'blue',
-          },
-        ],
+        currentPeriod: {
+          title: 'Average',
+          data: [{ x: 1, y: 10 }],
+          legendValue: '1 μs',
+          type: 'linemark',
+          color: 'blue',
+        },
+
+        previousPeriod: {
+          color: 'green',
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          title: 'Previous period',
+        },
       });
     });
 
     it('returns 95th percentile timeseries', () => {
-      const { anomalyTimeseries, ...latencyWithouAnomaly } = latencyChartData;
+      const { anomalyTimeseries, ...latencyWithoutAnomaly } = latencyChartData;
       const latencyTimeseries = getLatencyChartSelector({
-        latencyChart: latencyWithouAnomaly as LatencyChartsResponse,
+        latencyChart: latencyWithoutAnomaly as LatencyChartsResponse,
         theme,
         latencyAggregationType: LatencyAggregationType.p95,
       });
       expect(latencyTimeseries).toEqual({
-        latencyTimeseries: [
-          {
-            title: '95th percentile',
-            data: [{ x: 1, y: 10 }],
-            titleShort: '95th',
-            type: 'linemark',
-            color: 'red',
-          },
-        ],
+        currentPeriod: {
+          title: '95th percentile',
+          titleShort: '95th',
+          data: [{ x: 1, y: 10 }],
+          type: 'linemark',
+          color: 'red',
+        },
+        previousPeriod: {
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          color: 'green',
+          title: 'Previous period',
+        },
       });
     });
 
     it('returns 99th percentile timeseries', () => {
-      const { anomalyTimeseries, ...latencyWithouAnomaly } = latencyChartData;
+      const { anomalyTimeseries, ...latencyWithoutAnomaly } = latencyChartData;
       const latencyTimeseries = getLatencyChartSelector({
-        latencyChart: latencyWithouAnomaly as LatencyChartsResponse,
+        latencyChart: latencyWithoutAnomaly as LatencyChartsResponse,
         theme,
         latencyAggregationType: LatencyAggregationType.p99,
       });
+
       expect(latencyTimeseries).toEqual({
-        latencyTimeseries: [
-          {
-            title: '99th percentile',
-            data: [{ x: 1, y: 10 }],
-            titleShort: '99th',
-            type: 'linemark',
-            color: 'black',
-          },
-        ],
+        currentPeriod: {
+          title: '99th percentile',
+          titleShort: '99th',
+          data: [{ x: 1, y: 10 }],
+          type: 'linemark',
+          color: 'black',
+        },
+        previousPeriod: {
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          color: 'green',
+          title: 'Previous period',
+        },
       });
     });
   });
@@ -111,76 +133,52 @@ describe('getLatencyChartSelector', () => {
         latencyAggregationType: LatencyAggregationType.p99,
       });
       expect(latencyTimeseries).toEqual({
+        currentPeriod: {
+          title: '99th percentile',
+          titleShort: '99th',
+          data: [{ x: 1, y: 10 }],
+          type: 'linemark',
+          color: 'black',
+        },
+        previousPeriod: {
+          data: [{ x: 1, y: 10 }],
+          type: 'area',
+          color: 'green',
+          title: 'Previous period',
+        },
+        mlJobId: '1',
         anomalyTimeseries: {
           boundaries: [
             {
-              color: 'rgba(0,0,0,0)',
-              areaSeriesStyle: {
-                point: {
-                  opacity: 0,
-                },
-              },
-              data: [
-                {
-                  x: 1,
-                  y: 1,
-                },
-              ],
+              type: 'area',
               fit: 'lookahead',
               hideLegend: true,
               hideTooltipValue: true,
               stackAccessors: ['y'],
+              areaSeriesStyle: { point: { opacity: 0 } },
               title: 'anomalyBoundariesLower',
-              type: 'area',
+              data: [{ x: 1, y: 1 }],
+              color: 'rgba(0,0,0,0)',
             },
             {
-              color: 'rgba(0,0,255,0.5)',
-              areaSeriesStyle: {
-                point: {
-                  opacity: 0,
-                },
-              },
-              data: [
-                {
-                  x: 1,
-                  y: 1,
-                },
-              ],
+              type: 'area',
               fit: 'lookahead',
               hideLegend: true,
               hideTooltipValue: true,
               stackAccessors: ['y'],
+              areaSeriesStyle: { point: { opacity: 0 } },
               title: 'anomalyBoundariesUpper',
-              type: 'area',
+              data: [{ x: 1, y: 1 }],
+              color: 'rgba(0,0,255,0.5)',
             },
           ],
           scores: {
-            color: 'yellow',
-            data: [
-              {
-                x: 1,
-                x0: 2,
-              },
-            ],
             title: 'anomalyScores',
             type: 'rectAnnotation',
+            data: [{ x: 1, x0: 2 }],
+            color: 'yellow',
           },
         },
-        latencyTimeseries: [
-          {
-            color: 'black',
-            data: [
-              {
-                x: 1,
-                y: 10,
-              },
-            ],
-            title: '99th percentile',
-            titleShort: '99th',
-            type: 'linemark',
-          },
-        ],
-        mlJobId: '1',
       });
     });
   });

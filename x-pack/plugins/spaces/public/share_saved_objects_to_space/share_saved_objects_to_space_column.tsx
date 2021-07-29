@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsManagementColumn } from '../../../../../src/plugins/saved_objects_management/public';
-import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public';
+import type { SavedObjectsManagementColumn } from 'src/plugins/saved_objects_management/public';
+import type { SpaceListProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+interface WrapperProps {
+  spacesApiUi: SpacesApiUi;
+  props: SpaceListProps;
+}
+
+const Wrapper = ({ spacesApiUi, props }: WrapperProps) => {
+  const LazyComponent = useMemo(() => spacesApiUi.components.getSpaceList, [spacesApiUi]);
+
+  return <LazyComponent {...props} />;
+};
 
 export class ShareToSpaceSavedObjectsManagementColumn
   implements SavedObjectsManagementColumn<void> {
@@ -26,7 +38,12 @@ export class ShareToSpaceSavedObjectsManagementColumn
       if (!namespaces) {
         return null;
       }
-      return <this.spacesApiUi.components.SpaceList namespaces={namespaces} />;
+
+      const props: SpaceListProps = {
+        namespaces,
+      };
+
+      return <Wrapper spacesApiUi={this.spacesApiUi} props={props} />;
     },
   };
 

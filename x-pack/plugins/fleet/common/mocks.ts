@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewPackagePolicy, PackagePolicy } from './types';
+import type { NewPackagePolicy, PackagePolicy } from './types';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {

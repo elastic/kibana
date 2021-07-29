@@ -11,9 +11,14 @@ import { createInterface } from 'readline';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../..';
-import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
-import { registerDiagnoseBrowser } from './browser';
+import {
+  createMockConfigSchema,
+  createMockLevelLogger,
+  createMockPluginSetup,
+  createMockReportingCore,
+} from '../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../types';
+import { registerDiagnoseBrowser } from './browser';
 
 jest.mock('child_process');
 jest.mock('readline');
@@ -34,33 +39,25 @@ describe('POST /diagnose/browser', () => {
   const mockedSpawn: any = spawn;
   const mockedCreateInterface: any = createInterface;
 
-  const config = {
-    get: jest.fn().mockImplementation((...keys) => {
-      const key = keys.join('.');
-      switch (key) {
-        case 'queue.timeout':
-          return 120000;
-        case 'capture.browser.chromium.proxy':
-          return { enabled: false };
-      }
-    }),
-    kbnConfig: { get: jest.fn() },
-  };
+  const config = createMockConfigSchema({
+    queue: { timeout: 120000 },
+    capture: { browser: { chromium: { proxy: { enabled: false } } } },
+  });
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: () => false })
     );
 
-    const mockSetupDeps = ({
+    const mockSetupDeps = createMockPluginSetup({
       elasticsearch: {
         legacy: { client: { callAsInternalUser: jest.fn() } },
       },
       router: httpSetup.createRouter(''),
-    } as unknown) as any;
+    });
 
     core = await createMockReportingCore(config, mockSetupDeps);
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AuthorizationMode } from './mode';
 import { actionsMock } from './actions/actions.mock';
+import type { AuthorizationMode } from './mode';
 
 export const authorizationMock = {
   create: ({

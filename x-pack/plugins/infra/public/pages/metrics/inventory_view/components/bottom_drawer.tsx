@@ -74,8 +74,8 @@ const BottomActionContainer = euiStyled.div<{ isOpen: boolean; outerWidth: numbe
   right: 0;
   transition: transform ${TRANSITION_MS}ms;
   transform: translateY(${(props) => (props.isOpen ? 0 : '224px')});
-  width: ${(props) => props.outerWidth}px;
-`;
+  width: ${(props) => props.outerWidth + 34}px;
+`; // Additional width comes from the padding on the EuiPageBody and inner nodes container
 
 const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
   justifyContent: 'spaceBetween',

@@ -141,7 +141,7 @@ export interface SavedObjectsServiceSetup {
    * }
    * ```
    */
-  registerType: (type: SavedObjectsType) => void;
+  registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
 }
 
 /**
@@ -149,6 +149,8 @@ export interface SavedObjectsServiceSetup {
  */
 export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
   status$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+  /** Note: this must be called after server.setup to get all plugin SO types */
+  getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 /**
@@ -338,6 +340,7 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
+      getTypeRegistry: () => this.typeRegistry,
     };
   }
 
@@ -421,6 +424,7 @@ export class SavedObjectsService
         this.typeRegistry,
         kibanaConfig.index,
         esClient,
+        this.logger.get('repository'),
         includedHiddenTypes
       );
     };
@@ -475,7 +479,7 @@ export class SavedObjectsService
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
-    savedObjectsConfig: SavedObjectsMigrationConfigType,
+    soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     migrationsRetryDelay?: number
   ): IKibanaMigrator {
@@ -483,7 +487,7 @@ export class SavedObjectsService
       typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      savedObjectsConfig,
+      soMigrationsConfig,
       kibanaConfig,
       client,
       migrationsRetryDelay,

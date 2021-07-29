@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-import {
+import type { Observable } from 'rxjs';
+import type {
   CoreSetup,
   CoreStart,
   ElasticsearchServiceStart,
@@ -17,16 +16,24 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
   SavedObjectsClientContract,
+  RequestHandlerContext,
+  KibanaRequest,
 } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { LicensingPluginSetup, ILicense } from '../../licensing/server';
-import {
+import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { FleetConfigType, NewPackagePolicy, UpdatePackagePolicy } from '../common';
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import type { CloudSetup } from '../../cloud/server';
+
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -34,50 +41,49 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
-  registerLimitedConcurrencyRoutes,
   registerEPMRoutes,
   registerPackagePolicyRoutes,
   registerDataStreamRoutes,
   registerAgentPolicyRoutes,
   registerSetupRoutes,
   registerAgentAPIRoutes,
-  registerElasticAgentRoutes,
   registerEnrollmentApiKeyRoutes,
-  registerInstallScriptRoutes,
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
+  registerPreconfigurationRoutes,
 } from './routes';
-import { EsAssetReference, FleetConfigType } from '../common';
+
+import type { ExternalCallback } from './types';
+import type {
+  ESIndexPatternService,
+  AgentService,
+  AgentPolicyServiceInterface,
+  PackageService,
+} from './services';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
-  ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
   agentPolicyService,
   packagePolicyService,
-  PackageService,
 } from './services';
 import {
   getAgentStatusById,
   authenticateAgentWithAccessToken,
-  listAgents,
-  getAgent,
+  getAgentsByKuery,
+  getAgentById,
 } from './services/agents';
-import { CloudSetup } from '../../cloud/server';
-import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
-import { ExternalCallback } from './types';
+import { FleetArtifactsClient } from './services/artifacts';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -89,16 +95,19 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
 export interface FleetAppContext {
   elasticsearch: ElasticsearchServiceStart;
+  data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
+  configInitialValue: FleetConfigType;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -116,14 +125,20 @@ const allSavedObjectTypes = [
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
 
 /**
  * Describes public Fleet plugin contract returned at the `startup` stage.
  */
 export interface FleetStartContract {
+  /**
+   * returns a promise that resolved when fleet setup has been completed regardless if it was successful or failed).
+   * Any consumer of fleet start services should first `await` for this promise to be resolved before using those
+   * services
+   */
+  fleetSetupCompleted: () => Promise<void>;
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
@@ -137,12 +152,19 @@ export interface FleetStartContract {
    * @param args
    */
   registerExternalCallback: (...args: ExternalCallback) => void;
+
+  /**
+   * Create a Fleet Artifact Client instance
+   * @param packageName
+   */
+  createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 }
 
 export class FleetPlugin
   implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
+  private configInitialValue: FleetConfigType;
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
@@ -158,13 +180,15 @@ export class FleetPlugin
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
+    this.configInitialValue = this.initializerContext.config.get();
   }
 
-  public async setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
+    const config = this.configInitialValue;
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
@@ -174,14 +198,14 @@ export class FleetPlugin
     if (deps.features) {
       deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
-        name: 'Fleet',
+        name: 'Fleet and Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
-        app: [PLUGIN_ID, 'kibana'],
+        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
         catalogue: ['fleet'],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -191,7 +215,7 @@ export class FleetPlugin
           },
           read: {
             api: [`${PLUGIN_ID}-read`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
@@ -204,8 +228,6 @@ export class FleetPlugin
     }
 
     const router = core.http.createRouter();
-
-    const config = await this.config$.pipe(first()).toPromise();
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
@@ -223,39 +245,24 @@ export class FleetPlugin
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
       registerEPMRoutes(routerSuperuserOnly);
+      registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOCanEncrypt = deps.encryptedSavedObjects.canEncrypt;
-        if (!isESOCanEncrypt) {
-          if (this.logger) {
-            this.logger.warn(
-              'Fleet APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-            );
-          }
-        } else {
-          // we currently only use this global interceptor if fleet is enabled
-          // since it would run this func on *every* req (other plugins, CSS, etc)
-          registerLimitedConcurrencyRoutes(core, config);
-          registerAgentAPIRoutes(routerSuperuserOnly, config);
-          registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
-          registerInstallScriptRoutes({
-            router: routerSuperuserOnly,
-            basePath: core.http.basePath,
-          });
-          // Do not enforce superuser role for Elastic Agent routes
-          registerElasticAgentRoutes(router, config);
-        }
+        registerAgentAPIRoutes(routerSuperuserOnly, config);
+        registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
       }
     }
   }
 
-  public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
-    await appContextService.start({
+  public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    appContextService.start({
       elasticsearch: core.elasticsearch,
+      data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,
+      configInitialValue: this.configInitialValue,
       config$: this.config$,
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
@@ -266,27 +273,21 @@ export class FleetPlugin
       logger: this.logger,
     });
     licenseService.start(this.licensing$);
-    agentCheckinState.start();
 
-    if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
-      // Break the promise chain, the error handling is done in startFleetServerSetup
-      startFleetServerSetup();
-    }
+    const fleetServerSetup = startFleetServerSetup();
 
     return {
+      fleetSetupCompleted: () =>
+        new Promise<void>((resolve) => {
+          Promise.all([fleetServerSetup]).finally(() => resolve());
+        }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
-        getInstalledEsAssetReferences: async (
-          savedObjectsClient: SavedObjectsClientContract,
-          pkgName: string
-        ): Promise<EsAssetReference[]> => {
-          const installation = await getInstallation({ savedObjectsClient, pkgName });
-          return installation?.installed_es || [];
-        },
+        getInstallation,
       },
       agentService: {
-        getAgent,
-        listAgents,
+        getAgent: getAgentById,
+        listAgents: getAgentsByKuery,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
@@ -295,10 +296,14 @@ export class FleetPlugin
         list: agentPolicyService.list,
         getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
+        getByIds: agentPolicyService.getByIDs,
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
+      },
+      createArtifactsClient(packageName: string) {
+        return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
     };
   }
@@ -306,6 +311,5 @@ export class FleetPlugin
   public async stop() {
     appContextService.stop();
     licenseService.stop();
-    agentCheckinState.stop();
   }
 }

@@ -7,29 +7,32 @@
 
 import './login_form.scss';
 
-import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
-import ReactMarkdown from 'react-markdown';
 import {
   EuiButton,
-  EuiIcon,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldPassword,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiTitle,
-  EuiLoadingSpinner,
-  EuiLink,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import type { ChangeEvent, FormEvent, MouseEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+import ReactMarkdown from 'react-markdown';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
+import type { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
+
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';
 
@@ -37,7 +40,7 @@ interface Props {
   http: HttpStart;
   notifications: NotificationsStart;
   selector: LoginSelector;
-  infoMessage?: string;
+  message?: { type: MessageType.Danger | MessageType.Info; content: string };
   loginAssistanceMessage: string;
   loginHelp?: string;
   authProviderHint?: string;
@@ -63,7 +66,7 @@ enum LoadingStateType {
   AutoLogin,
 }
 
-enum MessageType {
+export enum MessageType {
   None,
   Info,
   Danger,
@@ -103,9 +106,7 @@ export class LoginForm extends Component<Props, State> {
       loadingState: { type: LoadingStateType.None },
       username: '',
       password: '',
-      message: this.props.infoMessage
-        ? { type: MessageType.Info, content: this.props.infoMessage }
-        : { type: MessageType.None },
+      message: this.props.message || { type: MessageType.None },
       mode,
       previousMode: mode,
     };
@@ -203,7 +204,7 @@ export class LoginForm extends Component<Props, State> {
         >
           <FormattedMessage
             id="xpack.security.loginPage.loginSelectorLinkText"
-            defaultMessage="See more login options"
+            defaultMessage="More login options"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -477,8 +478,8 @@ export class LoginForm extends Component<Props, State> {
       const message =
         (error as IHttpFetchError).response?.status === 401
           ? i18n.translate(
-              'xpack.security.login.basicLoginForm.invalidUsernameOrPasswordErrorMessage',
-              { defaultMessage: 'Invalid username or password. Please try again.' }
+              'xpack.security.login.basicLoginForm.usernameOrPasswordIsIncorrectErrorMessage',
+              { defaultMessage: 'Username or password is incorrect. Please try again.' }
             )
           : i18n.translate('xpack.security.login.basicLoginForm.unknownErrorMessage', {
               defaultMessage: 'Oops! Error. Try again.',

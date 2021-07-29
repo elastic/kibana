@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { buildHierarchicalData, Dimensions, Dimension } from './build_hierarchical_data';
+import type { Dimensions, Dimension } from '../../../../../vis_type_pie/public';
+import { buildHierarchicalData } from './build_hierarchical_data';
 import { Table, TableParent } from '../../types';
 
 function tableVisResponseHandler(table: Table, dimensions: Dimensions) {

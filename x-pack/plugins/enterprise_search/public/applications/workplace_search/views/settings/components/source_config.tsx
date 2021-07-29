@@ -12,7 +12,8 @@ import { useActions, useValues } from 'kea';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../../shared/loading';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
+import { NAV, REMOVE_BUTTON, CANCEL_BUTTON } from '../../../constants';
 import { SourceDataItem } from '../../../types';
 import { AddSourceHeader } from '../../content_sources/components/add_source/add_source_header';
 import { AddSourceLogic } from '../../content_sources/components/add_source/add_source_logic';
@@ -38,8 +39,6 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
     getSourceConfigData(serviceType);
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const hideConfirmModal = () => setConfirmModalVisibility(false);
   const showConfirmModal = () => setConfirmModalVisibility(true);
   const saveUpdatedConfig = () => saveSourceConfig(true);
@@ -47,7 +46,10 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
 
   return (
-    <>
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.SETTINGS, NAV.SETTINGS_SOURCE_PRIORITIZATION, name || '...']}
+      isLoading={dataLoading}
+    >
       <SaveConfig
         name={name}
         configuration={configuration}
@@ -60,6 +62,12 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
           onConfirm={() => deleteSourceConfig(serviceType, name)}
           onCancel={hideConfirmModal}
           buttonColor="danger"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfigTitle',
+            { defaultMessage: 'Remove configuration' }
+          )}
+          confirmButtonText={REMOVE_BUTTON}
+          cancelButtonText={CANCEL_BUTTON}
         >
           {i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',
@@ -70,6 +78,6 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
           )}
         </EuiConfirmModal>
       )}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

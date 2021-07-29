@@ -13,25 +13,32 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { keyBy } from 'lodash';
 import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { px, unit } from '../../../../style/variables';
-import { AgentIcon } from '../../../shared/AgentIcon';
+import { unit } from '../../../../utils/style';
+import { AgentIcon } from '../../../shared/agent_icon';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
@@ -39,12 +46,74 @@ interface Props {
   serviceName: string;
 }
 
+type ServiceDependencyPeriods = ServiceDependencyItem & {
+  latency: { previousPeriodTimeseries?: Coordinate[] };
+  throughput: { previousPeriodTimeseries?: Coordinate[] };
+  errorRate: { previousPeriodTimeseries?: Coordinate[] };
+  previousPeriodImpact?: number;
+};
+
+function mergeCurrentAndPreviousPeriods({
+  currentPeriod = [],
+  previousPeriod = [],
+}: {
+  currentPeriod?: ServiceDependencyItem[];
+  previousPeriod?: ServiceDependencyItem[];
+}): ServiceDependencyPeriods[] {
+  const previousPeriodMap = keyBy(previousPeriod, 'name');
+
+  return currentPeriod.map((currentDependency) => {
+    const previousDependency = previousPeriodMap[currentDependency.name];
+    if (!previousDependency) {
+      return currentDependency;
+    }
+    return {
+      ...currentDependency,
+      latency: {
+        ...currentDependency.latency,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.latency.timeseries,
+          previousPeriodTimeseries: previousDependency.latency?.timeseries,
+        }),
+      },
+      throughput: {
+        ...currentDependency.throughput,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.throughput.timeseries,
+          previousPeriodTimeseries: previousDependency.throughput?.timeseries,
+        }),
+      },
+      errorRate: {
+        ...currentDependency.errorRate,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.errorRate.timeseries,
+          previousPeriodTimeseries: previousDependency.errorRate?.timeseries,
+        }),
+      },
+      previousPeriodImpact: previousDependency.impact,
+    };
+  });
+}
+
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end, environment },
+    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
-  const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
+  const {
+    query: { rangeFrom, rangeTo, kuery },
+  } = useApmParams('/services/:serviceName/overview');
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
+
+  const apmRouter = useApmRouter();
+
+  const columns: Array<EuiBasicTableColumn<ServiceDependencyPeriods>> = [
     {
       field: 'name',
       name: i18n.translate(
@@ -78,7 +147,14 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                       {item.name}
                     </ServiceOverviewLink>
                   ) : (
-                    item.name
+                    <EuiLink
+                      href={apmRouter.link('/backends/:backendName/overview', {
+                        path: { backendName: item.name },
+                        query: { rangeFrom, rangeTo, kuery, environment },
+                      })}
+                    >
+                      {item.name}
+                    </EuiLink>
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -96,12 +172,15 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Latency (avg.)',
         }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { latency }) => {
         return (
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
+            comparisonSeries={
+              comparisonEnabled ? latency.previousPeriodTimeseries : undefined
+            }
             valueLabel={asMillisecondDuration(latency.value)}
           />
         );
@@ -114,13 +193,18 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { throughput }) => {
         return (
           <SparkPlot
             compact
             color="euiColorVis0"
             series={throughput.timeseries}
+            comparisonSeries={
+              comparisonEnabled
+                ? throughput.previousPeriodTimeseries
+                : undefined
+            }
             valueLabel={asTransactionRate(throughput.value)}
           />
         );
@@ -135,13 +219,16 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Error rate',
         }
       ),
-      width: px(unit * 10),
+      width: `${unit * 10}px`,
       render: (_, { errorRate }) => {
         return (
           <SparkPlot
             compact
             color="euiColorVis7"
             series={errorRate.timeseries}
+            comparisonSeries={
+              comparisonEnabled ? errorRate.previousPeriodTimeseries : undefined
+            }
             valueLabel={asPercent(errorRate.value, 1)}
           />
         );
@@ -156,15 +243,30 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Impact',
         }
       ),
-      width: px(unit * 5),
-      render: (_, { impact }) => {
-        return <ImpactBar size="m" value={impact} />;
+      width: `${unit * 5}px`,
+      render: (_, { impact, previousPeriodImpact }) => {
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <ImpactBar value={impact} size="m" />
+            </EuiFlexItem>
+            {comparisonEnabled && previousPeriodImpact !== undefined && (
+              <EuiFlexItem>
+                <ImpactBar
+                  value={previousPeriodImpact}
+                  size="s"
+                  color="subdued"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
       sortable: true,
     },
   ];
-
-  const { data = [], status } = useFetcher(
+  // Fetches current period dependencies
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return;
@@ -173,23 +275,44 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       return callApmApi({
         endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
         params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            environment,
-            numBuckets: 20,
-          },
+          path: { serviceName },
+          query: { start, end, environment, numBuckets: 20 },
         },
       });
     },
     [start, end, serviceName, environment]
   );
 
+  // Fetches previous period dependencies
+  const { data: previousPeriodData, status: previousPeriodStatus } = useFetcher(
+    (callApmApi) => {
+      if (!comparisonStart || !comparisonEnd) {
+        return;
+      }
+
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        params: {
+          path: { serviceName },
+          query: {
+            start: comparisonStart,
+            end: comparisonEnd,
+            environment,
+            numBuckets: 20,
+          },
+        },
+      });
+    },
+    [comparisonStart, comparisonEnd, serviceName, environment]
+  );
+
+  const serviceDependencies = mergeCurrentAndPreviousPeriods({
+    currentPeriod: data?.serviceDependencies,
+    previousPeriod: previousPeriodData?.serviceDependencies,
+  });
+
   // need top-level sortable fields for the managed table
-  const items = data.map((item) => ({
+  const items = serviceDependencies.map((item) => ({
     ...item,
     errorRateValue: item.errorRate.value,
     latencyValue: item.latency.value,
@@ -236,7 +359,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
               columns={columns}
               items={items}
               allowNeutralSort={false}
-              loading={status === FETCH_STATUS.LOADING}
+              loading={
+                status === FETCH_STATUS.LOADING ||
+                previousPeriodStatus === FETCH_STATUS.LOADING
+              }
               pagination={{
                 initialPageSize: 5,
                 pageSizeOptions: [5],

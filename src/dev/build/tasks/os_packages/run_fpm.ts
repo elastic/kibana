@@ -28,11 +28,7 @@ export async function runFpm(
   const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
 
   const pickLicense = () => {
-    if (build.isOss()) {
-      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
-    } else {
-      return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
-    }
+    return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
   };
 
   const envFolder = type === 'rpm' ? 'sysconfig' : 'default';
@@ -57,7 +53,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    build.isOss() ? 'kibana-oss' : 'kibana',
+    'kibana',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -71,10 +67,6 @@ export async function runFpm(
     '--license',
     pickLicense(),
 
-    // prevent installing kibana if installing kibana-oss and vice versa
-    '--conflicts',
-    build.isOss() ? 'kibana' : 'kibana-oss',
-
     // define install/uninstall scripts
     '--after-install',
     resolve(__dirname, 'package_scripts/post_install.sh'),
@@ -86,6 +78,10 @@ export async function runFpm(
     resolve(__dirname, 'package_scripts/post_remove.sh'),
     '--rpm-posttrans',
     resolve(__dirname, 'package_scripts/post_trans.sh'),
+
+    // for RHEL 8+ package verification
+    '--rpm-digest',
+    'sha256',
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',

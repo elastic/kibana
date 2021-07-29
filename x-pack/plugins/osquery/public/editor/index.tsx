@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
-import 'brace/mode/sql';
 import 'brace/theme/tomorrow';
-import 'brace/ext/language_tools';
+
+import './osquery_mode.ts';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,
@@ -22,29 +22,27 @@ const EDITOR_PROPS = {
 
 interface OsqueryEditorProps {
   defaultValue: string;
+  disabled?: boolean;
   onChange: (newValue: string) => void;
 }
 
-const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
-  const handleChange = useCallback(
-    (newValue) => {
-      onChange(newValue);
-    },
-    [onChange]
-  );
-
-  return (
-    <EuiCodeEditor
-      value={defaultValue}
-      mode="sql"
-      theme="tomorrow"
-      onChange={handleChange}
-      name="osquery_editor"
-      setOptions={EDITOR_SET_OPTIONS}
-      editorProps={EDITOR_PROPS}
-      height="200px"
-    />
-  );
-};
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
+  defaultValue,
+  // disabled,
+  onChange,
+}) => (
+  <EuiCodeEditor
+    value={defaultValue}
+    mode="osquery"
+    // isReadOnly={disabled}
+    theme="tomorrow"
+    onChange={onChange}
+    name="osquery_editor"
+    setOptions={EDITOR_SET_OPTIONS}
+    editorProps={EDITOR_PROPS}
+    height="150px"
+    width="100%"
+  />
+);
 
 export const OsqueryEditor = React.memo(OsqueryEditorComponent);

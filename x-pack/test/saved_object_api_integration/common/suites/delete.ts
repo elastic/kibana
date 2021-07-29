@@ -6,7 +6,7 @@
  */
 
 import { SuperTest } from 'supertest';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -78,8 +78,16 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

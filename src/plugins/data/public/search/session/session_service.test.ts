@@ -15,6 +15,28 @@ import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
+import { SearchSessionStatus } from '../../../common';
+import { CoreStart } from 'kibana/public';
+
+const mockSavedObject: SearchSessionSavedObject = {
+  id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
+  type: 'search-session',
+  attributes: {
+    name: 'my_name',
+    appId: 'my_app_id',
+    urlGeneratorId: 'my_url_generator_id',
+    idMapping: {},
+    sessionId: 'session_id',
+    touched: new Date().toISOString(),
+    created: new Date().toISOString(),
+    expires: new Date().toISOString(),
+    status: SearchSessionStatus.COMPLETE,
+    persisted: true,
+    version: '8.0.0',
+  },
+  references: [],
+};
 
 describe('Session service', () => {
   let sessionService: ISessionService;
@@ -22,18 +44,28 @@ describe('Session service', () => {
   let nowProvider: jest.Mocked<NowProviderInternalContract>;
   let userHasAccessToSearchSessions = true;
   let currentAppId$: BehaviorSubject<string>;
+  let toastService: jest.Mocked<CoreStart['notifications']['toasts']>;
+  let sessionsClient: jest.Mocked<ISessionsClient>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const startService = coreMock.createSetup().getStartServices;
+    const startServicesMock = coreMock.createStart();
+    toastService = startServicesMock.notifications.toasts;
     nowProvider = createNowProviderMock();
     currentAppId$ = new BehaviorSubject('app');
+    sessionsClient = getSessionsClientMock();
+    sessionsClient.get.mockImplementation(async (id) => ({
+      ...mockSavedObject,
+      id,
+      attributes: { ...mockSavedObject.attributes, sessionId: id },
+    }));
     sessionService = new SessionService(
       initializerContext,
       () =>
         startService().then(([coreStart, ...rest]) => [
           {
-            ...coreStart,
+            ...startServicesMock,
             application: {
               ...coreStart.application,
               currentAppId$,
@@ -49,7 +81,7 @@ describe('Session service', () => {
           },
           ...rest,
         ]),
-      getSessionsClientMock(),
+      sessionsClient,
       nowProvider,
       { freezeState: false } // needed to use mocks inside state container
     );
@@ -128,6 +160,72 @@ describe('Session service', () => {
 
       expect(abort).toBeCalledTimes(3);
     });
+  });
+
+  it('Can continue previous session from another app', async () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+
+    sessionService.clear();
+    currentAppId$.next('change');
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.getSessionId()).toBe(sessionId);
+  });
+
+  it('Calling clear() more than once still allows previous session from another app to continue', async () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+
+    sessionService.clear();
+    sessionService.clear();
+
+    currentAppId$.next('change');
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.getSessionId()).toBe(sessionId);
+  });
+
+  it('Continue drops storage configuration', () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    expect(sessionService.isSessionStorageReady()).toBe(true);
+
+    sessionService.clear();
+
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+  });
+
+  // it might be that search requests finish after the session is cleared and before it was continued,
+  // to avoid "infinite loading" state after we continue the session we have to drop pending searches
+  it('Continue drops client side loading state', async () => {
+    const sessionId = sessionService.start();
+
+    sessionService.trackSearch({ abort: () => {} });
+    expect(state$.getValue()).toBe(SearchSessionState.Loading);
+
+    sessionService.clear(); // even allow to call clear multiple times
+
+    expect(state$.getValue()).toBe(SearchSessionState.None);
+
+    sessionService.continue(sessionId!);
+    expect(sessionService.getSessionId()).toBe(sessionId);
+
+    // the original search was never `untracked`,
+    // but we still consider this a completed session until new search fire
+    expect(state$.getValue()).toBe(SearchSessionState.Completed);
   });
 
   test('getSearchOptions infers isRestore & isStored from state', async () => {
@@ -268,5 +366,27 @@ describe('Session service', () => {
         `"No access to search sessions"`
       );
     });
+  });
+
+  test("rename() doesn't throw in case rename failed but shows a toast instead", async () => {
+    const renameError = new Error('Haha');
+    sessionsClient.rename.mockRejectedValue(renameError);
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+    sessionService.start();
+    await sessionService.save();
+    await expect(sessionService.renameCurrentSession('New name')).resolves.toBeUndefined();
+    expect(toastService.addError).toHaveBeenCalledWith(
+      renameError,
+      expect.objectContaining({
+        title: expect.stringContaining('Failed to edit name of the search session'),
+      })
+    );
   });
 });

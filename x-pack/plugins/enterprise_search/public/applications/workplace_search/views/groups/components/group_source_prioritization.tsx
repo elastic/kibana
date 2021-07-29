@@ -26,9 +26,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../../shared/loading';
+import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { SourceIcon } from '../../../components/shared/source_icon';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { NAV } from '../../../constants';
 import { ContentSource } from '../../../types';
 import { GroupLogic } from '../group_logic';
 
@@ -42,12 +43,6 @@ const HEADER_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerDescription',
   {
     defaultMessage: 'Calibrate relative document importance across group content sources.',
-  }
-);
-const HEADER_ACTION_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerActionText',
-  {
-    defaultMessage: 'Save',
   }
 );
 const ZERO_STATE_TITLE = i18n.translate(
@@ -81,13 +76,11 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   const {
-    group: { contentSources, name: groupName },
+    group: { contentSources = [], name: groupName },
     dataLoading,
     activeSourcePriorities,
     groupPrioritiesUnchanged,
   } = useValues(GroupLogic);
-
-  if (dataLoading) return <Loading />;
 
   const headerAction = (
     <EuiButton
@@ -96,7 +89,7 @@ export const GroupSourcePrioritization: React.FC = () => {
       fill
       onClick={saveGroupSourcePrioritization}
     >
-      {HEADER_ACTION_TEXT}
+      {SAVE_BUTTON_LABEL}
     </EuiButton>
   );
   const handleSliderChange = (
@@ -106,7 +99,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   const hasSources = contentSources.length > 0;
 
   const zeroState = (
-    <EuiPanel paddingSize="none" className="euiPanel--inset">
+    <EuiPanel paddingSize="none">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt
         iconType="advancedSettingsApp"
@@ -132,7 +125,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   const sourceTable = (
-    <EuiTable className="table table--emphasized" responsive={false} tableLayout="auto">
+    <EuiTable responsive={false} tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SOURCE_TABLE_HEADER}</EuiTableHeaderCell>
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>
@@ -143,14 +136,12 @@ export const GroupSourcePrioritization: React.FC = () => {
             <EuiTableRowCell>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <SourceIcon serviceType={serviceType} name={name} className="source-row__icon" />
+                  <SourceIcon serviceType={serviceType} name={name} />
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <span className="source-row__name">{name}</span>
-                </EuiFlexItem>
+                <EuiFlexItem>{name}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
-            <EuiTableRowCell align="right" style={{ padding: 0 }}>
+            <EuiTableRowCell align="right">
               <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
                   <EuiRange
@@ -158,16 +149,12 @@ export const GroupSourcePrioritization: React.FC = () => {
                     min={1}
                     max={10}
                     step={1}
+                    showInput
                     value={activeSourcePriorities[id]}
                     onChange={(e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) =>
                       handleSliderChange(id, e)
                     }
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ paddingLeft: 10 }}>
-                  <div style={{ margin: 0 }} className="input-container--range__count">
-                    {activeSourcePriorities[id]}
-                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
@@ -178,13 +165,17 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader
-        title={HEADER_TITLE}
-        description={HEADER_DESCRIPTION}
-        action={headerAction}
-      />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS, groupName || '...', NAV.SOURCE_PRIORITIZATION]}
+      pageViewTelemetry="group_overview"
+      pageHeader={{
+        pageTitle: HEADER_TITLE,
+        description: HEADER_DESCRIPTION,
+        rightSideItems: [headerAction],
+      }}
+      isLoading={dataLoading}
+    >
       {hasSources ? sourceTable : zeroState}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

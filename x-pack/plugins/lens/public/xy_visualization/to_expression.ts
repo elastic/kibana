@@ -8,9 +8,10 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { State, ValidLayer, XYLayerConfig } from './types';
+import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
+import { ValidLayer, XYLayerConfig } from '../../common/expressions';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -142,12 +143,70 @@ export const buildExpression = (
                       ? [state.legend.showSingleSeries]
                       : [],
                     position: [state.legend.position],
+                    isInside: state.legend.isInside ? [state.legend.isInside] : [],
+                    horizontalAlignment: state.legend.horizontalAlignment
+                      ? [state.legend.horizontalAlignment]
+                      : [],
+                    verticalAlignment: state.legend.verticalAlignment
+                      ? [state.legend.verticalAlignment]
+                      : [],
+                    // ensure that even if the user types more than 5 columns
+                    // we will only show 5
+                    floatingColumns: state.legend.floatingColumns
+                      ? [Math.min(5, state.legend.floatingColumns)]
+                      : [],
                   },
                 },
               ],
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          curveType: [state.curveType || 'LINEAR'],
+          fillOpacity: [state.fillOpacity || 0.3],
+          yLeftExtent: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisExtentConfig',
+                  arguments: {
+                    mode: [state?.yLeftExtent?.mode || 'full'],
+                    lowerBound:
+                      state?.yLeftExtent?.lowerBound !== undefined
+                        ? [state?.yLeftExtent?.lowerBound]
+                        : [],
+                    upperBound:
+                      state?.yLeftExtent?.upperBound !== undefined
+                        ? [state?.yLeftExtent?.upperBound]
+                        : [],
+                  },
+                },
+              ],
+            },
+          ],
+          yRightExtent: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisExtentConfig',
+                  arguments: {
+                    mode: [state?.yRightExtent?.mode || 'full'],
+                    lowerBound:
+                      state?.yRightExtent?.lowerBound !== undefined
+                        ? [state?.yRightExtent?.lowerBound]
+                        : [],
+                    upperBound:
+                      state?.yRightExtent?.upperBound !== undefined
+                        ? [state?.yRightExtent?.upperBound]
+                        : [],
+                  },
+                },
+              ],
+            },
+          ],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
@@ -196,7 +255,25 @@ export const buildExpression = (
               ],
             },
           ],
+          labelsOrientation: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_labelsOrientationConfig',
+                  arguments: {
+                    x: [state?.labelsOrientation?.x ?? 0],
+                    yLeft: [state?.labelsOrientation?.yLeft ?? 0],
+                    yRight: [state?.labelsOrientation?.yRight ?? 0],
+                  },
+                },
+              ],
+            },
+          ],
           valueLabels: [state?.valueLabels || 'hide'],
+          hideEndzones: [state?.hideEndzones || false],
+          valuesInLegend: [state?.valuesInLegend || false],
           layers: validLayers.map((layer) => {
             const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 

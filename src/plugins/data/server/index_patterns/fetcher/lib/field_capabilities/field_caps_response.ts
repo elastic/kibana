@@ -7,22 +7,10 @@
  */
 
 import { uniq } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 import { castEsToKbnFieldTypeName } from '../../../../../common';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 import { FieldDescriptor } from '../../../fetcher';
-
-interface FieldCapObject {
-  type: string;
-  searchable: boolean;
-  aggregatable: boolean;
-  indices?: string[];
-  non_searchable_indices?: string[];
-  non_aggregatable_indices?: string[];
-}
-
-export interface FieldCapsResponse {
-  fields: Record<string, Record<string, FieldCapObject>>;
-}
 
 /**
  *  Read the response from the _field_caps API to determine the type and
@@ -80,7 +68,9 @@ export interface FieldCapsResponse {
  *  @param {FieldCapsResponse} fieldCapsResponse
  *  @return {Array<FieldDescriptor>}
  */
-export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): FieldDescriptor[] {
+export function readFieldCapsResponse(
+  fieldCapsResponse: estypes.FieldCapsResponse
+): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
 
   const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{

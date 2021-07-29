@@ -24,6 +24,8 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -37,6 +39,8 @@ export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { applicationServiceMock } from './application/application_service.mock';
+export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 function createCoreSetupMock({
   basePath = '',
@@ -57,6 +61,7 @@ function createCoreSetupMock({
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
+    deprecations: deprecationsServiceMock.createSetupContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
     },
@@ -76,10 +81,12 @@ function createCoreStartMock({ basePath = '' } = {}) {
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
+    deprecations: deprecationsServiceMock.createStartContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
+    executionContext: executionContextServiceMock.createStartContract(),
   };
 
   return mock;

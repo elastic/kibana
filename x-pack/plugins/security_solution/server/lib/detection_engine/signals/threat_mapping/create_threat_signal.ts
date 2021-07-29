@@ -13,6 +13,7 @@ import { CreateThreatSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
+  tuple,
   threatMapping,
   threatEnrichment,
   query,
@@ -23,29 +24,18 @@ export const createThreatSignal = async ({
   savedId,
   services,
   exceptionItems,
-  gap,
-  previousStartedAt,
   listClient,
   logger,
   eventsTelemetry,
   alertId,
   outputIndex,
-  params,
+  ruleSO,
   searchAfterSize,
-  actions,
-  createdBy,
-  createdAt,
-  updatedBy,
-  interval,
-  updatedAt,
-  enabled,
-  refresh,
-  tags,
-  throttle,
   buildRuleMessage,
-  name,
   currentThreatList,
   currentResult,
+  bulkCreate,
+  wrapHits,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -80,11 +70,10 @@ export const createThreatSignal = async ({
     );
 
     const result = await searchAfterAndBulkCreate({
-      gap,
-      previousStartedAt,
+      tuple,
       listClient,
       exceptionsList: exceptionItems,
-      ruleParams: params,
+      ruleSO,
       services,
       logger,
       eventsTelemetry,
@@ -92,21 +81,15 @@ export const createThreatSignal = async ({
       inputIndexPattern: inputIndex,
       signalsIndex: outputIndex,
       filter: esFilter,
-      actions,
-      name,
-      createdBy,
-      createdAt,
-      updatedBy,
-      updatedAt,
-      interval,
-      enabled,
       pageSize: searchAfterSize,
-      refresh,
-      tags,
-      throttle,
       buildRuleMessage,
       enrichment: threatEnrichment,
+      bulkCreate,
+      wrapHits,
+      sortOrder: 'desc',
+      trackTotalHits: false,
     });
+
     logger.debug(
       buildRuleMessage(
         `${

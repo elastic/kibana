@@ -6,7 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository } from './lib';
+import type {
+  ISavedObjectsRepository,
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from './lib';
 import {
   SavedObject,
   SavedObjectError,
@@ -53,7 +63,11 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
    * {@link SavedObjectsCreateOptions}.
    *
-   * Note: this can only be used for multi-namespace object types.
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
 }
@@ -86,7 +100,11 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
    * {@link SavedObjectsCreateOptions}.
    *
-   * Note: this can only be used for multi-namespace object types.
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
 }
@@ -96,7 +114,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+  extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -157,7 +175,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * await savedObjectsClient.closePointInTime(page2.pit_id);
    * ```
    */
-  sort?: unknown[];
+  sort?: string[];
 }
 
 /**
@@ -168,7 +186,8 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
  *
  * @public
  */
-export interface SavedObjectsFindResponse<T = unknown> {
+export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
+  aggregations?: A;
   saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
@@ -201,51 +220,15 @@ export interface SavedObjectsCheckConflictsResponse {
  *
  * @public
  */
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsAddToNamespacesResponse {
-  /** The namespaces the object exists in after this operation is complete. */
-  namespaces: string[];
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsDeleteFromNamespacesResponse {
-  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
-  namespaces: string[];
+  /** If specified, will be used to perform an upsert if the document doesn't exist */
+  upsert?: Attributes;
 }
 
 /**
@@ -328,6 +311,9 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  * @public
  */
 export interface SavedObjectsResolveResponse<T = unknown> {
+  /**
+   * The saved object that was found.
+   */
   saved_object: SavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
@@ -458,7 +444,9 @@ export class SavedObjectsClient {
    *
    * @param options
    */
-  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+  async find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
   }
 
@@ -521,43 +509,9 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: SavedObjectsUpdateOptions = {}
+    options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
-  }
-
-  /**
-   * Adds namespaces to a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<SavedObjectsAddToNamespacesResponse> {
-    return await this._repository.addToNamespaces(type, id, namespaces, options);
-  }
-
-  /**
-   * Removes namespaces from a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
-    return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
 
   /**
@@ -587,6 +541,9 @@ export class SavedObjectsClient {
    * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
    * The returned `id` can then be passed to {@link SavedObjectsClient.find} to search
    * against that PIT.
+   *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsClient.createPointInTimeFinder} method.
    */
   async openPointInTimeForType(
     type: string | string[],
@@ -599,8 +556,102 @@ export class SavedObjectsClient {
    * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the
    * Elasticsearch client, and is included in the Saved Objects Client as a convenience
    * for consumers who are using {@link SavedObjectsClient.openPointInTimeForType}.
+   *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsClient.createPointInTimeFinder} method.
    */
   async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
     return await this._repository.closePointInTime(id, options);
+  }
+
+  /**
+   * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
+   * large sets of saved objects. We strongly recommend using this API for
+   * any `find` queries that might return more than 1000 saved objects,
+   * however this API is only intended for use in server-side "batch"
+   * processing of objects where you are collecting all objects in memory
+   * or streaming them back to the client.
+   *
+   * Do NOT use this API in a route handler to facilitate paging through
+   * saved objects on the client-side unless you are streaming all of the
+   * results back to the client at once. Because the returned generator is
+   * stateful, you cannot rely on subsequent http requests retrieving new
+   * pages from the same Kibana server in multi-instance deployments.
+   *
+   * The generator wraps calls to {@link SavedObjectsClient.find} and iterates
+   * over multiple pages of results using `_pit` and `search_after`. This will
+   * open a new Point-In-Time (PIT), and continue paging until a set of
+   * results is received that's smaller than the designated `perPage`.
+   *
+   * Once you have retrieved all of the results you need, it is recommended
+   * to call `close()` to clean up the PIT and prevent Elasticsearch from
+   * consuming resources unnecessarily. This is only required if you are
+   * done iterating and have not yet paged through all of the results: the
+   * PIT will automatically be closed for you once you reach the last page
+   * of results, or if the underlying call to `find` fails for any reason.
+   *
+   * @example
+   * ```ts
+   * const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+   *   type: 'visualization',
+   *   search: 'foo*',
+   *   perPage: 100,
+   * };
+   *
+   * const finder = savedObjectsClient.createPointInTimeFinder(findOptions);
+   *
+   * const responses: SavedObjectFindResponse[] = [];
+   * for await (const response of finder.find()) {
+   *   responses.push(...response);
+   *   if (doneSearching) {
+   *     await finder.close();
+   *   }
+   * }
+   * ```
+   */
+  createPointInTimeFinder<T = unknown, A = unknown>(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): ISavedObjectsPointInTimeFinder<T, A> {
+    return this._repository.createPointInTimeFinder(findOptions, {
+      client: this,
+      // Include dependencies last so that SO client wrappers have their settings applied.
+      ...dependencies,
+    });
+  }
+
+  /**
+   * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
+   *
+   * @param objects
+   * @param options
+   */
+  async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return await this._repository.collectMultiNamespaceReferences(objects, options);
+  }
+
+  /**
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
+   */
+  async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options?: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return await this._repository.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
   }
 }

@@ -20,7 +20,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -44,18 +44,18 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
       describe(scenario.id, () => {
         it('should handle disable alert request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'MY action',
-              actionTypeId: 'test.noop',
+              connector_type_id: 'test.noop',
               config: {},
               secrets: {},
             })
             .expect(200);
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -70,7 +70,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -89,7 +89,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 statusCode: 403,
               });
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
@@ -98,10 +98,10 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               // Ensure AAD isn't broken
               await checkAAD({
@@ -118,17 +118,17 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
         it('should handle disable alert request appropriately when consumer is the same as producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
                 enabled: true,
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -154,10 +154,10 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -167,17 +167,17 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
         it('should handle disable alert request appropriately when consumer is not the producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
                 enabled: true,
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -214,10 +214,10 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -227,17 +227,17 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
         it('should handle disable alert request appropriately when consumer is "alerts"', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.noop',
+                rule_type_id: 'test.noop',
                 consumer: 'alerts',
                 enabled: true,
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -270,10 +270,10 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -283,11 +283,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
         it('should still be able to disable alert when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: true }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await retry.try(async () => {
             await supertest
@@ -320,7 +320,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 statusCode: 403,
               });
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -329,10 +329,10 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               // Ensure AAD isn't broken
               await checkAAD({
@@ -349,11 +349,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
         it(`shouldn't disable alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix('other')}/api/alerts/alert`)
+            .post(`${getUrlPrefix('other')}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: true }))
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert', 'alerts');
+          objectRemover.add('other', createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 

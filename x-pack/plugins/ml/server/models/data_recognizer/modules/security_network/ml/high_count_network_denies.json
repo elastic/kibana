@@ -1,0 +1,34 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "Security: Network - looks for an unusually large spike in network traffic that was denied by network ACLs or firewall rules. Such a burst of denied traffic is usually either 1) a misconfigured application or firewall or 2) suspicious or malicious activity. Unsuccessful attempts at network transit, in order to connect to command-and-control (C2), or engage in data exfiltration, may produce a burst of failed connections. This could also be due to unusually large amounts of reconnaissance or enumeration traffic.  Denial-of-service attacks or traffic floods may also produce such a surge in traffic.",
+  "groups": [
+    "security",
+    "network"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_count",
+        "function": "high_count",
+        "detector_index": 0
+      }
+    ],
+    "influencers": [
+      "destination.geo.country_name",
+      "destination.as.organization.name",
+      "source.ip",
+      "destination.port"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-network"
+  }
+}

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -20,7 +21,7 @@ import {
   CommonAlertFilter,
   IndexShardSizeStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_LARGE_SHARD_SIZE,
@@ -29,26 +30,25 @@ import {
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerts/common';
+import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
-const MAX_INDICES_LIST = 10;
 export class LargeShardSizeAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
       id: ALERT_LARGE_SHARD_SIZE,
       name: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].label,
       throttle: '12h',
-      defaultParams: { indexPattern: '*', threshold: 55 },
+      defaultParams: { indexPattern: '-.*', threshold: 55 },
       actionVariables: [
         {
-          name: 'shardIndices',
+          name: 'shardIndex',
           description: i18n.translate(
             'xpack.monitoring.alerts.shardSize.actionVariables.shardIndex',
             {
-              defaultMessage: 'List of indices which are experiencing large shard size.',
+              defaultMessage: 'The index experiencing large average shard size.',
             }
           ),
         },
@@ -59,7 +59,7 @@ export class LargeShardSizeAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams & { indexPattern: string },
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -70,7 +70,7 @@ export class LargeShardSizeAlert extends BaseAlert {
     const { threshold, indexPattern: shardIndexPatterns } = params;
 
     const stats = await fetchIndexShardSize(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       threshold!,
@@ -99,7 +99,7 @@ export class LargeShardSizeAlert extends BaseAlert {
     const { shardIndex, shardSize } = item.meta as IndexShardSizeUIMeta;
     return {
       text: i18n.translate('xpack.monitoring.alerts.shardSize.ui.firingMessage', {
-        defaultMessage: `The following index: #start_link{shardIndex}#end_link has a large shard size of: {shardSize}GB at #absolute`,
+        defaultMessage: `The following index: #start_link{shardIndex}#end_link has a large average shard size of: {shardSize}GB at #absolute`,
         values: {
           shardIndex,
           shardSize,
@@ -165,23 +165,11 @@ export class LargeShardSizeAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    let sortedAlertStates = alertStates.slice(0).sort((alertStateA, alertStateB) => {
-      const { meta: metaA } = alertStateA as { meta?: IndexShardSizeUIMeta };
-      const { meta: metaB } = alertStateB as { meta?: IndexShardSizeUIMeta };
-      return metaB!.shardSize - metaA!.shardSize;
-    });
-
-    let suffix = '';
-    if (sortedAlertStates.length > MAX_INDICES_LIST) {
-      const diff = sortedAlertStates.length - MAX_INDICES_LIST;
-      sortedAlertStates = sortedAlertStates.slice(0, MAX_INDICES_LIST);
-      suffix = `, and ${diff} more`;
+    if (alertStates.length === 0) {
+      return;
     }
-
-    const shardIndices =
-      sortedAlertStates
-        .map((alertState) => (alertState.meta as IndexShardSizeUIMeta).shardIndex)
-        .join(', ') + suffix;
+    const shardIndexMeta = alertStates[0].meta as IndexShardSizeUIMeta;
+    const { shardIndex } = shardIndexMeta;
 
     const shortActionText = i18n.translate('xpack.monitoring.alerts.shardSize.shortAction', {
       defaultMessage: 'Investigate indices with large shard sizes.',
@@ -192,7 +180,7 @@ export class LargeShardSizeAlert extends BaseAlert {
 
     const ccs = alertStates.find((state) => state.ccs)?.ccs;
     const globalStateLink = this.createGlobalStateLink(
-      'elasticsearch/indices',
+      `elasticsearch/indices/${shardIndex}`,
       cluster.clusterUuid,
       ccs
     );
@@ -201,9 +189,9 @@ export class LargeShardSizeAlert extends BaseAlert {
     const internalShortMessage = i18n.translate(
       'xpack.monitoring.alerts.shardSize.firing.internalShortMessage',
       {
-        defaultMessage: `Large shard size alert is firing for the following indices: {shardIndices}. {shortActionText}`,
+        defaultMessage: `Large shard size alert is firing for the following index: {shardIndex}. {shortActionText}`,
         values: {
-          shardIndices,
+          shardIndex,
           shortActionText,
         },
       }
@@ -211,10 +199,10 @@ export class LargeShardSizeAlert extends BaseAlert {
     const internalFullMessage = i18n.translate(
       'xpack.monitoring.alerts.shardSize.firing.internalFullMessage',
       {
-        defaultMessage: `Large shard size alert is firing for the following indices: {shardIndices}. {action}`,
+        defaultMessage: `Large shard size alert is firing for the following index: {shardIndex}. {action}`,
         values: {
           action,
-          shardIndices,
+          shardIndex,
         },
       }
     );
@@ -223,7 +211,12 @@ export class LargeShardSizeAlert extends BaseAlert {
       internalShortMessage,
       internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
-      shardIndices,
+      /* continue to send "shardIndices" values for users still using it though 
+        we have replaced it with shardIndex in the template due to alerts per index instead of all indices
+        see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
+        */
+      shardIndices: shardIndex,
+      shardIndex,
       clusterName: cluster.clusterName,
       action,
       actionPlain: shortActionText,

@@ -13,7 +13,13 @@ import useMount from 'react-use/lib/useMount';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParam, IAggConfig, IFieldParamType, IndexPatternField } from 'src/plugins/data/public';
+import {
+  AggParam,
+  IAggConfig,
+  IFieldParamType,
+  IndexPatternField,
+  KBN_FIELD_TYPES,
+} from '../../../../../plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
@@ -55,6 +61,7 @@ function FieldParamEditor({
     }
   };
   const errors = customError ? [customError] : [];
+  let showErrorMessageImmediately = false;
 
   if (!indexedFields.length) {
     errors.push(
@@ -69,9 +76,38 @@ function FieldParamEditor({
     );
   }
 
+  if (value && value.type === KBN_FIELD_TYPES.MISSING) {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.fieldIsNotExists', {
+        defaultMessage:
+          'The field "{fieldParameter}" associated with this object no longer exists in the index pattern. Please use another field.',
+        values: {
+          fieldParameter: value.name,
+        },
+      })
+    );
+    showErrorMessageImmediately = true;
+  } else if (
+    value &&
+    !getFieldTypes(agg).find((type: string) => type === value.type || type === '*')
+  ) {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.invalidFieldForAggregation', {
+        defaultMessage:
+          'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with this aggregation. Please select a new field.',
+        values: {
+          fieldParameter: value?.name,
+          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+        },
+      })
+    );
+    showErrorMessageImmediately = true;
+  }
+
   const isValid = !!value && !errors.length && !isDirty;
   // we show an error message right away if there is no compatible fields
-  const showErrorMessage = (showValidation || !indexedFields.length) && !isValid;
+  const showErrorMessage =
+    (showValidation || !indexedFields.length || showErrorMessageImmediately) && !isValid;
 
   useValidation(setValidity, isValid);
   useMount(() => {
@@ -122,10 +158,14 @@ function FieldParamEditor({
 }
 
 function getFieldTypesString(agg: IAggConfig) {
+  return formatListAsProse(getFieldTypes(agg), { inclusive: false });
+}
+
+function getFieldTypes(agg: IAggConfig) {
   const param =
     get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') ||
     ({} as IFieldParamType);
-  return formatListAsProse(parseCommaSeparatedList(param.filterFieldTypes), { inclusive: false });
+  return parseCommaSeparatedList(param.filterFieldTypes || []);
 }
 
 export { FieldParamEditor };

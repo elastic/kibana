@@ -10,10 +10,10 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapContainer } from './map_container';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
-import { triggerRefreshTimer, cancelAllInFlightRequests, exitFullScreen } from '../../actions';
+import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
   areLayersLoaded,
-  getRefreshConfig,
+  getLayerList,
   getMapInitError,
   getMapSettings,
   getQueryableUniqueIndexPatternIds,
@@ -26,16 +26,15 @@ function mapStateToProps(state: MapStoreState) {
     areLayersLoaded: areLayersLoaded(state),
     flyoutDisplay: getFlyoutDisplay(state),
     isFullScreen: getIsFullScreen(state),
-    refreshConfig: getRefreshConfig(state),
     mapInitError: getMapInitError(state),
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
     settings: getMapSettings(state),
+    layerList: getLayerList(state),
   };
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
     exitFullScreen: () => {
       dispatch(exitFullScreen());
       getCoreChrome().setIsVisible(true);

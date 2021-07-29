@@ -43,11 +43,36 @@ describe('tooltipFormatter', function () {
       extraMetrics: [],
       seriesId: '1',
     },
+    config: {
+      get: (name) => {
+        const config = {
+          setColorRange: false,
+          gauge: false,
+          percentageMode: false,
+        };
+        return config[name];
+      },
+    },
+    handler: {
+      pointSeries: {
+        getSeries: () => ({
+          getValueAxis: () => ({
+            getScale: () => ({
+              domain: () => [0, 10],
+            }),
+          }),
+        }),
+      },
+    },
+  };
+
+  const uiSettings = {
+    get: () => '',
   };
 
   it('returns html based on the mouse event', function () {
     const event = _.cloneDeep(baseEvent);
-    const $el = $(tooltipFormatter(event));
+    const $el = $(tooltipFormatter(event, uiSettings));
     const $rows = $el.find('tr');
     expect($rows.length).toBe(3);
 
@@ -67,8 +92,31 @@ describe('tooltipFormatter', function () {
   it('renders correctly on missing extraMetrics in datum', function () {
     const event = _.cloneDeep(baseEvent);
     delete event.datum.extraMetrics;
-    const $el = $(tooltipFormatter(event));
+    const $el = $(tooltipFormatter(event, uiSettings));
     const $rows = $el.find('tr');
     expect($rows.length).toBe(3);
+  });
+
+  it('renders correctly for gauge/goal visualizations', function () {
+    const event = _.cloneDeep(baseEvent);
+    let type = 'gauge';
+    event.config.get = (name) => {
+      const config = {
+        setColorRange: false,
+        gauge: false,
+        percentageMode: false,
+        type,
+      };
+      return config[name];
+    };
+
+    let $el = $(tooltipFormatter(event, uiSettings));
+    let $rows = $el.find('tr');
+    expect($rows.length).toBe(2);
+
+    type = 'goal';
+    $el = $(tooltipFormatter(event, uiSettings));
+    $rows = $el.find('tr');
+    expect($rows.length).toBe(2);
   });
 });

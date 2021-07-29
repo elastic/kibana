@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, isValidElement, memo, ReactElement, ReactNode, useMemo } from 'react';
+import React, {
+  FC,
+  isValidElement,
+  memo,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+  useMemo,
+} from 'react';
 import styled from 'styled-components';
 import {
   EuiPanel,
@@ -92,41 +100,47 @@ export const ItemDetailsAction: FC<PropsForButton<EuiButtonProps>> = memo(
 
 ItemDetailsAction.displayName = 'ItemDetailsAction';
 
-export const ItemDetailsCard: FC = memo(({ children }) => {
-  const childElements = useMemo(
-    () => groupChildrenByType(children, [ItemDetailsPropertySummary, ItemDetailsAction]),
-    [children]
-  );
+export type ItemDetailsCardProps = PropsWithChildren<{
+  'data-test-subj'?: string;
+  className?: string;
+}>;
+export const ItemDetailsCard = memo<ItemDetailsCardProps>(
+  ({ children, 'data-test-subj': dataTestSubj, className }) => {
+    const childElements = useMemo(
+      () => groupChildrenByType(children, [ItemDetailsPropertySummary, ItemDetailsAction]),
+      [children]
+    );
 
-  return (
-    <EuiPanel paddingSize="none">
-      <EuiFlexGroup direction="row">
-        <SummarySection grow={2}>
-          <EuiDescriptionList compressed type="column">
-            {childElements.get(ItemDetailsPropertySummary)}
-          </EuiDescriptionList>
-        </SummarySection>
-        <DetailsSection grow={5}>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem grow={1}>
-              <div>{childElements.get(OTHER_NODES)}</div>
-            </EuiFlexItem>
-            {childElements.has(ItemDetailsAction) && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                  {childElements.get(ItemDetailsAction)?.map((action, index) => (
-                    <EuiFlexItem grow={false} key={index}>
-                      {action}
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
+    return (
+      <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} className={className} hasBorder>
+        <EuiFlexGroup direction="row">
+          <SummarySection grow={2}>
+            <EuiDescriptionList compressed type="column">
+              {childElements.get(ItemDetailsPropertySummary)}
+            </EuiDescriptionList>
+          </SummarySection>
+          <DetailsSection grow={5}>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem grow={1}>
+                <div>{childElements.get(OTHER_NODES)}</div>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </DetailsSection>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-});
+              {childElements.has(ItemDetailsAction) && (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    {childElements.get(ItemDetailsAction)?.map((action, index) => (
+                      <EuiFlexItem grow={false} key={index}>
+                        {action}
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </DetailsSection>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+);
 
 ItemDetailsCard.displayName = 'ItemDetailsCard';

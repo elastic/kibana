@@ -82,6 +82,17 @@ describe('helpers', () => {
           ],
         },
         { label: 'event', options: [{ label: 'event.end' }] },
+        {
+          label: 'nestedField',
+          options: [
+            {
+              label: 'nestedField.firstAttributes',
+            },
+            {
+              label: 'nestedField.secondAttributes',
+            },
+          ],
+        },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
       ]);
     });

@@ -3,14 +3,13 @@
 == APM app users and privileges
 
 :beat_default_index_prefix: apm
-:beat_kib_app: APM app
 :annotation_index: observability-annotations
 
 ++++
 <titleabbrev>Users and privileges</titleabbrev>
 ++++
 
-You can use role-based access control to grant users access to secured
+Use role-based access control to grant users access to secured
 resources. The roles that you set up depend on your organization's security
 requirements and the minimum privileges required to use specific features.
 
@@ -22,7 +21,14 @@ In general, there are three types of privileges you'll work with:
 
 * **Elasticsearch cluster privileges**: Manage the actions a user can perform against your cluster.
 * **Elasticsearch index privileges**: Control access to the data in specific indices your cluster.
-* **Kibana space privileges**: Grant users write or read access to features and apps within Kibana.
+* **Kibana feature privileges**: Grant users write or read access to features and apps within Kibana.
+
+Select your use-case to get started:
+
+* <<apm-app-reader>>
+* <<apm-app-annotation-user-create>>
+* <<apm-app-central-config-user>>
+* <<apm-app-api-user>>
 
 ////
 ***********************************  ***********************************
@@ -36,13 +42,25 @@ In general, there are three types of privileges you'll work with:
 <titleabbrev>Create an APM reader user</titleabbrev>
 ++++
 
-[[apm-app-reader-full]]
-==== Full APM reader
-
-APM reader users typically need to view the APM app, dashboards, and visualizations that contain APM data.
+APM reader users typically need to view the APM app and dashboards and visualizations that use APM data.
 These users might also need to create and edit dashboards, visualizations, and machine learning jobs.
 
-. Assign the following built-in roles:
+[[apm-app-reader-full]]
+==== APM reader
+
+To create an APM reader user:
+
+. Create a new role, named something like `read-apm`, and assign the following privileges:
++
+--
+include::./tab-widgets/apm-app-reader/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
+
+. Assign the `read-apm` role created in the previous step, and the following built-in roles to
+any APM reader users:
 +
 [options="header"]
 |====
@@ -50,9 +68,6 @@ These users might also need to create and edit dashboards, visualizations, and m
 
 |`kibana_admin`
 |Grants access to all features in Kibana.
-
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
 
 |`machine_learning_admin`
 |Grants the privileges required to create, update, and view machine learning jobs
@@ -63,27 +78,27 @@ These users might also need to create and edit dashboards, visualizations, and m
 
 In some instances, you may wish to restrict certain Kibana apps that a user has access to.
 
-. Assign the following built in roles:
+. Create a new role, named something like `read-apm-partial`, and assign the following privileges:
 +
-[options="header"]
-|====
-|Role | Purpose
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
-|====
+--
+include::./tab-widgets/apm-app-reader/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
 
-. Assign space privileges to any Kibana space that the user needs access to.
+. Assign feature privileges to any Kibana feature that the user needs access to.
 Here are two examples:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
-| Spaces
-| `Read` or `All` on the {beat_kib_app}
-| Allow the use of the the {beat_kib_app}
+| Kibana
+| `Read` or `All` on the {beat_kib_app} feature
+| Allow the use of the the {beat_kib_app} apps
 
-| Spaces
+| Kibana
 | `Read` or `All` on Dashboards and Discover
 | Allow the user to view, edit, and create dashboards, as well as browse data.
 |====
@@ -97,6 +112,8 @@ Here are two examples:
 |`machine_learning_admin`
 |Grants the privileges required to create, update, and view machine learning jobs
 |====
+
+include::./tab-widgets/code.asciidoc[]
 
 ////
 ***********************************  ***********************************
@@ -138,7 +155,7 @@ and assign the following privileges:
 ^1^ +\{ANNOTATION_INDEX\}+ should be the index name you've defined in
 <<apm-settings-kb,`xpack.observability.annotations.index`>>.
 
-. Assign the `annotation_user` created previously, and the built-in roles necessary to create
+. Assign the `annotation_user` created previously, and the roles and privileges necessary to create
 a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view annotations in the APM app
 
 [[apm-app-annotation-api]]
@@ -163,25 +180,25 @@ See <<apm-app-api-user>>.
 
 Central configuration users need to be able to view, create, update, and delete Agent configurations.
 
-. Assign the following built-in roles:
+. Create a new role, named something like `central-config-manager`, and assign the following privileges:
 +
-[options="header"]
-|====
-|Role | Purpose
+--
+include::./tab-widgets/central-config-users/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
 
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
-|====
-
-. Assign the following Kibana space privileges:
+. Assign the `central-config-manager` role created in the previous step,
+and the following Kibana feature privileges to anyone who needs to manage central configurations:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
-| Spaces
-|`All` on {beat_kib_app}
-|Allow full use of the {beat_kib_app}
+| Kibana
+|`All` on the {beat_kib_app} feature
+|Allow full use of the {beat_kib_app} apps
 |====
 
 [[apm-app-central-config-reader]]
@@ -190,30 +207,33 @@ Central configuration users need to be able to view, create, update, and delete 
 In some instances, you may wish to create a user that can only read central configurations,
 but not create, update, or delete them.
 
-. Assign the following built-in roles:
+. Create a new role, named something like `central-config-reader`, and assign the following privileges:
 +
-[options="header"]
-|====
-|Role | Purpose
-|`apm_user`
-|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
-|====
+--
+include::./tab-widgets/central-config-users/widget.asciidoc[]
+--
++
+TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
+Add the privileges under the **Data streams** tab.
 
-. Assign the following Kibana space privileges:
+. Assign the `central-config-reader` role created in the previous step,
+and the following Kibana feature privileges to anyone who needs to read central configurations:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
-| Spaces
-|`read` on the {beat_kib_app}
-|Allow read access to the {beat_kib_app}
+| Kibana
+|`read` on the {beat_kib_app} feature
+|Allow read access to the {beat_kib_app} apps
 |====
 
 [[apm-app-central-config-api]]
 ==== Central configuration API
 
 See <<apm-app-api-user>>.
+
+include::./tab-widgets/code.asciidoc[]
 
 ////
 ***********************************  ***********************************
@@ -232,15 +252,15 @@ See <<apm-app-api-user>>.
 
 Users can list, search, create, update, and delete central configurations via the APM app API.
 
-. Assign the following Kibana space privileges:
+. Assign the following Kibana feature privileges:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
-| Spaces
-|`all` on the {beat_kib_app}
-|Allow all access to the {beat_kib_app}
+| Kibana
+|`all` on the {beat_kib_app} feature
+|Allow all access to the {beat_kib_app} apps
 |====
 
 [[apm-app-api-config-reader]]
@@ -248,15 +268,15 @@ Users can list, search, create, update, and delete central configurations via th
 
 Sometimes a user only needs to list and search central configurations via the APM app API.
 
-. Assign the following Kibana space privileges:
+. Assign the following Kibana feature privileges:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
-| Spaces
-|`read` on the {beat_kib_app}
-|Allow read access to the {beat_kib_app}
+| Kibana
+|`read` on the {beat_kib_app} feature
+|Allow read access to the {beat_kib_app} apps
 |====
 
 [[apm-app-api-annotation-manager]]
@@ -289,15 +309,15 @@ and assign the following privileges:
 |====
 
 . Assign the `annotation_role` created previously,
-and the following Kibana space privileges to any annotation API users:
+and the following Kibana feature privileges to any annotation API users:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
-| Spaces
-|`all` on the {beat_kib_app}
-|Allow all access to the {beat_kib_app}
+| Kibana
+|`all` on the {beat_kib_app} feature
+|Allow all access to the {beat_kib_app} apps
 |====
 
 //LEARN MORE

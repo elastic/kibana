@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
-export { config, PidConfigType } from './pid_config';
+export { EnvironmentService } from './environment_service';
+export type {
+  InternalEnvironmentServicePreboot,
+  InternalEnvironmentServiceSetup,
+} from './environment_service';
+export { config } from './pid_config';
+export type { PidConfigType } from './pid_config';

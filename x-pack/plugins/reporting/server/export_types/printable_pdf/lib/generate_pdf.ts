@@ -89,7 +89,11 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
           tracker.startGetBuffer();
           logger.debug(`Generating PDF Buffer...`);
           buffer = await pdfOutput.getBuffer();
-          logger.debug(`PDF buffer byte length: ${buffer?.byteLength || 0}`);
+
+          const byteLength = buffer?.byteLength ?? 0;
+          logger.debug(`PDF buffer byte length: ${byteLength}`);
+          tracker.setByteLength(byteLength);
+
           tracker.endGetBuffer();
         } catch (err) {
           logger.error(`Could not generate the PDF buffer!`);

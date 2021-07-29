@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources, sourceConfigData } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -23,7 +23,6 @@ import { SourceSettings } from './source_settings';
 describe('SourceSettings', () => {
   const updateContentSource = jest.fn();
   const removeContentSource = jest.fn();
-  const resetSourceState = jest.fn();
   const getSourceConfigData = jest.fn();
   const contentSource = fullContentSources[0];
   const buttonLoading = false;
@@ -41,7 +40,6 @@ describe('SourceSettings', () => {
     setMockActions({
       updateContentSource,
       removeContentSource,
-      resetSourceState,
       getSourceConfigData,
     });
   });
@@ -105,5 +103,37 @@ describe('SourceSettings', () => {
     expect(wrapper.find(SourceConfigFields).prop('publicKey')).toEqual(
       sourceConfigData.configuredFields.publicKey
     );
+  });
+
+  describe('DownloadDiagnosticsButton', () => {
+    it('renders for org with correct href', () => {
+      const wrapper = shallow(<SourceSettings />);
+
+      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
+        '/api/workplace_search/org/sources/123/download_diagnostics'
+      );
+    });
+
+    it('renders for account with correct href', () => {
+      setMockValues({
+        ...mockValues,
+        isOrganization: false,
+      });
+      const wrapper = shallow(<SourceSettings />);
+
+      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
+        '/api/workplace_search/account/sources/123/download_diagnostics'
+      );
+    });
+
+    it('renders with the correct download file name', () => {
+      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => new Date('1970-01-01').valueOf());
+
+      const wrapper = shallow(<SourceSettings />);
+
+      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('download')).toEqual(
+        '123_custom_0_diagnostics.json'
+      );
+    });
   });
 });

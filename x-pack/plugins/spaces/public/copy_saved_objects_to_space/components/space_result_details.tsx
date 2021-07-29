@@ -6,27 +6,30 @@
  */
 
 import './space_result_details.scss';
-import React, { Fragment } from 'react';
+
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiToolTip,
   EuiIcon,
+  EuiSuperSelect,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-} from 'kibana/public';
-import { EuiSuperSelect } from '@elastic/eui';
 import moment from 'moment';
-import { SummarizedCopyToSpaceResult } from '../index';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import React, { Fragment } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import type {
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportConflictError,
+} from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SummarizedCopyToSpaceResult } from '../lib';
+import type { ImportRetry } from '../types';
 import { CopyStatusIndicator } from './copy_status_indicator';
-import { ImportRetry } from '../types';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

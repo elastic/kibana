@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
+import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -18,7 +19,8 @@ import { HostItem } from '../../../../../common/search_strategy';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { HostOverviewByNameQuery } from '../../../../hosts/containers/hosts/details';
+import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -54,48 +56,57 @@ export const ExpandableHostDetails = ({
   hostName,
 }: ExpandableHostProps & { contextID: string }) => {
   const { to, from, isInitializing } = useGlobalTime();
-  const { docValueFields, selectedPatterns } = useSourcererScope();
+  const { docValueFields } = useSourcererScope();
+  /*
+    Normally `selectedPatterns` from useSourcerScope would be where we obtain the indices,
+    but those indices are only loaded when viewing the pages where the sourcerer is initialized (i.e. Hosts and Overview)
+    When a user goes directly to the detections page, the patterns have not been loaded yet
+    as that information isn't used for the detections page. With this details component being accessible
+    from the detections page, the decision was made to get all existing index names to account for this.
+    Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
+    (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
+  */
+  const allExistingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    []
+  );
+  const allPatterns = useDeepEqualSelector<string[]>(allExistingIndexNamesSelector);
+  const [loading, { hostDetails: hostOverview }] = useHostDetails({
+    endDate: to,
+    hostName,
+    indexNames: allPatterns,
+    startDate: from,
+  });
   return (
-    <HostOverviewByNameQuery
-      indexNames={selectedPatterns}
-      sourceId="default"
-      hostName={hostName}
-      skip={isInitializing}
+    <AnomalyTableProvider
+      criteriaFields={hostToCriteria(hostOverview)}
       startDate={from}
       endDate={to}
+      skip={isInitializing}
     >
-      {({ hostOverview, loading, id }) => (
-        <AnomalyTableProvider
-          criteriaFields={hostToCriteria(hostOverview)}
+      {({ isLoadingAnomaliesData, anomaliesData }) => (
+        <HostOverview
+          contextID={contextID}
+          docValueFields={docValueFields}
+          id={ID}
+          isInDetailsSidePanel
+          data={hostOverview as HostItem}
+          anomaliesData={anomaliesData}
+          isLoadingAnomaliesData={isLoadingAnomaliesData}
+          indexNames={allPatterns}
+          loading={loading}
           startDate={from}
           endDate={to}
-          skip={isInitializing}
-        >
-          {({ isLoadingAnomaliesData, anomaliesData }) => (
-            <HostOverview
-              contextID={contextID}
-              docValueFields={docValueFields}
-              id={id}
-              isInDetailsSidePanel
-              data={hostOverview as HostItem}
-              anomaliesData={anomaliesData}
-              isLoadingAnomaliesData={isLoadingAnomaliesData}
-              indexNames={selectedPatterns}
-              loading={loading}
-              startDate={from}
-              endDate={to}
-              narrowDateRange={(score, interval) => {
-                const fromTo = scoreIntervalToDateTime(score, interval);
-                setAbsoluteRangeDatePicker({
-                  id: 'global',
-                  from: fromTo.from,
-                  to: fromTo.to,
-                });
-              }}
-            />
-          )}
-        </AnomalyTableProvider>
+          narrowDateRange={(score, interval) => {
+            const fromTo = scoreIntervalToDateTime(score, interval);
+            setAbsoluteRangeDatePicker({
+              id: 'global',
+              from: fromTo.from,
+              to: fromTo.to,
+            });
+          }}
+        />
       )}
-    </HostOverviewByNameQuery>
+    </AnomalyTableProvider>
   );
 };

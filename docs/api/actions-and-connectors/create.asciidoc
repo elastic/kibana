@@ -1,50 +1,58 @@
-[[actions-and-connectors-api-create]]
-=== Create action API
+[[create-connector-api]]
+=== Create connector API
 ++++
-<titleabbrev>Create action API</titleabbrev>
+<titleabbrev>Create connector</titleabbrev>
 ++++
 
-Creates an action.
+Creates a connector.
 
-[[actions-and-connectors-api-create-request]]
+[[create-connector-api-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/actions/action`
+`POST <kibana host>:<port>/api/actions/connector`
 
-[[actions-and-connectors-api-create-request-body]]
+`POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
+
+[[create-connector-api-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[create-connector-api-request-body]]
 ==== Request body
 
 `name`::
-  (Required, string) The display name for the action.
+  (Required, string) The display name for the connector.
 
-`actionTypeId`::
-  (Required, string) The action type ID for the action.
+`connector_type_id`::
+  (Required, string) The connector type ID for the connector.
 
 `config`::
-  (Required, object) The configuration for the action. Configuration properties vary depending on
-  the action type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+  (Required, object) The configuration for the connector. Configuration properties vary depending on
+  the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
 
 `secrets`::
-  (Required, object) The secrets configuration for the action. Secrets configuration properties vary
-  depending on the action type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+  (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
+  depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 +
-WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-api-update, update>> API.
+WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
 
-[[actions-and-connectors-api-create-request-codes]]
+[[create-connector-api-request-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-create-example]]
+[[create-connector-api-example]]
 ==== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/action  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/actions/connector  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
-  "name": "my-action",
-  "actionTypeId": ".index",
+  "name": "my-connector",
+  "connector_type_id": ".index",
   "config": {
     "index": "test-index"
   }
@@ -58,13 +66,14 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
-  "actionTypeId": ".index",
-  "name": "my-action",
+  "connector_type_id": ".index",
+  "name": "my-connector",
   "config": {
     "index": "test-index",
     "refresh": false,
     "executionTimeField": null
   },
-  "isPreconfigured": false
+  "is_preconfigured": false,
+  "is_missing_secrets": false
 }
 --------------------------------------------------

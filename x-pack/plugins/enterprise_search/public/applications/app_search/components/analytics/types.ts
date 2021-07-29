@@ -31,11 +31,10 @@ export interface RecentQuery {
  */
 
 interface BaseData {
-  analyticsUnavailable: boolean;
   allTags: string[];
   startDate: string;
   // NOTE: The API sends us back even more data than this (e.g.,
-  // endDate, currentTag, logRetentionSettings, query),
+  // analyticsUnavailable, endDate, currentTag, logRetentionSettings, query),
   // but we currently don't need that data in our front-end code,
   // so I'm opting not to list them in our types
 }

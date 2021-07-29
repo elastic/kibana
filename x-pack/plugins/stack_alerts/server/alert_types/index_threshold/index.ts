@@ -17,10 +17,10 @@ export const DEFAULT_GROUPS = 100;
 interface RegisterParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, data, alerts } = params;
-  alerts.registerType(getAlertType(logger, data));
+  const { logger, data, alerting } = params;
+  alerting.registerType(getAlertType(logger, data));
 }

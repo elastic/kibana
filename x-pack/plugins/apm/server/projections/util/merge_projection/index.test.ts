@@ -13,11 +13,11 @@ describe('mergeProjection', () => {
       mergeProjection(
         {
           apm: { events: [] },
-          body: { query: { bool: { must: [{ terms: ['a'] }] } } },
+          body: { query: { bool: { must: [{ terms: { field: ['a'] } }] } } },
         },
         {
           apm: { events: [] },
-          body: { query: { bool: { must: [{ term: 'b' }] } } },
+          body: { query: { bool: { must: [{ term: { field: 'b' } }] } } },
         }
       )
     ).toEqual({
@@ -29,7 +29,7 @@ describe('mergeProjection', () => {
           bool: {
             must: [
               {
-                term: 'b',
+                term: { field: 'b' },
               },
             ],
           },

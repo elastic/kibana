@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../__mocks__';
-
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiSteps, EuiLink } from '@elastic/eui';
+
+import { mountWithIntl } from '../../test_helpers';
 
 import { SetupInstructions } from './instructions';
 

@@ -14,7 +14,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 
-import { logger, Warn, version as vegaVersion } from 'vega';
+import { logger, Warn, None, version as vegaVersion } from 'vega';
 import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
 import { EsQueryParser } from './es_query_parser';
 import { Utils } from './utils';
@@ -22,7 +22,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
-import { IServiceSettings } from '../../../maps_legacy/public';
+import { IServiceSettings } from '../../../maps_ems/public';
 import {
   Bool,
   Data,
@@ -149,14 +149,14 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     if (this.useMap) {
       this.mapConfig = this._parseMapConfig();
       this.useResize = false;
-    } else if (this.spec) {
-      this._compileWithAutosize();
     }
 
     await this._resolveDataUrls();
 
     if (this.isVegaLite) {
       this._compileVegaLite();
+    } else {
+      this._compileWithAutosize();
     }
   }
 
@@ -238,6 +238,36 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * Convert VegaLite to Vega spec
    */
   private _compileVegaLite() {
+    if (!this.useMap) {
+      // Compile without warnings to get the normalized spec, this simplifies the autosize detection
+      const normalized = compile(this.spec as TopLevelSpec, { logger: logger(None) }).normalized;
+
+      // Vega-Lite allows autosize when there is a single mark or layered chart, but
+      // does not allow autosize for other specs.
+      if ('mark' in normalized || 'layer' in normalized) {
+        this._compileWithAutosize();
+      } else {
+        this.useResize = false;
+        if (
+          normalized.autosize &&
+          typeof normalized.autosize !== 'string' &&
+          normalized.autosize.type === 'none'
+        ) {
+          this._onWarning(
+            i18n.translate('visTypeVega.vegaParser.widthAndHeightParamsAreRequired', {
+              defaultMessage:
+                'Nothing is rendered when {autoSizeParam} is set to {noneParam} while using faceted or repeated {vegaLiteParam} specs. To fix, remove {autoSizeParam} or use {vegaParam}.',
+              values: {
+                autoSizeParam: '"autosize"',
+                noneParam: '"none"',
+                vegaLiteParam: 'Vega-Lite',
+                vegaParam: 'Vega',
+              },
+            })
+          );
+        }
+      }
+    }
     this.vlspec = this.spec;
     const vegaLogger = logger(Warn); // note: eslint has a false positive here
     vegaLogger.warn = this._onWarning.bind(this);

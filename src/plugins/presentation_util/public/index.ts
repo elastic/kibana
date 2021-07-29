@@ -9,13 +9,52 @@
 import { PresentationUtilPlugin } from './plugin';
 
 export {
-  SavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
-} from './components/saved_object_save_modal_dashboard';
+  PresentationCapabilitiesService,
+  PresentationDashboardsService,
+  PresentationLabsService,
+  getStubPluginServices,
+} from './services';
 
-export { DashboardPicker } from './components/dashboard_picker';
+export {
+  KibanaPluginServiceFactory,
+  PluginServiceFactory,
+  PluginServices,
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+  KibanaPluginServiceParams,
+} from './services/create';
+
+export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+export { SaveModalDashboardProps } from './components/types';
+export { projectIDs, ProjectID, Project } from '../common/labs';
+export * from '../common/lib';
+
+export {
+  LazyLabsBeakerButton,
+  LazyLabsFlyout,
+  LazyDashboardPicker,
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from './components';
+
+export * from './components/types';
+
+export {
+  AddFromLibraryButton,
+  PrimaryActionButton,
+  PrimaryActionPopover,
+  QuickButtonGroup,
+  QuickButtonProps,
+  SolutionToolbar,
+  SolutionToolbarButton,
+  SolutionToolbarPopover,
+} from './components/solution_toolbar';
 
 export function plugin() {
   return new PresentationUtilPlugin();
 }
-export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+
+import { pluginServices } from './services';
+
+export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, findTestSubject } from '@kbn/test/jest';
 import { FollowerIndicesList } from '../../../app/sections/home/follower_indices_list';
@@ -37,24 +38,44 @@ export const setup = (props) => {
    * User Actions
    */
 
-  const selectFollowerIndexAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData(EUI_TABLE);
+  const selectFollowerIndexAt = async (index = 0) => {
+    const { table, component } = testBed;
+    const { rows } = table.getMetaData(EUI_TABLE);
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
-    checkBox.simulate('change', { target: { checked: true } });
+
+    await act(async () => {
+      checkBox.simulate('change', { target: { checked: true } });
+    });
+
+    component.update();
   };
 
-  const openContextMenu = () => {
-    testBed.find('contextMenuButton').simulate('click');
+  const openContextMenu = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('contextMenuButton').simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickContextMenuButtonAt = (index = 0) => {
-    const contextMenu = testBed.find('contextMenu');
-    contextMenu.find('button').at(index).simulate('click');
+  const clickContextMenuButtonAt = async (index = 0) => {
+    const { find, component } = testBed;
+
+    const contextMenu = find('contextMenu');
+
+    await act(async () => {
+      contextMenu.find('button').at(index).simulate('click');
+    });
+
+    component.update();
   };
 
-  const openTableRowContextMenuAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData(EUI_TABLE);
+  const openTableRowContextMenuAt = async (index = 0) => {
+    const { table, component } = testBed;
+    const { rows } = table.getMetaData(EUI_TABLE);
     const actionsColumnIndex = rows[0].columns.length - 1; // Actions are in the last column
     const actionsTableCell = rows[index].columns[actionsColumnIndex];
     const button = actionsTableCell.reactWrapper.find('button');
@@ -63,17 +84,34 @@ export const setup = (props) => {
         `No button to open context menu were found on Follower index list table row ${index}`
       );
     }
-    button.simulate('click');
+
+    await act(async () => {
+      button.simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickFollowerIndexAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData(EUI_TABLE);
+  const clickFollowerIndexAt = async (index = 0) => {
+    const { table, component } = testBed;
+    const { rows } = table.getMetaData(EUI_TABLE);
     const followerIndexLink = findTestSubject(rows[index].reactWrapper, 'followerIndexLink');
-    followerIndexLink.simulate('click');
+
+    await act(async () => {
+      followerIndexLink.simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickPaginationNextButton = () => {
-    testBed.find('followerIndexListTable.pagination-button-next').simulate('click');
+  const clickPaginationNextButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('followerIndexListTable.pagination-button-next').simulate('click');
+    });
+
+    component.update();
   };
 
   return {

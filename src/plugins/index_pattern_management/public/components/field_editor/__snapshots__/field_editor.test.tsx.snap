@@ -918,12 +918,24 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "number",
             },
             Object {
+              "text": "number_range",
+              "value": "number_range",
+            },
+            Object {
               "text": "date",
               "value": "date",
             },
             Object {
+              "text": "date_range",
+              "value": "date_range",
+            },
+            Object {
               "text": "ip",
               "value": "ip",
+            },
+            Object {
+              "text": "ip_range",
+              "value": "ip_range",
             },
             Object {
               "text": "boolean",

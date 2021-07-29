@@ -11,7 +11,7 @@ export * from './agent';
 export * from './package_policy';
 export * from './epm';
 export * from './enrollment_api_key';
-export * from './install_script';
 export * from './output';
+export * from './preconfiguration';
 export * from './settings';
 export * from './setup';

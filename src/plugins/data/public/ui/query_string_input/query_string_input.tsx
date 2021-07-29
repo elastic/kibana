@@ -37,6 +37,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -53,6 +54,7 @@ export interface QueryStringInputProps {
   onChange?: (query: Query) => void;
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
+  submitOnBlur?: boolean;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -66,6 +68,14 @@ export interface QueryStringInputProps {
    */
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  /**
+   * @param autoSubmit if user selects a value, in that case kuery will be auto submitted
+   */
+  autoSubmit?: boolean;
+  /**
+   * @param storageKey this key is used to use user preference between kql and non-kql mode
+   */
+  storageKey?: string;
 }
 
 interface Props extends QueryStringInputProps {
@@ -98,6 +108,10 @@ const KEY_CODES = {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
+  static defaultProps = {
+    storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
+  };
+
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -121,6 +135,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
   );
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
+
+  /**
+   * If any element within the container is currently focused
+   * @private
+   */
+  private isFocusWithin = false;
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -211,7 +231,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const recentSearches = this.persistedLog.get();
     const matchingRecentSearches = recentSearches.filter((recentQuery) => {
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
-      return recentQueryString.includes(query);
+      return recentQueryString !== '' && recentQueryString.includes(query);
     });
     return matchingRecentSearches.map((recentSearch) => {
       const text = toUser(recentSearch);
@@ -257,7 +277,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    this.onQueryStringChange(event.target.value);
+    const value = this.formatTextAreaValue(event.target.value);
+    this.onQueryStringChange(value);
     if (event.target.value === '') {
       this.handleRemoveHeight();
     } else {
@@ -267,7 +288,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
     if (event.target instanceof HTMLTextAreaElement) {
-      this.onQueryStringChange(event.target.value);
+      const value = this.formatTextAreaValue(event.target.value);
+      this.onQueryStringChange(value);
     }
   };
 
@@ -275,7 +297,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
       this.setState({ isSuggestionsVisible: true });
       if (event.target instanceof HTMLTextAreaElement) {
-        this.onQueryStringChange(event.target.value);
+        const value = this.formatTextAreaValue(event.target.value);
+        this.onQueryStringChange(value);
       }
     }
   };
@@ -369,14 +392,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const newQueryString = value.substr(0, start) + text + value.substr(end);
 
     this.reportUiCounter?.(
-      METRIC_TYPE.LOADED,
-      `query_string:${type}:suggestions_select_position`,
-      listIndex
+      METRIC_TYPE.CLICK,
+      `query_string:${type}:suggestions_select_position_${listIndex}`
     );
     this.reportUiCounter?.(
-      METRIC_TYPE.LOADED,
-      `query_string:${type}:suggestions_select_q_length`,
-      end - start
+      METRIC_TYPE.CLICK,
+      `query_string:${type}:suggestions_select_q_length_${end - start}`
     );
 
     this.onQueryStringChange(newQueryString);
@@ -385,8 +406,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       selectionStart: start + (cursorIndex ? cursorIndex : text.length),
       selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
+    const isTypeRecentSearch = type === QuerySuggestionTypes.RecentSearch;
 
-    if (type === QuerySuggestionTypes.RecentSearch) {
+    const isAutoSubmitAndValid =
+      this.props.autoSubmit &&
+      (type === QuerySuggestionTypes.Value || [':*', ': *'].includes(value.trim()));
+
+    if (isTypeRecentSearch || isAutoSubmitAndValid) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }
@@ -480,29 +506,49 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('kibana.userQueryLanguage', language);
+    const storageKey = this.props.storageKey;
+    this.services.storage.set(storageKey!, language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
     this.onSubmit(newQuery);
-    this.reportUiCounter?.(METRIC_TYPE.LOADED, `query_string:language:${language}`);
+    this.reportUiCounter?.(
+      METRIC_TYPE.LOADED,
+      storageKey ? `${storageKey}:language:${language}` : `query_string:language:${language}`
+    );
   };
 
   private onOutsideClick = () => {
     if (this.state.isSuggestionsVisible) {
       this.setState({ isSuggestionsVisible: false, index: null });
-    }
-    this.handleBlurHeight();
-    if (this.props.onChangeQueryInputFocus) {
-      this.props.onChangeQueryInputFocus(false);
+      this.scheduleOnInputBlur();
     }
   };
 
+  private blurTimeoutHandle: number | undefined;
+  /**
+   * Notify parent about input's blur after a delay only
+   * if the focus didn't get back inside the input container
+   * and if suggestions were closed
+   * https://github.com/elastic/kibana/issues/92040
+   */
+  private scheduleOnInputBlur = () => {
+    clearTimeout(this.blurTimeoutHandle);
+    this.blurTimeoutHandle = window.setTimeout(() => {
+      if (!this.isFocusWithin && !this.state.isSuggestionsVisible && !this.componentIsUnmounting) {
+        this.handleBlurHeight();
+        if (this.props.onChangeQueryInputFocus) {
+          this.props.onChangeQueryInputFocus(false);
+        }
+
+        if (this.props.submitOnBlur) {
+          this.onSubmit(this.props.query);
+        }
+      }
+    }, 50);
+  };
+
   private onInputBlur = () => {
-    this.handleBlurHeight();
-    if (this.props.onChangeQueryInputFocus) {
-      this.props.onChangeQueryInputFocus(false);
-    }
     if (isFunction(this.props.onBlur)) {
       this.props.onBlur();
     }
@@ -594,6 +640,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   handleAutoHeight = () => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
+      this.inputRef.classList.add('kbnQueryBar__textarea--autoHeight');
       this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
     }
     this.handleListUpdate();
@@ -602,6 +649,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
   handleRemoveHeight = () => {
     if (this.inputRef !== null) {
       this.inputRef.style.removeProperty('height');
+      this.inputRef.classList.remove('kbnQueryBar__textarea--autoHeight');
     }
   };
 
@@ -634,11 +682,27 @@ export default class QueryStringInputUI extends Component<Props, State> {
     );
     const inputClassName = classNames(
       'kbnQueryBar__textarea',
-      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null
+      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
+      this.props.prepend ? 'kbnQueryBar__textarea--hasPrepend' : null,
+      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
+    );
+    const inputWrapClassName = classNames(
+      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
+      this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
+      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
     );
 
     return (
-      <div className={containerClassName}>
+      <div
+        className={containerClassName}
+        onFocus={(e) => {
+          this.isFocusWithin = true;
+        }}
+        onBlur={(e) => {
+          this.isFocusWithin = false;
+          this.scheduleOnInputBlur();
+        }}
+      >
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
@@ -654,7 +718,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           >
             <div
               role="search"
-              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
+              className={inputWrapClassName}
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
@@ -664,7 +728,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                     defaultMessage: 'Search',
                   })
                 }
-                value={this.getQueryString()}
+                value={this.forwardNewValueIfNeeded(this.getQueryString())}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}
                 onChange={this.onInputChange}
@@ -700,7 +764,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
                 isInvalid={this.props.isInvalid}
               >
-                {this.getQueryString()}
+                {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
               {this.props.iconType ? (
                 <div className="euiFormControlLayoutIcons">
@@ -721,6 +785,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
                     })}
                     onClick={() => {
                       this.onQueryStringChange('');
+                      if (this.props.autoSubmit) {
+                        this.onSubmit({ query: '', language: this.props.query.language });
+                      }
                     }}
                   >
                     <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
@@ -753,5 +820,35 @@ export default class QueryStringInputUI extends Component<Props, State> {
         )}
       </div>
     );
+  }
+
+  /**
+   * Used to apply any string formatting to textarea value before converting it to {@link Query} and emitting it to the parent.
+   * This is a bit lower level then {@link fromUser} and needed to address any cross-browser inconsistencies where
+   * {@link forwardNewValueIfNeeded} should be kept in mind
+   */
+  private formatTextAreaValue(newValue: string): string {
+    // Safari has a bug that it sometimes uses a non-breaking space instead of a regular space
+    // this breaks the search query: https://github.com/elastic/kibana/issues/87176
+    return newValue.replace(/\u00A0/g, ' ');
+  }
+
+  /**
+   * When passing a "value" prop into a textarea,
+   * check first if value has changed because of {@link formatTextAreaValue},
+   * if this is just a formatting change, then skip this update by re-using current textarea value.
+   * This is needed to avoid re-rendering to preserve focus and selection
+   * @private
+   */
+  private forwardNewValueIfNeeded(newQueryString: string) {
+    const oldQueryString = this.inputRef?.value ?? '';
+
+    const formattedNewQueryString = this.formatTextAreaValue(newQueryString);
+    // if old & new values are equal with formatting applied, then return an old query without formatting applied
+    if (formattedNewQueryString === this.formatTextAreaValue(oldQueryString)) {
+      return oldQueryString;
+    } else {
+      return formattedNewQueryString;
+    }
   }
 }

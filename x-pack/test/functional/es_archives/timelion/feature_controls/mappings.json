@@ -1,7 +1,10 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana",
+    "aliases": {
+      ".kibana": {}
+    },
+    "index": ".kibana_1",
     "settings": {
       "index": {
         "number_of_shards": "1",
@@ -161,9 +164,9 @@
         },
         "map" : {
           "properties" : {
-            "bounds" : {
-              "type" : "geo_shape",
-              "tree" : "quadtree"
+            "bounds": {
+              "dynamic": false,
+              "properties": {}
             },
             "description" : {
               "type" : "text"

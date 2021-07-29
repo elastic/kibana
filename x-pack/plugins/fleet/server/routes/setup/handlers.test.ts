@@ -6,12 +6,14 @@
  */
 
 import { httpServerMock } from 'src/core/server/mocks';
-import { PostIngestSetupResponse } from '../../../common';
+
+import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import { FleetSetupHandler } from './handlers';
 import { appContextService } from '../../services/app_context';
 import { setupIngestManager } from '../../services/setup';
+
+import { fleetSetupHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {
@@ -43,10 +45,15 @@ describe('FleetSetupHandler', () => {
   });
 
   it('POST /setup succeeds w/200 and body of resolved value', async () => {
-    mockSetupIngestManager.mockImplementation(() => Promise.resolve({ isIntialized: true }));
-    await FleetSetupHandler(context, request, response);
+    mockSetupIngestManager.mockImplementation(() =>
+      Promise.resolve({
+        isInitialized: true,
+        nonFatalErrors: [],
+      })
+    );
+    await fleetSetupHandler(context, request, response);
 
-    const expectedBody: PostIngestSetupResponse = { isInitialized: true };
+    const expectedBody: PostFleetSetupResponse = { isInitialized: true, nonFatalErrors: [] };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
   });
@@ -55,7 +62,7 @@ describe('FleetSetupHandler', () => {
     mockSetupIngestManager.mockImplementation(() =>
       Promise.reject(new Error('SO method mocked to throw'))
     );
-    await FleetSetupHandler(context, request, response);
+    await fleetSetupHandler(context, request, response);
 
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
@@ -71,7 +78,7 @@ describe('FleetSetupHandler', () => {
       Promise.reject(new RegistryError('Registry method mocked to throw'))
     );
 
-    await FleetSetupHandler(context, request, response);
+    await fleetSetupHandler(context, request, response);
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 502,

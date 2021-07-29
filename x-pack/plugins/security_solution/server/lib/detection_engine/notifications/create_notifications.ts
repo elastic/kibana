@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { Alert } from '../../../../../alerts/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
 import { CreateNotificationParams, RuleNotificationAlertTypeParams } from './types';
 import { addTags } from './add_tags';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 export const createNotifications = async ({
-  alertsClient,
+  rulesClient,
   actions,
   enabled,
   ruleAlertId,
   interval,
   name,
-}: CreateNotificationParams): Promise<Alert<RuleNotificationAlertTypeParams>> =>
-  alertsClient.create<RuleNotificationAlertTypeParams>({
+}: CreateNotificationParams): Promise<SanitizedAlert<RuleNotificationAlertTypeParams>> =>
+  rulesClient.create<RuleNotificationAlertTypeParams>({
     data: {
       name,
       tags: addTags([], ruleAlertId),

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SpacesManager } from '.';
-import { coreMock } from 'src/core/public/mocks';
 import { nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { SpacesManager } from './spaces_manager';
 
 describe('SpacesManager', () => {
   describe('#constructor', () => {
@@ -151,6 +152,35 @@ describe('SpacesManager', () => {
           query: { type: 'foo' },
         }
       );
+    });
+  });
+
+  describe('#getShareableReferences', () => {
+    it('retrieves the shareable references, filters out references that are tags, and returns the result', async () => {
+      const obj1 = { type: 'not-a-tag', id: '1' }; // requested object
+      const obj2 = { type: 'tag', id: '2' }; // requested object
+      const obj3 = { type: 'tag', id: '3' }; // referenced object
+      const obj4 = { type: 'not-a-tag', id: '4' }; // referenced object
+
+      const coreStart = coreMock.createStart();
+      coreStart.http.post.mockResolvedValue({ objects: [obj1, obj2, obj3, obj4] }); // A realistic response would include additional fields besides 'type' and 'id', but they are not needed for this test case
+      const spacesManager = new SpacesManager(coreStart.http);
+
+      const requestObjects = [obj1, obj2];
+      const result = await spacesManager.getShareableReferences(requestObjects);
+      expect(coreStart.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStart.http.post).toHaveBeenLastCalledWith(
+        '/api/spaces/_get_shareable_references',
+        { body: JSON.stringify({ objects: requestObjects }) }
+      );
+      expect(result).toEqual({
+        objects: [
+          obj1, // obj1 is not a tag
+          obj2, // obj2 is a tag, but it was included in the request, so it is not excluded from the response
+          // obj3 is a tag, but it was not included in the request, so it is excluded from the response
+          obj4, // obj4 is not a tag
+        ],
+      });
     });
   });
 });

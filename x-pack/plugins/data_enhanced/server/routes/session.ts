@@ -98,7 +98,7 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           page: schema.maybe(schema.number()),
           perPage: schema.maybe(schema.number()),
           sortField: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
           filter: schema.maybe(schema.string()),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
           search: schema.maybe(schema.string()),

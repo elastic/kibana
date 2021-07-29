@@ -33,12 +33,8 @@ describe('Enterprise Search Config Data API', () => {
   describe('GET /api/enterprise_search/config_data', () => {
     it('returns an initial set of config data from Enterprise Search', async () => {
       const mockData = {
-        access: {
-          hasAppSearchAccess: true,
-          hasWorkplaceSearchAccess: true,
-        },
-        publicUrl: 'http://localhost:3002',
         ...DEFAULT_INITIAL_APP_DATA,
+        publicUrl: 'http://localhost:3002',
       };
 
       (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => {

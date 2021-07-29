@@ -26,8 +26,8 @@ export declare class Execution<Input = unknown, Output = unknown, InspectorAdapt
 |  [expression](./kibana-plugin-plugins-expressions-public.execution.expression.md) |  | <code>string</code> |  |
 |  [input](./kibana-plugin-plugins-expressions-public.execution.input.md) |  | <code>Input</code> | Initial input of the execution.<!-- -->N.B. It is initialized to <code>null</code> rather than <code>undefined</code> for legacy reasons, because in legacy interpreter it was set to <code>null</code> by default. |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-public.execution.inspectoradapters.md) |  | <code>InspectorAdapters</code> |  |
-|  [result](./kibana-plugin-plugins-expressions-public.execution.result.md) |  | <code>Promise&lt;Output &#124; ExpressionValueError&gt;</code> |  |
-|  [state](./kibana-plugin-plugins-expressions-public.execution.state.md) |  | <code>ExecutionContainer&lt;Output &#124; ExpressionValueError&gt;</code> | Dynamic state of the execution. |
+|  [result](./kibana-plugin-plugins-expressions-public.execution.result.md) |  | <code>Observable&lt;ExecutionResult&lt;Output &#124; ExpressionValueError&gt;&gt;</code> | Future that tracks result or error of this execution. |
+|  [state](./kibana-plugin-plugins-expressions-public.execution.state.md) |  | <code>ExecutionContainer&lt;ExecutionResult&lt;Output &#124; ExpressionValueError&gt;&gt;</code> | Dynamic state of the execution. |
 
 ## Methods
 
@@ -39,5 +39,5 @@ export declare class Execution<Input = unknown, Output = unknown, InspectorAdapt
 |  [invokeChain(chainArr, input)](./kibana-plugin-plugins-expressions-public.execution.invokechain.md) |  |  |
 |  [invokeFunction(fn, input, args)](./kibana-plugin-plugins-expressions-public.execution.invokefunction.md) |  |  |
 |  [resolveArgs(fnDef, input, argAsts)](./kibana-plugin-plugins-expressions-public.execution.resolveargs.md) |  |  |
-|  [start(input)](./kibana-plugin-plugins-expressions-public.execution.start.md) |  | Call this method to start execution.<!-- -->N.B. <code>input</code> is initialized to <code>null</code> rather than <code>undefined</code> for legacy reasons, because in legacy interpreter it was set to <code>null</code> by default. |
+|  [start(input, isSubExpression)](./kibana-plugin-plugins-expressions-public.execution.start.md) |  | Call this method to start execution.<!-- -->N.B. <code>input</code> is initialized to <code>null</code> rather than <code>undefined</code> for legacy reasons, because in legacy interpreter it was set to <code>null</code> by default. |
 

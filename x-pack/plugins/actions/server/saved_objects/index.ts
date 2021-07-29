@@ -5,25 +5,55 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import type {
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
+} from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
-
-export const ACTION_SAVED_OBJECT_TYPE = 'action';
-export const ALERT_SAVED_OBJECT_TYPE = 'alert';
-export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
+import { RawAction } from '../types';
+import { getImportWarnings } from './get_import_warnings';
+import { transformConnectorsForExport } from './transform_connectors_for_export';
+import { ActionTypeRegistry } from '../action_type_registry';
+import {
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+} from '../constants/saved_objects';
+import { getOldestIdleActionTask } from '../../../task_manager/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  actionTypeRegistry: ActionTypeRegistry,
+  taskManagerIndex: string
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action,
+    mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
+    management: {
+      defaultSearchField: 'name',
+      importableAndExportable: true,
+      getTitle(savedObject: SavedObject<RawAction>) {
+        return `Connector: [${savedObject.attributes.name}]`;
+      },
+      onExport<RawAction>(
+        context: SavedObjectsExportTransformContext,
+        objects: Array<SavedObject<RawAction>>
+      ) {
+        return transformConnectorsForExport(objects, actionTypeRegistry);
+      },
+      onImport(connectors) {
+        return {
+          warnings: getImportWarnings(connectors as Array<SavedObject<RawAction>>),
+        };
+      },
+    },
   });
 
   // Encrypted attributes
@@ -40,7 +70,21 @@ export function setupSavedObjects(
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action_task_params,
+    mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
+    excludeOnUpgrade: async ({ readonlyEsClient }) => {
+      const oldestIdleActionTask = await getOldestIdleActionTask(
+        readonlyEsClient,
+        taskManagerIndex
+      );
+      return {
+        bool: {
+          must: [
+            { term: { type: 'action_task_params' } },
+            { range: { updated_at: { lt: oldestIdleActionTask } } },
+          ],
+        },
+      };
+    },
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

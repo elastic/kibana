@@ -17,8 +17,9 @@ import hits from '../../../__fixtures__/real_hits';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../navigation/public/mocks';
+import { initAngularBootstrap } from '../../../../../kibana_legacy/public/angular_bootstrap';
 import { setScopedHistory, setServices } from '../../../kibana_services';
-import { getInnerAngularModule } from '../../../get_inner_angular';
+import { getInnerAngularModule } from '../get_inner_angular';
 
 let $parentScope;
 
@@ -54,6 +55,9 @@ describe('docTable', () => {
   const core = coreMock.createStart();
   let $elem;
 
+  beforeAll(async () => {
+    await initAngularBootstrap();
+  });
   beforeAll(() => setScopedHistory(createBrowserHistory()));
   beforeEach(() => {
     angular.element.prototype.slice = jest.fn(() => {

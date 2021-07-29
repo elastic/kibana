@@ -47,13 +47,13 @@ interface Range {
   display: string;
 }
 
-interface UpdateReduxTime extends OnTimeChangeProps {
+export interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
   kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
 }
 
-interface ReturnUpdateReduxTime {
+export interface ReturnUpdateReduxTime {
   kqlHaveBeenUpdated: boolean;
 }
 
@@ -91,6 +91,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     timelineId,
     toStr,
     updateReduxTime,
+    disabled,
   }) => {
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
@@ -201,6 +202,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         refreshInterval={duration}
         showUpdateButton={true}
         start={startDate}
+        isDisabled={disabled}
       />
     );
   },
@@ -216,6 +218,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     prevProps.startAutoReload === nextProps.startAutoReload &&
     prevProps.stopAutoReload === nextProps.stopAutoReload &&
     prevProps.timelineId === nextProps.timelineId &&
+    prevProps.disabled === nextProps.disabled &&
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateReduxTime === nextProps.updateReduxTime &&
     deepEqual(prevProps.kqlQuery, nextProps.kqlQuery) &&

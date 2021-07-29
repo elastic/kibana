@@ -4,39 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import {
   getValueTypeConfig,
   ProfilingValueType,
 } from '../../../../common/profiling';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { SearchBar } from '../../shared/search_bar';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
 import { ServiceProfilingTimeline } from './service_profiling_timeline';
 
-interface ServiceProfilingProps {
-  serviceName: string;
-  environment?: string;
-}
+type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/profiling/timeline'>;
+const DEFAULT_DATA: ApiResponse = { profilingTimeline: [] };
 
-export function ServiceProfiling({
-  serviceName,
-  environment,
-}: ServiceProfilingProps) {
+export function ServiceProfiling() {
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: { environment },
+  } = useApmParams('/services/:serviceName/profiling');
+
   const {
     urlParams: { kuery, start, end },
   } = useUrlParams();
 
-  const { data = [] } = useFetcher(
+  const { data = DEFAULT_DATA } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return;
@@ -58,14 +54,16 @@ export function ServiceProfiling({
     [kuery, start, end, serviceName, environment]
   );
 
+  const { profilingTimeline } = data;
+
   const [valueType, setValueType] = useState<ProfilingValueType | undefined>();
 
   useEffect(() => {
-    if (!data.length) {
+    if (!profilingTimeline.length) {
       return;
     }
 
-    const availableValueTypes = data.reduce((set, point) => {
+    const availableValueTypes = profilingTimeline.reduce((set, point) => {
       (Object.keys(point.valueTypes).filter(
         (type) => type !== 'unknown'
       ) as ProfilingValueType[])
@@ -80,58 +78,42 @@ export function ServiceProfiling({
     if (!valueType || !availableValueTypes.has(valueType)) {
       setValueType(Array.from(availableValueTypes)[0]);
     }
-  }, [data, valueType]);
+  }, [profilingTimeline, valueType]);
 
   return (
     <>
-      <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>
-                {i18n.translate('xpack.apm.profilingOverviewTitle', {
-                  defaultMessage: 'Profiling',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
+      <EuiPanel>
+        <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <EuiPanel>
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <ServiceProfilingTimeline
-                    start={start!}
-                    end={end!}
-                    series={data}
-                    onValueTypeSelect={(type) => {
-                      setValueType(type);
-                    }}
-                    selectedValueType={valueType}
-                  />
-                </EuiFlexItem>
-                {valueType ? (
-                  <EuiFlexItem>
-                    <EuiTitle size="s">
-                      <h3>{getValueTypeConfig(valueType).label}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                ) : null}
-                <EuiFlexItem>
-                  <ServiceProfilingFlamegraph
-                    serviceName={serviceName}
-                    environment={environment}
-                    valueType={valueType}
-                    start={start}
-                    end={end}
-                    kuery={kuery}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <ServiceProfilingTimeline
+              start={start!}
+              end={end!}
+              series={profilingTimeline}
+              onValueTypeSelect={(type) => {
+                setValueType(type);
+              }}
+              selectedValueType={valueType}
+            />
+          </EuiFlexItem>
+          {valueType ? (
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>{getValueTypeConfig(valueType).label}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <ServiceProfilingFlamegraph
+              serviceName={serviceName}
+              environment={environment}
+              valueType={valueType}
+              start={start}
+              end={end}
+              kuery={kuery}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPage>
+      </EuiPanel>
     </>
   );
 }

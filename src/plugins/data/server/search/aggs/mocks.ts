@@ -58,7 +58,6 @@ export const searchAggsSetupMock = (): AggsSetup => ({
 
 const commonStartMock = (): AggsCommonStart => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
-  getDateMetaByDatatableColumn: jest.fn(),
   datatableUtilities: {
     getIndexPattern: jest.fn(),
     getAggConfig: jest.fn(),

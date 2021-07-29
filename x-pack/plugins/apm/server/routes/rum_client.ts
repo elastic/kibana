@@ -6,13 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { jsonRt } from '../../common/runtime_types/json_rt';
-import { LocalUIFilterName } from '../../common/ui_filter';
-import {
-  Setup,
-  setupRequest,
-  SetupTimeRange,
-} from '../lib/helpers/setup_request';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { setupRequest } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
@@ -24,13 +19,9 @@ import { getUrlSearch } from '../lib/rum_client/get_url_search';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { hasRumData } from '../lib/rum_client/has_rum_data';
-import { getLocalUIFilters } from '../lib/rum_client/ui_filters/local_ui_filters';
-import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filters/config';
-import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
-import { Projection } from '../projections/typings';
-import { createRoute } from './create_route';
+import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { rangeRt } from './default_api_types';
-import { APMRequestHandlerContext } from './typings';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
@@ -45,18 +36,18 @@ const uxQueryRt = t.intersection([
   t.partial({ urlQuery: t.string, percentile: t.string }),
 ]);
 
-export const rumClientMetricsRoute = createRoute({
+const rumClientMetricsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/rum/client-metrics',
   params: t.type({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { urlQuery, percentile },
-    } = context.params;
+    } = resources.params;
 
     return getClientMetrics({
       setup,
@@ -66,29 +57,31 @@ export const rumClientMetricsRoute = createRoute({
   },
 });
 
-export const rumPageLoadDistributionRoute = createRoute({
+const rumPageLoadDistributionRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/page-load-distribution',
   params: t.type({
     query: t.intersection([uxQueryRt, percentileRangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { minPercentile, maxPercentile, urlQuery },
-    } = context.params;
+    } = resources.params;
 
-    return getPageLoadDistribution({
+    const pageLoadDistribution = await getPageLoadDistribution({
       setup,
       minPercentile,
       maxPercentile,
       urlQuery,
     });
+
+    return { pageLoadDistribution };
   },
 });
 
-export const rumPageLoadDistBreakdownRoute = createRoute({
+const rumPageLoadDistBreakdownRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/page-load-distribution/breakdown',
   params: t.type({
     query: t.intersection([
@@ -98,35 +91,37 @@ export const rumPageLoadDistBreakdownRoute = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { minPercentile, maxPercentile, breakdown, urlQuery },
-    } = context.params;
+    } = resources.params;
 
-    return getPageLoadDistBreakdown({
+    const pageLoadDistBreakdown = await getPageLoadDistBreakdown({
       setup,
       minPercentile: Number(minPercentile),
       maxPercentile: Number(maxPercentile),
       breakdown,
       urlQuery,
     });
+
+    return { pageLoadDistBreakdown };
   },
 });
 
-export const rumPageViewsTrendRoute = createRoute({
+const rumPageViewsTrendRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/page-view-trends',
   params: t.type({
     query: t.intersection([uxQueryRt, t.partial({ breakdowns: t.string })]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { breakdowns, urlQuery },
-    } = context.params;
+    } = resources.params;
 
     return getPageViewTrends({
       setup,
@@ -136,31 +131,32 @@ export const rumPageViewsTrendRoute = createRoute({
   },
 });
 
-export const rumServicesRoute = createRoute({
+const rumServicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/services',
   params: t.type({
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
-    return getRumServices({ setup });
+    const rumServices = await getRumServices({ setup });
+    return { rumServices };
   },
 });
 
-export const rumVisitorsBreakdownRoute = createRoute({
+const rumVisitorsBreakdownRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/visitor-breakdown',
   params: t.type({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { urlQuery },
-    } = context.params;
+    } = resources.params;
 
     return getVisitorBreakdown({
       setup,
@@ -169,18 +165,18 @@ export const rumVisitorsBreakdownRoute = createRoute({
   },
 });
 
-export const rumWebCoreVitals = createRoute({
+const rumWebCoreVitals = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/web-core-vitals',
   params: t.type({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { urlQuery, percentile },
-    } = context.params;
+    } = resources.params;
 
     return getWebCoreVitals({
       setup,
@@ -190,18 +186,18 @@ export const rumWebCoreVitals = createRoute({
   },
 });
 
-export const rumLongTaskMetrics = createRoute({
+const rumLongTaskMetrics = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/long-task-metrics',
   params: t.type({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { urlQuery, percentile },
-    } = context.params;
+    } = resources.params;
 
     return getLongTaskMetrics({
       setup,
@@ -211,24 +207,24 @@ export const rumLongTaskMetrics = createRoute({
   },
 });
 
-export const rumUrlSearch = createRoute({
+const rumUrlSearch = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/url-search',
   params: t.type({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { urlQuery, percentile },
-    } = context.params;
+    } = resources.params;
 
     return getUrlSearch({ setup, urlQuery, percentile: Number(percentile) });
   },
 });
 
-export const rumJSErrors = createRoute({
+const rumJSErrors = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/js-errors',
   params: t.type({
     query: t.intersection([
@@ -239,12 +235,12 @@ export const rumJSErrors = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const {
       query: { pageSize, pageIndex, urlQuery },
-    } = context.params;
+    } = resources.params;
 
     return getJSErrors({
       setup,
@@ -255,104 +251,31 @@ export const rumJSErrors = createRoute({
   },
 });
 
-export const rumHasDataRoute = createRoute({
+const rumHasDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/observability_overview/has_rum_data',
-  params: t.type({
-    query: t.intersection([uiFiltersRt, rangeRt]),
+  params: t.partial({
+    query: t.partial({
+      uiFilters: t.string,
+      start: isoToEpochRt,
+      end: isoToEpochRt,
+    }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
     return await hasRumData({ setup });
   },
 });
 
-// Everything below here was originally in ui_filters.ts but now is here, since
-// UX is the only part of APM using UI filters now.
-
-const filterNamesRt = t.type({
-  filterNames: jsonRt.pipe(
-    t.array(
-      t.keyof(
-        Object.fromEntries(
-          localUIFilterNames.map((filterName) => [filterName, null])
-        ) as Record<LocalUIFilterName, null>
-      )
-    )
-  ),
-});
-
-const localUiBaseQueryRt = t.intersection([
-  filterNamesRt,
-  uiFiltersRt,
-  rangeRt,
-]);
-
-function createLocalFiltersRoute<
-  TEndpoint extends string,
-  TProjection extends Projection,
-  TQueryRT extends t.HasProps
->({
-  endpoint,
-  getProjection,
-  queryRt,
-}: {
-  endpoint: TEndpoint;
-  getProjection: GetProjection<
-    TProjection,
-    t.IntersectionC<[TQueryRT, BaseQueryType]>
-  >;
-  queryRt: TQueryRT;
-}) {
-  return createRoute({
-    endpoint,
-    params: t.type({
-      query: t.intersection([localUiBaseQueryRt, queryRt]),
-    }),
-    options: { tags: ['access:apm'] },
-    handler: async ({ context, request }) => {
-      const setup = await setupRequest(context, request);
-      const { uiFilters } = setup;
-      const { query } = context.params;
-
-      const { filterNames } = query;
-      const projection = await getProjection({
-        query,
-        context,
-        setup,
-      });
-
-      return getLocalUIFilters({
-        projection,
-        setup,
-        uiFilters,
-        localFilterNames: filterNames,
-      });
-    },
-  });
-}
-
-export const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
-  endpoint: 'GET /api/apm/rum/local_filters',
-  getProjection: async ({ setup }) => {
-    return getRumPageLoadTransactionsProjection({
-      setup,
-    });
-  },
-  queryRt: t.type({}),
-});
-
-type BaseQueryType = typeof localUiBaseQueryRt;
-
-type GetProjection<
-  TProjection extends Projection,
-  TQueryRT extends t.HasProps
-> = ({
-  query,
-  setup,
-  context,
-}: {
-  query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupTimeRange;
-  context: APMRequestHandlerContext;
-}) => Promise<TProjection> | TProjection;
+export const rumRouteRepository = createApmServerRouteRepository()
+  .add(rumClientMetricsRoute)
+  .add(rumPageLoadDistributionRoute)
+  .add(rumPageLoadDistBreakdownRoute)
+  .add(rumPageViewsTrendRoute)
+  .add(rumServicesRoute)
+  .add(rumVisitorsBreakdownRoute)
+  .add(rumWebCoreVitals)
+  .add(rumLongTaskMetrics)
+  .add(rumUrlSearch)
+  .add(rumJSErrors)
+  .add(rumHasDataRoute);

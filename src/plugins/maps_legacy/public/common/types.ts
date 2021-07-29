@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TmsLayer } from '..';
+import { TmsLayer } from '../../../maps_ems/public';
 
 export interface WMSOptions {
   selectedTmsLayer?: TmsLayer;

@@ -5,23 +5,49 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import {
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiSpacer,
+  EuiLoadingContent,
+  EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../containers/source';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
+import { ThreatSummaryView } from './cti_details/threat_summary_view';
+import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
-import { SummaryView } from './summary_view';
+import { AlertSummaryView } from './alert_summary_view';
+import { BrowserFields } from '../../containers/source';
+import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import {
+  filterDuplicateEnrichments,
+  getEnrichmentFields,
+  parseExistingEnrichments,
+  timelineDataToEnrichment,
+} from './cti_details/helpers';
+import { NoEnrichmentsPanel } from './cti_details/no_enrichments_panel';
 
-export type View = EventsViewType.tableView | EventsViewType.jsonView | EventsViewType.summaryView;
+type EventViewTab = EuiTabbedContentTab;
+
+export type EventViewId =
+  | EventsViewType.tableView
+  | EventsViewType.jsonView
+  | EventsViewType.summaryView
+  | EventsViewType.threatIntelView;
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
+  threatIntelView = 'threat-intel-view',
 }
 
 interface Props {
@@ -29,8 +55,6 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   id: string;
   isAlert: boolean;
-  view: EventsViewType;
-  onViewSelected: (selected: EventsViewType) => void;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
@@ -46,6 +70,16 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     flex: 1;
     flex-direction: column;
     overflow: hidden;
+    overflow-y: auto;
+    ::-webkit-scrollbar {
+      -webkit-appearance: none;
+      width: 7px;
+    }
+    ::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background-color: rgba(0, 0, 0, 0.5);
+      -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+    }
   }
 `;
 
@@ -58,70 +92,176 @@ const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
   id,
-  view,
-  onViewSelected,
-  timelineTabType,
-  timelineId,
   isAlert,
+  timelineId,
+  timelineTabType,
 }) => {
-  const handleTabClick = useCallback((e) => onViewSelected(e.id), [onViewSelected]);
-
-  const alerts = useMemo(
-    () => [
-      {
-        id: EventsViewType.summaryView,
-        name: i18n.SUMMARY,
-        content: (
-          <>
-            <EuiSpacer size="l" />
-            <SummaryView
-              data={data}
-              eventId={id}
-              browserFields={browserFields}
-              timelineId={timelineId}
-            />
-          </>
-        ),
-      },
-    ],
-    [data, id, browserFields, timelineId]
-  );
-  const tabs: EuiTabbedContentTab[] = useMemo(
-    () => [
-      ...(isAlert ? alerts : []),
-      {
-        id: EventsViewType.tableView,
-        name: i18n.TABLE,
-        content: (
-          <>
-            <EuiSpacer size="l" />
-            <EventFieldsBrowser
-              browserFields={browserFields}
-              data={data}
-              eventId={id}
-              timelineId={timelineId}
-              timelineTabType={timelineTabType}
-            />
-          </>
-        ),
-      },
-      {
-        id: EventsViewType.jsonView,
-        name: i18n.JSON_VIEW,
-        content: (
-          <>
-            <EuiSpacer size="m" />
-            <TabContentWrapper>
-              <JsonView data={data} />
-            </TabContentWrapper>
-          </>
-        ),
-      },
-    ],
-    [alerts, browserFields, data, id, isAlert, timelineId, timelineTabType]
+  const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
+  const handleTabClick = useCallback(
+    (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
+    [setSelectedTabId]
   );
 
-  const selectedTab = useMemo(() => tabs.find((t) => t.id === view) ?? tabs[0], [tabs, view]);
+  const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
+  const existingEnrichments = useMemo(
+    () =>
+      isAlert
+        ? parseExistingEnrichments(data).map((enrichmentData) =>
+            timelineDataToEnrichment(enrichmentData)
+          )
+        : [],
+    [data, isAlert]
+  );
+  const {
+    loading: enrichmentsLoading,
+    result: enrichmentsResponse,
+  } = useInvestigationTimeEnrichment(eventFields);
+
+  const allEnrichments = useMemo(() => {
+    if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
+      return existingEnrichments;
+    }
+    return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
+  }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
+
+  const enrichmentCount = allEnrichments.length;
+
+  const summaryTab: EventViewTab | undefined = useMemo(
+    () =>
+      isAlert
+        ? {
+            id: EventsViewType.summaryView,
+            name: i18n.OVERVIEW,
+            content: (
+              <>
+                <AlertSummaryView
+                  {...{
+                    data,
+                    eventId: id,
+                    browserFields,
+                    timelineId,
+                    title: i18n.DUCOMENT_SUMMARY,
+                  }}
+                />
+                {enrichmentCount > 0 && (
+                  <ThreatSummaryView
+                    eventId={id}
+                    timelineId={timelineId}
+                    enrichments={allEnrichments}
+                  />
+                )}
+                {enrichmentsLoading && (
+                  <>
+                    <EuiLoadingContent lines={2} />
+                  </>
+                )}
+              </>
+            ),
+          }
+        : undefined,
+    [
+      isAlert,
+      data,
+      id,
+      browserFields,
+      timelineId,
+      enrichmentsLoading,
+      enrichmentCount,
+      allEnrichments,
+    ]
+  );
+
+  const threatIntelTab = useMemo(
+    () =>
+      isAlert
+        ? {
+            id: EventsViewType.threatIntelView,
+            'data-test-subj': 'threatIntelTab',
+            name: (
+              <EuiFlexGroup
+                direction="row"
+                alignItems={'center'}
+                justifyContent={'spaceAround'}
+                gutterSize="xs"
+              >
+                <EuiFlexItem>
+                  <span>{i18n.THREAT_INTEL}</span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {enrichmentsLoading ? (
+                    <EuiLoadingSpinner />
+                  ) : (
+                    <EuiNotificationBadge data-test-subj="enrichment-count-notification">
+                      {enrichmentCount}
+                    </EuiNotificationBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            content: (
+              <>
+                <ThreatDetailsView enrichments={allEnrichments} />
+                <NoEnrichmentsPanel
+                  isInvestigationTimeEnrichmentsPresent={
+                    enrichmentCount > existingEnrichments.length
+                  }
+                  isIndicatorMatchesPresent={existingEnrichments.length > 0}
+                />
+              </>
+            ),
+          }
+        : undefined,
+    [allEnrichments, enrichmentCount, enrichmentsLoading, existingEnrichments.length, isAlert]
+  );
+
+  const tableTab = useMemo(
+    () => ({
+      id: EventsViewType.tableView,
+      'data-test-subj': 'tableTab',
+      name: i18n.TABLE,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <EventFieldsBrowser
+            browserFields={browserFields}
+            data={data}
+            eventId={id}
+            timelineId={timelineId}
+            timelineTabType={timelineTabType}
+          />
+        </>
+      ),
+    }),
+    [browserFields, data, id, timelineId, timelineTabType]
+  );
+
+  const jsonTab = useMemo(
+    () => ({
+      id: EventsViewType.jsonView,
+      'data-test-subj': 'jsonViewTab',
+      name: i18n.JSON_VIEW,
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <TabContentWrapper>
+            <JsonView data={data} />
+          </TabContentWrapper>
+        </>
+      ),
+    }),
+    [data]
+  );
+
+  const tabs = useMemo(() => {
+    return [summaryTab, threatIntelTab, tableTab, jsonTab].filter(
+      (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
+    );
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
+
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0], [
+    tabs,
+    selectedTabId,
+  ]);
 
   return (
     <StyledEuiTabbedContent
@@ -129,6 +269,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       tabs={tabs}
       selectedTab={selectedTab}
       onTabClick={handleTabClick}
+      key="event-summary-tabs"
     />
   );
 };

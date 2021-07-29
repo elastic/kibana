@@ -7,7 +7,6 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import { durationToNumber } from '../../common/schema_utils';
 import { BaseParams, ReportingUser } from '../types';
 import { LevelLogger } from './';
 import { Report } from './store';
@@ -25,15 +24,7 @@ export function enqueueJobFactory(
   reporting: ReportingCore,
   parentLogger: LevelLogger
 ): EnqueueJobFn {
-  const logger = parentLogger.clone(['queue-job']);
-  const config = reporting.getConfig();
-  const jobSettings = {
-    timeout: durationToNumber(config.get('queue', 'timeout')),
-    browser_type: config.get('capture', 'browser', 'type'),
-    max_attempts: config.get('capture', 'maxAttempts'),
-    priority: 10, // unused
-  };
-
+  const logger = parentLogger.clone(['createJob']);
   return async function enqueueJob(
     exportTypeId: string,
     jobParams: BaseParams,
@@ -47,27 +38,36 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const [createJob, { store }] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger),
-      reporting.getPluginStartDeps(),
+    if (!exportType.createJobFnFactory) {
+      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
+    }
+
+    const [createJob, store] = await Promise.all([
+      exportType.createJobFnFactory(reporting, logger.clone([exportType.id])),
+      reporting.getStore(),
     ]);
 
-    const job = await createJob(jobParams, context, request);
-    const pendingReport = new Report({
-      jobtype: exportType.jobType,
-      created_by: user ? user.username : false,
-      payload: job,
-      meta: {
-        objectType: jobParams.objectType,
-        layout: jobParams.layout?.id,
-      },
-      ...jobSettings,
-    });
+    const job = await createJob!(jobParams, context, request);
 
-    // store the pending report, puts it in the Reporting Management UI table
-    const report = await store.addReport(pendingReport);
+    // 1. Add the report to ReportingStore to show as pending
+    const report = await store.addReport(
+      new Report({
+        jobtype: exportType.jobType,
+        created_by: user ? user.username : false,
+        payload: job,
+        meta: {
+          objectType: jobParams.objectType,
+          layout: jobParams.layout?.id,
+        },
+      })
+    );
+    logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
-    logger.info(`Scheduled ${exportType.name} report: ${report._id}`);
+    // 2. Schedule the report with Task Manager
+    const task = await reporting.scheduleTask(report.toReportTaskJSON());
+    logger.info(
+      `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
+    );
 
     return report;
   };

@@ -10,8 +10,11 @@ import { i18n } from '@kbn/i18n';
 import {
   BoostOperation,
   BoostType,
+  FunctionalBoost,
   FunctionalBoostFunction,
+  ProximityBoost,
   ProximityBoostFunction,
+  ValueBoost,
 } from './types';
 
 export const FIELD_FILTER_CUTOFF = 10;
@@ -24,16 +27,22 @@ export const RELEVANCE_TUNING_TITLE = i18n.translate(
 export const UPDATE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.updateSuccess',
   {
-    defaultMessage: 'Relevance successfully tuned. The changes will impact your results shortly.',
+    defaultMessage: 'Relevance was tuned',
   }
 );
 export const DELETE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.deleteSuccess',
   {
-    defaultMessage:
-      'Relevance has been reset to default values. The change will impact your results shortly.',
+    defaultMessage: 'Relevance was reset to default values',
   }
 );
+export const SUCCESS_CHANGES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.successDescription',
+  {
+    defaultMessage: 'The changes will impact your results shortly.',
+  }
+);
+
 export const RESET_CONFIRMATION_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.resetConfirmation',
   {
@@ -75,6 +84,39 @@ export const BOOST_TYPE_TO_ICON_MAP = {
   [BoostType.Value]: 'tokenNumber',
   [BoostType.Functional]: 'tokenFunction',
   [BoostType.Proximity]: 'tokenGeo',
+};
+
+const EMPTY_VALUE_BOOST: ValueBoost = {
+  type: BoostType.Value,
+  factor: 1,
+  value: [''],
+  newBoost: true,
+  function: undefined,
+  operation: undefined,
+};
+
+const EMPTY_FUNCTIONAL_BOOST: FunctionalBoost = {
+  value: undefined,
+  type: BoostType.Functional,
+  factor: 1,
+  newBoost: true,
+  function: FunctionalBoostFunction.Logarithmic,
+  operation: BoostOperation.Multiply,
+};
+
+const EMPTY_PROXIMITY_BOOST: ProximityBoost = {
+  value: undefined,
+  type: BoostType.Proximity,
+  factor: 1,
+  newBoost: true,
+  operation: undefined,
+  function: ProximityBoostFunction.Gaussian,
+};
+
+export const BOOST_TYPE_TO_EMPTY_BOOST = {
+  [BoostType.Value]: EMPTY_VALUE_BOOST,
+  [BoostType.Functional]: EMPTY_FUNCTIONAL_BOOST,
+  [BoostType.Proximity]: EMPTY_PROXIMITY_BOOST,
 };
 
 export const ADD_DISPLAY = i18n.translate(

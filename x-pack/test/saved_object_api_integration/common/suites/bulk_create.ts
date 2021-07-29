@@ -41,13 +41,25 @@ const EACH_SPACE = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
 
 const NEW_SINGLE_NAMESPACE_OBJ = Object.freeze({ type: 'dashboard', id: 'new-dashboard-id' });
 const NEW_MULTI_NAMESPACE_OBJ = Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' });
-const NEW_EACH_SPACE_OBJ = Object.freeze({
+const INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE = Object.freeze({
+  type: 'isolatedtype',
+  id: 'new-other-space-id',
+  expectedNamespaces: ['other-space'], // expected namespaces of resulting object
+  initialNamespaces: ['other-space'], // args passed to the bulkCreate method
+});
+const INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE = Object.freeze({
+  type: 'sharecapabletype',
+  id: 'new-other-space-id',
+  expectedNamespaces: ['other-space'], // expected namespaces of resulting object
+  initialNamespaces: ['other-space'], // args passed to the bulkCreate method
+});
+const INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE = Object.freeze({
   type: 'sharedtype',
   id: 'new-each-space-id',
   expectedNamespaces: EACH_SPACE, // expected namespaces of resulting object
   initialNamespaces: EACH_SPACE, // args passed to the bulkCreate method
 });
-const NEW_ALL_SPACES_OBJ = Object.freeze({
+const INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES = Object.freeze({
   type: 'sharedtype',
   id: 'new-all-spaces-id',
   expectedNamespaces: [ALL_SPACES_ID], // expected namespaces of resulting object
@@ -58,8 +70,10 @@ export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   ...CASES,
   NEW_SINGLE_NAMESPACE_OBJ,
   NEW_MULTI_NAMESPACE_OBJ,
-  NEW_EACH_SPACE_OBJ,
-  NEW_ALL_SPACES_OBJ,
+  INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
+  INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
+  INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
+  INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
   NEW_NAMESPACE_AGNOSTIC_OBJ,
 });
 
@@ -69,7 +83,7 @@ const createRequest = ({ type, id, initialNamespaces }: BulkCreateTestCase) => (
   ...(initialNamespaces && { initialNamespaces }),
 });
 
-export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: BulkCreateTestCase | BulkCreateTestCase[],
@@ -151,8 +165,16 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
 

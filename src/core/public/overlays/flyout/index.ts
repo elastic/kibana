@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FlyoutService, OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout_service';
+export { FlyoutService } from './flyout_service';
+export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout_service';

@@ -6,13 +6,16 @@
  */
 
 import { SlmPolicyPayload } from '../../../../../common/types';
-import { PolicyValidation } from '../../../services/validation';
+import { PolicyValidation, ValidatePolicyHelperData } from '../../../services/validation';
 
 export interface StepProps {
   policy: SlmPolicyPayload;
   indices: string[];
   dataStreams: string[];
-  updatePolicy: (updatedSettings: Partial<SlmPolicyPayload>, validationHelperData?: any) => void;
+  updatePolicy: (
+    updatedSettings: Partial<SlmPolicyPayload>,
+    validationHelperData?: ValidatePolicyHelperData
+  ) => void;
   isEditing: boolean;
   currentUrl: string;
   errors: PolicyValidation['errors'];

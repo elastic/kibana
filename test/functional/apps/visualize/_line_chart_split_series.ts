@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split series', function () {
+    let isNewChartsLibraryEnabled = false;
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -40,7 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     };
 
-    before(initLineChart);
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await initLineChart();
+    });
 
     afterEach(async () => {
       await inspector.close();
@@ -201,19 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          [
-            '0',
-            '1,000',
-            '2,000',
-            '3,000',
-            '4,000',
-            '5,000',
-            '6,000',
-            '7,000',
-            '8,000',
-            '9,000',
-            '10,000',
-          ],
+          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -224,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000'],
+          ['2,000', '4,000', '6,000', '8,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -237,19 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          [
-            '0',
-            '1,000',
-            '2,000',
-            '3,000',
-            '4,000',
-            '5,000',
-            '6,000',
-            '7,000',
-            '8,000',
-            '9,000',
-            '10,000',
-          ],
+          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -260,7 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000'],
+          ['2,000', '4,000', '6,000', '8,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -305,7 +287,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should have advanced accordion and json input', async () => {
           await testSubjects.click('advancedParams-1');
-          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+          await find.byCssSelector('.euiAccordion .react-monaco-editor-container');
         });
       });
 
@@ -336,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should have advanced accordion and json input', async () => {
           await testSubjects.click('advancedParams-1');
-          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+          await find.byCssSelector('.euiAccordion .react-monaco-editor-container');
         });
       });
     });

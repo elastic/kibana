@@ -6,9 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '../';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
 export function defineGetUserRoutes({ router }: RouteDefinitionParams) {
   router.get(
@@ -23,9 +24,7 @@ export function defineGetUserRoutes({ router }: RouteDefinitionParams) {
         const username = request.params.username;
         const {
           body: users,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getUser<
-          Record<string, {}>
-        >({
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getUser({
           username,
         });
 

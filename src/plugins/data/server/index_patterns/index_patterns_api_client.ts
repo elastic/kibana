@@ -12,6 +12,7 @@ import {
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
 } from '../../common/index_patterns/types';
+import { IndexPatternMissingIndices } from '../../common/index_patterns/lib';
 import { IndexPatternsFetcher } from './fetcher';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
@@ -27,12 +28,23 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     allowNoIndex,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
-    return await indexPatterns.getFieldsForWildcard({
-      pattern,
-      metaFields,
-      type,
-      rollupIndex,
-    });
+    return await indexPatterns
+      .getFieldsForWildcard({
+        pattern,
+        metaFields,
+        type,
+        rollupIndex,
+      })
+      .catch((err) => {
+        if (
+          err.output.payload.statusCode === 404 &&
+          err.output.payload.code === 'no_matching_indices'
+        ) {
+          throw new IndexPatternMissingIndices(pattern);
+        } else {
+          throw err;
+        }
+      });
   }
   async getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient);

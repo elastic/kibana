@@ -18,11 +18,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should return 200 when creating an email action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
-          actionTypeId: '.email',
+          connector_type_id: '.email',
           config: {
             service: '__json',
             from: 'bob@example.com',
@@ -38,9 +38,10 @@ export default function emailTest({ getService }: FtrProviderContext) {
       createdActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdActionId,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'An email action',
-        actionTypeId: '.email',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
         config: {
           service: '__json',
           hasAuth: true,
@@ -54,14 +55,15 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(typeof createdActionId).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/actions/action/${createdActionId}`)
+        .get(`/api/actions/connector/${createdActionId}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'An email action',
-        actionTypeId: '.email',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
         config: {
           from: 'bob@example.com',
           service: '__json',
@@ -75,7 +77,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should return the message data when firing the __json service', async () => {
       await supertest
-        .post(`/api/actions/action/${createdActionId}/_execute`)
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -119,7 +121,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should render html from markdown', async () => {
       await supertest
-        .post(`/api/actions/action/${createdActionId}/_execute`)
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -142,7 +144,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should allow customizing the kibana footer link', async () => {
       await supertest
-        .post(`/api/actions/action/${createdActionId}/_execute`)
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -169,11 +171,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating an email action with an invalid config', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
-          actionTypeId: '.email',
+          connector_type_id: '.email',
           config: {},
         })
         .expect(400)
@@ -189,11 +191,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating an email action with a server not added to allowedHosts', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
-          actionTypeId: '.email',
+          connector_type_id: '.email',
           config: {
             service: 'gmail', // not added to allowedHosts in the config for this test
             from: 'bob@example.com',
@@ -214,11 +216,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
 
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
-          actionTypeId: '.email',
+          connector_type_id: '.email',
           config: {
             host: 'stmp.gmail.com', // not added to allowedHosts in the config for this test
             port: 666,
@@ -242,11 +244,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should handle creating an email action with a server added to allowedHosts', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
-          actionTypeId: '.email',
+          connector_type_id: '.email',
           config: {
             host: 'some.non.existent.com', // added to allowedHosts in the config for this test
             port: 666,
@@ -263,11 +265,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should handle an email action with no auth', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action with no auth',
-          actionTypeId: '.email',
+          connector_type_id: '.email',
           config: {
             service: '__json',
             from: 'jim@example.com',
@@ -276,7 +278,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       await supertest
-        .post(`/api/actions/action/${createdAction.id}/_execute`)
+        .post(`/api/actions/connector/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

@@ -10,12 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
 const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';
-const DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM =
-  'actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN';
-const DASHBOARD_TO_DASHBOARD_ACTION_WIZARD =
-  'selectedActionFactory-DASHBOARD_TO_DASHBOARD_DRILLDOWN';
-const DASHBOARD_TO_URL_ACTION_LIST_ITEM = 'actionFactoryItem-URL_DRILLDOWN';
-const DASHBOARD_TO_URL_ACTION_WIZARD = 'selectedActionFactory-URL_DRILLDOWN';
 const DESTINATION_DASHBOARD_SELECT = 'dashboardDrilldownSelectDashboard';
 const DRILLDOWN_WIZARD_SUBMIT = 'drilldownWizardSubmit';
 
@@ -33,12 +27,12 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
 
     async loadData() {
       log.debug('loadData');
-      await esArchiver.load('dashboard/drilldowns');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
     }
 
     async unloadData() {
       log.debug('unloadData');
-      await esArchiver.unload('dashboard/drilldowns');
+      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
     }
 
     async expectsCreateDrilldownFlyoutOpen() {
@@ -69,7 +63,6 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       destinationDashboardTitle: string;
     }) {
       await this.fillInDrilldownName(drilldownName);
-      await this.selectDashboardToDashboardActionIfNeeded();
       await this.selectDestinationDashboard(destinationDashboardTitle);
     }
 
@@ -83,27 +76,12 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER';
     }) {
       await this.fillInDrilldownName(drilldownName);
-      await this.selectDashboardToURLActionIfNeeded();
       await this.selectTriggerIfNeeded(trigger);
       await this.fillInURLTemplate(destinationURLTemplate);
     }
 
     async fillInDrilldownName(name: string) {
       await testSubjects.setValue('drilldownNameInput', name);
-    }
-
-    async selectDashboardToURLActionIfNeeded() {
-      if (await testSubjects.exists(DASHBOARD_TO_URL_ACTION_LIST_ITEM)) {
-        await testSubjects.click(DASHBOARD_TO_URL_ACTION_LIST_ITEM);
-      }
-      await testSubjects.existOrFail(DASHBOARD_TO_URL_ACTION_WIZARD);
-    }
-
-    async selectDashboardToDashboardActionIfNeeded() {
-      if (await testSubjects.exists(DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM)) {
-        await testSubjects.click(DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM);
-      }
-      await testSubjects.existOrFail(DASHBOARD_TO_DASHBOARD_ACTION_WIZARD);
     }
 
     async selectDestinationDashboard(title: string) {

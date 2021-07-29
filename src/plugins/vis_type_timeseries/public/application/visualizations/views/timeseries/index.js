@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -16,7 +16,7 @@ import {
   Chart,
   Position,
   Settings,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotation,
   TooltipType,
   StackMode,
@@ -30,7 +30,12 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { TOOLTIP_MODES } from '../../../../../common/enums';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
+import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
+import { renderEndzoneTooltip } from '../../../../../../charts/public';
+import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
+import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -53,14 +58,19 @@ export const TimeSeries = ({
   legend,
   legendPosition,
   tooltipMode,
-  xAxisLabel,
   series,
   yAxis,
   onBrush,
+  onFilterClick,
   xAxisFormatter,
   annotations,
+  syncColors,
+  palettesService,
+  interval,
+  isLastBucketDropped,
 }) => {
   const chartRef = useRef();
+  // const [palettesRegistry, setPalettesRegistry] = useState(null);
 
   useEffect(() => {
     const updateCursor = (cursor) => {
@@ -76,37 +86,69 @@ export const TimeSeries = ({
     };
   }, []);
 
-  const tooltipFormatter = decorateFormatter(xAxisFormatter);
+  let tooltipFormatter = decorateFormatter(xAxisFormatter);
+  if (!isLastBucketDropped) {
+    const domainBounds = calculateDomainForSeries(series);
+    tooltipFormatter = renderEndzoneTooltip(
+      interval,
+      domainBounds?.domainStart,
+      domainBounds?.domainEnd,
+      xAxisFormatter
+    );
+  }
+
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // apply legend style change if bgColor is configured
-  const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
+  const classes = classNames(getChartClasses(backgroundColor));
 
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { legacyColors: colors, theme: themeService } = getChartsSetup();
-  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
+  const { theme: themeService } = getChartsSetup();
 
-  colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
+  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
     if (!x) {
       return;
     }
     const [min, max] = x;
-    onBrush(min, max);
+    onBrush(min, max, series);
   };
+
+  const handleElementClick = (points) => {
+    onFilterClick(series, points);
+  };
+
+  const getSeriesColor = useCallback(
+    (seriesName, seriesGroupId, seriesId) => {
+      const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
+      const props = {
+        seriesById,
+        seriesName,
+        seriesId,
+        baseColor: seriesById[0].baseColor,
+        seriesPalette: seriesById[0].palette,
+        palettesRegistry: palettesService,
+        syncColors,
+      };
+      return getSplitByTermsColor(props) || null;
+    },
+    [palettesService, series, syncColors]
+  );
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
+        onElementClick={(args) => handleElementClick(args)}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
@@ -128,7 +170,11 @@ export const TimeSeries = ({
         baseTheme={baseTheme}
         tooltip={{
           snap: true,
-          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          type:
+            tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
+              ? TooltipType.Follow
+              : TooltipType.VerticalCursor,
+          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}
@@ -142,7 +188,7 @@ export const TimeSeries = ({
           <LineAnnotation
             key={id}
             id={id}
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             hideLinesTooltips={true}
@@ -155,6 +201,7 @@ export const TimeSeries = ({
         (
           {
             id,
+            seriesId,
             label,
             labelFormatted,
             bars,
@@ -165,6 +212,7 @@ export const TimeSeries = ({
             yScaleType,
             groupId,
             color,
+            isSplitByTerms,
             stack,
             points,
             y1AccessorFormat,
@@ -177,19 +225,20 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
-          // Only use color mapping if there is no color from the server
-          const finalColor = color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
           }
+          // The colors from the paletteService should be applied only when the timeseries is split by terms
+          const splitColor = getSeriesColor(seriesName, seriesId, id);
+          const finalColor = isSplitByTerms && splitColor ? splitColor : color;
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -214,7 +263,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}
@@ -257,7 +306,7 @@ export const TimeSeries = ({
       <Axis
         id="bottom"
         position={Position.Bottom}
-        title={xAxisLabel}
+        title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={{
           ...GRID_LINE_CONFIG,
@@ -279,10 +328,11 @@ TimeSeries.propTypes = {
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
-  xAxisLabel: PropTypes.string,
   series: PropTypes.array,
   yAxis: PropTypes.array,
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
+  interval: PropTypes.number,
+  isLastBucketDropped: PropTypes.bool,
 };

@@ -65,7 +65,7 @@ export class ScriptedFieldsTable extends Component<
     const supportedLangs = getSupportedScriptingLanguages();
 
     for (const field of fields) {
-      const lang: string = field.lang;
+      const lang = field.lang;
       if (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang)) {
         deprecatedLangsInUse.push(lang);
       }

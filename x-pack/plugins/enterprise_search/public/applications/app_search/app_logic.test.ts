@@ -6,7 +6,11 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { LogicMounter } from '../__mocks__';
+import { LogicMounter } from '../__mocks__/kea_logic/logic_mounter.test_helper';
+
+jest.mock('../shared/licensing', () => ({
+  LicensingLogic: { selectors: { hasPlatinumLicense: () => false } },
+}));
 
 import { AppLogic } from './app_logic';
 
@@ -14,66 +18,55 @@ describe('AppLogic', () => {
   const { mount } = new LogicMounter(AppLogic);
 
   beforeEach(() => {
-    mount();
+    jest.clearAllMocks();
   });
 
-  const DEFAULT_VALUES = {
-    hasInitialized: false,
-    account: {},
-    configuredLimits: {},
-    ilmEnabled: false,
-    myRole: {},
-  };
+  it('sets values from props', () => {
+    mount({}, DEFAULT_INITIAL_APP_DATA);
 
-  it('has expected default values', () => {
-    expect(AppLogic.values).toEqual(DEFAULT_VALUES);
-  });
-
-  describe('initializeAppData()', () => {
-    it('sets values based on passed props', () => {
-      AppLogic.actions.initializeAppData(DEFAULT_INITIAL_APP_DATA);
-
-      expect(AppLogic.values).toEqual({
-        hasInitialized: true,
-        ilmEnabled: true,
-        configuredLimits: {
-          engine: {
-            maxDocumentByteSize: 102400,
-            maxEnginesPerMetaEngine: 15,
-          },
+    expect(AppLogic.values).toEqual({
+      ilmEnabled: true,
+      configuredLimits: {
+        engine: {
+          maxDocumentByteSize: 102400,
+          maxEnginesPerMetaEngine: 15,
         },
-        account: {
-          accountId: 'some-id-string',
-          onboardingComplete: true,
-          role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
-        },
-        myRole: expect.objectContaining({
-          id: 'account_id:somestring|user_oid:somestring',
-          roleType: 'owner',
-          availableRoleTypes: ['owner', 'admin'],
-          credentialTypes: ['admin', 'private', 'search'],
-          canAccessAllEngines: true,
-          canViewAccountCredentials: true,
-          // Truncated for brevity - see utils/role/index.test.ts for full output
-        }),
-      });
+      },
+      account: {
+        accountId: 'some-id-string',
+        onboardingComplete: true,
+        role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
+      },
+      myRole: expect.objectContaining({
+        id: 'account_id:somestring|user_oid:somestring',
+        roleType: 'owner',
+        availableRoleTypes: ['owner', 'admin'],
+        credentialTypes: ['admin', 'private', 'search'],
+        canAccessAllEngines: true,
+        canViewAccountCredentials: true,
+        // Truncated for brevity - see utils/role/index.test.ts for full output
+      }),
     });
+  });
 
-    it('gracefully handles missing initial data', () => {
-      AppLogic.actions.initializeAppData({});
+  describe('actions', () => {
+    describe('setOnboardingComplete()', () => {
+      it('sets true', () => {
+        mount({}, { ...DEFAULT_INITIAL_APP_DATA, appSearch: { onboardingComplete: false } });
 
-      expect(AppLogic.values).toEqual({
-        ...DEFAULT_VALUES,
-        hasInitialized: true,
+        AppLogic.actions.setOnboardingComplete();
+        expect(AppLogic.values.account.onboardingComplete).toEqual(true);
       });
     });
   });
 
-  describe('setOnboardingComplete()', () => {
-    it('sets true', () => {
-      expect(AppLogic.values.account.onboardingComplete).toBeFalsy();
-      AppLogic.actions.setOnboardingComplete();
-      expect(AppLogic.values.account.onboardingComplete).toEqual(true);
+  describe('selectors', () => {
+    describe('myRole', () => {
+      it('falls back to an empty object if role is missing', () => {
+        mount({}, { ...DEFAULT_INITIAL_APP_DATA, appSearch: {} });
+
+        expect(AppLogic.values.myRole).toEqual({});
+      });
     });
   });
 });

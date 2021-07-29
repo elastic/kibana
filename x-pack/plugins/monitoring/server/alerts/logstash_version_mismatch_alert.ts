@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -16,7 +17,7 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   ALERT_LOGSTASH_VERSION_MISMATCH,
   LEGACY_ALERT_DETAILS,
@@ -24,7 +25,7 @@ import {
 } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -53,7 +54,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -62,7 +63,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       logstashIndexPattern = getCcsIndexPattern(logstashIndexPattern, availableCcs);
     }
     const logstashVersions = await fetchLogstashVersions(
-      callCluster,
+      esClient,
       clusters,
       logstashIndexPattern,
       Globals.app.config.ui.max_bucket_size

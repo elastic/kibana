@@ -9,23 +9,25 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { px, unit } from '../../../../style/variables';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { unit } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-type ErrorGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/primary_statistics'>;
-type ErrorGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
+type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
-  errorGroupComparisonStatistics,
+  errorGroupDetailedStatistics,
+  comparisonEnabled,
 }: {
   serviceName: string;
-  errorGroupComparisonStatistics: ErrorGroupComparisonStatistics;
-}): Array<EuiBasicTableColumn<ErrorGroupPrimaryStatistics['error_groups'][0]>> {
+  errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
+  comparisonEnabled?: boolean;
+}): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['error_groups'][0]>> {
   return [
     {
       field: 'name',
@@ -59,7 +61,7 @@ export function getColumns({
       render: (_, { last_seen: lastSeen }) => {
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
-      width: px(unit * 9),
+      width: `${unit * 9}px`,
     },
     {
       field: 'occurrences',
@@ -69,14 +71,19 @@ export function getColumns({
           defaultMessage: 'Occurrences',
         }
       ),
-      width: px(unit * 12),
+      width: `${unit * 12}px`,
       render: (_, { occurrences, group_id: errorGroupId }) => {
-        const timeseries =
-          errorGroupComparisonStatistics?.[errorGroupId]?.timeseries;
+        const currentPeriodTimeseries =
+          errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
+            ?.timeseries;
+        const previousPeriodTimeseries =
+          errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
+            ?.timeseries;
+
         return (
           <SparkPlot
             color="euiColorVis7"
-            series={timeseries}
+            series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {
@@ -86,6 +93,9 @@ export function getColumns({
                 },
               }
             )}
+            comparisonSeries={
+              comparisonEnabled ? previousPeriodTimeseries : undefined
+            }
           />
         );
       },

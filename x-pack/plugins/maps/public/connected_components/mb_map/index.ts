@@ -8,28 +8,33 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MBMap } from './mb_map';
+import { MbMap } from './mb_map';
 import {
-  mapExtentChanged,
-  mapReady,
-  mapDestroyed,
-  setMouseCoordinates,
-  clearMouseCoordinates,
   clearGoto,
-  setMapInitError,
+  clearMouseCoordinates,
+  mapDestroyed,
+  mapExtentChanged,
   MapExtentState,
+  mapReady,
+  setAreTilesLoaded,
+  setMapInitError,
+  setMouseCoordinates,
+  updateMetaFromTiles,
 } from '../../actions';
 import {
+  getGoto,
   getLayerList,
   getMapReady,
-  getGoto,
+  getMapSettings,
   getScrollZoom,
   getSpatialFiltersLayer,
-  getMapSettings,
+  getTimeslice,
 } from '../../selectors/map_selectors';
-import { getIsFullScreen } from '../../selectors/ui_selectors';
+import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
+import { DRAW_MODE } from '../../../common';
+import { TileMetaFeature } from '../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -41,6 +46,10 @@ function mapStateToProps(state: MapStoreState) {
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
+    timeslice: getTimeslice(state),
+    featureModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
+    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
   };
 }
 
@@ -69,8 +78,14 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setMapInitError(errorMessage: string) {
       dispatch(setMapInitError(errorMessage));
     },
+    setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+      dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
+    },
+    updateMetaFromTiles(layerId: string, features: TileMetaFeature[]) {
+      dispatch(updateMetaFromTiles(layerId, features));
+    },
   };
 }
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(MBMap);
+const connected = connect(mapStateToProps, mapDispatchToProps)(MbMap);
 export { connected as MBMap };

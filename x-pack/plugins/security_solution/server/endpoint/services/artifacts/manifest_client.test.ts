@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
 import { getInternalManifestMock } from '../../schemas/artifacts/saved_objects.mock';
-import { getManifestClientMock } from './manifest_client.mock';
+import { getManifestClientMock } from './mocks';
 import { ManifestClient } from './manifest_client';
 
 describe('manifest_client', () => {

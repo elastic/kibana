@@ -10,14 +10,21 @@ import yargs from 'yargs';
 import fs from 'fs';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { KbnClient, ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
+import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../fleet/common/constants';
 import {
-  CreateFleetSetupResponse,
-  PostIngestSetupResponse,
+  AGENTS_SETUP_API_ROUTES,
+  EPM_API_ROUTES,
+  SETUP_API_ROUTE,
+} from '../../../fleet/common/constants';
+import {
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
+  IBulkInstallPackageHTTPError,
+  PostFleetSetupResponse,
 } from '../../../fleet/common/types/rest_spec';
 import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
 
@@ -43,13 +50,19 @@ async function deleteIndices(indices: string[], client: Client) {
   }
 }
 
+function isFleetBulkInstallError(
+  installResponse: BulkInstallPackageInfo | IBulkInstallPackageHTTPError
+): installResponse is IBulkInstallPackageHTTPError {
+  return 'error' in installResponse && installResponse.error !== undefined;
+}
+
 async function doIngestSetup(kbnClient: KbnClient) {
   // Setup Ingest
   try {
     const setupResponse = (await kbnClient.request({
       path: SETUP_API_ROUTE,
       method: 'POST',
-    })) as AxiosResponse<PostIngestSetupResponse>;
+    })) as AxiosResponse<PostFleetSetupResponse>;
 
     if (!setupResponse.data.isInitialized) {
       console.error(setupResponse.data);
@@ -65,11 +78,40 @@ async function doIngestSetup(kbnClient: KbnClient) {
     const setupResponse = (await kbnClient.request({
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
       method: 'POST',
-    })) as AxiosResponse<CreateFleetSetupResponse>;
+    })) as AxiosResponse<PostFleetSetupResponse>;
 
     if (!setupResponse.data.isInitialized) {
       console.error(setupResponse.data);
       throw new Error('Initializing Fleet failed, existing');
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+
+  // Install/upgrade the endpoint package
+  try {
+    const installEndpointPackageResp = (await kbnClient.request({
+      path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
+      method: 'POST',
+      body: {
+        packages: ['endpoint'],
+      },
+    })) as AxiosResponse<BulkInstallPackagesResponse>;
+
+    const bulkResp = installEndpointPackageResp.data.response;
+    if (bulkResp.length <= 0) {
+      throw new Error('Installing the Endpoint package failed, response was empty, existing');
+    }
+
+    if (isFleetBulkInstallError(bulkResp[0])) {
+      if (bulkResp[0].error instanceof Error) {
+        throw new Error(
+          `Installing the Endpoint package failed: ${bulkResp[0].error.message}, exiting`
+        );
+      }
+
+      throw new Error(bulkResp[0].error);
     }
   } catch (error) {
     console.error(error);

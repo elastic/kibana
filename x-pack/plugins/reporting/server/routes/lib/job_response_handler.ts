@@ -32,37 +32,40 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
     params: JobResponseHandlerParams,
     opts: JobResponseHandlerOpts = {}
   ) {
-    const { docId } = params;
+    try {
+      const { docId } = params;
 
-    const doc = await jobsQuery.get(user, docId, { includeContent: !opts.excludeContent });
-    if (!doc) {
-      return res.notFound();
-    }
+      const doc = await jobsQuery.getContent(user, docId);
+      if (!doc) {
+        return res.notFound();
+      }
 
-    const { jobtype: jobType } = doc._source;
+      if (!validJobTypes.includes(doc.jobtype)) {
+        return res.unauthorized({
+          body: `Sorry, you are not authorized to download ${doc.jobtype} reports`,
+        });
+      }
 
-    if (!validJobTypes.includes(jobType)) {
-      return res.unauthorized({
-        body: `Sorry, you are not authorized to download ${jobType} reports`,
+      const payload = getDocumentPayload(doc);
+
+      if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
+        return res.badRequest({
+          body: `Unsupported content-type of ${payload.contentType} specified by job output`,
+        });
+      }
+
+      return res.custom({
+        body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
+        statusCode: payload.statusCode,
+        headers: {
+          ...payload.headers,
+          'content-type': payload.contentType || '',
+        },
       });
+    } catch (err) {
+      const { logger } = reporting.getPluginSetupDeps();
+      logger.error(err);
     }
-
-    const payload = getDocumentPayload(doc);
-
-    if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
-      return res.badRequest({
-        body: `Unsupported content-type of ${payload.contentType} specified by job output`,
-      });
-    }
-
-    return res.custom({
-      body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
-      statusCode: payload.statusCode,
-      headers: {
-        ...payload.headers,
-        'content-type': payload.contentType || '',
-      },
-    });
   };
 }
 
@@ -76,13 +79,13 @@ export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;
-    const doc = await jobsQuery.get(user, docId, { includeContent: false });
+    const doc = await jobsQuery.get(user, docId);
 
     if (!doc) {
       return res.notFound();
     }
 
-    const { jobtype: jobType } = doc._source;
+    const { jobtype: jobType } = doc;
 
     if (!validJobTypes.includes(jobType)) {
       return res.unauthorized({
@@ -91,7 +94,7 @@ export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
     }
 
     try {
-      const docIndex = doc._index;
+      const docIndex = doc.index;
       await jobsQuery.delete(docIndex, docId);
       return res.ok({
         body: { deleted: true },

@@ -9,7 +9,11 @@ import { createAction } from 'redux-actions';
 
 export const addPage = createAction('addPage');
 export const duplicatePage = createAction('duplicatePage');
-export const movePage = createAction('movePage', (id, position) => ({ id, position }));
+export const movePage = createAction('movePage', (id, position, gotoPage) => ({
+  id,
+  position,
+  gotoPage,
+}));
 export const removePage = createAction('removePage');
 export const stylePage = createAction('stylePage', (pageId, style) => ({ pageId, style }));
 export const setPage = createAction('setPage');

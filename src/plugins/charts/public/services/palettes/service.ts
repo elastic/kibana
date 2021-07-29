@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import {
   ChartsPluginSetup,
@@ -24,12 +23,12 @@ export class PaletteService {
   private palettes: Record<string, PaletteDefinition<unknown>> | undefined = undefined;
   constructor() {}
 
-  public setup(core: CoreSetup, colorsService: LegacyColorsService) {
+  public setup(colorsService: LegacyColorsService) {
     return {
       getPalettes: async (): Promise<PaletteRegistry> => {
         if (!this.palettes) {
           const { buildPalettes } = await import('./palettes');
-          this.palettes = buildPalettes(core.uiSettings, colorsService);
+          this.palettes = buildPalettes(colorsService);
         }
         return {
           get: (name: string) => {

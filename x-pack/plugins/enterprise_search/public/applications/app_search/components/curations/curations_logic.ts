@@ -11,12 +11,14 @@ import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
 import {
   clearFlashMessages,
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
-import { EngineLogic } from '../engine';
+import { ENGINE_CURATION_PATH } from '../../routes';
+import { EngineLogic, generateEnginePath } from '../engine';
 
 import { DELETE_MESSAGE, SUCCESS_MESSAGE } from './constants';
 import { Curation, CurationsAPIResponse } from './types';
@@ -31,7 +33,8 @@ interface CurationsActions {
   onCurationsLoad(response: CurationsAPIResponse): CurationsAPIResponse;
   onPaginate(newPageIndex: number): { newPageIndex: number };
   loadCurations(): void;
-  deleteCurationSet(id: string): string;
+  deleteCuration(id: string): string;
+  createCuration(queries: Curation['queries']): Curation['queries'];
 }
 
 export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsActions>>({
@@ -40,7 +43,8 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     onCurationsLoad: ({ results, meta }) => ({ results, meta }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
     loadCurations: true,
-    deleteCurationSet: (id) => id,
+    deleteCuration: (id) => id,
+    createCuration: (queries) => queries,
   }),
   reducers: () => ({
     dataLoading: [
@@ -82,7 +86,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
         flashAPIErrors(e);
       }
     },
-    deleteCurationSet: async (id) => {
+    deleteCuration: async (id) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
       clearFlashMessages();
@@ -91,10 +95,25 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
         try {
           await http.delete(`/api/app_search/engines/${engineName}/curations/${id}`);
           actions.loadCurations();
-          setSuccessMessage(SUCCESS_MESSAGE);
+          flashSuccessToast(SUCCESS_MESSAGE);
         } catch (e) {
           flashAPIErrors(e);
         }
+      }
+    },
+    createCuration: async (queries) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const { navigateToUrl } = KibanaLogic.values;
+      clearFlashMessages();
+
+      try {
+        const response = await http.post(`/api/app_search/engines/${engineName}/curations`, {
+          body: JSON.stringify({ queries }),
+        });
+        navigateToUrl(generateEnginePath(ENGINE_CURATION_PATH, { curationId: response.id }));
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
   }),

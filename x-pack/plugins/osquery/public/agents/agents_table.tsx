@@ -6,144 +6,184 @@
  */
 
 import { find } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiBasicTableProps,
-  EuiTableSelectionType,
-  EuiHealth,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiComboBox, EuiHealth, EuiHighlight, EuiSpacer } from '@elastic/eui';
 
+import useDebounce from 'react-use/lib/useDebounce';
 import { useAllAgents } from './use_all_agents';
-import { Direction } from '../../common/search_strategy';
-import { Agent } from '../../common/shared_imports';
+import { useAgentGroups } from './use_agent_groups';
+import { useOsqueryPolicies } from './use_osquery_policies';
+import { AgentGrouper } from './agent_grouper';
+import {
+  getNumAgentsInGrouping,
+  generateAgentCheck,
+  getNumOverlapped,
+  generateAgentSelection,
+} from './helpers';
+
+import {
+  SELECT_AGENT_LABEL,
+  generateSelectedAgentsMessage,
+  ALL_AGENTS_LABEL,
+  AGENT_POLICY_LABEL,
+} from './translations';
+
+import {
+  AGENT_GROUP_KEY,
+  SelectedGroups,
+  AgentOptionValue,
+  GroupOption,
+  AgentSelection,
+} from './types';
 
 interface AgentsTableProps {
-  selectedAgents: string[];
-  onChange: (payload: string[]) => void;
+  agentSelection: AgentSelection;
+  onChange: (payload: AgentSelection) => void;
 }
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<keyof Agent>('id');
-  const [sortDirection, setSortDirection] = useState<Direction>(Direction.asc);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const tableRef = useRef<EuiBasicTable<Agent>>(null);
+const perPage = 10;
+const DEBOUNCE_DELAY = 100; // ms
 
-  const onTableChange: EuiBasicTableProps<Agent>['onChange'] = useCallback(
-    ({ page = {}, sort = {} }) => {
-      const { index: newPageIndex, size: newPageSize } = page;
-
-      const { field: newSortField, direction: newSortDirection } = sort;
-
-      setPageIndex(newPageIndex);
-      setPageSize(newPageSize);
-      setSortField(newSortField);
-      setSortDirection(newSortDirection);
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
+  // search related
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState<string>('');
+  useDebounce(
+    () => {
+      // update the real search value, set the typing flag
+      setDebouncedSearchValue(searchValue);
+      setModifyingSearch(false);
     },
-    []
+    DEBOUNCE_DELAY,
+    [searchValue]
   );
 
-  const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
-    (newSelectedItems) => {
-      setSelectedItems(newSelectedItems);
-      // @ts-expect-error
-      onChange(newSelectedItems.map((item) => item._id));
-    },
-    [onChange]
+  // grouping related
+  const osqueryPolicyData = useOsqueryPolicies();
+  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
+    osqueryPolicyData
   );
-
-  const renderStatus = (online: string) => {
-    const color = online ? 'success' : 'danger';
-    const label = online ? 'Online' : 'Offline';
-    return <EuiHealth color={color}>{label}</EuiHealth>;
-  };
-
-  const [, { agents, totalCount }] = useAllAgents({
-    activePage: pageIndex,
-    limit: pageSize,
-    direction: sortDirection,
-    sortField,
+  const grouper = useMemo(() => new AgentGrouper(), []);
+  const { agentsLoading, agents } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
+    perPage,
   });
 
-  const columns: Array<EuiBasicTableColumn<{}>> = useMemo(
-    () => [
-      {
-        field: 'local_metadata.elastic.agent.id',
-        name: 'id',
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'local_metadata.host.name',
-        name: 'hostname',
-        truncateText: true,
-      },
-
-      {
-        field: 'active',
-        name: 'Online',
-        dataType: 'boolean',
-        render: (active: string) => renderStatus(active),
-      },
-    ],
-    []
-  );
-
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount: totalCount,
-      pageSizeOptions: [3, 5, 8],
-    }),
-    [pageIndex, pageSize, totalCount]
-  );
-
-  const sorting = useMemo(
-    () => ({
-      sort: {
-        field: sortField,
-        direction: sortDirection,
-      },
-    }),
-    [sortDirection, sortField]
-  );
-
-  const selection: EuiBasicTableProps<Agent>['selection'] = useMemo(
-    () => ({
-      selectable: (agent: Agent) => agent.active,
-      selectableMessage: (selectable: boolean) => (!selectable ? 'User is currently offline' : ''),
-      onSelectionChange,
-      initialSelected: selectedItems,
-    }),
-    [onSelectionChange, selectedItems]
-  );
+  // option related
+  const [options, setOptions] = useState<GroupOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
+  const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
+  const defaultValueInitialized = useRef(false);
 
   useEffect(() => {
-    if (selectedAgents?.length && agents.length && selectedItems.length !== selectedAgents.length) {
-      tableRef?.current?.setSelection(
-        // @ts-expect-error
-        selectedAgents.map((agentId) => find({ _id: agentId }, agents))
-      );
+    if (agentSelection && !defaultValueInitialized.current && options.length) {
+      if (agentSelection.allAgentsSelected) {
+        const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
+
+        if (allAgentsOptions?.options) {
+          setSelectedOptions(allAgentsOptions.options);
+          defaultValueInitialized.current = true;
+        }
+      }
+
+      if (agentSelection.policiesSelected.length) {
+        const policyOptions = find(['label', AGENT_POLICY_LABEL], options);
+
+        if (policyOptions) {
+          const defaultOptions = policyOptions.options?.filter((option) =>
+            agentSelection.policiesSelected.includes(option.label)
+          );
+
+          if (defaultOptions?.length) {
+            setSelectedOptions(defaultOptions);
+            defaultValueInitialized.current = true;
+          }
+        }
+      }
     }
-  }, [selectedAgents, agents, selectedItems.length]);
+  }, [agentSelection, options, selectedOptions]);
+
+  useEffect(() => {
+    // update the groups when groups or agents have changed
+    grouper.setTotalAgents(totalNumAgents);
+    grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
+    grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents!);
+    const newOptions = grouper.generateOptions();
+    setOptions(newOptions);
+  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, grouper]);
+
+  const onSelection = useCallback(
+    (selection: GroupOption[]) => {
+      // TODO?: optimize this by making the selection computation incremental
+      const {
+        newAgentSelection,
+        selectedAgents,
+        selectedGroups,
+      }: {
+        newAgentSelection: AgentSelection;
+        selectedAgents: AgentOptionValue[];
+        selectedGroups: SelectedGroups;
+      } = generateAgentSelection(selection);
+      if (newAgentSelection.allAgentsSelected) {
+        setNumAgentsSelected(totalNumAgents);
+      } else {
+        const checkAgent = generateAgentCheck(selectedGroups);
+        setNumAgentsSelected(
+          // filter out all the agents counted by selected policies and platforms
+          selectedAgents.filter(checkAgent).length +
+            // add the number of agents added via policy and platform groups
+            getNumAgentsInGrouping(selectedGroups) -
+            // subtract the number of agents double counted by policy/platform selections
+            getNumOverlapped(selectedGroups, groups.overlap)
+        );
+      }
+      onChange(newAgentSelection);
+      setSelectedOptions(selection);
+    },
+    [groups, onChange, totalNumAgents]
+  );
+
+  const renderOption = useCallback((option, searchVal, contentClassName) => {
+    const { label, value } = option;
+    return value?.groupType === AGENT_GROUP_KEY.Agent ? (
+      <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
+        <span className={contentClassName}>
+          <EuiHighlight search={searchVal}>{label}</EuiHighlight>
+        </span>
+      </EuiHealth>
+    ) : (
+      <span className={contentClassName}>
+        <span>[{value?.size ?? 0}]</span>
+        &nbsp;
+        <EuiHighlight search={searchVal}>{label}</EuiHighlight>
+      </span>
+    );
+  }, []);
+
+  const onSearchChange = useCallback((v: string) => {
+    // set the typing flag and update the search value
+    setModifyingSearch(v !== '');
+    setSearchValue(v);
+  }, []);
 
   return (
-    <EuiBasicTable<Agent>
-      ref={tableRef}
-      items={agents}
-      itemId="_id"
-      columns={columns}
-      pagination={pagination}
-      sorting={sorting}
-      isSelectable={true}
-      selection={selection}
-      onChange={onTableChange}
-      rowHeader="firstName"
-    />
+    <div>
+      <EuiComboBox
+        placeholder={SELECT_AGENT_LABEL}
+        isLoading={modifyingSearch || groupsLoading || agentsLoading}
+        options={options}
+        isClearable={true}
+        fullWidth={true}
+        onSearchChange={onSearchChange}
+        selectedOptions={selectedOptions}
+        onChange={onSelection}
+        renderOption={renderOption}
+      />
+      <EuiSpacer size="xs" />
+      {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
+    </div>
   );
 };
 

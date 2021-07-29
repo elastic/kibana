@@ -6,44 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionGroup } from '../../../alerts/common';
-import { MINIMUM_FULL_LICENSE } from '../license';
-import { PLUGIN_ID } from './app';
+import { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
   ANOMALY_DETECTION: 'xpack.ml.anomaly_detection_alert',
+  AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
 } as const;
 
 export type MlAlertType = typeof ML_ALERT_TYPES[keyof typeof ML_ALERT_TYPES];
 
-export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
-export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
-export const THRESHOLD_MET_GROUP: ActionGroup<AnomalyScoreMatchGroupId> = {
-  id: ANOMALY_SCORE_MATCH_GROUP_ID,
-  name: i18n.translate('xpack.ml.anomalyDetectionAlert.actionGroupName', {
-    defaultMessage: 'Anomaly score matched the condition',
+export const ALERT_PREVIEW_SAMPLE_SIZE = 5;
+
+export const TOP_N_BUCKETS_COUNT = 1;
+
+export const ALL_JOBS_SELECTION = '*';
+
+export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, string> = {
+  datafeed: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckName', {
+    defaultMessage: 'Datafeed is not started',
+  }),
+  mml: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
+    defaultMessage: 'Model memory limit reached',
+  }),
+  errorMessages: i18n.translate(
+    'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckName',
+    {
+      defaultMessage: 'There are errors in the job messages',
+    }
+  ),
+  behindRealtime: i18n.translate(
+    'xpack.ml.alertTypes.jobsHealthAlertingRule.behindRealtimeCheckName',
+    {
+      defaultMessage: 'Job is running behind real-time',
+    }
+  ),
+  delayedData: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckName', {
+    defaultMessage: 'Data delay has occurred',
   }),
 };
-
-export const ML_ALERT_TYPES_CONFIG: Record<
-  MlAlertType,
-  {
-    name: string;
-    actionGroups: Array<ActionGroup<AnomalyScoreMatchGroupId>>;
-    defaultActionGroupId: AnomalyScoreMatchGroupId;
-    minimumLicenseRequired: string;
-    producer: string;
-  }
-> = {
-  [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
-    name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
-      defaultMessage: 'Anomaly detection alert',
-    }),
-    actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
-    minimumLicenseRequired: MINIMUM_FULL_LICENSE,
-    producer: PLUGIN_ID,
-  },
-};
-
-export const ALERT_PREVIEW_SAMPLE_SIZE = 5;

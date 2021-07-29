@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 
-import { getKibanaTileMap } from '../../../meta';
+import { getKibanaTileMap } from '../../../util';
 import { i18n } from '@kbn/i18n';
 
 export function CreateSourceEditor({ onSourceConfigChange }) {

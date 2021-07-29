@@ -6,41 +6,41 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternsService } from '../../../../../data/common';
+
 import { from } from 'rxjs';
-import {
-  AbstractSearchStrategy,
-  ReqFacade,
-  toSanitizedFieldType,
-} from './abstract_search_strategy';
-import type { VisPayload } from '../../../../common/types';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 import type { IFieldType } from '../../../../../data/common';
-import type { FieldSpec, RuntimeField } from '../../../../../data/common';
+import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
+import type {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
 
 class FooSearchStrategy extends AbstractSearchStrategy {}
 
 describe('AbstractSearchStrategy', () => {
   let abstractSearchStrategy: AbstractSearchStrategy;
-  let req: ReqFacade;
   let mockedFields: IFieldType[];
-  let indexPattern: string;
+  let requestContext: VisTypeTimeseriesRequestHandlerContext;
 
   beforeEach(() => {
     mockedFields = [];
-    req = ({
-      payload: {},
-      pre: {
-        indexPatternsFetcher: {
-          getFieldsForWildcard: jest.fn().mockReturnValue(mockedFields),
+    requestContext = ({
+      core: {
+        elasticsearch: {
+          client: {
+            asCurrentUser: jest.fn(),
+          },
+        },
+        uiSettings: {
+          client: jest.fn(),
         },
       },
-      getIndexPatternsService: jest.fn(() =>
-        Promise.resolve({
-          find: jest.fn(() => []),
-          getDefault: jest.fn(() => {}),
-        })
-      ),
-    } as unknown) as ReqFacade<VisPayload>;
-
+      search: {
+        search: jest.fn().mockReturnValue(from(Promise.resolve({}))),
+      },
+    } as unknown) as VisTypeTimeseriesRequestHandlerContext;
     abstractSearchStrategy = new FooSearchStrategy();
   });
 
@@ -51,38 +51,37 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return fields for wildcard', async () => {
-    const fields = await abstractSearchStrategy.getFieldsForWildcard(req, indexPattern);
+    const fields = await abstractSearchStrategy.getFieldsForWildcard(
+      { indexPatternString: '', indexPattern: undefined },
+      ({
+        getDefault: jest.fn(),
+        getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
+      } as unknown) as IndexPatternsService,
+      (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
+    );
 
     expect(fields).toEqual(mockedFields);
-    expect(req.pre.indexPatternsFetcher!.getFieldsForWildcard).toHaveBeenCalledWith({
-      pattern: indexPattern,
-      metaFields: [],
-      fieldCapsOptions: { allow_no_indices: true },
-    });
   });
 
   test('should return response', async () => {
     const searches = [{ body: 'body', index: 'index' }];
-    const searchFn = jest.fn().mockReturnValue(from(Promise.resolve({})));
 
     const responses = await abstractSearchStrategy.search(
+      requestContext,
       ({
-        payload: {
+        body: {
           searchSession: {
             sessionId: '1',
             isRestore: false,
             isStored: true,
           },
         },
-        requestContext: {
-          search: { search: searchFn },
-        },
-      } as unknown) as ReqFacade<VisPayload>,
+      } as unknown) as VisTypeTimeseriesVisDataRequest,
       searches
     );
 
     expect(responses).toEqual([{}]);
-    expect(searchFn).toHaveBeenCalledWith(
+    expect(requestContext.search.search).toHaveBeenCalledWith(
       {
         params: {
           body: 'body',
@@ -96,67 +95,5 @@ describe('AbstractSearchStrategy', () => {
         isStored: true,
       }
     );
-  });
-
-  describe('toSanitizedFieldType', () => {
-    const mockedField = {
-      lang: 'lang',
-      conflictDescriptions: {},
-      aggregatable: true,
-      name: 'name',
-      type: 'type',
-      esTypes: ['long', 'geo'],
-    } as FieldSpec;
-
-    test('should sanitize fields ', async () => {
-      const fields = [mockedField] as FieldSpec[];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "label": "name",
-            "name": "name",
-            "type": "type",
-          },
-        ]
-      `);
-    });
-
-    test('should filter runtime fields', async () => {
-      const fields: FieldSpec[] = [
-        {
-          ...mockedField,
-          runtimeField: {} as RuntimeField,
-        },
-      ];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
-    });
-
-    test('should filter non-aggregatable fields', async () => {
-      const fields: FieldSpec[] = [
-        {
-          ...mockedField,
-          aggregatable: false,
-        },
-      ];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
-    });
-
-    test('should filter nested fields', async () => {
-      const fields: FieldSpec[] = [
-        {
-          ...mockedField,
-          subType: {
-            nested: {
-              path: 'path',
-            },
-          },
-        },
-      ];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
-    });
   });
 });

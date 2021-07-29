@@ -24,6 +24,7 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
     options: HostOverviewRequestOptions,
     response: IEsSearchResponse<OverviewHostHit>
   ): Promise<HostsOverviewStrategyResponse> => {
+    // @ts-expect-error specify aggregations type explicitly
     const aggregations: OverviewHostHit = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildOverviewHostQuery(options))],

@@ -22,6 +22,7 @@ import {
   StringFormat,
   TruncateFormat,
   UrlFormat,
+  HistogramFormat,
 } from '../converters';
 
 export const baseFormatters: FieldFormatInstanceType[] = [
@@ -38,4 +39,5 @@ export const baseFormatters: FieldFormatInstanceType[] = [
   StringFormat,
   TruncateFormat,
   UrlFormat,
+  HistogramFormat,
 ];

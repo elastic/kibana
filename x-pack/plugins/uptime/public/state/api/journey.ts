@@ -8,6 +8,12 @@
 import { apiService } from './utils';
 import { FetchJourneyStepsParams } from '../actions/journey';
 import {
+  FailedStepsApiResponse,
+  FailedStepsApiResponseType,
+  JourneyStep,
+  JourneyStepType,
+  ScreenshotImageBlob,
+  ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
 } from '../../../common/runtime_types';
@@ -15,26 +21,48 @@ import {
 export async function fetchJourneySteps(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
-  return (await apiService.get(
+  return apiService.get(
     `/api/uptime/journey/${params.checkGroup}`,
     { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
-  )) as SyntheticsJourneyApiResponse;
+  );
 }
 
 export async function fetchJourneysFailedSteps({
   checkGroups,
 }: {
   checkGroups: string[];
-}): Promise<SyntheticsJourneyApiResponse> {
-  return (await apiService.get(
+}): Promise<FailedStepsApiResponse> {
+  return apiService.get(
     `/api/uptime/journeys/failed_steps`,
     { checkGroups },
-    SyntheticsJourneyApiResponseType
-  )) as SyntheticsJourneyApiResponse;
+    FailedStepsApiResponseType
+  );
 }
 
-export async function getJourneyScreenshot(imgSrc: string) {
+export async function fetchLastSuccessfulStep({
+  monitorId,
+  timestamp,
+  stepIndex,
+}: {
+  monitorId: string;
+  timestamp: string;
+  stepIndex: number;
+}): Promise<JourneyStep> {
+  return await apiService.get(
+    `/api/uptime/synthetics/step/success/`,
+    {
+      monitorId,
+      timestamp,
+      stepIndex,
+    },
+    JourneyStepType
+  );
+}
+
+export async function getJourneyScreenshot(
+  imgSrc: string
+): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
   try {
     const imgRequest = new Request(imgSrc);
 
@@ -44,16 +72,22 @@ export async function getJourneyScreenshot(imgSrc: string) {
       return null;
     }
 
-    const imgBlob = await response.blob();
-
+    const contentType = response.headers.get('content-type');
     const stepName = response.headers.get('caption-name');
-    const maxSteps = response.headers.get('max-steps');
-
-    return {
-      stepName,
-      maxSteps: Number(maxSteps ?? 0),
-      src: URL.createObjectURL(imgBlob),
-    };
+    const maxSteps = Number(response.headers.get('max-steps') ?? 0);
+    if (contentType?.indexOf('application/json') !== -1) {
+      return {
+        stepName,
+        maxSteps,
+        ref: await response.json(),
+      };
+    } else {
+      return {
+        stepName,
+        maxSteps,
+        src: URL.createObjectURL(await response.blob()),
+      };
+    }
   } catch (e) {
     return null;
   }

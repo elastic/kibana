@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse, SearchParams } from 'elasticsearch';
-
-import { Filter } from 'src/plugins/data/public';
-import { DslQuery } from 'src/plugins/data/common';
+import type { estypes } from '@elastic/elasticsearch';
+import { DslQuery, Filter } from '@kbn/es-query';
 import { Assign } from '@kbn/utility-types';
 import { Spec } from 'vega';
 import { EsQueryParser } from './es_query_parser';
@@ -17,7 +15,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
 interface Body {
-  aggs?: SearchParams['body']['aggs'];
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
   query?: Query;
   timeout?: string;
 }
@@ -76,7 +74,7 @@ interface Projection {
 interface RequestDataObject<TUrlData = UrlObject> {
   name?: string;
   url?: TUrlData;
-  values: SearchResponse<unknown>;
+  values: estypes.SearchResponse;
 }
 
 type ContextVarsObjectProps =
@@ -147,7 +145,7 @@ export interface Bool {
   bool?: Bool;
   must?: DslQuery[];
   filter?: Filter[];
-  should?: never[];
+  should?: Filter[];
   must_not?: Filter[];
 }
 

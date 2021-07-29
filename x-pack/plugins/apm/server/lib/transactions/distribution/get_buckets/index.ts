@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   SERVICE_NAME,
@@ -17,11 +17,8 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../../../observability/server';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -86,63 +83,60 @@ export async function getBuckets({
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
-      ];
+      ] as QueryDslQueryContainer[];
 
       async function getSamplesForDistributionBuckets() {
-        const response = await withApmSpan(
+        const response = await apmEventClient.search(
           'get_samples_for_latency_distribution_buckets',
-          () =>
-            apmEventClient.search({
-              apm: {
-                events: [ProcessorEvent.transaction],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      ...commonFilters,
-                      { term: { [TRANSACTION_SAMPLED]: true } },
-                    ],
-                    should: [
-                      { term: { [TRACE_ID]: traceId } },
-                      { term: { [TRANSACTION_ID]: transactionId } },
-                    ],
-                  },
+          {
+            apm: {
+              events: [ProcessorEvent.transaction],
+            },
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    ...commonFilters,
+                    { term: { [TRANSACTION_SAMPLED]: true } },
+                  ],
+                  should: [
+                    { term: { [TRACE_ID]: traceId } },
+                    { term: { [TRANSACTION_ID]: transactionId } },
+                  ] as QueryDslQueryContainer[],
                 },
-                aggs: {
-                  distribution: {
-                    histogram: getHistogramAggOptions({
-                      bucketSize,
-                      field: TRANSACTION_DURATION,
-                      distributionMax,
-                    }),
-                    aggs: {
-                      samples: {
-                        top_metrics: {
-                          metrics: [
-                            { field: TRANSACTION_ID },
-                            { field: TRACE_ID },
-                          ] as const,
-                          size: 10,
-                          sort: {
-                            _score: 'desc',
-                          },
+              },
+              aggs: {
+                distribution: {
+                  histogram: getHistogramAggOptions({
+                    bucketSize,
+                    field: TRANSACTION_DURATION,
+                    distributionMax,
+                  }),
+                  aggs: {
+                    samples: {
+                      top_hits: {
+                        _source: [TRANSACTION_ID, TRACE_ID],
+                        size: 10,
+                        sort: {
+                          _score: 'desc' as const,
                         },
                       },
                     },
                   },
                 },
               },
-            })
+            },
+          }
         );
 
         return (
           response.aggregations?.distribution.buckets.map((bucket) => {
+            const samples = bucket.samples.hits.hits;
             return {
               key: bucket.key,
-              samples: bucket.samples.top.map((sample) => ({
-                traceId: sample.metrics[TRACE_ID] as string,
-                transactionId: sample.metrics[TRANSACTION_ID] as string,
+              samples: samples.map(({ _source: sample }) => ({
+                traceId: sample.trace.id,
+                transactionId: sample.transaction.id,
               })),
             };
           }) ?? []
@@ -150,41 +144,40 @@ export async function getBuckets({
       }
 
       async function getDistributionBuckets() {
-        const response = await withApmSpan(
+        const response = await apmEventClient.search(
           'get_latency_distribution_buckets',
-          () =>
-            apmEventClient.search({
-              apm: {
-                events: [
-                  getProcessorEventForAggregatedTransactions(
-                    searchAggregatedTransactions
-                  ),
-                ],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      ...commonFilters,
-                      ...getDocumentTypeFilterForAggregatedTransactions(
-                        searchAggregatedTransactions
-                      ),
-                    ],
-                  },
-                },
-                aggs: {
-                  distribution: {
-                    histogram: getHistogramAggOptions({
-                      field: getTransactionDurationFieldForAggregatedTransactions(
-                        searchAggregatedTransactions
-                      ),
-                      bucketSize,
-                      distributionMax,
-                    }),
-                  },
+          {
+            apm: {
+              events: [
+                getProcessorEventForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+              ],
+            },
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    ...commonFilters,
+                    ...getDocumentTypeFilterForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
+                  ],
                 },
               },
-            })
+              aggs: {
+                distribution: {
+                  histogram: getHistogramAggOptions({
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
+                    bucketSize,
+                    distributionMax,
+                  }),
+                },
+              },
+            },
+          }
         );
 
         return (

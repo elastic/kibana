@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard panel copy to', function viewEditModeTests() {
     before(async function () {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -91,6 +91,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.expectOnDashboard(`Editing ${fewPanelsTitle}`);
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.be(fewPanelsPanelCount + 1);
+
+      // Save & ensure that view mode is applied properly.
+      await PageObjects.dashboard.clickQuickSave();
+      await testSubjects.existOrFail('saveDashboardSuccess');
+
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      const panelOptions = await dashboardPanelActions.getPanelHeading(markdownTitle);
+      await dashboardPanelActions.openContextMenu(panelOptions);
+      await dashboardPanelActions.expectMissingEditPanelAction();
     });
 
     it('does not show the current dashboard in the dashboard picker', async () => {

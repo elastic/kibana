@@ -6,10 +6,10 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { getResult } from '../routes/__mocks__/request_responses';
+import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { NotificationExecutorOptions } from './types';
 import {
   sampleDocSearchResultsNoSortIdNoVersion,
@@ -17,6 +17,9 @@ import {
   sampleEmptyDocSearchResults,
 } from '../signals/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 jest.mock('./build_signals_query');
 
 describe('rules_notification_alert_type', () => {
@@ -41,6 +44,25 @@ describe('rules_notification_alert_type', () => {
       previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
       createdBy: 'elastic',
       updatedBy: 'elastic',
+      rule: {
+        name: 'name',
+        tags: [],
+        consumer: 'foo',
+        producer: 'foo',
+        ruleTypeId: 'ruleType',
+        ruleTypeName: 'Name of rule',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdAt: new Date('2019-12-14T16:40:33.400Z'),
+        updatedAt: new Date('2019-12-14T16:40:33.400Z'),
+        throttle: null,
+        notifyWhen: null,
+      },
     };
 
     alert = rulesNotificationAlertType({
@@ -63,14 +85,18 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should call buildSignalsSearchQuery with proper params', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
 
       await alert.executor(payload);
 
@@ -86,7 +112,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should resolve results_link when meta is undefined to use "/app/security"', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       delete ruleAlert.params.meta;
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'rule-id',
@@ -94,7 +120,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
 
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
@@ -110,7 +140,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.params.meta = {};
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'rule-id',
@@ -118,7 +148,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -133,7 +167,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should resolve results_link to custom kibana link when given one', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.params.meta = {
         kibana_siem_app_url: 'http://localhost',
       };
@@ -143,7 +177,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -158,14 +196,16 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should not call alertInstanceFactory if signalsCount was 0', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleEmptyDocSearchResults());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      );
 
       await alert.executor(payload);
 
@@ -173,14 +213,18 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should call scheduleActions if signalsCount was greater than 0', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortIdNoVersion());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsNoSortIdNoVersion()
+        )
+      );
 
       await alert.executor(payload);
 

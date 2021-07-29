@@ -12,6 +12,6 @@ insert_final_newline = true
 [package.json]
 insert_final_newline = false
 
-[*.{md,asciidoc}]
+[*.{md,mdx,asciidoc}]
 trim_trailing_whitespace = false
 insert_final_newline = false

@@ -11,18 +11,19 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiSpacer,
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -33,18 +34,20 @@ import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  KueryFilterQueryKind,
+  RowRenderer,
+  TimelineEventsType,
+  TimelineId,
+  TimelineTabs,
+  ToggleDetailPanel,
+} from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { PickEventType } from '../search_or_filter/pick_events';
-import {
-  inputsModel,
-  inputsSelectors,
-  KueryFilterQueryKind,
-  State,
-} from '../../../../common/store';
+import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
@@ -52,11 +55,11 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { HideShowContainer } from '../styles';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { DetailsPanel } from '../../side_panel';
+import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
+import { defaultControlColumn } from '../body/control_columns';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -70,7 +73,11 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  padding: 0;
+
+  &.euiFlyoutHeader {
+    ${({ theme }) =>
+      `padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
+  }
 `;
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -91,7 +98,9 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
 const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   background: none;
-  padding: 0;
+  &.euiFlyoutFooter {
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0;`}
+  }
 `;
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
@@ -101,6 +110,7 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
 `;
 
@@ -136,6 +146,8 @@ const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   deepEqual(prevProps.filters, nextProps.filters);
 
 interface OwnProps {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
@@ -158,6 +170,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   kqlMode,
   kqlQueryExpression,
   onEventClosed,
+  renderCellValue,
+  rowRenderers,
   show,
   showCallOutUnauthorizedMsg,
   showExpandedDetails,
@@ -167,8 +181,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
   updateEventTypeAndIndexesName,
 }) => {
+  const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
-  const { timelineFullScreen } = useTimelineFullScreen();
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
     docValueFields,
@@ -183,7 +198,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = { query: kqlQueryExpression, language: 'kuery' };
+  } = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [kqlQueryExpression]);
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -195,15 +210,31 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlMode,
   });
 
-  const isBlankTimeline: boolean =
-    isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query);
+  useInvalidFilterQuery({
+    id: timelineId,
+    filterQuery: combinedQueries?.filterQuery,
+    kqlError: combinedQueries?.kqlError,
+    query: kqlQuery,
+    startDate: start,
+    endDate: end,
+  });
 
-  const canQueryTimeline = () =>
-    combinedQueries != null &&
-    loadingSourcerer != null &&
-    !loadingSourcerer &&
-    !isEmpty(start) &&
-    !isEmpty(end);
+  const isBlankTimeline: boolean =
+    isEmpty(dataProviders) &&
+    isEmpty(filters) &&
+    isEmpty(kqlQuery.query) &&
+    combinedQueries?.filterQuery === undefined;
+
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
+      !isEmpty(start) &&
+      !isEmpty(end) &&
+      combinedQueries?.filterQuery !== undefined,
+    [combinedQueries, end, loadingSourcerer, start]
+  );
 
   const getTimelineQueryFields = () => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -218,13 +249,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
-  const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
-    initializeTimeline({
-      filterManager,
-      id: timelineId,
-    });
-  }, [initializeTimeline, filterManager, timelineId]);
+    dispatch(
+      timelineActions.initializeTGridSettings({
+        filterManager,
+        id: timelineId,
+      })
+    );
+  }, [filterManager, timelineId, dispatch]);
 
   const [
     isQueryLoading,
@@ -237,9 +269,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     fields: getTimelineQueryFields(),
     language: kqlQuery.language,
     limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery ?? '',
+    filterQuery: combinedQueries?.filterQuery,
     startDate: start,
-    skip: !canQueryTimeline(),
+    skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     timerangeKind,
   });
@@ -257,8 +289,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   useEffect(() => {
-    setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
-  }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
+    dispatch(
+      timelineActions.updateIsLoading({
+        id: timelineId,
+        isLoading: isQueryLoading || loadingSourcerer,
+      })
+    );
+  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
+
+  const isDatePickerDisabled = useMemo(() => {
+    return (combinedQueries && combinedQueries.kqlError != null) || false;
+  }, [combinedQueries]);
+
+  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
+  const trailingControlColumns: ControlColumnProps[] = [];
 
   return (
     <>
@@ -271,41 +315,52 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
+        skip={!canQueryTimeline}
       />
-      <FullWidthFlexGroup>
+      <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
-          <HideShowContainer $isVisible={!timelineFullScreen}>
-            <StyledEuiFlyoutHeader
-              data-test-subj={`${activeTab}-tab-flyout-header`}
-              hasBorder={false}
+          <StyledEuiFlyoutHeader
+            data-test-subj={`${activeTab}-tab-flyout-header`}
+            hasBorder={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              data-test-subj="timeline-date-picker-container"
             >
-              <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
-                <DatePicker grow={1}>
-                  <SuperDatePicker id="timeline" timelineId={timelineId} />
-                </DatePicker>
-                <EuiFlexItem grow={false}>
-                  <PickEventType
-                    eventType={eventType}
-                    onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <div>
-                <EuiSpacer size="s" />
-                <TimelineDatePickerLock />
-                <EuiSpacer size="s" />
-              </div>
-              <TimelineHeaderContainer data-test-subj="timelineHeader">
-                <TimelineHeader
-                  filterManager={filterManager}
-                  show={show && activeTab === TimelineTabs.query}
-                  showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                  status={status}
-                  timelineId={timelineId}
+              {timelineFullScreen && setTimelineFullScreen != null && (
+                <ExitFullScreen
+                  fullScreen={timelineFullScreen}
+                  setFullScreen={setTimelineFullScreen}
                 />
-              </TimelineHeaderContainer>
-            </StyledEuiFlyoutHeader>
-          </HideShowContainer>
+              )}
+              <DatePicker grow={1}>
+                <SuperDatePicker
+                  id="timeline"
+                  timelineId={timelineId}
+                  disabled={isDatePickerDisabled}
+                />
+              </DatePicker>
+              <EuiFlexItem grow={false}>
+                <TimelineDatePickerLock />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <PickEventType
+                  eventType={eventType}
+                  onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <TimelineHeaderContainer data-test-subj="timelineHeader">
+              <TimelineHeader
+                filterManager={filterManager}
+                show={show && activeTab === TimelineTabs.query}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+                status={status}
+                timelineId={timelineId}
+              />
+            </TimelineHeaderContainer>
+          </StyledEuiFlyoutHeader>
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
@@ -318,12 +373,16 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
                 id={timelineId}
                 refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
                 sort={sort}
                 tabType={TimelineTabs.query}
                 totalPages={calculateTotalPages({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
 

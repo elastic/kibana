@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  RiskScoreMapping,
+  ThreatIndex,
+  ThreatMapping,
+  Threats,
+  Type,
+  SeverityMapping,
+  Severity,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { AlertAction } from '../../../../../../alerts/common';
+import { AlertAction } from '../../../../../../alerting/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
@@ -15,20 +25,10 @@ import {
   Author,
   BuildingBlockType,
   License,
-  RiskScoreMapping,
   RuleNameOverride,
-  SeverityMapping,
   SortOrder,
   TimestampOverride,
-  Type,
-  Severity,
-  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  List,
-  ThreatIndex,
-  ThreatMapping,
-} from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -126,7 +126,7 @@ export interface AboutStepRiskScore {
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
-  machineLearningJobId: string;
+  machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   ruleType: Type;
   timeline: FieldValueTimeline;
@@ -153,15 +153,17 @@ export interface DefineStepRuleJson {
   anomaly_threshold?: number;
   index?: string[];
   filters?: Filter[];
-  machine_learning_job_id?: string;
+  machine_learning_job_id?: string[];
   saved_id?: string;
   query?: string;
   language?: string;
   threshold?: {
     field: string[];
     value: number;
-    cardinality_field: string;
-    cardinality_value: number;
+    cardinality: Array<{
+      field: string;
+      value: number;
+    }>;
   };
   threat_query?: string;
   threat_mapping?: ThreatMapping;

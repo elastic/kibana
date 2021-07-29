@@ -1,0 +1,11 @@
+{
+  "id": "timelines",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "timelines"],
+  "extraPublicDirs": ["common"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["alerting", "cases", "data", "dataEnhanced", "kibanaReact", "kibanaUtils"],
+  "optionalPlugins": []
+}

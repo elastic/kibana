@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
-import { Client } from '@elastic/elasticsearch';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
@@ -36,23 +37,21 @@ const pipeline = (...streams: Readable[]) =>
   );
 
 export async function loadAction({
-  name,
+  inputDir,
   skipExisting,
   useCreate,
   client,
-  dataDir,
   log,
   kbnClient,
 }: {
-  name: string;
+  inputDir: string;
   skipExisting: boolean;
   useCreate: boolean;
-  client: Client;
-  dataDir: string;
+  client: KibanaClient;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
-  const inputDir = resolve(dataDir, name);
+  const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();

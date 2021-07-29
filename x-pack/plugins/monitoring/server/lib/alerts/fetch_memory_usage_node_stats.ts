@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMemoryUsageNodeStats } from '../../../common/types/alerts';
 
 export async function fetchMemoryUsageNodeStats(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   startMs: number,
@@ -19,7 +20,7 @@ export async function fetchMemoryUsageNodeStats(
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
     index,
-    filterPath: ['aggregations'],
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -91,11 +92,12 @@ export async function fetchMemoryUsageNodeStats(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: AlertMemoryUsageNodeStats[] = [];
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  // @ts-expect-error declare type for aggregations explicitly
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
-  if (!clusterBuckets.length) {
+  if (!clusterBuckets?.length) {
     return stats;
   }
 

@@ -21,6 +21,7 @@ import {
   SearchSourceFields,
 } from '../../data/public';
 
+/** @deprecated */
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;

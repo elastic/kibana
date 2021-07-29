@@ -34,6 +34,7 @@ export function defineActionTypes(
   actions.registerType(noopActionType);
   actions.registerType(throwActionType);
   actions.registerType(getIndexRecordActionType());
+  actions.registerType(getDelayedActionType());
   actions.registerType(getFailingActionType());
   actions.registerType(getRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
@@ -64,7 +65,7 @@ function getIndexRecordActionType() {
       secrets: secretsSchema,
     },
     async executor({ config, secrets, params, services, actionId }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -74,6 +75,40 @@ function getIndexRecordActionType() {
           reference: params.reference,
           source: 'action:test.index-record',
         },
+      });
+      return { status: 'ok', actionId };
+    },
+  };
+  return result;
+}
+
+function getDelayedActionType() {
+  const paramsSchema = schema.object({
+    delayInMs: schema.number({ defaultValue: 1000 }),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const configSchema = schema.object({
+    unencrypted: schema.string(),
+  });
+  type ConfigType = TypeOf<typeof configSchema>;
+  const secretsSchema = schema.object({
+    encrypted: schema.string(),
+  });
+  type SecretsType = TypeOf<typeof secretsSchema>;
+  const result: ActionType<ConfigType, SecretsType, ParamsType> = {
+    id: 'test.delayed',
+    name: 'Test: Delayed',
+    minimumLicenseRequired: 'gold',
+    validate: {
+      params: paramsSchema,
+      config: configSchema,
+      secrets: secretsSchema,
+    },
+    async executor({ config, secrets, params, services, actionId }) {
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true);
+        }, params.delayInMs);
       });
       return { status: 'ok', actionId };
     },
@@ -95,7 +130,7 @@ function getFailingActionType() {
       params: paramsSchema,
     },
     async executor({ config, secrets, params, services }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -128,7 +163,7 @@ function getRateLimitedActionType() {
       params: paramsSchema,
     },
     async executor({ config, params, services }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -149,7 +184,6 @@ function getRateLimitedActionType() {
 }
 
 function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
-  const clusterClient = core.elasticsearch.legacy.client;
   const paramsSchema = schema.object({
     callClusterAuthorizationIndex: schema.string(),
     savedObjectsClientType: schema.string(),
@@ -170,7 +204,7 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
       let callClusterSuccess = false;
       let callClusterError;
       try {
-        await services.callCluster('index', {
+        await services.scopedClusterClient.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -182,11 +216,11 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
         callClusterError = e;
       }
       // Call scoped cluster
-      const scopedClusterClient = services.getLegacyScopedClusterClient(clusterClient);
+      const scopedClusterClient = services.scopedClusterClient;
       let callScopedClusterSuccess = false;
       let callScopedClusterError;
       try {
-        await scopedClusterClient.callAsCurrentUser('index', {
+        await scopedClusterClient.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -210,7 +244,7 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
         savedObjectsClientError = e;
       }
       // Save the result
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {

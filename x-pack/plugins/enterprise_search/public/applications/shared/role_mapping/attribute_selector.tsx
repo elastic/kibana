@@ -11,46 +11,36 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiPanel,
   EuiSelect,
-  EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
+
+import { AttributeName, AttributeExamples } from '../types';
 
 import {
   ANY_AUTH_PROVIDER,
   ANY_AUTH_PROVIDER_OPTION_LABEL,
+  ATTRIBUTE_VALUE_LABEL,
+  REQUIRED_LABEL,
   AUTH_ANY_PROVIDER_LABEL,
   AUTH_INDIVIDUAL_PROVIDER_LABEL,
-  ATTRIBUTE_SELECTOR_TITLE,
   AUTH_PROVIDER_LABEL,
   EXTERNAL_ATTRIBUTE_LABEL,
-  ATTRIBUTE_VALUE_LABEL,
 } from './constants';
-
-export type AttributeName = keyof AttributeExamples | 'role';
 
 interface Props {
   attributeName: AttributeName;
   attributeValue?: string;
+  attributeValueInvalid: boolean;
   attributes: string[];
   selectedAuthProviders?: string[];
   availableAuthProviders?: string[];
   elasticsearchRoles: string[];
-  disabled: boolean;
+  disabled?: boolean;
   multipleAuthProvidersConfig: boolean;
   handleAttributeSelectorChange(value: string, elasticsearchRole: string): void;
   handleAttributeValueChange(value: string): void;
   handleAuthProviderChange?(value: string[]): void;
-}
-
-interface AttributeExamples {
-  username: string;
-  email: string;
-  metadata: string;
 }
 
 interface ParentOption extends EuiComboBoxOptionOption<string> {
@@ -95,6 +85,7 @@ const getSelectedOptions = (selectedAuthProviders: string[], availableAuthProvid
 export const AttributeSelector: React.FC<Props> = ({
   attributeName,
   attributeValue = '',
+  attributeValueInvalid,
   attributes,
   availableAuthProviders,
   selectedAuthProviders = [ANY_AUTH_PROVIDER],
@@ -106,84 +97,69 @@ export const AttributeSelector: React.FC<Props> = ({
   handleAuthProviderChange = () => null,
 }) => {
   return (
-    <EuiPanel
-      data-test-subj="AttributeSelector"
-      paddingSize="l"
-      className={disabled ? 'euiPanel--disabled' : ''}
-    >
-      <EuiTitle size="s">
-        <h3>{ATTRIBUTE_SELECTOR_TITLE}</h3>
-      </EuiTitle>
-      <EuiSpacer />
+    <div data-test-subj="AttributeSelector">
       {availableAuthProviders && multipleAuthProvidersConfig && (
-        <EuiFlexGroup alignItems="stretch">
-          <EuiFlexItem>
-            <EuiFormRow label={AUTH_PROVIDER_LABEL} fullWidth>
-              <EuiComboBox
-                data-test-subj="AuthProviderSelect"
-                selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
-                options={getAuthProviderOptions(availableAuthProviders)}
-                onChange={(options) => {
-                  handleAuthProviderChange(options.map((o) => (o as ChildOption).value));
-                }}
-                fullWidth
-                isDisabled={disabled}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem />
-        </EuiFlexGroup>
+        <EuiFormRow label={AUTH_PROVIDER_LABEL} fullWidth>
+          <EuiComboBox
+            data-test-subj="AuthProviderSelect"
+            selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
+            options={getAuthProviderOptions(availableAuthProviders)}
+            onChange={(options) => {
+              handleAuthProviderChange(options.map((o) => o.value || ''));
+            }}
+            fullWidth
+            isDisabled={disabled}
+          />
+        </EuiFormRow>
       )}
-      <EuiFlexGroup alignItems="stretch">
-        <EuiFlexItem>
-          <EuiFormRow label={EXTERNAL_ATTRIBUTE_LABEL} fullWidth>
-            <EuiSelect
-              name="external-attribute"
-              data-test-subj="ExternalAttributeSelect"
-              value={attributeName}
-              required
-              options={attributes.map((attribute) => ({ value: attribute, text: attribute }))}
-              onChange={(e) => {
-                handleAttributeSelectorChange(e.target.value, elasticsearchRoles[0]);
-              }}
-              fullWidth
-              disabled={disabled}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow label={ATTRIBUTE_VALUE_LABEL} fullWidth>
-            {attributeName === 'role' ? (
-              <EuiSelect
-                value={attributeValue}
-                name="elasticsearch-role"
-                data-test-subj="ElasticsearchRoleSelect"
-                required
-                options={elasticsearchRoles.map((elasticsearchRole) => ({
-                  value: elasticsearchRole,
-                  text: elasticsearchRole,
-                }))}
-                onChange={(e) => {
-                  handleAttributeValueChange(e.target.value);
-                }}
-                fullWidth
-                disabled={disabled}
-              />
-            ) : (
-              <EuiFieldText
-                value={attributeValue}
-                name="attribute-value"
-                placeholder={attributeValueExamples[attributeName]}
-                onChange={(e) => {
-                  handleAttributeValueChange(e.target.value);
-                }}
-                fullWidth
-                disabled={disabled}
-              />
-            )}
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiFormRow label={EXTERNAL_ATTRIBUTE_LABEL} fullWidth>
+        <EuiSelect
+          name="external-attribute"
+          data-test-subj="ExternalAttributeSelect"
+          value={attributeName}
+          required
+          options={attributes.map((attribute) => ({ value: attribute, text: attribute }))}
+          onChange={(e) => {
+            handleAttributeSelectorChange(e.target.value, elasticsearchRoles[0]);
+          }}
+          fullWidth
+          disabled={disabled}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={ATTRIBUTE_VALUE_LABEL}
+        fullWidth
+        helpText={attributeValueInvalid && REQUIRED_LABEL}
+      >
+        {attributeName === 'role' ? (
+          <EuiSelect
+            value={attributeValue}
+            name="elasticsearch-role"
+            data-test-subj="ElasticsearchRoleSelect"
+            required
+            options={elasticsearchRoles.map((elasticsearchRole) => ({
+              value: elasticsearchRole,
+              text: elasticsearchRole,
+            }))}
+            onChange={(e) => {
+              handleAttributeValueChange(e.target.value);
+            }}
+            fullWidth
+            disabled={disabled}
+          />
+        ) : (
+          <EuiFieldText
+            value={attributeValue}
+            name="attribute-value"
+            placeholder={attributeValueExamples[attributeName]}
+            onChange={(e) => {
+              handleAttributeValueChange(e.target.value);
+            }}
+            fullWidth
+            disabled={disabled}
+          />
+        )}
+      </EuiFormRow>
+    </div>
   );
 };

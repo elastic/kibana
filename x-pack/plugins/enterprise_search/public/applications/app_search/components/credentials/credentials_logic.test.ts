@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -18,6 +22,8 @@ jest.mock('../../app_logic', () => ({
 }));
 import { AppLogic } from '../../app_logic';
 
+import { EngineTypes } from '../engine/types';
+
 import { ApiTokenTypes } from './constants';
 
 import { CredentialsLogic } from './credentials_logic';
@@ -25,7 +31,7 @@ import { CredentialsLogic } from './credentials_logic';
 describe('CredentialsLogic', () => {
   const { mount } = new LogicMounter(CredentialsLogic);
   const { http } = mockHttpValues;
-  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     activeApiToken: {
@@ -61,8 +67,8 @@ describe('CredentialsLogic', () => {
 
   const credentialsDetails = {
     engines: [
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
     ],
   };
 
@@ -1023,7 +1029,9 @@ describe('CredentialsLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('fetchCredentials', () => {
       const meta = {
         page: {
@@ -1102,7 +1110,7 @@ describe('CredentialsLogic', () => {
         await nextTick();
 
         expect(CredentialsLogic.actions.fetchCredentials).toHaveBeenCalled();
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
@@ -1134,7 +1142,7 @@ describe('CredentialsLogic', () => {
         });
         await nextTick();
         expect(CredentialsLogic.actions.onApiTokenCreateSuccess).toHaveBeenCalledWith(createdToken);
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('calls a PUT endpoint that updates the active token if it already exists', async () => {
@@ -1161,7 +1169,7 @@ describe('CredentialsLogic', () => {
         });
         await nextTick();
         expect(CredentialsLogic.actions.onApiTokenUpdateSuccess).toHaveBeenCalledWith(updatedToken);
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {

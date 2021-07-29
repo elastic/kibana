@@ -14,12 +14,23 @@ import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { Logger } from '../../../../../src/core/server';
-import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
+import {
+  HealthStatus,
+  MonitoringStats,
+  RawMonitoringStats,
+  summarizeMonitoringStats,
+} from '../monitoring';
 import { ServiceStatusLevels } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
+import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
+import { FillPoolResult } from '../lib/fill_pool';
 
-describe('healthRoute', () => {
+jest.mock('../lib/log_health_metrics', () => ({
+  logHealthMetrics: jest.fn(),
+}));
+
+// FLAKY: https://github.com/elastic/kibana/issues/106388
+describe.skip('healthRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -38,6 +49,9 @@ describe('healthRoute', () => {
   it('logs the Task Manager stats at a fixed interval', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
+    const calculateHealthStatus = calculateHealthStatusMock.create();
+    calculateHealthStatus.mockImplementation(() => HealthStatus.OK);
+    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
 
     const mockStat = mockHealthStats();
     await sleep(10);
@@ -55,6 +69,10 @@ describe('healthRoute', () => {
       id,
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
+        monitored_stats_health_verbose_log: {
+          enabled: true,
+          warn_delayed_task_start_in_seconds: 100,
+        },
         monitored_aggregated_stats_refresh_rate: 60000,
       })
     );
@@ -65,33 +83,165 @@ describe('healthRoute', () => {
     await sleep(600);
     stats$.next(nextMockStat);
 
-    const firstDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
-    );
-    expect(firstDebug).toMatchObject({
+    expect(logHealthMetrics).toBeCalledTimes(2);
+    expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(mockStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(summarizeMonitoringStats(mockStat, getTaskManagerConfig({}))),
     });
+    expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({}))),
+    });
+  });
 
-    const secondDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[1][0].replace('Latest Monitored Stats: ', '')
-    );
-    expect(secondDebug).not.toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...summarizeMonitoringStats(skippedMockStat, getTaskManagerConfig({})),
-    });
-    expect(secondDebug).toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({})),
-    });
+  it(`logs at a warn level if the status is warning`, async () => {
+    const router = httpServiceMock.createRouter();
+    const logger = loggingSystemMock.create().get();
+    const calculateHealthStatus = calculateHealthStatusMock.create();
+    calculateHealthStatus.mockImplementation(() => HealthStatus.Warning);
+    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
 
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    const warnRuntimeStat = mockHealthStats();
+    const warnConfigurationStat = mockHealthStats();
+    const warnWorkloadStat = mockHealthStats();
+    const warnEphemeralStat = mockHealthStats();
+
+    const stats$ = new Subject<MonitoringStats>();
+
+    const id = uuid.v4();
+    healthRoute(
+      router,
+      stats$,
+      logger,
+      id,
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_stats_health_verbose_log: {
+          enabled: true,
+          warn_delayed_task_start_in_seconds: 120,
+        },
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
+    );
+
+    stats$.next(warnRuntimeStat);
+    await sleep(1001);
+    stats$.next(warnConfigurationStat);
+    await sleep(1001);
+    stats$.next(warnWorkloadStat);
+    await sleep(1001);
+    stats$.next(warnEphemeralStat);
+
+    expect(logHealthMetrics).toBeCalledTimes(4);
+    expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnRuntimeStat, getTaskManagerConfig({}))
+      ),
+    });
+    expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnConfigurationStat, getTaskManagerConfig({}))
+      ),
+    });
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({}))
+      ),
+    });
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnEphemeralStat, getTaskManagerConfig({}))
+      ),
+    });
+  });
+
+  it(`logs at an error level if the status is error`, async () => {
+    const router = httpServiceMock.createRouter();
+    const logger = loggingSystemMock.create().get();
+    const calculateHealthStatus = calculateHealthStatusMock.create();
+    calculateHealthStatus.mockImplementation(() => HealthStatus.Error);
+    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
+
+    const errorRuntimeStat = mockHealthStats();
+    const errorConfigurationStat = mockHealthStats();
+    const errorWorkloadStat = mockHealthStats();
+    const errorEphemeralStat = mockHealthStats();
+
+    const stats$ = new Subject<MonitoringStats>();
+
+    const id = uuid.v4();
+    healthRoute(
+      router,
+      stats$,
+      logger,
+      id,
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_stats_health_verbose_log: {
+          enabled: true,
+          warn_delayed_task_start_in_seconds: 120,
+        },
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
+    );
+
+    stats$.next(errorRuntimeStat);
+    await sleep(1001);
+    stats$.next(errorConfigurationStat);
+    await sleep(1001);
+    stats$.next(errorWorkloadStat);
+    await sleep(1001);
+    stats$.next(errorEphemeralStat);
+
+    expect(logHealthMetrics).toBeCalledTimes(4);
+    expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorRuntimeStat, getTaskManagerConfig({}))
+      ),
+    });
+    expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorConfigurationStat, getTaskManagerConfig({}))
+      ),
+    });
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({}))
+      ),
+    });
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorEphemeralStat, getTaskManagerConfig({}))
+      ),
+    });
   });
 
   it('returns a error status if the overall stats have not been updated within the required hot freshness', async () => {
@@ -99,7 +249,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const serviceStatus$ = healthRoute(
+    const { serviceStatus$ } = healthRoute(
       router,
       stats$,
       loggingSystemMock.create().get(),
@@ -127,27 +277,32 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchObject({
       body: {
         status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll: expect.any(String),
+        ...ignoreCapacityEstimation(
+          summarizeMonitoringStats(
+            mockHealthStats({
+              last_update: expect.any(String),
+              stats: {
+                configuration: {
+                  timestamp: expect.any(String),
+                },
+                workload: {
+                  timestamp: expect.any(String),
+                },
+                ephemeral: {
+                  timestamp: expect.any(String),
+                },
+                runtime: {
+                  timestamp: expect.any(String),
+                  value: {
+                    polling: {
+                      last_successful_poll: expect.any(String),
+                    },
                   },
                 },
               },
-            },
-          }),
-          getTaskManagerConfig({})
+            }),
+            getTaskManagerConfig({})
+          )
         ),
       },
     });
@@ -155,31 +310,6 @@ describe('healthRoute', () => {
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.unavailable,
       summary: 'Task Manager is unavailable',
-      meta: {
-        status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll: expect.any(String),
-                  },
-                },
-              },
-            },
-          }),
-          getTaskManagerConfig({})
-        ),
-      },
     });
   });
 
@@ -221,27 +351,32 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchObject({
       body: {
         status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll: expect.any(String),
+        ...ignoreCapacityEstimation(
+          summarizeMonitoringStats(
+            mockHealthStats({
+              last_update: expect.any(String),
+              stats: {
+                configuration: {
+                  timestamp: expect.any(String),
+                },
+                workload: {
+                  timestamp: expect.any(String),
+                },
+                ephemeral: {
+                  timestamp: expect.any(String),
+                },
+                runtime: {
+                  timestamp: expect.any(String),
+                  value: {
+                    polling: {
+                      last_successful_poll: expect.any(String),
+                    },
                   },
                 },
               },
-            },
-          }),
-          getTaskManagerConfig()
+            }),
+            getTaskManagerConfig()
+          )
         ),
       },
     });
@@ -287,98 +422,127 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchObject({
       body: {
         status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll,
+        ...ignoreCapacityEstimation(
+          summarizeMonitoringStats(
+            mockHealthStats({
+              last_update: expect.any(String),
+              stats: {
+                configuration: {
+                  timestamp: expect.any(String),
+                },
+                workload: {
+                  timestamp: expect.any(String),
+                },
+                ephemeral: {
+                  timestamp: expect.any(String),
+                },
+                runtime: {
+                  timestamp: expect.any(String),
+                  value: {
+                    polling: {
+                      last_successful_poll,
+                    },
                   },
                 },
               },
-            },
-          }),
-          getTaskManagerConfig()
+            }),
+            getTaskManagerConfig()
+          )
         ),
       },
     });
   });
 });
 
+function ignoreCapacityEstimation(stats: RawMonitoringStats) {
+  stats.stats.capacity_estimation = expect.any(Object);
+  return stats;
+}
+
 function mockHealthStats(overrides = {}) {
-  return (merge(
-    {
-      last_update: new Date().toISOString(),
-      stats: {
-        configuration: {
-          timestamp: new Date().toISOString(),
-          value: {
-            value: {
-              max_workers: 10,
-              poll_interval: 6000000,
-              max_poll_inactivity_cycles: 10,
-              request_capacity: 1000,
-              monitored_aggregated_stats_refresh_rate: 5000,
-              monitored_stats_running_average_window: 50,
-              monitored_task_execution_thresholds: {
-                default: {
-                  error_threshold: 90,
-                  warn_threshold: 80,
-                },
-                custom: {},
-              },
+  const stub: MonitoringStats = {
+    last_update: new Date().toISOString(),
+    stats: {
+      configuration: {
+        timestamp: new Date().toISOString(),
+        value: {
+          max_workers: 10,
+          poll_interval: 3000,
+          max_poll_inactivity_cycles: 10,
+          request_capacity: 1000,
+          monitored_aggregated_stats_refresh_rate: 5000,
+          monitored_stats_running_average_window: 50,
+          monitored_task_execution_thresholds: {
+            default: {
+              error_threshold: 90,
+              warn_threshold: 80,
             },
-          },
-        },
-        workload: {
-          timestamp: new Date().toISOString(),
-          value: {
-            count: 4,
-            taskTypes: {
-              actions_telemetry: { count: 2, status: { idle: 2 } },
-              alerting_telemetry: { count: 1, status: { idle: 1 } },
-              session_cleanup: { count: 1, status: { idle: 1 } },
-            },
-            schedule: {},
-            overdue: 0,
-            estimatedScheduleDensity: [],
-          },
-        },
-        runtime: {
-          timestamp: new Date().toISOString(),
-          value: {
-            drift: [1000, 60000],
-            load: [0, 100, 75],
-            execution: {
-              duration: [],
-              result_frequency_percent_as_number: [],
-            },
-            polling: {
-              last_successful_poll: new Date().toISOString(),
-              duration: [500, 400, 3000],
-              claim_conflicts: [0, 100, 75],
-              claim_mismatches: [0, 100, 75],
-              result_frequency_percent_as_number: [
-                'NoTasksClaimed',
-                'NoTasksClaimed',
-                'NoTasksClaimed',
-              ],
-            },
+            custom: {},
           },
         },
       },
+      workload: {
+        timestamp: new Date().toISOString(),
+        value: {
+          count: 4,
+          task_types: {
+            actions_telemetry: { count: 2, status: { idle: 2 } },
+            alerting_telemetry: { count: 1, status: { idle: 1 } },
+            session_cleanup: { count: 1, status: { idle: 1 } },
+          },
+          schedule: [],
+          overdue: 0,
+          overdue_non_recurring: 0,
+          estimatedScheduleDensity: [],
+          non_recurring: 20,
+          owner_ids: [0, 0, 0, 1, 2, 0, 0, 2, 2, 2, 1, 2, 1, 1],
+          estimated_schedule_density: [],
+          capacity_requirements: {
+            per_minute: 150,
+            per_hour: 360,
+            per_day: 820,
+          },
+        },
+      },
+      runtime: {
+        timestamp: new Date().toISOString(),
+        value: {
+          drift: [1000, 60000],
+          drift_by_type: {},
+          load: [0, 100, 75],
+          execution: {
+            duration: {},
+            duration_by_persistence: {},
+            persistence: [],
+            result_frequency_percent_as_number: {},
+          },
+          polling: {
+            last_successful_poll: new Date().toISOString(),
+            duration: [500, 400, 3000],
+            claim_conflicts: [0, 100, 75],
+            claim_mismatches: [0, 100, 75],
+            claim_duration: [0, 100, 75],
+            result_frequency_percent_as_number: [
+              FillPoolResult.NoTasksClaimed,
+              FillPoolResult.NoTasksClaimed,
+              FillPoolResult.NoTasksClaimed,
+            ],
+            persistence: [],
+          },
+        },
+      },
+      ephemeral: {
+        timestamp: new Date().toISOString(),
+        value: {
+          load: [],
+          executionsPerCycle: [],
+          queuedTasks: [],
+          delay: [],
+        },
+      },
     },
-    overrides
-  ) as unknown) as MonitoringStats;
+  };
+  return (merge(stub, overrides) as unknown) as MonitoringStats;
 }
 
 async function getLatest<T>(stream$: Observable<T>) {

@@ -12,12 +12,21 @@ import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { FilterStateStore, Filter } from '@kbn/es-query';
+import {
+  KueryFilterQueryKind,
+  TimelineId,
+  TimelineResult,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
-import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
+import {
+  SendAlertToTimelineActionProps,
+  ThresholdAggregationData,
+  UpdateAlertStatusActionProps,
+} from './types';
 import { Ecs } from '../../../../common/ecs';
-import { GetOneTimeline, TimelineResult } from '../../../graphql/types';
 import {
   TimelineNonEcsData,
   TimelineEventsDetailsItem,
@@ -25,7 +34,6 @@ import {
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsQueries,
 } from '../../../../common/search_strategy/timeline';
-import { oneTimelineQuery } from '../../../timelines/containers/one/index.gql_query';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   omitTypenameInTimeline,
@@ -37,12 +45,11 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
-import { KueryFilterQueryKind } from '../../../common/store';
 import {
   DataProvider,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { getTimelineTemplate } from '../../../timelines/containers/api';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -123,13 +130,13 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
     };
   }
   const ecsData = ecs as Ecs;
-  const ellapsedTimeRule = moment.duration(
+  const elapsedTimeRule = moment.duration(
     moment().diff(
       dateMath.parse(ecsData?.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
     )
   );
   const from = moment(ecsData?.timestamp ?? new Date())
-    .subtract(ellapsedTimeRule)
+    .subtract(elapsedTimeRule)
     .toISOString();
   const to = moment(ecsData?.timestamp ?? new Date()).toISOString();
 
@@ -146,83 +153,100 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
     }
   }, [] as Filter[]);
 
-export const getThresholdAggregationDataProvider = (
+export const getThresholdAggregationData = (
   ecsData: Ecs | Ecs[],
   nonEcsData: TimelineNonEcsData[]
-): DataProvider[] => {
+): ThresholdAggregationData => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
-  return thresholdEcsData.reduce<DataProvider[]>((outerAcc, thresholdData) => {
-    const threshold = thresholdData.signal?.rule?.threshold as string[];
+  return thresholdEcsData.reduce<ThresholdAggregationData>(
+    (outerAcc, thresholdData) => {
+      const threshold = thresholdData.signal?.rule?.threshold as string[];
 
-    let aggField: string[] = [];
-    let thresholdResult: {
-      terms?: Array<{
-        field?: string;
-        value: string;
-      }>;
-      count: number;
-    };
-
-    try {
-      thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
-      aggField = JSON.parse(threshold[0]).field;
-    } catch (err) {
-      thresholdResult = {
-        terms: [
-          {
-            field: (thresholdData.rule?.threshold as { field: string }).field,
-            value: (thresholdData.signal?.threshold_result as { value: string }).value,
-          },
-        ],
-        count: (thresholdData.signal?.threshold_result as { count: number }).count,
+      let aggField: string[] = [];
+      let thresholdResult: {
+        terms?: Array<{
+          field?: string;
+          value: string;
+        }>;
+        count: number;
+        from: string;
       };
-    }
 
-    const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
-
-    return [
-      ...outerAcc,
-      ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
-        const aggregationValue = (thresholdResult.terms ?? []).filter(
-          (term: { field?: string | undefined; value: string }) => term.field === aggregationField
-        )[0].value;
-        const dataProviderValue = Array.isArray(aggregationValue)
-          ? aggregationValue[0]
-          : aggregationValue;
-
-        if (!dataProviderValue) {
-          return acc;
-        }
-
-        const aggregationFieldId = aggregationField.replace('.', '-');
-        const dataProviderPartial = {
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-          name: aggregationField,
-          enabled: true,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: aggregationField,
-            value: dataProviderValue,
-            operator: ':' as QueryOperator,
-          },
-        };
-
-        if (i === 0) {
-          return [
-            ...acc,
+      try {
+        thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
+        aggField = JSON.parse(threshold[0]).field;
+      } catch (err) {
+        thresholdResult = {
+          terms: [
             {
-              ...dataProviderPartial,
-              and: [],
+              field: (thresholdData.rule?.threshold as { field: string }).field,
+              value: (thresholdData.signal?.threshold_result as { value: string }).value,
             },
-          ];
-        } else {
-          acc[0].and.push(dataProviderPartial);
-          return acc;
-        }
-      }, []),
-    ];
-  }, []);
+          ],
+          count: (thresholdData.signal?.threshold_result as { count: number }).count,
+          from: (thresholdData.signal?.threshold_result as { from: string }).from,
+        };
+      }
+
+      const originalTime = moment(thresholdData.signal?.original_time![0]);
+      const now = moment();
+      const ruleFrom = dateMath.parse(thresholdData.signal?.rule?.from![0]!);
+      const ruleInterval = moment.duration(now.diff(ruleFrom));
+      const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
+      const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
+
+      return {
+        // Use `threshold_result.from` if available (it will always be available for new signals). Otherwise, use a calculated
+        // lower bound, which could result in the timeline showing a superset of the events that made up the threshold set.
+        thresholdFrom: thresholdResult.from ?? fromOriginalTime.toISOString(),
+        thresholdTo: originalTime.toISOString(),
+        dataProviders: [
+          ...outerAcc.dataProviders,
+          ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
+            const aggregationValue = (thresholdResult.terms ?? []).filter(
+              (term: { field?: string | undefined; value: string }) =>
+                term.field === aggregationField
+            )[0].value;
+            const dataProviderValue = Array.isArray(aggregationValue)
+              ? aggregationValue[0]
+              : aggregationValue;
+
+            if (!dataProviderValue) {
+              return acc;
+            }
+
+            const aggregationFieldId = aggregationField.replace('.', '-');
+            const dataProviderPartial = {
+              id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
+              name: aggregationField,
+              enabled: true,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: aggregationField,
+                value: dataProviderValue,
+                operator: ':' as QueryOperator,
+              },
+            };
+
+            if (i === 0) {
+              return [
+                ...acc,
+                {
+                  ...dataProviderPartial,
+                  and: [],
+                },
+              ];
+            } else {
+              acc[0].and.push(dataProviderPartial);
+              return acc;
+            }
+          }, []),
+        ],
+      };
+    },
+    { dataProviders: [], thresholdFrom: '', thresholdTo: '' } as ThresholdAggregationData
+  );
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
@@ -258,7 +282,7 @@ export const buildAlertsKqlFilter = (
         params: alertIds,
       },
       $state: {
-        store: esFilters.FilterStateStore.APP_STATE,
+        store: FilterStateStore.APP_STATE,
       },
     },
   ];
@@ -341,7 +365,6 @@ export const buildEqlDataProviderOrFilter = (
 };
 
 export const sendAlertToTimelineAction = async ({
-  apolloClient,
   createTimeline,
   ecsData: ecs,
   nonEcsData,
@@ -360,18 +383,11 @@ export const sendAlertToTimelineAction = async ({
   const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds
-  if (!isEmpty(timelineId) && apolloClient != null && isEmpty(alertIds)) {
+  if (!isEmpty(timelineId) && isEmpty(alertIds)) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
-        apolloClient.query<GetOneTimeline.Query, GetOneTimeline.Variables>({
-          query: oneTimelineQuery,
-          fetchPolicy: 'no-cache',
-          variables: {
-            id: timelineId,
-            timelineType: TimelineType.template,
-          },
-        }),
+        getTimelineTemplate(timelineId),
         searchStrategyClient
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
             {
@@ -382,7 +398,7 @@ export const sendAlertToTimelineAction = async ({
               factoryQueryType: TimelineEventsQueries.details,
             },
             {
-              strategy: 'securitySolutionTimelineSearchStrategy',
+              strategy: 'timelineSearchStrategy',
             }
           )
           .toPromise(),
@@ -446,19 +462,24 @@ export const sendAlertToTimelineAction = async ({
   }
 
   if (isThresholdRule(ecsData)) {
+    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(
+      ecsData,
+      nonEcsData
+    );
+
     return createTimeline({
-      from,
+      from: thresholdFrom,
       notes: null,
       timeline: {
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
         filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
-        dataProviders: getThresholdAggregationDataProvider(ecsData, nonEcsData),
+        dataProviders,
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
-          start: from,
-          end: to,
+          start: thresholdFrom,
+          end: thresholdTo,
         },
         eventType: 'all',
         kqlQuery: {
@@ -475,7 +496,7 @@ export const sendAlertToTimelineAction = async ({
           },
         },
       },
-      to,
+      to: thresholdTo,
       ruleNote: noteContent,
     });
   } else {

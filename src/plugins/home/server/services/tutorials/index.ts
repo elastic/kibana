@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-export {
-  TutorialsRegistry,
-  TutorialsRegistrySetup,
-  TutorialsRegistryStart,
-} from './tutorials_registry';
-export {
-  TutorialsCategory,
-  ParamTypes,
+export { TutorialsRegistry } from './tutorials_registry';
+export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials_registry';
+
+export { TutorialsCategory } from './lib/tutorials_registry_types';
+
+export type {
   InstructionSetSchema,
   ParamsSchema,
   InstructionsSchema,

@@ -8,13 +8,15 @@
 import { combineLatest, Observable, timer } from 'rxjs';
 import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 import { keyBy, mapValues } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
-import { AggregationResultOf } from '../../../../typings/elasticsearch';
+import { AggregationResultOf } from '../../../../../src/core/types/elasticsearch';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
+import { createRunningAveragedStat } from './task_run_calcultors';
 
 interface StatusStat extends JsonObject {
   [status: string]: number;
@@ -26,12 +28,27 @@ interface TaskTypeStat extends JsonObject {
   };
 }
 
-export interface WorkloadStat extends JsonObject {
+interface RawWorkloadStat extends JsonObject {
   count: number;
   task_types: TaskTypeStat;
   schedule: Array<[string, number]>;
+  non_recurring: number;
   overdue: number;
+  overdue_non_recurring: number;
   estimated_schedule_density: number[];
+  capacity_requirements: CapacityRequirements;
+}
+
+export interface WorkloadStat extends RawWorkloadStat {
+  owner_ids: number[];
+}
+export interface SummarizedWorkloadStat extends RawWorkloadStat {
+  owner_ids: number;
+}
+export interface CapacityRequirements extends JsonObject {
+  per_minute: number;
+  per_hour: number;
+  per_day: number;
 }
 
 export interface WorkloadAggregation {
@@ -88,6 +105,7 @@ type ScheduleDensityResult = AggregationResultOf<
   WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
   {}
 >['buckets'][0];
+// @ts-expect-error cannot infer histogram
 type ScheduledIntervals = ScheduleDensityResult['histogram']['buckets'][0];
 
 // Set an upper bound just in case a customer sets a really high refresh rate
@@ -107,13 +125,15 @@ export function createWorkloadAggregator(
     MAX_SHCEDULE_DENSITY_BUCKETS
   );
 
+  const ownerIdsQueue = createRunningAveragedStat<number>(scheduleDensityBuckets);
+
   return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
     filter(([, areElasticsearchAndSOAvailable]) => areElasticsearchAndSOAvailable),
     mergeMap(() =>
       taskStore.aggregate({
         aggs: {
           taskType: {
-            terms: { field: 'task.taskType' },
+            terms: { size: 100, field: 'task.taskType' },
             aggs: {
               status: {
                 terms: { field: 'task.status' },
@@ -122,6 +142,14 @@ export function createWorkloadAggregator(
           },
           schedule: {
             terms: { field: 'task.schedule.interval' },
+          },
+          nonRecurringTasks: {
+            missing: { field: 'task.schedule' },
+          },
+          ownerIds: {
+            cardinality: {
+              field: 'task.ownerId',
+            },
           },
           idleTasks: {
             filter: {
@@ -161,6 +189,11 @@ export function createWorkloadAggregator(
                     'task.runAt': { lt: 'now' },
                   },
                 },
+                aggs: {
+                  nonRecurring: {
+                    missing: { field: 'task.schedule' },
+                  },
+                },
               },
             },
           },
@@ -170,29 +203,59 @@ export function createWorkloadAggregator(
     map((result) => {
       const {
         aggregations,
-        hits: {
-          total: { value: count },
-        },
+        hits: { total },
       } = result;
+      const count = typeof total === 'number' ? total : total.value;
 
-      if (
-        !(
-          aggregations?.taskType &&
-          aggregations?.schedule &&
-          aggregations?.idleTasks?.overdue &&
-          aggregations?.idleTasks?.scheduleDensity
-        )
-      ) {
+      if (!hasAggregations(aggregations)) {
         throw new Error(`Invalid workload: ${JSON.stringify(result)}`);
       }
 
       const taskTypes = aggregations.taskType.buckets;
-      const schedules = aggregations.schedule.buckets;
+      const nonRecurring = aggregations.nonRecurringTasks.doc_count;
+      const ownerIds = aggregations.ownerIds.value;
 
       const {
-        overdue: { doc_count: overdue },
+        overdue: {
+          doc_count: overdue,
+          nonRecurring: { doc_count: overdueNonRecurring },
+        },
         scheduleDensity: { buckets: [scheduleDensity] = [] } = {},
       } = aggregations.idleTasks;
+
+      const { schedules, cadence } = aggregations.schedule.buckets.reduce(
+        (accm, schedule) => {
+          const parsedSchedule = {
+            interval: schedule.key as string,
+            asSeconds: parseIntervalAsSecond(schedule.key as string),
+            count: schedule.doc_count,
+          };
+          accm.schedules.push(parsedSchedule);
+          if (parsedSchedule.asSeconds <= 60) {
+            accm.cadence.perMinute +=
+              parsedSchedule.count * Math.round(60 / parsedSchedule.asSeconds);
+          } else if (parsedSchedule.asSeconds <= 3600) {
+            accm.cadence.perHour +=
+              parsedSchedule.count * Math.round(3600 / parsedSchedule.asSeconds);
+          } else {
+            accm.cadence.perDay +=
+              parsedSchedule.count * Math.round((3600 * 24) / parsedSchedule.asSeconds);
+          }
+          return accm;
+        },
+        {
+          cadence: {
+            perMinute: 0,
+            perHour: 0,
+            perDay: 0,
+          },
+          schedules: [] as Array<{
+            interval: string;
+            asSeconds: number;
+            count: number;
+          }>,
+        }
+      );
 
       const summary: WorkloadStat = {
         count,
@@ -202,19 +265,23 @@ export function createWorkloadAggregator(
             status: mapValues(keyBy(status.buckets, 'key'), 'doc_count'),
           };
         }),
+        non_recurring: nonRecurring,
+        owner_ids: ownerIdsQueue(ownerIds),
         schedule: schedules
-          .sort(
-            (scheduleLeft, scheduleRight) =>
-              parseIntervalAsSecond(scheduleLeft.key as string) -
-              parseIntervalAsSecond(scheduleRight.key as string)
-          )
-          .map((schedule) => [schedule.key as string, schedule.doc_count]),
+          .sort((scheduleLeft, scheduleRight) => scheduleLeft.asSeconds - scheduleRight.asSeconds)
+          .map((schedule) => [schedule.interval, schedule.count]),
         overdue,
+        overdue_non_recurring: overdueNonRecurring,
         estimated_schedule_density: padBuckets(
           scheduleDensityBuckets,
           pollInterval,
           scheduleDensity
         ),
+        capacity_requirements: {
+          per_minute: cadence.perMinute,
+          per_hour: cadence.perHour,
+          per_day: cadence.perDay,
+        },
       };
       return {
         key: 'workload',
@@ -240,7 +307,9 @@ export function padBuckets(
   pollInterval: number,
   scheduleDensity: ScheduleDensityResult
 ): number[] {
+  // @ts-expect-error cannot infer histogram
   if (scheduleDensity.from && scheduleDensity.to && scheduleDensity.histogram?.buckets?.length) {
+    // @ts-expect-error cannot infer histogram
     const { histogram, from, to } = scheduleDensity;
     const firstBucket = histogram.buckets[0].key;
     const lastBucket = histogram.buckets[histogram.buckets.length - 1].key;
@@ -348,9 +417,104 @@ export function estimateRecurringTaskScheduling(
 
 export function summarizeWorkloadStat(
   workloadStats: WorkloadStat
-): { value: WorkloadStat; status: HealthStatus } {
+): { value: SummarizedWorkloadStat; status: HealthStatus } {
   return {
-    value: workloadStats,
+    value: {
+      ...workloadStats,
+      // assume the largest number we've seen of active owner IDs
+      // matches the number of active Task Managers in the cluster
+      owner_ids: Math.max(...workloadStats.owner_ids),
+    },
     status: HealthStatus.OK,
   };
+}
+
+function hasAggregations(
+  aggregations?: Record<string, estypes.AggregationsAggregate>
+): aggregations is WorkloadAggregationResponse {
+  return !!(
+    aggregations?.taskType &&
+    aggregations?.schedule &&
+    (aggregations?.idleTasks as IdleTasksAggregation)?.overdue &&
+    (aggregations?.idleTasks as IdleTasksAggregation)?.scheduleDensity
+  );
+}
+export interface WorkloadAggregationResponse {
+  taskType: TaskTypeAggregation;
+  schedule: ScheduleAggregation;
+  idleTasks: IdleTasksAggregation;
+  nonRecurringTasks: {
+    doc_count: number;
+  };
+  ownerIds: {
+    value: number;
+  };
+  [otherAggs: string]: estypes.AggregationsAggregate;
+}
+export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
+  buckets: Array<{
+    doc_count: number;
+    key: string | number;
+    status: {
+      buckets: Array<{
+        doc_count: number;
+        key: string | number;
+      }>;
+      doc_count_error_upper_bound?: number | undefined;
+      sum_other_doc_count?: number | undefined;
+    };
+  }>;
+  doc_count_error_upper_bound?: number | undefined;
+  sum_other_doc_count?: number | undefined;
+}
+export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
+  buckets: Array<{
+    doc_count: number;
+    key: string | number;
+  }>;
+  doc_count_error_upper_bound?: number | undefined;
+  sum_other_doc_count?: number | undefined;
+}
+
+export type ScheduleDensityHistogram = DateRangeBucket & {
+  histogram: {
+    buckets: Array<
+      DateHistogramBucket & {
+        interval: {
+          buckets: Array<{
+            doc_count: number;
+            key: string | number;
+          }>;
+          doc_count_error_upper_bound?: number | undefined;
+          sum_other_doc_count?: number | undefined;
+        };
+      }
+    >;
+  };
+};
+export interface IdleTasksAggregation extends estypes.AggregationsFiltersAggregate {
+  doc_count: number;
+  scheduleDensity: {
+    buckets: ScheduleDensityHistogram[];
+  };
+  overdue: {
+    doc_count: number;
+    nonRecurring: {
+      doc_count: number;
+    };
+  };
+}
+
+interface DateHistogramBucket {
+  doc_count: number;
+  key: number;
+  key_as_string: string;
+}
+interface DateRangeBucket {
+  key: string;
+  to?: number;
+  from?: number;
+  to_as_string?: string;
+  from_as_string?: string;
+  doc_count: number;
 }

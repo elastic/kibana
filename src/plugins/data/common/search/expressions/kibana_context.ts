@@ -10,13 +10,24 @@ import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
-import { Query, uniqFilters } from '../../query';
-import { ExecutionContextSearch, KibanaContext } from './kibana_context_type';
+import { Filter } from '@kbn/es-query';
+import { Query, uniqFilters } from '@kbn/es-query';
+import { unboxExpressionValue } from '../../../../expressions/common';
+import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
+import { KibanaQueryOutput } from './kibana_context_type';
+import { KibanaTimerangeOutput } from './timerange';
+import { SavedObjectReference } from '../../../../../core/types';
+import { SavedObjectsClientCommon } from '../../index_patterns';
+
+/** @internal */
+export interface KibanaContextStartDependencies {
+  savedObjectsClient: SavedObjectsClientCommon;
+}
 
 interface Arguments {
-  q?: string | null;
-  filters?: string | null;
-  timeRange?: string | null;
+  q?: KibanaQueryOutput | null;
+  filters?: KibanaFilter[] | null;
+  timeRange?: KibanaTimerangeOutput | null;
   savedSearchId?: string | null;
 }
 
@@ -37,75 +48,108 @@ const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
     (n: any) => JSON.stringify(n.query)
   );
 
-export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
-  name: 'kibana_context',
-  type: 'kibana_context',
-  inputTypes: ['kibana_context', 'null'],
-  help: i18n.translate('data.search.functions.kibana_context.help', {
-    defaultMessage: 'Updates kibana global context',
-  }),
-  args: {
-    q: {
-      types: ['string', 'null'],
-      aliases: ['query', '_'],
-      default: null,
-      help: i18n.translate('data.search.functions.kibana_context.q.help', {
-        defaultMessage: 'Specify Kibana free form text query',
-      }),
+export const getKibanaContextFn = (
+  getStartDependencies: (
+    getKibanaRequest: ExecutionContext['getKibanaRequest']
+  ) => Promise<KibanaContextStartDependencies>
+) => {
+  const kibanaContextFunction: ExpressionFunctionKibanaContext = {
+    name: 'kibana_context',
+    type: 'kibana_context',
+    inputTypes: ['kibana_context', 'null'],
+    help: i18n.translate('data.search.functions.kibana_context.help', {
+      defaultMessage: 'Updates kibana global context',
+    }),
+    args: {
+      q: {
+        types: ['kibana_query', 'null'],
+        aliases: ['query', '_'],
+        default: null,
+        help: i18n.translate('data.search.functions.kibana_context.q.help', {
+          defaultMessage: 'Specify Kibana free form text query',
+        }),
+      },
+      filters: {
+        types: ['kibana_filter', 'null'],
+        multi: true,
+        help: i18n.translate('data.search.functions.kibana_context.filters.help', {
+          defaultMessage: 'Specify Kibana generic filters',
+        }),
+      },
+      timeRange: {
+        types: ['timerange', 'null'],
+        default: null,
+        help: i18n.translate('data.search.functions.kibana_context.timeRange.help', {
+          defaultMessage: 'Specify Kibana time range filter',
+        }),
+      },
+      savedSearchId: {
+        types: ['string', 'null'],
+        default: null,
+        help: i18n.translate('data.search.functions.kibana_context.savedSearchId.help', {
+          defaultMessage: 'Specify saved search ID to be used for queries and filters',
+        }),
+      },
     },
-    filters: {
-      types: ['string', 'null'],
-      default: '"[]"',
-      help: i18n.translate('data.search.functions.kibana_context.filters.help', {
-        defaultMessage: 'Specify Kibana generic filters',
-      }),
-    },
-    timeRange: {
-      types: ['string', 'null'],
-      default: null,
-      help: i18n.translate('data.search.functions.kibana_context.timeRange.help', {
-        defaultMessage: 'Specify Kibana time range filter',
-      }),
-    },
-    savedSearchId: {
-      types: ['string', 'null'],
-      default: null,
-      help: i18n.translate('data.search.functions.kibana_context.savedSearchId.help', {
-        defaultMessage: 'Specify saved search ID to be used for queries and filters',
-      }),
-    },
-  },
 
-  async fn(input, args, { getSavedObject }) {
-    const timeRange = getParsedValue(args.timeRange, input?.timeRange);
-    let queries = mergeQueries(input?.query, getParsedValue(args?.q, []));
-    let filters = [...(input?.filters || []), ...getParsedValue(args?.filters, [])];
-
-    if (args.savedSearchId) {
-      if (typeof getSavedObject !== 'function') {
-        throw new Error(
-          '"getSavedObject" function not available in execution context. ' +
-            'When you execute expression you need to add extra execution context ' +
-            'as the third argument and provide "getSavedObject" implementation.'
-        );
+    extract(state) {
+      const references: SavedObjectReference[] = [];
+      if (state.savedSearchId.length && typeof state.savedSearchId[0] === 'string') {
+        const refName = 'kibana_context.savedSearchId';
+        references.push({
+          name: refName,
+          type: 'search',
+          id: state.savedSearchId[0] as string,
+        });
+        return {
+          state: {
+            ...state,
+            savedSearchId: [refName],
+          },
+          references,
+        };
       }
-      const obj = await getSavedObject('search', args.savedSearchId);
-      const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-      const { query, filter } = getParsedValue(search.searchSourceJSON, {});
+      return { state, references };
+    },
 
-      if (query) {
-        queries = mergeQueries(queries, query);
+    inject(state, references) {
+      const reference = references.find((r) => r.name === 'kibana_context.savedSearchId');
+      if (reference) {
+        state.savedSearchId[0] = reference.id;
       }
-      if (filter) {
-        filters = [...filters, ...(Array.isArray(filter) ? filter : [filter])];
-      }
-    }
+      return state;
+    },
 
-    return {
-      type: 'kibana_context',
-      query: queries,
-      filters: uniqFilters(filters).filter((f: any) => !f.meta?.disabled),
-      timeRange,
-    };
-  },
+    async fn(input, args, { getKibanaRequest }) {
+      const { savedObjectsClient } = await getStartDependencies(getKibanaRequest);
+
+      const timeRange = args.timeRange || input?.timeRange;
+      let queries = mergeQueries(input?.query, args?.q || []);
+      let filters = [
+        ...(input?.filters || []),
+        ...((args?.filters?.map(unboxExpressionValue) || []) as Filter[]),
+      ];
+
+      if (args.savedSearchId) {
+        const obj = await savedObjectsClient.get('search', args.savedSearchId);
+        const search = (obj.attributes as any).kibanaSavedObjectMeta.searchSourceJSON as string;
+        const { query, filter } = getParsedValue(search, {});
+
+        if (query) {
+          queries = mergeQueries(queries, query);
+        }
+        if (filter) {
+          filters = [...filters, ...(Array.isArray(filter) ? filter : [filter])];
+        }
+      }
+
+      return {
+        type: 'kibana_context',
+        query: queries,
+        filters: uniqFilters(filters.filter((f: any) => !f.meta?.disabled)),
+        timeRange,
+      };
+    },
+  };
+  return kibanaContextFunction;
 };

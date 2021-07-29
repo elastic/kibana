@@ -12,6 +12,7 @@ import Fs from 'fs';
 import del from 'del';
 import cpy from 'cpy';
 import globby from 'globby';
+import normalize from 'normalize-path';
 import {
   ToolingLog,
   createAbsolutePathSerializer,
@@ -98,7 +99,10 @@ it('creates and extracts caches, ingoring dirs with matching merge-base file and
 
   const files = Object.fromEntries(
     globby
-      .sync(outDirs, { dot: true })
+      .sync(
+        outDirs.map((p) => normalize(p)),
+        { dot: true }
+      )
       .map((path) => [Path.relative(TMP, path), Fs.readFileSync(path, 'utf-8')])
   );
 

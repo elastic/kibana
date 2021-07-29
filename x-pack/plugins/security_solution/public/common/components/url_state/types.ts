@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
 import {
@@ -20,7 +19,7 @@ import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
-import { NavTab } from '../navigation/types';
+import { SecurityNav } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
 import { SourcererScopePatterns } from '../../store/sourcerer/model';
@@ -35,7 +34,23 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  detections: [
+  alerts: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  rules: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  exceptions: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
@@ -44,6 +59,14 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timeline,
   ],
   host: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  ueba: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
@@ -89,7 +112,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
 export type LocationTypes =
   | CONSTANTS.caseDetails
   | CONSTANTS.casePage
-  | CONSTANTS.detectionsPage
+  | CONSTANTS.alertsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
   | CONSTANTS.networkDetails
@@ -109,7 +132,7 @@ export interface UrlState {
 export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
-  navTabs: Record<string, NavTab>;
+  navTabs: SecurityNav;
   indexPattern?: IIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
@@ -148,7 +171,6 @@ export interface UrlStateToRedux {
 }
 
 export interface SetInitialStateFromUrl<TCache> {
-  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
   filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
@@ -160,7 +182,6 @@ export interface SetInitialStateFromUrl<TCache> {
 }
 
 export type DispatchSetInitialStateFromUrl = <TCache>({
-  apolloClient,
   detailName,
   indexPattern,
   pageName,

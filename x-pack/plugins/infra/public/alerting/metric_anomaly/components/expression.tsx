@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiSpacer, EuiText, EuiLoadingContent } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
-import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
+import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
 import { AlertPreview } from '../../common';
 import {
   METRIC_ANOMALY_ALERT_TYPE_ID,
@@ -27,7 +27,7 @@ import {
   AlertTypeParamsExpressionProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/types';
-import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { NodeTypeExpression } from './node_type';
@@ -75,12 +75,11 @@ export const Expression: React.FC<Props> = (props) => {
   } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
     createDerivedIndexPattern,
   ]);
 
@@ -186,7 +185,7 @@ export const Expression: React.FC<Props> = (props) => {
   }, [metadata, derivedIndexPattern, defaultExpression, source, space]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoadingMLCapabilities) return <EuiLoadingContent lines={10} />;
-  if (!hasInfraMLCapabilities) return <SubscriptionSplashContent />;
+  if (!hasInfraMLCapabilities) return <SubscriptionSplashPrompt />;
 
   return (
     // https://github.com/elastic/kibana/issues/89506

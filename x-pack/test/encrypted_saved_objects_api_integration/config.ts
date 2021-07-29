@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -18,9 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services,
     junit: {
       reportName: 'X-Pack Encrypted Saved Objects API Integration Tests',
-    },
-    esArchiver: {
-      directory: path.join(__dirname, 'fixtures', 'es_archiver'),
     },
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {

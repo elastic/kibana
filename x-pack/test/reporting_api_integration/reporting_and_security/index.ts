@@ -8,13 +8,24 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('Reporting APIs', function () {
     this.tags('ciGroup2');
-    loadTestFile(require.resolve('./csv_job_params'));
-    loadTestFile(require.resolve('./csv_saved_search'));
+
+    before(async () => {
+      const reportingAPI = getService('reportingAPI');
+      await reportingAPI.createDataAnalystRole();
+      await reportingAPI.createTestReportingUserRole();
+      await reportingAPI.createDataAnalyst();
+      await reportingAPI.createTestReportingUser();
+    });
+
+    loadTestFile(require.resolve('./security_roles_privileges'));
+    loadTestFile(require.resolve('./download_csv_dashboard'));
+    loadTestFile(require.resolve('./generate_csv_discover'));
     loadTestFile(require.resolve('./network_policy'));
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./usage'));
+    loadTestFile(require.resolve('./ilm_migration_apis'));
   });
 }

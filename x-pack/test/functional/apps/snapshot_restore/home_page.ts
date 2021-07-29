@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'snapshotRestore']);
   const log = getService('log');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('Home page', function () {
     before(async () => {

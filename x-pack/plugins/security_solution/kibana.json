@@ -6,7 +6,9 @@
   "configPath": ["xpack", "securitySolution"],
   "requiredPlugins": [
     "actions",
-    "alerts",
+    "alerting",
+    "cases",
+    "ruleRegistry",
     "data",
     "dataEnhanced",
     "embeddable",
@@ -15,6 +17,7 @@
     "inspector",
     "licensing",
     "maps",
+    "timelines",
     "triggersActionsUi",
     "uiActions"
   ],
@@ -22,6 +25,7 @@
     "encryptedSavedObjects",
     "fleet",
     "ml",
+    "dashboard",
     "newsfeed",
     "security",
     "spaces",
@@ -33,5 +37,13 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lists", "ml"]
+  "requiredBundles": [
+    "esUiShared",
+    "fleet",
+    "kibanaUtils",
+    "kibanaReact",
+    "usageCollection",
+    "lists",
+    "ml"
+  ]
 }

@@ -9,22 +9,22 @@ import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
-  getEmptyIndex,
-  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { SecurityPluginSetup } from '../../../../../../security/server';
-import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
 import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { siemMock } from '../../../../mocks';
 import { FrameworkRequest } from '../../../framework';
 import { ExceptionListClient } from '../../../../../../lists/server';
+import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: (): AddPrepackagedRulesSchemaDecoded[] => {
+    getLatestPrepackagedRules: async (): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
       return [
         {
           author: ['Elastic'],
@@ -58,7 +58,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
+jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines', () => {
   return {
     installPrepackagedTimelines: jest.fn().mockResolvedValue({
       success: true,
@@ -89,8 +89,7 @@ describe('add_prepackaged_rules_route', () => {
 
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -101,19 +100,22 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
 
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+    );
     addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating with a valid actionClient and alertClient', async () => {
+    test('returns 200 when creating with a valid actionClient and rulesClient', async () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+    test('returns 404 if rulesClient is not available on the route', async () => {
+      context.alerting!.getRulesClient = jest.fn();
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -125,8 +127,10 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('it returns a 400 if the index does not exist', async () => {
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const request = addPrepackagedRulesRequest();
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
+      );
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(400);
@@ -152,7 +156,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('responses', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -179,9 +183,9 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('catches errors if payloads cause errors to be thrown', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(() => {
-        throw new Error('Test error');
-      });
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      );
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -288,13 +292,16 @@ describe('add_prepackaged_rules_route', () => {
         getExceptionListClient: jest.fn(),
         getListClient: jest.fn(),
       };
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         context,
         siemMockClient,
-        clients.alertsClient,
+        clients.rulesClient,
         {} as FrameworkRequest,
         1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 
@@ -304,13 +311,16 @@ describe('add_prepackaged_rules_route', () => {
 
     test('uses passed in exceptions list client when lists client not available in context', async () => {
       const { lists, ...myContext } = context;
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         myContext,
         siemMockClient,
-        clients.alertsClient,
+        clients.rulesClient,
         {} as FrameworkRequest,
         1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 

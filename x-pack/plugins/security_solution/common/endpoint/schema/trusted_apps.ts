@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
-import { getDuplicateFields, isValidHash } from '../validation/trusted_apps';
-
-const entryFieldLabels: { [k in ConditionEntryField]: string } = {
-  [ConditionEntryField.HASH]: 'Hash',
-  [ConditionEntryField.PATH]: 'Path',
-  [ConditionEntryField.SIGNER]: 'Signer',
-};
+import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 export const DeleteTrustedAppsRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
+export const GetOneTrustedAppRequestSchema = {
   params: schema.object({
     id: schema.string(),
   }),
@@ -25,61 +25,128 @@ export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
+    kuery: schema.maybe(schema.string()),
   }),
 };
 
-const ConditionEntryTypeSchema = schema.literal('match');
+const ConditionEntryTypeSchema = schema.conditional(
+  schema.siblingRef('field'),
+  ConditionEntryField.PATH,
+  schema.oneOf([schema.literal('match'), schema.literal('wildcard')]),
+  schema.literal('match')
+);
 const ConditionEntryOperatorSchema = schema.literal('included');
-const HashConditionEntrySchema = schema.object({
-  field: schema.literal(ConditionEntryField.HASH),
+
+/*
+ * A generic Entry schema to be used for a specific entry schema depending on the OS
+ */
+const CommonEntrySchema = {
+  field: schema.oneOf([
+    schema.literal(ConditionEntryField.HASH),
+    schema.literal(ConditionEntryField.PATH),
+  ]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
-  value: schema.string({
-    validate: (hash) => (isValidHash(hash) ? undefined : `Invalid hash value [${hash}]`),
-  }),
-});
-const PathConditionEntrySchema = schema.object({
-  field: schema.literal(ConditionEntryField.PATH),
-  type: ConditionEntryTypeSchema,
-  operator: ConditionEntryOperatorSchema,
-  value: schema.string({ minLength: 1 }),
-});
-const SignerConditionEntrySchema = schema.object({
-  field: schema.literal(ConditionEntryField.SIGNER),
-  type: ConditionEntryTypeSchema,
-  operator: ConditionEntryOperatorSchema,
-  value: schema.string({ minLength: 1 }),
+  // If field === HASH then validate hash with custom method, else validate string with minLength = 1
+  value: schema.conditional(
+    schema.siblingRef('field'),
+    ConditionEntryField.HASH,
+    schema.string({
+      validate: (hash: string) =>
+        isValidHash(hash) ? undefined : `invalidField.${ConditionEntryField.HASH}`,
+    }),
+    schema.conditional(
+      schema.siblingRef('field'),
+      ConditionEntryField.PATH,
+      schema.string({
+        validate: (field: string) =>
+          field.length > 0 ? undefined : `invalidField.${ConditionEntryField.PATH}`,
+      }),
+      schema.string({
+        validate: (field: string) =>
+          field.length > 0 ? undefined : `invalidField.${ConditionEntryField.SIGNER}`,
+      })
+    )
+  ),
+};
+
+const WindowsEntrySchema = schema.object({
+  ...CommonEntrySchema,
+  field: schema.oneOf([
+    schema.literal(ConditionEntryField.HASH),
+    schema.literal(ConditionEntryField.PATH),
+    schema.literal(ConditionEntryField.SIGNER),
+  ]),
 });
 
-const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends ConditionEntry>(
-  osSchema: Type<O>,
-  entriesSchema: Type<E>
-) =>
+const LinuxEntrySchema = schema.object({
+  ...CommonEntrySchema,
+});
+
+const MacEntrySchema = schema.object({
+  ...CommonEntrySchema,
+});
+
+const entriesSchemaOptions = {
+  minSize: 1,
+  validate(entries: ConditionEntry[]) {
+    return (
+      getDuplicateFields(entries)
+        .map((field) => `duplicatedEntry.${field}`)
+        .join(', ') || undefined
+    );
+  },
+};
+
+/*
+ * Entities array schema depending on Os type using schema.conditional.
+ * If OS === WINDOWS then use Windows schema,
+ * else if OS === LINUX then use Linux schema,
+ * else use Mac schema
+ *
+ * The validate function checks there is no duplicated entry inside the array
+ */
+const EntriesSchema = schema.conditional(
+  schema.siblingRef('os'),
+  OperatingSystem.WINDOWS,
+  schema.arrayOf(WindowsEntrySchema, entriesSchemaOptions),
+  schema.conditional(
+    schema.siblingRef('os'),
+    OperatingSystem.LINUX,
+    schema.arrayOf(LinuxEntrySchema, entriesSchemaOptions),
+    schema.arrayOf(MacEntrySchema, entriesSchemaOptions)
+  )
+);
+
+const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
-    os: osSchema,
-    entries: schema.arrayOf(entriesSchema, {
-      minSize: 1,
-      validate(entries) {
-        return (
-          getDuplicateFields(entries)
-            .map((field) => `[${entryFieldLabels[field]}] field can only be used once`)
-            .join(', ') || undefined
-        );
-      },
-    }),
+    os: schema.oneOf([
+      schema.literal(OperatingSystem.WINDOWS),
+      schema.literal(OperatingSystem.LINUX),
+      schema.literal(OperatingSystem.MAC),
+    ]),
+    effectScope: schema.oneOf([
+      schema.object({
+        type: schema.literal('global'),
+      }),
+      schema.object({
+        type: schema.literal('policy'),
+        policies: schema.arrayOf(schema.string({ minLength: 1 })),
+      }),
+    ]),
+    entries: EntriesSchema,
+    ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
   });
 
 export const PostTrustedAppCreateRequestSchema = {
-  body: schema.oneOf([
-    createNewTrustedAppForOsScheme(
-      schema.oneOf([schema.literal(OperatingSystem.LINUX), schema.literal(OperatingSystem.MAC)]),
-      schema.oneOf([HashConditionEntrySchema, PathConditionEntrySchema])
-    ),
-    createNewTrustedAppForOsScheme(
-      schema.literal(OperatingSystem.WINDOWS),
-      schema.oneOf([HashConditionEntrySchema, PathConditionEntrySchema, SignerConditionEntrySchema])
-    ),
-  ]),
+  body: getTrustedAppForOsScheme(),
+};
+
+export const PutTrustedAppUpdateRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+  body: getTrustedAppForOsScheme(true),
 };

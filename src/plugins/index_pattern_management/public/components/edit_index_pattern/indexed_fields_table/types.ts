@@ -13,4 +13,5 @@ export interface IndexedFieldItem extends IFieldType {
   excluded: boolean;
   kbnType: string;
   isMapped: boolean;
+  hasRuntime: boolean;
 }

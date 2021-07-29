@@ -17,7 +17,9 @@ import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
+import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
+import { defaultRowRenderers } from './body/renderers';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -63,6 +65,8 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
     timelineId: TimelineId.test,
   };
 

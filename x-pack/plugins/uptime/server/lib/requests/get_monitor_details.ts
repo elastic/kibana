@@ -9,22 +9,21 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
 import { UptimeESClient } from '../lib';
-import { ESSearchBody } from '../../../../../typings/elasticsearch';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
-  alertsClient: any;
+  rulesClient: any;
 }
 
 const getMonitorAlerts = async ({
   uptimeEsClient,
-  alertsClient,
+  rulesClient,
   monitorId,
 }: {
   uptimeEsClient: UptimeESClient;
-  alertsClient: any;
+  rulesClient: any;
   monitorId: string;
 }) => {
   const options: any = {
@@ -35,7 +34,7 @@ const getMonitorAlerts = async ({
     sortField: 'name.keyword',
   };
 
-  const { data } = await alertsClient.find({ options });
+  const { data } = await rulesClient.find({ options });
   const monitorAlerts = [];
   for (let i = 0; i < data.length; i++) {
     const currAlert = data[i];
@@ -44,7 +43,7 @@ const getMonitorAlerts = async ({
       monitorAlerts.push(currAlert);
       continue;
     }
-    const esParams: ESSearchBody = {
+    const esParams = {
       query: {
         bool: {
           filter: [
@@ -86,7 +85,7 @@ const getMonitorAlerts = async ({
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, alertsClient }) => {
+> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, rulesClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -121,7 +120,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
     sort: [
       {
         '@timestamp': {
-          order: 'desc',
+          order: 'desc' as const,
         },
       },
     ],
@@ -134,7 +133,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   const errorTimestamp: string | undefined = data?.['@timestamp'];
   const monAlerts = await getMonitorAlerts({
     uptimeEsClient,
-    alertsClient,
+    rulesClient,
     monitorId,
   });
 

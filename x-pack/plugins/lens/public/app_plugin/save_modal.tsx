@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { Document } from '../persistence';
 import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
 import {
@@ -23,7 +21,7 @@ import {
 export type SaveProps = OriginSaveProps | DashboardSaveProps;
 
 export interface Props {
-  isVisible: boolean;
+  savingToLibraryPermitted?: boolean;
 
   originatingApp?: string;
   allowByValueEmbeddables: boolean;
@@ -31,7 +29,9 @@ export interface Props {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   tagsIds: string[];
 
-  lastKnownDoc?: Document;
+  title?: string;
+  savedObjectId?: string;
+  description?: string;
 
   getAppNameFromId: () => string | undefined;
   returnToOriginSwitchLabel?: string;
@@ -41,15 +41,14 @@ export interface Props {
 }
 
 export const SaveModal = (props: Props) => {
-  if (!props.isVisible || !props.lastKnownDoc) {
-    return null;
-  }
-
   const {
     originatingApp,
+    savingToLibraryPermitted,
     savedObjectsTagging,
     tagsIds,
-    lastKnownDoc,
+    savedObjectId,
+    title,
+    description,
     allowByValueEmbeddables,
     returnToOriginSwitchLabel,
     getAppNameFromId,
@@ -68,9 +67,9 @@ export const SaveModal = (props: Props) => {
         onSave={(saveProps) => onSave(saveProps, { saveToLibrary: true })}
         getAppNameFromId={getAppNameFromId}
         documentInfo={{
-          id: lastKnownDoc.savedObjectId,
-          title: lastKnownDoc.title || '',
-          description: lastKnownDoc.description || '',
+          id: savedObjectId,
+          title: title || '',
+          description: description || '',
         }}
         returnToOriginSwitchLabel={returnToOriginSwitchLabel}
         objectType={i18n.translate('xpack.lens.app.saveModalType', {
@@ -85,15 +84,17 @@ export const SaveModal = (props: Props) => {
     <TagEnhancedSavedObjectSaveModalDashboard
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}
+      canSaveByReference={Boolean(savingToLibraryPermitted)}
       onSave={(saveProps) => {
-        const saveToLibrary = saveProps.dashboardId === null;
+        const saveToLibrary = Boolean(saveProps.addToLibrary);
         onSave(saveProps, { saveToLibrary });
       }}
       onClose={onClose}
       documentInfo={{
-        id: lastKnownDoc.savedObjectId,
-        title: lastKnownDoc.title || '',
-        description: lastKnownDoc.description || '',
+        // if the user cannot save to the library - treat this as a new document.
+        id: savingToLibraryPermitted ? savedObjectId : undefined,
+        title: title || '',
+        description: description || '',
       }}
       objectType={i18n.translate('xpack.lens.app.saveModalType', {
         defaultMessage: 'Lens visualization',

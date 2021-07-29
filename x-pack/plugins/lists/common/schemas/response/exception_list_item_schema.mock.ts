@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   COMMENTS,
   DATE_NOW,
@@ -22,8 +24,6 @@ import {
   USER,
 } from '../../constants.mock';
 
-import { ExceptionListItemSchema } from './exception_list_item_schema';
-
 export const getExceptionListItemSchemaMock = (
   overrides?: Partial<ExceptionListItemSchema>
 ): ExceptionListItemSchema => ({
@@ -39,7 +39,7 @@ export const getExceptionListItemSchemaMock = (
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
-  os_types: ['linux'],
+  os_types: [],
   tags: ['user added string for a tag', 'malware'],
   tie_breaker_id: TIE_BREAKER,
   type: ITEM_TYPE,
@@ -47,10 +47,6 @@ export const getExceptionListItemSchemaMock = (
   updated_by: USER,
   ...(overrides || {}),
 });
-
-export const getExceptionListItemSchemaXMock = (count = 1): ExceptionListItemSchema[] => {
-  return new Array(count).fill(null).map(() => getExceptionListItemSchemaMock());
-};
 
 /**
  * This is useful for end to end tests where we remove the auto generated parts for comparisons

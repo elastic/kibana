@@ -87,6 +87,7 @@ const indexPattern2: IndexPattern = {
 const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultOptions = {
+  layerId: '1',
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
@@ -97,6 +98,10 @@ const defaultOptions = {
   data: dataStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 describe('date_histogram', () => {
@@ -171,30 +176,6 @@ describe('date_histogram', () => {
       });
       expect(column.params.interval).toEqual('auto');
     });
-
-    it('should create column object with restrictions', () => {
-      const column = dateHistogramOperation.buildColumn({
-        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
-        indexPattern: createMockedIndexPattern(),
-        field: {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          esTypes: ['date'],
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              time_zone: 'UTC',
-              calendar_interval: '1y',
-            },
-          },
-        },
-      });
-      expect(column.params.interval).toEqual('1y');
-      expect(column.params.timeZone).toEqual('UTC');
-    });
   });
 
   describe('toEsAggsFn', () => {
@@ -204,7 +185,8 @@ describe('date_histogram', () => {
         'col1',
         indexPattern1,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -217,7 +199,7 @@ describe('date_histogram', () => {
       );
     });
 
-    it('should not use normalized es interval for rollups', () => {
+    it('should use restricted time zone and omit use normalized es interval for rollups', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         layer.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
@@ -257,13 +239,15 @@ describe('date_histogram', () => {
           ]),
         },
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
             interval: ['42w'],
             field: ['timestamp'],
+            time_zone: ['UTC'],
             useNormalizedEsInterval: [false],
           }),
         })
@@ -310,114 +294,6 @@ describe('date_histogram', () => {
       expect(column).toHaveProperty('sourceField', 'start_date');
       expect(column).toHaveProperty('params.interval', 'auto');
       expect(column.label).toContain('start_date');
-    });
-  });
-
-  describe('transfer', () => {
-    it('should adjust interval and time zone params if that is necessary due to restrictions', () => {
-      const transferedColumn = dateHistogramOperation.transfer!(
-        {
-          dataType: 'date',
-          isBucketed: true,
-          label: '',
-          operationType: 'date_histogram',
-          sourceField: 'dateField',
-          params: {
-            interval: 'd',
-          },
-        },
-        {
-          title: '',
-          id: '',
-          hasRestrictions: true,
-          fields: [
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-              aggregationRestrictions: {
-                date_histogram: {
-                  agg: 'date_histogram',
-                  time_zone: 'CET',
-                  calendar_interval: 'w',
-                },
-              },
-            },
-          ],
-          getFieldByName: getFieldByNameFactory([
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-              aggregationRestrictions: {
-                date_histogram: {
-                  agg: 'date_histogram',
-                  time_zone: 'CET',
-                  calendar_interval: 'w',
-                },
-              },
-            },
-          ]),
-        }
-      );
-      expect(transferedColumn).toEqual(
-        expect.objectContaining({
-          params: {
-            interval: 'w',
-            timeZone: 'CET',
-          },
-        })
-      );
-    });
-
-    it('should retain interval', () => {
-      const transferedColumn = dateHistogramOperation.transfer!(
-        {
-          dataType: 'date',
-          isBucketed: true,
-          label: '',
-          operationType: 'date_histogram',
-          sourceField: 'dateField',
-          params: {
-            interval: '20s',
-          },
-        },
-        {
-          title: '',
-          id: '',
-          hasRestrictions: false,
-          fields: [
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-            },
-          ],
-          getFieldByName: getFieldByNameFactory([
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-            },
-          ]),
-        }
-      );
-      expect(transferedColumn).toEqual(
-        expect.objectContaining({
-          params: {
-            interval: '20s',
-            timeZone: undefined,
-          },
-        })
-      );
     });
   });
 

@@ -7,9 +7,10 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiFormFieldset, EuiCheckbox } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiFormFieldset, EuiCheckbox, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent } from '../../../../types';
+
+import type { Agent } from '../../../../types';
 import {
   sendPostAgentUnenroll,
   sendPostBulkAgentUnenroll,
@@ -21,6 +22,7 @@ interface Props {
   agents: Agent[] | string;
   agentCount: number;
   useForceUnenroll?: boolean;
+  hasFleetServer?: boolean;
 }
 
 export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
@@ -28,6 +30,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
   agents,
   agentCount,
   useForceUnenroll,
+  hasFleetServer = false,
 }) => {
   const { notifications } = useStartServices();
   const [forceUnenroll, setForceUnenroll] = useState<boolean>(useForceUnenroll || false);
@@ -39,11 +42,11 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       setIsSubmitting(true);
       const { error } = isSingleAgent
         ? await sendPostAgentUnenroll((agents[0] as Agent).id, {
-            force: forceUnenroll,
+            revoke: forceUnenroll,
           })
         : await sendPostBulkAgentUnenroll({
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            force: forceUnenroll,
+            revoke: forceUnenroll,
           });
       if (error) {
         throw error;
@@ -122,6 +125,25 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       buttonColor="danger"
     >
       <p>
+        {hasFleetServer && isSingleAgent ? (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerTitle', {
+                defaultMessage: 'This agent is running Fleet Server',
+              })}
+              color="warning"
+              iconType="alert"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.unenrollAgents.unenrollFleetServerDescription"
+                  defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        ) : null}
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.unenrollAgents.deleteSingleDescription"

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
-import { migrateToKibana660 } from './migrations';
-import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
-import { SpacesServiceStart } from '../spaces_service';
+import type { CoreSetup } from 'src/core/server';
+
+import type { SpacesServiceStart } from '../spaces_service';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
+import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
+import { spaceMigrations, usageStatsMigrations } from './migrations';
+import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
@@ -25,7 +26,7 @@ export class SpacesSavedObjectsService {
       namespaceType: 'agnostic',
       mappings: SpacesSavedObjectMappings,
       migrations: {
-        '6.6.0': migrateToKibana660,
+        '6.6.0': spaceMigrations.migrateTo660,
       },
     });
 
@@ -34,6 +35,9 @@ export class SpacesSavedObjectsService {
       hidden: true,
       namespaceType: 'agnostic',
       mappings: UsageStatsMappings,
+      migrations: {
+        '7.14.1': usageStatsMigrations.migrateTo7141,
+      },
     });
 
     core.savedObjects.addClientWrapper(

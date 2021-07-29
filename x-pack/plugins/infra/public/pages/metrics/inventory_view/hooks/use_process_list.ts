@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
-import { useSourceContext } from '../../../../containers/source';
+import { useSourceContext } from '../../../../containers/metrics_source';
 
 export interface SortBy {
   name: string;

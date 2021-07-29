@@ -16,14 +16,20 @@ import {
   flashAPIErrors,
   setSuccessMessage,
   clearFlashMessages,
+  setErrorMessage,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { parseQueryParams } from '../../../../../shared/query_params';
 import { AppLogic } from '../../../../app_logic';
 import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
+import {
+  SOURCES_PATH,
+  ADD_GITHUB_PATH,
+  PERSONAL_SOURCES_PATH,
+  getSourcesPath,
+} from '../../../../routes';
 import { CustomSource } from '../../../../types';
+import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { staticSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -42,7 +48,7 @@ export enum AddSourceSteps {
   ConfigureCustomStep = 'Configure Custom',
   ConfigureOauthStep = 'Configure Oauth',
   SaveCustomStep = 'Save Custom',
-  ReAuthenticateStep = 'ReAuthenticate',
+  ReauthenticateStep = 'Reauthenticate',
 }
 
 export interface OauthParams {
@@ -50,6 +56,8 @@ export interface OauthParams {
   state: string;
   session_state: string;
   oauth_verifier?: string;
+  error?: string;
+  error_description?: string;
 }
 
 export interface AddSourceActions {
@@ -74,6 +82,7 @@ export interface AddSourceActions {
   setSourceIndexPermissionsValue(indexPermissionsValue: boolean): boolean;
   setCustomSourceData(data: CustomSource): CustomSource;
   setPreContentSourceConfigData(data: PreContentSourceResponse): PreContentSourceResponse;
+  setPreContentSourceId(preContentSourceId: string): string;
   setSelectedGithubOrganizations(option: string): string;
   resetSourceState(): void;
   createContentSource(
@@ -85,14 +94,18 @@ export interface AddSourceActions {
     isUpdating: boolean,
     successCallback?: () => void
   ): { isUpdating: boolean; successCallback?(): void };
-  saveSourceParams(search: Search): { search: Search };
+  saveSourceParams(
+    search: Search,
+    params: OauthParams,
+    isOrganization: boolean
+  ): { search: Search; params: OauthParams; isOrganization: boolean };
   getSourceConfigData(serviceType: string): { serviceType: string };
   getSourceConnectData(
     serviceType: string,
     successCallback: (oauthUrl: string) => void
   ): { serviceType: string; successCallback(oauthUrl: string): void };
   getSourceReConnectData(sourceId: string): { sourceId: string };
-  getPreContentSourceConfigData(preContentSourceId: string): { preContentSourceId: string };
+  getPreContentSourceConfigData(): void;
   setButtonNotLoading(): void;
 }
 
@@ -144,6 +157,8 @@ interface AddSourceValues {
   githubOrganizations: string[];
   selectedGithubOrganizationsMap: OrganizationsMap;
   selectedGithubOrganizations: string[];
+  preContentSourceId: string;
+  oauthConfigCompleted: boolean;
 }
 
 interface PreContentSourceResponse {
@@ -181,6 +196,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setSourceIndexPermissionsValue: (indexPermissionsValue: boolean) => indexPermissionsValue,
     setCustomSourceData: (data: CustomSource) => data,
     setPreContentSourceConfigData: (data: PreContentSourceResponse) => data,
+    setPreContentSourceId: (preContentSourceId: string) => preContentSourceId,
     setSelectedGithubOrganizations: (option: string) => option,
     getSourceConfigData: (serviceType: string) => ({ serviceType }),
     getSourceConnectData: (serviceType: string, successCallback: (oauthUrl: string) => string) => ({
@@ -188,12 +204,16 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       successCallback,
     }),
     getSourceReConnectData: (sourceId: string) => ({ sourceId }),
-    getPreContentSourceConfigData: (preContentSourceId: string) => ({ preContentSourceId }),
+    getPreContentSourceConfigData: () => true,
     saveSourceConfig: (isUpdating: boolean, successCallback?: () => void) => ({
       isUpdating,
       successCallback,
     }),
-    saveSourceParams: (search: Search) => ({ search }),
+    saveSourceParams: (search: Search, params: OauthParams, isOrganization: boolean) => ({
+      search,
+      params,
+      isOrganization,
+    }),
     createContentSource: (
       serviceType: string,
       successCallback: () => void,
@@ -344,6 +364,20 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         resetSourceState: () => ({}),
       },
     ],
+    preContentSourceId: [
+      '',
+      {
+        setPreContentSourceId: (_, preContentSourceId) => preContentSourceId,
+        setPreContentSourceConfigData: () => '',
+        resetSourceState: () => '',
+      },
+    ],
+    oauthConfigCompleted: [
+      false,
+      {
+        setPreContentSourceConfigData: () => true,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     selectedGithubOrganizations: [
@@ -400,15 +434,20 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/api/workplace_search/org/sources/${sourceId}/reauth_prepare`
         : `/api/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
+      const query = {
+        kibana_host: kibanaHost,
+      } as HttpFetchQuery;
+
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get(route, { query });
         actions.setSourceConnectData(response);
       } catch (e) {
         flashAPIErrors(e);
       }
     },
-    getPreContentSourceConfigData: async ({ preContentSourceId }) => {
+    getPreContentSourceConfigData: async () => {
       const { isOrganization } = AppLogic.values;
+      const { preContentSourceId } = values;
       const route = isOrganization
         ? `/api/workplace_search/org/pre_sources/${preContentSourceId}`
         : `/api/workplace_search/account/pre_sources/${preContentSourceId}`;
@@ -468,23 +507,49 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         actions.setButtonNotLoading();
       }
     },
-    saveSourceParams: async ({ search }) => {
+    saveSourceParams: async ({ search, params, isOrganization }) => {
       const { http } = HttpLogic.values;
-      const { isOrganization } = AppLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
-      const params = (parseQueryParams(search) as unknown) as OauthParams;
       const query = { ...params, kibana_host: kibanaHost };
       const route = '/api/workplace_search/sources/create';
 
+      /**
+        There is an extreme edge case where the user is trying to connect Github as source from ent-search,
+        after configuring it in Kibana. When this happens, Github redirects the user from ent-search to Kibana
+        with special error properties in the query params. In this case we need to redirect the user to the
+        app home page and display the error message, and not persist the other query params to the server.
+      */
+      if (params.error_description) {
+        navigateToUrl(isOrganization ? '/' : PERSONAL_SOURCES_PATH);
+        setErrorMessage(
+          isOrganization
+            ? params.error_description
+            : PERSONAL_DASHBOARD_SOURCE_ERROR(params.error_description)
+        );
+        return;
+      }
+
       try {
         const response = await http.get(route, { query });
+        const {
+          serviceName,
+          indexPermissions,
+          serviceType,
+          preContentSourceId,
+          hasConfigureStep,
+        } = response;
 
-        const { serviceName, indexPermissions, serviceType } = response;
-        setAddedSource(serviceName, indexPermissions, serviceType);
+        // GitHub requires an intermediate configuration step, where we collect the repos to index.
+        if (hasConfigureStep && !values.oauthConfigCompleted) {
+          actions.setPreContentSourceId(preContentSourceId);
+          navigateToUrl(getSourcesPath(`${ADD_GITHUB_PATH}/configure${search}`, isOrganization));
+        } else {
+          setAddedSource(serviceName, indexPermissions, serviceType);
+          navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
+        }
       } catch (e) {
         flashAPIErrors(e);
-      } finally {
         navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       }
     },
@@ -541,6 +606,6 @@ const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
   if (isCustom) return AddSourceSteps.ConfigureCustomStep;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
-  if (reAuthenticate) return AddSourceSteps.ReAuthenticateStep;
+  if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
   return AddSourceSteps.ConfigIntroStep;
 };

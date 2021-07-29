@@ -22,7 +22,6 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -40,8 +39,9 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -104,7 +104,6 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -122,8 +121,9 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -216,7 +216,6 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -234,8 +233,9 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -298,7 +298,6 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -316,8 +315,9 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -380,7 +380,6 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorDownLeft"
-            id="QuickSelectPopover"
           >
             <div
               className="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -398,8 +397,9 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                 >
                   <span
                     className="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
-                    size="m"
+                    size="s"
                   />
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"

@@ -21,13 +21,11 @@ import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_c
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { SiemNavigation } from '../../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
-import { manageQuery } from '../../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../../common/components/search_bar';
-import { WrapperPage } from '../../../common/components/wrapper_page';
-import { HostOverviewByNameQuery } from '../../containers/hosts/details';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -51,6 +49,9 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { ID, useHostDetails } from '../../containers/hosts/details';
+import { manageQuery } from '../../../common/components/page/manage_query';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -96,12 +97,21 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const filterQuery = convertToBuildEsQuery({
+  const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
+    endDate: to,
+    startDate: from,
+    hostName: detailName,
+    indexNames: selectedPatterns,
+    skip: selectedPatterns.length === 0,
+  });
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],
     filters: getFilters(),
   });
+
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());
@@ -116,7 +126,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
                 border
@@ -131,49 +141,38 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 title={detailName}
               />
 
-              <HostOverviewByNameQuery
-                indexNames={selectedPatterns}
-                sourceId="default"
-                hostName={detailName}
-                skip={isInitializing}
+              <AnomalyTableProvider
+                criteriaFields={hostToCriteria(hostOverview)}
                 startDate={from}
                 endDate={to}
+                skip={isInitializing}
               >
-                {({ hostOverview, loading, id, inspect, refetch }) => (
-                  <AnomalyTableProvider
-                    criteriaFields={hostToCriteria(hostOverview)}
+                {({ isLoadingAnomaliesData, anomaliesData }) => (
+                  <HostOverviewManage
+                    docValueFields={docValueFields}
+                    id={id}
+                    isInDetailsSidePanel={false}
+                    data={hostOverview as HostItem}
+                    anomaliesData={anomaliesData}
+                    isLoadingAnomaliesData={isLoadingAnomaliesData}
+                    indexNames={selectedPatterns}
+                    loading={loading}
                     startDate={from}
                     endDate={to}
-                    skip={isInitializing}
-                  >
-                    {({ isLoadingAnomaliesData, anomaliesData }) => (
-                      <HostOverviewManage
-                        docValueFields={docValueFields}
-                        id={id}
-                        inspect={inspect}
-                        isInDetailsSidePanel={false}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        data={hostOverview as HostItem}
-                        anomaliesData={anomaliesData}
-                        isLoadingAnomaliesData={isLoadingAnomaliesData}
-                        indexNames={selectedPatterns}
-                        loading={loading}
-                        startDate={from}
-                        endDate={to}
-                        narrowDateRange={(score, interval) => {
-                          const fromTo = scoreIntervalToDateTime(score, interval);
-                          setAbsoluteRangeDatePicker({
-                            id: 'global',
-                            from: fromTo.from,
-                            to: fromTo.to,
-                          });
-                        }}
-                      />
-                    )}
-                  </AnomalyTableProvider>
+                    narrowDateRange={(score, interval) => {
+                      const fromTo = scoreIntervalToDateTime(score, interval);
+                      setAbsoluteRangeDatePicker({
+                        id: 'global',
+                        from: fromTo.from,
+                        to: fromTo.to,
+                      });
+                    }}
+                    setQuery={setQuery}
+                    refetch={refetch}
+                    inspect={inspect}
+                  />
                 )}
-              </HostOverviewByNameQuery>
+              </AnomalyTableProvider>
 
               <EuiHorizontalRule />
 
@@ -189,7 +188,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
               <EuiSpacer />
 
-              <SiemNavigation
+              <SecuritySolutionTabNavigation
                 navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
               />
 
@@ -212,14 +211,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               indexPattern={indexPattern}
               setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <HeaderPage border title={detailName} />
 
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

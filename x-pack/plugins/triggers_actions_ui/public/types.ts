@@ -10,9 +10,15 @@ import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionType } from '../../actions/common';
+import { IconType } from '@elastic/eui';
+import {
+  ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDefaultIndexName,
+} from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
-import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
   ActionGroup,
   AlertActionParam,
@@ -26,7 +32,9 @@ import {
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
-} from '../../alerts/common';
+  ActionVariable,
+  AlertType as CommonAlertType,
+} from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -44,7 +52,13 @@ export {
   AlertNotifyWhenType,
   AlertTypeParams,
 };
-export { ActionType };
+export {
+  ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
+};
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Map<string, AlertType>;
@@ -52,7 +66,7 @@ export type ActionTypeRegistryContract<
   ActionConnector = unknown,
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
-export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
+export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
@@ -83,17 +97,22 @@ export interface Pagination {
   size: number;
 }
 
+export interface Sorting {
+  field: string;
+  direction: string;
+}
+
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
-  iconClass: string;
+  iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>;
+  ) => Promise<ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>>;
   validateParams: (
     actionParams: ActionParams
-  ) => GenericValidationResult<Partial<ActionParams> | unknown>;
+  ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
@@ -115,7 +134,7 @@ export interface ConnectorValidationResult<Config, Secrets> {
   secrets?: GenericValidationResult<Secrets>;
 }
 
-interface ActionConnectorProps<Config, Secrets> {
+export interface ActionConnectorProps<Config, Secrets> {
   secrets: Secrets;
   id: string;
   actionTypeId: string;
@@ -123,6 +142,7 @@ interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isMissingSecrets?: boolean;
 }
 
 export type PreConfiguredActionConnector = Omit<
@@ -151,12 +171,6 @@ export type ActionConnectorWithoutId<
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
 };
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  useWithTripleBracesInTemplates?: boolean;
-}
 
 type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
@@ -191,6 +205,7 @@ export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
+  actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
 }
@@ -232,4 +247,51 @@ export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams
 
 export interface IErrorObject {
   [key: string]: string | string[] | IErrorObject;
+}
+
+export interface ConnectorAddFlyoutProps {
+  onClose: () => void;
+  actionTypes?: ActionType[];
+  onTestConnector?: (connector: ActionConnector) => void;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+export enum EditConectorTabs {
+  Configuration = 'configuration',
+  Test = 'test',
+}
+
+export interface ConnectorEditFlyoutProps {
+  initialConnector: ActionConnector;
+  onClose: () => void;
+  tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+
+export interface AlertEditProps<MetaData = Record<string, any>> {
+  initialAlert: Alert;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
+  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
+  metadata?: MetaData;
+}
+
+export interface AlertAddProps<MetaData = Record<string, any>> {
+  consumer: string;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
+  alertTypeId?: string;
+  canChangeTrigger?: boolean;
+  initialValues?: Partial<Alert>;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
+  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
+  metadata?: MetaData;
 }

@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Persistence via KDE AutoStart Script or Desktop File Modification",
   "query": "file where event.type != \"deletion\" and\n  file.extension in (\"sh\", \"desktop\") and\n  file.path :\n    (\n      \"/home/*/.config/autostart/*\", \"/root/.config/autostart/*\",\n      \"/home/*/.kde/Autostart/*\", \"/root/.kde/Autostart/*\",\n      \"/home/*/.kde4/Autostart/*\", \"/root/.kde4/Autostart/*\",\n      \"/home/*/.kde/share/autostart/*\", \"/root/.kde/share/autostart/*\",\n      \"/home/*/.kde4/share/autostart/*\", \"/root/.kde4/share/autostart/*\",\n      \"/home/*/.local/share/autostart/*\", \"/root/.local/share/autostart/*\",\n      \"/home/*/.config/autostart-scripts/*\", \"/root/.config/autostart-scripts/*\",\n      \"/etc/xdg/autostart/*\", \"/usr/share/autostart/*\"\n    )\n",
   "references": [

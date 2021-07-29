@@ -6,17 +6,24 @@
  */
 
 import { Meta } from '../../../../../common/types';
+import { Result } from '../result/types';
 
 export interface Curation {
   id: string;
   last_updated: string;
   queries: string[];
-  promoted: object[];
-  hidden: object[];
-  organic: object[];
+  promoted: CurationResult[];
+  hidden: CurationResult[];
+  organic: Result[];
 }
 
 export interface CurationsAPIResponse {
   results: Curation[];
   meta: Meta;
+}
+
+export interface CurationResult {
+  // TODO: Consider updating our internal API to return more standard Result data in the future
+  id: string;
+  [key: string]: string | string[];
 }

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiBasicTable,
@@ -17,13 +18,11 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiText,
-  HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import {
-  ENROLLMENT_API_KEYS_INDEX,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-} from '../../../constants';
+
+import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
+import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
   usePagination,
@@ -32,11 +31,11 @@ import {
   sendGetOneEnrollmentAPIKey,
   useStartServices,
   sendDeleteOneEnrollmentAPIKey,
-  useConfig,
 } from '../../../hooks';
-import { EnrollmentAPIKey } from '../../../types';
+import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
-import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
+import { DefaultLayout } from '../../../layouts';
+
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
 const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
@@ -157,9 +156,8 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 };
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
-  useBreadcrumbs('fleet_enrollment_tokens');
-  const config = useConfig();
-  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  useBreadcrumbs('enrollment_tokens');
+  const [isModalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
 
@@ -174,9 +172,21 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   });
 
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
+  const agentPoliciesById = agentPolicies.reduce(
+    (acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
+      acc[policy.id] = policy;
+      return acc;
+    },
+    {}
+  );
 
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
-  const items = enrollmentAPIKeysRequest?.data?.list ?? [];
+  const rowItems =
+    enrollmentAPIKeysRequest?.data?.list.filter((enrollmentKey) => {
+      if (!agentPolicies.length || !enrollmentKey.policy_id) return false;
+      const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
+      return !agentPolicy?.is_managed;
+    }) || [];
 
   const columns = [
     {
@@ -206,7 +216,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string) => {
-        const agentPolicy = agentPolicies.find((c) => c.id === policyId);
+        const agentPolicy = agentPoliciesById[policyId];
         const value = agentPolicy ? agentPolicy.name : policyId;
         return (
           <span className="eui-textTruncate" title={value}>
@@ -245,8 +255,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       }),
       width: '70px',
       render: (_: any, apiKey: EnrollmentAPIKey) => {
+        const agentPolicy = agentPolicies.find((c) => c.id === apiKey.policy_id);
+        const canUnenroll = apiKey.active && !agentPolicy?.is_managed;
         return (
-          apiKey.active && (
+          canUnenroll && (
             <DeleteButton
               apiKey={apiKey}
               refresh={() => enrollmentAPIKeysRequest.resendRequest()}
@@ -258,12 +270,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   ];
 
   return (
-    <>
-      {flyoutOpen && (
-        <NewEnrollmentTokenFlyout
+    <DefaultLayout section="enrollment_tokens">
+      {isModalOpen && (
+        <NewEnrollmentTokenModal
           agentPolicies={agentPolicies}
-          onClose={() => {
-            setFlyoutOpen(false);
+          onClose={(key?: EnrollmentAPIKey) => {
+            setModalOpen(false);
             enrollmentAPIKeysRequest.resendRequest();
           }}
         />
@@ -286,17 +298,11 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            {...(config.agents.fleetServerEnabled
-              ? {
-                  indexPattern: ENROLLMENT_API_KEYS_INDEX,
-                }
-              : {
-                  fieldPrefix: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-                })}
+            indexPattern={ENROLLMENT_API_KEYS_INDEX}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="plusInCircle" onClick={() => setFlyoutOpen(true)}>
+          <EuiButton iconType="plusInCircle" onClick={() => setModalOpen(true)}>
             <FormattedMessage
               id="xpack.fleet.enrollmentTokensList.newKeyButton"
               defaultMessage="Create enrollment token"
@@ -321,7 +327,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
             />
           )
         }
-        items={total ? items : []}
+        items={total ? rowItems : []}
         itemId="id"
         columns={columns}
         pagination={{
@@ -339,6 +345,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           setPagination(newPagination);
         }}
       />
-    </>
+    </DefaultLayout>
   );
 };

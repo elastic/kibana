@@ -8,14 +8,15 @@
   ],
   "from": "now-9m",
   "index": [
+    "auditbeat-*",
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Telnet Port Activity",
-  "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:23",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:23\n",
   "risk_score": 47,
   "rule_id": "34fde489-94b0-4500-a76f-b8a157cf9269",
   "severity": "medium",
@@ -24,7 +25,8 @@
     "Host",
     "Network",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "Host"
   ],
   "threat": [
     {
@@ -69,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

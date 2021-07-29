@@ -21,18 +21,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('index stats apis', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
     after(async () => {
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('field distribution', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('visualize/default');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
       });
       after(async () => {
-        await esArchiver.unload('visualize/default');
+        await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
       });
 
       it('should return a 404 for missing index patterns', async () => {
@@ -427,14 +427,48 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.totalDocuments).to.eql(425);
       });
+
+      it('should allow filtering on a runtime field other than the field in use', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ exists: { field: 'runtime_string_field' } }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'runtime_number_field',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
+          topValues: {
+            buckets: [
+              {
+                count: 4634,
+                key: 5,
+              },
+            ],
+          },
+          histogram: { buckets: [] },
+        });
+      });
     });
 
     describe('histogram', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('pre_calculated_histogram');
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/pre_calculated_histogram'
+        );
       });
       after(async () => {
-        await esArchiver.unload('pre_calculated_histogram');
+        await esArchiver.unload('x-pack/test/functional/es_archives/pre_calculated_histogram');
       });
 
       it('should return an auto histogram for precalculated histograms', async () => {

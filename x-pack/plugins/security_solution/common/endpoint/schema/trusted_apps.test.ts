@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { GetTrustedAppsRequestSchema, PostTrustedAppCreateRequestSchema } from './trusted_apps';
-import { ConditionEntryField, OperatingSystem } from '../types';
+import {
+  GetTrustedAppsRequestSchema,
+  PostTrustedAppCreateRequestSchema,
+  PutTrustedAppUpdateRequestSchema,
+} from './trusted_apps';
+import {
+  ConditionEntry,
+  ConditionEntryField,
+  NewTrustedApp,
+  OperatingSystem,
+  PutTrustedAppsRequestParams,
+} from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -72,17 +82,18 @@ describe('When invoking Trusted Apps Schema', () => {
   });
 
   describe('for POST Create', () => {
-    const createConditionEntry = <T>(data?: T) => ({
+    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
       field: ConditionEntryField.PATH,
       type: 'match',
       operator: 'included',
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(data?: T) => ({
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
-      os: 'windows',
+      os: OperatingSystem.WINDOWS,
+      effectScope: { type: 'global' },
       entries: [createConditionEntry()],
       ...(data || {}),
     });
@@ -106,7 +117,7 @@ describe('When invoking Trusted Apps Schema', () => {
       expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
     });
 
-    it('should validate `os` to to only accept known values', () => {
+    it('should validate `os` to only accept known values', () => {
       const bodyMsg = createNewTrustedApp({ os: undefined });
       expect(() => body.validate(bodyMsg)).toThrow();
 
@@ -236,6 +247,30 @@ describe('When invoking Trusted Apps Schema', () => {
         expect(() => body.validate(bodyMsg)).not.toThrow();
       });
 
+      it('should validate `entry.type` does not accept `wildcard` when field is NOT PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.HASH,
+              type: 'wildcard',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should validate `entry.type` accepts `wildcard` when field is PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.PATH,
+              type: 'wildcard',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).not.toThrow();
+      });
+
       it('should validate `entry.value` required', () => {
         const { value, ...entry } = createConditionEntry();
         expect(() => body.validate(createNewTrustedApp({ entries: [entry] }))).toThrow();
@@ -250,7 +285,9 @@ describe('When invoking Trusted Apps Schema', () => {
         const bodyMsg = createNewTrustedApp({
           entries: [createConditionEntry(), createConditionEntry()],
         });
-        expect(() => body.validate(bodyMsg)).toThrow('[Path] field can only be used once');
+        expect(() => body.validate(bodyMsg)).toThrow(
+          '[entries]: duplicatedEntry.process.executable.caseless'
+        );
       });
 
       it('should validate that `entry.field` hash field value can only be used once', () => {
@@ -266,7 +303,7 @@ describe('When invoking Trusted Apps Schema', () => {
             }),
           ],
         });
-        expect(() => body.validate(bodyMsg)).toThrow('[Hash] field can only be used once');
+        expect(() => body.validate(bodyMsg)).toThrow('[entries]: duplicatedEntry.process.hash.*');
       });
 
       it('should validate that `entry.field` signer field value can only be used once', () => {
@@ -282,7 +319,9 @@ describe('When invoking Trusted Apps Schema', () => {
             }),
           ],
         });
-        expect(() => body.validate(bodyMsg)).toThrow('[Signer] field can only be used once');
+        expect(() => body.validate(bodyMsg)).toThrow(
+          '[entries]: duplicatedEntry.process.Ext.code_signature'
+        );
       });
 
       it('should validate Hash field valid value', () => {
@@ -323,6 +362,57 @@ describe('When invoking Trusted Apps Schema', () => {
           );
         }).toThrow();
       });
+    });
+  });
+
+  describe('for PUT Update', () => {
+    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
+      field: ConditionEntryField.PATH,
+      type: 'match',
+      operator: 'included',
+      value: 'c:/programs files/Anti-Virus',
+      ...(data || {}),
+    });
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
+      name: 'Some Anti-Virus App',
+      description: 'this one is ok',
+      os: OperatingSystem.WINDOWS,
+      effectScope: { type: 'global' },
+      entries: [createConditionEntry()],
+      ...(data || {}),
+    });
+
+    const updateParams = <T>(data?: T): PutTrustedAppsRequestParams => ({
+      id: 'validId',
+      ...(data || {}),
+    });
+
+    const body = PutTrustedAppUpdateRequestSchema.body;
+    const params = PutTrustedAppUpdateRequestSchema.params;
+
+    it('should not error on a valid message', () => {
+      const bodyMsg = createNewTrustedApp();
+      const paramsMsg = updateParams();
+      expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
+      expect(params.validate(paramsMsg)).toStrictEqual(paramsMsg);
+    });
+
+    it('should validate `id` params is required', () => {
+      expect(() => params.validate(updateParams({ id: undefined }))).toThrow();
+    });
+
+    it('should validate `id` params to be string', () => {
+      expect(() => params.validate(updateParams({ id: 1 }))).toThrow();
+    });
+
+    it('should validate `version`', () => {
+      const bodyMsg = createNewTrustedApp({ version: 'v1' });
+      expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
+    });
+
+    it('should validate `version` must be string', () => {
+      const bodyMsg = createNewTrustedApp({ version: 1 });
+      expect(() => body.validate(bodyMsg)).toThrow();
     });
   });
 });

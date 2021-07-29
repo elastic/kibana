@@ -10,8 +10,13 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
 import { lastValueFrom } from '@kbn/std';
-import { CiStatsMetrics } from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import { CiStatsMetric } from '@kbn/dev-utils';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  reportOptimizerTimings,
+} from '@kbn/optimizer';
 
 import { Task, deleteAll, write, read } from '../lib';
 
@@ -22,20 +27,22 @@ export const BuildKibanaPlatformPlugins: Task = {
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       cache: false,
-      oss: build.isOss(),
       examples: false,
       watch: false,
       dist: true,
       includeCoreBundle: true,
+      limitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
     });
 
-    await lastValueFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
+    await lastValueFrom(
+      runOptimizer(config).pipe(logOptimizerState(log, config), reportOptimizerTimings(log, config))
+    );
 
-    const combinedMetrics: CiStatsMetrics = [];
+    const combinedMetrics: CiStatsMetric[] = [];
     const metricFilePaths: string[] = [];
     for (const bundle of config.bundles) {
       const path = Path.resolve(bundle.outputDir, 'metrics.json');
-      const metrics: CiStatsMetrics = JSON.parse(await read(path));
+      const metrics: CiStatsMetric[] = JSON.parse(await read(path));
       combinedMetrics.push(...metrics);
       metricFilePaths.push(path);
     }

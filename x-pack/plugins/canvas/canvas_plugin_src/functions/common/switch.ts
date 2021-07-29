@@ -5,16 +5,23 @@
  * 2.0.
  */
 
+import { Observable, defer, from, of } from 'rxjs';
+import { concatMap, filter, merge, pluck, take } from 'rxjs/operators';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  case: Array<() => Promise<Case>>;
-  default: () => any;
+  case?: Array<() => Observable<Case>>;
+  default?(): Observable<any>;
 }
 
-export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Arguments, unknown> {
+export function switchFn(): ExpressionFunctionDefinition<
+  'switch',
+  unknown,
+  Arguments,
+  Observable<unknown>
+> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {
@@ -27,30 +34,22 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Argu
         resolve: false,
         multi: true,
         required: true,
-        help: argHelp.case,
+        help: argHelp.case!,
       },
       default: {
         aliases: ['finally'],
         resolve: false,
-        help: argHelp.default,
+        help: argHelp.default!,
       },
     },
-    fn: async (input, args) => {
-      const cases = args.case || [];
-
-      for (let i = 0; i < cases.length; i++) {
-        const { matches, result } = await cases[i]();
-
-        if (matches) {
-          return result;
-        }
-      }
-
-      if (typeof args.default !== 'undefined') {
-        return await args.default();
-      }
-
-      return input;
+    fn(input, args) {
+      return from(args.case ?? []).pipe(
+        concatMap((item) => item()),
+        filter(({ matches }) => matches),
+        pluck('result'),
+        merge(defer(() => args.default?.() ?? of(input))),
+        take(1)
+      );
     },
   };
 }

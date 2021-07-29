@@ -6,6 +6,8 @@
 
 Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the Elasticsearch client, and is included in the Saved Objects Client as a convenience for consumers who are using [SavedObjectsClient.openPointInTimeForType()](./kibana-plugin-core-server.savedobjectsclient.openpointintimefortype.md)<!-- -->.
 
+Only use this API if you have an advanced use case that's not solved by the [SavedObjectsClient.createPointInTimeFinder()](./kibana-plugin-core-server.savedobjectsclient.createpointintimefinder.md) method.
+
 <b>Signature:</b>
 
 ```typescript

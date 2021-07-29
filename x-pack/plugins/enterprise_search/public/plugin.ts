@@ -15,12 +15,14 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -42,11 +44,14 @@ export interface ClientData extends InitialAppData {
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  security: SecurityPluginSetup;
 }
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -114,6 +119,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
+        // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
+        // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
+        if (this.config.host) chrome.setIsVisible(false);
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 

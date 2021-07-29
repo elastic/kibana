@@ -9,6 +9,7 @@ import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
 import {
@@ -17,10 +18,14 @@ import {
   scheduleLensTelemetry,
 } from './usage';
 import { setupSavedObjects } from './saved_objects';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
+import { lensEmbeddableFactory } from './embeddable/lens_embeddable_factory';
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
   taskManager?: TaskManagerSetupContract;
+  embeddable: EmbeddableSetup;
+  expressions: ExpressionsServerSetup;
 }
 
 export interface PluginStartContract {
@@ -53,6 +58,7 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
         plugins.taskManager
       );
     }
+    plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
     return {};
   }
 

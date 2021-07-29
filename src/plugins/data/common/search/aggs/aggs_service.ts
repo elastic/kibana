@@ -17,7 +17,6 @@ import {
   getCalculateAutoTimeExpression,
 } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
-import { getDateMetaByDatatableColumn } from './utils/time_column_meta';
 import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
 /** @internal */
@@ -89,12 +88,6 @@ export class AggsCommonService {
 
     return {
       calculateAutoTimeExpression,
-      getDateMetaByDatatableColumn: getDateMetaByDatatableColumn({
-        calculateAutoTimeExpression,
-        getIndexPattern,
-        getConfig,
-        isDefaultTimezone,
-      }),
       datatableUtilities: getDatatableColumnUtilities({
         getIndexPattern,
         createAggConfigs,

@@ -16,7 +16,8 @@ import { APIReturnType } from '../services/rest/createCallApmApi';
 export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export interface LatencyChartData {
-  latencyTimeseries: Array<APMChartSpec<Coordinate>>;
+  currentPeriod?: APMChartSpec<Coordinate>;
+  previousPeriod?: APMChartSpec<Coordinate>;
   mlJobId?: string;
   anomalyTimeseries?: { boundaries: APMChartSpec[]; scores: APMChartSpec };
 }
@@ -29,19 +30,22 @@ export function getLatencyChartSelector({
   latencyChart?: LatencyChartsResponse;
   theme: EuiTheme;
   latencyAggregationType?: string;
-}): LatencyChartData {
-  if (!latencyChart?.latencyTimeseries || !latencyAggregationType) {
-    return {
-      latencyTimeseries: [],
-      mlJobId: undefined,
-      anomalyTimeseries: undefined,
-    };
+}): Partial<LatencyChartData> {
+  if (
+    !latencyChart?.currentPeriod.latencyTimeseries ||
+    !latencyAggregationType
+  ) {
+    return {};
   }
   return {
-    latencyTimeseries: getLatencyTimeseries({
-      latencyChart,
+    currentPeriod: getLatencyTimeseries({
+      latencyChart: latencyChart.currentPeriod,
       theme,
       latencyAggregationType,
+    }),
+    previousPeriod: getPreviousPeriodTimeseries({
+      previousPeriod: latencyChart.previousPeriod,
+      theme,
     }),
     mlJobId: latencyChart.anomalyTimeseries?.jobId,
     anomalyTimeseries: getAnomalyTimeseries({
@@ -51,12 +55,30 @@ export function getLatencyChartSelector({
   };
 }
 
+function getPreviousPeriodTimeseries({
+  previousPeriod,
+  theme,
+}: {
+  previousPeriod: LatencyChartsResponse['previousPeriod'];
+  theme: EuiTheme;
+}) {
+  return {
+    data: previousPeriod.latencyTimeseries ?? [],
+    type: 'area',
+    color: theme.eui.euiColorMediumShade,
+    title: i18n.translate(
+      'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
+      { defaultMessage: 'Previous period' }
+    ),
+  };
+}
+
 function getLatencyTimeseries({
   latencyChart,
   theme,
   latencyAggregationType,
 }: {
-  latencyChart: LatencyChartsResponse;
+  latencyChart: LatencyChartsResponse['currentPeriod'];
   theme: EuiTheme;
   latencyAggregationType: string;
 }) {
@@ -65,49 +87,42 @@ function getLatencyTimeseries({
 
   switch (latencyAggregationType) {
     case 'avg': {
-      return [
-        {
-          title: i18n.translate(
-            'xpack.apm.transactions.latency.chart.averageLabel',
-            { defaultMessage: 'Average' }
-          ),
-          data: latencyTimeseries,
-          legendValue: asDuration(overallAvgDuration),
-          type: 'linemark',
-          color: theme.eui.euiColorVis1,
-        },
-      ];
+      return {
+        title: i18n.translate(
+          'xpack.apm.transactions.latency.chart.averageLabel',
+          { defaultMessage: 'Average' }
+        ),
+        data: latencyTimeseries,
+        legendValue: asDuration(overallAvgDuration),
+        type: 'linemark',
+        color: theme.eui.euiColorVis1,
+      };
     }
     case 'p95': {
-      return [
-        {
-          title: i18n.translate(
-            'xpack.apm.transactions.latency.chart.95thPercentileLabel',
-            { defaultMessage: '95th percentile' }
-          ),
-          titleShort: '95th',
-          data: latencyTimeseries,
-          type: 'linemark',
-          color: theme.eui.euiColorVis5,
-        },
-      ];
+      return {
+        title: i18n.translate(
+          'xpack.apm.transactions.latency.chart.95thPercentileLabel',
+          { defaultMessage: '95th percentile' }
+        ),
+        titleShort: '95th',
+        data: latencyTimeseries,
+        type: 'linemark',
+        color: theme.eui.euiColorVis5,
+      };
     }
     case 'p99': {
-      return [
-        {
-          title: i18n.translate(
-            'xpack.apm.transactions.latency.chart.99thPercentileLabel',
-            { defaultMessage: '99th percentile' }
-          ),
-          titleShort: '99th',
-          data: latencyTimeseries,
-          type: 'linemark',
-          color: theme.eui.euiColorVis7,
-        },
-      ];
+      return {
+        title: i18n.translate(
+          'xpack.apm.transactions.latency.chart.99thPercentileLabel',
+          { defaultMessage: '99th percentile' }
+        ),
+        titleShort: '99th',
+        data: latencyTimeseries,
+        type: 'linemark',
+        color: theme.eui.euiColorVis7,
+      };
     }
   }
-  return [];
 }
 
 function getAnomalyTimeseries({

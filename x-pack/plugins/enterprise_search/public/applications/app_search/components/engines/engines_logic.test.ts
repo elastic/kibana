@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { EngineDetails } from '../engine/types';
+import { EngineDetails, EngineTypes } from '../engine/types';
 
 import { EnginesLogic } from './';
 
 describe('EnginesLogic', () => {
   const { mount } = new LogicMounter(EnginesLogic);
   const { http } = mockHttpValues;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -123,6 +128,30 @@ describe('EnginesLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('deleteEngine', () => {
+      it('calls the engine API endpoint then onDeleteEngineSuccess', async () => {
+        http.delete.mockReturnValueOnce(Promise.resolve({}));
+        mount();
+        jest.spyOn(EnginesLogic.actions, 'onDeleteEngineSuccess');
+
+        EnginesLogic.actions.deleteEngine(MOCK_ENGINE);
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/hello-world');
+        expect(EnginesLogic.actions.onDeleteEngineSuccess).toHaveBeenCalledWith(MOCK_ENGINE);
+      });
+
+      it('calls flashAPIErrors on API Error', async () => {
+        http.delete.mockReturnValueOnce(Promise.reject());
+        mount();
+
+        EnginesLogic.actions.deleteEngine(MOCK_ENGINE);
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('loadEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_ENGINES_API_RESPONSE));
@@ -140,6 +169,16 @@ describe('EnginesLogic', () => {
           },
         });
         expect(EnginesLogic.actions.onEnginesLoad).toHaveBeenCalledWith(MOCK_ENGINES_API_RESPONSE);
+      });
+
+      it('handles errors', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        EnginesLogic.actions.loadEngines();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -162,6 +201,50 @@ describe('EnginesLogic', () => {
         expect(EnginesLogic.actions.onMetaEnginesLoad).toHaveBeenCalledWith(
           MOCK_ENGINES_API_RESPONSE
         );
+      });
+
+      it('handles errors', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        EnginesLogic.actions.loadMetaEngines();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('onDeleteEngineSuccess', () => {
+      beforeEach(() => {
+        mount();
+      });
+
+      it('should call flashSuccessToast', () => {
+        EnginesLogic.actions.onDeleteEngineSuccess(MOCK_ENGINE);
+
+        expect(flashSuccessToast).toHaveBeenCalled();
+      });
+
+      it('should call loadEngines if engine.type === default', () => {
+        jest.spyOn(EnginesLogic.actions, 'loadEngines');
+
+        EnginesLogic.actions.onDeleteEngineSuccess({
+          ...MOCK_ENGINE,
+          type: 'default' as EngineTypes.default,
+        });
+
+        expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
+      });
+
+      it('should call loadMetaEngines if engine.type === meta', () => {
+        jest.spyOn(EnginesLogic.actions, 'loadMetaEngines');
+
+        EnginesLogic.actions.onDeleteEngineSuccess({
+          ...MOCK_ENGINE,
+          type: 'meta' as EngineTypes.meta,
+        });
+
+        expect(EnginesLogic.actions.loadMetaEngines).toHaveBeenCalled();
       });
     });
   });

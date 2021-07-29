@@ -10,19 +10,13 @@ import React, { lazy } from 'react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { GaugeVisParams } from '../../gauge';
-import { PieVisParams } from '../../pie';
 import { HeatmapVisParams } from '../../heatmap';
 
 const GaugeOptionsLazy = lazy(() => import('./gauge'));
-const PieOptionsLazy = lazy(() => import('./pie'));
 const HeatmapOptionsLazy = lazy(() => import('./heatmap'));
 
 export const GaugeOptions = (props: VisEditorOptionsProps<GaugeVisParams>) => (
   <GaugeOptionsLazy {...props} />
-);
-
-export const PieOptions = (props: VisEditorOptionsProps<PieVisParams>) => (
-  <PieOptionsLazy {...props} />
 );
 
 export const HeatmapOptions = (props: VisEditorOptionsProps<HeatmapVisParams>) => (

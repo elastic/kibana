@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
-import { rollupServiceProvider, RollupJob } from './rollup';
+import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
 
 const supportedTypes: string[] = [
@@ -69,7 +70,7 @@ class FieldsService {
   }
 
   // create field object from the results from _field_caps
-  private async createFields(): Promise<Field[]> {
+  private async createFields(includeNested: boolean = false): Promise<Field[]> {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
     if (fieldCaps && fieldCaps.fields) {
@@ -79,7 +80,10 @@ class FieldsService {
         if (firstKey !== undefined) {
           const field = fc[firstKey];
           // add to the list of fields if the field type can be used by ML
-          if (supportedTypes.includes(field.type) === true) {
+          if (
+            (supportedTypes.includes(field.type) === true && field.metadata_field !== true) ||
+            (includeNested && field.type === ES_FIELD_TYPES.NESTED)
+          ) {
             fields.push({
               id: k,
               name: k,
@@ -100,7 +104,7 @@ class FieldsService {
   // based on what is available in the rollup job
   // the _indexPattern will be replaced with a comma separated list
   // of index patterns from all of the rollup jobs
-  public async getData(): Promise<NewJobCaps> {
+  public async getData(includeNested: boolean = false): Promise<NewJobCaps> {
     let rollupFields: RollupFields = {};
 
     if (this._isRollup) {
@@ -109,7 +113,9 @@ class FieldsService {
         this._mlClusterClient,
         this._savedObjectsClient
       );
-      const rollupConfigs: RollupJob[] | null = await rollupService.getRollupJobs();
+      const rollupConfigs:
+        | estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
+        | null = await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
       // rollup configs, return with no results
@@ -125,20 +131,24 @@ class FieldsService {
     }
 
     const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
-    const fields: Field[] = await this.createFields();
+    const fields: Field[] = await this.createFields(includeNested);
 
     return combineFieldsAndAggs(fields, aggs, rollupFields);
   }
 }
 
-function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
+function combineAllRollupFields(
+  rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
+): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {
     Object.keys(conf.fields).forEach((fieldName) => {
       if (rollupFields[fieldName] === undefined) {
+        // @ts-expect-error fix type. our RollupFields type is better
         rollupFields[fieldName] = conf.fields[fieldName];
       } else {
         const aggs = conf.fields[fieldName];
+        // @ts-expect-error fix type. our RollupFields type is better
         aggs.forEach((agg) => {
           if (rollupFields[fieldName].find((f) => f.agg === agg.agg) === null) {
             rollupFields[fieldName].push(agg);

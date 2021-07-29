@@ -53,6 +53,9 @@ export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobS
 
 export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
 
+export const FIELDS_BROWSER_BTN =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
+
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
 export const RULE_ABOUT_DETAILS_HEADER_TOGGLE = '[data-test-subj="stepAboutDetailsToggle"]';
@@ -91,6 +94,10 @@ export const THRESHOLD_DETAILS = 'Threshold';
 export const TIMELINE_TEMPLATE_DETAILS = 'Timeline template';
 
 export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
+
+export const TIMELINE_FIELD = (field: string) => {
+  return `[data-test-subj="draggable-content-${field}"]`;
+};
 
 export const getDetails = (title: string) =>
   cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);

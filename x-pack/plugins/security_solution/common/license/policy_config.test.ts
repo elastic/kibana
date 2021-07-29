@@ -7,11 +7,12 @@
 
 import {
   isEndpointPolicyValidForLicense,
-  unsetPolicyFeaturesAboveLicenseLevel,
+  unsetPolicyFeaturesAccordingToLicenseLevel,
 } from './policy_config';
 import {
-  DefaultMalwareMessage,
+  DefaultPolicyNotificationMessage,
   policyFactory,
+  policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidFeatures,
 } from '../endpoint/models/policy_config';
 import { licenseMock } from '../../../licensing/common/licensing.mock';
@@ -74,59 +75,151 @@ describe('policy_config and licenses', () => {
       expect(valid).toBeFalsy();
     });
 
-    it('allows ransomware to be turned on for Platinum licenses', () => {
+    it('allows ransomware, memory and behavior to be turned on for Platinum licenses', () => {
       const policy = policyFactoryWithoutPaidFeatures();
+      // ransomware protection
       policy.windows.ransomware.mode = ProtectionModes.prevent;
-      policy.mac.ransomware.mode = ProtectionModes.prevent;
+      policy.windows.ransomware.supported = true;
+      // memory protection
+      policy.windows.memory_protection.mode = ProtectionModes.prevent;
+      policy.windows.memory_protection.supported = true;
+      // behavior protection
+      policy.windows.behavior_protection.mode = ProtectionModes.prevent;
+      policy.windows.behavior_protection.supported = true;
 
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
-    it('blocks ransomware to be turned on for Gold and below licenses', () => {
-      const policy = policyFactoryWithoutPaidFeatures();
-      policy.windows.ransomware.mode = ProtectionModes.prevent;
-      policy.mac.ransomware.mode = ProtectionModes.prevent;
 
-      let valid = isEndpointPolicyValidForLicense(policy, Gold);
-      expect(valid).toBeFalsy();
-      valid = isEndpointPolicyValidForLicense(policy, Basic);
-      expect(valid).toBeFalsy();
-    });
-
-    it('allows ransomware notification to be turned on with a Platinum license', () => {
+    it('allows ransomware, memory  and behavior protection notification to be turned on with a Platinum license', () => {
       const policy = policyFactoryWithoutPaidFeatures();
+      // ransomware protection
       policy.windows.popup.ransomware.enabled = true;
-      policy.mac.popup.ransomware.enabled = true;
+      policy.windows.ransomware.supported = true;
+      // memory protection
+      policy.windows.popup.memory_protection.enabled = true;
+      policy.windows.memory_protection.supported = true;
+      // behavior protection
+      policy.windows.popup.behavior_protection.enabled = true;
+      policy.windows.behavior_protection.supported = true;
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
-    it('blocks ransomware notification to be turned on for Gold and below licenses', () => {
-      const policy = policyFactoryWithoutPaidFeatures();
-      policy.windows.popup.ransomware.enabled = true;
-      policy.mac.popup.ransomware.enabled = true;
-      let valid = isEndpointPolicyValidForLicense(policy, Gold);
-      expect(valid).toBeFalsy();
 
-      valid = isEndpointPolicyValidForLicense(policy, Basic);
-      expect(valid).toBeFalsy();
+    describe('ransomware protection checks', () => {
+      it('blocks ransomware to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.ransomware.mode = ProtectionModes.prevent;
+
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
+
+      it('blocks ransomware notification to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.popup.ransomware.enabled = true;
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
+
+      it('allows ransomware notification message changes with a Platinum license', () => {
+        const policy = policyFactory();
+        policy.windows.popup.ransomware.message = 'BOOM';
+        const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+        expect(valid).toBeTruthy();
+      });
+      it('blocks ransomware notification message changes for Gold and below licenses', () => {
+        const policy = policyFactory();
+        policy.windows.popup.ransomware.message = 'BOOM';
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
     });
 
-    it('allows ransomware notification message changes with a Platinum license', () => {
-      const policy = policyFactory();
-      policy.windows.popup.ransomware.message = 'BOOM';
-      policy.mac.popup.ransomware.message = 'BOOM';
-      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
-      expect(valid).toBeTruthy();
-    });
-    it('blocks ransomware notification message changes for Gold and below licenses', () => {
-      const policy = policyFactory();
-      policy.windows.popup.ransomware.message = 'BOOM';
-      policy.mac.popup.ransomware.message = 'BOOM';
-      let valid = isEndpointPolicyValidForLicense(policy, Gold);
-      expect(valid).toBeFalsy();
+    describe('memory protection checks', () => {
+      it('blocks memory_protection to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.memory_protection.mode = ProtectionModes.prevent;
 
-      valid = isEndpointPolicyValidForLicense(policy, Basic);
-      expect(valid).toBeFalsy();
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
+
+      it('blocks memory_protection notification to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.popup.memory_protection.enabled = true;
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
+
+      it('allows memory_protection notification message changes with a Platinum license', () => {
+        const policy = policyFactory();
+        policy.windows.popup.memory_protection.message = 'BOOM';
+        const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+        expect(valid).toBeTruthy();
+      });
+
+      it('blocks memory_protection notification message changes for Gold and below licenses', () => {
+        const policy = policyFactory();
+        policy.windows.popup.memory_protection.message = 'BOOM';
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
+    });
+
+    describe('behavior protection checks', () => {
+      it('blocks behavior_protection to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.behavior_protection.mode = ProtectionModes.prevent;
+
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
+
+      it('blocks behavior_protection notification to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.popup.behavior_protection.enabled = true;
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
+
+      it('allows behavior_protection notification message changes with a Platinum license', () => {
+        const policy = policyFactory();
+        policy.windows.popup.behavior_protection.message = 'BOOM';
+        const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+        expect(valid).toBeTruthy();
+      });
+
+      it('blocks behavior_protection notification message changes for Gold and below licenses', () => {
+        const policy = policyFactory();
+        policy.windows.popup.behavior_protection.message = 'BOOM';
+        let valid = isEndpointPolicyValidForLicense(policy, Gold);
+        expect(valid).toBeFalsy();
+
+        valid = isEndpointPolicyValidForLicense(policy, Basic);
+        expect(valid).toBeFalsy();
+      });
     });
 
     it('allows default policyConfig with Basic', () => {
@@ -136,7 +229,7 @@ describe('policy_config and licenses', () => {
     });
   });
 
-  describe('unsetPolicyFeaturesAboveLicenseLevel', () => {
+  describe('unsetPolicyFeaturesAccordingToLicenseLevel', () => {
     it('does not change any malware fields with a Platinum license', () => {
       const policy = policyFactory();
       const popupMessage = 'WOOP WOOP';
@@ -144,7 +237,7 @@ describe('policy_config and licenses', () => {
       policy.mac.popup.malware.message = popupMessage;
       policy.windows.popup.malware.enabled = false;
 
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Platinum);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
       expect(retPolicy.windows.popup.malware.enabled).toBeFalsy();
       expect(retPolicy.windows.popup.malware.message).toEqual(popupMessage);
       expect(retPolicy.mac.popup.malware.message).toEqual(popupMessage);
@@ -154,22 +247,42 @@ describe('policy_config and licenses', () => {
       const policy = policyFactory();
       const popupMessage = 'WOOP WOOP';
       policy.windows.ransomware.mode = ProtectionModes.detect;
-      policy.mac.ransomware.mode = ProtectionModes.detect;
       policy.windows.popup.ransomware.enabled = false;
-      policy.mac.popup.ransomware.enabled = false;
       policy.windows.popup.ransomware.message = popupMessage;
-      policy.mac.popup.ransomware.message = popupMessage;
 
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Platinum);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
       expect(retPolicy.windows.ransomware.mode).toEqual(ProtectionModes.detect);
-      expect(retPolicy.mac.ransomware.mode).toEqual(ProtectionModes.detect);
       expect(retPolicy.windows.popup.ransomware.enabled).toBeFalsy();
-      expect(retPolicy.mac.popup.ransomware.enabled).toBeFalsy();
       expect(retPolicy.windows.popup.ransomware.message).toEqual(popupMessage);
-      expect(retPolicy.mac.popup.ransomware.message).toEqual(popupMessage);
     });
 
-    it('resets Platinum-paid malware fields for lower license tiers', () => {
+    it('does not change any memory fields with a Platinum license', () => {
+      const policy = policyFactory();
+      const popupMessage = 'WOOP WOOP';
+      policy.windows.memory_protection.mode = ProtectionModes.detect;
+      policy.windows.popup.memory_protection.enabled = false;
+      policy.windows.popup.memory_protection.message = popupMessage;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+      expect(retPolicy.windows.memory_protection.mode).toEqual(ProtectionModes.detect);
+      expect(retPolicy.windows.popup.memory_protection.enabled).toBeFalsy();
+      expect(retPolicy.windows.popup.memory_protection.message).toEqual(popupMessage);
+    });
+
+    it('does not change any behavior fields with a Platinum license', () => {
+      const policy = policyFactory();
+      const popupMessage = 'WOOP WOOP';
+      policy.windows.behavior_protection.mode = ProtectionModes.detect;
+      policy.windows.popup.behavior_protection.enabled = false;
+      policy.windows.popup.behavior_protection.message = popupMessage;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+      expect(retPolicy.windows.behavior_protection.mode).toEqual(ProtectionModes.detect);
+      expect(retPolicy.windows.popup.behavior_protection.enabled).toBeFalsy();
+      expect(retPolicy.windows.popup.behavior_protection.message).toEqual(popupMessage);
+    });
+
+    it('resets Platinum-paid fields for lower license tiers', () => {
       const defaults = policyFactory(); // reference
       const policy = policyFactory(); // what we will modify, and should be reset
       const popupMessage = 'WOOP WOOP';
@@ -177,18 +290,16 @@ describe('policy_config and licenses', () => {
       policy.mac.popup.malware.message = popupMessage;
       policy.windows.popup.malware.enabled = false;
 
-      policy.windows.popup.ransomware.message = popupMessage;
-      policy.mac.popup.ransomware.message = popupMessage;
-      policy.windows.popup.ransomware.enabled = false;
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Gold);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
       expect(retPolicy.windows.popup.malware.enabled).toEqual(
         defaults.windows.popup.malware.enabled
       );
       expect(retPolicy.windows.popup.malware.message).not.toEqual(popupMessage);
-      expect(retPolicy.mac.popup.malware.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultMalwareMessage]).toContain(retPolicy.windows.popup.malware.message);
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.windows.popup.malware.message
+      );
     });
 
     it('resets Platinum-paid ransomware fields for lower license tiers', () => {
@@ -196,22 +307,130 @@ describe('policy_config and licenses', () => {
       const policy = policyFactory(); // what we will modify, and should be reset
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.ransomware.message = popupMessage;
-      policy.mac.popup.ransomware.message = popupMessage;
 
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Gold);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
       expect(retPolicy.windows.ransomware.mode).toEqual(defaults.windows.ransomware.mode);
-      expect(retPolicy.mac.ransomware.mode).toEqual(defaults.mac.ransomware.mode);
       expect(retPolicy.windows.popup.ransomware.enabled).toEqual(
         defaults.windows.popup.ransomware.enabled
       );
-      expect(retPolicy.mac.popup.ransomware.enabled).toEqual(defaults.mac.popup.ransomware.enabled);
       expect(retPolicy.windows.popup.ransomware.message).not.toEqual(popupMessage);
-      expect(retPolicy.mac.popup.ransomware.message).not.toEqual(popupMessage);
 
       // need to invert the test, since it could be either value
-      expect(['', DefaultMalwareMessage]).toContain(retPolicy.windows.popup.ransomware.message);
-      expect(['', DefaultMalwareMessage]).toContain(retPolicy.mac.popup.ransomware.message);
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.windows.popup.ransomware.message
+      );
+    });
+
+    it('resets Platinum-paid memory_protection fields for lower license tiers', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      const popupMessage = 'WOOP WOOP';
+      policy.windows.popup.memory_protection.message = popupMessage;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.memory_protection.mode).toEqual(
+        defaults.windows.memory_protection.mode
+      );
+      expect(retPolicy.windows.popup.memory_protection.enabled).toEqual(
+        defaults.windows.popup.memory_protection.enabled
+      );
+      expect(retPolicy.windows.popup.memory_protection.message).not.toEqual(popupMessage);
+
+      // need to invert the test, since it could be either value
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.windows.popup.memory_protection.message
+      );
+    });
+
+    it('resets Platinum-paid behavior_protection fields for lower license tiers', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      const popupMessage = 'WOOP WOOP';
+      policy.windows.popup.behavior_protection.message = popupMessage;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.behavior_protection.mode).toEqual(
+        defaults.windows.behavior_protection.mode
+      );
+      expect(retPolicy.windows.popup.behavior_protection.enabled).toEqual(
+        defaults.windows.popup.behavior_protection.enabled
+      );
+      expect(retPolicy.windows.popup.behavior_protection.message).not.toEqual(popupMessage);
+
+      // need to invert the test, since it could be either value
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.windows.popup.behavior_protection.message
+      );
+    });
+
+    it('sets ransomware supported field to false when license is below Platinum', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.ransomware.supported = true;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.ransomware.supported).toEqual(defaults.windows.ransomware.supported);
+    });
+
+    it('sets ransomware supported field to true when license is at Platinum', () => {
+      const defaults = policyFactoryWithSupportedFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.ransomware.supported = false;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+
+      expect(retPolicy.windows.ransomware.supported).toEqual(defaults.windows.ransomware.supported);
+    });
+
+    it('sets memory_protection supported field to false when license is below Platinum', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.memory_protection.supported = true;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.memory_protection.supported).toEqual(
+        defaults.windows.memory_protection.supported
+      );
+    });
+
+    it('sets memory_protection supported field to true when license is at Platinum', () => {
+      const defaults = policyFactoryWithSupportedFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.memory_protection.supported = false;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+
+      expect(retPolicy.windows.memory_protection.supported).toEqual(
+        defaults.windows.memory_protection.supported
+      );
+    });
+    it('sets behavior_protection supported field to false when license is below Platinum', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.behavior_protection.supported = true;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.behavior_protection.supported).toEqual(
+        defaults.windows.behavior_protection.supported
+      );
+    });
+
+    it('sets behavior_protection supported field to true when license is at Platinum', () => {
+      const defaults = policyFactoryWithSupportedFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.behavior_protection.supported = false;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+
+      expect(retPolicy.windows.behavior_protection.supported).toEqual(
+        defaults.windows.behavior_protection.supported
+      );
     });
   });
 

@@ -33,17 +33,24 @@ export default {
       control: 'boolean',
       defaultValue: true,
     },
+    canSaveVisualizations: {
+      control: 'boolean',
+      defaultValue: true,
+    },
   },
 };
 
 export function Example({
   copyOnSave,
   hasDocumentId,
+  canSaveVisualizations,
 }: {
   copyOnSave: boolean;
   hasDocumentId: boolean;
+  canSaveVisualizations: boolean;
 } & StorybookParams) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>('existing');
+  const [isAddToLibrarySelected, setAddToLibrary] = useState(false);
 
   return (
     <SaveModalDashboardSelector
@@ -51,7 +58,10 @@ export function Example({
       onChange={setDashboardOption}
       dashboardOption={dashboardOption}
       copyOnSave={copyOnSave}
+      canSaveByReference={canSaveVisualizations}
       documentId={hasDocumentId ? 'abc' : undefined}
+      isAddToLibrarySelected={isAddToLibrarySelected}
+      setAddToLibrary={setAddToLibrary}
     />
   );
 }

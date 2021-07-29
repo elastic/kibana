@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 
@@ -41,7 +42,7 @@ interface TopHitESResponse {
 // TODO: only Elasticsearch until we can figure out how to handle upgrades for the rest of the stack
 // https://github.com/elastic/kibana/issues/83309
 export async function fetchMissingMonitoringData(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   size: number,
@@ -51,7 +52,7 @@ export async function fetchMissingMonitoringData(
   const endMs = nowInMs;
   const params = {
     index,
-    filterPath: ['aggregations.clusters.buckets'],
+    filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       query: {
@@ -98,8 +99,8 @@ export async function fetchMissingMonitoringData(
                     sort: [
                       {
                         timestamp: {
-                          order: 'desc',
-                          unmapped_type: 'long',
+                          order: 'desc' as const,
+                          unmapped_type: 'long' as const,
                         },
                       },
                     ],
@@ -116,7 +117,7 @@ export async function fetchMissingMonitoringData(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const clusterBuckets = get(
     response,
     'aggregations.clusters.buckets',

@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 describe('#toExpression', () => {
@@ -50,7 +50,18 @@ describe('#toExpression', () => {
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          labelsOrientation: {
+            x: 0,
+            yLeft: -90,
+            yRight: -45,
+          },
           gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          hideEndzones: true,
+          yRightExtent: {
+            mode: 'custom',
+            lowerBound: 123,
+            upperBound: 456,
+          },
           layers: [
             {
               layerId: 'first',
@@ -220,6 +231,31 @@ describe('#toExpression', () => {
       x: [true],
       yLeft: [true],
       yRight: [true],
+    });
+  });
+
+  it('should default the tick labels orientation settings to 0', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.labelsOrientation[0] as Ast).chain[0].arguments).toEqual({
+      x: [0],
+      yLeft: [0],
+      yRight: [0],
     });
   });
 

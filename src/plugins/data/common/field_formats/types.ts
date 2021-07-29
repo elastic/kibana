@@ -56,6 +56,7 @@ export enum FIELD_FORMAT_IDS {
   STRING = 'string',
   TRUNCATE = 'truncate',
   URL = 'url',
+  HISTOGRAM = 'histogram',
 }
 
 export interface FieldFormatConfig {
@@ -81,6 +82,7 @@ export type FieldFormatInstanceType = (new (
   // Static properties:
   id: FieldFormatId;
   title: string;
+  hidden?: boolean;
   fieldType: string | string[];
 };
 
@@ -93,4 +95,4 @@ export interface IFieldFormatMetaParams {
   };
 }
 
-export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'register'>;

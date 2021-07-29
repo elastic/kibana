@@ -7,8 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFlyout } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
@@ -17,10 +16,6 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
-
-const StyledEuiFlyout = styled(EuiFlyout)`
-  z-index: ${({ theme }) => theme.eui.euiZLevel7};
-`;
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -69,9 +64,10 @@ export const DetailsPanel = React.memo(
     if (!currentTabDetail?.panelView) return null;
 
     let visiblePanel = null; // store in variable to make return statement more readable
+    let panelSize: EuiFlyoutProps['size'] = 's';
     const contextID = `${timelineId}-${activeTab}`;
-
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
+      panelSize = 'm';
       visiblePanel = (
         <EventDetailsPanel
           browserFields={browserFields}
@@ -108,9 +104,14 @@ export const DetailsPanel = React.memo(
     }
 
     return isFlyoutView ? (
-      <StyledEuiFlyout data-test-subj="timeline:details-panel:flyout" size="s" onClose={closePanel}>
+      <EuiFlyout
+        data-test-subj="timeline:details-panel:flyout"
+        size={panelSize}
+        onClose={closePanel}
+        ownFocus={false}
+      >
         {visiblePanel}
-      </StyledEuiFlyout>
+      </EuiFlyout>
     ) : (
       visiblePanel
     );

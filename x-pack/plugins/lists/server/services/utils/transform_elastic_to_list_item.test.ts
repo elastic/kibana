@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import type { ListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
-import { ListItemArraySchema } from '../../../common/schemas';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import {
   transformElasticHitsToListItem,

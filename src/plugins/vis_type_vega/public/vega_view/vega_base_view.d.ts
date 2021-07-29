@@ -8,7 +8,7 @@
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { IServiceSettings } from 'src/plugins/maps_legacy/public';
+import { IServiceSettings } from 'src/plugins/maps_ems/public';
 import { VegaParser } from '../data_model/vega_parser';
 import { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
@@ -34,6 +34,7 @@ export class VegaBaseView {
   destroy(): Promise<void>;
 
   _$container: any;
+  _$controls: any;
   _parser: any;
   _vegaViewConfig: any;
   _serviceSettings: VegaViewParams['serviceSettings'];

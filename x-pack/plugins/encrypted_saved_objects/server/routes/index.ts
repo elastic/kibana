@@ -6,10 +6,10 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { IRouter, Logger } from '../../../../../src/core/server';
-import { ConfigType } from '../config';
-import { EncryptionKeyRotationService } from '../crypto';
+import type { IRouter, Logger } from 'src/core/server';
 
+import type { ConfigType } from '../config';
+import type { EncryptionKeyRotationService } from '../crypto';
 import { defineKeyRotationRoutes } from './key_rotation';
 
 /**

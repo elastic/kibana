@@ -18,7 +18,7 @@ import { RouteDependencies } from '../../../types';
 export const registerUpdateRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({ id: schema.string() });
 
@@ -44,13 +44,14 @@ export const registerUpdateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id } = request.params;
 
       // We need to first pause the follower and then resume it by passing the advanced settings
       try {
         const {
-          follower_indices: followerIndices,
-        } = await context.crossClusterReplication.client.callAsCurrentUser('ccr.info', { id });
+          body: { follower_indices: followerIndices },
+        } = await client.asCurrentUser.ccr.followInfo({ index: id });
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 
@@ -63,12 +64,7 @@ export const registerUpdateRoute = ({
 
         // Pause follower if not already paused
         if (!isPaused) {
-          await context.crossClusterReplication!.client.callAsCurrentUser(
-            'ccr.pauseFollowerIndex',
-            {
-              id,
-            }
-          );
+          await client.asCurrentUser.ccr.pauseFollow({ index: id });
         }
 
         // Resume follower
@@ -76,18 +72,16 @@ export const registerUpdateRoute = ({
           serializeAdvancedSettings(request.body as FollowerIndexAdvancedSettings)
         );
 
-        return response.ok({
-          body: await context.crossClusterReplication!.client.callAsCurrentUser(
-            'ccr.resumeFollowerIndex',
-            { id, body }
-          ),
+        const { body: responseBody } = await client.asCurrentUser.ccr.resumeFollow({
+          index: id,
+          body,
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+
+        return response.ok({
+          body: responseBody,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

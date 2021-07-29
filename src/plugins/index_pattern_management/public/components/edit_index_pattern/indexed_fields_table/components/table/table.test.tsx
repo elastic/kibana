@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
-import { Table } from './table';
+import { Table, renderFieldName } from './table';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
-} as IIndexPattern;
+} as IndexPattern;
 
 const items: IndexedFieldItem[] = [
   {
@@ -27,6 +27,7 @@ const items: IndexedFieldItem[] = [
     excluded: false,
     format: '',
     isMapped: true,
+    hasRuntime: false,
   },
   {
     name: 'timestamp',
@@ -37,6 +38,7 @@ const items: IndexedFieldItem[] = [
     excluded: false,
     format: 'YYYY-MM-DD',
     isMapped: true,
+    hasRuntime: false,
   },
   {
     name: 'conflictingField',
@@ -47,6 +49,17 @@ const items: IndexedFieldItem[] = [
     excluded: false,
     format: '',
     isMapped: true,
+    hasRuntime: false,
+  },
+  {
+    name: 'customer',
+    displayName: 'customer',
+    type: 'keyword',
+    kbnType: 'text',
+    info: [],
+    excluded: false,
+    isMapped: false,
+    hasRuntime: true,
   },
 ];
 
@@ -102,5 +115,31 @@ describe('Table', () => {
     // Click the edit button
     renderTable({ editField }).prop('columns')[6].actions[0].onClick();
     expect(editField).toBeCalled();
+  });
+
+  test('render name', () => {
+    const mappedField = {
+      name: 'customer',
+      info: [],
+      excluded: false,
+      kbnType: 'string',
+      type: 'keyword',
+      isMapped: true,
+      hasRuntime: false,
+    };
+
+    expect(renderFieldName(mappedField)).toMatchSnapshot();
+
+    const runtimeField = {
+      name: 'customer',
+      info: [],
+      excluded: false,
+      kbnType: 'string',
+      type: 'keyword',
+      isMapped: false,
+      hasRuntime: true,
+    };
+
+    expect(renderFieldName(runtimeField)).toMatchSnapshot();
   });
 });

@@ -89,12 +89,4 @@ describe('state action machine', () => {
       }
     `);
   });
-
-  test("rejects if control state doesn't change after 50 steps", async () => {
-    await expect(
-      stateActionMachine(state, next, countUntilModel(51))
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Control state didn't change after 50 steps aborting."`
-    );
-  });
 });

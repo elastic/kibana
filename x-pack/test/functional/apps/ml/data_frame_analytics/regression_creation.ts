@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -14,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('regression creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -25,15 +26,22 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
+    const jobId = `egs_1_${Date.now()}`;
     const testDataList = [
       {
         suiteTitle: 'electrical grid stability',
         jobType: 'regression',
-        jobId: `egs_1_${Date.now()}`,
-        jobDescription: 'This is the job description',
+        jobId,
+        jobDescription: 'Regression job based on ft_egs_regression dataset with runtime fields',
         source: 'ft_egs_regression',
         get destinationIndex(): string {
-          return `user-${this.jobId}`;
+          return `user-${jobId}`;
+        },
+        runtimeFields: {
+          uppercase_stab: {
+            type: 'keyword',
+            script: 'emit(params._source.stabf.toUpperCase())',
+          },
         },
         dependentVariable: 'stab',
         trainingPercent: 20,
@@ -41,20 +49,36 @@ export default function ({ getService }: FtrProviderContext) {
         createIndexPattern: true,
         expected: {
           scatterplotMatrixColorStats: [
-            // background
-            { key: '#000000', value: 80 },
+            // some marker colors of the continuous color scale
+            { color: '#61AFA3', percentage: 2 },
+            { color: '#D1E5E0', percentage: 2 },
             // tick/grid/axis
-            { key: '#6A717D', value: 1 },
-            { key: '#F5F7FA', value: 2 },
-            { key: '#D3DAE6', value: 1 },
-            // because a continuous color scale is used for the scatterplot circles,
-            // none of the generated colors is above the 1% threshold.
+            { color: '#6A717D', percentage: 10 },
+            { color: '#F5F7FA', percentage: 10 },
+            { color: '#D3DAE6', percentage: 3 },
           ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_stab": {', '    "type": "keyword",'],
           row: {
             type: 'regression',
             status: 'stopped',
             progress: '100',
           },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: jobId,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":400,"test_docs_count":1600,"skipped_docs_count":0}',
+                  description:
+                    'Regression job based on ft_egs_regression dataset with runtime fields',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
         },
       },
     ];
@@ -72,6 +96,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
 
           await ml.testExecution.logTestStep('loads the source selection modal');
+
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await ml.commonUI.disableAntiAliasing();
+
           await ml.dataFrameAnalytics.startAnalyticsCreation();
 
           await ml.testExecution.logTestStep(
@@ -85,6 +113,22 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('selects the job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(testData.jobType);
+
+          await ml.testExecution.logTestStep('displays the runtime mappings editor switch');
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingSwitchExists();
+
+          await ml.testExecution.logTestStep('enables the runtime mappings editor');
+          await ml.dataFrameAnalyticsCreation.toggleRuntimeMappingsEditorSwitch(true);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(['']);
+
+          await ml.testExecution.logTestStep('sets runtime mappings');
+          await ml.dataFrameAnalyticsCreation.setRuntimeMappingsEditorContent(
+            JSON.stringify(testData.runtimeFields)
+          );
+          await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
+            testData.expected.runtimeFieldsEditorContent
+          );
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
@@ -100,9 +144,18 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
+
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
 
@@ -141,6 +194,13 @@ export default function ({ getService }: FtrProviderContext) {
             testData.createIndexPattern
           );
 
+          await ml.testExecution.logTestStep('continues to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('checks validation callouts exist');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
+
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
@@ -177,6 +237,10 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
+            testData.jobId,
+            testData.expected.rowDetails
+          );
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {
@@ -224,10 +288,23 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlDFExpandableSection-splom',
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {

@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Persistence via WMI Event Subscription",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n  process.args : \"create\" and\n  process.args : (\"ActiveScriptEventConsumer\", \"CommandLineEventConsumer\")\n",
   "risk_score": 21,

@@ -11,8 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
-import { pipelineSchema } from './pipeline_schema';
-import { isObjectWithKeys } from './shared';
+import { pipelineSchema } from './shared';
 
 const bodySchema = schema.object({
   name: schema.string(),
@@ -21,8 +20,7 @@ const bodySchema = schema.object({
 
 export const registerCreateRoute = ({
   router,
-  license,
-  lib: { isEsError },
+  lib: { handleEsError },
 }: RouteDependencies): void => {
   router.post(
     {
@@ -31,8 +29,8 @@ export const registerCreateRoute = ({
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+    async (ctx, req, res) => {
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const pipeline = req.body as Pipeline;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -40,7 +38,9 @@ export const registerCreateRoute = ({
 
       try {
         // Check that a pipeline with the same name doesn't already exist
-        const pipelineByName = await callAsCurrentUser('ingest.getPipeline', { id: name });
+        const { body: pipelineByName } = await clusterClient.asCurrentUser.ingest.getPipeline({
+          id: name,
+        });
 
         if (pipelineByName[name]) {
           return res.conflict({
@@ -59,7 +59,7 @@ export const registerCreateRoute = ({
       }
 
       try {
-        const response = await callAsCurrentUser('ingest.putPipeline', {
+        const { body: response } = await clusterClient.asCurrentUser.ingest.putPipeline({
           id: name,
           body: {
             description,
@@ -71,20 +71,8 @@ export const registerCreateRoute = ({
 
         return res.ok({ body: response });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: isObjectWithKeys(error.body)
-              ? {
-                  message: error.message,
-                  attributes: error.body,
-                }
-              : error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

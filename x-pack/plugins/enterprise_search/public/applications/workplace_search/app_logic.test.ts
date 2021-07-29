@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { LogicMounter } from '../__mocks__';
+import { LogicMounter } from '../__mocks__/kea_logic';
 
 import { AppLogic } from './app_logic';
 
@@ -20,8 +20,8 @@ describe('AppLogic', () => {
   const DEFAULT_VALUES = {
     account: {},
     hasInitialized: false,
-    isFederatedAuth: true,
     isOrganization: false,
+    searchOAuth: {},
     organization: {},
   };
 
@@ -36,8 +36,11 @@ describe('AppLogic', () => {
       viewedOnboardingPage: true,
     },
     hasInitialized: true,
-    isFederatedAuth: false,
     isOrganization: false,
+    searchOAuth: {
+      clientId: 'someUID',
+      redirectUrl: 'http://localhost:3002/ws/search_callback',
+    },
     organization: {
       defaultOrgName: 'My Organization',
       name: 'ACME Donuts',
@@ -48,7 +51,7 @@ describe('AppLogic', () => {
     expect(AppLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  describe('initializeAppData()', () => {
+  describe('initializeAppData', () => {
     it('sets values based on passed props', () => {
       AppLogic.actions.initializeAppData(DEFAULT_INITIAL_APP_DATA);
 
@@ -61,16 +64,34 @@ describe('AppLogic', () => {
       expect(AppLogic.values).toEqual({
         ...DEFAULT_VALUES,
         hasInitialized: true,
-        isFederatedAuth: false,
       });
     });
   });
 
-  describe('setContext()', () => {
+  describe('setContext', () => {
     it('sets context', () => {
       AppLogic.actions.setContext(true);
 
       expect(AppLogic.values.isOrganization).toEqual(true);
+    });
+  });
+
+  describe('setSourceRestriction', () => {
+    it('sets property', () => {
+      mount(DEFAULT_INITIAL_APP_DATA);
+      AppLogic.actions.setSourceRestriction(true);
+
+      expect(AppLogic.values.account.canCreatePersonalSources).toEqual(true);
+    });
+  });
+
+  describe('setOrgName', () => {
+    it('sets property', () => {
+      const NAME = 'new name';
+      mount(DEFAULT_INITIAL_APP_DATA);
+      AppLogic.actions.setOrgName(NAME);
+
+      expect(AppLogic.values.organization.name).toEqual(NAME);
     });
   });
 });

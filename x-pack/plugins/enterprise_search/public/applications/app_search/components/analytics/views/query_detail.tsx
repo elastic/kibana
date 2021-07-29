@@ -9,11 +9,9 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
 import { useDecodedParams } from '../../../utils/encode_path_params';
 
 import { AnalyticsLayout } from '../analytics_layout';
@@ -25,10 +23,7 @@ const QUERY_DETAIL_TITLE = i18n.translate(
   { defaultMessage: 'Query' }
 );
 
-interface Props {
-  breadcrumbs: BreadcrumbTrail;
-}
-export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
+export const QueryDetail: React.FC = () => {
   const { query } = useDecodedParams();
   const queryTitle = query === '""' ? query : `"${query}"`;
 
@@ -37,9 +32,7 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
   );
 
   return (
-    <AnalyticsLayout isQueryView title={queryTitle}>
-      <SetPageChrome trail={[...breadcrumbs, QUERY_DETAIL_TITLE, query]} />
-
+    <AnalyticsLayout isQueryView title={queryTitle} breadcrumbs={[QUERY_DETAIL_TITLE, query]}>
       <AnalyticsCards
         stats={[
           {
@@ -56,17 +49,19 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
       />
       <EuiSpacer />
 
-      <AnalyticsChart
-        lines={[
-          {
-            id: i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.chartTooltip',
-              { defaultMessage: 'Queries per day' }
-            ),
-            data: convertToChartData({ startDate, data: queriesPerDayForQuery }),
-          },
-        ]}
-      />
+      <EuiPanel hasBorder>
+        <AnalyticsChart
+          lines={[
+            {
+              id: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.chartTooltip',
+                { defaultMessage: 'Queries per day' }
+              ),
+              data: convertToChartData({ startDate, data: queriesPerDayForQuery }),
+            },
+          ]}
+        />
+      </EuiPanel>
       <EuiSpacer />
 
       <AnalyticsSection

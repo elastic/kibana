@@ -54,11 +54,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     };
 
     const { body: createdAction } = await supertest
-      .post('/api/actions/action')
+      .post('/api/actions/connector')
       .set('kbn-xsrf', 'test')
       .send({
         name: 'A generic Webhook action',
-        actionTypeId: '.webhook',
+        connector_type_id: '.webhook',
         secrets: {
           user,
           password,
@@ -99,11 +99,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     it('should return 200 when creating a webhook action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',
-          actionTypeId: '.webhook',
+          connector_type_id: '.webhook',
           secrets: {
             user: 'username',
             password: 'mypassphrase',
@@ -116,9 +116,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'A generic Webhook action',
-        actionTypeId: '.webhook',
+        connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
@@ -128,14 +129,15 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/actions/action/${createdAction.id}`)
+        .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'A generic Webhook action',
-        actionTypeId: '.webhook',
+        connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
@@ -145,11 +147,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     it('should remove headers when a webhook is updated', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',
-          actionTypeId: '.webhook',
+          connector_type_id: '.webhook',
           secrets: {
             user: 'username',
             password: 'mypassphrase',
@@ -165,9 +167,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'A generic Webhook action',
-        actionTypeId: '.webhook',
+        connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
@@ -178,7 +181,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       await supertest
-        .put(`/api/actions/action/${createdAction.id}`)
+        .put(`/api/actions/connector/${createdAction.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A generic Webhook action',
@@ -196,14 +199,15 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/actions/action/${createdAction.id}`)
+        .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'A generic Webhook action',
-        actionTypeId: '.webhook',
+        connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
@@ -217,7 +221,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('should send authentication to the webhook target', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL, {}, kibanaURL);
       const { body: result } = await supertest
-        .post(`/api/actions/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -236,7 +240,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         kibanaURL
       );
       const { body: result } = await supertest
-        .post(`/api/actions/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -255,7 +259,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         kibanaURL
       );
       const { body: result } = await supertest
-        .post(`/api/actions/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -270,11 +274,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     it('should handle target webhooks that are not added to allowedHosts', async () => {
       const { body: result } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',
-          actionTypeId: '.webhook',
+          connector_type_id: '.webhook',
           secrets: {
             user: 'username',
             password: 'mypassphrase',
@@ -296,7 +300,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         kibanaURL
       );
       const { body: result } = await supertest
-        .post(`/api/actions/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -312,7 +316,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('should handle failing webhook targets', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL, {}, kibanaURL);
       const { body: result } = await supertest
-        .post(`/api/actions/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -323,7 +327,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling webhook, retry later/);
-      expect(result.serviceMessage).to.eql('[500] Internal Server Error');
+      expect(result.service_message).to.eql('[500] Internal Server Error');
     });
 
     after(() => {

@@ -6,4 +6,3 @@
  */
 
 export { useGetAgentStatus, AgentStatusRefreshContext } from './use_agent_status';
-export { AgentPolicyRefreshContext, useAgentPolicyRefresh } from './use_config';

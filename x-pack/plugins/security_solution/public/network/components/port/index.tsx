@@ -9,7 +9,6 @@ import React from 'react';
 
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyValue } from '../../../common/components/empty_value';
-import { ExternalLinkIcon } from '../../../common/components/external_link_icon';
 import { PortOrServiceNameLink } from '../../../common/components/links';
 
 export const CLIENT_PORT_FIELD_NAME = 'client.port';
@@ -30,18 +29,22 @@ export const Port = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   value: string | undefined | null;
-}>(({ contextId, eventId, fieldName, value }) => (
-  <DefaultDraggable
-    data-test-subj="port"
-    field={fieldName}
-    id={`port-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-    tooltipContent={fieldName}
-    value={value}
-  >
+}>(({ contextId, eventId, fieldName, isDraggable, value }) =>
+  isDraggable ? (
+    <DefaultDraggable
+      data-test-subj="port"
+      field={fieldName}
+      id={`port-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      tooltipContent={fieldName}
+      value={value}
+    >
+      <PortOrServiceNameLink portOrServiceName={value || getEmptyValue()} />
+    </DefaultDraggable>
+  ) : (
     <PortOrServiceNameLink portOrServiceName={value || getEmptyValue()} />
-    <ExternalLinkIcon />
-  </DefaultDraggable>
-));
+  )
+);
 
 Port.displayName = 'Port';

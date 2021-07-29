@@ -7,6 +7,7 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
+import memoizeOne from 'memoize-one';
 import {
   Datasource,
   DatasourcePublicAPI,
@@ -18,9 +19,13 @@ import {
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
-import { getActiveDatasourceIdFromDoc } from './state_management';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
-import { getMissingCurrentDatasource, getMissingVisualizationTypeError } from '../error_helper';
+import {
+  getMissingCurrentDatasource,
+  getMissingIndexPatterns,
+  getMissingVisualizationTypeError,
+} from '../error_helper';
 
 export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
@@ -49,7 +54,7 @@ export async function initializeDatasources(
   return states;
 }
 
-export function createDatasourceLayers(
+export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>
 ) {
@@ -69,7 +74,7 @@ export function createDatasourceLayers(
       });
     });
   return datasourceLayers;
-}
+});
 
 export async function persistedStateToExpression(
   datasources: Record<string, Datasource>,
@@ -112,6 +117,19 @@ export async function persistedStateToExpression(
       errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
     };
   }
+
+  const indexPatternValidation = validateRequiredIndexPatterns(
+    datasources[datasourceId],
+    datasourceStates[datasourceId]
+  );
+
+  if (indexPatternValidation) {
+    return {
+      ast: null,
+      errors: indexPatternValidation,
+    };
+  }
+
   const validationResult = validateDatasourceAndVisualization(
     datasources[datasourceId],
     datasourceStates[datasourceId].state,
@@ -133,6 +151,33 @@ export async function persistedStateToExpression(
     errors: validationResult,
   };
 }
+
+export function getMissingIndexPattern(
+  currentDatasource: Datasource | null,
+  currentDatasourceState: { state: unknown } | null
+) {
+  if (currentDatasourceState == null || currentDatasource == null) {
+    return [];
+  }
+  const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state);
+  if (!missingIds.length) {
+    return [];
+  }
+  return missingIds;
+}
+
+const validateRequiredIndexPatterns = (
+  currentDatasource: Datasource,
+  currentDatasourceState: { state: unknown } | null
+): ErrorMessage[] | undefined => {
+  const missingIds = getMissingIndexPattern(currentDatasource, currentDatasourceState);
+
+  if (!missingIds.length) {
+    return;
+  }
+
+  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' }];
+};
 
 export const validateDatasourceAndVisualization = (
   currentDataSource: Datasource | null,
@@ -162,7 +207,7 @@ export const validateDatasourceAndVisualization = (
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState
-    ? currentVisualization?.getErrorMessages(currentVisualizationState)
+    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI.datasourceLayers)
     : undefined;
 
   if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {

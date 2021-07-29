@@ -22,11 +22,10 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
 import { LicensingLogic } from '../../../shared/licensing';
-import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { WorkplaceSearchPageTemplate } from '../../components/layout';
 import { LicenseCallout } from '../../components/shared/license_callout';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
 import {
   SECURITY_UNSAVED_CHANGES_MESSAGE,
   RESET_BUTTON,
@@ -39,6 +38,7 @@ import {
   PRIVATE_PLATINUM_LICENSE_CALLOUT,
   CONFIRM_CHANGES_TEXT,
   PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT,
+  NAV,
 } from '../../constants';
 
 import { PrivateSourcesTable } from './components/private_sources_table';
@@ -69,58 +69,34 @@ export const Security: React.FC = () => {
     initializeSourceRestrictions();
   }, []);
 
-  useEffect(() => {
-    window.onbeforeunload = unsavedChanges ? () => SECURITY_UNSAVED_CHANGES_MESSAGE : null;
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [unsavedChanges]);
-
-  if (dataLoading) return <Loading />;
-
-  const panelClass = classNames('euiPanel--noShadow', {
-    'euiPanel--disabled': !hasPlatinumLicense,
-  });
-
   const savePrivateSources = () => {
     saveSourceRestrictions();
     hideConfirmModal();
   };
 
-  const headerActions = (
-    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty disabled={!unsavedChanges} onClick={resetState}>
-          {RESET_BUTTON}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButton
-          disabled={!hasPlatinumLicense || !unsavedChanges}
-          onClick={showConfirmModal}
-          fill
-          data-test-subj="SaveSettingsButton"
-        >
-          {SAVE_SETTINGS_BUTTON}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const header = (
-    <>
-      <ViewContentHeader
-        title={PRIVATE_SOURCES}
-        alignItems="flexStart"
-        description={PRIVATE_SOURCES_DESCRIPTION}
-        action={headerActions}
-      />
-      <EuiSpacer />
-    </>
-  );
+  const headerActions = [
+    <EuiButtonEmpty disabled={!unsavedChanges || dataLoading} onClick={resetState}>
+      {RESET_BUTTON}
+    </EuiButtonEmpty>,
+    <EuiButton
+      disabled={!hasPlatinumLicense || !unsavedChanges || dataLoading}
+      onClick={showConfirmModal}
+      fill
+      data-test-subj="SaveSettingsButton"
+    >
+      {SAVE_SETTINGS_BUTTON}
+    </EuiButton>,
+  ];
 
   const allSourcesToggle = (
-    <EuiPanel paddingSize="none" className={panelClass}>
+    <EuiPanel
+      paddingSize="none"
+      hasShadow={false}
+      color="subdued"
+      className={classNames({
+        'euiPanel--disabled': !hasPlatinumLicense,
+      })}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSwitch
@@ -181,13 +157,25 @@ export const Security: React.FC = () => {
   );
 
   return (
-    <>
-      <FlashMessages />
-      {header}
-      {allSourcesToggle}
-      {!hasPlatinumLicense && platinumLicenseCallout}
-      {sourceTables}
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.SECURITY]}
+      pageHeader={{
+        pageTitle: PRIVATE_SOURCES,
+        description: PRIVATE_SOURCES_DESCRIPTION,
+        rightSideItems: headerActions,
+      }}
+      isLoading={dataLoading}
+    >
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={unsavedChanges}
+        messageText={SECURITY_UNSAVED_CHANGES_MESSAGE}
+      />
+      <EuiPanel color="subdued" hasBorder={false}>
+        {allSourcesToggle}
+        {!hasPlatinumLicense && platinumLicenseCallout}
+        {sourceTables}
+      </EuiPanel>
       {confirmModalVisible && confirmModal}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

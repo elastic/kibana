@@ -9,9 +9,9 @@ Merges input$ and output$ streams and debounces emit till next macro-task. Could
 <b>Signature:</b>
 
 ```typescript
-getUpdated$(): Readonly<Rx.Observable<void>>;
+getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>>;
 ```
 <b>Returns:</b>
 
-`Readonly<Rx.Observable<void>>`
+`Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>>`
 

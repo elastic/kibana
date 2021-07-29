@@ -47,7 +47,7 @@ const fieldsConfig: FieldsConfig = {
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateRoundingRequiredError',
             {
-              defaultMessage: 'A field value is required.',
+              defaultMessage: 'A date rounding value is required.',
             }
           )
         ),
@@ -160,6 +160,7 @@ export const DateIndexName: FunctionComponent = () => {
         component={SelectField}
         componentProps={{
           euiFieldProps: {
+            'data-test-subj': 'dateRoundingField',
             options: [
               {
                 value: 'y',
@@ -217,26 +218,39 @@ export const DateIndexName: FunctionComponent = () => {
       />
 
       <UseField
+        data-test-subj="indexNamePrefixField"
         config={fieldsConfig.index_name_prefix}
         component={Field}
         path="fields.index_name_prefix"
       />
 
       <UseField
+        data-test-subj="indexNameFormatField"
         config={fieldsConfig.index_name_format}
         component={Field}
         path="fields.index_name_format"
       />
 
       <UseField
+        data-test-subj="dateFormatsField"
         config={fieldsConfig.date_formats}
         component={ComboBoxField}
         path="fields.date_formats"
       />
 
-      <UseField config={fieldsConfig.timezone} component={Field} path="fields.timezone" />
+      <UseField
+        data-test-subj="timezoneField"
+        config={fieldsConfig.timezone}
+        component={Field}
+        path="fields.timezone"
+      />
 
-      <UseField config={fieldsConfig.locale} component={Field} path="fields.locale" />
+      <UseField
+        data-test-subj="localeField"
+        config={fieldsConfig.locale}
+        component={Field}
+        path="fields.locale"
+      />
     </>
   );
 };

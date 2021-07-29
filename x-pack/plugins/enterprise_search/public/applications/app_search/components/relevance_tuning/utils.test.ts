@@ -4,12 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BoostType } from './types';
+
+import { SchemaType } from '../../../shared/schema/types';
+
+import { Boost, BoostType } from './types';
 import {
   filterIfTerm,
   normalizeBoostValues,
   removeBoostStateProps,
   parseBoostCenter,
+  removeEmptyValueBoosts,
 } from './utils';
 
 describe('filterIfTerm', () => {
@@ -42,6 +46,7 @@ describe('removeBoostStateProps', () => {
             type: BoostType.Value,
             factor: 5,
             newBoost: true,
+            value: [''],
           },
         ],
       },
@@ -50,6 +55,7 @@ describe('removeBoostStateProps', () => {
           weight: 1,
         },
       },
+      precision: 10,
     };
     expect(removeBoostStateProps(searchSettings)).toEqual({
       ...searchSettings,
@@ -58,6 +64,7 @@ describe('removeBoostStateProps', () => {
           {
             type: BoostType.Value,
             factor: 5,
+            value: [''],
           },
         ],
       },
@@ -67,17 +74,17 @@ describe('removeBoostStateProps', () => {
 
 describe('parseBoostCenter', () => {
   it('should parse the value to a number when the type is number', () => {
-    expect(parseBoostCenter('number', 5)).toEqual(5);
-    expect(parseBoostCenter('number', '5')).toEqual(5);
+    expect(parseBoostCenter(SchemaType.Number, 5)).toEqual(5);
+    expect(parseBoostCenter(SchemaType.Number, '5')).toEqual(5);
   });
 
   it('should not try to parse the value when the type is text', () => {
-    expect(parseBoostCenter('text', 5)).toEqual(5);
-    expect(parseBoostCenter('text', '4')).toEqual('4');
+    expect(parseBoostCenter(SchemaType.Text, 5)).toEqual(5);
+    expect(parseBoostCenter(SchemaType.Text, '4')).toEqual('4');
   });
 
   it('should leave text invalid numbers alone', () => {
-    expect(parseBoostCenter('number', 'foo')).toEqual('foo');
+    expect(parseBoostCenter(SchemaType.Number, 'foo')).toEqual('foo');
   });
 });
 
@@ -150,5 +157,33 @@ describe('normalizeBoostValues', () => {
       ],
       sp_def: [{ type: BoostType.Functional, factor: 5 }],
     });
+  });
+});
+
+describe('removeEmptyValueBoosts', () => {
+  const boosts: Record<string, Boost[]> = {
+    bar: [
+      { factor: 9.5, type: BoostType.Proximity },
+      { type: BoostType.Functional, factor: 5 },
+    ],
+    foo: [
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+      { factor: 9.5, type: BoostType.Value, value: ['1', '', '   '] },
+      { factor: 9.5, type: BoostType.Value, value: [] },
+      { factor: 9.5, type: BoostType.Value, value: ['', '1'] },
+    ],
+    baz: [{ factor: 9.5, type: BoostType.Value, value: [''] }],
+  };
+
+  expect(removeEmptyValueBoosts(boosts)).toEqual({
+    bar: [
+      { factor: 9.5, type: BoostType.Proximity },
+      { type: BoostType.Functional, factor: 5 },
+    ],
+    foo: [
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+    ],
   });
 });

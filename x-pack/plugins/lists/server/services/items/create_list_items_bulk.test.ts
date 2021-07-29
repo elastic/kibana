@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getIndexESListItemMock } from '../../../common/schemas/elastic_query/index_es_list_item_schema.mock';
 import { LIST_ITEM_INDEX, TIE_BREAKERS, VALUE_2 } from '../../../common/constants.mock';
+import { getIndexESListItemMock } from '../../schemas/elastic_query/index_es_list_item_schema.mock';
 
 import { CreateListItemsBulkOptions, createListItemsBulk } from './create_list_items_bulk';
 import { getCreateListItemBulkOptionsMock } from './create_list_items_bulk.mock';
@@ -20,13 +20,13 @@ describe('crete_list_item_bulk', () => {
     jest.clearAllMocks();
   });
 
-  test('It calls "callCluster" with body, index, and the bulk items', async () => {
+  test('It calls "esClient" with body, index, and the bulk items', async () => {
     const options = getCreateListItemBulkOptionsMock();
     await createListItemsBulk(options);
     const firstRecord = getIndexESListItemMock();
     const secondRecord = getIndexESListItemMock(VALUE_2);
     [firstRecord.tie_breaker_id, secondRecord.tie_breaker_id] = TIE_BREAKERS;
-    expect(options.callCluster).toBeCalledWith('bulk', {
+    expect(options.esClient.bulk).toBeCalledWith({
       body: [
         { create: { _index: LIST_ITEM_INDEX } },
         firstRecord,
@@ -41,7 +41,7 @@ describe('crete_list_item_bulk', () => {
   test('It should not call the dataClient when the values are empty', async () => {
     const options = getCreateListItemBulkOptionsMock();
     options.value = [];
-    expect(options.callCluster).not.toBeCalled();
+    expect(options.esClient.bulk).not.toBeCalled();
   });
 
   test('It should skip over a value if it is not able to add that item because it is not parsable such as an ip_range with a serializer that only matches one ip', async () => {
@@ -52,7 +52,7 @@ describe('crete_list_item_bulk', () => {
       value: ['127.0.0.1', '127.0.0.2'],
     };
     await createListItemsBulk(options);
-    expect(options.callCluster).toBeCalledWith('bulk', {
+    expect(options.esClient.bulk).toBeCalledWith({
       body: [
         { create: { _index: LIST_ITEM_INDEX } },
         {

@@ -46,11 +46,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
 
         expectSnapshot(response.body).toMatchInline(`
-        Object {
-          "agentName": "java",
-          "containerType": "Kubernetes",
-        }
-      `);
+          Object {
+            "agentName": "java",
+            "cloudProvider": "gcp",
+            "containerType": "Kubernetes",
+          }
+        `);
       });
 
       it('returns python service icons', async () => {
@@ -64,12 +65,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
 
         expectSnapshot(response.body).toMatchInline(`
-        Object {
-          "agentName": "python",
-          "cloudProvider": "gcp",
-          "containerType": "Kubernetes",
-        }
-      `);
+          Object {
+            "agentName": "python",
+            "cloudProvider": "gcp",
+            "containerType": "Kubernetes",
+          }
+        `);
       });
     }
   );

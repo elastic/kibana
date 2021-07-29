@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
 import { BoostType } from '../types';
 
@@ -35,7 +35,7 @@ describe('Boosts', () => {
 
   const props = {
     name: 'foo',
-    type: 'number' as SchemaTypes,
+    type: SchemaType.Number,
   };
 
   it('renders a select box that allows users to create boosts of various types', () => {
@@ -55,13 +55,45 @@ describe('Boosts', () => {
       <Boosts
         {...{
           ...props,
-          type: 'text' as SchemaTypes,
+          type: SchemaType.Text,
         }}
       />
     );
 
     const select = wrapper.find(EuiSuperSelect);
     expect(select.prop('options').map((o: any) => o.value)).toEqual(['add-boost', 'value']);
+  });
+
+  it('will not render functional or value options if "type" prop is "geolocation"', () => {
+    const wrapper = shallow(
+      <Boosts
+        {...{
+          ...props,
+          type: SchemaType.Geolocation,
+        }}
+      />
+    );
+
+    const select = wrapper.find(EuiSuperSelect);
+    expect(select.prop('options').map((o: any) => o.value)).toEqual(['add-boost', 'proximity']);
+  });
+
+  it('will not render functional option if "type" prop is "date"', () => {
+    const wrapper = shallow(
+      <Boosts
+        {...{
+          ...props,
+          type: SchemaType.Date,
+        }}
+      />
+    );
+
+    const select = wrapper.find(EuiSuperSelect);
+    expect(select.prop('options').map((o: any) => o.value)).toEqual([
+      'add-boost',
+      'proximity',
+      'value',
+    ]);
   });
 
   it('will add a boost of the selected type when a selection is made', () => {
@@ -76,6 +108,7 @@ describe('Boosts', () => {
     const boost1 = {
       factor: 2,
       type: 'value' as BoostType,
+      value: [''],
     };
     const boost2 = {
       factor: 10,

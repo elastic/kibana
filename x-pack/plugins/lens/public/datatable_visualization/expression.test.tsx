@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { DatatableProps, getDatatable } from './expression';
-import { LensMultiTable } from '../types';
+import { DatatableProps } from '../../common/expressions';
+import type { LensMultiTable } from '../../common';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import { getDatatable } from './expression';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -73,7 +74,7 @@ function sampleArgs() {
         type: 'lens_datatable_column',
       },
     ],
-    sortingColumnId: '',
+    sortingColumnId: undefined,
     sortingDirection: 'none',
   };
 

@@ -6,26 +6,23 @@
  */
 
 import { URL } from 'url';
+
 import { Type } from '@kbn/config-schema';
-import {
+import type {
   HttpResources,
   HttpResourcesRequestHandler,
   RequestHandler,
-  kibanaResponseFactory,
   RouteConfig,
-} from '../../../../../../src/core/server';
-import { SecurityLicense } from '../../../common/licensing';
-import { LoginSelectorProvider } from '../../../common/login_state';
-import { ConfigType } from '../../config';
-import { defineLoginRoutes } from './login';
-import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
+} from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
-import {
-  coreMock,
-  httpServerMock,
-  httpResourcesMock,
-} from '../../../../../../src/core/server/mocks';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { LoginSelectorProvider } from '../../../common/login_state';
+import type { ConfigType } from '../../config';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineLoginRoutes } from './login';
 
 describe('Login view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;

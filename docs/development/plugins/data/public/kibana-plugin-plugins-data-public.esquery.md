@@ -4,19 +4,24 @@
 
 ## esQuery variable
 
+> Warning: This API is now obsolete.
+> 
+> Please import helpers from the package kbn/es-query directly. This import will be removed in v8.0.0.
+> 
+
 <b>Signature:</b>
 
 ```typescript
 esQuery: {
-    buildEsQuery: typeof buildEsQuery;
+    buildEsQuery: typeof import("@kbn/es-query").buildEsQuery;
     getEsQueryConfig: typeof getEsQueryConfig;
-    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../common").IIndexPattern | undefined, ignoreFilterIfFieldNotInIndex?: boolean) => {
+    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
         must: never[];
-        filter: import("../common").Filter[];
+        filter: import("@kbn/es-query").Filter[];
         should: never[];
-        must_not: import("../common").Filter[];
+        must_not: import("@kbn/es-query").Filter[];
     };
-    luceneStringToDsl: typeof luceneStringToDsl;
-    decorateQuery: typeof decorateQuery;
+    luceneStringToDsl: typeof import("@kbn/es-query").luceneStringToDsl;
+    decorateQuery: typeof import("@kbn/es-query").decorateQuery;
 }
 ```

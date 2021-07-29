@@ -8,7 +8,7 @@
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { ILicense } from '../../../../../../../licensing/common/types';
-import { unsetPolicyFeaturesAboveLicenseLevel } from '../../../../../../common/license/policy_config';
+import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {
   Immutable,
@@ -33,7 +33,7 @@ export const licensedPolicy: (
   licenseState,
   (policyData, license) => {
     if (policyData) {
-      const policyValue = unsetPolicyFeaturesAboveLicenseLevel(
+      const policyValue = unsetPolicyFeaturesAccordingToLicenseLevel(
         policyData.inputs[0].config.policy.value,
         license as ILicense
       );
@@ -185,6 +185,8 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: windows.events,
         malware: windows.malware,
         ransomware: windows.ransomware,
+        memory_protection: windows.memory_protection,
+        behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
       },
@@ -192,12 +194,13 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
-        ransomware: mac.ransomware,
         popup: mac.popup,
       },
       linux: {
         advanced: linux.advanced,
         events: linux.events,
+        malware: linux.malware,
+        popup: linux.popup,
       },
     };
   }

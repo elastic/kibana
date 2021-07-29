@@ -1,0 +1,477 @@
+{
+  "id": "data.autocomplete",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QuerySuggestionBasic",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySuggestionBasic",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionBasic.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataAutocompletePluginApi",
+                "section": "def-public.QuerySuggestionTypes",
+                "text": "QuerySuggestionTypes"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionBasic.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | JSX.Element | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 40
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionBasic.end",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionBasic.start",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionBasic.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionBasic.cursorIndex",
+            "type": "number",
+            "tags": [],
+            "label": "cursorIndex",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QuerySuggestionField",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySuggestionField",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionField",
+            "text": "QuerySuggestionField"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionBasic",
+            "text": "QuerySuggestionBasic"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 48
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionField.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataAutocompletePluginApi",
+                "section": "def-public.QuerySuggestionTypes",
+                "text": "QuerySuggestionTypes"
+              },
+              ".Field"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionField.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IFieldType",
+                "text": "IFieldType"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 50
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QuerySuggestionGetFnArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySuggestionGetFnArgs",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 25
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.language",
+            "type": "string",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionStart",
+            "type": "number",
+            "tags": [],
+            "label": "selectionStart",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionEnd",
+            "type": "number",
+            "tags": [],
+            "label": "selectionEnd",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.useTimeRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useTimeRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.boolFilter",
+            "type": "Any",
+            "tags": [],
+            "label": "boolFilter",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.method",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              "\"terms_enum\" | \"terms_agg\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QuerySuggestionTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "QuerySuggestionTypes",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "data",
+        "id": "def-public.AutocompleteStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AutocompleteStart",
+        "description": [],
+        "signature": [
+          "{ getQuerySuggestions: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionGetFn",
+            "text": "QuerySuggestionGetFn"
+          },
+          "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
+          "ValueSuggestionsGetFn",
+          "; }"
+        ],
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/autocomplete_service.ts",
+          "lineNumber": 103
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QuerySuggestion",
+        "type": "Type",
+        "tags": [],
+        "label": "QuerySuggestion",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionBasic",
+            "text": "QuerySuggestionBasic"
+          },
+          " | ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionField",
+            "text": "QuerySuggestionField"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 54
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QuerySuggestionGetFn",
+        "type": "Type",
+        "tags": [],
+        "label": "QuerySuggestionGetFn",
+        "description": [],
+        "signature": [
+          "(args: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionGetFnArgs",
+            "text": "QuerySuggestionGetFnArgs"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataAutocompletePluginApi",
+            "section": "def-public.QuerySuggestion",
+            "text": "QuerySuggestion"
+          },
+          "[]> | undefined"
+        ],
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

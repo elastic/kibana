@@ -6,28 +6,100 @@ The Elastic Stack comes with the `kibana_admin` {ref}/built-in-roles.html[built-
 
 When you assign a user multiple roles, the user receives a union of the roles’ privileges. Therefore, assigning the `kibana_admin` role in addition to a custom role that grants {kib} privileges is ineffective because `kibana_admin` has access to all the features in all spaces.
 
-NOTE: When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, you cannot use `kibana_admin` to grant access. You must create custom roles that authorize the user for that specific tenant. Although multi-tenant installations are supported, the recommended approach to securing access to {kib} segments is to grant users access to specific spaces.
+[[xpack-security-multiple-tenants]]
+==== Supporting multiple tenants
+
+There are two approaches to supporting multi-tenancy in {kib}:
+
+1. *Recommended:* Create a space and a limited role for each tenant, and configure each user with the appropriate role. See
+<<tutorial-secure-access-to-kibana, Securing access to {kib}>> for more details.
+2. deprecated:[7.13.0,"In 8.0 and later, the `kibana.index` setting will no longer be supported."] Set up separate {kib} instances to work
+with a single {es} cluster by changing the `kibana.index` setting in your `kibana.yml` file.
++
+NOTE: When using multiple {kib} instances this way, you cannot use the `kibana_admin` role to grant access. You must create custom roles
+that authorize the user for each specific instance.
+
+Whichever approach you use, be careful when granting cluster privileges and index privileges. Both of these approaches share the same {es}
+cluster, and {kib} spaces do not prevent you from granting users of two different tenants access to the same index.
 
 [role="xpack"]
 [[xpack-kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, open the menu, then click *Stack Management > Roles* and click **Create role**.
+Roles are a collection of privileges that allow you to perform actions in {kib} and {es}. Users are not directly granted privileges, but are instead assigned one or more roles that describe the desired level of access. When you assign a user multiple roles, the user receives a union of the roles’ privileges. This means that you cannot reduce the privileges of a user by assigning them an additional role. You must instead remove or edit one of their existing roles.
+
+To create a role, open the menu, then click *Stack Management > Roles* and click **Create role**.
 
 [float]
 ==== Required permissions
 
-The `manage_security` cluster privilege is required to access role management.
+The `manage_security` {ref}/security-privileges.html#privileges-list-cluster[cluster privilege] is required to access role management.
+
+[[adding_cluster_privileges]]
+==== Cluster privileges
+
+Cluster privileges grant access to monitoring and management features in {es}. They also enable <<management, Stack Management>> capabilities in {kib}.
+
+Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileges] for a complete description of available options.
+
+[[adding_index_privileges]]
+==== Index privileges
+
+Each role can grant access to multiple data indices, and each index can have a different set of privileges.
+We recommend granting the `read` and `view_index_metadata` privileges to each index that you expect your users to work with in {kib}.
+
+Refer to {ref}/security-privileges.html#privileges-list-indices[index privileges] for a complete description of available options.
+
+Document-level and field-level security affords you even more granularity when it comes to granting access to your data.
+With document-level security (DLS), you can write an {es} query to describe which documents this role grants access to.
+With field-level security (FLS), you can instruct {es} to grant or deny access to specific fields within each document.
+
+[[index_privilege_example_1]]
+===== Example: Grant access to indices that match the `filebeat-*` pattern
+
+. Go to **Stack Management > Roles**, and then click **Create role**.
+. In **Index privileges**, enter:
+.. `filebeat-*` in the **Index** field.
+.. `read` and `view_index_metadata` in the **Privileges** field.
+
+[role="screenshot"]
+image::security/images/create-role-index-example.png[Create role with index privileges]
+
+[[index_privilege_dls_example]]
+===== Example: Grant read access to specific documents in indices that match the `filebeat-*` pattern
+
+{ref}/document-level-security.html[Document-level security] is a https://www.elastic.co/subscriptions[subscription feature].
+
+. Go to **Stack Management > Roles**, and then click **Create role**.
+. In **Index privileges**, enter:
+.. `filebeat-*` in the **Indices** field.
+.. `read` and `view_index_metadata` in the **Privileges** field.
+. Select **Grant read privileges to specific documents**.
+. Enter an {es} query that matches the documents your users should access. This example writes a query that allows access to documents that have a `category` field equal to `click`:
++
+[source,sh]
+--------------------------------------------------
+{
+  "match": {
+    "category": "click"
+  }
+}
+--------------------------------------------------
++
+NOTE: {kib} automatically surrounds your DLS query with a `query` block, so you don't have to provide your own.
+
+[role="screenshot"]
+image::security/images/create-role-dls-example.png[Create role with DLS index privileges]
 
 [[adding_kibana_privileges]]
-==== Adding {kib} privileges
+==== {kib} privileges
 
 To assign {kib} privileges to the role, click **Add {kib} privilege** in the {kib} section.
 
 [role="screenshot"]
-image::user/security/images/add-space-privileges.png[Add {kib} privileges]
+image::spaces/images/spaces-roles.png[Add {kib} privileges]
 
-Open the **Spaces** selection control to specify whether to grant the role access to all spaces *** Global (all spaces)** or one or more individual spaces. If you select *** Global (all spaces)**, you can’t select individual spaces until you clear your selection.
+Open the **Spaces** selection control to specify whether to grant the role access to all spaces **All Spaces** or one or more individual spaces. If you select **All Spaces**, you can’t select individual spaces until you clear your selection.
 
 Use the **Privilege** menu to grant access to features. The default is **Custom**, which you can use to grant access to individual features. Otherwise, you can grant read and write access to all current and future features by selecting **All**, or grant read access to all current and future features by selecting **Read**.
 
@@ -41,7 +113,7 @@ To apply your changes, click **Add {kib} privilege**. The privilege shows up und
 
 
 [role="screenshot"]
-image::user/security/images/create-space-privilege.png[Add {kib} privilege]
+image::security/images/create-space-privilege.png[Add {kib} privilege]
 
 ==== Feature availability
 
@@ -69,9 +141,9 @@ Features are available to users when their roles grant access to the features, *
 
 ==== Assigning different privileges to different spaces
 
-Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added privileges, click **Add {kib} privilege**. If you’ve already added privileges for either *** Global (all spaces)** or an individual space, you will not be able to select these in the **Spaces** selection control.
+Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added privileges, click **Add {kib} privilege**. If you’ve already added privileges for either **All Spaces** or an individual space, you will not be able to select these in the **Spaces** selection control.
 
-Additionally, if you’ve already assigned privileges at *** Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, {kib} privileges are also a union. If you’ve already granted the user the **All** privilege at *** Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space.
+Additionally, if you’ve already assigned privileges at **All Spaces**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, {kib} privileges are also a union. If you’ve already granted the user the **All** privilege at **All Spaces**, you’re not able to restrict the role to only the **Read** privilege at an individual space.
 
 
 ==== Privilege summary
@@ -79,7 +151,7 @@ Additionally, if you’ve already assigned privileges at *** Global (all spaces)
 To view a summary of the privileges granted, click **View privilege summary**.
 
 [role="screenshot"]
-image::user/security/images/view-privilege-summary.png[View privilege summary]
+image::security/images/view-privilege-summary.png[View privilege summary]
 
 ==== Example 1: Grant all access to Dashboard at an individual space
 
@@ -90,7 +162,7 @@ image::user/security/images/view-privilege-summary.png[View privilege summary]
 . Click **Add {kib} privilege**.
 
 [role="screenshot"]
-image::user/security/images/privilege-example-1.png[Privilege example 1]
+image::security/images/privilege-example-1.png[Privilege example 1]
 
 ==== Example 2: Grant all access to one space and read access to another
 
@@ -103,12 +175,12 @@ image::user/security/images/privilege-example-1.png[Privilege example 1]
 . Click **Add {kib} privilege**.
 
 [role="screenshot"]
-image::user/security/images/privilege-example-2.png[Privilege example 2]
+image::security/images/privilege-example-2.png[Privilege example 2]
 
 ==== Example 3: Grant read access to all spaces and write access to an individual space
 
 . Click **Add {kib} privilege**.
-. For **Spaces**, select *** Global (all spaces)**.
+. For **Spaces**, select **All Spaces**.
 . For **Privilege**, select **Read**.
 . Click **Add {kib} privilege**.
 . For **Spaces**, select the individual space.
@@ -116,4 +188,4 @@ image::user/security/images/privilege-example-2.png[Privilege example 2]
 . Click **Add {kib} privilege**.
 
 [role="screenshot"]
-image::user/security/images/privilege-example-3.png[Privilege example 3]
+image::security/images/privilege-example-3.png[Privilege example 3]

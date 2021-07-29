@@ -14,7 +14,7 @@ import {
   SnapshotNodeMetric,
   SnapshotNodePath,
 } from '../../common/http_api/snapshot_api';
-import { InfraSourceConfigurationFields } from '../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../common/metrics_sources';
 import { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 export interface InfraWaffleMapNode {
@@ -124,7 +124,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  fields?: InfraSourceConfigurationFields | null;
+  fields?: MetricsSourceConfigurationProperties['fields'] | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
   metric: SnapshotMetricInput;

@@ -7,9 +7,11 @@
  */
 
 import moment from 'moment';
+import * as Rx from 'rxjs';
 import { isSavedObjectOlderThan, rollUiCounterIndices } from './rollups';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
 import { SavedObjectsFindResult } from 'kibana/server';
+
 import {
   UICounterSavedObjectAttributes,
   UI_COUNTER_SAVED_OBJECT_TYPE,
@@ -70,14 +72,18 @@ describe('isSavedObjectOlderThan', () => {
 describe('rollUiCounterIndices', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let stopUsingUiCounterIndicies$: Rx.Subject<void>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     savedObjectClient = savedObjectsRepositoryMock.create();
+    stopUsingUiCounterIndicies$ = new Rx.Subject();
   });
 
   it('returns undefined if no savedObjectsClient initialised yet', async () => {
-    await expect(rollUiCounterIndices(logger, undefined)).resolves.toBe(undefined);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, undefined)
+    ).resolves.toBe(undefined);
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
@@ -90,10 +96,26 @@ describe('rollUiCounterIndices', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toEqual([]);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual([]);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(0);
+  });
+  it('calls Subject complete() on empty saved objects', async () => {
+    savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
+      switch (type) {
+        case UI_COUNTER_SAVED_OBJECT_TYPE:
+          return { saved_objects: [], total: 0, page, per_page: perPage };
+        default:
+          throw new Error(`Unexpected type [${type}]`);
+      }
+    });
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual([]);
+    expect(stopUsingUiCounterIndicies$.isStopped).toBe(true);
   });
 
   it(`deletes documents older than ${UI_COUNTERS_KEEP_DOCS_FOR_DAYS} days`, async () => {
@@ -111,7 +133,9 @@ describe('rollUiCounterIndices', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toHaveLength(2);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toHaveLength(2);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
@@ -131,7 +155,9 @@ describe('rollUiCounterIndices', () => {
     savedObjectClient.find.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(2);
@@ -151,7 +177,9 @@ describe('rollUiCounterIndices', () => {
     savedObjectClient.delete.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(rollUiCounterIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
+    await expect(
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
+    ).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(

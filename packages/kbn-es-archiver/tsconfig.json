@@ -1,10 +1,17 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "incremental": true,
     "outDir": "./target",
+    "target": "ES2019",
     "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
-    "target": "ES2019"
+    "sourceRoot": "../../../../packages/kbn-es-archiver/src",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "src/**/*"

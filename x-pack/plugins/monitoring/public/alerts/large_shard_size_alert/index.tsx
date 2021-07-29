@@ -14,7 +14,7 @@ import {
   ALERT_DETAILS,
   ALERT_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 
 interface ValidateOptions extends AlertTypeParams {
   indexPattern: string;
@@ -42,7 +42,7 @@ export function createLargeShardSizeAlertType(): AlertTypeModel<ValidateOptions>
     description: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.links.monitoring.alertsKibana}`;
+      return `${docLinks.links.monitoring.alertsKibanaLargeShardSize}`;
     },
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].paramDetails} />

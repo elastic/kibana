@@ -6,22 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { first } from 'rxjs/operators';
+import type { PluginInitializerContext } from 'kibana/server';
+import type { UsageCollectionSetup } from '../../../../../usage_collection/server';
 import { fetchProvider, TelemetryResponse } from './collector_fetch';
-import { UsageCollectionSetup } from '../../../../../usage_collection/server';
 
-export async function makeSampleDataUsageCollector(
+export function makeSampleDataUsageCollector(
   usageCollection: UsageCollectionSetup,
   context: PluginInitializerContext
 ) {
-  let index: string;
-  try {
-    const config = await context.config.legacy.globalConfig$.pipe(first()).toPromise();
-    index = config.kibana.index;
-  } catch (err) {
-    return; // kibana plugin is not enabled (test environment)
-  }
+  const config = context.config.legacy.get();
+  const index = config.kibana.index;
+
   const collector = usageCollection.makeUsageCollector<TelemetryResponse>({
     type: 'sample-data',
     fetch: fetchProvider(index),

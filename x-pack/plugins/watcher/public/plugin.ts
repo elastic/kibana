@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, CoreStart } from 'kibana/public';
+import { CoreSetup, Plugin, CoreStart, Capabilities } from 'kibana/public';
 import { first, map, skip } from 'rxjs/operators';
 
+import { Subject, combineLatest } from 'rxjs';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 import { LicenseStatus } from '../common/types/license_status';
@@ -26,6 +27,8 @@ const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
 };
 
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
+  private capabilities$: Subject<Capabilities> = new Subject();
+
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home, charts }: Dependencies
@@ -99,13 +102,16 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
 
     home.featureCatalogue.register(watcherHome);
 
-    licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
+    combineLatest([
+      licensing.license$.pipe(first(), map(licenseToLicenseStatus)),
+      this.capabilities$,
+    ]).subscribe(([{ valid }, capabilities]) => {
       // NOTE: We enable the plugin by default instead of disabling it by default because this
       // creates a race condition that can cause the app nav item to not render in the side nav.
       // The race condition still exists, but it will result in the item rendering when it shouldn't
       // (e.g. on a license it's not available for), instead of *not* rendering when it *should*,
       // which is a less frustrating UX.
-      if (valid) {
+      if (valid && capabilities.management.insightsAndAlerting?.watcher === true) {
         watcherESApp.enable();
       } else {
         watcherESApp.disable();
@@ -113,7 +119,9 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     });
   }
 
-  start(core: CoreStart) {}
+  start(core: CoreStart) {
+    this.capabilities$.next(core.application.capabilities);
+  }
 
   stop() {}
 }

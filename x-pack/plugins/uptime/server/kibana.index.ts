@@ -6,12 +6,14 @@
  */
 
 import { Request, Server } from '@hapi/hapi';
+import { Logger } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
 import { umDynamicSettings } from './lib/saved_objects';
+import { UptimeRuleRegistry } from './plugin';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -25,7 +27,12 @@ export interface KibanaServer extends Server {
   route: (options: KibanaRouteOptions) => void;
 }
 
-export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
+export const initServerWithKibana = (
+  server: UptimeCoreSetup,
+  plugins: UptimeCorePlugins,
+  ruleRegistry: UptimeRuleRegistry,
+  logger: Logger
+) => {
   const { features } = plugins;
   const libs = compose(server);
 
@@ -50,7 +57,12 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
           read: [],
         },
         alerting: {
-          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          rule: {
+            all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          },
+          alert: {
+            all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          },
         },
         management: {
           insightsAndAlerting: ['triggersActions'],
@@ -66,7 +78,12 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
           read: [umDynamicSettings.name],
         },
         alerting: {
-          read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          rule: {
+            read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          },
+          alert: {
+            read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          },
         },
         management: {
           insightsAndAlerting: ['triggersActions'],
@@ -76,5 +93,5 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     },
   });
 
-  initUptimeServer(server, libs, plugins);
+  initUptimeServer(server, libs, plugins, ruleRegistry, logger);
 };

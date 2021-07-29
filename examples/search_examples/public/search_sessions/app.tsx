@@ -247,6 +247,12 @@ export const SearchSessionsExampleApp = ({
               <EuiSpacer />
             </>
           )}
+          {!indexPattern && (
+            <>
+              <NoIndexPatternsCallout />
+              <EuiSpacer />
+            </>
+          )}
           <EuiText>
             <p>
               This example shows how you can use <EuiCode>data.search.session</EuiCode> service to
@@ -332,7 +338,8 @@ export const SearchSessionsExampleApp = ({
                       size="xs"
                       onClick={() => search()}
                       iconType="play"
-                      disabled={isSearching}
+                      disabled={isSearching || !indexPattern || !numericFieldName}
+                      data-test-subj={'startSearch'}
                     >
                       Start the search from low-level client (data.search.search)
                     </EuiButtonEmpty>
@@ -401,6 +408,7 @@ export const SearchSessionsExampleApp = ({
                           onClick={() => {
                             search(data.search.session.getSessionId());
                           }}
+                          data-test-subj={'restoreSearch'}
                         >
                           Restore the search session
                         </EuiButtonEmpty>
@@ -493,7 +501,7 @@ function SearchInspector({
   tookMs: number | null;
 }) {
   return (
-    <div>
+    <div data-test-subj={`searchResults-${accordionId}`}>
       The search took: {tookMs ? Math.round(tookMs) : 'unknown'}ms
       <EuiAccordion id={accordionId} buttonContent="Request / response">
         <EuiFlexGroup>
@@ -582,11 +590,24 @@ function useAppState({ data }: { data: DataPublicPluginStart }) {
   useEffect(() => {
     let canceled = false;
     const loadIndexPattern = async () => {
-      const loadedIndexPattern = state.indexPatternId
+      // eslint-disable-next-line no-console
+      console.warn('Loading default index pattern');
+      let loadedIndexPattern = state.indexPatternId
         ? await data.indexPatterns.get(state.indexPatternId)
         : await data.indexPatterns.getDefault();
+      if (!loadedIndexPattern) {
+        // try to find any available index pattern
+        const [id] = await data.indexPatterns.getIds(true);
+        if (id) {
+          loadedIndexPattern = await data.indexPatterns.get(id);
+        }
+      }
       if (canceled) return;
-      if (!loadedIndexPattern) return;
+      if (!loadedIndexPattern) {
+        // eslint-disable-next-line no-console
+        console.warn('No index patterns to pick from');
+        return;
+      }
       if (!state.indexPatternId) {
         setState({
           indexPatternId: loadedIndexPattern.id,
@@ -681,13 +702,15 @@ function doSearch(
   const startTs = performance.now();
 
   // Submit the search request using the `data.search` service.
+  // @ts-expect-error request.params is incompatible. Filter is not assignable to QueryDslQueryContainer
   return data.search
     .search(req, { sessionId })
     .pipe(
       tap((res) => {
         if (isCompleteResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
-            ? res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
+            ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+              res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
             : undefined;
           const message = (
             <EuiText>
@@ -763,6 +786,14 @@ function NoShardDelayCallout() {
         We recommend to enable it in your <EuiCode>kibana.dev.yml</EuiCode>:
       </p>
       <EuiCodeBlock isCopyable={true}>data.search.aggs.shardDelay.enabled: true</EuiCodeBlock>
+    </EuiCallOut>
+  );
+}
+
+function NoIndexPatternsCallout() {
+  return (
+    <EuiCallOut title={<>Missing index patterns!</>} color="warning" iconType="help">
+      <p>This demo requires at least one index pattern.</p>
     </EuiCallOut>
   );
 }

@@ -24,11 +24,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
     it('should generate events for alert decrypt errors', async () => {
       const spaceId = Spaces[0].id;
       const response = await supertest
-        .post(`${getUrlPrefix(spaceId)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.noop',
+            rule_type_id: 'test.noop',
             schedule: { interval: '1s' },
             throttle: null,
           })
@@ -36,7 +36,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      objectRemover.add(spaceId, alertId, 'alert', 'alerts');
+      objectRemover.add(spaceId, alertId, 'rule', 'alerting');
 
       await retry.try(async () => {
         // break AAD
@@ -75,12 +75,19 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       validateEvent(event, {
         spaceId,
-        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.noop' }],
         outcome: 'failure',
         message: `test.noop:${alertId}: execution failed`,
         errorMessage: 'Unable to decrypt attribute "apiKey"',
         status: 'error',
         reason: 'decrypt',
+        shouldHaveTask: true,
+        rule: {
+          id: alertId,
+          category: response.body.rule_type_id,
+          license: 'basic',
+          ruleset: 'alertsFixture',
+        },
       });
     });
   });

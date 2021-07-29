@@ -17,33 +17,34 @@ import {
   XYChartSeriesIdentifier,
   SeriesNameFn,
   Fit,
+  HorizontalAlignment,
+  VerticalAlignment,
+  LayoutDirection,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { calculateMinInterval, XYChart, XYChartRenderProps, xyChart } from './expression';
+import type { LensMultiTable } from '../../common';
 import {
-  calculateMinInterval,
-  xyChart,
-  XYChart,
+  layerConfig,
+  legendConfig,
+  tickLabelsConfig,
+  gridlinesConfig,
+  XYArgs,
+  LegendConfig,
+  LayerArgs,
+  AxesSettingsConfig,
   XYChartProps,
-  XYChartRenderProps,
-} from './expression';
-import { LensMultiTable } from '../types';
+  labelsOrientationConfig,
+  LabelsOrientationConfig,
+} from '../../common/expressions';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
-import {
-  XYArgs,
-  LegendConfig,
-  legendConfig,
-  layerConfig,
-  LayerArgs,
-  AxesSettingsConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-} from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
+import { XyEndzones } from './x_domain';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -264,6 +265,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     position: Position.Top,
   },
   valueLabels: 'hide',
+  valuesInLegend: false,
   axisTitlesVisibilitySettings: {
     type: 'lens_xy_axisTitlesVisibilityConfig',
     x: true,
@@ -276,11 +278,25 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     yLeft: false,
     yRight: false,
   },
+  labelsOrientation: {
+    type: 'lens_xy_labelsOrientationConfig',
+    x: 0,
+    yLeft: -90,
+    yRight: -45,
+  },
   gridlinesVisibilitySettings: {
     type: 'lens_xy_gridlinesConfig',
     x: true,
     yLeft: false,
     yRight: false,
+  },
+  yLeftExtent: {
+    mode: 'full',
+    type: 'lens_xy_axisExtentConfig',
+  },
+  yRightExtent: {
+    mode: 'full',
+    type: 'lens_xy_axisExtentConfig',
   },
   layers,
 });
@@ -369,6 +385,21 @@ describe('xy_expression', () => {
 
     expect(result).toEqual({
       type: 'lens_xy_gridlinesConfig',
+      ...args,
+    });
+  });
+
+  test('labelsOrientationConfig produces the correct arguments', () => {
+    const args: LabelsOrientationConfig = {
+      x: 0,
+      yLeft: -90,
+      yRight: -45,
+    };
+
+    const result = labelsOrientationConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_labelsOrientationConfig',
       ...args,
     });
   });
@@ -549,9 +580,246 @@ describe('xy_expression', () => {
           }
         `);
       });
+
+      describe('endzones', () => {
+        const { args } = sampleArgs();
+        const data: LensMultiTable = {
+          type: 'lens_multitable',
+          tables: {
+            first: createSampleDatatableWithRows([
+              { a: 1, b: 2, c: new Date('2021-04-22').valueOf(), d: 'Foo' },
+              { a: 1, b: 2, c: new Date('2021-04-23').valueOf(), d: 'Foo' },
+              { a: 1, b: 2, c: new Date('2021-04-24').valueOf(), d: 'Foo' },
+            ]),
+          },
+          dateRange: {
+            // first and last bucket are partial
+            fromDate: new Date('2021-04-22T12:00:00.000Z'),
+            toDate: new Date('2021-04-24T12:00:00.000Z'),
+          },
+        };
+        const timeArgs: XYArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              seriesType: 'line',
+              xScaleType: 'time',
+              isHistogram: true,
+              splitAccessor: undefined,
+            },
+          ],
+        };
+
+        test('it extends interval if data is exceeding it', () => {
+          const component = shallow(
+            <XYChart
+              {...defaultProps}
+              minInterval={24 * 60 * 60 * 1000}
+              data={data}
+              args={timeArgs}
+            />
+          );
+
+          expect(component.find(Settings).prop('xDomain')).toEqual({
+            // shortened to 24th midnight (elastic-charts automatically adds one min interval)
+            max: new Date('2021-04-24').valueOf(),
+            // extended to 22nd midnight because of first bucket
+            min: new Date('2021-04-22').valueOf(),
+            minInterval: 24 * 60 * 60 * 1000,
+          });
+        });
+
+        test('it renders endzone component bridging gap between domain and extended domain', () => {
+          const component = shallow(
+            <XYChart
+              {...defaultProps}
+              minInterval={24 * 60 * 60 * 1000}
+              data={data}
+              args={timeArgs}
+            />
+          );
+
+          expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
+            expect.objectContaining({
+              domainStart: new Date('2021-04-22T12:00:00.000Z').valueOf(),
+              domainEnd: new Date('2021-04-24T12:00:00.000Z').valueOf(),
+              domainMin: new Date('2021-04-22').valueOf(),
+              domainMax: new Date('2021-04-24').valueOf(),
+            })
+          );
+        });
+
+        test('should pass enabled histogram mode and min interval to endzones component', () => {
+          const component = shallow(
+            <XYChart
+              {...defaultProps}
+              minInterval={24 * 60 * 60 * 1000}
+              data={data}
+              args={timeArgs}
+            />
+          );
+
+          expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
+            expect.objectContaining({
+              interval: 24 * 60 * 60 * 1000,
+              isFullBin: false,
+            })
+          );
+        });
+
+        test('should pass disabled histogram mode and min interval to endzones component', () => {
+          const component = shallow(
+            <XYChart
+              {...defaultProps}
+              minInterval={24 * 60 * 60 * 1000}
+              data={data}
+              args={{
+                ...args,
+                layers: [
+                  {
+                    ...args.layers[0],
+                    seriesType: 'bar',
+                    xScaleType: 'time',
+                    isHistogram: true,
+                  },
+                ],
+              }}
+            />
+          );
+
+          expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
+            expect.objectContaining({
+              interval: 24 * 60 * 60 * 1000,
+              isFullBin: true,
+            })
+          );
+        });
+
+        test('it does not render endzones if disabled via settings', () => {
+          const component = shallow(
+            <XYChart
+              {...defaultProps}
+              minInterval={24 * 60 * 60 * 1000}
+              data={data}
+              args={{ ...timeArgs, hideEndzones: true }}
+            />
+          );
+
+          expect(component.find(XyEndzones).length).toEqual(0);
+        });
+      });
     });
 
-    test('it does not use date range if the x is not a time scale', () => {
+    describe('y axis extents', () => {
+      test('it passes custom y axis extents to elastic-charts axis spec', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+          min: 123,
+          max: 456,
+        });
+      });
+
+      test('it passes fit to bounds y axis extents to elastic-charts axis spec', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'dataBounds',
+              },
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: true,
+          min: undefined,
+          max: undefined,
+        });
+      });
+
+      test('it does not allow fit for area chart', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'dataBounds',
+              },
+              layers: [
+                {
+                  ...args.layers[0],
+                  seriesType: 'area',
+                },
+              ],
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+        });
+      });
+
+      test('it does not allow positive lower bound for bar', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+              layers: [
+                {
+                  ...args.layers[0],
+                  seriesType: 'bar',
+                },
+              ],
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+          min: undefined,
+          max: undefined,
+        });
+      });
+    });
+
+    test('it has xDomain undefined if the x is not a time scale or a histogram', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -571,15 +839,10 @@ describe('xy_expression', () => {
         />
       );
       const xDomain = component.find(Settings).prop('xDomain');
-      expect(xDomain).toEqual(
-        expect.objectContaining({
-          min: undefined,
-          max: undefined,
-        })
-      );
+      expect(xDomain).toEqual(undefined);
     });
 
-    test('it uses min interval if passed in', () => {
+    test('it uses min interval if interval is passed in and visualization is histogram', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -589,11 +852,43 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'linear' }],
+            layers: [
+              { ...args.layers[0], seriesType: 'line', xScaleType: 'linear', isHistogram: true },
+            ],
           }}
         />
       );
       expect(component.find(Settings).prop('xDomain')).toEqual({ minInterval: 101 });
+    });
+
+    test('disabled legend extra by default', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+      expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    });
+
+    test('ignores legend extra for ordinal chart', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart {...defaultProps} data={data} args={{ ...args, valuesInLegend: true }} />
+      );
+      expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    });
+
+    test('shows legend extra for histogram chart', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          data={dateHistogramData}
+          args={{
+            ...args,
+            layers: [dateHistogramLayer],
+            valuesInLegend: true,
+          }}
+        />
+      );
+      expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
     });
 
     test('it renders bar', () => {
@@ -820,6 +1115,205 @@ describe('xy_expression', () => {
             row: 0,
             table: data.tables.first,
             value: 2,
+          },
+        ],
+      });
+    });
+
+    test('onElementClick returns correct context data for date histogram', () => {
+      const geometry: GeometryValue = {
+        x: 1585758120000,
+        y: 1,
+        accessor: 'y1',
+        mark: null,
+        datum: {},
+      };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'yAccessorId',
+        splitAccessors: {},
+        seriesKeys: ['yAccessorId'],
+      };
+
+      const { args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={dateHistogramData}
+          args={{
+            ...args,
+            layers: [dateHistogramLayer],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: dateHistogramData.tables.timeLayer,
+            value: 1585758120000,
+          },
+        ],
+        timeFieldName: 'order_date',
+      });
+    });
+
+    test('onElementClick returns correct context data for numeric histogram', () => {
+      const { args } = sampleArgs();
+
+      const numberLayer: LayerArgs = {
+        layerId: 'numberLayer',
+        hide: false,
+        xAccessor: 'xAccessorId',
+        yScaleType: 'linear',
+        xScaleType: 'linear',
+        isHistogram: true,
+        seriesType: 'bar_stacked',
+        accessors: ['yAccessorId'],
+        palette: mockPaletteOutput,
+      };
+
+      const numberHistogramData: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          numberLayer: {
+            type: 'datatable',
+            rows: [
+              {
+                xAccessorId: 5,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 7,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 8,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 10,
+                yAccessorId: 1,
+              },
+            ],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'bytes',
+                meta: { type: 'number' },
+              },
+              {
+                id: 'yAccessorId',
+                name: 'Count of records',
+                meta: { type: 'number' },
+              },
+            ],
+          },
+        },
+        dateRange: {
+          fromDate: new Date('2020-04-01T16:14:16.246Z'),
+          toDate: new Date('2020-04-01T17:15:41.263Z'),
+        },
+      };
+      const geometry: GeometryValue = {
+        x: 5,
+        y: 1,
+        accessor: 'y1',
+        mark: null,
+        datum: {},
+      };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'yAccessorId',
+        splitAccessors: {},
+        seriesKeys: ['yAccessorId'],
+      };
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={numberHistogramData}
+          args={{
+            ...args,
+            layers: [numberLayer],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: numberHistogramData.tables.numberLayer,
+            value: 5,
+          },
+        ],
+        timeFieldName: undefined,
+      });
+    });
+
+    test('returns correct original data for ordinal x axis with special formatter', () => {
+      const geometry: GeometryValue = { x: 'BAR', y: 1, accessor: 'y1', mark: null, datum: {} };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'a',
+        splitAccessors: {},
+        seriesKeys: ['a'],
+      };
+
+      const { args, data } = sampleArgs();
+
+      convertSpy.mockImplementation((x) => (typeof x === 'string' ? x.toUpperCase() : x));
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'line',
+                xAccessor: 'd',
+                accessors: ['a', 'b'],
+                columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                xScaleType: 'ordinal',
+                yScaleType: 'linear',
+                isHistogram: false,
+                palette: mockPaletteOutput,
+              },
+            ],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 3,
+            row: 1,
+            table: data.tables.first,
+            value: 'Bar',
           },
         ],
       });
@@ -1511,6 +2005,27 @@ describe('xy_expression', () => {
       });
     });
 
+    test('it should set the tickLabel orientation on the x axis', () => {
+      const { data, args } = sampleArgs();
+
+      args.labelsOrientation = {
+        x: -45,
+        yLeft: 0,
+        yRight: -90,
+        type: 'lens_xy_labelsOrientationConfig',
+      };
+
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+
+      const axisStyle = instance.find(Axis).first().prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          rotation: -45,
+        },
+      });
+    });
+
     test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
       const { data, args } = sampleArgs();
 
@@ -1528,6 +2043,27 @@ describe('xy_expression', () => {
       expect(axisStyle).toMatchObject({
         tickLabel: {
           visible: true,
+        },
+      });
+    });
+
+    test('it should set the tickLabel orientation on the y axis', () => {
+      const { data, args } = sampleArgs();
+
+      args.labelsOrientation = {
+        x: -45,
+        yLeft: -90,
+        yRight: -90,
+        type: 'lens_xy_labelsOrientationConfig',
+      };
+
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+
+      const axisStyle = instance.find(Axis).at(1).prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          rotation: -90,
         },
       });
     });
@@ -1580,6 +2116,20 @@ describe('xy_expression', () => {
           x: true,
           yLeft: false,
           yRight: false,
+        },
+        labelsOrientation: {
+          type: 'lens_xy_labelsOrientationConfig',
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
+        },
+        yLeftExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
+        yRightExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
         },
         layers: [
           {
@@ -1655,6 +2205,20 @@ describe('xy_expression', () => {
           yLeft: false,
           yRight: false,
         },
+        labelsOrientation: {
+          type: 'lens_xy_labelsOrientationConfig',
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
+        },
+        yLeftExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
+        yRightExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
         layers: [
           {
             layerId: 'first',
@@ -1715,6 +2279,20 @@ describe('xy_expression', () => {
           yLeft: false,
           yRight: false,
         },
+        labelsOrientation: {
+          type: 'lens_xy_labelsOrientationConfig',
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
+        },
+        yLeftExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
+        yRightExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
         layers: [
           {
             layerId: 'first',
@@ -1752,6 +2330,30 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it should populate the correct legendPosition if isInside is set', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          data={{ ...data }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
+            legend: { ...args.legend, isVisible: true, isInside: true },
+          }}
+        />
+      );
+
+      expect(component.find(Settings).prop('legendPosition')).toEqual({
+        vAlign: VerticalAlignment.Top,
+        hAlign: HorizontalAlignment.Right,
+        direction: LayoutDirection.Vertical,
+        floating: true,
+        floatingColumns: 1,
+      });
     });
 
     test('it not show legend if isVisible is set to false', () => {
@@ -1897,10 +2499,14 @@ describe('xy_expression', () => {
       xyProps.args.layers[0].xScaleType = 'time';
     });
     it('should use first valid layer and determine interval', async () => {
-      const result = await calculateMinInterval(
-        xyProps,
-        jest.fn().mockResolvedValue({ interval: '5m' })
-      );
+      xyProps.data.tables.first.columns[2].meta.source = 'esaggs';
+      xyProps.data.tables.first.columns[2].meta.sourceParams = {
+        type: 'date_histogram',
+        params: {
+          used_interval: '5m',
+        },
+      };
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(5 * 60 * 1000);
     });
 
@@ -1918,34 +2524,38 @@ describe('xy_expression', () => {
           },
         },
       };
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(5);
     });
 
     it('should return undefined if data table is empty', async () => {
       xyProps.data.tables.first.rows = [];
-      const result = await calculateMinInterval(
-        xyProps,
-        jest.fn().mockResolvedValue({ interval: '5m' })
-      );
+      xyProps.data.tables.first.columns[2].meta.source = 'esaggs';
+      xyProps.data.tables.first.columns[2].meta.sourceParams = {
+        type: 'date_histogram',
+        params: {
+          used_interval: '5m',
+        },
+      };
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if interval can not be checked', async () => {
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if date column is not found', async () => {
       xyProps.data.tables.first.columns.splice(2, 1);
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if x axis is not a date', async () => {
       xyProps.args.layers[0].xScaleType = 'ordinal';
       xyProps.data.tables.first.columns.splice(2, 1);
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
   });

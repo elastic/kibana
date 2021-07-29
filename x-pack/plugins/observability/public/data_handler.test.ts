@@ -7,6 +7,12 @@
 
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
+import { ApmIndicesConfig } from '../common/typings';
+
+const sampleAPMIndices = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'apm_oss.transactionIndices': 'apm-*',
+} as ApmIndicesConfig;
 
 const params = {
   absoluteTime: {
@@ -23,7 +29,7 @@ const params = {
 describe('registerDataHandler', () => {
   const originalConsole = global.console;
   beforeAll(() => {
-    // mocks console to avoid poluting the test output
+    // mocks console to avoid polluting the test output
     global.console = ({ error: jest.fn() } as unknown) as typeof console;
   });
 
@@ -58,7 +64,7 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
 
     it('registered data handler', () => {
@@ -179,7 +185,7 @@ describe('registerDataHandler', () => {
   });
   describe('Uptime', () => {
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: async () => {
         return {
           title: 'uptime',
@@ -213,17 +219,17 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     it('registered data handler', () => {
-      const dataHandler = getDataHandler('uptime');
+      const dataHandler = getDataHandler('synthetics');
       expect(dataHandler?.fetchData).toBeDefined();
       expect(dataHandler?.hasData).toBeDefined();
     });
 
     it('returns data when fetchData is called', async () => {
-      const dataHandler = getDataHandler('uptime');
+      const dataHandler = getDataHandler('synthetics');
       const response = await dataHandler?.fetchData(params);
       expect(response).toEqual({
         title: 'uptime',
@@ -284,7 +290,11 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => ({ hasData: true, serviceName: 'elastic-co-frontend' }),
+      hasData: async () => ({
+        hasData: true,
+        serviceName: 'elastic-co-frontend',
+        indices: 'apm-*',
+      }),
     });
 
     it('registered data handler', () => {
@@ -321,56 +331,18 @@ describe('registerDataHandler', () => {
   });
 
   describe('Metrics', () => {
+    const makeRequestResponse = {
+      title: 'metrics',
+      appLink: '/metrics',
+      sort: () => makeRequest(),
+      series: [],
+    };
+    const makeRequest = async () => {
+      return makeRequestResponse;
+    };
     registerDataHandler({
       appName: 'infra_metrics',
-      fetchData: async () => {
-        return {
-          title: 'metrics',
-          appLink: '/metrics',
-          stats: {
-            hosts: {
-              label: 'hosts',
-              type: 'number',
-              value: 1,
-            },
-            cpu: {
-              label: 'cpu',
-              type: 'number',
-              value: 1,
-            },
-            memory: {
-              label: 'memory',
-              type: 'number',
-              value: 1,
-            },
-            disk: {
-              label: 'disk',
-              type: 'number',
-              value: 1,
-            },
-            inboundTraffic: {
-              label: 'inboundTraffic',
-              type: 'number',
-              value: 1,
-            },
-            outboundTraffic: {
-              label: 'outboundTraffic',
-              type: 'number',
-              value: 1,
-            },
-          },
-          series: {
-            inboundTraffic: {
-              label: 'inbound Traffic',
-              coordinates: [{ x: 1 }],
-            },
-            outboundTraffic: {
-              label: 'outbound Traffic',
-              coordinates: [{ x: 1 }],
-            },
-          },
-        };
-      },
+      fetchData: makeRequest,
       hasData: async () => true,
     });
 
@@ -383,52 +355,7 @@ describe('registerDataHandler', () => {
     it('returns data when fetchData is called', async () => {
       const dataHandler = getDataHandler('infra_metrics');
       const response = await dataHandler?.fetchData(params);
-      expect(response).toEqual({
-        title: 'metrics',
-        appLink: '/metrics',
-        stats: {
-          hosts: {
-            label: 'hosts',
-            type: 'number',
-            value: 1,
-          },
-          cpu: {
-            label: 'cpu',
-            type: 'number',
-            value: 1,
-          },
-          memory: {
-            label: 'memory',
-            type: 'number',
-            value: 1,
-          },
-          disk: {
-            label: 'disk',
-            type: 'number',
-            value: 1,
-          },
-          inboundTraffic: {
-            label: 'inboundTraffic',
-            type: 'number',
-            value: 1,
-          },
-          outboundTraffic: {
-            label: 'outboundTraffic',
-            type: 'number',
-            value: 1,
-          },
-        },
-        series: {
-          inboundTraffic: {
-            label: 'inbound Traffic',
-            coordinates: [{ x: 1 }],
-          },
-          outboundTraffic: {
-            label: 'outbound Traffic',
-            coordinates: [{ x: 1 }],
-          },
-        },
-      });
+      expect(response).toEqual(makeRequestResponse);
     });
 
     it('returns true when hasData is called', async () => {

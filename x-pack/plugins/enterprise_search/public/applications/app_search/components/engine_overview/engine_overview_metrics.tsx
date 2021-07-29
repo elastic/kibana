@@ -5,45 +5,49 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../shared/flash_messages';
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
-import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
+import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 import { EngineOverviewLogic } from './';
 
 export const EngineOverviewMetrics: React.FC = () => {
-  const { apiLogsUnavailable } = useValues(EngineOverviewLogic);
+  const { loadOverviewMetrics } = useActions(EngineOverviewLogic);
+  const { dataLoading } = useValues(EngineOverviewLogic);
+
+  useEffect(() => {
+    loadOverviewMetrics();
+  }, []);
 
   return (
-    <>
-      <EuiPageHeader>
-        <EuiTitle size="l">
-          <h1>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
-              defaultMessage: 'Engine overview',
-            })}
-          </h1>
-        </EuiTitle>
-      </EuiPageHeader>
-      <FlashMessages />
-      {apiLogsUnavailable ? (
-        <UnavailablePrompt />
-      ) : (
-        <>
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs()}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
+          defaultMessage: 'Engine overview',
+        }),
+      }}
+      isLoading={dataLoading}
+      data-test-subj="EngineOverview"
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
           <TotalStats />
-          <EuiSpacer size="xl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
           <TotalCharts />
-          <EuiSpacer size="xl" />
-          <RecentApiLogs />
-        </>
-      )}
-    </>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <RecentApiLogs />
+    </AppSearchPageTemplate>
   );
 };

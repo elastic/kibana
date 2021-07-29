@@ -16,7 +16,7 @@ import { UseField } from '../../../form';
 import { DescribedFormRow } from '../../described_form_row';
 
 interface Props {
-  phase: 'warm' | 'cold';
+  phase: 'warm' | 'cold' | 'frozen';
 }
 
 export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {

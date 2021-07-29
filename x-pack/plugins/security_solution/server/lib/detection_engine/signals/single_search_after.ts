@@ -4,43 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { Logger } from '../../../../../../../src/core/server';
-import { SignalSearchResponse } from './types';
+import type { SignalSearchResponse, SignalSource } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import {
-  SortOrderOrUndefined,
-  TimestampOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
-  aggregations?: unknown;
-  searchAfterSortId: string | undefined;
+  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
+  searchAfterSortIds: estypes.SearchSortResults | undefined;
   index: string[];
   from: string;
   to: string;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
-  sortOrder?: SortOrderOrUndefined;
-  filter: unknown;
+  sortOrder?: estypes.SearchSortOrder;
+  filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
-  excludeDocsWithTimestampOverride: boolean;
+  trackTotalHits?: boolean;
 }
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
   aggregations,
-  searchAfterSortId,
+  searchAfterSortIds,
   index,
   from,
   to,
@@ -51,7 +48,7 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
-  excludeDocsWithTimestampOverride,
+  trackTotalHits,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -66,15 +63,16 @@ export const singleSearchAfter = async ({
       filter,
       size: pageSize,
       sortOrder,
-      searchAfterSortId,
+      searchAfterSortIds,
       timestampOverride,
-      excludeDocsWithTimestampOverride,
+      trackTotalHits,
     });
 
     const start = performance.now();
-    const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
-      'search',
-      searchAfterQuery
+    const {
+      body: nextSearchAfterResult,
+    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+      searchAfterQuery as estypes.SearchRequest
     );
     const end = performance.now();
     const searchErrors = createErrorsFromShard({

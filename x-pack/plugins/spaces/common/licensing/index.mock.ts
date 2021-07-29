@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SpacesLicense } from '.';
+import type { SpacesLicense } from './license_service';
 
 export const licenseMock = {
   create: (): jest.Mocked<SpacesLicense> => ({

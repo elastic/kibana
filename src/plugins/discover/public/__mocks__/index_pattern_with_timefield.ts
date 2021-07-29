@@ -22,6 +22,8 @@ const fields = [
     type: 'date',
     scripted: false,
     filterable: true,
+    aggregatable: true,
+    sortable: true,
   },
   {
     name: 'message',
@@ -34,12 +36,14 @@ const fields = [
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'bytes',
     type: 'number',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'scripted',
@@ -52,21 +56,27 @@ const fields = [
 fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);
 };
+fields.getAll = () => {
+  return fields;
+};
 
 const indexPattern = ({
   id: 'index-pattern-with-timefield-id',
-  title: 'index-pattern-without-timefield',
+  title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
   fields,
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
-  getFieldByName: () => ({}),
+  getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
+indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
+  return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+};
 
 export const indexPatternWithTimefieldMock = indexPattern;

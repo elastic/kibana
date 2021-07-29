@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('markdown app in visualize app', () => {
     before(async function () {
+      await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visEditor.setMarkdownTxt(markdown);

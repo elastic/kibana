@@ -1,13 +1,303 @@
 # Event Log
 
+The event log plugin provides a persistent history of alerting and action
+actitivies.
+
 ## Overview
 
-The purpose of this plugin is to provide a way to persist a history of events
-occuring in Kibana, initially just for the Make It Action project - alerts
-and actions.
+This plugin provides a persistent log of "events" that can be used by other
+plugins to record their processing, for later accces. It is used by:
+
+- `alerting` and `actions` plugins
+- [work in progress] `security_solution` (detection rules execution log)
+
+The "events" are [ECS documents](https://www.elastic.co/guide/en/ecs/current/index.html)
+containing both standard ECS fields and some custom fields for Kibana.
+
+- Standard fields are those which are defined in the ECS specification.
+  Examples: `@timestamp`, `message`, `event.provider`. The number of ECS fields
+  supported in Event Log is limited today, but can be extended fairly easily.
+  We are being conservative in adding new fields though, to help prevent
+  indexing explosions.
+- Custom fields are not part of the ECS spec. We defined a top-level `kibana`
+  field set where we have some Kibana-specific fields like `kibana.server_uuid`
+  and `kibana.saved_objects`. Plugins added a few custom fields as well,
+  for example `kibana.alerting` field set.
+
+A client API is available for other plugins to:
+
+- register the events they want to write
+- write the events, with helpers for `duration` calculation, etc
+- query the events
+
+HTTP APIs are also available to query the events.
+
+Currently, events are written with references to Saved Objects, and queries
+against the event log must include the Saved Object references that the query
+should return events for.  This is the basic security mechanism to prevent
+users from accessing events for Saved Objects that they do not have access to.
+The queries ensure that the user can read the referenced Saved Objects before
+returning the events relating to them.
+
+The default index name is `.kibana-event-log-${kibanaVersion}-${ILM-sequence}`.
+
+The index written to is controlled by ILM.  The ILM policy is initially created
+by the plugin, but is otherwise never updated by the plugin.  This allows
+customers to customize it to their environment, without having to worry about
+their updates getting overwritten by newer versions of Kibana.
+The policy provides some default phases to roll over and delete older
+indices.  The name of the policy is `kibana-event-log-policy`.
 
 
-## Basic Usage - Logging Events
+## Event Documents
+
+The structure of the event documents can be seen in the
+[mappings](generated/mappings.json) and
+[config-schema definitions](generated/schemas.ts).  Note these files are
+generated via a script when the structure changes.  See the
+[README.md](generated/README.md) for how to change the document structure.
+
+Below is a document in the expected structure, with descriptions of the fields:
+
+```js
+{
+  // Base ECS fields.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-base.html
+  "@timestamp": "ISO date",
+  tags: ["tags", "here"],
+  message: "message for humans here",
+
+  // ECS version. This is set by the Event Log and should not be specified
+  // by a client of Event Log.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-ecs.html
+  ecs: {
+    version: "version of ECS used by the event log",
+  },
+
+  // Event fields. All of them are supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-event.html
+  event: {
+    provider: "see below",
+    action: "see below",
+    start: "ISO date of start time for events that capture a duration",
+    duration: "duration in nanoseconds for events that capture a duration",
+    end: "ISO date of end time for events that capture a duration",
+    outcome: "success | failure, for events that indicate an outcome",
+    reason: "additional detail on failure outcome",
+    // etc
+  },
+
+  // Error fields. All of them are supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-error.html
+  error: {
+    message: "an error message, usually associated with outcome: failure",
+    // etc
+  },
+
+  // Log fields. Only a subset is supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-log.html
+  log: {
+    level: "info | warning | any log level keyword you need",
+    logger: "name of the logger",
+  },
+
+  // Rule fields.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-rule.html
+  rule: {
+    // Fields currently are populated:
+    id: "a823fd56-5467-4727-acb1-66809737d943", // rule id
+    category: "test", // rule type id
+    license: "basic", // rule type minimumLicenseRequired
+    name: "rule-name", //
+    ruleset: "alerts", // rule type producer
+    // Fields currently are not populated:
+    author: ["Elastic"],
+    description: "Some rule description",
+    version: '1',
+    uuid: "uuid"
+    // etc
+  },
+
+  // User fields. Only user.name is supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-user.html
+  user: {
+    name: "name of Kibana user",
+  }, 
+
+  // Custom fields that are not part of ECS.
+  kibana: {
+    server_uuid: "UUID of kibana server, for diagnosing multi-Kibana scenarios",
+    task: {
+      scheduled: "ISO date of when the task for this event was supposed to start",
+      schedule_delay: "delay in nanoseconds between when this task was supposed to start and when it actually started",
+    },
+    alerting: {
+      instance_id: "alert instance id, for relevant documents",
+      action_group_id: "alert action group, for relevant documents",
+      action_subgroup: "alert action subgroup, for relevant documents",
+      status: "overall alert status, after rule  execution",
+    },
+    saved_objects: [
+      {
+        rel: "'primary' | undefined; see below",
+        namespace: "${spaceId} | undefined",
+        id: "saved object id",
+        type: " saved object type",
+      },
+    ],
+  },
+}
+```
+
+The `event.provider` and `event.action` fields provide a scoped mechanism for
+describing who is generating the event, and what kind of event it is.  Plugins
+that write events need to register the `provider` and `action` values they
+will be using.  Generally, each plugin should provide it's own `provider`,
+but a plugin could provide multiple providers, or a single provider might be
+used by multiple plugins.
+
+The following `provider` / `action` pairs are used by the alerting and actions
+plugins:
+
+- `provider: actions`
+  - `action: execute` - generated when an action is executed by the actions client
+  - `action: execute-via-http` - generated when an action is executed via HTTP request
+
+- `provider: alerting`
+  - `action: execute` - generated when a rule executor runs
+  - `action: execute-action` - generated when a rule schedules an action to run
+  - `action: new-instance` - generated when a rule has a new instance id that is active
+  - `action: recovered-instance` - generated when a rule has a previously active instance id that is no longer active
+  - `action: active-instance` - generated when a rule determines an instance id is active
+
+For the `saved_objects` array elements, these are references to saved objects
+associated with the event.  For the `alerting` provider, those are rule saved
+ojects and for the `actions` provider those are connector saved objects.  The 
+`alerts:execute-action` event includes both the rule and connector saved object
+references.  For that event, only the rule reference has the optional `rel`
+property with a `primary` value.  This property is used when searching the
+event log to indicate which saved objects should be directly searchable via 
+saved object references.  For the `alerts:execute-action` event, only searching 
+via the rule saved object reference will return the event; searching via the
+connector save object reference will **NOT** return the event.  The 
+`actions:execute` event also includes both the rule and connector saved object
+references, and both of them have the `rel` property with a `primary` value,
+allowing those events to be returned in searches of either the rule or 
+connector.
+
+
+## Event Log index - associated resources
+
+The index template and ILM policy are defined in the file
+[`x-pack/plugins/event_log/server/es/documents.ts`](server/es/documents.ts).
+
+See [ILM rollover action docs][] for more information on the `is_write_index`
+and `index.lifecycle.*` properties.
+
+[ILM rollover action docs]: https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-rollover.html
+
+
+## Using the Event Log for diagnosing alerting and actions issues
+
+For ad-hoc diagnostic purposes, your go to tools are Discover and Lens. Your
+user will need to have access to the index, which is considered a Kibana
+system index due to it's prefix.
+
+Add the event log index as an index pattern.  The only customization needed is
+to set the `event.duration` field to a duration in nanoseconds.  You'll
+probably want it displayed as milliseconds.
+
+
+## Experimental RESTful API for querying
+
+As this plugin is space-aware, prefix any URL below with the usual `/s/{space}`
+to target a space other than the default space.
+
+Usage of the event log allows you to retrieve the events for a given saved object type by the specified set of IDs.
+The following API is experimental and can change or be removed in a future release.
+
+### `GET /api/event_log/{type}/{id}/_find`: Get events for a given saved object type by the ID
+
+Collects event information from the event log for the selected saved object by type and ID.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+|id|The id of the saved object.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of events to return per page.|number|
+|sort_field|Sorts the response. Could be an event fields returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+
+Response body:
+
+See `QueryEventsBySavedObjectResult` in the Plugin Client APIs below.
+
+### `POST /api/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
+
+Collects event information from the event log for the selected saved object by type and by IDs.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of events to return per page.|number|
+|sort_field|Sorts the response. Could be an event field returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+
+Request Body:
+
+|Property|Description|Type|
+|---|---|---|
+|ids|The array ids of the saved object.|string array|
+
+Response body:
+
+See `QueryEventsBySavedObjectResult` in the Plugin Client APIs below.
+
+
+## Plugin Client APIs for querying
+
+```ts
+interface EventLogClient {
+  findEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult>;
+}
+
+interface FindOptionsType { /* typed version of HTTP query parameters ^^^ */ }
+
+interface QueryEventsBySavedObjectResult {
+  page: number;
+  per_page: number;
+  total: number;
+  data: Event[];
+}
+```
+
+## Generating Events
 
 Follow these steps to use `eventLog` in your plugin: 
 
@@ -21,8 +311,8 @@ Follow these steps to use `eventLog` in your plugin:
 }
 ```
 
-2. Register provider / actions, and create your plugin's logger, using service
-API provided in the `setup` stage:
+2. Register provider / actions, and create your plugin's logger, using the
+service API provided in the `setup` stage:
 
 ```typescript
 ...
@@ -40,147 +330,12 @@ public setup(core: CoreSetup, { eventLog }: PluginSetupDependencies) {
 ...
 ```
 
-4. To log an event, call `logEvent()` on the `eventLogger` object you created:
+3. To log an event, call `logEvent()` on the `eventLogger` object you created:
 
 ```typescript
 ...
   eventLogger.logEvent({ event: { action: 'action-1' }, tags: ['fe', 'fi', 'fo'] });
 ...
-```
-
-
-## Testing
-
-### Unit tests
-
-Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
-
-```
-yarn test:jest x-pack/plugins/event_log --watch
-```
-
-### API Integration tests
-
-None yet!
-
-
-## Background
-
-For the Make It Action alerting / action plugins, we will need a way to
-persist data regarding alerts and actions, for UI and investigative purposes.
-We're referring to this persisted data as "events", and will be persisted to
-a new elasticsearch index referred to as the "event log".
-
-Example events are actions firing, alerts running their scheduled functions,
-alerts scheduling actions to run, etc.
-
-This functionality will be provided in a new NP plugin `eventLog`, and will
-provide server-side plugin APIs to write to the event log, and run limited
-queries against it. For now, access via HTTP will not be available, due to
-security concerns and lack of use cases.
-
-The current clients for the event log are the actions and alerting plugins,
-however the event log currently has nothing specific to them, and is general
-purpose, so can be used by any plugin to "log events".
-
-We currently assume that there may be many events logged, and that (some) customers
-may not be interested in "old" events, and so to keep the event log from
-consuming too much disk space, we'll set it up with ILM and some kind of
-reasonable default policy that can be customized by the user.  This implies
-also the use of rollver, setting a write index alias upon rollover, and
-that searches for events will be done via an ES index pattern / alias to search
-across event log indices with a wildcard.
-
-The shape of the documents indexed into the event log index is a subset of ECS
-properties with a few Kibana extensions.  Over time the subset is of ECS and
-Kibana extensions will likely grow.
-
-# Basic example
-
-When an action is executed, an event should be written to the event log.
-
-Here's a [`kbn-action` command](https://github.com/pmuellr/kbn-action) to
-execute a "server log" action (writes a message to the Kibana log):
-
-```console
-$ kbn-action execute 79b4c37e-ef42-4421-a0b0-b536840f930d '{level:info message:hallo}'
-{
-    "status": "ok"
-}
-```
-
-Here's the event written to the event log index:
-
-```json
-{
-  "_index": ".kibana-event-log-000001",
-  "_type": "_doc",
-  "_id": "d2CXT20BPOpswQ8vgXp5",
-  "_score": 1,
-  "_source": {
-    "event": {
-      "provider": "actions",
-      "action": "execute",
-      "start": "2019-12-09T21:16:43.424Z",
-      "end": "2019-12-09T21:16:43.425Z",
-      "duration": 1000000
-    },
-    "kibana": {
-      "saved_objects": [
-        {
-          "type": "action",
-          "id": "79b4c37e-ef42-4421-a0b0-b536840f930d"
-        }
-      ]
-    },
-    "message": "action executed successfully: 79b4c37e-ef42-4421-a0b0-b536840f930d - .server-log - server-log",
-    "@timestamp": "2019-12-09T21:16:43.425Z",
-    "ecs": {
-      "version": "1.3.1"
-    }
-  }
-}
-```
-
-The shape of the document written to the index is a subset of [ECS][] with an
-extended field of `kibana` with some Kibana-related properties contained within
-it.
-
-The ES mappings for the ECS data, and the config-schema for the ECS data, are
-generated by a script, and available here:
-
-- [`generated/mappings.json`](generated/mappings.json)
-- [`generated/schemas.ts`](generated/schemas.ts)
-
-It's anticipated that these interfaces will grow over time, hopefully adding
-more ECS fields but adding Kibana extensions as required.
-
-Since there are some security concerns with the data, we are currently
-restricting access via known saved object ids.  That is, you can only query
-history records associated with specific saved object ids.
-
-[ECS]: https://www.elastic.co/guide/en/ecs/current/index.html
-
-
-## API
-
-```typescript
-// IEvent is a TS type generated from the subset of ECS supported
-
-// the NP plugin returns a service instance from setup() and start()
-export interface IEventLogService {
-  registerProviderActions(provider: string, actions: string[]): void;
-  isProviderActionRegistered(provider: string, action: string): boolean;
-  getProviderActions(): Map<string, Set<string>>;
-
-  getLogger(properties: IEvent): IEventLogger;
-}
-
-export interface IEventLogger {
-  logEvent(properties: IEvent): void;
-  startTiming(event: IEvent): void;
-  stopTiming(event: IEvent): void;
-}
 ```
 
 The plugin exposes an `IEventLogService` object to plugins that pre-req it.
@@ -209,15 +364,15 @@ that result is validated to ensure it's complete and valid.  Errors will be
 logged to the server log.
 
 The `logEvent()` method returns no values, and is itself not asynchronous. 
-It's a "call and forget" kind of thing.  The method itself will arrange 
-to have the ultimate document written to the index asynchronously.  It's designed
+The messages are queued written asynchonously in bulk.  It's designed
 this way because it's not clear what a client would do with a result from this
 method, nor what it would do if the method threw an error.  All the error
 processing involved with getting the data into the index is handled internally,
 and logged to the server log as appropriate.
 
-The `startTiming()` and `stopTiming()` methods can be used to set the timing
-properties `start`, `end`, and `duration` in the event.  For example:
+There are additional utility methods `startTiming()` and `stopTiming()` which
+can be used to set the timing properties `start`, `end`, and `duration` in the
+event.  For example:
 
 ```typescript
     const loggedEvent: IEvent = { event: { action: 'foo' } };
@@ -237,70 +392,47 @@ properties `start`, `end`, and `duration` in the event.  For example:
 It's anticipated that more "helper" methods like this will be provided in the
 future.
 
+### Start
+```typescript
 
-## Stored data
+export interface IEventLogClientService {
+  getClient(request: KibanaRequest): IEventLogClient;
+}
 
-The elasticsearch index for the event log will have ILM and rollover support,
-as customers may decide to only keep recent event documents, wanting indices
-with older event documents deleted, turned cold, frozen, etc.  We'll supply
-some default values, but customers will be able to tweak these.
-
-The index template, mappings, config-schema types, etc for the index can
-be found in the [generated directory](generated).  These files are generated
-from a script which takes as input the ECS properties to use, and the Kibana
-extensions.
-
-See [ilm rollover action docs][] for more info on the `is_write_index`, and `index.lifecycle.*` properties.
-
-[ilm rollover action docs]: https://www.elastic.co/guide/en/elasticsearch/reference/current/_actions.html#ilm-rollover-action
-
-Of particular note in the `mappings`:
-
-- all "objects" are `dynamic: 'strict'` implies users can't add new fields
-- all the `properties` are indexed
-
-We may change some of that before releasing.
-
-
-## ILM setup
-
-We'll want to provide default ILM policy, this seems like a reasonable first
-attempt:
-
-```
-PUT _ilm/policy/event_log_policy   
-{
-  "policy": {                       
-    "phases": {
-      "hot": {                      
-        "actions": {
-          "rollover": {             
-            "max_size": "50GB",
-            "max_age": "30d"
-          }
-        }
-      },
-      "delete": {
-        "min_age": "90d",
-        "actions": {
-          "delete": {}
-        }
-      }
-    }
-  }
+export interface IEventLogClient {
+  findEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult>;
 }
 ```
 
-This means that ILM would "rollover" the current index, say
-`.kibana-event-log-8.0.0-000001` by creating a new index `.kibana-event-log-8.0.0-000002`,
-which would "inherit" everything from the index template, and then ILM will
-set the write index of the the alias to the new index.  This would happen
-when the original index grew past 50 GB, or was created more than 30 days ago.
-After rollover, the indices will be removed after 90 days to avoid disks to fill up.
+The plugin exposes an `IEventLogClientService` object to plugins that request it.
+These plugins must call `getClient(request)` to get the event log client.
 
-For more relevant information on ILM, see:
-[getting started with ILM doc][] and [write index alias behavior][]:
+## Testing
 
-[getting started with ILM doc]: https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html
-[write index alias behavior]: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html#indices-rollover-is-write-index
+### Unit tests
 
+Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
+```
+yarn test:jest x-pack/plugins/event_log --watch
+```
+
+### API Integration tests
+
+See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/master/x-pack/test/plugin_api_integration/test_suites/event_log).
+
+To develop integration tests, first start the test server from the root of the repo:
+
+```sh
+node scripts/functional_tests_server --config x-pack/test/plugin_api_integration/config.ts
+```
+
+Then start the test runner:
+
+```sh
+node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts --include x-pack/test/plugin_api_integration/test_suites/event_log/index.ts
+```

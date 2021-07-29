@@ -123,7 +123,7 @@ export interface AuthToolkit {
   authenticated: (data?: AuthResultParams) => AuthResult;
   /**
    * User has no credentials.
-   * Allows user to access a resource when authRequired: 'optional'
+   * Allows user to access a resource when authRequired is 'optional'
    * Rejects a request when authRequired: true
    * */
   notHandled: () => AuthResult;

@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from 'kibana/server';
-import {
-  ML_ALERT_TYPES,
-  ML_ALERT_TYPES_CONFIG,
-  AnomalyScoreMatchGroupId,
-} from '../../../common/constants/alerts';
+import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
@@ -21,12 +17,11 @@ import {
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 import {
+  ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
-} from '../../../../alerts/common';
-
-const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
+} from '../../../../alerting/common';
 
 export type AnomalyDetectionAlertContext = {
   name: string;
@@ -38,25 +33,37 @@ export type AnomalyDetectionAlertContext = {
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
   anomalyExplorerUrl: string;
-  kibanaBaseUrl: string;
 } & AlertInstanceContext;
 
+export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
+
+export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
+
+export const THRESHOLD_MET_GROUP: ActionGroup<AnomalyScoreMatchGroupId> = {
+  id: ANOMALY_SCORE_MATCH_GROUP_ID,
+  name: i18n.translate('xpack.ml.anomalyDetectionAlert.actionGroupName', {
+    defaultMessage: 'Anomaly score matched the condition',
+  }),
+};
+
 export function registerAnomalyDetectionAlertType({
-  alerts,
+  alerting,
   mlSharedServices,
-  publicBaseUrl,
 }: RegisterAlertParams) {
-  alerts.registerType<
+  alerting.registerType<
     MlAnomalyDetectionAlertParams,
+    never, // Only use if defining useSavedObjectReferences hook
     AlertTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
     AnomalyScoreMatchGroupId
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
-    name: alertTypeConfig.name,
-    actionGroups: alertTypeConfig.actionGroups,
-    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+    name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
+      defaultMessage: 'Anomaly detection alert',
+    }),
+    actionGroups: [THRESHOLD_MET_GROUP],
+    defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
     validate: {
       params: mlAnomalyDetectionAlertParams,
     },
@@ -65,19 +72,25 @@ export function registerAnomalyDetectionAlertType({
         {
           name: 'timestamp',
           description: i18n.translate('xpack.ml.alertContext.timestampDescription', {
-            defaultMessage: 'Timestamp of the anomaly',
+            defaultMessage: 'The bucket timestamp of the anomaly',
           }),
         },
         {
           name: 'timestampIso8601',
           description: i18n.translate('xpack.ml.alertContext.timestampIso8601Description', {
-            defaultMessage: 'Time in ISO8601 format',
+            defaultMessage: 'The bucket time of the anomaly in ISO8601 format',
           }),
         },
         {
           name: 'jobIds',
           description: i18n.translate('xpack.ml.alertContext.jobIdsDescription', {
-            defaultMessage: 'List of job IDs triggered the alert instance',
+            defaultMessage: 'List of job IDs that triggered the alert',
+          }),
+        },
+        {
+          name: 'message',
+          description: i18n.translate('xpack.ml.alertContext.messageDescription', {
+            defaultMessage: 'Alert info message',
           }),
         },
         {
@@ -89,7 +102,7 @@ export function registerAnomalyDetectionAlertType({
         {
           name: 'score',
           description: i18n.translate('xpack.ml.alertContext.scoreDescription', {
-            defaultMessage: 'Anomaly score',
+            defaultMessage: 'Anomaly score at the time of the notification action',
           }),
         },
         {
@@ -111,36 +124,23 @@ export function registerAnomalyDetectionAlertType({
           }),
           useWithTripleBracesInTemplates: true,
         },
-        // TODO remove when https://github.com/elastic/kibana/pull/90525 is merged
-        {
-          name: 'kibanaBaseUrl',
-          description: i18n.translate('xpack.ml.alertContext.kibanaBasePathUrlDescription', {
-            defaultMessage: 'Kibana base path',
-          }),
-          useWithTripleBracesInTemplates: true,
-        },
       ],
     },
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
+    isExportable: true,
     async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
       const fakeRequest = {} as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest
       );
-      const executionResult = await execute(
-        params,
-        publicBaseUrl,
-        alertId,
-        startedAt,
-        previousStartedAt
-      );
+      const executionResult = await execute(params, startedAt, previousStartedAt);
 
       if (executionResult) {
         const alertInstanceName = executionResult.name;
         const alertInstance = services.alertInstanceFactory(alertInstanceName);
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, executionResult);
+        alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult);
       }
     },
   });

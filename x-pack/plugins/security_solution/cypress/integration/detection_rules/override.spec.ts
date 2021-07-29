@@ -7,9 +7,9 @@
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import {
-  indexPatterns,
-  newOverrideRule,
-  severitiesOverride,
+  getIndexPatterns,
+  getNewOverrideRule,
+  getSeveritiesOverride,
   OverrideRule,
 } from '../../objects/rule';
 
@@ -68,7 +68,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -86,21 +86,21 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
-  const expectedUrls = newOverrideRule.referenceUrls.join('');
-  const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
-  const expectedTags = newOverrideRule.tags.join('');
-  const expectedMitre = formatMitreAttackDescription(newOverrideRule.mitre);
+  const expectedUrls = getNewOverrideRule().referenceUrls.join('');
+  const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples.join('');
+  const expectedTags = getNewOverrideRule().tags.join('');
+  const expectedMitre = formatMitreAttackDescription(getNewOverrideRule().mitre);
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(newOverrideRule.timeline).then((response) => {
+    createTimeline(getNewOverrideRule().timeline).then((response) => {
       cy.wrap({
-        ...newOverrideRule,
+        ...getNewOverrideRule(),
         timeline: {
-          ...newOverrideRule.timeline,
+          ...getNewOverrideRule().timeline,
           id: response.body.data.persistTimeline.timeline.savedObjectId,
         },
       }).as('rule');
@@ -108,7 +108,7 @@ describe('Detection rules, override', () => {
   });
 
   it('Creates and activates a new custom rule with override option', function () {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -121,7 +121,7 @@ describe('Detection rules, override', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
@@ -140,7 +140,7 @@ describe('Detection rules, override', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${this.rule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
@@ -167,7 +167,7 @@ describe('Detection rules, override', () => {
               .eq(severityOverrideIndex + i)
               .should(
                 'have.text',
-                `${severity.sourceField}:${severity.sourceValue}${severitiesOverride[i]}`
+                `${severity.sourceField}:${severity.sourceValue}${getSeveritiesOverride()[i]}`
               );
           });
         });
@@ -175,7 +175,7 @@ describe('Detection rules, override', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');

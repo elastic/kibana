@@ -11,16 +11,22 @@ import React, { Fragment } from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, defaultState } from '../default';
+import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
+
+import { context as contextType } from '../../../../../../kibana_react/public';
 
 export interface NumberFormatEditorParams {
   pattern: string;
 }
 
 export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorParams> {
-  static formatId = 'number';
+  static contextType = contextType;
+  static formatId = formatId;
+
+  context!: React.ContextType<typeof contextType>;
   state = {
     ...defaultState,
     sampleInputs: [10000, 12.345678, -1, -999, 0.52],
@@ -43,7 +49,10 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
           }
           helpText={
             <span>
-              <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
+              <EuiLink
+                target="_blank"
+                href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersNumber}
+              >
                 <FormattedMessage
                   id="indexPatternFieldEditor.number.documentationLabel"
                   defaultMessage="Documentation"

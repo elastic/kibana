@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { XYLayerConfig } from './types';
+import { FormatFactory } from '../../common';
+import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
 import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 
@@ -15,7 +16,7 @@ interface FormattedMetric {
   fieldFormat: SerializedFieldFormat;
 }
 
-type GroupsConfiguration = Array<{
+export type GroupsConfiguration = Array<{
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
@@ -33,7 +34,7 @@ export function getAxesConfiguration(
   layers: XYLayerConfig[],
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
-  formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat
+  formatFactory?: FormatFactory
 ): GroupsConfiguration {
   const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
     auto: [],
@@ -110,4 +111,18 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
+}
+
+export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
+  const inclusiveZeroError =
+    extent &&
+    hasBarOrArea &&
+    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
+      (extent.upperBound !== undefined && extent.upperBound) < 0);
+  const boundaryError =
+    extent &&
+    extent.lowerBound !== undefined &&
+    extent.upperBound !== undefined &&
+    extent.upperBound <= extent.lowerBound;
+  return { inclusiveZeroError, boundaryError };
 }

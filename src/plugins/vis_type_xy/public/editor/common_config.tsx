@@ -9,11 +9,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { VisEditorOptionsProps } from '../../../visualizations/public';
+import type { VisEditorOptionsProps } from '../../../visualizations/public';
 
-import { VisParams } from '../types';
+import type { VisParams } from '../types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
-import { ValidationWrapper } from './components/common';
+import { ValidationWrapper } from './components/common/validation_wrapper';
 
 export function getOptionTabs(showElasticChartsOptions = false) {
   return [

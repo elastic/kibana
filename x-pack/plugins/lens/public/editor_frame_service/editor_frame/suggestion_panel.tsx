@@ -7,7 +7,7 @@
 
 import './suggestion_panel.scss';
 
-import _, { camelCase } from 'lodash';
+import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -24,8 +24,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
-import { Action, PreviewState } from './state_management';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import {
@@ -34,7 +33,13 @@ import {
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { validateDatasourceAndVisualization } from './state_helpers';
+import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
+import {
+  PreviewState,
+  rollbackSuggestion,
+  submitSuggestion,
+  useLensDispatch,
+} from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -51,11 +56,9 @@ export interface SuggestionPanelProps {
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   stagedPreview?: PreviewState;
-  plugins: { data: DataPublicPluginStart };
 }
 
 const PreviewRenderer = ({
@@ -130,6 +133,8 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
+          hasBorder
+          hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
@@ -168,12 +173,12 @@ export function SuggestionPanel({
   activeVisualizationId,
   visualizationMap,
   visualizationState,
-  dispatch,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   stagedPreview,
-  plugins,
 }: SuggestionPanelProps) {
+  const dispatchLens = useLensDispatch();
+
   const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
   const currentVisualizationState = stagedPreview
     ? stagedPreview.visualization.state
@@ -182,46 +187,53 @@ export function SuggestionPanel({
     ? stagedPreview.visualization.activeId
     : activeVisualizationId;
 
+  const missingIndexPatterns = getMissingIndexPattern(
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+  );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(
     () => {
-      const newSuggestions = getSuggestions({
-        datasourceMap,
-        datasourceStates: currentDatasourceStates,
-        visualizationMap,
-        activeVisualizationId: currentVisualizationId,
-        visualizationState: currentVisualizationState,
-        activeData: frame.activeData,
-      })
-        .filter((suggestion) => !suggestion.hide)
-        .filter(
-          ({
-            visualizationId,
-            visualizationState: suggestionVisualizationState,
-            datasourceState: suggestionDatasourceState,
-            datasourceId: suggetionDatasourceId,
-          }) => {
-            return (
-              validateDatasourceAndVisualization(
-                suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
-                suggestionDatasourceState,
-                visualizationMap[visualizationId],
-                suggestionVisualizationState,
-                frame
-              ) == null
-            );
-          }
-        )
-        .slice(0, MAX_SUGGESTIONS_DISPLAYED)
-        .map((suggestion) => ({
-          ...suggestion,
-          previewExpression: preparePreviewExpression(
-            suggestion,
-            visualizationMap[suggestion.visualizationId],
+      const newSuggestions = missingIndexPatterns.length
+        ? []
+        : getSuggestions({
             datasourceMap,
-            currentDatasourceStates,
-            frame
-          ),
-        }));
+            datasourceStates: currentDatasourceStates,
+            visualizationMap,
+            activeVisualizationId: currentVisualizationId,
+            visualizationState: currentVisualizationState,
+            activeData: frame.activeData,
+          })
+            .filter(
+              ({
+                hide,
+                visualizationId,
+                visualizationState: suggestionVisualizationState,
+                datasourceState: suggestionDatasourceState,
+                datasourceId: suggetionDatasourceId,
+              }) => {
+                return (
+                  !hide &&
+                  validateDatasourceAndVisualization(
+                    suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                    suggestionDatasourceState,
+                    visualizationMap[visualizationId],
+                    suggestionVisualizationState,
+                    frame
+                  ) == null
+                );
+              }
+            )
+            .slice(0, MAX_SUGGESTIONS_DISPLAYED)
+            .map((suggestion) => ({
+              ...suggestion,
+              previewExpression: preparePreviewExpression(
+                suggestion,
+                visualizationMap[suggestion.visualizationId],
+                datasourceMap,
+                currentDatasourceStates,
+                frame
+              ),
+            }));
 
       const validationErrors = validateDatasourceAndVisualization(
         activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -311,9 +323,7 @@ export function SuggestionPanel({
     if (lastSelectedSuggestion !== -1) {
       trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
-      dispatch({
-        type: 'ROLLBACK_SUGGESTION',
-      });
+      dispatchLens(rollbackSuggestion());
     }
   }
 
@@ -343,9 +353,7 @@ export function SuggestionPanel({
                 iconType="refresh"
                 onClick={() => {
                   trackUiEvent('suggestion_confirmed');
-                  dispatch({
-                    type: 'SUBMIT_SUGGESTION',
-                  });
+                  dispatchLens(submitSuggestion());
                 }}
               >
                 {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
@@ -392,7 +400,7 @@ export function SuggestionPanel({
                   rollbackToCurrentVisualization();
                 } else {
                   setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatch, suggestion);
+                  switchToSuggestion(dispatchLens, suggestion);
                 }
               }}
               selected={index === lastSelectedSuggestion}
@@ -434,7 +442,7 @@ function getPreviewExpression(
   ) {
     const datasource = datasources[visualizableState.datasourceId];
     const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = _.pick(
+    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
       frame.datasourceLayers,
       visualizableState.keptLayerIds
     );

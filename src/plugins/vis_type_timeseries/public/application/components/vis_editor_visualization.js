@@ -8,17 +8,9 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { get } from 'lodash';
 import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import {
-  getInterval,
-  convertIntervalIntoUnit,
-  isAutoInterval,
-  isGteInterval,
-} from './lib/get_interval';
-import { AUTO_INTERVAL } from '../../../common/constants';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import { pluck } from 'rxjs/operators';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -28,7 +20,6 @@ class VisEditorVisualizationUI extends Component {
     this.state = {
       height: MIN_CHART_HEIGHT,
       dragging: false,
-      panelInterval: 0,
     };
 
     this._visEl = React.createRef();
@@ -65,18 +56,9 @@ class VisEditorVisualizationUI extends Component {
     await this._handler.render(this._visEl.current);
     this.props.eventEmitter.emit('embeddableRendered');
 
-    this._subscription = this._handler.handler.data$.subscribe((data) => {
-      this.setPanelInterval(data.value.visData);
-      onDataChange(data.value);
-    });
-  }
-
-  setPanelInterval(visData) {
-    const panelInterval = getInterval(visData, this.props.model);
-
-    if (this.state.panelInterval !== panelInterval) {
-      this.setState({ panelInterval });
-    }
+    this._subscription = this._handler.handler.data$
+      .pipe(pluck('result'))
+      .subscribe((data) => onDataChange(data.value));
   }
 
   /**
@@ -97,28 +79,6 @@ class VisEditorVisualizationUI extends Component {
       });
     }
   };
-
-  hasShowPanelIntervalValue() {
-    const type = get(this.props, 'model.type', '');
-    const interval = get(this.props, 'model.interval', AUTO_INTERVAL);
-
-    return (
-      [
-        PANEL_TYPES.METRIC,
-        PANEL_TYPES.TOP_N,
-        PANEL_TYPES.GAUGE,
-        PANEL_TYPES.MARKDOWN,
-        PANEL_TYPES.TABLE,
-      ].includes(type) &&
-      (isAutoInterval(interval) || isGteInterval(interval))
-    );
-  }
-
-  getFormattedPanelInterval() {
-    const interval = convertIntervalIntoUnit(this.state.panelInterval, false);
-
-    return interval ? `${interval.unitValue}${interval.unitString}` : null;
-  }
 
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.handleMouseMove);
@@ -153,8 +113,6 @@ class VisEditorVisualizationUI extends Component {
     if (this.state.dragging) {
       style.userSelect = 'none';
     }
-
-    const panelInterval = this.hasShowPanelIntervalValue() && this.getFormattedPanelInterval();
 
     let applyMessage = (
       <FormattedMessage
@@ -193,20 +151,6 @@ class VisEditorVisualizationUI extends Component {
             onChange={onToggleAutoApply}
           />
         </EuiFlexItem>
-
-        {panelInterval && (
-          <EuiFlexItem grow={false}>
-            <EuiText color="default" size="xs">
-              <p>
-                <FormattedMessage
-                  id="visTypeTimeseries.visEditorVisualization.panelInterval"
-                  defaultMessage="Interval: {panelInterval}"
-                  values={{ panelInterval }}
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        )}
 
         <EuiFlexItem grow={false}>
           <EuiText color={dirty ? 'default' : 'subdued'} size="xs">

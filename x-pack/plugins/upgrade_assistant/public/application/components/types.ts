@@ -8,15 +8,16 @@
 import React from 'react';
 
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../../common/types';
+import { ResponseError } from '../lib/api';
 
 export interface UpgradeAssistantTabProps {
   alertBanner?: React.ReactNode;
-  checkupData?: UpgradeAssistantStatus;
+  checkupData?: UpgradeAssistantStatus | null;
   deprecations?: EnrichedDeprecationInfo[];
-  refreshCheckupData: () => Promise<void>;
-  loadingError?: Error;
-  loadingState: LoadingState;
-  setSelectedTabIndex: (tabIndex: number) => void;
+  refreshCheckupData: () => void;
+  error: ResponseError | null;
+  isLoading: boolean;
+  navigateToOverviewPage: () => void;
 }
 
 // eslint-disable-next-line react/prefer-stateless-function
@@ -31,10 +32,7 @@ export enum LoadingState {
   Error,
 }
 
-export enum LevelFilterOption {
-  all = 'all',
-  critical = 'critical',
-}
+export type LevelFilterOption = 'all' | 'critical';
 
 export enum GroupByOption {
   message = 'message',
@@ -46,3 +44,5 @@ export enum TelemetryState {
   Running,
   Complete,
 }
+
+export type EsTabs = 'cluster' | 'indices';

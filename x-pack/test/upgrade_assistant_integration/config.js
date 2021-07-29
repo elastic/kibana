@@ -26,7 +26,6 @@ export default async function ({ readConfigFile }) {
       ...kibanaCommonConfig.get('services'),
       supertest: kibanaAPITestsConfig.get('services.supertest'),
     },
-    esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack Upgrade Assistant Integration Tests',
     },

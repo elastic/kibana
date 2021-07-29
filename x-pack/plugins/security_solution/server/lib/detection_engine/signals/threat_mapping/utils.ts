@@ -66,6 +66,7 @@ export const combineResults = (
   newResult: SearchAfterAndBulkCreateReturnType
 ): SearchAfterAndBulkCreateReturnType => ({
   success: currentResult.success === false ? false : newResult.success,
+  warning: currentResult.warning || newResult.warning,
   bulkCreateTimes: calculateAdditiveMax(currentResult.bulkCreateTimes, newResult.bulkCreateTimes),
   searchAfterTimes: calculateAdditiveMax(
     currentResult.searchAfterTimes,
@@ -74,6 +75,7 @@ export const combineResults = (
   lastLookBackDate: newResult.lastLookBackDate,
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
+  warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
   errors: [...new Set([...currentResult.errors, ...newResult.errors])],
 });
 
@@ -93,43 +95,48 @@ export const combineConcurrentResults = (
       const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
       return {
         success: accum.success && item.success,
+        warning: accum.warning || item.warning,
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
         lastLookBackDate,
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
+        warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
       };
     },
     {
       success: true,
+      warning: false,
       searchAfterTimes: [],
       bulkCreateTimes: [],
       lastLookBackDate: undefined,
       createdSignalsCount: 0,
       createdSignals: [],
       errors: [],
+      warningMessages: [],
     }
   );
 
   return combineResults(currentResult, maxedNewResult);
 };
 
-const separator = '___SEPARATOR___';
+const separator = '__SEP__';
 export const encodeThreatMatchNamedQuery = ({
   id,
+  index,
   field,
   value,
 }: ThreatMatchNamedQuery): string => {
-  return [id, field, value].join(separator);
+  return [id, index, field, value].join(separator);
 };
 
 export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQuery => {
   const queryValues = encoded.split(separator);
-  const [id, field, value] = queryValues;
-  const query = { id, field, value };
+  const [id, index, field, value] = queryValues;
+  const query = { id, index, field, value };
 
-  if (queryValues.length !== 3 || !queryValues.every(Boolean)) {
+  if (queryValues.length !== 4 || !queryValues.every(Boolean)) {
     const queryString = JSON.stringify(query);
     throw new Error(`Decoded query is invalid. Decoded value: ${queryString}`);
   }

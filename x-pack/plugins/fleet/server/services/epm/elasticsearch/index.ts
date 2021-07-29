@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegistryDataStream } from '../../../types';
+import type { RegistryDataStream } from '../../../types';
 
 /**
  * Creates the base name for Elasticsearch assets in the form of

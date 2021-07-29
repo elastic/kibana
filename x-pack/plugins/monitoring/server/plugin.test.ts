@@ -13,6 +13,9 @@ jest.mock('./es_client/instantiate_client', () => ({
   instantiateClient: jest.fn().mockImplementation(() => ({
     cluster: {},
   })),
+  instantiateLegacyClient: jest.fn().mockImplementation(() => ({
+    cluster: {},
+  })),
 }));
 
 jest.mock('./license_service', () => ({
@@ -32,7 +35,6 @@ jest.mock('./config', () => ({
 describe('Monitoring plugin', () => {
   const coreSetup = coreMock.createSetup();
   coreSetup.http.getServerInfo.mockReturnValue({ port: 5601 } as any);
-  coreSetup.status.overall$.subscribe = jest.fn();
 
   const setupPlugins = {
     usageCollection: {
@@ -40,7 +42,7 @@ describe('Monitoring plugin', () => {
       makeStatsCollector: jest.fn(),
       registerCollector: jest.fn(),
     },
-    alerts: {
+    alerting: {
       registerType: jest.fn(),
     },
   };
@@ -59,20 +61,20 @@ describe('Monitoring plugin', () => {
   const initializerContext = coreMock.createPluginInitializerContext(defaultConfig);
 
   afterEach(() => {
-    (setupPlugins.alerts.registerType as jest.Mock).mockReset();
-    (coreSetup.status.overall$.subscribe as jest.Mock).mockReset();
+    (setupPlugins.alerting.registerType as jest.Mock).mockReset();
   });
 
   it('always create the bulk uploader', async () => {
     const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup, setupPlugins as any);
-    expect(coreSetup.status.overall$.subscribe).toHaveBeenCalled();
+    // eslint-disable-next-line dot-notation
+    expect(plugin['bulkUploader']).not.toBeUndefined();
   });
 
   it('should register all alerts', async () => {
     const alerts = AlertsFactory.getAll();
     const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup as any, setupPlugins as any);
-    expect(setupPlugins.alerts.registerType).toHaveBeenCalledTimes(alerts.length);
+    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(alerts.length);
   });
 });

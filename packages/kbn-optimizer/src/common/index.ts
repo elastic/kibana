@@ -18,3 +18,4 @@ export * from './array_helpers';
 export * from './event_stream_helpers';
 export * from './parse_path';
 export * from './theme_tags';
+export * from './obj_helpers';

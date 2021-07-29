@@ -27,13 +27,9 @@ export const generateTeamAssignments = () => {
       if (flags.src === '') throw createFlagError('please provide a single --src flag');
       if (flags.dest === '') throw createFlagError('please provide a single --dest flag');
 
-      const logCreepAndFlush = pipe(
-        logSuccess(flags.src, log),
-        enumeratePatterns(REPO_ROOT)(log),
-        flush(flags.dest)(log)
-      );
-
-      parse(flags.src).pipe(reduce(toMap, new Map())).subscribe(logCreepAndFlush);
+      parse(flags.src)
+        .pipe(reduce(toMap, new Map()))
+        .subscribe(pipe(enumeratePatterns(REPO_ROOT)(log), flush(flags.dest)));
     },
     {
       description: `
@@ -50,11 +46,4 @@ Create a file defining the team assignments,
 function toMap(acc, x) {
   acc.set(x[0], x[1][0]);
   return acc;
-}
-
-function logSuccess(src, log) {
-  return (dataObj) => {
-    log.verbose(`\n### Parsing [${src}] Complete`);
-    return dataObj;
-  };
 }

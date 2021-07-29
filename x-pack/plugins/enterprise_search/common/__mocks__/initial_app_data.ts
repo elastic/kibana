@@ -8,7 +8,10 @@
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
   ilmEnabled: true,
-  isFederatedAuth: false,
+  searchOAuth: {
+    clientId: 'someUID',
+    redirectUrl: 'http://localhost:3002/ws/search_callback',
+  },
   configuredLimits: {
     appSearch: {
       engine: {
@@ -22,6 +25,10 @@ export const DEFAULT_INITIAL_APP_DATA = {
         totalFields: 64,
       },
     },
+  },
+  access: {
+    hasAppSearchAccess: true,
+    hasWorkplaceSearchAccess: true,
   },
   appSearch: {
     accountId: 'some-id-string',

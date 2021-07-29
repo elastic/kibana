@@ -139,5 +139,7 @@ export function createPluginStartContext<
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
     fatalErrors: deps.fatalErrors,
+    deprecations: deps.deprecations,
+    executionContext: deps.executionContext,
   };
 }

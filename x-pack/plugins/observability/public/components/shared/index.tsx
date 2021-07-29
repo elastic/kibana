@@ -6,7 +6,12 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { CoreVitalProps, HeaderMenuPortalProps } from './types';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
+import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
+
+export { createLazyObservabilityPageTemplate } from './page_template';
+export type { LazyObservabilityPageTemplateProps } from './page_template';
 
 const CoreVitalsLazy = lazy(() => import('./core_web_vitals/index'));
 
@@ -22,8 +27,18 @@ const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));
 
 export function HeaderMenuPortal(props: HeaderMenuPortalProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<EuiLoadingSpinner />}>
       <HeaderMenuPortalLazy {...props} />
+    </Suspense>
+  );
+}
+
+const FieldValueSuggestionsLazy = lazy(() => import('./field_value_suggestions/index'));
+
+export function FieldValueSuggestions(props: FieldValueSuggestionsProps) {
+  return (
+    <Suspense fallback={null}>
+      <FieldValueSuggestionsLazy {...props} />
     </Suspense>
   );
 }

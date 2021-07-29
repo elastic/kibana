@@ -6,58 +6,51 @@
  */
 
 import querystring from 'querystring';
-
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Subscription, Observable } from 'rxjs';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import type { Observable, Subscription } from 'rxjs';
 
-import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
-
-import {
-  LoggerFactory,
+import type {
+  CapabilitiesSetup,
+  HttpServiceSetup,
+  IClusterClient,
   KibanaRequest,
   Logger,
-  HttpServiceSetup,
-  CapabilitiesSetup,
-  IClusterClient,
-} from '../../../../../src/core/server';
+  LoggerFactory,
+} from 'src/core/server';
+import type { Capabilities as UICapabilities } from 'src/core/types';
 
-import {
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../../features/server';
-
-import { SpacesService } from '../plugin';
+import { APPLICATION_PREFIX } from '../../common/constants';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser } from '../../common/model';
+import { canRedirectRequest } from '../authentication';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { SpacesService } from '../plugin';
 import { Actions } from './actions';
-import { checkPrivilegesWithRequestFactory } from './check_privileges';
-import {
-  CheckPrivilegesDynamicallyWithRequest,
-  checkPrivilegesDynamicallyWithRequestFactory,
-} from './check_privileges_dynamically';
-import {
-  CheckSavedObjectsPrivilegesWithRequest,
-  checkSavedObjectsPrivilegesWithRequestFactory,
-} from './check_saved_objects_privileges';
-import { AuthorizationMode, authorizationModeFactory } from './mode';
-import { privilegesFactory, PrivilegesService } from './privileges';
-import { initAppAuthorization } from './app_authorization';
 import { initAPIAuthorization } from './api_authorization';
+import { initAppAuthorization } from './app_authorization';
+import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import type { CheckPrivilegesDynamicallyWithRequest } from './check_privileges_dynamically';
+import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
+import type { CheckSavedObjectsPrivilegesWithRequest } from './check_saved_objects_privileges';
+import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
+import type { AuthorizationMode } from './mode';
+import { authorizationModeFactory } from './mode';
+import type { PrivilegesService } from './privileges';
+import { privilegesFactory } from './privileges';
+import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
+import { ResetSessionPage } from './reset_session_page';
+import type { CheckPrivilegesWithRequest } from './types';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
-import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
-import { APPLICATION_PREFIX } from '../../common/constants';
-import { SecurityLicense } from '../../common/licensing';
-import { CheckPrivilegesWithRequest } from './types';
-import { OnlineStatusRetryScheduler } from '../elasticsearch';
-import { canRedirectRequest } from '../authentication';
-import { ResetSessionPage } from './reset_session_page';
-import { AuthenticatedUser } from '..';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
-export { featurePrivilegeIterator } from './privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
@@ -79,7 +72,7 @@ interface AuthorizationServiceStartParams {
   online$: Observable<OnlineStatusRetryScheduler>;
 }
 
-export interface AuthorizationServiceSetup {
+export interface AuthorizationServiceSetupInternal extends AuthorizationServiceSetup {
   actions: Actions;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
@@ -87,6 +80,22 @@ export interface AuthorizationServiceSetup {
   applicationName: string;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
+}
+
+/**
+ * Authorization services available on the setup contract of the security plugin.
+ */
+export interface AuthorizationServiceSetup {
+  /**
+   * Actions are used to create the "actions" that are associated with Elasticsearch's
+   * application privileges, and are used to perform the authorization checks implemented
+   * by the various `checkPrivilegesWithRequest` derivatives.
+   */
+  actions: Actions;
+  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
+  checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
+  mode: AuthorizationMode;
 }
 
 export class AuthorizationService {
@@ -108,7 +117,7 @@ export class AuthorizationService {
     kibanaIndexName,
     getSpacesService,
     getCurrentUser,
-  }: AuthorizationServiceSetupParams): AuthorizationServiceSetup {
+  }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
@@ -168,25 +177,14 @@ export class AuthorizationService {
 
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
-        const basePath = http.basePath.get(request);
-        const next = `${basePath}${request.url.pathname}${request.url.search}`;
-        const regularBundlePath = `${basePath}/${buildNumber}/bundles`;
-
-        const logoutUrl = http.basePath.prepend(
-          `/api/security/logout?${querystring.stringify({ next })}`
-        );
-        const styleSheetPaths = [
-          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
-          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-          `${basePath}/ui/legacy_light_theme.css`,
-        ];
-
+        const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
         const body = renderToStaticMarkup(
           <ResetSessionPage
-            logoutUrl={logoutUrl}
-            styleSheetPaths={styleSheetPaths}
-            basePath={basePath}
+            buildNumber={buildNumber}
+            basePath={http.basePath}
+            logoutUrl={http.basePath.prepend(
+              `/api/security/logout?${querystring.stringify({ next })}`
+            )}
           />
         );
 

@@ -89,6 +89,73 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+/** Packages which should not be included within production code. */
+const DEV_PACKAGES = [
+  'kbn-babel-code-parser',
+  'kbn-dev-utils',
+  'kbn-cli-dev-mode',
+  'kbn-docs-utils',
+  'kbn-es*',
+  'kbn-eslint*',
+  'kbn-optimizer',
+  'kbn-plugin-generator',
+  'kbn-plugin-helpers',
+  'kbn-pm',
+  'kbn-storybook',
+  'kbn-telemetry-tools',
+  'kbn-test',
+];
+
+/** Directories (at any depth) which include dev-only code. */
+const DEV_DIRECTORIES = [
+  '.storybook',
+  '__tests__',
+  '__test__',
+  '__jest__',
+  '__fixtures__',
+  '__mocks__',
+  '__stories__',
+  'e2e',
+  'fixtures',
+  'ftr_e2e',
+  'integration_tests',
+  'manual_tests',
+  'mock',
+  'storybook',
+  'scripts',
+  'test',
+  'test-d',
+  'test_utils',
+  'test_utilities',
+  'test_helpers',
+  'tests_client_integration',
+];
+
+/** File patterns for dev-only code. */
+const DEV_FILE_PATTERNS = [
+  '*.mock.{js,ts,tsx}',
+  '*.test.{js,ts,tsx}',
+  '*.test.helpers.{js,ts,tsx}',
+  '*.stories.{js,ts,tsx}',
+  '*.story.{js,ts,tsx}',
+  '*.stub.{js,ts,tsx}',
+  'mock.{js,ts,tsx}',
+  '_stubs.{js,ts,tsx}',
+  '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
+  '{postcss,webpack}.config.js',
+];
+
+/** Glob patterns which describe dev-only code. */
+const DEV_PATTERNS = [
+  ...DEV_PACKAGES.map((pkg) => `packages/${pkg}/**/*`),
+  ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
+  ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
+  'packages/kbn-interpreter/tasks/**/*',
+  'src/dev/**/*',
+  'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
+  'x-pack/plugins/*/server/scripts/**/*',
+];
+
 module.exports = {
   root: true,
 
@@ -343,11 +410,7 @@ module.exports = {
                 errorMessage: `Common code can not import from server or public, use a common directory.`,
               },
               {
-                target: [
-                  'src/legacy/**/*',
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'examples/**/*',
-                ],
+                target: ['(src|x-pack)/plugins/**/(public|server)/**/*', 'examples/**/*'],
                 from: [
                   'src/core/public/**/*',
                   '!src/core/public/index.ts', // relative import
@@ -361,8 +424,6 @@ module.exports = {
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils{,.ts}',
-                  '!src/core/server/utils', // ts alias
-                  '!src/core/server/utils/**/*',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
@@ -375,7 +436,6 @@ module.exports = {
               },
               {
                 target: [
-                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
@@ -385,6 +445,8 @@ module.exports = {
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__fixtures__/index.{js,mjs,ts,tsx}',
                 ],
                 allowSameFolder: true,
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
@@ -415,26 +477,13 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: ['plugins/**/*', 'src/plugins/**/*', 'src/legacy/ui/**/*'],
+                from: ['plugins/**/*', 'src/plugins/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
                 from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
-              },
-              {
-                from: ['src/legacy/ui/**/*', 'ui/**/*'],
-                target: [
-                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
-                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
-                ],
-                allowSameFolder: true,
-                errorMessage:
-                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
-                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
-                  'import those things once at the top level of your plugin and pass those down, just ' +
-                  'like you pass down `core` and `plugins` objects.',
               },
             ],
           },
@@ -491,43 +540,17 @@ module.exports = {
     },
 
     /**
-     * Files that ARE NOT allowed to use devDependencies
+     * Single package.json rules, it tells eslint to ignore the child package.json files
+     * and look for dependencies declarations in the single and root level package.json
      */
     {
-      files: ['x-pack/**/*.js', 'packages/kbn-interpreter/**/*.js'],
+      files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
           {
-            devDependencies: false,
-            peerDependencies: true,
-            packageDir: '.',
-          },
-        ],
-      },
-    },
-
-    /**
-     * Files that ARE allowed to use devDependencies
-     */
-    {
-      files: [
-        'packages/kbn-es/src/**/*.js',
-        'packages/kbn-interpreter/tasks/**/*.js',
-        'packages/kbn-interpreter/src/plugin/**/*.js',
-        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
-        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__,public}/**/*.js',
-        'x-pack/**/*.test.js',
-        'x-pack/test_utils/**/*',
-        'x-pack/gulpfile.js',
-        'x-pack/plugins/apm/public/utils/testHelpers.js',
-        'x-pack/plugins/canvas/shareable_runtime/postcss.config.js',
-      ],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            devDependencies: true,
+            /* Files that ARE allowed to use devDependencies */
+            devDependencies: [...DEV_PATTERNS],
             peerDependencies: true,
             packageDir: '.',
           },
@@ -572,7 +595,6 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'src/legacy/ui/ui_render/bootstrap/kbn_bundles_loader_source.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -692,6 +714,33 @@ module.exports = {
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
+                name: 'lodash',
+                importNames: ['template'],
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash.template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/fp',
+                importNames: ['template'],
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/fp/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
                 name: 'react-use',
                 message: 'Please use react-use/lib/{method} instead.',
               },
@@ -711,12 +760,22 @@ module.exports = {
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
+                name: 'lodash.template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
                 name: 'lodash/set',
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
                 name: 'lodash/setWith',
                 message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
               },
             ],
           },
@@ -732,6 +791,18 @@ module.exports = {
             object: '_',
             property: 'set',
             message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: 'lodash',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            object: '_',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
           {
             object: 'lodash',
@@ -788,6 +859,46 @@ module.exports = {
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
+    {
+      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      rules: {
+        'react/function-component-definition': [
+          'off',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
+
+    /**
+     * Fleet overrides
+     */
+    {
+      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
+     * Cases overrides
+     */
+    {
+      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
+      },
+    },
 
     /**
      * Security Solution overrides
@@ -797,9 +908,13 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -811,53 +926,23 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+      ],
       rules: {
-        // This will be turned on after bug fixes are complete
-        // '@typescript-eslint/explicit-member-accessibility': 'warn',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        // This will be turned on after bug fixes are complete
-        // '@typescript-eslint/no-object-literal-type-assertion': 'warn',
         '@typescript-eslint/unified-signatures': 'error',
-
-        // eventually we want this to be a warn and then an error since this is a recommended linter rule
-        // for now, keeping it commented out to avoid too much IDE noise until the other linter issues
-        // are fixed in the next release or two
-        // '@typescript-eslint/explicit-function-return-type': 'warn',
-
-        // these rules cannot be turned on and tested at the moment until this issue is resolved:
-        // https://github.com/prettier/prettier-eslint/issues/201
-        // '@typescript-eslint/await-thenable': 'error',
-        // '@typescript-eslint/no-non-null-assertion': 'error'
-        // '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-        // '@typescript-eslint/no-unused-vars': 'error',
-        // '@typescript-eslint/prefer-includes': 'error',
-        // '@typescript-eslint/prefer-string-starts-ends-with': 'error',
-        // '@typescript-eslint/promise-function-async': 'error',
-        // '@typescript-eslint/prefer-regexp-exec': 'error',
-        // '@typescript-eslint/promise-function-async': 'error',
-        // '@typescript-eslint/require-array-sort-compare': 'error',
-        // '@typescript-eslint/restrict-plus-operands': 'error',
-        // '@typescript-eslint/unbound-method': 'error',
       },
     },
-    // {
-    //   // will introduced after the other warns are fixed
-    //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/plugins/security_solution/public/**/!(*.test).{js,mjs,ts,tsx}'],
-    //   plugins: ['react-perf'],
-    //   rules: {
-    //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
-    //     // 'react-perf/jsx-no-new-array-as-prop': 'error',
-    //     // 'react-perf/jsx-no-new-function-as-prop': 'error',
-    //     // 'react/jsx-no-bind': 'error',
-    //   },
-    // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+      ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         jest: true,
@@ -867,27 +952,12 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        // This will be turned on after bug fixes are mostly completed
-        // 'consistent-return': 'warn',
-        // This will be turned on after bug fixes are mostly completed
-        // 'func-style': ['warn', 'expression'],
-        // These will be turned on after bug fixes are mostly completed and we can
-        // run a fix-lint
-        /*
-        'import/order': [
-          'warn',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-            'newlines-between': 'always',
-          },
-        ],
-        */
         'node/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -921,12 +991,8 @@ module.exports = {
         'no-useless-catch': 'error',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-escape': 'warn',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        // This will be turned on after bug fixers are mostly complete
-        // 'no-void': 'warn',
         'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
@@ -942,9 +1008,6 @@ module.exports = {
         'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
         'react/no-did-mount-set-state': 'error',
-        // Re-enable once we have better options per this issue:
-        // https://github.com/airbnb/javascript/issues/1875
-        // 'react/no-did-update-set-state': 'error',
         'react/no-direct-mutation-state': 'error',
         'react/no-find-dom-node': 'error',
         'react/no-redundant-should-component-update': 'error',
@@ -956,8 +1019,6 @@ module.exports = {
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
-        // will introduced after the other warns are fixed
-        // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
@@ -967,6 +1028,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
       },
     },
 
@@ -991,8 +1053,175 @@ module.exports = {
       },
     },
     {
-      // typescript and javascript for front and back end
+      // typescript for /public and /common
+      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-for-in-array': 'error',
+      },
+    },
+    {
+      // typescript for /public and /common
+      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      plugins: ['react'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/display-name': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        'react/no-children-prop': 'error',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'error',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'error',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        'react/sort-comp': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'react/jsx-sort-default-props': 'error',
+      },
+    },
+    {
+      files: ['x-pack/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      plugins: ['react-perf'],
+      rules: {
+        'react-perf/jsx-no-new-object-as-prop': 'error',
+        'react-perf/jsx-no-new-array-as-prop': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'error',
+        'react/jsx-no-bind': 'error',
+      },
+    },
+    {
+      // typescript and javascript for front and back
       files: ['x-pack/plugins/lists/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['eslint-plugin-node'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
+        'no-array-constructor': 'error',
+        complexity: 'error',
+        'consistent-return': 'error',
+        'func-style': ['error', 'expression'],
+        'import/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+          },
+        ],
+        'sort-imports': [
+          'error',
+          {
+            ignoreDeclarationSort: true,
+          },
+        ],
+        'node/no-deprecated-api': 'error',
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
+        'no-duplicate-imports': 'error',
+        'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
+        'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
+        'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
+        'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
+        'no-param-reassign': ['error', { props: true }],
+        'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
+        'no-return-await': 'error',
+        'no-self-compare': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
+        // rely on typescript
+        'no-undef': 'off',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        'no-useless-catch': 'error',
+        'no-useless-concat': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-escape': 'error',
+        'no-useless-rename': 'error',
+        'no-useless-return': 'error',
+        'no-void': 'error',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        'require-atomic-updates': 'error',
+        'symbol-description': 'error',
+        'vars-on-top': 'error',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        '@typescript-eslint/unified-signatures': 'error',
+        '@typescript-eslint/explicit-function-return-type': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
+        'no-template-curly-in-string': 'error',
+        'sort-keys': 'error',
+        'prefer-destructuring': 'error',
+      },
+    },
+    /**
+     * Metrics entities overrides
+     */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/metrics_entities/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/metrics_entities/common/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
+    {
+      // typescript and javascript for front and back end
+      files: ['x-pack/plugins/metrics_entities/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node'],
       env: {
         jest: true,
@@ -1087,7 +1316,9 @@ module.exports = {
      */
     {
       // typescript for front and back end
-      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1111,6 +1342,22 @@ module.exports = {
     },
 
     /**
+     * Discover overrides
+     */
+    {
+      files: ['src/plugins/discover/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-expect-error': false,
+          },
+        ],
+      },
+    },
+
+    /**
      * Enterprise Search overrides
      * NOTE: We also have a single rule at the bottom of the file that
      * overrides Prettier's default of not linting unnecessary backticks
@@ -1126,7 +1373,7 @@ module.exports = {
             pathGroups: [
               {
                 pattern:
-                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../}{common/,*}__mocks__{*,/**}',
+                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../,./}{common/,*}__mocks__{*,/**}',
                 group: 'unknown',
               },
               {
@@ -1159,7 +1406,7 @@ module.exports = {
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1250,7 +1497,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1270,14 +1517,19 @@ module.exports = {
      * Osquery overrides
      */
     {
-      extends: ['eslint:recommended', 'plugin:react/recommended'],
-      plugins: ['react'],
+      extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+      ],
+      plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
     {
@@ -1314,9 +1566,80 @@ module.exports = {
       },
     },
 
+    /**
+     * Platform Security Team overrides
+     */
     {
       files: [
-        // platform-team owned code
+        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 1,
+        'import/order': [
+          // This rule sorts import declarations
+          'error',
+          {
+            groups: [
+              'unknown',
+              ['builtin', 'external'],
+              'internal',
+              ['parent', 'sibling', 'index'],
+            ],
+            pathGroups: [
+              {
+                pattern: '{**,.}/*.test.mocks',
+                group: 'unknown',
+              },
+              {
+                pattern: '{@kbn/**,src/**,kibana{,/**}}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always',
+          },
+        ],
+        'import/no-duplicates': ['error'],
+        'sort-imports': [
+          // This rule sorts imports of multiple members (destructured imports)
+          'error',
+          {
+            ignoreCase: true,
+            ignoreDeclarationSort: true,
+          },
+        ],
+      },
+    },
+
+    /**
+     * Do not allow `any`
+     */
+    {
+      files: [
+        'packages/kbn-analytics/**',
+        // 'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+    {
+      files: [
+        // core-team owned code
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
@@ -1325,40 +1648,17 @@ module.exports = {
         'packages/kbn-config-schema',
         'src/plugins/status_page/**',
         'src/plugins/saved_objects_management/**',
+        'packages/kbn-analytics/**',
+        'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
-      },
-    },
-    {
-      files: [
-        '**/public/**/*.{js,mjs,ts,tsx}',
-        '**/common/**/*.{js,mjs,ts,tsx}',
-        'packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: ['lodash/*', '!lodash/fp'],
-          },
-        ],
-      },
-    },
-
-    /**
-     * Single package.json rules, it tells eslint to ignore the child package.json files
-     * and look for dependencies declarations in the single and root level package.json
-     */
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: '.',
-          },
-        ],
       },
     },
   ],

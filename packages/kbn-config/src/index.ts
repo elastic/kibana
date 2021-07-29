@@ -6,19 +6,26 @@
  * Side Public License, v 1.
  */
 
-export {
-  applyDeprecations,
-  ConfigDeprecation,
+export type {
   ConfigDeprecationFactory,
-  configDeprecationFactory,
-  ConfigDeprecationLogger,
+  AddConfigDeprecation,
   ConfigDeprecationProvider,
   ConfigDeprecationWithContext,
+  ConfigDeprecation,
+  ConfigDeprecationCommand,
+  ChangedDeprecatedPaths,
 } from './deprecation';
 
-export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';
+export { applyDeprecations, configDeprecationFactory } from './deprecation';
 
-export { ConfigService, IConfigService } from './config_service';
+export {
+  RawConfigurationProvider,
+  RawConfigService,
+  RawConfigAdapter,
+  getConfigFromFiles,
+} from './raw';
+
+export { ConfigService, IConfigService, ConfigValidateParameters } from './config_service';
 export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env, RawPackageInfo } from './env';

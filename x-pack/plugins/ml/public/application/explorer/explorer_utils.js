@@ -26,7 +26,6 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
-import { mlResultsService } from '../services/results_service';
 import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
@@ -65,6 +64,7 @@ export function getDefaultSwimlaneData() {
 }
 
 export async function loadFilteredTopInfluencers(
+  mlResultsService,
   jobIds,
   earliestMs,
   latestMs,
@@ -125,6 +125,7 @@ export async function loadFilteredTopInfluencers(
   });
 
   return await loadTopInfluencers(
+    mlResultsService,
     jobIds,
     earliestMs,
     latestMs,
@@ -384,6 +385,57 @@ export function getViewBySwimlaneOptions({
   };
 }
 
+export function loadOverallAnnotations(selectedJobs, interval, bounds) {
+  const jobIds = selectedJobs.map((d) => d.id);
+  const timeRange = getSelectionTimeRange(undefined, interval, bounds);
+
+  return new Promise((resolve) => {
+    ml.annotations
+      .getAnnotations$({
+        jobIds,
+        earliestMs: timeRange.earliestMs,
+        latestMs: timeRange.latestMs,
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+      })
+      .toPromise()
+      .then((resp) => {
+        if (resp.error !== undefined || resp.annotations === undefined) {
+          const errorMessage = extractErrorMessage(resp.error);
+          return resolve({
+            annotationsData: [],
+            error: errorMessage !== '' ? errorMessage : undefined,
+          });
+        }
+
+        const annotationsData = [];
+        jobIds.forEach((jobId) => {
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
+          }
+        });
+
+        return resolve({
+          annotationsData: annotationsData
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = (i + 1).toString();
+              return d;
+            }),
+        });
+      })
+      .catch((resp) => {
+        const errorMessage = extractErrorMessage(resp);
+        return resolve({
+          annotationsData: [],
+          error: errorMessage !== '' ? errorMessage : undefined,
+        });
+      });
+  });
+}
+
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds =
     selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
@@ -535,61 +587,8 @@ export async function loadAnomaliesTableData(
   });
 }
 
-// track the request to be able to ignore out of date requests
-// and avoid race conditions ending up with the wrong charts.
-let requestCount = 0;
-export async function loadDataForCharts(
-  jobIds,
-  earliestMs,
-  latestMs,
-  influencers = [],
-  selectedCells,
-  influencersFilterQuery
-) {
-  return new Promise((resolve) => {
-    // Just skip doing the request when this function
-    // is called without the minimum required data.
-    if (
-      selectedCells === undefined &&
-      influencers.length === 0 &&
-      influencersFilterQuery === undefined
-    ) {
-      resolve([]);
-    }
-
-    const newRequestCount = ++requestCount;
-    requestCount = newRequestCount;
-
-    // Load the top anomalies (by record_score) which will be displayed in the charts.
-    mlResultsService
-      .getRecordsForInfluencer(
-        jobIds,
-        influencers,
-        0,
-        earliestMs,
-        latestMs,
-        500,
-        influencersFilterQuery
-      )
-      .then((resp) => {
-        // Ignore this response if it's returned by an out of date promise
-        if (newRequestCount < requestCount) {
-          resolve([]);
-        }
-
-        if (
-          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
-          influencersFilterQuery !== undefined
-        ) {
-          resolve(resp.records);
-        }
-
-        resolve([]);
-      });
-  });
-}
-
 export async function loadTopInfluencers(
+  mlResultsService,
   selectedJobIds,
   earliestMs,
   latestMs,

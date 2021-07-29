@@ -8,15 +8,8 @@
     "devOnly": true
   },
   "main": "target/index.js",
+  "types": "target/index.d.ts",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
-  },
-  "scripts": {
-    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
-    "kbn:watch": "../../node_modules/.bin/tsc --watch"
-  },
-  "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/optimizer": "link:../kbn-optimizer"
   }
 }

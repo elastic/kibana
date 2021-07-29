@@ -7,14 +7,14 @@
 
 import { AnomalyResultType } from './anomalies';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import { AlertTypeParams } from '../../../alerts/common';
+import type { AlertTypeParams, Alert } from '../../../alerting/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
 
 export interface AlertExecutionResult {
   count: number;
-  key: number;
+  key?: number;
   alertInstanceKey: string;
   isInterim: boolean;
   jobIds: string[];
@@ -25,6 +25,7 @@ export interface AlertExecutionResult {
   bucketRange: { start: string; end: string };
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
+  message: string;
 }
 
 export interface PreviewResponse {
@@ -93,4 +94,52 @@ export type MlAnomalyDetectionAlertParams = {
   severity: number;
   resultType: AnomalyResultType;
   includeInterim: boolean;
+  lookbackInterval: string | null | undefined;
+  topNBuckets: number | null | undefined;
 } & AlertTypeParams;
+
+export type MlAnomalyDetectionAlertAdvancedSettings = Pick<
+  MlAnomalyDetectionAlertParams,
+  'lookbackInterval' | 'topNBuckets'
+>;
+
+export type MlAnomalyDetectionAlertRule = Omit<Alert<MlAnomalyDetectionAlertParams>, 'apiKey'>;
+
+export interface JobAlertingRuleStats {
+  alerting_rules?: MlAnomalyDetectionAlertRule[];
+}
+
+interface CommonHealthCheckConfig {
+  enabled: boolean;
+}
+
+export type MlAnomalyDetectionJobsHealthRuleParams = {
+  includeJobs: {
+    jobIds?: string[];
+    groupIds?: string[];
+  };
+  excludeJobs?: {
+    jobIds?: string[];
+    groupIds?: string[];
+  } | null;
+  testsConfig?: {
+    datafeed?: CommonHealthCheckConfig | null;
+    mml?: CommonHealthCheckConfig | null;
+    delayedData?:
+      | (CommonHealthCheckConfig & {
+          docsCount?: number | null;
+          timeInterval?: string | null;
+        })
+      | null;
+    behindRealtime?:
+      | (CommonHealthCheckConfig & {
+          timeInterval?: string | null;
+        })
+      | null;
+    errorMessages?: CommonHealthCheckConfig | null;
+  } | null;
+} & AlertTypeParams;
+
+export type JobsHealthRuleTestsConfig = MlAnomalyDetectionJobsHealthRuleParams['testsConfig'];
+
+export type JobsHealthTests = keyof Exclude<JobsHealthRuleTestsConfig, null | undefined>;

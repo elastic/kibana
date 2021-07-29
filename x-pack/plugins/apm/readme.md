@@ -31,19 +31,19 @@ _Docker Compose is required_
 
 ## Testing
 
-### E2E (Cypress) tests
+### Cypress tests
 
 ```sh
-x-pack/plugins/apm/e2e/run-e2e.sh
+node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js
 ```
 
 _Starts Kibana (:5701), APM Server (:8201) and Elasticsearch (:9201). Ingests sample data into Elasticsearch via APM Server and runs the Cypress tests_
 
-### Unit testing
+### Jest tests
 
 Note: Run the following commands from `kibana/x-pack/plugins/apm`.
 
-#### Run unit tests
+#### Run
 
 ```
 npx jest --watch
@@ -82,8 +82,11 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### API integration tests
 
-Our tests are separated in two suites: one suite runs with a basic license, and the other
-with a trial license (the equivalent of gold+). This requires separate test servers and test runners.
+API tests are separated in two suites: 
+ - a basic license test suite
+ - a trial license test suite (the equivalent of gold+)
+
+This requires separate test servers and test runners.
 
 **Basic**
 
@@ -109,7 +112,10 @@ node scripts/functional_test_runner --config x-pack/test/apm_api_integration/tri
 
 The API tests for "trial" are located in `x-pack/test/apm_api_integration/trial/tests`.
 
-For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+
+**API Test tips**
+ - For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+ - To update snapshots append `--updateSnapshots` to the functional_test_runner command
 
 ## Linting
 
@@ -118,7 +124,7 @@ _Note: Run the following commands from `kibana/`._
 ### Typescript
 
 ```
-yarn tsc --noEmit --project x-pack/plugins/apm/tsconfig.json --skipLibCheck
+node scripts/type_check.js --project x-pack/plugins/apm/tsconfig.json
 ```
 
 ### Prettier
@@ -130,7 +136,7 @@ yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
 ### ESLint
 
 ```
-yarn eslint ./x-pack/plugins/apm --fix
+node scripts/eslint.js x-pack/legacy/plugins/apm
 ```
 
 ## Setup default APM users
@@ -154,10 +160,10 @@ The users will be created with the password specified in kibana.dev.yml for `ela
 
 ## Debugging Elasticsearch queries
 
-All APM api endpoints accept `_debug=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
+All APM api endpoints accept `_inspect=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
 
 Example:
-`/api/apm/services/my_service?_debug=true`
+`/api/apm/services/my_service?_inspect=true`
 
 ## Storybook
 

@@ -7,10 +7,18 @@
 
 import { getBannerInfoMock } from './plugin.test.mocks';
 import { coreMock } from '../../../../src/core/public/mocks';
+import { BannerConfiguration } from '../common/types';
 import { BannersPlugin } from './plugin';
-import { BannerClientConfig } from './types';
 
 const nextTick = async () => await new Promise<void>((resolve) => resolve());
+
+const createBannerConfig = (parts: Partial<BannerConfiguration> = {}): BannerConfiguration => ({
+  placement: 'disabled',
+  textContent: 'foo',
+  textColor: '#FFFFFF',
+  backgroundColor: '#000000',
+  ...parts,
+});
 
 describe('BannersPlugin', () => {
   let plugin: BannersPlugin;
@@ -25,11 +33,12 @@ describe('BannersPlugin', () => {
 
     getBannerInfoMock.mockResolvedValue({
       allowed: false,
+      banner: createBannerConfig(),
     });
   });
 
-  const startPlugin = async (config: BannerClientConfig) => {
-    pluginInitContext = coreMock.createPluginInitializerContext(config);
+  const startPlugin = async () => {
+    pluginInitContext = coreMock.createPluginInitializerContext();
     plugin = new BannersPlugin(pluginInitContext);
     plugin.setup(coreSetup);
     plugin.start(coreStart);
@@ -41,46 +50,62 @@ describe('BannersPlugin', () => {
     getBannerInfoMock.mockReset();
   });
 
-  it('calls `getBannerInfo` if `config.placement !== disabled`', async () => {
-    await startPlugin({
-      placement: 'header',
+  describe('when banner is allowed', () => {
+    it('registers the header banner if `banner.placement` is `top`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'top',
+        }),
+      });
+
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
+        content: expect.any(Function),
+      });
     });
 
-    expect(getBannerInfoMock).toHaveBeenCalledTimes(1);
+    it('does not register the header banner if `banner.placement` is `disabled`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'disabled',
+        }),
+      });
+
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
+    });
   });
 
-  it('does not call `getBannerInfo` if `config.placement === disabled`', async () => {
-    await startPlugin({
-      placement: 'disabled',
+  describe('when banner is not allowed', () => {
+    it('does not register the header banner if `banner.placement` is `top`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: false,
+        banner: createBannerConfig({
+          placement: 'top',
+        }),
+      });
+
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
     });
 
-    expect(getBannerInfoMock).not.toHaveBeenCalled();
-  });
+    it('does not register the header banner if `banner.placement` is `disabled`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: false,
+        banner: createBannerConfig({
+          placement: 'disabled',
+        }),
+      });
 
-  it('registers the header banner if `getBannerInfo` return `allowed=true`', async () => {
-    getBannerInfoMock.mockResolvedValue({
-      allowed: true,
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
     });
-
-    await startPlugin({
-      placement: 'header',
-    });
-
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
-      content: expect.any(Function),
-    });
-  });
-
-  it('does not register the header banner if `getBannerInfo` return `allowed=false`', async () => {
-    getBannerInfoMock.mockResolvedValue({
-      allowed: false,
-    });
-
-    await startPlugin({
-      placement: 'header',
-    });
-
-    expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
   });
 });

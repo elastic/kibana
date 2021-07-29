@@ -18,7 +18,7 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { cloneActionNameText, CloneActionName } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
-export const useCloneAction = (forceDisable: boolean) => {
+export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
   const history = useHistory();
   const appDeps = useAppDependencies();
   const savedObjectsClient = appDeps.savedObjects.client;
@@ -72,14 +72,14 @@ export const useCloneAction = (forceDisable: boolean) => {
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => <CloneActionName disabled={!canCreateTransform} />,
-      enabled: () => canCreateTransform && !forceDisable,
+      enabled: () => canCreateTransform && !forceDisable && transformNodes > 0,
       description: cloneActionNameText,
       icon: 'copy',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'transformActionClone',
     }),
-    [canCreateTransform, forceDisable, clickHandler]
+    [canCreateTransform, forceDisable, clickHandler, transformNodes]
   );
 
   return { action };

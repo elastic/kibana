@@ -6,8 +6,6 @@
  */
 
 import { RefObject } from 'react';
-// @ts-expect-error Unlinked Webpack Type
-import ContainerStyle from 'types/interpreter';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
@@ -26,15 +24,14 @@ export interface CanvasRenderedElement {
  * Represents a Page within a Canvas Workpad that is made up of ready-to-
  * render Elements.
  */
-export interface CanvasRenderedPage extends Omit<Omit<CanvasPage, 'elements'>, 'groups'> {
+export interface CanvasRenderedPage extends Omit<CanvasPage, 'elements'> {
   elements: CanvasRenderedElement[];
-  groups: CanvasRenderedElement[][];
 }
 
 /**
  * A Canvas Workpad made up of ready-to-render Elements.
  */
-export interface CanvasRenderedWorkpad extends Omit<CanvasWorkpad, 'pages'> {
+export interface CanvasRenderedWorkpad extends Omit<CanvasWorkpad, 'pages' | 'variables'> {
   pages: CanvasRenderedPage[];
 }
 
@@ -52,7 +49,7 @@ export interface CanvasRenderable {
   state: 'ready' | 'error';
   value: {
     as: string;
-    containerStyle: ContainerStyle;
+    containerStyle: any;
     css: string;
     type: 'render';
     value: any;

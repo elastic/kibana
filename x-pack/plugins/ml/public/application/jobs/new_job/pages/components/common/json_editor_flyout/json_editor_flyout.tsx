@@ -25,7 +25,9 @@ import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anom
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
+import { isAdvancedJobCreator } from '../../../../common/job_creator';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
+import { useToastNotificationService } from '../../../../../../services/toast_notification_service';
 
 export enum EDITOR_MODE {
   HIDDEN,
@@ -40,6 +42,7 @@ interface Props {
 }
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [showChangedIndicesWarning, setShowChangedIndicesWarning] = useState(false);
 
@@ -120,10 +123,23 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     setSaveable(valid);
   }
 
-  function onSave() {
+  async function onSave() {
     const jobConfig = JSON.parse(jobConfigString);
     const datafeedConfig = JSON.parse(collapseLiteralStrings(datafeedConfigString));
     jobCreator.cloneFromExistingJob(jobConfig, datafeedConfig);
+    if (isAdvancedJobCreator(jobCreator)) {
+      try {
+        await jobCreator.autoSetTimeRange();
+      } catch (error) {
+        const title = i18n.translate(
+          'xpack.ml.newJob.wizard.jsonFlyout.autoSetJobCreatorTimeRange.error',
+          {
+            defaultMessage: `Error retrieving beginning and end times of index`,
+          }
+        );
+        displayErrorToast(error, title);
+      }
+    }
     jobCreatorUpdate();
     setShowJsonFlyout(false);
   }

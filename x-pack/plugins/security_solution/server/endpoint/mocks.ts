@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
+import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerts/server/mocks';
-import { xpackMocks } from '../../../../mocks';
+import { alertsMock } from '../../../alerting/server/mocks';
+import { xpackMocks } from '../fixtures';
 import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
+  createArtifactsClientMock,
 } from '../../../fleet/server/mocks';
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
@@ -27,9 +28,16 @@ import { ManifestManager } from './services/artifacts/manifest_manager/manifest_
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
-// import { licenseMock } from '../../../licensing/common/licensing.mock';
-import { LicenseService } from '../../common/license/license';
+import { LicenseService } from '../../common/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
+import { parseExperimentalConfigValue } from '../../common/experimental_features';
+// A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
+// plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
+// file and not bundled with the application, adding a eslint disable below and using import from
+// a restricted path.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createCasesClientMock } from '../../../cases/server/client/mocks';
+import { EndpointMetadataService } from './services/metadata';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -41,6 +49,7 @@ export const createMockEndpointAppContext = (
     logFactory: loggingSystemMock.create(),
     config: () => Promise.resolve(createMockConfig()),
     service: createMockEndpointAppContextService(mockManifestManager),
+    experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
   };
 };
 
@@ -53,10 +62,10 @@ export const createMockEndpointAppContextService = (
   return ({
     start: jest.fn(),
     stop: jest.fn(),
+    getExperimentalFeatures: jest.fn(),
     getAgentService: jest.fn(),
     getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
-    getScopedSavedObjectsClient: jest.fn(),
   } as unknown) as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -66,16 +75,28 @@ export const createMockEndpointAppContextService = (
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<EndpointAppContextServiceStartContract> => {
   const factory = new AppClientFactory();
   const config = createMockConfig();
+  const casesClientMock = createCasesClientMock();
+  const savedObjectsStart = savedObjectsServiceMock.createStartContract();
+  const agentService = createMockAgentService();
+  const agentPolicyService = createMockAgentPolicyService();
+  const endpointMetadataService = new EndpointMetadataService(
+    savedObjectsStart,
+    agentService,
+    agentPolicyService
+  );
+
   factory.setup({ getSpaceId: () => 'mockSpace', config });
+
   return {
-    agentService: createMockAgentService(),
+    agentService,
+    agentPolicyService,
+    endpointMetadataService,
     packageService: createMockPackageService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
-    security: securityMock.createSetup(),
-    alerts: alertsMock.createStart(),
+    security: securityMock.createStart(),
+    alerting: alertsMock.createStart(),
     config,
     licenseService: new LicenseService(),
     registerIngestCallback: jest.fn<
@@ -83,6 +104,10 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
       Parameters<FleetStartContract['registerExternalCallback']>
     >(),
     exceptionListsClient: listMock.getExceptionListClient(),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    cases: {
+      getCasesClientWithRequest: jest.fn(async () => casesClientMock),
+    },
   };
 };
 
@@ -92,7 +117,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 
 export const createMockPackageService = (): jest.Mocked<PackageService> => {
   return {
-    getInstalledEsAssetReferences: jest.fn(),
+    getInstallation: jest.fn(),
   };
 };
 
@@ -105,6 +130,7 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
  */
 export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
+    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
@@ -113,6 +139,7 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     agentPolicyService: createMockAgentPolicyService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
+    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
   };
 };
 
@@ -125,11 +152,11 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<ILegacyScopedClusterClient>,
+  dataClient: jest.Mocked<IScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
-  const context = xpackMocks.createRequestHandlerContext();
-  context.core.elasticsearch.legacy.client = dataClient;
+  const context = (xpackMocks.createRequestHandlerContext() as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -12,10 +13,9 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // Failing: See https://github.com/elastic/kibana/issues/91450
-  describe.skip('classification creation', function () {
+  describe('classification creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -26,16 +26,23 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
+    const jobId = `bm_1_${Date.now()}`;
     const testDataList = [
       {
         suiteTitle: 'bank marketing',
         jobType: 'classification',
-        jobId: `bm_1_${Date.now()}`,
+        jobId,
         jobDescription:
           "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
         source: 'ft_bank_marketing',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
+        },
+        runtimeFields: {
+          uppercase_y: {
+            type: 'keyword',
+            script: 'emit(params._source.y.toUpperCase())',
+          },
         },
         dependentVariable: 'y',
         trainingPercent: 20,
@@ -43,30 +50,42 @@ export default function ({ getService }: FtrProviderContext) {
         createIndexPattern: true,
         expected: {
           rocCurveColorState: [
-            // background
-            { key: '#FFFFFF', value: 93 },
             // tick/grid/axis
-            { key: '#98A2B3', value: 1 },
-            { key: '#DDDDDD', value: 3 },
+            { color: '#DDDDDD', percentage: 50 },
             // line
-            { key: '#6092C0', value: 1 },
+            { color: '#98A2B3', percentage: 30 },
           ],
           scatterplotMatrixColorStats: [
-            // background
-            { key: '#000000', value: 94 },
+            // marker colors
+            { color: '#7FC6B3', percentage: 1 },
+            { color: '#88ADD0', percentage: 0.03 },
             // tick/grid/axis
-            { key: '#DDDDDD', value: 1 },
-            { key: '#D3DAE6', value: 1 },
-            { key: '#F5F7FA', value: 1 },
-            // scatterplot circles
-            { key: '#6A717D', value: 1 },
-            { key: '#54B39A', value: 1 },
+            { color: '#DDDDDD', percentage: 8 },
+            { color: '#D3DAE6', percentage: 8 },
+            { color: '#F5F7FA', percentage: 15 },
           ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_y": {', '    "type": "keyword",'],
           row: {
             type: 'classification',
             status: 'stopped',
             progress: '100',
           },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: jobId,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":1862,"test_docs_count":7452,"skipped_docs_count":0}',
+                  description:
+                    "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
         },
       },
     ];
@@ -83,6 +102,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
 
           await ml.testExecution.logTestStep('loads the source selection modal');
+
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await ml.commonUI.disableAntiAliasing();
+
           await ml.dataFrameAnalytics.startAnalyticsCreation();
 
           await ml.testExecution.logTestStep(
@@ -96,6 +119,22 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('selects the job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(testData.jobType);
+
+          await ml.testExecution.logTestStep('displays the runtime mappings editor switch');
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingSwitchExists();
+
+          await ml.testExecution.logTestStep('enables the runtime mappings editor');
+          await ml.dataFrameAnalyticsCreation.toggleRuntimeMappingsEditorSwitch(true);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(['']);
+
+          await ml.testExecution.logTestStep('sets runtime mappings');
+          await ml.dataFrameAnalyticsCreation.setRuntimeMappingsEditorContent(
+            JSON.stringify(testData.runtimeFields)
+          );
+          await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
+            testData.expected.runtimeFieldsEditorContent
+          );
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
@@ -111,9 +150,18 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
+
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
 
@@ -152,6 +200,18 @@ export default function ({ getService }: FtrProviderContext) {
             testData.createIndexPattern
           );
 
+          await ml.testExecution.logTestStep('continues to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('checks validation callouts exist');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          // Expect the follow callouts:
+          // - ✓ Dependent variable
+          // - ✓ Training percent
+          // - ✓ Top classes
+          // - ⚠ Analysis fields
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
+
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
@@ -188,6 +248,11 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
+            testData.jobId,
+            testData.expected.rowDetails
+          );
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {
@@ -231,18 +296,39 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
           await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlDFAnalyticsClassificationExplorationRocCurveChart',
-            testData.expected.rocCurveColorState
-          );
           await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlDFExpandableSection-splom',
+
+          await ml.testExecution.logTestStep('displays the ROC curve chart');
+          await ml.commonUI.assertColorsInCanvasElement(
+            'mlDFAnalyticsClassificationExplorationRocCurveChart',
+            testData.expected.rocCurveColorState,
+            ['#000000'],
+            undefined,
+            undefined,
+            // increased tolerance for ROC curve chart up from 10 to 20
+            // since the returned colors vary quite a bit on each run.
+            20
+          );
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {

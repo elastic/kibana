@@ -15,6 +15,7 @@ import type {
   CombinedJobWithStats,
   Job,
   Datafeed,
+  IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
@@ -26,7 +27,7 @@ import type {
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import type { Category } from '../../../../common/types/categories';
-import type { JobsExistResponse } from '../../../../common/types/job_service';
+import type { JobsExistResponse, BulkCreateResults } from '../../../../common/types/job_service';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
@@ -76,7 +77,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  updateGroups(updatedJobs: string[]) {
+  updateGroups(updatedJobs: Array<{ jobId: string; groups: string[] }>) {
     const body = JSON.stringify({ jobs: updatedJobs });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/update_groups`,
@@ -135,13 +136,36 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobAuditMessages(jobId: string, from?: number) {
+  jobAuditMessages({
+    jobId,
+    from,
+    start,
+    end,
+  }: {
+    jobId: string;
+    from?: number;
+    start?: string;
+    end?: string;
+  }) {
     const jobIdString = jobId !== undefined ? `/${jobId}` : '';
-    const query = from !== undefined ? { from } : {};
+    const query = {
+      ...(from !== undefined ? { from } : {}),
+      ...(start !== undefined && end !== undefined ? { start, end } : {}),
+    };
+
     return httpService.http<JobMessage[]>({
       path: `${ML_BASE_PATH}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',
       query,
+    });
+  },
+
+  clearJobAuditMessages(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ success: boolean; latest_cleared: number }>({
+      path: `${ML_BASE_PATH}/job_audit_messages/clear_messages`,
+      method: 'PUT',
+      body,
     });
   },
 
@@ -189,7 +213,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
     splitFieldValue: string | null,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -202,6 +227,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       splitFieldName,
       splitFieldValue,
       runtimeMappings,
+      indicesOptions,
     });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/new_job_line_chart`,
@@ -219,7 +245,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -231,6 +258,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       aggFieldNamePairs,
       splitFieldName,
       runtimeMappings,
+      indicesOptions,
     });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/new_job_population_chart`,
@@ -268,7 +296,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     start: number,
     end: number,
     analyzer: CategorizationAnalyzer,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -280,6 +309,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       end,
       analyzer,
       runtimeMappings,
+      indicesOptions,
     });
     return httpService.http<{
       examples: CategoryFieldExample[];
@@ -318,6 +348,27 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       categories: Array<{ count?: number; category: Category }>;
     }>({
       path: `${ML_BASE_PATH}/jobs/revert_model_snapshot`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  datafeedPreview(datafeedId?: string, job?: Job, datafeed?: Datafeed) {
+    const body = JSON.stringify({ datafeedId, job, datafeed });
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
+      path: `${ML_BASE_PATH}/jobs/datafeed_preview`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  bulkCreateJobs(jobs: { job: Job; datafeed: Datafeed } | Array<{ job: Job; datafeed: Datafeed }>) {
+    const body = JSON.stringify(jobs);
+    return httpService.http<BulkCreateResults>({
+      path: `${ML_BASE_PATH}/jobs/bulk_create`,
       method: 'POST',
       body,
     });

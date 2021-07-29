@@ -6,7 +6,7 @@
  */
 
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { AlertsClient } from '../../../../alerts/server';
+import { RulesClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import {
   CommonAlertStatus,
@@ -17,7 +17,7 @@ import { ALERTS } from '../../../common/constants';
 import { MonitoringLicenseService } from '../../types';
 
 export async function fetchStatus(
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
   clusterUuids: string[],
@@ -27,7 +27,7 @@ export async function fetchStatus(
   const byType: { [type: string]: CommonAlertStatus } = {};
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
-      const alert = await AlertsFactory.getByType(type, alertsClient);
+      const alert = await AlertsFactory.getByType(type, rulesClient);
       if (!alert || !alert.rawAlert) {
         return;
       }
@@ -45,11 +45,13 @@ export async function fetchStatus(
       }
 
       // Now that we have the id, we can get the state
-      const states = await alert.getStates(alertsClient, id, filters);
+      const states = await alert.getStates(rulesClient, id, filters);
       if (!states) {
         return result;
       }
-
+      // puts all alert states associated with this rule into a flat array.  this works with both the legacy alert
+      // of having multiple alert states per alert, each representing a firing node, and the current alert where each firing
+      // node is an alert with a single alert state, the node itself. https://github.com/elastic/kibana/pull/102544
       result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
         const alertInstanceState = instance.state as AlertInstanceState;
         if (!alertInstanceState.alertStates) {

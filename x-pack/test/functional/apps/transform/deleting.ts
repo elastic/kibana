@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {
@@ -99,10 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
             );
 
             await transform.testExecution.logTestStep('should stop the transform');
-            await transform.table.clickTransformRowActionWithRetry(
-              testData.originalConfig.id,
-              'Stop'
-            );
+            await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Stop');
           }
 
           await transform.testExecution.logTestStep('should display the stopped transform');
@@ -120,10 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
             'Delete',
             true
           );
-          await transform.table.clickTransformRowActionWithRetry(
-            testData.originalConfig.id,
-            'Delete'
-          );
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Delete');
           await transform.table.assertTransformDeleteModalExists();
 
           await transform.testExecution.logTestStep('should delete the transform');

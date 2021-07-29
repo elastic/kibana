@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,12 +13,14 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 
-import { Boost, BoostType, ProximityBoostFunction } from '../../types';
+import { ProximityBoost, BoostType, ProximityBoostFunction } from '../../types';
 
 import { ProximityBoostForm } from './proximity_boost_form';
 
 describe('ProximityBoostForm', () => {
-  const boost: Boost = {
+  const boost: ProximityBoost = {
+    value: undefined,
+    operation: undefined,
     factor: 2,
     type: 'proximity' as BoostType,
     function: 'linear' as ProximityBoostFunction,
@@ -46,8 +48,8 @@ describe('ProximityBoostForm', () => {
 
   describe('various boost values', () => {
     const renderWithBoostValues = (boostValues: {
-      center?: Boost['center'];
-      function?: Boost['function'];
+      center?: ProximityBoost['center'];
+      function?: ProximityBoost['function'];
     }) => {
       return shallow(
         <ProximityBoostForm

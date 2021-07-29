@@ -54,6 +54,18 @@ describe('Modal all errors', () => {
         mockToastWithTwoError.errors.length
       );
     });
+
+    // This test exists to ensure that errors will work if it is a non-array which can happen in rare corner cases.
+    test('it doesnt cause errors when errors is not an array which can be the rare case in corner cases', () => {
+      const mockToastWithTwoError = cloneDeep(mockToast);
+      mockToastWithTwoError.errors = ('' as unknown) as string[];
+      const wrapper = shallow(
+        <ModalAllErrors isShowing={true} toast={mockToastWithTwoError} toggle={toggle} />
+      );
+      expect(wrapper.find('[data-test-subj="modal-all-errors-accordion"]').length).toBe(
+        mockToastWithTwoError.errors.length
+      );
+    });
   });
 
   describe('events', () => {

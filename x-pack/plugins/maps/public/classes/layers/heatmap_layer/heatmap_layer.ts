@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
+import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor, MapQuery } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { addGeoJsonMbSource, syncVectorSource } from '../vector_layer';
+import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
 
@@ -43,6 +43,12 @@ export class HeatmapLayer extends AbstractLayer {
       this._style = new HeatmapStyle(defaultStyle);
     } else {
       this._style = new HeatmapStyle(layerDescriptor.style);
+    }
+  }
+
+  destroy() {
+    if (this.getSource()) {
+      this.getSource().destroy();
     }
   }
 
@@ -105,6 +111,9 @@ export class HeatmapLayer extends AbstractLayer {
         },
         syncContext,
         source: this.getSource(),
+        getUpdateDueToTimeslice: () => {
+          return true;
+        },
       });
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
@@ -178,5 +187,30 @@ export class HeatmapLayer extends AbstractLayer {
   renderLegendDetails() {
     const metricFields = this.getSource().getMetricFields();
     return this.getCurrentStyle().renderLegendDetails(metricFields[0]);
+  }
+
+  async getBounds(syncContext: DataRequestContext) {
+    return await getVectorSourceBounds({
+      layerId: this.getId(),
+      syncContext,
+      source: this.getSource(),
+      sourceQuery: this.getQuery() as MapQuery,
+    });
+  }
+
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    return this.getSource().getApplyGlobalTime() && (await this.getSource().isTimeAware());
+  }
+
+  getIndexPatternIds() {
+    return this.getSource().getIndexPatternIds();
+  }
+
+  getQueryableIndexPatternIds() {
+    return this.getSource().getQueryableIndexPatternIds();
+  }
+
+  async getLicensedFeatures() {
+    return await this.getSource().getLicensedFeatures();
   }
 }

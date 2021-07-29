@@ -12,7 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -356,18 +356,9 @@ export class DetailPanel extends Component {
                     </h3>
                   </EuiTitle>
                   <EuiSpacer size="s" />
-                  <EuiCodeEditor
-                    mode="json"
-                    theme="textmate"
-                    width="100%"
-                    isReadOnly
-                    setOptions={{ maxLines: Infinity }}
-                    value={JSON.stringify(shard, null, 2)}
-                    editorProps={{
-                      $blockScrolling: Infinity,
-                    }}
-                    data-test-subj={`shardsStats${i}`}
-                  />
+                  <EuiCodeBlock language="json" data-test-subj="shardsStats">
+                    {JSON.stringify(shard, null, 2)}
+                  </EuiCodeBlock>
                 </Fragment>
               ))}
           </section>

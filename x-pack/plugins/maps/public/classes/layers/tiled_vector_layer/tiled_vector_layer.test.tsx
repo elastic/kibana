@@ -7,6 +7,7 @@
 
 import { MockSyncContext } from '../__fixtures__/mock_sync_context';
 import sinon from 'sinon';
+import url from 'url';
 
 jest.mock('../../../kibana_services', () => {
   return {
@@ -37,7 +38,9 @@ const defaultConfig = {
 
 function createLayer(
   layerOptions: Partial<VectorLayerDescriptor> = {},
-  sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {}
+  sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {},
+  isTimeAware: boolean = false,
+  includeToken: boolean = false
 ): TiledVectorLayer {
   const sourceDescriptor: TiledSingleLayerVectorSourceDescriptor = {
     type: SOURCE_TYPES.MVT_SINGLE_LAYER,
@@ -47,6 +50,27 @@ function createLayer(
     ...sourceOptions,
   };
   const mvtSource = new MVTSingleLayerVectorSource(sourceDescriptor);
+  if (isTimeAware) {
+    mvtSource.isTimeAware = async () => {
+      return true;
+    };
+    mvtSource.getApplyGlobalTime = () => {
+      return true;
+    };
+  }
+
+  if (includeToken) {
+    mvtSource.getUrlTemplateWithMeta = async (...args) => {
+      const superReturn = await MVTSingleLayerVectorSource.prototype.getUrlTemplateWithMeta.call(
+        mvtSource,
+        ...args
+      );
+      return {
+        ...superReturn,
+        refreshTokenParamName: 'token',
+      };
+    };
+  }
 
   const defaultLayerOptions = {
     ...layerOptions,
@@ -72,7 +96,7 @@ describe('visiblity', () => {
 });
 
 describe('icon', () => {
-  it('should use vector icon', async () => {
+  it('should use no data icon', async () => {
     const layer: TiledVectorLayer = createLayer({}, {});
 
     const iconAndTooltipContent = layer.getCustomIconAndTooltipContent();
@@ -103,68 +127,115 @@ describe('syncData', () => {
 
     // @ts-expect-error
     const call = syncContext.stopLoading.getCall(0);
-    expect(call.args[2]).toEqual(defaultConfig);
+    expect(call.args[2]!.minSourceZoom).toEqual(defaultConfig.minSourceZoom);
+    expect(call.args[2]!.maxSourceZoom).toEqual(defaultConfig.maxSourceZoom);
+    expect(call.args[2]!.layerName).toEqual(defaultConfig.layerName);
+    expect(call.args[2]!.urlTemplate).toEqual(defaultConfig.urlTemplate);
   });
 
   it('Should not resync when no changes to source params', async () => {
-    const layer1: TiledVectorLayer = createLayer({}, {});
-    const syncContext1 = new MockSyncContext({ dataFilters: {} });
-
-    await layer1.syncData(syncContext1);
-
     const dataRequestDescriptor: DataRequestDescriptor = {
       data: { ...defaultConfig },
       dataId: 'source',
     };
-    const layer2: TiledVectorLayer = createLayer(
+    const layer: TiledVectorLayer = createLayer(
       {
         __dataRequests: [dataRequestDescriptor],
       },
       {}
     );
-    const syncContext2 = new MockSyncContext({ dataFilters: {} });
-    await layer2.syncData(syncContext2);
+    const syncContext = new MockSyncContext({ dataFilters: {} });
+    await layer.syncData(syncContext);
     // @ts-expect-error
-    sinon.assert.notCalled(syncContext2.startLoading);
+    sinon.assert.notCalled(syncContext.startLoading);
     // @ts-expect-error
-    sinon.assert.notCalled(syncContext2.stopLoading);
+    sinon.assert.notCalled(syncContext.stopLoading);
+  });
+
+  it('Should resync when changes to syncContext', async () => {
+    const dataRequestDescriptor: DataRequestDescriptor = {
+      data: { ...defaultConfig },
+      dataId: 'source',
+    };
+    const layer: TiledVectorLayer = createLayer(
+      {
+        __dataRequests: [dataRequestDescriptor],
+      },
+      {},
+      true
+    );
+    const syncContext = new MockSyncContext({
+      dataFilters: {
+        timeFilters: {
+          from: 'now',
+          to: '30m',
+          mode: 'relative',
+        },
+      },
+    });
+    await layer.syncData(syncContext);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.startLoading);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.stopLoading);
   });
 
   describe('Should resync when changes to source params: ', () => {
-    [
-      { layerName: 'barfoo' },
-      { urlTemplate: 'https://sub.example.com/{z}/{x}/{y}.pbf' },
-      { minSourceZoom: 1 },
-      { maxSourceZoom: 12 },
-    ].forEach((changes) => {
+    [{ layerName: 'barfoo' }, { minSourceZoom: 1 }, { maxSourceZoom: 12 }].forEach((changes) => {
       it(`change in ${Object.keys(changes).join(',')}`, async () => {
-        const layer1: TiledVectorLayer = createLayer({}, {});
-        const syncContext1 = new MockSyncContext({ dataFilters: {} });
-
-        await layer1.syncData(syncContext1);
-
         const dataRequestDescriptor: DataRequestDescriptor = {
           data: defaultConfig,
           dataId: 'source',
         };
-        const layer2: TiledVectorLayer = createLayer(
+        const layer: TiledVectorLayer = createLayer(
           {
             __dataRequests: [dataRequestDescriptor],
           },
           changes
         );
-        const syncContext2 = new MockSyncContext({ dataFilters: {} });
-        await layer2.syncData(syncContext2);
+        const syncContext = new MockSyncContext({ dataFilters: {} });
+        await layer.syncData(syncContext);
 
         // @ts-expect-error
-        sinon.assert.calledOnce(syncContext2.startLoading);
+        sinon.assert.calledOnce(syncContext.startLoading);
         // @ts-expect-error
-        sinon.assert.calledOnce(syncContext2.stopLoading);
+        sinon.assert.calledOnce(syncContext.stopLoading);
 
         // @ts-expect-error
-        const call = syncContext2.stopLoading.getCall(0);
-        expect(call.args[2]).toEqual({ ...defaultConfig, ...changes });
+        const call = syncContext.stopLoading.getCall(0);
+
+        const newMeta = { ...defaultConfig, ...changes };
+        expect(call.args[2]!.minSourceZoom).toEqual(newMeta.minSourceZoom);
+        expect(call.args[2]!.maxSourceZoom).toEqual(newMeta.maxSourceZoom);
+        expect(call.args[2]!.layerName).toEqual(newMeta.layerName);
+        expect(call.args[2]!.urlTemplate).toEqual(newMeta.urlTemplate);
       });
+    });
+  });
+
+  describe('refresh token', () => {
+    const uuidRegex = /\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b/;
+
+    it(`should add token in url`, async () => {
+      const layer: TiledVectorLayer = createLayer({}, {}, false, true);
+
+      const syncContext = new MockSyncContext({ dataFilters: {} });
+
+      await layer.syncData(syncContext);
+      // @ts-expect-error
+      sinon.assert.calledOnce(syncContext.startLoading);
+      // @ts-expect-error
+      sinon.assert.calledOnce(syncContext.stopLoading);
+
+      // @ts-expect-error
+      const call = syncContext.stopLoading.getCall(0);
+      expect(call.args[2]!.minSourceZoom).toEqual(defaultConfig.minSourceZoom);
+      expect(call.args[2]!.maxSourceZoom).toEqual(defaultConfig.maxSourceZoom);
+      expect(call.args[2]!.layerName).toEqual(defaultConfig.layerName);
+      expect(call.args[2]!.urlTemplate.startsWith(defaultConfig.urlTemplate)).toBe(true);
+
+      const parsedUrl = url.parse(call.args[2]!.urlTemplate, true);
+      expect(!!(parsedUrl.query.token! as string).match(uuidRegex)).toBe(true);
     });
   });
 });

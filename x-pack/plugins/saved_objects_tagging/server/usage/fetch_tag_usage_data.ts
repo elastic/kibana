@@ -11,26 +11,22 @@ import { TaggingUsageData, ByTypeTaggingUsageData } from './types';
 /**
  * Manual type reflection of the `tagDataAggregations` resulting payload
  */
-interface AggregatedTagUsageResponseBody {
-  aggregations: {
-    by_type: {
-      buckets: Array<{
-        key: string;
+interface AggregatedTagUsage {
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+    nested_ref: {
+      tag_references: {
         doc_count: number;
-        nested_ref: {
-          tag_references: {
+        tag_id: {
+          buckets: Array<{
+            key: string;
             doc_count: number;
-            tag_id: {
-              buckets: Array<{
-                key: string;
-                doc_count: number;
-              }>;
-            };
-          };
+          }>;
         };
-      }>;
+      };
     };
-  };
+  }>;
 }
 
 export const fetchTagUsageData = async ({
@@ -40,7 +36,7 @@ export const fetchTagUsageData = async ({
   esClient: ElasticsearchClient;
   kibanaIndex: string;
 }): Promise<TaggingUsageData> => {
-  const { body } = await esClient.search<AggregatedTagUsageResponseBody>({
+  const { body } = await esClient.search({
     index: [kibanaIndex],
     ignore_unavailable: true,
     filter_path: 'aggregations',
@@ -59,7 +55,7 @@ export const fetchTagUsageData = async ({
   const allUsedTags = new Set<string>();
   let totalTaggedObjects = 0;
 
-  const typeBuckets = body.aggregations.by_type.buckets;
+  const typeBuckets = (body.aggregations!.by_type as AggregatedTagUsage).buckets;
   typeBuckets.forEach((bucket) => {
     const type = bucket.key;
     const taggedDocCount = bucket.doc_count;

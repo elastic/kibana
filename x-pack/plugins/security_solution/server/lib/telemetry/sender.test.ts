@@ -38,9 +38,12 @@ describe('TelemetryEventsSender', () => {
             id: 'X',
             name: 'Y',
             ruleset: 'Z',
+            version: '100',
           },
           file: {
+            extension: '.exe',
             size: 3,
+            created: 0,
             path: 'X',
             test: 'me',
             another: 'nope',
@@ -66,6 +69,21 @@ describe('TelemetryEventsSender', () => {
             },
             something_else: 'nope',
           },
+          process: {
+            name: 'foo.exe',
+            nope: 'nope',
+            executable: null, // null fields are never allowlisted
+            working_directory: '/some/usr/dir',
+          },
+          Target: {
+            process: {
+              name: 'bar.exe',
+              nope: 'nope',
+              thread: {
+                id: 1234,
+              },
+            },
+          },
         },
       ];
 
@@ -82,9 +100,12 @@ describe('TelemetryEventsSender', () => {
             id: 'X',
             name: 'Y',
             ruleset: 'Z',
+            version: '100',
           },
           file: {
+            extension: '.exe',
             size: 3,
+            created: 0,
             path: 'X',
             Ext: {
               code_signature: {
@@ -104,6 +125,18 @@ describe('TelemetryEventsSender', () => {
           host: {
             os: {
               name: 'windows',
+            },
+          },
+          process: {
+            name: 'foo.exe',
+            working_directory: '/some/usr/dir',
+          },
+          Target: {
+            process: {
+              name: 'bar.exe',
+              thread: {
+                id: 1234,
+              },
             },
           },
         },
@@ -223,6 +256,57 @@ describe('allowlistEventFields', () => {
       c: {
         d: 'd',
       },
+    });
+  });
+
+  it('filters arrays of objects', () => {
+    const event = {
+      a: [
+        {
+          a1: 'a1',
+        },
+      ],
+      b: {
+        b1: 'b1',
+      },
+      c: [
+        {
+          d: 'd1',
+          e: 'e1',
+          f: 'f1',
+        },
+        {
+          d: 'd2',
+          e: 'e2',
+          f: 'f2',
+        },
+        {
+          d: 'd3',
+          e: 'e3',
+          f: 'f3',
+        },
+      ],
+    };
+    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+      a: [
+        {
+          a1: 'a1',
+        },
+      ],
+      b: {
+        b1: 'b1',
+      },
+      c: [
+        {
+          d: 'd1',
+        },
+        {
+          d: 'd2',
+        },
+        {
+          d: 'd3',
+        },
+      ],
     });
   });
 

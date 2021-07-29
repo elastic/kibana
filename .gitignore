@@ -19,6 +19,9 @@ target
 *.iml
 *.log
 
+# Ignore example plugin builds
+/examples/*/build
+
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
 /test/*/screenshots/diff
@@ -60,9 +63,10 @@ npm-debug.log*
 .ci/runbld
 .ci/bash_standard_lib.sh
 .gradle
+.vagrant
 
 ## @cypress/snapshot from apm plugin
-snapshots.js
+/snapshots.js
 
 # release notes script output
 report.csv
@@ -76,4 +80,5 @@ report.asciidoc
 
 # Bazel
 /bazel
-/.bazelrc.user
+/bazel-*
+.bazelrc.user

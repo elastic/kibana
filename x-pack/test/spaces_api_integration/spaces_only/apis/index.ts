@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
+export default function spacesOnlyTestSuite({ loadTestFile }: FtrProviderContext) {
   describe('spaces api without security', function () {
     this.tags('ciGroup5');
 
@@ -17,9 +17,10 @@ export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_shareable_references'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./share_add'));
-    loadTestFile(require.resolve('./share_remove'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./update_objects_spaces'));
+    loadTestFile(require.resolve('./disable_legacy_url_aliases'));
   });
 }

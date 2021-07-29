@@ -17,37 +17,35 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
+
+import type { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
   useStartServices,
   useConfig,
+  useUIExtension,
   sendUpdatePackagePolicy,
   sendGetAgentStatus,
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
-import { Loading, Error } from '../../../components';
+import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
+import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
-import {
-  PackagePolicyValidationResults,
-  validatePackagePolicy,
-  validationHasErrors,
-} from '../create_package_policy_page/services';
-import {
+import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
+import { validatePackagePolicy, validationHasErrors } from '../create_package_policy_page/services';
+import type {
   PackagePolicyFormState,
   CreatePackagePolicyFrom,
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
-import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
-import { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import type { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -341,7 +339,7 @@ export const EditPackagePolicyForm = memo<{
     packageInfo,
   };
 
-  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
 
   const configurePackage = useMemo(
     () =>
@@ -353,27 +351,26 @@ export const EditPackagePolicyForm = memo<{
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!ExtensionView && (
+          {!extensionView && (
             <StepConfigurePackagePolicy
-              from={'edit'}
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
-              packagePolicyId={packagePolicyId}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
               submitAttempted={formState === 'INVALID'}
             />
           )}
 
-          {ExtensionView &&
+          {extensionView &&
             packagePolicy.policy_id &&
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
-                <ExtensionView
+                <extensionView.Component
                   policy={originalPackagePolicy}
                   newPolicy={packagePolicy}
                   onChange={handleExtensionViewOnChange}
@@ -388,10 +385,9 @@ export const EditPackagePolicyForm = memo<{
       packagePolicy,
       updatePackagePolicy,
       validationResults,
-      packagePolicyId,
       formState,
       originalPackagePolicy,
-      ExtensionView,
+      extensionView,
       handleExtensionViewOnChange,
     ]
   );
@@ -435,7 +431,9 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
           {configurePackage}
-          <EuiSpacer size="l" />
+          {/* Extra space to accomodate the EuiBottomBar height */}
+          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xxl" />
           <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -495,6 +493,6 @@ const IntegrationsBreadcrumb = memo<{
   policyName: string;
   pkgkey: string;
 }>(({ pkgTitle, policyName, pkgkey }) => {
-  useBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
   return null;
 });

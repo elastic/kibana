@@ -6,13 +6,20 @@
  */
 
 import { FeatureCollection } from 'geojson';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import {
+  DataMeta,
+  MapExtent,
+  MapQuery,
+  Timeslice,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { DataRequestContext } from '../../../actions';
 import { IVectorSource } from '../../sources/vector_source';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -51,6 +58,7 @@ export async function syncVectorSource({
   requestMeta,
   syncContext,
   source,
+  getUpdateDueToTimeslice,
 }: {
   layerId: string;
   layerName: string;
@@ -58,6 +66,7 @@ export async function syncVectorSource({
   requestMeta: VectorSourceRequestMeta;
   syncContext: DataRequestContext;
   source: IVectorSource;
+  getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<{ refreshed: boolean; featureCollection: FeatureCollection }> {
   const {
     startLoading,
@@ -68,11 +77,15 @@ export async function syncVectorSource({
   } = syncContext;
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
-  const canSkipFetch = await canSkipSourceUpdate({
-    source,
-    prevDataRequest,
-    nextMeta: requestMeta,
-  });
+  const canSkipFetch = syncContext.forceRefresh
+    ? false
+    : await canSkipSourceUpdate({
+        source,
+        prevDataRequest,
+        nextMeta: requestMeta,
+        extentAware: source.isFilterByMapBounds(),
+        getUpdateDueToTimeslice,
+      });
   if (canSkipFetch) {
     return {
       refreshed: false,
@@ -100,7 +113,14 @@ export async function syncVectorSource({
     ) {
       layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
     }
-    stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
+    const responseMeta: DataMeta = meta ? { ...meta } : {};
+    if (requestMeta.applyGlobalTime && (await source.isTimeAware())) {
+      const timesiceMaskField = await source.getTimesliceMaskFieldName();
+      if (timesiceMaskField) {
+        responseMeta.timesiceMaskField = timesiceMaskField;
+      }
+    }
+    stopLoading(dataRequestId, requestToken, layerFeatureCollection, responseMeta);
     return {
       refreshed: true,
       featureCollection: layerFeatureCollection,
@@ -111,4 +131,46 @@ export async function syncVectorSource({
     }
     throw error;
   }
+}
+
+export async function getVectorSourceBounds({
+  layerId,
+  syncContext,
+  source,
+  sourceQuery,
+}: {
+  layerId: string;
+  syncContext: DataRequestContext;
+  source: IVectorSource;
+  sourceQuery: MapQuery | null;
+}): Promise<MapExtent | null> {
+  const { startLoading, stopLoading, registerCancelCallback, dataFilters } = syncContext;
+
+  const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${layerId}`);
+
+  // Do not pass all searchFilters to source.getBoundsForFilters().
+  // For example, do not want to filter bounds request by extent and buffer.
+  const boundsFilters = {
+    sourceQuery: sourceQuery ? sourceQuery : undefined,
+    query: dataFilters.query,
+    timeFilters: dataFilters.timeFilters,
+    timeslice: dataFilters.timeslice,
+    filters: dataFilters.filters,
+    applyGlobalQuery: source.getApplyGlobalQuery(),
+    applyGlobalTime: source.getApplyGlobalTime(),
+  };
+
+  let bounds = null;
+  try {
+    startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
+    bounds = await source.getBoundsForFilters(
+      boundsFilters,
+      registerCancelCallback.bind(null, requestToken)
+    );
+  } finally {
+    // Use stopLoading callback instead of onLoadError callback.
+    // Function is loading bounds and not feature data.
+    stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds ? bounds : {});
+  }
+  return bounds;
 }

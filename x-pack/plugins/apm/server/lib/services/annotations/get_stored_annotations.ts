@@ -7,12 +7,13 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../../../../../observability/server';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
@@ -57,17 +58,17 @@ export function getStoredAnnotations({
       const response: ESSearchResponse<
         ESAnnotation,
         { body: typeof body }
-      > = await unwrapEsResponse(
-        client.search<any>({
+      > = await (unwrapEsResponse(
+        client.search({
           index: annotationsClient.index,
           body,
         })
-      );
+      ) as any);
 
       return response.hits.hits.map((hit) => {
         return {
           type: AnnotationType.VERSION,
-          id: hit._id,
+          id: hit._id as string,
           '@timestamp': new Date(hit._source['@timestamp']).getTime(),
           text: hit._source.message,
         };

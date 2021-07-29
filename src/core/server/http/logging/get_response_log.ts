@@ -11,21 +11,28 @@ import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import { LogMeta } from '@kbn/logging';
-import { EcsEvent, Logger } from '../../logging';
+import { Logger } from '../../logging';
 import { getResponsePayloadBytes } from './get_payload_size';
 
-const ECS_VERSION = '1.7.0';
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
+type HapiHeaders = Record<string, string | string[]>;
+
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
-function redactSensitiveHeaders(
-  headers?: Record<string, string | string[]>
-): Record<string, string | string[]> {
-  const result = {} as Record<string, string | string[]>;
+function redactSensitiveHeaders(key: string, value: string | string[]): string | string[] {
+  return FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : value;
+}
+
+// Shallow clone the headers so they are not mutated if filtered by a RewriteAppender.
+function cloneAndFilterHeaders(headers?: HapiHeaders) {
+  const result = {} as HapiHeaders;
   if (headers) {
     for (const key of Object.keys(headers)) {
-      result[key] = FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : headers[key];
+      result[key] = redactSensitiveHeaders(
+        key,
+        Array.isArray(headers[key]) ? [...headers[key]] : headers[key]
+      );
     }
   }
   return result;
@@ -36,7 +43,7 @@ function redactSensitiveHeaders(
  *
  * @internal
  */
-export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
+export function getEcsResponseLog(request: Request, log: Logger) {
   const { path, response } = request;
   const method = request.method.toUpperCase();
 
@@ -45,7 +52,11 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const status_code = isBoom(response) ? response.output.statusCode : response.statusCode;
-  const responseHeaders = isBoom(response) ? response.output.headers : response.headers;
+
+  const requestHeaders = cloneAndFilterHeaders(request.headers);
+  const responseHeaders = cloneAndFilterHeaders(
+    isBoom(response) ? (response.output.headers as HapiHeaders) : response.headers
+  );
 
   // borrowed from the hapi/good implementation
   const responseTime = (request.info.completed || request.info.responded) - request.info.received;
@@ -54,9 +65,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
   const bytes = getResponsePayloadBytes(response, log);
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
-  const meta: EcsEvent = {
-    ecs: { version: ECS_VERSION },
-    message: `${method} ${pathWithQuery} ${status_code}${responseTimeMsg}${bytesMsg}`,
+  const meta: LogMeta = {
     client: {
       ip: request.info.remoteAddress,
     },
@@ -65,16 +74,16 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
         method,
         mime_type: request.mime,
         referrer: request.info.referrer,
-        // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
-        headers: redactSensitiveHeaders(request.headers),
+        // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
+        headers: requestHeaders,
       },
       response: {
         body: {
           bytes,
         },
         status_code,
-        // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
-        headers: redactSensitiveHeaders(responseHeaders),
+        // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
+        headers: responseHeaders,
         // responseTime is a custom non-ECS field
         responseTime: !isNaN(responseTime) ? responseTime : undefined,
       },
@@ -88,5 +97,8 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
     },
   };
 
-  return meta;
+  return {
+    message: `${method} ${pathWithQuery} ${status_code}${responseTimeMsg}${bytesMsg}`,
+    meta,
+  };
 }

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { isValidNamespace } from '../../../common';
 
 export const NamespaceSchema = schema.string({
@@ -23,6 +24,7 @@ const ConfigRecordSchema = schema.recordOf(
   schema.object({
     type: schema.maybe(schema.string()),
     value: schema.maybe(schema.any()),
+    frozen: schema.maybe(schema.boolean()),
   })
 );
 
@@ -43,7 +45,9 @@ const PackagePolicyBaseSchema = {
   inputs: schema.arrayOf(
     schema.object({
       type: schema.string(),
+      policy_template: schema.maybe(schema.string()),
       enabled: schema.boolean(),
+      keep_enabled: schema.maybe(schema.boolean()),
       vars: schema.maybe(ConfigRecordSchema),
       config: schema.maybe(
         schema.recordOf(
@@ -58,6 +62,7 @@ const PackagePolicyBaseSchema = {
         schema.object({
           id: schema.maybe(schema.string()), // BWC < 7.11
           enabled: schema.boolean(),
+          keep_enabled: schema.maybe(schema.boolean()),
           data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(
@@ -73,10 +78,13 @@ const PackagePolicyBaseSchema = {
       ),
     })
   ),
+  vars: schema.maybe(ConfigRecordSchema),
 };
 
 export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
+  id: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({

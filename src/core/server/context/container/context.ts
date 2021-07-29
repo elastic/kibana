@@ -130,12 +130,9 @@ export type HandlerParameters<T extends HandlerFunction<any>> = T extends (
  * }
  * ```
  *
- * @typeParam THandler - the type of {@link HandlerFunction} this container should manage. The first argument of this
- *                       function will be used as the context type.
- *
  * @public
  */
-export interface IContextContainer<THandler extends RequestHandler> {
+export interface IContextContainer {
   /**
    * Register a new context provider.
    *
@@ -161,18 +158,17 @@ export interface IContextContainer<THandler extends RequestHandler> {
    *
    * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this handler.
    * @param handler - Handler function to pass context object to.
-   * @returns A function that takes `THandlerParameters`, calls `handler` with a new context, and returns a Promise of
+   * @returns A function that takes `RequestHandler` parameters, calls `handler` with a new context, and returns a Promise of
    * the `handler` return value.
    */
   createHandler(
     pluginOpaqueId: PluginOpaqueId,
-    handler: THandler
-  ): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
+    handler: RequestHandler
+  ): (...rest: HandlerParameters<RequestHandler>) => ShallowPromise<ReturnType<RequestHandler>>;
 }
 
 /** @internal */
-export class ContextContainer<THandler extends RequestHandler>
-  implements IContextContainer<THandler> {
+export class ContextContainer implements IContextContainer {
   /**
    * Used to map contexts to their providers and associated plugin. In registration order which is tightly coupled to
    * plugin load order.
@@ -222,22 +218,23 @@ export class ContextContainer<THandler extends RequestHandler>
     return this;
   };
 
-  public createHandler = (source: symbol, handler: THandler) => {
+  public createHandler = (source: symbol, handler: RequestHandler) => {
     if (source !== this.coreId && !this.pluginDependencies.has(source)) {
       throw new Error(`Cannot create handler for unknown plugin: ${source.toString()}`);
     }
 
-    return (async (...args: HandlerParameters<THandler>) => {
+    return (async (...args: HandlerParameters<RequestHandler>) => {
       const context = await this.buildContext(source, ...args);
-      // @ts-expect-error requires explicit handler arity
       return handler(context, ...args);
-    }) as (...args: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
+    }) as (
+      ...args: HandlerParameters<RequestHandler>
+    ) => ShallowPromise<ReturnType<RequestHandler>>;
   };
 
   private async buildContext(
     source: symbol,
-    ...contextArgs: HandlerParameters<THandler>
-  ): Promise<HandlerContextType<THandler>> {
+    ...contextArgs: HandlerParameters<RequestHandler>
+  ): Promise<HandlerContextType<RequestHandler>> {
     const contextsToBuild = new Set(this.getContextNamesForSource(source));
 
     return [...this.contextProviders]
@@ -254,10 +251,9 @@ export class ContextContainer<THandler extends RequestHandler>
 
         return {
           ...resolvedContext,
-          // @ts-expect-error requires explicit provider arity
           [contextName]: await provider(exposedContext, ...contextArgs),
         };
-      }, Promise.resolve({}) as Promise<HandlerContextType<THandler>>);
+      }, Promise.resolve({}) as Promise<HandlerContextType<RequestHandler>>);
   }
 
   private getContextNamesForSource(source: symbol): ReadonlySet<string> {

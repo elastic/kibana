@@ -47,7 +47,7 @@ export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) 
     <EuiButtonIcon
       data-test-subj="uptimePingListExpandBtn"
       onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
-      disabled={!rowShouldExpand(item)}
+      isDisabled={!rowShouldExpand(item)}
       aria-label={
         expandedRows[item.docId]
           ? i18n.translate('xpack.uptime.pingList.collapseRow', {

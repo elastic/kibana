@@ -6,9 +6,11 @@
  */
 
 export type OnActionComplete = () => void;
+export type OnActionDismiss = () => void;
 
 export enum ACTION {
   INSPECT = 'inspect',
   EXTEND = 'extend',
   DELETE = 'delete',
+  RENAME = 'rename',
 }

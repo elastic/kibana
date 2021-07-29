@@ -8,10 +8,10 @@
 import { Unit } from '@elastic/datemath';
 import { EuiSelectOption } from '@elastic/eui';
 
+import { Type, Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { ESQuery } from '../../../../../common/typed_json';
-import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FieldValueQueryBar } from '../query_bar';
 import { formatDate } from '../../../../common/components/super_date_picker';
 import { getInfoFromQueryBar, getTimeframeOptions } from './helpers';
@@ -67,7 +67,6 @@ export type Action =
       type: 'setToFrom';
     };
 
-/* eslint-disable-next-line complexity */
 export const queryPreviewReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
     case 'setQueryInfo': {
@@ -132,9 +131,8 @@ export const queryPreviewReducer = () => (state: State, action: Action): State =
       const thresholdField =
         action.threshold != null &&
         action.threshold.field != null &&
-        ((typeof action.threshold.field === 'string' && action.threshold.field.trim() !== '') ||
-          (Array.isArray(action.threshold.field) &&
-            action.threshold.field.every((field) => field.trim() !== '')));
+        action.threshold.field.length > 0 &&
+        action.threshold.field.every((field) => field.trim() !== '');
       const showNonEqlHist =
         action.ruleType === 'query' ||
         action.ruleType === 'saved_query' ||

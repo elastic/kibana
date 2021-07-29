@@ -13,15 +13,20 @@ import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 import { modelSnapshotProvider } from './model_snapshots';
 import type { MlClient } from '../../lib/ml_client';
+import type { RulesClient } from '../../../../alerting/server';
 
-export function jobServiceProvider(client: IScopedClusterClient, mlClient: MlClient) {
+export function jobServiceProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  rulesClient?: RulesClient
+) {
   return {
-    ...datafeedsProvider(mlClient),
-    ...jobsProvider(client, mlClient),
+    ...datafeedsProvider(client, mlClient),
+    ...jobsProvider(client, mlClient, rulesClient),
     ...groupsProvider(mlClient),
     ...newJobCapsProvider(client),
     ...newJobChartsProvider(client),
     ...topCategoriesProvider(mlClient),
-    ...modelSnapshotProvider(mlClient),
+    ...modelSnapshotProvider(client, mlClient),
   };
 }

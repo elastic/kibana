@@ -199,23 +199,44 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the template components', async function () {
-      const res = await es.transport.request({
+    it('should have updated the component templates', async function () {
+      const resMappings = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}-mappings`,
+        path: `/_component_template/${logsTemplateName}@mappings`,
       });
-      expect(res.statusCode).equal(200);
-      expect(res.body.component_templates[0].component_template.template.mappings).eql({
+      expect(resMappings.statusCode).equal(200);
+      expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
-        properties: { '@timestamp': { type: 'date' } },
       });
       const resSettings = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}-settings`,
+        path: `/_component_template/${logsTemplateName}@settings`,
       });
-      expect(res.statusCode).equal(200);
+      expect(resSettings.statusCode).equal(200);
       expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
         index: { lifecycle: { name: 'reference2' } },
+      });
+      const resUserSettings = await es.transport.request({
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@custom`,
+      });
+      expect(resUserSettings.statusCode).equal(200);
+      expect(resUserSettings.body).eql({
+        component_templates: [
+          {
+            name: 'logs-all_assets.test_logs@custom',
+            component_template: {
+              _meta: {
+                package: {
+                  name: 'all_assets',
+                },
+              },
+              template: {
+                settings: {},
+              },
+            },
+          },
+        ],
       });
     });
     it('should have updated the index patterns', async function () {
@@ -296,6 +317,14 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_lens',
             type: 'lens',
           },
+          {
+            id: 'sample_security_rule',
+            type: 'security-rule',
+          },
+          {
+            id: 'sample_ml_module',
+            type: 'ml-module',
+          },
         ],
         installed_es: [
           {
@@ -315,12 +344,32 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs@mappings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs@settings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs@custom',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs2',
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2@custom',
+            type: 'component_template',
+          },
+          {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@custom',
+            type: 'component_template',
           },
         ],
         es_index_patterns: {
@@ -344,7 +393,9 @@ export default function (providerContext: FtrProviderContext) {
           { id: '48e582df-b1d2-5f88-b6ea-ba1fafd3a569', type: 'epm-packages-assets' },
           { id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490', type: 'epm-packages-assets' },
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
+          { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
+          { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
           { id: '8c665f28-a439-5f43-b5fd-8fda7b576735', type: 'epm-packages-assets' },
         ],

@@ -8,7 +8,7 @@
     "declarationMap": true
   },
   "include": [
-    "../../typings/**/*",
+    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "scripts/**/*",
@@ -29,7 +29,7 @@
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../actions/tsconfig.json" },
-    { "path": "../alerts/tsconfig.json" },
+    { "path": "../alerting/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../infra/tsconfig.json" },
@@ -38,8 +38,10 @@
     { "path": "../ml/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../reporting/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
+    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../fleet/tsconfig.json" }
   ]
 }

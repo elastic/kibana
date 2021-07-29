@@ -19,6 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -51,11 +54,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickOptionsTab();
       await testSubjects.setValue('gaugeColorRange2__to', '10000');
       await testSubjects.click('gaugePercentageMode');
+      await testSubjects.setValue('gaugePercentageModeFormatPattern', '0.0%');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await PageObjects.visEditor.clickGo();
 
       await retry.try(async function tryingForTime() {
-        const expectedTexts = ['57.273%', 'Average bytes'];
+        const expectedTexts = ['57.3%', 'Average bytes'];
         const metricValue = await PageObjects.visChart.getGaugeValue();
         expect(expectedTexts).to.eql(metricValue);
       });

@@ -22,31 +22,41 @@ const asApiResponse = <T>(body: T): RequestEvent<T> =>
 
 describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {
-    indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
+    indices: fakeIndexNames.map((indexName) => {
+      // mark one index as closed to test blockerForReindexing flag
+      if (indexName === 'closed_index') {
+        return { name: indexName, attributes: ['closed'] };
+      }
+      return { name: indexName, attributes: ['open'] };
+    }),
   };
+
   // @ts-expect-error mock data is too loosely typed
   const deprecationsResponse: DeprecationAPIResponse = _.cloneDeep(fakeDeprecations);
 
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
 
   esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+    // @ts-expect-error not full interface
     asApiResponse(deprecationsResponse)
   );
 
+  // @ts-expect-error not full interface of response
   esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(esClient, false);
+    await getUpgradeAssistantStatus(esClient);
     expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(esClient, false);
+    const resp = await getUpgradeAssistantStatus(esClient);
     expect(resp).toMatchSnapshot();
   });
 
   it('returns readyForUpgrade === false when critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
         node_settings: [],
@@ -55,7 +65,7 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient)).resolves.toHaveProperty(
       'readyForUpgrade',
       false
     );
@@ -63,6 +73,7 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('returns readyForUpgrade === true when no critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
         node_settings: [],
@@ -71,31 +82,9 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient)).resolves.toHaveProperty(
       'readyForUpgrade',
       true
     );
-  });
-
-  it('filters out security realm deprecation on Cloud', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
-      asApiResponse({
-        cluster_settings: [
-          {
-            level: 'critical',
-            message: 'Security realm settings structure changed',
-            url: 'https://...',
-          },
-        ],
-        node_settings: [],
-        ml_settings: [],
-        index_settings: {},
-      })
-    );
-
-    const result = await getUpgradeAssistantStatus(esClient, true);
-
-    expect(result).toHaveProperty('readyForUpgrade', true);
-    expect(result).toHaveProperty('cluster', []);
   });
 });

@@ -9,9 +9,9 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Modification of Dynamic Linker Preload Shared Object",
-  "query": "event.category:file and not event.type:deletion and file.path:/etc/ld.so.preload",
+  "query": "event.category:file and not event.type:deletion and file.path:/etc/ld.so.preload\n",
   "references": [
     "https://www.anomali.com/blog/rocke-evolves-its-arsenal-with-a-new-malware-family-written-in-golang"
   ],
@@ -23,8 +23,7 @@
     "Host",
     "Linux",
     "Threat Detection",
-    "Privilege Escalation",
-    "Persistence"
+    "Privilege Escalation"
   ],
   "threat": [
     {

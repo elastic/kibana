@@ -21,12 +21,15 @@ const {
 export interface ExportTestDefinition extends TestDefinition {
   request: ReturnType<typeof createRequest>;
 }
+
 export type ExportTestSuite = TestSuite<ExportTestDefinition>;
+
 interface SuccessResult {
   type: string;
   id: string;
   originId?: string;
 }
+
 export interface ExportTestCase {
   title: string;
   type: string;
@@ -135,7 +138,13 @@ export const createRequest = ({ type, id }: ExportTestCase) =>
 const getTestTitle = ({ failure, title }: ExportTestCase) =>
   `${failure?.reason || 'success'} ["${title}"]`;
 
-const EMPTY_RESULT = { exportedCount: 0, missingRefCount: 0, missingReferences: [] };
+const EMPTY_RESULT = {
+  excludedObjects: [],
+  excludedObjectsCount: 0,
+  exportedCount: 0,
+  missingRefCount: 0,
+  missingReferences: [],
+};
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
@@ -189,6 +198,8 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         exportedCount: ndjson.length - 1,
         missingRefCount: 0,
         missingReferences: [],
+        excludedObjectsCount: 0,
+        excludedObjects: [],
       });
     }
   };
@@ -219,8 +230,16 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     const { user, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

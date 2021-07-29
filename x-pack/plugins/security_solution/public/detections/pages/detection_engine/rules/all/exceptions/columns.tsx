@@ -9,23 +9,20 @@
 
 import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
-import { History } from 'history';
 
-import { Spacer } from '../../../../../../common/components/page';
-import { NamespaceType } from '../../../../../../../../lists/common';
+import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { FormatUrl } from '../../../../../../common/components/link_to';
-import { LinkAnchor } from '../../../../../../common/components/links';
 import * as i18n from './translations';
 import { ExceptionListInfo } from './use_all_exception_lists';
-import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
+import { ExceptionOverflowDisplay } from './exceptions_overflow_display';
 
 export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
 
 export const getAllExceptionListsColumns = (
   onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   onDelete: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
-  history: History,
-  formatUrl: FormatUrl
+  formatUrl: FormatUrl,
+  navigateToUrl: (url: string) => Promise<void>
 ): AllExceptionListsColumns[] => [
   {
     align: 'left',
@@ -73,24 +70,11 @@ export const getAllExceptionListsColumns = (
     width: '20%',
     render: (value: ExceptionListInfo['rules']) => {
       return (
-        <>
-          {value.map(({ id, name }, index) => (
-            <Spacer key={id}>
-              <LinkAnchor
-                key={id}
-                data-test-subj="ruleName"
-                onClick={(ev: { preventDefault: () => void }) => {
-                  ev.preventDefault();
-                  history.push(getRuleDetailsUrl(id));
-                }}
-                href={formatUrl(getRuleDetailsUrl(id))}
-              >
-                {name}
-              </LinkAnchor>
-              {index !== value.length - 1 ? ', ' : ''}
-            </Spacer>
-          ))}
-        </>
+        <ExceptionOverflowDisplay
+          rules={value}
+          navigateToUrl={navigateToUrl}
+          formatUrl={formatUrl}
+        />
       );
     },
   },

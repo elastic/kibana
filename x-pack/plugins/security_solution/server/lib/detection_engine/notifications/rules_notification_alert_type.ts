@@ -7,6 +7,7 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   NOTIFICATIONS_ID,
@@ -14,11 +15,10 @@ import {
 } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
-import { RuleAlertAttributes } from '../signals/types';
+import { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { getSignals } from './get_signals';
 
 export const rulesNotificationAlertType = ({
@@ -37,8 +37,9 @@ export const rulesNotificationAlertType = ({
     }),
   },
   minimumLicenseRequired: 'basic',
+  isExportable: false,
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
-    const ruleAlertSavedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+    const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
     );
@@ -64,7 +65,7 @@ export const rulesNotificationAlertType = ({
       size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId,
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient.asCurrentUser,
     });
 
     const signals = results.hits.hits.map((hit) => hit._source);

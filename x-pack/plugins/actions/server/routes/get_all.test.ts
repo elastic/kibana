@@ -8,16 +8,17 @@
 import { getAllActionRoute } from './get_all';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib';
-import { mockHandlerArguments } from './_mock_handler_arguments';
+import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client.mock';
+import { verifyAccessAndContext } from './verify_access_and_context';
 
-jest.mock('../lib/verify_api_access.ts', () => ({
-  verifyApiAccess: jest.fn(),
+jest.mock('./verify_access_and_context.ts', () => ({
+  verifyAccessAndContext: jest.fn(),
 }));
 
 beforeEach(() => {
   jest.resetAllMocks();
+  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('getAllActionRoute', () => {
@@ -29,7 +30,7 @@ describe('getAllActionRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connectors"`);
 
     const actionsClient = actionsClientMock.create();
     actionsClient.getAll.mockResolvedValueOnce([]);
@@ -57,7 +58,7 @@ describe('getAllActionRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connectors"`);
 
     const actionsClient = actionsClientMock.create();
     actionsClient.getAll.mockResolvedValueOnce([]);
@@ -66,14 +67,14 @@ describe('getAllActionRoute', () => {
 
     await handler(context, req, res);
 
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 
   it('ensures the license check prevents getting all actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 
@@ -81,7 +82,7 @@ describe('getAllActionRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connectors"`);
 
     const actionsClient = actionsClientMock.create();
     actionsClient.getAll.mockResolvedValueOnce([]);
@@ -90,6 +91,6 @@ describe('getAllActionRoute', () => {
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 });

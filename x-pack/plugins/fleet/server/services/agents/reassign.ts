@@ -7,17 +7,21 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
+
+import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../agent_policy';
+import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+
 import {
+  getAgentDocuments,
   getAgents,
   getAgentPolicyForAgent,
-  listAllAgents,
   updateAgent,
   bulkUpdateAgents,
 } from './crud';
-import { AgentReassignmentError } from '../../errors';
-
+import type { GetAgentsOptions } from './index';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { searchHitToAgent } from './helpers';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -32,15 +36,15 @@ export async function reassignAgent(
 
   await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
 
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
   });
 
-  await createAgentAction(soClient, esClient, {
+  await createAgentAction(esClient, {
     agent_id: agentId,
     created_at: new Date().toISOString(),
-    type: 'INTERNAL_POLICY_REASSIGN',
+    type: 'POLICY_REASSIGN',
   });
 }
 
@@ -52,15 +56,15 @@ export async function reassignAgentIsAllowed(
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new AgentReassignmentError(
-      `Cannot reassign an agent from managed agent policy ${agentPolicy.id}`
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign an agent from hosted agent policy ${agentPolicy.id}`
     );
   }
 
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (newAgentPolicy?.is_managed) {
-    throw new AgentReassignmentError(
-      `Cannot reassign an agent to managed agent policy ${newAgentPolicy.id}`
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
     );
   }
 
@@ -70,42 +74,67 @@ export async function reassignAgentIsAllowed(
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      },
+  options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
   newAgentPolicyId: string
-): Promise<{ items: Array<{ id: string; sucess: boolean; error?: Error }> }> {
+): Promise<{ items: BulkActionResult[] }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  // Filter to agents that do not already use the new agent policy ID
-  const agents =
-    'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
-      : (
-          await listAllAgents(soClient, esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
-  // And which are allowed to unenroll
-  const settled = await Promise.allSettled(
-    agents.map((agent) =>
-      reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId).then((_) => agent)
-    )
-  );
-  const agentsToUpdate = agents.filter(
-    (agent, index) => settled[index].status === 'fulfilled' && agent.policy_id !== newAgentPolicyId
+  const outgoingErrors: Record<Agent['id'], Error> = {};
+  let givenAgents: Agent[] = [];
+  if ('agents' in options) {
+    givenAgents = options.agents;
+  } else if ('agentIds' in options) {
+    const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
+    for (const agentResult of givenAgentsResults) {
+      if (agentResult.found === false) {
+        outgoingErrors[agentResult._id] = new AgentReassignmentError(
+          `Cannot find agent ${agentResult._id}`
+        );
+      } else {
+        givenAgents.push(searchHitToAgent(agentResult));
+      }
+    }
+  } else if ('kuery' in options) {
+    givenAgents = await getAgents(esClient, options);
+  }
+  const givenOrder =
+    'agentIds' in options ? options.agentIds : givenAgents.map((agent) => agent.id);
+
+  // which are allowed to unenroll
+  const agentResults = await Promise.allSettled(
+    givenAgents.map(async (agent, index) => {
+      if (agent.policy_id === newAgentPolicyId) {
+        throw new AgentReassignmentError(`${agent.id} is already assigned to ${newAgentPolicyId}`);
+      }
+
+      const isAllowed = await reassignAgentIsAllowed(
+        soClient,
+        esClient,
+        agent.id,
+        newAgentPolicyId
+      );
+      if (isAllowed) {
+        return agent;
+      }
+      throw new AgentReassignmentError(`${agent.id} may not be reassigned to ${newAgentPolicyId}`);
+    })
   );
 
-  const res = await bulkUpdateAgents(
-    soClient,
+  // Filter to agents that do not already use the new agent policy ID
+  const agentsToUpdate = agentResults.reduce<Agent[]>((agents, result, index) => {
+    if (result.status === 'fulfilled') {
+      agents.push(result.value);
+    } else {
+      const id = givenAgents[index].id;
+      outgoingErrors[id] = result.reason;
+    }
+    return agents;
+  }, []);
+
+  await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
@@ -116,16 +145,27 @@ export async function reassignAgents(
     }))
   );
 
+  const orderedOut = givenOrder.map((agentId) => {
+    const hasError = agentId in outgoingErrors;
+    const result: BulkActionResult = {
+      id: agentId,
+      success: !hasError,
+    };
+    if (hasError) {
+      result.error = outgoingErrors[agentId];
+    }
+    return result;
+  });
+
   const now = new Date().toISOString();
   await bulkCreateAgentActions(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agent_id: agent.id,
       created_at: now,
-      type: 'INTERNAL_POLICY_REASSIGN',
+      type: 'POLICY_REASSIGN',
     }))
   );
 
-  return res;
+  return { items: orderedOut };
 }

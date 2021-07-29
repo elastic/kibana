@@ -5,29 +5,68 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
+import * as t from 'io-ts';
+import type {
+  ClientRequestParamsOf,
+  EndpointOf,
+  ReturnOf,
+  RouteRepositoryClient,
+  ServerRouteRepository,
+  ServerRoute,
+} from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository/target/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { APMAPI } from '../../../server/routes/create_apm_api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Client } from '../../../server/routes/typings';
-
-export type APMClient = Client<APMAPI['_S']>;
-export type AutoAbortedAPMClient = Client<APMAPI['_S'], { abortable: false }>;
+import type {
+  APMServerRouteRepository,
+  InspectResponse,
+  APMRouteHandlerResources,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../server';
 
 export type APMClientOptions = Omit<
   FetchOptions,
   'query' | 'body' | 'pathname' | 'signal'
 > & {
-  endpoint: string;
   signal: AbortSignal | null;
-  params?: {
-    body?: any;
-    query?: any;
-    path?: any;
-  };
 };
+
+export type APMClient = RouteRepositoryClient<
+  APMServerRouteRepository,
+  APMClientOptions
+>;
+
+export type AutoAbortedAPMClient = RouteRepositoryClient<
+  APMServerRouteRepository,
+  Omit<APMClientOptions, 'signal'>
+>;
+
+export type APIReturnType<
+  TEndpoint extends EndpointOf<APMServerRouteRepository>
+> = ReturnOf<APMServerRouteRepository, TEndpoint> & {
+  _inspect?: InspectResponse;
+};
+
+export type APIEndpoint = EndpointOf<APMServerRouteRepository>;
+
+export type APIClientRequestParamsOf<
+  TEndpoint extends EndpointOf<APMServerRouteRepository>
+> = ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+
+export type AbstractAPMRepository = ServerRouteRepository<
+  APMRouteHandlerResources,
+  {},
+  Record<
+    string,
+    ServerRoute<string, t.Mixed | undefined, APMRouteHandlerResources, any, {}>
+  >
+>;
+
+export type AbstractAPMClient = RouteRepositoryClient<
+  AbstractAPMRepository,
+  APMClientOptions
+>;
 
 export let callApmApi: APMClient = () => {
   throw new Error(
@@ -35,30 +74,21 @@ export let callApmApi: APMClient = () => {
   );
 };
 
-export function createCallApmApi(http: HttpSetup) {
-  callApmApi = ((options: APMClientOptions) => {
-    const { endpoint, params = {}, ...opts } = options;
+export function createCallApmApi(core: CoreStart | CoreSetup) {
+  callApmApi = ((options) => {
+    const { endpoint, ...opts } = options;
+    const { params } = (options as unknown) as {
+      params?: Partial<Record<string, any>>;
+    };
 
-    const path = (params.path || {}) as Record<string, any>;
-    const [method, pathname] = endpoint.split(' ');
+    const { method, pathname } = formatRequest(endpoint, params?.path);
 
-    const formattedPathname = Object.keys(path).reduce((acc, paramName) => {
-      return acc.replace(`{${paramName}}`, path[paramName]);
-    }, pathname);
-
-    return callApi(http, {
+    return callApi(core, {
       ...opts,
       method,
-      pathname: formattedPathname,
-      body: params.body,
-      query: params.query,
+      pathname,
+      body: params?.body,
+      query: params?.query,
     });
   }) as APMClient;
 }
-
-// infer return type from API
-export type APIReturnType<
-  TPath extends keyof APMAPI['_S']
-> = APMAPI['_S'][TPath] extends { ret: any }
-  ? APMAPI['_S'][TPath]['ret']
-  : unknown;
