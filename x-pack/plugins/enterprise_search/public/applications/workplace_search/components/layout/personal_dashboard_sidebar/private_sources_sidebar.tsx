@@ -42,7 +42,7 @@ export const PrivateSourcesSidebar = () => {
 
   return (
     <>
-      <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+      <ViewContentHeader headingLevel={1} title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
       {id && <EuiSideNav items={navItems} mobileBreakpoints={[]} />}
     </>
   );

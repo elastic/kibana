@@ -24,13 +24,13 @@ describe('SourcesTable', () => {
     const wrapper = shallow(<SourcesTable sources={contentSources} />);
 
     expect(wrapper.find(EuiTable)).toHaveLength(1);
-    expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(4);
+    expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(3);
     expect(wrapper.find(SourceRow)).toHaveLength(2);
   });
 
   it('renders "Searchable" header item when toggle fn present', () => {
     const wrapper = shallow(
-      <SourcesTable onSearchableToggle={onToggle} sources={contentSources} />
+      <SourcesTable onSearchableToggle={onToggle} isOrganization sources={contentSources} />
     );
 
     expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(5);

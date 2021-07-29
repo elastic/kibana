@@ -97,6 +97,7 @@ export const PrivateSources: React.FC = () => {
 
   const privateSourcesSection = (
     <ContentSection
+      isPersonal
       title={PRIVATE_HEADER_TITLE}
       description={PRIVATE_HEADER_DESCRIPTION}
       action={canAddSources && headerAction}
@@ -123,6 +124,7 @@ export const PrivateSources: React.FC = () => {
 
   const sharedSourcesSection = (
     <ContentSection
+      isPersonal
       title={PRIVATE_SHARED_SOURCES_TITLE}
       description={
         hasSharedSources && (
