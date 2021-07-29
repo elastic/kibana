@@ -6,6 +6,7 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -16,8 +17,7 @@ import {
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -37,41 +37,39 @@ export interface ColumnFilter {
   query: string;
 }
 
-export interface ReportDefinition {
-  field: string;
-  required?: boolean;
-  custom?: boolean;
-  options?: Array<{
-    id: string;
-    field?: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
-    columnFilters?: ColumnFilter[];
-    timeScale?: string;
-  }>;
+export interface MetricOption {
+  id: string;
+  field?: string;
+  label: string;
+  description?: string;
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
+  columnFilters?: ColumnFilter[];
+  timeScale?: string;
 }
 
-export interface DataSeries {
+export interface SeriesConfig {
   reportType: ReportViewType;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
-  breakdowns: string[];
+  breakdownFields: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
+  filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[] | ExistsFilter[];
-  reportDefinitions: ReportDefinition[];
+  baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+  definitionFields: string[];
+  metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
   yConfig?: YConfig[];
+  query?: { query: string; language: 'kuery' };
 }
 
 export type URLReportDefinition = Record<string, string[]>;
 
 export interface SeriesUrl {
+  name: string;
   time: {
     to: string;
     from: string;
@@ -79,11 +77,12 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
-  reportType: ReportViewType;
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
-  isNew?: boolean;
+  selectedMetricField?: string;
+  hidden?: boolean;
+  color?: string;
 }
 
 export interface UrlFilter {

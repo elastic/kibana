@@ -10,8 +10,6 @@ import './app.scss';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Toast } from 'kibana/public';
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
@@ -22,10 +20,11 @@ import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import { LensByReferenceInput } from '../editor_frame_service/embeddable';
+import { LensByReferenceInput } from '../embeddable';
 import { EditorFrameInstance } from '../types';
+import { Document } from '../persistence/saved_object_store';
 import {
-  setState as setAppState,
+  setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
@@ -36,6 +35,7 @@ import {
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';
+import { getSavedObjectFormat } from '../utils';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -54,7 +54,8 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
-  initialContext,
+  datasourceMap,
+  visualizationMap,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -73,16 +74,69 @@ export function App({
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
-    (state: Partial<LensAppState>) => dispatch(setAppState(state)),
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
 
-  const appState = useLensSelector((state) => state.app);
+  const {
+    datasourceStates,
+    visualization,
+    filters,
+    query,
+    activeDatasourceId,
+    persistedDoc,
+    isLinkedToOriginatingApp,
+    searchSessionId,
+    isLoading,
+    isSaveable,
+  } = useLensSelector((state) => state.lens);
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const { lastKnownDoc } = appState;
+  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+
+  useEffect(() => {
+    const activeVisualization = visualization.activeId && visualizationMap[visualization.activeId];
+    const activeDatasource =
+      activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
+        ? datasourceMap[activeDatasourceId]
+        : undefined;
+
+    if (!activeDatasource || !activeVisualization || !visualization.state) {
+      return;
+    }
+    setLastKnownDoc(
+      // todo: that should be redux store selector
+      getSavedObjectFormat({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates,
+        visualization,
+        filters,
+        query,
+        title: persistedDoc?.title || '',
+        description: persistedDoc?.description,
+        persistedId: persistedDoc?.savedObjectId,
+      })
+    );
+  }, [
+    persistedDoc?.title,
+    persistedDoc?.description,
+    persistedDoc?.savedObjectId,
+    datasourceStates,
+    visualization,
+    filters,
+    query,
+    activeDatasourceId,
+    datasourceMap,
+    visualizationMap,
+  ]);
 
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
@@ -92,30 +146,17 @@ export function App({
     if (indicateNoData) {
       setIndicateNoData(false);
     }
-  }, [
-    setIndicateNoData,
-    indicateNoData,
-    appState.indexPatternsForTopNav,
-    appState.searchSessionId,
-  ]);
-
-  const onError = useCallback(
-    (e: { message: string }) =>
-      notifications.toasts.addDanger({
-        title: e.message,
-      }),
-    [notifications.toasts]
-  );
+  }, [setIndicateNoData, indicateNoData, searchSessionId]);
 
   const getIsByValueMode = useCallback(
     () =>
       Boolean(
         // Temporarily required until the 'by value' paradigm is default.
         dashboardFeatureFlag.allowByValueEmbeddables &&
-          appState.isLinkedToOriginatingApp &&
+          isLinkedToOriginatingApp &&
           !(initialInput as LensByReferenceInput)?.savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, appState.isLinkedToOriginatingApp, initialInput]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput]
   );
 
   useEffect(() => {
@@ -138,13 +179,11 @@ export function App({
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
+
       if (
         application.capabilities.visualize.save &&
-        !isEqual(
-          appState.persistedDoc?.state,
-          getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state
-        ) &&
-        (appState.isSaveable || appState.persistedDoc)
+        !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
+        (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
@@ -158,19 +197,13 @@ export function App({
         return actions.default();
       }
     });
-  }, [
-    onAppLeave,
-    lastKnownDoc,
-    appState.isSaveable,
-    appState.persistedDoc,
-    application.capabilities.visualize.save,
-  ]);
+  }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     const isByValueMode = getIsByValueMode();
     const breadcrumbs: EuiBreadcrumb[] = [];
-    if (appState.isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
+    if (isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
       breadcrumbs.push({
         onClick: () => {
           redirectToOrigin();
@@ -193,10 +226,10 @@ export function App({
     let currentDocTitle = i18n.translate('xpack.lens.breadcrumbsCreate', {
       defaultMessage: 'Create',
     });
-    if (appState.persistedDoc) {
+    if (persistedDoc) {
       currentDocTitle = isByValueMode
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
-        : appState.persistedDoc.title;
+        : persistedDoc.title;
     }
     breadcrumbs.push({ text: currentDocTitle });
     chrome.setBreadcrumbs(breadcrumbs);
@@ -207,39 +240,55 @@ export function App({
     getIsByValueMode,
     application,
     chrome,
-    appState.isLinkedToOriginatingApp,
-    appState.persistedDoc,
+    isLinkedToOriginatingApp,
+    persistedDoc,
   ]);
 
-  const runSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
-    return runSaveLensVisualization(
-      {
-        lastKnownDoc,
-        getIsByValueMode,
-        savedObjectsTagging,
-        initialInput,
-        redirectToOrigin,
-        persistedDoc: appState.persistedDoc,
-        onAppLeave,
-        redirectTo,
-        originatingApp: incomingState?.originatingApp,
-        ...lensAppServices,
-      },
-      saveProps,
-      options
-    ).then(
-      (newState) => {
-        if (newState) {
-          dispatchSetState(newState);
-          setIsSaveModalVisible(false);
+  const runSave = useCallback(
+    (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+      return runSaveLensVisualization(
+        {
+          lastKnownDoc,
+          getIsByValueMode,
+          savedObjectsTagging,
+          initialInput,
+          redirectToOrigin,
+          persistedDoc,
+          onAppLeave,
+          redirectTo,
+          originatingApp: incomingState?.originatingApp,
+          ...lensAppServices,
+        },
+        saveProps,
+        options
+      ).then(
+        (newState) => {
+          if (newState) {
+            dispatchSetState(newState);
+            setIsSaveModalVisible(false);
+          }
+        },
+        () => {
+          // error is handled inside the modal
+          // so ignoring it here
         }
-      },
-      () => {
-        // error is handled inside the modal
-        // so ignoring it here
-      }
-    );
-  };
+      );
+    },
+    [
+      incomingState?.originatingApp,
+      lastKnownDoc,
+      persistedDoc,
+      getIsByValueMode,
+      savedObjectsTagging,
+      initialInput,
+      redirectToOrigin,
+      onAppLeave,
+      redirectTo,
+      lensAppServices,
+      dispatchSetState,
+      setIsSaveModalVisible,
+    ]
+  );
 
   return (
     <>
@@ -253,64 +302,53 @@ export function App({
           setIsSaveModalVisible={setIsSaveModalVisible}
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
+          datasourceMap={datasourceMap}
+          title={persistedDoc?.title}
         />
-        {(!appState.isAppLoading || appState.persistedDoc) && (
+        {(!isLoading || persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
-            onError={onError}
             showNoDataPopover={showNoDataPopover}
-            initialContext={initialContext}
           />
         )}
       </div>
-      <SaveModalContainer
-        isVisible={isSaveModalVisible}
-        lensServices={lensAppServices}
-        originatingApp={
-          appState.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
-        }
-        isSaveable={appState.isSaveable}
-        runSave={runSave}
-        onClose={() => {
-          setIsSaveModalVisible(false);
-        }}
-        getAppNameFromId={() => getOriginatingAppName()}
-        lastKnownDoc={lastKnownDoc}
-        onAppLeave={onAppLeave}
-        persistedDoc={appState.persistedDoc}
-        initialInput={initialInput}
-        redirectTo={redirectTo}
-        redirectToOrigin={redirectToOrigin}
-        returnToOriginSwitchLabel={
-          getIsByValueMode() && initialInput
-            ? i18n.translate('xpack.lens.app.updatePanel', {
-                defaultMessage: 'Update panel on {originatingAppName}',
-                values: { originatingAppName: getOriginatingAppName() },
-              })
-            : undefined
-        }
-      />
+      {isSaveModalVisible && (
+        <SaveModalContainer
+          lensServices={lensAppServices}
+          originatingApp={isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+          isSaveable={isSaveable}
+          runSave={runSave}
+          onClose={() => {
+            setIsSaveModalVisible(false);
+          }}
+          getAppNameFromId={() => getOriginatingAppName()}
+          lastKnownDoc={lastKnownDoc}
+          onAppLeave={onAppLeave}
+          persistedDoc={persistedDoc}
+          initialInput={initialInput}
+          redirectTo={redirectTo}
+          redirectToOrigin={redirectToOrigin}
+          returnToOriginSwitchLabel={
+            getIsByValueMode() && initialInput
+              ? i18n.translate('xpack.lens.app.updatePanel', {
+                  defaultMessage: 'Update panel on {originatingAppName}',
+                  values: { originatingAppName: getOriginatingAppName() },
+                })
+              : undefined
+          }
+        />
+      )}
     </>
   );
 }
 
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
-  onError,
   showNoDataPopover,
-  initialContext,
 }: {
   editorFrame: EditorFrameInstance;
-  onError: (e: { message: string }) => Toast;
   showNoDataPopover: () => void;
-  initialContext: VisualizeFieldContext | undefined;
 }) {
   const { EditorFrameContainer } = editorFrame;
-  return (
-    <EditorFrameContainer
-      onError={onError}
-      showNoDataPopover={showNoDataPopover}
-      initialContext={initialContext}
-    />
-  );
+  return <EditorFrameContainer showNoDataPopover={showNoDataPopover} />;
 });

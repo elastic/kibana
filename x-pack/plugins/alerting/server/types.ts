@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicAlertInstance } from './alert_instance';
-import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
+import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { AlertsClient } from './alerts_client';
+import { RulesClient } from './rules_client';
 export * from '../common';
 import {
   IScopedClusterClient,
@@ -44,8 +44,8 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
-  getAlertsClient: () => AlertsClient;
-  listTypes: AlertTypeRegistry['list'];
+  getRulesClient: () => RulesClient;
+  listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
 }
@@ -99,6 +99,11 @@ export interface AlertExecutorOptions<
   updatedBy: string | null;
 }
 
+export interface RuleParamsAndRefs<Params extends AlertTypeParams> {
+  references: SavedObjectReference[];
+  params: Params;
+}
+
 export type ExecutorType<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
@@ -114,6 +119,7 @@ export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
 }
 export interface AlertType<
   Params extends AlertTypeParams = never,
+  ExtractedParams extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
@@ -146,6 +152,11 @@ export interface AlertType<
     params?: ActionVariable[];
   };
   minimumLicenseRequired: LicenseType;
+  useSavedObjectReferences?: {
+    extractReferences: (params: Params) => RuleParamsAndRefs<ExtractedParams>;
+    injectReferences: (params: ExtractedParams, references: SavedObjectReference[]) => Params;
+  };
+  isExportable: boolean;
 }
 
 export type UntypedAlertType = AlertType<
@@ -241,4 +252,4 @@ export interface InvalidatePendingApiKey {
   createdAt: string;
 }
 
-export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;
+export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;

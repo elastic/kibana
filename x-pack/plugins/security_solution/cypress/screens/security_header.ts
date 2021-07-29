@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const DETECTIONS = '[data-test-subj="navigation-detections"]';
+export const ALERTS = '[data-test-subj="navigation-alerts"]';
 
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
@@ -15,9 +15,17 @@ export const HOSTS = '[data-test-subj="navigation-hosts"]';
 
 export const KQL_INPUT = '[data-test-subj="queryInput"]';
 
-export const ADMINISTRATION = '[data-test-subj="navigation-administration"]';
+export const ENDPOINTS = '[data-test-subj="navigation-endpoints"]';
+
+export const TRUSTED_APPS = '[data-test-subj="navigation-trusted_apps"]';
+
+export const EVENT_FILTERS = '[data-test-subj="navigation-event_filters"]';
 
 export const NETWORK = '[data-test-subj="navigation-network"]';
+
+export const RULES = '[data-test-subj="navigation-rules"]';
+
+export const EXCEPTIONS = '[data-test-subj="navigation-exceptions"]';
 
 export const OVERVIEW = '[data-test-subj="navigation-overview"]';
 

@@ -31,6 +31,7 @@ import {
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
+import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
@@ -338,7 +339,7 @@ export const EditPackagePolicyForm = memo<{
     packageInfo,
   };
 
-  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
 
   const configurePackage = useMemo(
     () =>
@@ -354,7 +355,7 @@ export const EditPackagePolicyForm = memo<{
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!ExtensionView && (
+          {!extensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
@@ -364,12 +365,12 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
 
-          {ExtensionView &&
+          {extensionView &&
             packagePolicy.policy_id &&
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
-                <ExtensionView
+                <extensionView.Component
                   policy={originalPackagePolicy}
                   newPolicy={packagePolicy}
                   onChange={handleExtensionViewOnChange}
@@ -386,7 +387,7 @@ export const EditPackagePolicyForm = memo<{
       validationResults,
       formState,
       originalPackagePolicy,
-      ExtensionView,
+      extensionView,
       handleExtensionViewOnChange,
     ]
   );
@@ -430,7 +431,9 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
           {configurePackage}
-          <EuiSpacer size="l" />
+          {/* Extra space to accomodate the EuiBottomBar height */}
+          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xxl" />
           <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -490,6 +493,6 @@ const IntegrationsBreadcrumb = memo<{
   policyName: string;
   pkgkey: string;
 }>(({ pkgTitle, policyName, pkgkey }) => {
-  useBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
   return null;
 });

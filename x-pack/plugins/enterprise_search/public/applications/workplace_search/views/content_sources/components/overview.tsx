@@ -198,12 +198,16 @@ export const Overview: React.FC = () => {
               {!custom && (
                 <EuiTableRowCell>
                   <EuiText size="xs">
-                    {status} {activityDetails && <StatusItem details={activityDetails} />}
+                    <small>
+                      {status} {activityDetails && <StatusItem details={activityDetails} />}
+                    </small>
                   </EuiText>
                 </EuiTableRowCell>
               )}
               <EuiTableRowCell align="right">
-                <EuiText size="xs">{time}</EuiText>
+                <EuiText size="xs">
+                  <small>{time}</small>
+                </EuiText>
               </EuiTableRowCell>
             </EuiTableRow>
           ))}
@@ -453,7 +457,7 @@ export const Overview: React.FC = () => {
       <ViewContentHeader title="Source overview" />
 
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-        <EuiFlexItem>
+        <EuiFlexItem grow={8}>
           <EuiFlexGroup gutterSize="xl" direction="column">
             <EuiFlexItem>
               <DocumentSummary data-test-subj="DocumentSummary" />
@@ -465,7 +469,7 @@ export const Overview: React.FC = () => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={7}>
           <EuiFlexGroup gutterSize="m" direction="column">
             <EuiFlexItem>{groups.length > 0 && groupsSummary}</EuiFlexItem>
             {details.length > 0 && <EuiFlexItem>{detailsSummary}</EuiFlexItem>}

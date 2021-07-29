@@ -6123,71 +6123,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonArray",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonArray",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonValue",
-            "text": "JsonValue"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonObject",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonObject",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.JsonObject.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/typed_json.ts",
-              "lineNumber": 12
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.KibanaServerError",
         "type": "Interface",
         "tags": [],
@@ -6955,39 +6890,6 @@
         ],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonValue",
-        "type": "Type",
-        "tags": [],
-        "label": "JsonValue",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonObject",
-            "text": "JsonObject"
-          },
-          " | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " | null"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
           "lineNumber": 9
         },
         "deprecated": false,
@@ -8178,7 +8080,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_utils/server/report_server_error.ts",
-          "lineNumber": 39
+          "lineNumber": 40
         },
         "deprecated": false,
         "children": [
@@ -8370,7 +8272,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_utils/server/report_server_error.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false,
             "isRequired": true
@@ -8393,7 +8295,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_utils/server/report_server_error.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false,
             "isRequired": true
@@ -9977,6 +9879,202 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-common.mergeMigrationFunctionMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeMigrationFunctionMaps",
+        "description": [],
+        "signature": [
+          "(obj1: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ", obj2: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ") => { [x: string]: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunction",
+            "text": "MigrateFunction"
+          },
+          "<any, any>; } & ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.mergeMigrationFunctionMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj1",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.mergeMigrationFunctionMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "obj2",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.migrateToLatest",
+        "type": "Function",
+        "tags": [],
+        "label": "migrateToLatest",
+        "description": [],
+        "signature": [
+          "(migrations: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ", { state, version: oldVersion }: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.VersionedState",
+            "text": "VersionedState"
+          },
+          "<",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ">) => S"
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.migrateToLatest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "migrations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.migrateToLatest.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ state, version: oldVersion }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.VersionedState",
+                "text": "VersionedState"
+              },
+              "<",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-common.now",
         "type": "Function",
         "tags": [],
@@ -10364,71 +10462,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonArray",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonArray",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonValue",
-            "text": "JsonValue"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonObject",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonObject",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-common.JsonObject.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/typed_json.ts",
-              "lineNumber": 12
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-common.KibanaServerError",
         "type": "Interface",
         "tags": [],
@@ -10499,9 +10532,13 @@
         "parentPluginId": "kibanaUtils",
         "id": "def-common.PersistableState",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "todo"
+        ],
         "label": "PersistableState",
-        "description": [],
+        "description": [
+          "\nPersistable state interface can be implemented by something that persists\n(stores) state, for example, in a saved object. Once implemented that thing\nwill gain ability to \"extract\" and \"inject\" saved object references, which\nare necessary for various saved object tasks, such as export. It will also be\nable to do state migrations across Kibana versions, if the shape of the state\nwould change over time.\n"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -10513,8 +10550,8 @@
           "<P>"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 63
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 53
         },
         "deprecated": false,
         "children": [
@@ -10525,17 +10562,19 @@
             "tags": [],
             "label": "telemetry",
             "description": [
-              "\n function to extract telemetry information"
+              "\nFunction which reports telemetry information. This function is essentially\na \"reducer\" - it receives the existing \"stats\" object and returns an\nupdated version of the \"stats\" object.\n"
             ],
             "signature": [
-              "(state: P, collector: Record<string, any>) => Record<string, any>"
+              "(state: P, stats: Record<string, any>) => Record<string, any>"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 69
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 64
             },
             "deprecated": false,
-            "returnComment": [],
+            "returnComment": [
+              "A new stats object augmented with new telemetry information."
+            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -10543,29 +10582,33 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
                 "signature": [
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 69
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 64
                 },
                 "deprecated": false
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.collector",
+                "id": "def-common.stats",
                 "type": "Object",
                 "tags": [],
-                "label": "collector",
-                "description": [],
+                "label": "stats",
+                "description": [
+                  "Stats object containing the stats which were already\ncollected. This `stats` object shall not be mutated in-line."
+                ],
                 "signature": [
                   "{ [x: string]: any; }"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 69
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 64
                 },
                 "deprecated": false
               }
@@ -10578,7 +10621,7 @@
             "tags": [],
             "label": "inject",
             "description": [
-              "\ninject function receives state and a list of references and should return state with references injected\ndefault is identity function"
+              "\nA function which receives state and a list of references and should return\nback the state with references injected. The default is an identity\nfunction.\n"
             ],
             "signature": [
               "(state: P, references: ",
@@ -10586,11 +10629,13 @@
               "[]) => P"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 76
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 75
             },
             "deprecated": false,
-            "returnComment": [],
+            "returnComment": [
+              "Persistable state object with references injected."
+            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -10598,13 +10643,15 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
                 "signature": [
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 76
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 75
                 },
                 "deprecated": false
               },
@@ -10614,14 +10661,16 @@
                 "type": "Array",
                 "tags": [],
                 "label": "references",
-                "description": [],
+                "description": [
+                  "List of saved object references."
+                ],
                 "signature": [
                   "SavedObjectReference",
                   "[]"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 76
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 75
                 },
                 "deprecated": false
               }
@@ -10634,7 +10683,7 @@
             "tags": [],
             "label": "extract",
             "description": [
-              "\nextract function receives state and should return state with references extracted and array of references\ndefault returns same state with empty reference array"
+              "\nA function which receives state and should return the state with references\nextracted and an array of the extracted references. The default case could\nsimply return the same state with an empty array of references.\n"
             ],
             "signature": [
               "(state: P) => { state: P; references: ",
@@ -10642,11 +10691,13 @@
               "[]; }"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 82
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 86
             },
             "deprecated": false,
-            "returnComment": [],
+            "returnComment": [
+              "Persistable state object with references extracted and a list of\nreferences."
+            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -10654,13 +10705,15 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
                 "signature": [
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 82
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 86
                 },
                 "deprecated": false
               }
@@ -10673,10 +10726,10 @@
             "tags": [],
             "label": "migrations",
             "description": [
-              "\nlist of all migrations per semver"
+              "\nA list of migration functions, which migrate the persistable state\nserializable object to the next version. Migration functions should are\nkeyed by the Kibana version using semver, where the version indicates to\nwhich version the state will be migrated to."
             ],
             "signature": [
-              "{ [key: string]: ",
+              "{ [semver: string]: ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
@@ -10684,27 +10737,11 @@
                 "section": "def-common.MigrateFunction",
                 "text": "MigrateFunction"
               },
-              "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
-              ", ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
-              ">; }"
+              "<any, any>; }"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 87
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 94
             },
             "deprecated": false
           }
@@ -10715,7 +10752,9 @@
         "parentPluginId": "kibanaUtils",
         "id": "def-common.PersistableStateService",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "todo"
+        ],
         "label": "PersistableStateService",
         "description": [],
         "signature": [
@@ -10729,8 +10768,8 @@
           "<P>"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 27
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 128
         },
         "deprecated": false,
         "children": [
@@ -10741,50 +10780,56 @@
             "tags": [],
             "label": "telemetry",
             "description": [
-              "\n function to extract telemetry information"
+              "\nFunction which reports telemetry information. This function is essentially\na \"reducer\" - it receives the existing \"stats\" object and returns an\nupdated version of the \"stats\" object.\n"
             ],
             "signature": [
               "(state: P, collector: Record<string, any>) => Record<string, any>"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 33
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 139
             },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableStateService.telemetry.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
                 "signature": [
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 33
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 139
                 },
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.collector",
+                "id": "def-common.PersistableStateService.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "collector",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 33
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 139
                 },
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "A new stats object augmented with new telemetry information."
             ]
           },
           {
@@ -10794,7 +10839,7 @@
             "tags": [],
             "label": "inject",
             "description": [
-              "\ninject function receives state and a list of references and should return state with references injected\ndefault is identity function"
+              "\nA function which receives state and a list of references and should return\nback the state with references injected. The default is an identity\nfunction.\n"
             ],
             "signature": [
               "(state: P, references: ",
@@ -10802,45 +10847,53 @@
               "[]) => P"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 40
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 150
             },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableStateService.inject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
                 "signature": [
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 40
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
                 },
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.references",
+                "id": "def-common.PersistableStateService.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
-                "description": [],
+                "description": [
+                  "List of saved object references."
+                ],
                 "signature": [
                   "SavedObjectReference",
                   "[]"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 40
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
                 },
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "Persistable state object with references injected."
             ]
           },
           {
@@ -10850,7 +10903,7 @@
             "tags": [],
             "label": "extract",
             "description": [
-              "\nextract function receives state and should return state with references extracted and array of references\ndefault returns same state with empty reference array"
+              "\nA function which receives state and should return the state with references\nextracted and an array of the extracted references. The default case could\nsimply return the same state with an empty array of references.\n"
             ],
             "signature": [
               "(state: P) => { state: P; references: ",
@@ -10858,28 +10911,33 @@
               "[]; }"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 46
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 161
             },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableStateService.extract.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": [],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
                 "signature": [
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 46
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 161
                 },
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "Persistable state object with references extracted and a list of\nreferences."
             ]
           },
           {
@@ -10889,7 +10947,7 @@
             "tags": [],
             "label": "migrateToLatest",
             "description": [
-              "\nmigrateToLatest function receives state of older version and should migrate to the latest version"
+              "\nA function which receives the state of an older object and version and\nshould migrate the state of the object to the latest possible version using\nthe `.migrations` dictionary provided on a {@link PersistableState} item.\n"
             ],
             "signature": [
               "((state: ",
@@ -10897,89 +10955,51 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.VersionedState",
+                "text": "VersionedState"
+              },
+              "<",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
                 "section": "def-common.SerializableState",
                 "text": "SerializableState"
               },
-              ", version: string) => P) | undefined"
+              ">) => P) | undefined"
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 53
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 172
             },
             "deprecated": false
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.PersistableStateService.migrate",
+            "id": "def-common.PersistableStateService.getAllMigrations",
             "type": "Function",
             "tags": [],
-            "label": "migrate",
+            "label": "getAllMigrations",
             "description": [
-              "\nmigrate function runs the specified migration"
+              "\nreturns all registered migrations"
             ],
             "signature": [
-              "(state: ",
+              "() => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
-              ", version: string) => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
               }
             ],
             "source": {
-              "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-              "lineNumber": 60
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 177
             },
             "deprecated": false,
             "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
-                "type": "Object",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "{ [key: string]: ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
-                  "; }"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 60
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-common.version",
-                "type": "string",
-                "tags": [],
-                "label": "version",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 60
-                },
-                "deprecated": false
-              }
-            ]
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -11467,6 +11487,63 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.VersionedState",
+        "type": "Interface",
+        "tags": [],
+        "label": "VersionedState",
+        "description": [
+          "\nVersioned state is a POJO JavaScript object that can be serialized to JSON,\nand which also contains the version information. The version is stored in\nsemver format and corresponds to the Kibana release version when the object\nwas created. The version can be used to apply migrations to the object.\n\nFor example:\n\n```ts\nconst obj: VersionedState<{ dashboardId: string }> = {\n  version: '7.14.0',\n  state: {\n    dashboardId: '123',\n  },\n};\n```"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.VersionedState",
+            "text": "VersionedState"
+          },
+          "<S>"
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.VersionedState.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.VersionedState.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "S"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+              "lineNumber": 40
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -11618,39 +11695,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonValue",
-        "type": "Type",
-        "tags": [],
-        "label": "JsonValue",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonObject",
-            "text": "JsonObject"
-          },
-          " | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " | null"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-common.MapStateToProps",
         "type": "Type",
         "tags": [],
@@ -11718,8 +11762,8 @@
           "(state: FromVersion) => ToVersion"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 18
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 103
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -11730,9 +11774,11 @@
         "type": "Type",
         "tags": [],
         "label": "MigrateFunctionsObject",
-        "description": [],
+        "description": [
+          "\nCollection of migrations that a given type of persistable state object has\naccumulated over time. Migration functions are keyed using semver version\nof Kibana releases."
+        ],
         "signature": [
-          "{ [key: string]: ",
+          "{ [semver: string]: ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -11740,27 +11786,11 @@
             "section": "def-common.MigrateFunction",
             "text": "MigrateFunction"
           },
-          "<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
-          },
-          ", ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
-          },
-          ">; }"
+          "<any, any>; }"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 23
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 102
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -11769,11 +11799,13 @@
         "parentPluginId": "kibanaUtils",
         "id": "def-common.PersistableStateDefinition",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "todo"
+        ],
         "label": "PersistableStateDefinition",
         "description": [],
         "signature": [
-          "{ telemetry?: ((state: P, collector: Record<string, any>) => Record<string, any>) | undefined; inject?: ((state: P, references: ",
+          "{ telemetry?: ((state: P, stats: Record<string, any>) => Record<string, any>) | undefined; inject?: ((state: P, references: ",
           "SavedObjectReference",
           "[]) => P) | undefined; extract?: ((state: P) => { state: P; references: ",
           "SavedObjectReference",
@@ -11788,8 +11820,42 @@
           " | undefined; }"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 90
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 121
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.PersistableStateMigrateFn",
+        "type": "Type",
+        "tags": [],
+        "label": "PersistableStateMigrateFn",
+        "description": [
+          "\nmigrate function runs the specified migration"
+        ],
+        "signature": [
+          "(state: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ", version: string) => ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 113
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -11947,8 +12013,8 @@
           "[] | null | undefined"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 12
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 19
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -11959,7 +12025,9 @@
         "type": "Type",
         "tags": [],
         "label": "SerializableState",
-        "description": [],
+        "description": [
+          "\nSerializable state is something is a POJO JavaScript object that can be\nserialized to a JSON string."
+        ],
         "signature": [
           "{ [key: string]: ",
           {
@@ -11972,8 +12040,8 @@
           "; }"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 14
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 15
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -11997,8 +12065,8 @@
           " | null | undefined"
         ],
         "source": {
-          "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-          "lineNumber": 11
+          "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false

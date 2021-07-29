@@ -7,7 +7,7 @@
 
 import { httpServerMock } from 'src/core/server/mocks';
 
-import type { PostIngestSetupResponse } from '../../../common';
+import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services/app_context';
@@ -53,7 +53,7 @@ describe('FleetSetupHandler', () => {
     );
     await fleetSetupHandler(context, request, response);
 
-    const expectedBody: PostIngestSetupResponse = { isInitialized: true, nonFatalErrors: [] };
+    const expectedBody: PostFleetSetupResponse = { isInitialized: true, nonFatalErrors: [] };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
   });

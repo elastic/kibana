@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -148,7 +147,7 @@ export const SettingsPage: React.FC = () => {
   );
 
   return (
-    <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>
       </EuiFlexGroup>
@@ -213,6 +212,6 @@ export const SettingsPage: React.FC = () => {
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 };

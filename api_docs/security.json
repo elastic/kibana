@@ -217,24 +217,6 @@
           },
           {
             "parentPluginId": "security",
-            "id": "def-public.SecurityLicense.getType",
-            "type": "Function",
-            "tags": [],
-            "label": "getType",
-            "description": [],
-            "signature": [
-              "() => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
             "id": "def-public.SecurityLicense.getFeatures",
             "type": "Function",
             "tags": [],
@@ -246,10 +228,46 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 18
+              "lineNumber": 17
             },
             "deprecated": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.SecurityLicense.hasAtLeast",
+            "type": "Function",
+            "tags": [],
+            "label": "hasAtLeast",
+            "description": [],
+            "signature": [
+              "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-public.SecurityLicense.hasAtLeast.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "licenseType",
+                "description": [],
+                "signature": [
+                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+                  "lineNumber": 18
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -705,7 +723,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 167
+        "lineNumber": 170
       },
       "deprecated": false,
       "children": [
@@ -729,7 +747,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 171
+            "lineNumber": 174
           },
           "deprecated": false
         },
@@ -753,7 +771,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 175
+            "lineNumber": 178
           },
           "deprecated": false
         }
@@ -770,7 +788,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 178
+        "lineNumber": 181
       },
       "deprecated": false,
       "children": [
@@ -794,7 +812,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 182
+            "lineNumber": 185
           },
           "deprecated": false
         },
@@ -818,7 +836,25 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/public/plugin.tsx",
-            "lineNumber": 186
+            "lineNumber": 189
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginStart.uiApi",
+          "type": "Object",
+          "tags": [],
+          "label": "uiApi",
+          "description": [
+            "\nExposes UI components that will be loaded asynchronously."
+          ],
+          "signature": [
+            "UiApi"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 193
           },
           "deprecated": false
         }
@@ -1721,14 +1757,14 @@
           {
             "plugin": "alerting",
             "link": {
-              "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
               "lineNumber": 23
             }
           },
           {
             "plugin": "alerting",
             "link": {
-              "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
               "lineNumber": 98
             }
           }
@@ -1847,7 +1883,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/server/plugin.ts",
-        "lineNumber": 72
+        "lineNumber": 71
       },
       "deprecated": false,
       "children": [
@@ -1881,7 +1917,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 76
+            "lineNumber": 75
           },
           "deprecated": true,
           "references": [
@@ -1910,7 +1946,7 @@
               "plugin": "actions",
               "link": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 444
+                "lineNumber": 453
               }
             },
             {
@@ -1931,7 +1967,7 @@
               "plugin": "dataEnhanced",
               "link": {
                 "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts",
-                "lineNumber": 448
+                "lineNumber": 516
               }
             },
             {
@@ -1991,7 +2027,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 80
+            "lineNumber": 79
           },
           "deprecated": true,
           "references": [
@@ -1999,7 +2035,7 @@
               "plugin": "actions",
               "link": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 443
+                "lineNumber": 452
               }
             },
             {
@@ -2034,14 +2070,14 @@
               "plugin": "enterpriseSearch",
               "link": {
                 "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
-                "lineNumber": 86
+                "lineNumber": 78
               }
             },
             {
               "plugin": "enterpriseSearch",
               "link": {
                 "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
-                "lineNumber": 88
+                "lineNumber": 80
               }
             },
             {
@@ -2073,7 +2109,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 84
+            "lineNumber": 83
           },
           "deprecated": false
         },
@@ -2097,7 +2133,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 88
+            "lineNumber": 87
           },
           "deprecated": false
         }
@@ -2116,7 +2152,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/server/plugin.ts",
-        "lineNumber": 94
+        "lineNumber": 93
       },
       "deprecated": false,
       "children": [
@@ -2140,7 +2176,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 98
+            "lineNumber": 97
           },
           "deprecated": false
         },
@@ -2164,7 +2200,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security/server/plugin.ts",
-            "lineNumber": 102
+            "lineNumber": 101
           },
           "deprecated": false
         }
@@ -2326,24 +2362,6 @@
           },
           {
             "parentPluginId": "security",
-            "id": "def-common.SecurityLicense.getType",
-            "type": "Function",
-            "tags": [],
-            "label": "getType",
-            "description": [],
-            "signature": [
-              "() => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
             "id": "def-common.SecurityLicense.getFeatures",
             "type": "Function",
             "tags": [],
@@ -2355,10 +2373,46 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 18
+              "lineNumber": 17
             },
             "deprecated": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.hasAtLeast",
+            "type": "Function",
+            "tags": [],
+            "label": "hasAtLeast",
+            "description": [],
+            "signature": [
+              "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-common.SecurityLicense.hasAtLeast.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "licenseType",
+                "description": [],
+                "signature": [
+                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+                  "lineNumber": 18
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {

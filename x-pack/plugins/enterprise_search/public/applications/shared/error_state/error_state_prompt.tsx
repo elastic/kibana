@@ -12,7 +12,8 @@ import { useValues } from 'kea';
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { KibanaLogic } from '../../shared/kibana';
+import { KibanaLogic } from '../kibana';
+import { BetaNotification } from '../layout/beta';
 import { EuiButtonTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
@@ -92,14 +93,15 @@ export const ErrorStatePrompt: React.FC = () => {
           </ol>
         </>
       }
-      actions={
+      actions={[
         <EuiButtonTo iconType="help" fill to="/setup_guide">
           <FormattedMessage
             id="xpack.enterpriseSearch.errorConnectingState.setupGuideCta"
             defaultMessage="Review setup guide"
           />
-        </EuiButtonTo>
-      }
+        </EuiButtonTo>,
+        <BetaNotification buttonProps={{ size: 'm', flush: undefined }} />,
+      ]}
     />
   );
 };

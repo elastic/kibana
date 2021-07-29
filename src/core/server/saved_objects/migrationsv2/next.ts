@@ -39,6 +39,8 @@ import type {
   OutdatedDocumentsSearchClosePit,
   RefreshTarget,
   OutdatedDocumentsRefresh,
+  CheckUnknownDocumentsState,
+  CalculateExcludeFiltersState,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -61,8 +63,20 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatusYellow({ client, index: state.sourceIndex.value }),
+    CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
+      Actions.checkForUnknownDocs({
+        client,
+        indexName: state.sourceIndex.value,
+        unusedTypesQuery: state.unusedTypesQuery,
+        knownTypes: state.knownTypes,
+      }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setWriteBlock({ client, index: state.sourceIndex.value }),
+    CALCULATE_EXCLUDE_FILTERS: (state: CalculateExcludeFiltersState) =>
+      Actions.calculateExcludeFilters({
+        client,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+      }),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
       Actions.createIndex({
         client,

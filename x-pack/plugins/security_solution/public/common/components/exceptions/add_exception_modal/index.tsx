@@ -28,7 +28,6 @@ import {
 import type {
   ExceptionListType,
   OsTypeArray,
-  OsType,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -303,10 +302,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return alertData !== undefined;
   }, [alertData]);
 
-  const [selectedOs, setSelectedOs] = useState<OsType | undefined>();
+  const [selectedOs, setSelectedOs] = useState<OsTypeArray | undefined>();
 
   const osTypesSelection = useMemo((): OsTypeArray => {
-    return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [selectedOs] : [];
+    return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
   const enrichExceptionItems = useCallback((): Array<
@@ -359,21 +358,25 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return false;
   }, [maybeRule]);
 
-  const OsOptions: Array<EuiComboBoxOptionOption<OsType>> = useMemo((): Array<
-    EuiComboBoxOptionOption<OsType>
+  const OsOptions: Array<EuiComboBoxOptionOption<OsTypeArray>> = useMemo((): Array<
+    EuiComboBoxOptionOption<OsTypeArray>
   > => {
     return [
       {
         label: sharedI18n.OPERATING_SYSTEM_WINDOWS,
-        value: 'windows',
+        value: ['windows'],
       },
       {
         label: sharedI18n.OPERATING_SYSTEM_MAC,
-        value: 'macos',
+        value: ['macos'],
       },
       {
         label: sharedI18n.OPERATING_SYSTEM_LINUX,
-        value: 'linux',
+        value: ['linux'],
+      },
+      {
+        label: sharedI18n.OPERATING_SYSTEM_WINDOWS_AND_MAC,
+        value: ['windows', 'macos'],
       },
     ];
   }, []);
@@ -385,7 +388,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setSelectedOs]
   );
 
-  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsType>> => {
+  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsTypeArray>> => {
     return OsOptions.filter((option) => {
       return selectedOs === option.value;
     });

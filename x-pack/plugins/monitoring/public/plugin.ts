@@ -93,7 +93,10 @@ export class MonitoringPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { AngularApp } = await import('./angular');
+        const [, { AngularApp }] = await Promise.all([
+          pluginsStart.kibanaLegacy.loadAngularBootstrap(),
+          import('./angular'),
+        ]);
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
@@ -105,6 +108,7 @@ export class MonitoringPlugin
           externalConfig: this.getExternalConfig(),
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
+          appMountParameters: params,
         };
 
         const monitoringApp = new AngularApp(deps);
@@ -167,29 +171,29 @@ export class MonitoringPlugin
 
   private registerAlerts(plugins: MonitoringSetupPluginDependencies) {
     const {
-      triggersActionsUi: { alertTypeRegistry },
+      triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
-    alertTypeRegistry.register(createCpuUsageAlertType());
-    alertTypeRegistry.register(createDiskUsageAlertType());
-    alertTypeRegistry.register(createMemoryUsageAlertType());
-    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
-    alertTypeRegistry.register(
+    ruleTypeRegistry.register(createCpuUsageAlertType());
+    ruleTypeRegistry.register(createDiskUsageAlertType());
+    ruleTypeRegistry.register(createMemoryUsageAlertType());
+    ruleTypeRegistry.register(createMissingMonitoringDataAlertType());
+    ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
         ALERT_THREAD_POOL_SEARCH_REJECTIONS,
         ALERT_DETAILS[ALERT_THREAD_POOL_SEARCH_REJECTIONS]
       )
     );
-    alertTypeRegistry.register(
+    ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
         ALERT_THREAD_POOL_WRITE_REJECTIONS,
         ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
       )
     );
-    alertTypeRegistry.register(createCCRReadExceptionsAlertType());
-    alertTypeRegistry.register(createLargeShardSizeAlertType());
+    ruleTypeRegistry.register(createCCRReadExceptionsAlertType());
+    ruleTypeRegistry.register(createLargeShardSizeAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
-      alertTypeRegistry.register(legacyAlertType);
+      ruleTypeRegistry.register(legacyAlertType);
     }
   }
 }

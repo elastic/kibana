@@ -683,7 +683,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-          "lineNumber": 36
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -701,7 +701,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-              "lineNumber": 36
+              "lineNumber": 39
             },
             "deprecated": false,
             "isRequired": true
@@ -726,7 +726,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-          "lineNumber": 50
+          "lineNumber": 53
         },
         "deprecated": false,
         "children": [
@@ -744,7 +744,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-              "lineNumber": 50
+              "lineNumber": 53
             },
             "deprecated": false,
             "isRequired": true
@@ -1055,7 +1055,7 @@
         "label": "KibanaPageTemplate",
         "description": [],
         "signature": [
-          "({ template, pageHeader, children, isEmptyState, restrictWidth, bottomBar, bottomBarProps, pageSideBar, solutionNav, ...rest }: React.PropsWithChildren<",
+          "({ template, pageHeader, children, isEmptyState, restrictWidth, pageSideBar, pageSideBarProps, solutionNav, ...rest }: React.PropsWithChildren<",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -1067,7 +1067,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-          "lineNumber": 37
+          "lineNumber": 44
         },
         "deprecated": false,
         "children": [
@@ -1076,7 +1076,7 @@
             "id": "def-public.KibanaPageTemplate.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  template,\n  pageHeader,\n  children,\n  isEmptyState,\n  restrictWidth = true,\n  bottomBar,\n  bottomBarProps,\n  pageSideBar,\n  solutionNav,\n  ...rest\n}",
+            "label": "{\n  template,\n  pageHeader,\n  children,\n  isEmptyState,\n  restrictWidth = true,\n  pageSideBar,\n  pageSideBarProps,\n  solutionNav,\n  ...rest\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1091,7 +1091,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-              "lineNumber": 37
+              "lineNumber": 44
             },
             "deprecated": false,
             "isRequired": true
@@ -1219,6 +1219,43 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-public.overviewPageActions",
+        "type": "Function",
+        "tags": [],
+        "label": "overviewPageActions",
+        "description": [],
+        "signature": [
+          "({ addBasePath, application, hidden, showDevToolsLink, showManagementLink, }: Props) => (JSX.Element | null)[]"
+        ],
+        "source": {
+          "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
+          "lineNumber": 23
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.overviewPageActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  addBasePath,\n  application,\n  hidden,\n  showDevToolsLink,\n  showManagementLink,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
+              "lineNumber": 23
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-public.OverviewPageFooter",
         "type": "Function",
         "tags": [],
@@ -1246,43 +1283,6 @@
             "source": {
               "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
               "lineNumber": 28
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.OverviewPageHeader",
-        "type": "Function",
-        "tags": [],
-        "label": "OverviewPageHeader",
-        "description": [],
-        "signature": [
-          "({ hideToolbar, iconType, overlap, showDevToolsLink, showManagementLink, title, addBasePath, }: React.PropsWithChildren<Props>) => JSX.Element"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_react/public/overview_page/overview_page_header/overview_page_header.tsx",
-          "lineNumber": 35
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.OverviewPageHeader.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  hideToolbar,\n  iconType,\n  overlap,\n  showDevToolsLink,\n  showManagementLink,\n  title,\n  addBasePath,\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_react/public/overview_page/overview_page_header/overview_page_header.tsx",
-              "lineNumber": 35
             },
             "deprecated": false,
             "isRequired": true
@@ -1830,7 +1830,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-          "lineNumber": 40
+          "lineNumber": 32
         },
         "deprecated": false,
         "children": [
@@ -1854,7 +1854,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 40
+              "lineNumber": 32
             },
             "deprecated": false,
             "isRequired": true
@@ -2385,7 +2385,7 @@
           },
           " extends Pick<",
           "EuiTokenProps",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"size\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"fill\" | \"shape\">"
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"size\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"fill\" | \"shape\">"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
@@ -3655,7 +3655,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-          "lineNumber": 31
+          "lineNumber": 23
         },
         "deprecated": false,
         "children": [
@@ -3668,7 +3668,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 32
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -3684,7 +3684,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 33
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -3707,7 +3707,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 34
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -3725,7 +3725,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 35
+              "lineNumber": 27
             },
             "deprecated": false,
             "returnComment": [],
@@ -3776,7 +3776,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 36
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -3796,7 +3796,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 37
+              "lineNumber": 29
             },
             "deprecated": false
           }
@@ -3812,7 +3812,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-          "lineNumber": 24
+          "lineNumber": 16
         },
         "deprecated": false,
         "children": [
@@ -3825,7 +3825,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 25
+              "lineNumber": 17
             },
             "deprecated": false
           },
@@ -3841,7 +3841,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 26
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -3857,7 +3857,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 27
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -3874,7 +3874,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 28
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -3890,7 +3890,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-              "lineNumber": 29
+              "lineNumber": 21
             },
             "deprecated": false
           }
@@ -3929,7 +3929,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-          "lineNumber": 29
+          "lineNumber": 32
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3944,19 +3944,9 @@
           "\nA thin wrapper around EuiPageTemplate with a few Kibana specific additions"
         ],
         "signature": [
-          "(Pick<",
+          "Pick<",
           "EuiPageProps",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"grow\" | \"direction\" | \"restrictWidth\"> & ",
-          "DisambiguateSet",
-          "<{ template?: \"default\" | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }, { position: \"static\" | \"sticky\"; }> & { position: \"static\" | \"sticky\"; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position: \"static\" | \"sticky\"; }, { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }> & { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | undefined; }, { template: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\"; }> & { template: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\"; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"grow\" | \"direction\" | \"restrictWidth\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
           "EuiPageSideBarProps",
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",
@@ -3966,13 +3956,7 @@
           "EuiPageContentProps",
           " | undefined; pageContentBodyProps?: ",
           "EuiPageContentBodyProps",
-          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
-          " | undefined; }) | (Pick<",
-          "EuiPageProps",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"grow\" | \"direction\" | \"restrictWidth\"> & ",
-          "DisambiguateSet",
-          "<{ template: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\"; }, { template?: \"default\" | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
+          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
           "CommonProps",
           " & React.HTMLAttributes<HTMLElement> & ",
           "DisambiguateSet",
@@ -3980,31 +3964,13 @@
           "CommonProps",
           " & React.HTMLAttributes<HTMLElement> & ",
           "DisambiguateSet",
-          "<{ position: \"static\" | \"sticky\"; }, { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }> & { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | undefined; }> & { template?: \"default\" | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }, { position: \"static\" | \"sticky\"; }> & { position: \"static\" | \"sticky\"; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement> & ",
-          "DisambiguateSet",
-          "<{ position: \"static\" | \"sticky\"; }, { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }> & { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | undefined; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "<{ position: \"static\" | \"sticky\"; }, { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }> & { position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; } & { paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: string | number | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
           "KibanaPageTemplateSolutionNavProps",
-          " | undefined; })"
+          " | undefined; }"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-          "lineNumber": 23
+          "lineNumber": 30
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4104,6 +4070,14 @@
             "docId": "kibCorePluginApi",
             "section": "def-public.DeprecationsServiceStart",
             "text": "DeprecationsServiceStart"
+          },
+          " | undefined; executionContext?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.ExecutionContextServiceStart",
+            "text": "ExecutionContextServiceStart"
           },
           " | undefined; injectedMetadata?: { getInjectedVar: (name: string, defaultValue?: any) => unknown; } | undefined; }"
         ],
@@ -4290,6 +4264,191 @@
           "lineNumber": 86
         },
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.Lang",
+        "type": "Object",
+        "tags": [],
+        "label": "Lang",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.ID",
+            "type": "string",
+            "tags": [],
+            "label": "ID",
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.lexerRules",
+            "type": "Any",
+            "tags": [],
+            "label": "lexerRules",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.languageConfiguration",
+            "type": "Any",
+            "tags": [],
+            "label": "languageConfiguration",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/css/index.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.Lang",
+        "type": "Object",
+        "tags": [],
+        "label": "Lang",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.ID",
+            "type": "string",
+            "tags": [],
+            "label": "ID",
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.languageConfiguration",
+            "type": "Object",
+            "tags": [],
+            "label": "languageConfiguration",
+            "description": [],
+            "signature": [
+              "languages",
+              ".LanguageConfiguration"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.lexerRules",
+            "type": "Object",
+            "tags": [],
+            "label": "lexerRules",
+            "description": [],
+            "signature": [
+              "languages",
+              ".IMonarchLanguage"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/index.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.Lang",
+        "type": "Object",
+        "tags": [],
+        "label": "Lang",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.ID",
+            "type": "string",
+            "tags": [],
+            "label": "ID",
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.languageConfiguration",
+            "type": "Any",
+            "tags": [],
+            "label": "languageConfiguration",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Lang.lexerRules",
+            "type": "Any",
+            "tags": [],
+            "label": "lexerRules",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/index.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -4807,7 +4966,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-          "lineNumber": 42
+          "lineNumber": 51
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4833,7 +4992,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-          "lineNumber": 41
+          "lineNumber": 50
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4859,7 +5018,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-          "lineNumber": 40
+          "lineNumber": 49
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4890,7 +5049,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-          "lineNumber": 21
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
@@ -4916,7 +5075,72 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-              "lineNumber": 23
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-common.EuiThemeProviderDecorator",
+        "type": "Function",
+        "tags": [],
+        "label": "EuiThemeProviderDecorator",
+        "description": [
+          "\nStorybook decorator using the EUI theme provider. Uses the value from\n`globals` provided by the Storybook theme switcher."
+        ],
+        "signature": [
+          "(storyFn: ",
+          "StoryFn",
+          "<",
+          "StoryFnReactReturnType",
+          ">, { globals }: ",
+          "StoryContext",
+          ") => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 42
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.EuiThemeProviderDecorator.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "storyFn",
+            "description": [],
+            "signature": [
+              "StoryFn",
+              "<",
+              "StoryFnReactReturnType",
+              ">"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+              "lineNumber": 42
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.EuiThemeProviderDecorator.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ globals }",
+            "description": [],
+            "signature": [
+              "StoryContext"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+              "lineNumber": 42
             },
             "deprecated": false,
             "isRequired": true
@@ -4942,7 +5166,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-          "lineNumber": 43
+          "lineNumber": 52
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4975,7 +5199,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-          "lineNumber": 44
+          "lineNumber": 53
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4991,23 +5215,23 @@
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-          "lineNumber": 16
+          "lineNumber": 15
         },
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
             "id": "def-common.EuiTheme.eui",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "eui",
             "description": [],
             "signature": [
-              "{ paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; inherit: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; } | { paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; inherit: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; }"
+              "{ paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; success: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; inherit: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuMarginSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; success: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; euiSideNavDisabledTextcolor: string; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; success: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; secondary: string; success: string; warning: string; danger: string; subdued: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; }"
             ],
             "source": {
               "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-              "lineNumber": 17
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -5020,7 +5244,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-              "lineNumber": 18
+              "lineNumber": 17
             },
             "deprecated": false
           }

@@ -406,9 +406,643 @@
           "a Promise that resolves when all the downloads have been correctly started"
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.formatSearchParams",
+        "type": "Function",
+        "tags": [],
+        "label": "formatSearchParams",
+        "description": [],
+        "signature": [
+          "(opts: ",
+          "RedirectOptions",
+          ") => URLSearchParams"
+        ],
+        "source": {
+          "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.formatSearchParams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "RedirectOptions"
+            ],
+            "source": {
+              "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.parseSearchParams",
+        "type": "Function",
+        "tags": [],
+        "label": "parseSearchParams",
+        "description": [
+          "\nParses redirect endpoint URL path search parameters. Expects them in the\nfollowing form:\n\n```\n/r?l=<locator_id>&v=<version>&p=<params>\n```\n"
+        ],
+        "signature": [
+          "(urlSearch: string) => ",
+          "RedirectOptions"
+        ],
+        "source": {
+          "path": "src/plugins/share/public/url_service/redirect/util/parse_search_params.ts",
+          "lineNumber": 24
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.parseSearchParams.$1",
+            "type": "string",
+            "tags": [],
+            "label": "urlSearch",
+            "description": [
+              "Search part of URL path."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/share/public/url_service/redirect/util/parse_search_params.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Parsed out locator ID, version, and locator params."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.useLocatorUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "useLocatorUrl",
+        "description": [],
+        "signature": [
+          "<P extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ">(locator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<P> | null | undefined, params: P, getUrlParams?: ",
+          "LocatorGetUrlParams",
+          " | undefined, deps?: React.DependencyList) => string"
+        ],
+        "source": {
+          "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useLocatorUrl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "locator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<P> | null | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useLocatorUrl.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useLocatorUrl.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "getUrlParams",
+            "description": [],
+            "signature": [
+              "LocatorGetUrlParams",
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useLocatorUrl.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "React.DependencyList"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "share",
+        "id": "def-public.KibanaLocation",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaLocation",
+        "description": [
+          "\nThis interface represents a location in Kibana to which one can navigate\nusing the `core.application.navigateToApp()` method."
+        ],
+        "signature": [
+          "KibanaLocation",
+          "<S>"
+        ],
+        "source": {
+          "path": "src/plugins/share/common/url_service/locators/types.ts",
+          "lineNumber": 110
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.KibanaLocation.app",
+            "type": "string",
+            "tags": [],
+            "label": "app",
+            "description": [
+              "\nKibana application ID."
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 114
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.KibanaLocation.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "\nA relative URL path within a Kibana application."
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 119
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.KibanaLocation.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\nA serializable location state object, which the app can use to determine\nwhat should be displayed on the screen."
+            ],
+            "signature": [
+              "S"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 125
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.LocatorDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "LocatorDefinition",
+        "description": [
+          "\nA convenience interface used to define and register a locator."
+        ],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<P> extends Partial<",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PersistableState",
+            "text": "PersistableState"
+          },
+          "<P>>"
+        ],
+        "source": {
+          "path": "src/plugins/share/common/url_service/locators/types.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique ID of the locator. Should be constant and unique across Kibana."
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [
+              "\nReturns a deep link, including location state, which can be used for\nnavigation in Kibana.\n"
+            ],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 47
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorDefinition.getLocation.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Parameters from which to generate a Kibana location."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 47
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.LocatorPublic",
+        "type": "Interface",
+        "tags": [],
+        "label": "LocatorPublic",
+        "description": [
+          "\nPublic interface of a registered locator."
+        ],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<P> extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PersistableState",
+            "text": "PersistableState"
+          },
+          "<P>"
+        ],
+        "source": {
+          "path": "src/plugins/share/common/url_service/locators/types.ts",
+          "lineNumber": 53
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [
+              "\nReturns a reference to a Kibana client-side location.\n"
+            ],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 59
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.getLocation.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 59
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.getUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getUrl",
+            "description": [
+              "\nReturns a URL as a string.\n"
+            ],
+            "signature": [
+              "(params: P, getUrlParams?: ",
+              "LocatorGetUrlParams",
+              " | undefined) => Promise<string>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 67
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.getUrl.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 67
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.getUrl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "getUrlParams",
+                "description": [
+                  "URL construction parameters."
+                ],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 67
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.navigate",
+            "type": "Function",
+            "tags": [],
+            "label": "navigate",
+            "description": [
+              "\nNavigate using the `core.application.navigateToApp()` method to a Kibana\nlocation generated by this locator. This method is available only on the\nbrowser.\n"
+            ],
+            "signature": [
+              "(params: P, navigationParams?: ",
+              "LocatorNavigationParams",
+              " | undefined) => Promise<void>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 77
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.navigate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 77
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.navigate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "navigationParams",
+                "description": [
+                  "Navigation parameters."
+                ],
+                "signature": [
+                  "LocatorNavigationParams",
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 77
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.useUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "useUrl",
+            "description": [
+              "\nReact hook which returns a URL string given locator parameters. Returns\nempty string if URL is being loaded or an error happened."
+            ],
+            "signature": [
+              "(params: P, getUrlParams?: ",
+              "LocatorGetUrlParams",
+              " | undefined, deps?: React.DependencyList | undefined) => string"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 83
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.params",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-public.getUrlParams",
+                "type": "Object",
+                "tags": [],
+                "label": "getUrlParams",
+                "description": [],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-public.deps",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "React.DependencyList | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "share",
         "id": "def-public.ShareContext",
@@ -1322,7 +1956,7 @@
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 32
+        "lineNumber": 33
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -1352,7 +1986,7 @@
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 47
+        "lineNumber": 48
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -1400,12 +2034,561 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "share",
+      "id": "def-server.SharePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SharePluginSetup",
+      "description": [],
+      "source": {
+        "path": "src/plugins/share/server/plugin.ts",
+        "lineNumber": 18
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "share",
+          "id": "def-server.SharePluginSetup.url",
+          "type": "Object",
+          "tags": [],
+          "label": "url",
+          "description": [],
+          "signature": [
+            "UrlService"
+          ],
+          "source": {
+            "path": "src/plugins/share/server/plugin.ts",
+            "lineNumber": 19
+          },
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "share",
+      "id": "def-server.SharePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SharePluginStart",
+      "description": [],
+      "source": {
+        "path": "src/plugins/share/server/plugin.ts",
+        "lineNumber": 23
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "share",
+          "id": "def-server.SharePluginStart.url",
+          "type": "Object",
+          "tags": [],
+          "label": "url",
+          "description": [],
+          "signature": [
+            "UrlService"
+          ],
+          "source": {
+            "path": "src/plugins/share/server/plugin.ts",
+            "lineNumber": 24
+          },
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "share",
+        "id": "def-common.useLocatorUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "useLocatorUrl",
+        "description": [],
+        "signature": [
+          "<P extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ">(locator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<P> | null | undefined, params: P, getUrlParams?: ",
+          "LocatorGetUrlParams",
+          " | undefined, deps?: React.DependencyList) => string"
+        ],
+        "source": {
+          "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.useLocatorUrl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "locator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<P> | null | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.useLocatorUrl.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.useLocatorUrl.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "getUrlParams",
+            "description": [],
+            "signature": [
+              "LocatorGetUrlParams",
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.useLocatorUrl.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "React.DependencyList"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "share",
+        "id": "def-common.LocatorDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "LocatorDefinition",
+        "description": [
+          "\nA convenience interface used to define and register a locator."
+        ],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<P> extends Partial<",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PersistableState",
+            "text": "PersistableState"
+          },
+          "<P>>"
+        ],
+        "source": {
+          "path": "src/plugins/share/common/url_service/locators/types.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique ID of the locator. Should be constant and unique across Kibana."
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [
+              "\nReturns a deep link, including location state, which can be used for\nnavigation in Kibana.\n"
+            ],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 47
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorDefinition.getLocation.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Parameters from which to generate a Kibana location."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 47
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-common.LocatorPublic",
+        "type": "Interface",
+        "tags": [],
+        "label": "LocatorPublic",
+        "description": [
+          "\nPublic interface of a registered locator."
+        ],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<P> extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PersistableState",
+            "text": "PersistableState"
+          },
+          "<P>"
+        ],
+        "source": {
+          "path": "src/plugins/share/common/url_service/locators/types.ts",
+          "lineNumber": 53
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [
+              "\nReturns a reference to a Kibana client-side location.\n"
+            ],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 59
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.getLocation.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 59
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.getUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getUrl",
+            "description": [
+              "\nReturns a URL as a string.\n"
+            ],
+            "signature": [
+              "(params: P, getUrlParams?: ",
+              "LocatorGetUrlParams",
+              " | undefined) => Promise<string>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 67
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.getUrl.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 67
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.getUrl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "getUrlParams",
+                "description": [
+                  "URL construction parameters."
+                ],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 67
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.navigate",
+            "type": "Function",
+            "tags": [],
+            "label": "navigate",
+            "description": [
+              "\nNavigate using the `core.application.navigateToApp()` method to a Kibana\nlocation generated by this locator. This method is available only on the\nbrowser.\n"
+            ],
+            "signature": [
+              "(params: P, navigationParams?: ",
+              "LocatorNavigationParams",
+              " | undefined) => Promise<void>"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 77
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.navigate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 77
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.navigate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "navigationParams",
+                "description": [
+                  "Navigation parameters."
+                ],
+                "signature": [
+                  "LocatorNavigationParams",
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 77
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.useUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "useUrl",
+            "description": [
+              "\nReact hook which returns a URL string given locator parameters. Returns\nempty string if URL is being loaded or an error happened."
+            ],
+            "signature": [
+              "(params: P, getUrlParams?: ",
+              "LocatorGetUrlParams",
+              " | undefined, deps?: React.DependencyList | undefined) => string"
+            ],
+            "source": {
+              "path": "src/plugins/share/common/url_service/locators/types.ts",
+              "lineNumber": 83
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-common.params",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-common.getUrlParams",
+                "type": "Object",
+                "tags": [],
+                "label": "getUrlParams",
+                "description": [],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-common.deps",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "React.DependencyList | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/share/common/url_service/locators/types.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

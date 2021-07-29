@@ -22,6 +22,7 @@ import {
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
+  cellHasFormulas,
 } from '../../../../../../../src/plugins/data/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
@@ -30,7 +31,6 @@ import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { TaskRunResult } from '../../../lib/tasks';
 import { JobParamsCSV } from '../types';
-import { cellHasFormulas } from './cell_has_formula';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
@@ -102,8 +102,10 @@ export class CsvGenerator {
     this.logger.debug(`executing scroll request`);
     const results = (
       await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
+        body: {
+          scroll: scrollSettings.duration,
+          scroll_id: scrollId,
+        },
       })
     ).body as SearchResponse<unknown>;
     return results;
@@ -387,7 +389,7 @@ export class CsvGenerator {
       if (scrollId) {
         this.logger.debug(`executing clearScroll request`);
         try {
-          await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
+          await this.clients.es.asCurrentUser.clearScroll({ body: { scroll_id: [scrollId] } });
         } catch (err) {
           this.logger.error(err);
         }

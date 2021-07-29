@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   CoreSetup,
   CoreStart,
@@ -29,7 +28,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
-import { alertTypeInitializers } from '../lib/alert_types';
+import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
 import {
   FetchDataParams,
@@ -42,6 +41,7 @@ import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
+import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -115,7 +115,7 @@ export class UptimePlugin
                 entries: [
                   {
                     label: i18n.translate('xpack.uptime.overview.heading', {
-                      defaultMessage: 'Monitoring overview',
+                      defaultMessage: 'Monitors',
                     }),
                     app: 'uptime',
                     path: '/',
@@ -139,6 +139,36 @@ export class UptimePlugin
         })
       )
     );
+
+    const { observabilityRuleTypeRegistry } = plugins.observability;
+
+    core.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      alertTypeInitializers.forEach((init) => {
+        const alertInitializer = init({
+          core: coreStart,
+          plugins: clientPluginsStart,
+        });
+        if (
+          clientPluginsStart.triggersActionsUi &&
+          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
+        ) {
+          observabilityRuleTypeRegistry.register(alertInitializer);
+        }
+      });
+
+      legacyAlertTypeInitializers.forEach((init) => {
+        const alertInitializer = init({
+          core: coreStart,
+          plugins: clientPluginsStart,
+        });
+        if (
+          clientPluginsStart.triggersActionsUi &&
+          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
+        ) {
+          plugins.triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
+        }
+      });
+    });
 
     core.application.register({
       id: PLUGIN.ID,
@@ -170,39 +200,31 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-
         return renderApp(coreStart, plugins, corePlugins, params);
       },
     });
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
-    alertTypeInitializers.forEach((init) => {
-      const alertInitializer = init({
-        core: start,
-        plugins,
-      });
-      if (
-        plugins.triggersActionsUi &&
-        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
-      ) {
-        plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
-      }
-    });
-
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-create',
-        component: LazySyntheticsPolicyCreateExtension,
+        Component: LazySyntheticsPolicyCreateExtension,
       });
 
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
-        component: LazySyntheticsPolicyEditExtension,
+        Component: LazySyntheticsPolicyEditExtension,
+      });
+
+      registerExtension({
+        package: 'synthetics',
+        view: 'package-detail-assets',
+        Component: LazySyntheticsCustomAssetsExtension,
       });
     }
   }

@@ -33,10 +33,10 @@ import {
   addIdToEntries,
   ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
+import { IndexPatternBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { AlertData, Flattened } from './types';
 
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
@@ -46,10 +46,10 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
-  patterns: IIndexPattern,
+  patterns: IndexPatternBase,
   type: ExceptionListType,
   osTypes?: OsTypeArray
-): IIndexPattern => {
+): IndexPatternBase => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -325,8 +325,8 @@ export const getCodeSignatureValue = (
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => {
       return {
-        subjectName: signature.subject_name ?? '',
-        trusted: signature.trusted.toString() ?? '',
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted?.toString() ?? '',
       };
     });
   } else {
@@ -496,12 +496,145 @@ export const getPrepopulatedRansomwareException = ({
   };
 };
 
+export const getPrepopulatedMemorySignatureException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries([
+      {
+        field: 'Memory_protection.feature',
+        operator: 'included',
+        type: 'match',
+        value: alertEcsData.Memory_protection?.feature ?? '',
+      },
+      {
+        field: 'process.executable.caseless',
+        operator: 'included',
+        type: 'match',
+        value: process?.executable ?? '',
+      },
+      {
+        field: 'process.name.caseless',
+        operator: 'included',
+        type: 'match',
+        value: process?.name ?? '',
+      },
+      {
+        field: 'process.hash.sha256',
+        operator: 'included',
+        type: 'match',
+        value: process?.hash?.sha256 ?? '',
+      },
+    ]),
+  };
+};
+export const getPrepopulatedMemoryShellcodeException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process, Target } = alertEcsData;
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries([
+      {
+        field: 'Memory_protection.feature',
+        operator: 'included',
+        type: 'match',
+        value: alertEcsData.Memory_protection?.feature ?? '',
+      },
+      {
+        field: 'Memory_protection.self_injection',
+        operator: 'included',
+        type: 'match',
+        value: String(alertEcsData.Memory_protection?.self_injection) ?? '',
+      },
+      {
+        field: 'process.executable.caseless',
+        operator: 'included',
+        type: 'match',
+        value: process?.executable ?? '',
+      },
+      {
+        field: 'process.name.caseless',
+        operator: 'included',
+        type: 'match',
+        value: process?.name ?? '',
+      },
+      {
+        field: 'process.Ext.token.integrity_level_name',
+        operator: 'included',
+        type: 'match',
+        value: process?.Ext?.token?.integrity_level_name ?? '',
+      },
+      {
+        field: 'Target.process.thread.Ext.start_address_details',
+        type: 'nested',
+        entries: [
+          {
+            field: 'allocation_type',
+            operator: 'included',
+            type: 'match',
+            value: Target?.process?.thread?.Ext?.start_address_details?.allocation_type ?? '',
+          },
+          {
+            field: 'allocation_size',
+            operator: 'included',
+            type: 'match',
+            value:
+              String(Target?.process?.thread?.Ext?.start_address_details?.allocation_size) ?? '',
+          },
+          {
+            field: 'region_size',
+            operator: 'included',
+            type: 'match',
+            value: String(Target?.process?.thread?.Ext?.start_address_details?.region_size) ?? '',
+          },
+          {
+            field: 'region_protection',
+            operator: 'included',
+            type: 'match',
+            value:
+              String(Target?.process?.thread?.Ext?.start_address_details?.region_protection) ?? '',
+          },
+          {
+            field: 'memory_pe.imphash',
+            operator: 'included',
+            type: 'match',
+            value:
+              String(Target?.process?.thread?.Ext?.start_address_details?.memory_pe?.imphash) ?? '',
+          },
+        ],
+      },
+    ]),
+  };
+};
 /**
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: IIndexPattern
+  indexPatterns: IndexPatternBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
     return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
@@ -537,26 +670,45 @@ export const defaultEndpointExceptionItems = (
   const { event: alertEvent } = alertEcsData;
   const eventCode = alertEvent?.code ?? '';
 
-  if (eventCode === 'ransomware') {
-    return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
-      getPrepopulatedRansomwareException({
-        listId,
-        ruleName,
-        eventCode,
-        codeSignature,
-        alertEcsData,
-      })
-    );
+  switch (eventCode) {
+    case 'memory_signature':
+      return [
+        getPrepopulatedMemorySignatureException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
+    case 'malicious_thread':
+      return [
+        getPrepopulatedMemoryShellcodeException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
+    case 'ransomware':
+      return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
+        getPrepopulatedRansomwareException({
+          listId,
+          ruleName,
+          eventCode,
+          codeSignature,
+          alertEcsData,
+        })
+      );
+    default:
+      // By default return the standard prepopulated Endpoint Exception fields
+      return getFileCodeSignature(alertEcsData).map((codeSignature) =>
+        getPrepopulatedEndpointException({
+          listId,
+          ruleName,
+          eventCode,
+          codeSignature,
+          alertEcsData,
+        })
+      );
   }
-
-  // By default return the standard prepopulated Endpoint Exception fields
-  return getFileCodeSignature(alertEcsData).map((codeSignature) =>
-    getPrepopulatedEndpointException({
-      listId,
-      ruleName,
-      eventCode,
-      codeSignature,
-      alertEcsData,
-    })
-  );
 };

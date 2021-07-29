@@ -53,12 +53,14 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
     filterQuery,
     indexNames,
     startDate,
+    skip: filterQuery === undefined,
   });
 
   const goToNetwork = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         path: getNetworkUrl(urlSearch),
       });
     },
@@ -122,7 +124,12 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
       <InspectButtonContainer>
         <EuiPanel hasBorder data-test-subj="overview-network-query">
           <>
-            <HeaderSection id={OverviewNetworkQueryId} subtitle={subtitle} title={title}>
+            <HeaderSection
+              id={OverviewNetworkQueryId}
+              subtitle={subtitle}
+              title={title}
+              isInspectDisabled={filterQuery === undefined}
+            >
               {networkPageButton}
             </HeaderSection>
 

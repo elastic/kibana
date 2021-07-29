@@ -15,11 +15,11 @@ import {
   SelectSeverityUI,
   TableSeverity,
 } from '../../components/controls/select_severity/select_severity';
-import type { UrlGeneratorContract } from '../../../../../../../src/plugins/share/public';
 import type { TimeBuckets } from '../../util/time_buckets';
 import type { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
+import type { MlLocator } from '../../../../common/types/locator';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
@@ -27,7 +27,7 @@ interface ExplorerAnomaliesContainerProps {
   showCharts: boolean;
   severity: TableSeverity;
   setSeverity: (severity: TableSeverity) => void;
-  mlUrlGenerator: UrlGeneratorContract<'ML_APP_URL_GENERATOR'>;
+  mlLocator: MlLocator;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
@@ -48,7 +48,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   showCharts,
   severity,
   setSeverity,
-  mlUrlGenerator,
+  mlLocator,
   timeBuckets,
   timefilter,
   onSelectEntity,
@@ -81,7 +81,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             {...{
               ...chartsData,
               severity: severity.val,
-              mlUrlGenerator,
+              mlLocator,
               timeBuckets,
               timefilter,
               onSelectEntity,

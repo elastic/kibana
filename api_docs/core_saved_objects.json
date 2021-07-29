@@ -13,7 +13,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 166
+          "lineNumber": 170
         },
         "deprecated": false,
         "children": [
@@ -47,7 +47,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 221
+              "lineNumber": 225
             },
             "deprecated": false,
             "children": [
@@ -63,7 +63,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 222
+                  "lineNumber": 226
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -80,7 +80,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 223
+                  "lineNumber": 227
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -103,7 +103,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 224
+                  "lineNumber": 228
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -151,7 +151,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 256
+              "lineNumber": 260
             },
             "deprecated": false,
             "children": [
@@ -176,7 +176,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 257
+                  "lineNumber": 261
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -199,7 +199,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 258
+                  "lineNumber": 262
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -225,7 +225,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 284
+              "lineNumber": 288
             },
             "deprecated": false,
             "children": [
@@ -241,7 +241,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 285
+                  "lineNumber": 289
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -258,7 +258,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 286
+                  "lineNumber": 290
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -276,7 +276,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 287
+                  "lineNumber": 291
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -322,7 +322,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 314
+              "lineNumber": 318
             },
             "deprecated": false,
             "children": [
@@ -346,7 +346,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 315
+                  "lineNumber": 319
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -378,7 +378,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 381
+              "lineNumber": 385
             },
             "deprecated": false,
             "children": [
@@ -394,7 +394,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 381
+                  "lineNumber": 385
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -411,7 +411,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 381
+                  "lineNumber": 385
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -443,7 +443,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 404
+              "lineNumber": 408
             },
             "deprecated": false,
             "children": [
@@ -461,7 +461,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 404
+                  "lineNumber": 408
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -469,6 +469,71 @@
             ],
             "returnComment": [
               "The saved objects with the given type and ids requested"
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsClient.resolve",
+            "type": "Function",
+            "tags": [],
+            "label": "resolve",
+            "description": [
+              "\nResolves a single object\n"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.ResolvedSimpleSavedObject",
+                "text": "ResolvedSimpleSavedObject"
+              },
+              "<T>>"
+            ],
+            "source": {
+              "path": "src/core/public/saved_objects/saved_objects_client.ts",
+              "lineNumber": 435
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.SavedObjectsClient.resolve.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/core/public/saved_objects/saved_objects_client.ts",
+                  "lineNumber": 436
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.SavedObjectsClient.resolve.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/core/public/saved_objects/saved_objects_client.ts",
+                  "lineNumber": 437
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The resolve result for the saved object for the given type and id."
             ]
           },
           {
@@ -504,7 +569,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 435
+              "lineNumber": 462
             },
             "deprecated": false,
             "children": [
@@ -520,7 +585,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 436
+                  "lineNumber": 463
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -537,7 +602,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 437
+                  "lineNumber": 464
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -554,7 +619,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 438
+                  "lineNumber": 465
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -578,7 +643,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 439
+                  "lineNumber": 466
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -616,7 +681,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 467
+              "lineNumber": 494
             },
             "deprecated": false,
             "children": [
@@ -641,7 +706,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 467
+                  "lineNumber": 494
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -806,6 +871,24 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.SimpleSavedObject.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "\nSpace(s) that this saved object exists in. This attribute is not used for \"global\" saved object types which are registered with\n`namespaceType: 'agnostic'`."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.SimpleSavedObject.Unnamed",
             "type": "Function",
             "tags": [],
@@ -816,7 +899,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 34
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [
@@ -836,11 +919,11 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 35
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -850,7 +933,7 @@
                 "id": "def-public.SimpleSavedObject.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
+                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n      namespaces,\n    }",
                 "description": [],
                 "signature": [
                   "SavedObject",
@@ -858,7 +941,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 36
+                  "lineNumber": 41
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -878,7 +961,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 59
+              "lineNumber": 66
             },
             "deprecated": false,
             "children": [
@@ -894,7 +977,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 59
+                  "lineNumber": 66
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -914,7 +997,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 63
+              "lineNumber": 70
             },
             "deprecated": false,
             "children": [
@@ -930,7 +1013,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 63
+                  "lineNumber": 70
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -947,7 +1030,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 63
+                  "lineNumber": 70
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -967,7 +1050,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 67
+              "lineNumber": 74
             },
             "deprecated": false,
             "children": [
@@ -983,7 +1066,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 67
+                  "lineNumber": 74
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1011,7 +1094,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 71
+              "lineNumber": 78
             },
             "deprecated": false,
             "children": [],
@@ -1029,7 +1112,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 85
+              "lineNumber": 92
             },
             "deprecated": false,
             "children": [],
@@ -1041,6 +1124,95 @@
     ],
     "functions": [],
     "interfaces": [
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ResolvedSimpleSavedObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResolvedSimpleSavedObject",
+        "description": [
+          "\nThis interface is a very simple wrapper for SavedObjects resolved from the server\nwith the {@link SavedObjectsClient}.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.ResolvedSimpleSavedObject",
+            "text": "ResolvedSimpleSavedObject"
+          },
+          "<T>"
+        ],
+        "source": {
+          "path": "src/core/public/saved_objects/types.ts",
+          "lineNumber": 18
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResolvedSimpleSavedObject.savedObject",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObject",
+            "description": [
+              "\nThe saved object that was found."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<T>"
+            ],
+            "source": {
+              "path": "src/core/public/saved_objects/types.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResolvedSimpleSavedObject.outcome",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outcome",
+            "description": [
+              "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
+            ],
+            "signature": [
+              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+            ],
+            "source": {
+              "path": "src/core/public/saved_objects/types.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResolvedSimpleSavedObject.aliasTargetId",
+            "type": "string",
+            "tags": [],
+            "label": "aliasTargetId",
+            "description": [
+              "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/saved_objects/types.ts",
+              "lineNumber": 36
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "core",
         "id": "def-public.SavedObjectsBatchResponse",
@@ -1060,7 +1232,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 87
+          "lineNumber": 91
         },
         "deprecated": false,
         "children": [
@@ -1083,7 +1255,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 88
+              "lineNumber": 92
             },
             "deprecated": false
           }
@@ -1116,7 +1288,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 54
+          "lineNumber": 58
         },
         "deprecated": false,
         "children": [
@@ -1129,7 +1301,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 55
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -1145,7 +1317,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 56
+              "lineNumber": 60
             },
             "deprecated": false
           }
@@ -1161,7 +1333,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 60
+          "lineNumber": 64
         },
         "deprecated": false,
         "children": [
@@ -1179,7 +1351,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 62
+              "lineNumber": 66
             },
             "deprecated": false
           }
@@ -1205,7 +1377,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 66
+          "lineNumber": 70
         },
         "deprecated": false,
         "children": [
@@ -1218,7 +1390,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 67
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -1231,7 +1403,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 68
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -1247,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 69
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -1263,7 +1435,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 70
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -1280,7 +1452,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 71
+              "lineNumber": 75
             },
             "deprecated": false
           }
@@ -1296,7 +1468,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 75
+          "lineNumber": 79
         },
         "deprecated": false,
         "children": [
@@ -1312,7 +1484,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 76
+              "lineNumber": 80
             },
             "deprecated": false
           }
@@ -1328,7 +1500,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 34
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -1346,7 +1518,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 38
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -1364,7 +1536,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 40
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -1383,7 +1555,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 42
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -1401,7 +1573,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 44
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -1418,7 +1590,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 45
+              "lineNumber": 49
             },
             "deprecated": false
           }
@@ -1454,7 +1626,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 105
+          "lineNumber": 109
         },
         "deprecated": false,
         "children": [
@@ -1470,7 +1642,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 107
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -1483,7 +1655,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 108
+              "lineNumber": 112
             },
             "deprecated": false
           },
@@ -1496,7 +1668,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 109
+              "lineNumber": 113
             },
             "deprecated": false
           },
@@ -1509,7 +1681,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 110
+              "lineNumber": 114
             },
             "deprecated": false
           }
@@ -1613,7 +1785,15 @@
                 "section": "def-public.SavedObjectsBatchResponse",
                 "text": "SavedObjectsBatchResponse"
               },
-              "<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
+              "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.ResolvedSimpleSavedObject",
+                "text": "ResolvedSimpleSavedObject"
+              },
+              "<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -1675,7 +1855,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 80
+          "lineNumber": 84
         },
         "deprecated": false,
         "children": [
@@ -1691,7 +1871,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 81
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -1707,7 +1887,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 82
+              "lineNumber": 86
             },
             "deprecated": false
           },
@@ -1724,7 +1904,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 83
+              "lineNumber": 87
             },
             "deprecated": false
           }
@@ -1818,7 +1998,15 @@
             "section": "def-public.SavedObjectsBatchResponse",
             "text": "SavedObjectsBatchResponse"
           },
-          "<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
+          "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.ResolvedSimpleSavedObject",
+            "text": "ResolvedSimpleSavedObject"
+          },
+          "<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1854,7 +2042,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 139
+          "lineNumber": 143
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1875,7 +2063,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 371
+          "lineNumber": 382
         },
         "deprecated": false,
         "children": [
@@ -1898,7 +2086,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 372
+              "lineNumber": 383
             },
             "deprecated": false
           },
@@ -1921,7 +2109,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 373
+              "lineNumber": 384
             },
             "deprecated": false
           },
@@ -1949,7 +2137,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 389
+              "lineNumber": 400
             },
             "deprecated": false,
             "children": [
@@ -1965,7 +2153,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 389
+                  "lineNumber": 400
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1982,7 +2170,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 389
+                  "lineNumber": 400
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2006,7 +2194,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 389
+                  "lineNumber": 400
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -2052,7 +2240,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 399
+              "lineNumber": 410
             },
             "deprecated": false,
             "children": [
@@ -2075,7 +2263,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 400
+                  "lineNumber": 411
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2099,7 +2287,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 401
+                  "lineNumber": 412
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -2145,7 +2333,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 413
+              "lineNumber": 424
             },
             "deprecated": false,
             "children": [
@@ -2168,7 +2356,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 414
+                  "lineNumber": 425
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2191,7 +2379,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 415
+                  "lineNumber": 426
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2221,7 +2409,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 427
+              "lineNumber": 438
             },
             "deprecated": false,
             "children": [
@@ -2237,7 +2425,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 427
+                  "lineNumber": 438
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2254,7 +2442,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 427
+                  "lineNumber": 438
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2277,7 +2465,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 427
+                  "lineNumber": 438
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2315,7 +2503,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 436
+              "lineNumber": 447
             },
             "deprecated": false,
             "children": [
@@ -2337,7 +2525,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 437
+                  "lineNumber": 448
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2383,7 +2571,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 453
+              "lineNumber": 464
             },
             "deprecated": false,
             "children": [
@@ -2408,7 +2596,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 454
+                  "lineNumber": 465
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2431,7 +2619,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 455
+                  "lineNumber": 466
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2463,7 +2651,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 467
+              "lineNumber": 478
             },
             "deprecated": false,
             "children": [
@@ -2481,7 +2669,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 468
+                  "lineNumber": 479
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2500,7 +2688,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 469
+                  "lineNumber": 480
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2523,7 +2711,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 470
+                  "lineNumber": 481
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2561,7 +2749,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 482
+              "lineNumber": 493
             },
             "deprecated": false,
             "children": [
@@ -2579,7 +2767,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 483
+                  "lineNumber": 494
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2598,7 +2786,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 484
+                  "lineNumber": 495
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2621,7 +2809,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 485
+                  "lineNumber": 496
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2659,7 +2847,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 497
+              "lineNumber": 508
             },
             "deprecated": false,
             "children": [
@@ -2675,7 +2863,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 498
+                  "lineNumber": 509
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2692,7 +2880,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 499
+                  "lineNumber": 510
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2709,7 +2897,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 500
+                  "lineNumber": 511
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2733,7 +2921,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 501
+                  "lineNumber": 512
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2779,7 +2967,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 511
+              "lineNumber": 522
             },
             "deprecated": false,
             "children": [
@@ -2802,7 +2990,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 512
+                  "lineNumber": 523
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2826,7 +3014,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 513
+                  "lineNumber": 524
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -2864,7 +3052,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 521
+              "lineNumber": 532
             },
             "deprecated": false,
             "children": [
@@ -2880,7 +3068,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 522
+                  "lineNumber": 533
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2897,7 +3085,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 523
+                  "lineNumber": 534
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2921,7 +3109,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 524
+                  "lineNumber": 535
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -2959,7 +3147,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 537
+              "lineNumber": 548
             },
             "deprecated": false,
             "children": [
@@ -2975,7 +3163,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 538
+                  "lineNumber": 549
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2998,7 +3186,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 539
+                  "lineNumber": 550
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3036,7 +3224,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 552
+              "lineNumber": 563
             },
             "deprecated": false,
             "children": [
@@ -3052,7 +3240,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 552
+                  "lineNumber": 563
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3076,7 +3264,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 552
+                  "lineNumber": 563
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -3122,7 +3310,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 601
+              "lineNumber": 612
             },
             "deprecated": false,
             "children": [
@@ -3146,7 +3334,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 602
+                  "lineNumber": 613
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3170,7 +3358,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 603
+                  "lineNumber": 614
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -3216,7 +3404,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 618
+              "lineNumber": 629
             },
             "deprecated": false,
             "children": [
@@ -3239,7 +3427,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 619
+                  "lineNumber": 630
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3263,7 +3451,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 620
+                  "lineNumber": 631
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -3309,7 +3497,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 633
+              "lineNumber": 644
             },
             "deprecated": false,
             "children": [
@@ -3332,7 +3520,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 634
+                  "lineNumber": 645
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3349,7 +3537,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 635
+                  "lineNumber": 646
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3366,7 +3554,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 636
+                  "lineNumber": 647
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3390,7 +3578,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 637
+                  "lineNumber": 648
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -4759,7 +4947,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-          "lineNumber": 35
+          "lineNumber": 34
         },
         "deprecated": false,
         "children": [
@@ -5075,31 +5263,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 36
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsExporter.exportTransforms",
-            "type": "Object",
-            "tags": [],
-            "label": "#exportTransforms",
-            "description": [],
-            "signature": [
-              "{ [x: string]: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsExportTransform",
-                "text": "SavedObjectsExportTransform"
-              },
-              "; }"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 37
+              "lineNumber": 35
             },
             "deprecated": false
           },
@@ -5112,7 +5276,55 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 38
+              "lineNumber": 36
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExporter.typeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "#typeRegistry",
+            "description": [],
+            "signature": [
+              "{ getType: (type: string) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any> | undefined; getVisibleTypes: () => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]; getAllTypes: () => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]; getImportableAndExportableTypes: () => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -5128,7 +5340,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 39
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -5144,7 +5356,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 41
+              "lineNumber": 40
             },
             "deprecated": false,
             "children": [
@@ -5157,7 +5369,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 46
+                  "lineNumber": 45
                 },
                 "deprecated": false,
                 "children": [
@@ -5473,7 +5685,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 47
+                      "lineNumber": 46
                     },
                     "deprecated": false
                   },
@@ -5493,7 +5705,7 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      " | undefined; getVisibleTypes: () => ",
+                      "<any> | undefined; getVisibleTypes: () => ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -5501,7 +5713,7 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      "[]; getAllTypes: () => ",
+                      "<any>[]; getAllTypes: () => ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -5509,7 +5721,7 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      "[]; getImportableAndExportableTypes: () => ",
+                      "<any>[]; getImportableAndExportableTypes: () => ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -5517,11 +5729,11 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      "[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+                      "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 48
+                      "lineNumber": 47
                     },
                     "deprecated": false
                   },
@@ -5534,7 +5746,7 @@
                     "description": [],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 49
+                      "lineNumber": 48
                     },
                     "deprecated": false
                   },
@@ -5550,7 +5762,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 50
+                      "lineNumber": 49
                     },
                     "deprecated": false
                   }
@@ -5585,7 +5797,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 73
+              "lineNumber": 64
             },
             "deprecated": false,
             "children": [
@@ -5607,7 +5819,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 73
+                  "lineNumber": 64
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5641,7 +5853,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 92
+              "lineNumber": 83
             },
             "deprecated": false,
             "children": [
@@ -5663,7 +5875,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 92
+                  "lineNumber": 83
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6314,7 +6526,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              " | undefined; getVisibleTypes: () => ",
+              "<any> | undefined; getVisibleTypes: () => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -6322,7 +6534,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]; getAllTypes: () => ",
+              "<any>[]; getAllTypes: () => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -6330,7 +6542,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]; getImportableAndExportableTypes: () => ",
+              "<any>[]; getImportableAndExportableTypes: () => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -6338,7 +6550,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+              "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
             ],
             "source": {
               "path": "src/core/server/saved_objects/import/saved_objects_importer.ts",
@@ -6744,7 +6956,7 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      " | undefined; getVisibleTypes: () => ",
+                      "<any> | undefined; getVisibleTypes: () => ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -6752,7 +6964,7 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      "[]; getAllTypes: () => ",
+                      "<any>[]; getAllTypes: () => ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -6760,7 +6972,7 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      "[]; getImportableAndExportableTypes: () => ",
+                      "<any>[]; getImportableAndExportableTypes: () => ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -6768,7 +6980,7 @@
                         "section": "def-server.SavedObjectsType",
                         "text": "SavedObjectsType"
                       },
-                      "[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+                      "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/import/saved_objects_importer.ts",
@@ -7174,7 +7386,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 171
+          "lineNumber": 176
         },
         "deprecated": false,
         "children": [
@@ -7208,7 +7420,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 269
+              "lineNumber": 274
             },
             "deprecated": false,
             "children": [
@@ -7224,7 +7436,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 270
+                  "lineNumber": 275
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7241,7 +7453,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 271
+                  "lineNumber": 276
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7264,7 +7476,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 272
+                  "lineNumber": 277
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7315,7 +7527,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 362
+              "lineNumber": 357
             },
             "deprecated": false,
             "children": [
@@ -7340,7 +7552,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 363
+                  "lineNumber": 358
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7363,7 +7575,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 364
+                  "lineNumber": 359
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7411,7 +7623,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 548
+              "lineNumber": 540
             },
             "deprecated": false,
             "children": [
@@ -7434,7 +7646,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 549
+                  "lineNumber": 541
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7457,7 +7669,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 550
+                  "lineNumber": 542
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7489,7 +7701,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 635
+              "lineNumber": 627
             },
             "deprecated": false,
             "children": [
@@ -7505,7 +7717,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 635
+                  "lineNumber": 627
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7522,7 +7734,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 635
+                  "lineNumber": 627
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7545,7 +7757,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 635
+                  "lineNumber": 627
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7575,7 +7787,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 696
+              "lineNumber": 688
             },
             "deprecated": false,
             "children": [
@@ -7591,7 +7803,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 697
+                  "lineNumber": 689
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7614,7 +7826,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 698
+                  "lineNumber": 690
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7667,7 +7879,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 758
+              "lineNumber": 750
             },
             "deprecated": false,
             "children": [
@@ -7689,7 +7901,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 759
+                  "lineNumber": 751
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7739,7 +7951,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 925
+              "lineNumber": 917
             },
             "deprecated": false,
             "children": [
@@ -7764,7 +7976,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 926
+                  "lineNumber": 918
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7787,7 +7999,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 927
+                  "lineNumber": 919
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7823,7 +8035,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1012
+              "lineNumber": 1004
             },
             "deprecated": false,
             "children": [
@@ -7839,7 +8051,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1013
+                  "lineNumber": 1005
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7856,7 +8068,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1014
+                  "lineNumber": 1006
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7879,7 +8091,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1015
+                  "lineNumber": 1007
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7921,7 +8133,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1054
+              "lineNumber": 1046
             },
             "deprecated": false,
             "children": [
@@ -7937,7 +8149,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1055
+                  "lineNumber": 1047
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7954,7 +8166,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1056
+                  "lineNumber": 1048
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7977,7 +8189,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1057
+                  "lineNumber": 1049
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8021,7 +8233,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1184
+              "lineNumber": 1187
             },
             "deprecated": false,
             "children": [
@@ -8037,7 +8249,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1185
+                  "lineNumber": 1188
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8054,7 +8266,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1186
+                  "lineNumber": 1189
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8071,7 +8283,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1187
+                  "lineNumber": 1190
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8095,7 +8307,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1188
+                  "lineNumber": 1191
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8141,7 +8353,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1282
+              "lineNumber": 1285
             },
             "deprecated": false,
             "children": [
@@ -8166,7 +8378,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1283
+                  "lineNumber": 1286
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8190,7 +8402,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1284
+                  "lineNumber": 1287
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8236,7 +8448,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1306
+              "lineNumber": 1309
             },
             "deprecated": false,
             "children": [
@@ -8259,7 +8471,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1307
+                  "lineNumber": 1310
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8276,7 +8488,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1308
+                  "lineNumber": 1311
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8293,7 +8505,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1309
+                  "lineNumber": 1312
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8317,7 +8529,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1310
+                  "lineNumber": 1313
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8366,7 +8578,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1333
+              "lineNumber": 1336
             },
             "deprecated": false,
             "children": [
@@ -8391,7 +8603,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1334
+                  "lineNumber": 1337
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8414,7 +8626,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1335
+                  "lineNumber": 1338
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8454,7 +8666,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1550
+              "lineNumber": 1553
             },
             "deprecated": false,
             "children": [
@@ -8470,7 +8682,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1551
+                  "lineNumber": 1554
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8487,7 +8699,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1552
+                  "lineNumber": 1555
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8510,7 +8722,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1553
+                  "lineNumber": 1556
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8544,13 +8756,13 @@
                 "section": "def-server.SavedObjectsIncrementCounterOptions",
                 "text": "SavedObjectsIncrementCounterOptions"
               },
-              "<T>) => Promise<",
+              "<T> | undefined) => Promise<",
               "SavedObject",
               "<T>>"
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1661
+              "lineNumber": 1664
             },
             "deprecated": false,
             "children": [
@@ -8568,7 +8780,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1662
+                  "lineNumber": 1665
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8587,7 +8799,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1663
+                  "lineNumber": 1666
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8614,7 +8826,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1664
+                  "lineNumber": 1667
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8636,14 +8848,14 @@
                     "section": "def-server.SavedObjectsIncrementCounterOptions",
                     "text": "SavedObjectsIncrementCounterOptions"
                   },
-                  "<T>"
+                  "<T> | undefined"
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1665
+                  "lineNumber": 1668
                 },
                 "deprecated": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": [
@@ -8683,7 +8895,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1821
+              "lineNumber": 1846
             },
             "deprecated": false,
             "children": [
@@ -8699,7 +8911,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1822
+                  "lineNumber": 1847
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8722,7 +8934,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1823
+                  "lineNumber": 1848
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8762,7 +8974,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1890
+              "lineNumber": 1915
             },
             "deprecated": false,
             "children": [
@@ -8778,7 +8990,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1891
+                  "lineNumber": 1916
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8804,7 +9016,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1892
+                  "lineNumber": 1917
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8852,7 +9064,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1946
+              "lineNumber": 1971
             },
             "deprecated": false,
             "children": [
@@ -8876,7 +9088,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1947
+                  "lineNumber": 1972
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8900,7 +9112,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1948
+                  "lineNumber": 1973
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -9580,7 +9792,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              ") => void"
+              "<any>) => void"
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
@@ -9602,7 +9814,8 @@
                     "docId": "kibCoreSavedObjectsPluginApi",
                     "section": "def-server.SavedObjectsType",
                     "text": "SavedObjectsType"
-                  }
+                  },
+                  "<any>"
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
@@ -9632,7 +9845,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              " | undefined"
+              "<any> | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
@@ -9678,7 +9891,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]"
+              "<any>[]"
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
@@ -9706,7 +9919,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]"
+              "<any>[]"
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
@@ -9734,7 +9947,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]"
+              "<any>[]"
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
@@ -10489,7 +10702,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 75
+          "lineNumber": 79
         },
         "deprecated": false,
         "children": [
@@ -10505,7 +10718,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 76
+              "lineNumber": 80
             },
             "deprecated": false
           },
@@ -10518,7 +10731,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 77
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -10534,7 +10747,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 78
+              "lineNumber": 82
             },
             "deprecated": false
           },
@@ -10550,7 +10763,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 79
+              "lineNumber": 83
             },
             "deprecated": false
           },
@@ -10567,7 +10780,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 80
+              "lineNumber": 84
             },
             "deprecated": false
           },
@@ -10586,7 +10799,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 82
+              "lineNumber": 86
             },
             "deprecated": false
           },
@@ -10604,7 +10817,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 92
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -10622,7 +10835,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 94
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -10633,14 +10846,14 @@
             "tags": [],
             "label": "initialNamespaces",
             "description": [
-              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\nNote: this can only be used for multi-namespace object types."
+              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
             "signature": [
               "string[] | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 101
+              "lineNumber": 109
             },
             "deprecated": false
           }
@@ -10658,7 +10871,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 268
+          "lineNumber": 276
         },
         "deprecated": false,
         "children": [
@@ -10671,7 +10884,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 269
+              "lineNumber": 277
             },
             "deprecated": false
           },
@@ -10684,7 +10897,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 270
+              "lineNumber": 278
             },
             "deprecated": false
           },
@@ -10702,97 +10915,97 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 272
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.SavedObjectsBulkResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsBulkResponse",
-        "description": [
-          "\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsBulkResponse",
-            "text": "SavedObjectsBulkResponse"
-          },
-          "<T>"
-        ],
-        "source": {
-          "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 129
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsBulkResponse.saved_objects",
-            "type": "Array",
-            "tags": [],
-            "label": "saved_objects",
-            "description": [],
-            "signature": [
-              "SavedObject",
-              "<T>[]"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 130
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.SavedObjectsBulkResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsBulkResponse",
-        "description": [
-          "\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsBulkResponse",
-            "text": "SavedObjectsBulkResponse"
-          },
-          "<T>"
-        ],
-        "source": {
-          "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 279
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsBulkResponse.saved_objects",
-            "type": "Array",
-            "tags": [],
-            "label": "saved_objects",
-            "description": [],
-            "signature": [
-              "SavedObject",
-              "<T>[]"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
               "lineNumber": 280
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsBulkResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkResponse",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResponse",
+            "text": "SavedObjectsBulkResponse"
+          },
+          "<T>"
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+          "lineNumber": 137
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkResponse.saved_objects",
+            "type": "Array",
+            "tags": [],
+            "label": "saved_objects",
+            "description": [],
+            "signature": [
+              "SavedObject",
+              "<T>[]"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+              "lineNumber": 138
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsBulkResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkResponse",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResponse",
+            "text": "SavedObjectsBulkResponse"
+          },
+          "<T>"
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+          "lineNumber": 287
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkResponse.saved_objects",
+            "type": "Array",
+            "tags": [],
+            "label": "saved_objects",
+            "description": [],
+            "signature": [
+              "SavedObject",
+              "<T>[]"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+              "lineNumber": 288
             },
             "deprecated": false
           }
@@ -10828,7 +11041,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 108
+          "lineNumber": 116
         },
         "deprecated": false,
         "children": [
@@ -10843,7 +11056,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 111
+              "lineNumber": 119
             },
             "deprecated": false
           },
@@ -10858,7 +11071,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 113
+              "lineNumber": 121
             },
             "deprecated": false
           },
@@ -10876,7 +11089,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 115
+              "lineNumber": 123
             },
             "deprecated": false
           },
@@ -10894,7 +11107,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 122
+              "lineNumber": 130
             },
             "deprecated": false
           }
@@ -10929,7 +11142,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 248
+          "lineNumber": 256
         },
         "deprecated": false,
         "children": [
@@ -10947,7 +11160,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 250
+              "lineNumber": 258
             },
             "deprecated": false
           }
@@ -10975,7 +11188,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 287
+          "lineNumber": 295
         },
         "deprecated": false,
         "children": [
@@ -10998,7 +11211,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 288
+              "lineNumber": 296
             },
             "deprecated": false
           }
@@ -11016,7 +11229,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 194
+          "lineNumber": 202
         },
         "deprecated": false,
         "children": [
@@ -11029,7 +11242,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 195
+              "lineNumber": 203
             },
             "deprecated": false
           },
@@ -11042,7 +11255,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 196
+              "lineNumber": 204
             },
             "deprecated": false
           }
@@ -11060,7 +11273,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 203
+          "lineNumber": 211
         },
         "deprecated": false,
         "children": [
@@ -11078,7 +11291,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 204
+              "lineNumber": 212
             },
             "deprecated": false
           }
@@ -11482,7 +11695,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              " | undefined; getVisibleTypes: () => ",
+              "<any> | undefined; getVisibleTypes: () => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -11490,7 +11703,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]; getAllTypes: () => ",
+              "<any>[]; getAllTypes: () => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -11498,7 +11711,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]; getImportableAndExportableTypes: () => ",
+              "<any>[]; getImportableAndExportableTypes: () => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -11506,7 +11719,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+              "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
@@ -11549,7 +11762,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 355
+          "lineNumber": 366
         },
         "deprecated": false,
         "children": [
@@ -11564,7 +11777,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 360
+              "lineNumber": 371
             },
             "deprecated": false
           },
@@ -11579,7 +11792,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 364
+              "lineNumber": 375
             },
             "deprecated": false
           }
@@ -11907,14 +12120,14 @@
             "tags": [],
             "label": "initialNamespaces",
             "description": [
-              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\nNote: this can only be used for multi-namespace object types."
+              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
             "signature": [
               "string[] | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 68
+              "lineNumber": 72
             },
             "deprecated": false
           }
@@ -12029,7 +12242,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 144
+          "lineNumber": 149
         },
         "deprecated": false,
         "children": [
@@ -12047,7 +12260,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 146
+              "lineNumber": 151
             },
             "deprecated": false
           }
@@ -12082,7 +12295,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 257
+          "lineNumber": 265
         },
         "deprecated": false,
         "children": [
@@ -12100,7 +12313,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 259
+              "lineNumber": 267
             },
             "deprecated": false
           },
@@ -12118,7 +12331,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 261
+              "lineNumber": 269
             },
             "deprecated": false
           }
@@ -12276,6 +12489,70 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.SavedObjectsExportExcludedObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsExportExcludedObject",
+        "description": [],
+        "source": {
+          "path": "src/core/server/saved_objects/export/types.ts",
+          "lineNumber": 82
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportExcludedObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "id of the excluded object"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/export/types.ts",
+              "lineNumber": 84
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportExcludedObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "type of the excluded object"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/export/types.ts",
+              "lineNumber": 86
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportExcludedObject.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [
+              "optional cause of the exclusion"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/export/types.ts",
+              "lineNumber": 88
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.SavedObjectsExportResultDetails",
         "type": "Interface",
         "tags": [],
@@ -12336,6 +12613,46 @@
               "lineNumber": 69
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportResultDetails.excludedObjectsCount",
+            "type": "number",
+            "tags": [],
+            "label": "excludedObjectsCount",
+            "description": [
+              "number of objects that were excluded from the export"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/export/types.ts",
+              "lineNumber": 76
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportResultDetails.excludedObjects",
+            "type": "Array",
+            "tags": [],
+            "label": "excludedObjects",
+            "description": [
+              "excluded objects details"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsExportExcludedObject",
+                "text": "SavedObjectsExportExcludedObject"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/export/types.ts",
+              "lineNumber": 78
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -12351,7 +12668,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/export/types.ts",
-          "lineNumber": 82
+          "lineNumber": 96
         },
         "deprecated": false,
         "children": [
@@ -12376,7 +12693,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/types.ts",
-              "lineNumber": 87
+              "lineNumber": 101
             },
             "deprecated": false
           }
@@ -12818,7 +13135,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 181
+          "lineNumber": 189
         },
         "deprecated": false,
         "children": [
@@ -12834,7 +13151,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 182
+              "lineNumber": 190
             },
             "deprecated": false
           },
@@ -12857,7 +13174,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 183
+              "lineNumber": 191
             },
             "deprecated": false
           },
@@ -12870,7 +13187,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 184
+              "lineNumber": 192
             },
             "deprecated": false
           },
@@ -12883,7 +13200,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 185
+              "lineNumber": 193
             },
             "deprecated": false
           },
@@ -12896,7 +13213,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 186
+              "lineNumber": 194
             },
             "deprecated": false
           },
@@ -12912,7 +13229,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 187
+              "lineNumber": 195
             },
             "deprecated": false
           }
@@ -12942,7 +13259,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 137
+          "lineNumber": 145
         },
         "deprecated": false,
         "children": [
@@ -12957,7 +13274,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 141
+              "lineNumber": 149
             },
             "deprecated": false
           },
@@ -12975,7 +13292,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 170
+              "lineNumber": 178
             },
             "deprecated": false
           }
@@ -14014,7 +14331,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 161
+          "lineNumber": 166
         },
         "deprecated": false,
         "children": [
@@ -14029,7 +14346,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 163
+              "lineNumber": 168
             },
             "deprecated": false
           },
@@ -14047,7 +14364,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 165
+              "lineNumber": 170
             },
             "deprecated": false
           }
@@ -14080,7 +14397,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 120
+          "lineNumber": 125
         },
         "deprecated": false,
         "children": [
@@ -14098,7 +14415,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 126
+              "lineNumber": 131
             },
             "deprecated": false
           },
@@ -14117,7 +14434,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 128
+              "lineNumber": 133
             },
             "deprecated": false
           },
@@ -14135,7 +14452,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 133
+              "lineNumber": 138
             },
             "deprecated": false
           },
@@ -14153,7 +14470,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 137
+              "lineNumber": 142
             },
             "deprecated": false
           }
@@ -14307,14 +14624,14 @@
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
-                  "lineNumber": 167
+                  "lineNumber": 170
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
-                  "lineNumber": 234
+                  "lineNumber": 237
                 }
               }
             ],
@@ -14448,7 +14765,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 326
+          "lineNumber": 337
         },
         "deprecated": false,
         "children": [
@@ -14466,7 +14783,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 330
+              "lineNumber": 341
             },
             "deprecated": false
           },
@@ -14484,7 +14801,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 334
+              "lineNumber": 345
             },
             "deprecated": false
           }
@@ -14500,7 +14817,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 340
+          "lineNumber": 351
         },
         "deprecated": false,
         "children": [
@@ -14515,7 +14832,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 344
+              "lineNumber": 355
             },
             "deprecated": false
           }
@@ -14710,7 +15027,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 230
+          "lineNumber": 238
         },
         "deprecated": false,
         "children": [
@@ -14728,7 +15045,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 232
+              "lineNumber": 240
             },
             "deprecated": false
           }
@@ -14763,7 +15080,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 239
+          "lineNumber": 247
         },
         "deprecated": false,
         "children": [
@@ -14778,7 +15095,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 241
+              "lineNumber": 249
             },
             "deprecated": false
           }
@@ -14796,7 +15113,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/saved_objects_service.ts",
-          "lineNumber": 226
+          "lineNumber": 228
         },
         "deprecated": false,
         "children": [
@@ -14830,7 +15147,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 234
+              "lineNumber": 236
             },
             "deprecated": false,
             "returnComment": [],
@@ -14854,7 +15171,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 235
+                  "lineNumber": 237
                 },
                 "deprecated": false
               },
@@ -14872,7 +15189,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 236
+                  "lineNumber": 238
                 },
                 "deprecated": false
               }
@@ -14900,7 +15217,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 244
+              "lineNumber": 246
             },
             "deprecated": false,
             "returnComment": [],
@@ -14919,7 +15236,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 244
+                  "lineNumber": 246
                 },
                 "deprecated": false
               }
@@ -15043,7 +15360,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 305
+          "lineNumber": 313
         },
         "deprecated": false,
         "children": [
@@ -15053,14 +15370,16 @@
             "type": "Object",
             "tags": [],
             "label": "saved_object",
-            "description": [],
+            "description": [
+              "\nThe saved object that was found."
+            ],
             "signature": [
               "SavedObject",
               "<T>"
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 306
+              "lineNumber": 317
             },
             "deprecated": false
           },
@@ -15078,7 +15397,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 316
+              "lineNumber": 327
             },
             "deprecated": false
           },
@@ -15096,7 +15415,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 320
+              "lineNumber": 331
             },
             "deprecated": false
           }
@@ -15275,7 +15594,7 @@
               "\nRegister a {@link SavedObjectsType | savedObjects type} definition.\n\nSee the {@link SavedObjectsTypeMappingDefinition | mappings format} and\n{@link SavedObjectMigrationMap | migration format} for more details about these.\n"
             ],
             "signature": [
-              "(type: ",
+              "<Attributes = any>(type: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15283,7 +15602,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              ") => void"
+              "<Attributes>) => void"
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
@@ -15306,7 +15625,8 @@
                     "docId": "kibCoreSavedObjectsPluginApi",
                     "section": "def-server.SavedObjectsType",
                     "text": "SavedObjectsType"
-                  }
+                  },
+                  "<Attributes>"
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
@@ -15330,7 +15650,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/saved_objects_service.ts",
-          "lineNumber": 162
+          "lineNumber": 164
         },
         "deprecated": false,
         "children": [
@@ -15372,7 +15692,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 172
+              "lineNumber": 174
             },
             "deprecated": false,
             "returnComment": [],
@@ -15396,7 +15716,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 173
+                  "lineNumber": 175
                 },
                 "deprecated": false
               },
@@ -15419,7 +15739,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 174
+                  "lineNumber": 176
                 },
                 "deprecated": false
               }
@@ -15455,7 +15775,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 188
+              "lineNumber": 190
             },
             "deprecated": false,
             "returnComment": [],
@@ -15481,7 +15801,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 189
+                  "lineNumber": 191
                 },
                 "deprecated": false
               },
@@ -15499,7 +15819,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 190
+                  "lineNumber": 192
                 },
                 "deprecated": false
               }
@@ -15527,7 +15847,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 198
+              "lineNumber": 200
             },
             "deprecated": false,
             "returnComment": [],
@@ -15546,7 +15866,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 198
+                  "lineNumber": 200
                 },
                 "deprecated": false
               }
@@ -15573,7 +15893,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 202
+              "lineNumber": 204
             },
             "deprecated": false,
             "returnComment": [],
@@ -15609,7 +15929,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 206
+              "lineNumber": 208
             },
             "deprecated": false,
             "returnComment": [],
@@ -15926,7 +16246,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 206
+                  "lineNumber": 208
                 },
                 "deprecated": false
               }
@@ -15962,7 +16282,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 210
+              "lineNumber": 212
             },
             "deprecated": false,
             "returnComment": [],
@@ -16279,7 +16599,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 210
+                  "lineNumber": 212
                 },
                 "deprecated": false
               }
@@ -16307,7 +16627,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 215
+              "lineNumber": 217
             },
             "deprecated": false,
             "returnComment": [],
@@ -16357,6 +16677,16 @@
         "tags": [],
         "label": "SavedObjectsType",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<Attributes>"
+        ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
           "lineNumber": 256
@@ -16539,7 +16869,7 @@
                 "section": "def-server.SavedObjectsTypeManagementDefinition",
                 "text": "SavedObjectsTypeManagementDefinition"
               },
-              " | undefined"
+              "<Attributes> | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
@@ -16558,6 +16888,16 @@
         "label": "SavedObjectsTypeManagementDefinition",
         "description": [
           "\nConfiguration options for the {@link SavedObjectsType | type}'s management section.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsTypeManagementDefinition",
+            "text": "SavedObjectsTypeManagementDefinition"
+          },
+          "<Attributes>"
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
@@ -16631,7 +16971,7 @@
             "signature": [
               "((savedObject: ",
               "SavedObject",
-              "<any>) => string) | undefined"
+              "<Attributes>) => string) | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
@@ -16651,7 +16991,7 @@
             "signature": [
               "((savedObject: ",
               "SavedObject",
-              "<any>) => string) | undefined"
+              "<Attributes>) => string) | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
@@ -16671,7 +17011,7 @@
             "signature": [
               "((savedObject: ",
               "SavedObject",
-              "<any>) => { path: string; uiCapabilitiesPath: string; }) | undefined"
+              "<Attributes>) => { path: string; uiCapabilitiesPath: string; }) | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
@@ -16686,7 +17026,7 @@
             "tags": [],
             "label": "onExport",
             "description": [
-              "\nAn optional export transform function that can be used transform the objects of the registered type during\nthe export process.\n\nIt can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.\n\nSee {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.\n"
+              "\nAn optional export transform function that can be used transform the objects of the registered type during\nthe export process.\n\nIt can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.\n\nSee {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.\n\nWhen implementing both `isExportable` and `onExport`, it is mandatory that\n`isExportable` returns the same value for an object before and after going\nthough the export transform.\nE.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`\n"
             ],
             "signature": [
               {
@@ -16696,11 +17036,11 @@
                 "section": "def-server.SavedObjectsExportTransform",
                 "text": "SavedObjectsExportTransform"
               },
-              " | undefined"
+              "<Attributes> | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 391
+              "lineNumber": 398
             },
             "deprecated": false
           },
@@ -16721,11 +17061,30 @@
                 "section": "def-server.SavedObjectsImportHook",
                 "text": "SavedObjectsImportHook"
               },
-              "<unknown> | undefined"
+              "<Attributes> | undefined"
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 434
+              "lineNumber": 441
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.isExportable",
+            "type": "Function",
+            "tags": [],
+            "label": "isExportable",
+            "description": [
+              "\nOptional hook to specify whether an object should be exportable.\n\nIf specified, `isExportable` will be called during export for each\nof this type's objects in the export, and the ones not matching the\npredicate will be excluded from the export.\n\nWhen implementing both `isExportable` and `onExport`, it is mandatory that\n`isExportable` returns the same value for an object before and after going\nthough the export transform.\nE.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`\n"
+            ],
+            "signature": [
+              "SavedObjectsExportablePredicate",
+              "<Attributes> | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/types.ts",
+              "lineNumber": 481
             },
             "deprecated": false
           }
@@ -17047,7 +17406,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 215
+          "lineNumber": 223
         },
         "deprecated": false,
         "children": [
@@ -17065,7 +17424,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 217
+              "lineNumber": 225
             },
             "deprecated": false
           },
@@ -17084,7 +17443,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 219
+              "lineNumber": 227
             },
             "deprecated": false
           },
@@ -17102,7 +17461,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 221
+              "lineNumber": 229
             },
             "deprecated": false
           },
@@ -17120,7 +17479,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 223
+              "lineNumber": 231
             },
             "deprecated": false
           }
@@ -17150,7 +17509,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 295
+          "lineNumber": 303
         },
         "deprecated": false,
         "children": [
@@ -17166,7 +17525,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 297
+              "lineNumber": 305
             },
             "deprecated": false
           },
@@ -17183,7 +17542,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 298
+              "lineNumber": 306
             },
             "deprecated": false
           }
@@ -17225,7 +17584,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-          "lineNumber": 30
+          "lineNumber": 29
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -17549,7 +17908,7 @@
             "section": "def-server.SavedObjectsIncrementCounterOptions",
             "text": "SavedObjectsIncrementCounterOptions"
           },
-          "<T>) => Promise<",
+          "<T> | undefined) => Promise<",
           "SavedObject",
           "<T>>; openPointInTimeForType: (type: string | string[], { keepAlive, preference }?: ",
           {
@@ -17611,7 +17970,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 156
+          "lineNumber": 161
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -17634,7 +17993,7 @@
             "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
-          " | undefined; getVisibleTypes: () => ",
+          "<any> | undefined; getVisibleTypes: () => ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -17642,7 +18001,7 @@
             "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
-          "[]; getAllTypes: () => ",
+          "<any>[]; getAllTypes: () => ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -17650,7 +18009,7 @@
             "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
-          "[]; getImportableAndExportableTypes: () => ",
+          "<any>[]; getImportableAndExportableTypes: () => ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -17658,7 +18017,7 @@
             "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
-          "[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+          "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
         ],
         "source": {
           "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
@@ -18189,7 +18548,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 350
+          "lineNumber": 361
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -18239,7 +18598,7 @@
           "\nTransformation function used to mutate the exported objects of the associated type.\n\nA type's export transform function will be executed once per user-initiated export,\nfor all objects of that type.\n"
         ],
         "signature": [
-          "<T = unknown>(context: ",
+          "(context: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -18257,7 +18616,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/export/types.ts",
-          "lineNumber": 161
+          "lineNumber": 175
         },
         "deprecated": false,
         "initialIsOpen": false

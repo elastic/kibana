@@ -23,7 +23,7 @@ import {
 } from '../../../timelines/components/timeline/body/constants';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions, TimelineEventsDetailsItem } from '../../../../common';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -55,22 +55,12 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    contextId: string;
+    data: TimelineEventsDetailsItem;
     eventId: string;
-    fieldName: string;
-    value: string;
-    fieldType: string;
+    fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
     linkValue: string | undefined;
-  };
-}
-
-export interface ThreatSummaryRow {
-  title: string;
-  description: {
-    contextId: string;
-    eventId: string;
-    fieldName: string;
-    values: string[];
+    timelineId: string;
+    values: string[] | null | undefined;
   };
 }
 
@@ -82,7 +72,7 @@ export interface ThreatDetailsRow {
   };
 }
 
-export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
+export type SummaryRow = AlertSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -207,7 +197,7 @@ export const onEventDetailsTabKeyPressed = ({
 };
 
 const getTitle = (title: string) => (
-  <EuiTitle size="xxs">
+  <EuiTitle size="xxxs">
     <h5>{title}</h5>
   </EuiTitle>
 );
@@ -215,7 +205,6 @@ getTitle.displayName = 'getTitle';
 
 export const getSummaryColumns = (
   DescriptionComponent:
-    | React.FC<ThreatSummaryRow['description']>
     | React.FC<AlertSummaryRow['description']>
     | React.FC<ThreatDetailsRow['description']>
 ): Array<EuiBasicTableColumn<SummaryRow>> => {
@@ -224,7 +213,7 @@ export const getSummaryColumns = (
       field: 'title',
       truncateText: false,
       render: getTitle,
-      width: '160px',
+      width: '33%',
       name: '',
     },
     {

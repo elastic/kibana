@@ -39,6 +39,7 @@ function getTShirtSizeByIdAndThreshold(
 
 export const alertType: AlertType<
   AlwaysFiringParams,
+  never,
   { count?: number },
   { triggerdOnCycle: number },
   never,
@@ -53,6 +54,7 @@ export const alertType: AlertType<
   ],
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },

@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
-import React from 'react';
-
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiCommentProps,
+  EuiToken,
+} from '@elastic/eui';
+import React, { useContext } from 'react';
+import classNames from 'classnames';
+import { ThemeContext } from 'styled-components';
 import {
   CaseFullExternalService,
   ActionConnector,
   CaseStatuses,
   CommentType,
+  Comment,
+  CommentRequestActionsType,
 } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
@@ -21,24 +31,31 @@ import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionCopyLink } from './user_action_copy_link';
+import { ContentWrapper } from './user_action_markdown';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CasesNavigation } from '../links';
+import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
+import { MarkdownRenderer } from '../markdown_editor';
 
 interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
+
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
+
+export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 const getStatusTitle = (id: string, status: CaseStatuses) => (
   <EuiFlexGroup
     gutterSize="s"
-    alignItems={'center'}
+    alignItems="center"
     data-test-subj={`${id}-user-action-status-title`}
+    responsive={false}
   >
     <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -103,7 +120,7 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
   const tags = action.newValue != null ? action.newValue.split(',') : [];
 
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
+    <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
         {action.action === 'add' && i18n.ADDED_FIELD}
         {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
@@ -118,7 +135,12 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
 export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
   const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="xs" data-test-subj="pushed-service-label-title">
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="xs"
+      data-test-subj="pushed-service-label-title"
+      responsive={false}
+    >
       <EuiFlexItem data-test-subj="pushed-label">
         {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
           pushedVal?.connector_name
@@ -183,15 +205,15 @@ export const getUpdateAction = ({
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: getUpdateActionIcon(action.actionField[0]),
   actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup responsive={false}>
+      <EuiFlexItem grow={false}>
         <UserActionCopyLink
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
           id={action.actionId}
         />
       </EuiFlexItem>
       {action.action === 'update' && action.commentId != null && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <UserActionMoveToReference id={action.commentId} outlineComment={handleOutlineComment} />
         </EuiFlexItem>
       )}
@@ -245,14 +267,14 @@ export const getAlertAttachment = ({
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: 'bell',
   actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup responsive={false}>
+      <EuiFlexItem grow={false}>
         <UserActionCopyLink
           id={action.actionId}
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <UserActionShowAlert
           id={action.actionId}
           alertId={alertId}
@@ -336,17 +358,81 @@ export const getGeneratedAlertsAttachment = ({
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: 'bell',
   actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup responsive={false}>
+      <EuiFlexItem grow={false}>
         <UserActionCopyLink
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
           id={action.actionId}
         />
       </EuiFlexItem>
       {renderInvestigateInTimelineActionComponent ? (
-        <EuiFlexItem>{renderInvestigateInTimelineActionComponent(alertIds)}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {renderInvestigateInTimelineActionComponent(alertIds)}
+        </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
+  ),
+});
+
+const ActionIcon = React.memo<{
+  actionType: string;
+}>(({ actionType }) => {
+  const theme = useContext(ThemeContext);
+  return (
+    <EuiToken
+      style={{ marginTop: '8px' }}
+      iconType={actionType === 'isolate' ? 'lock' : 'lockOpen'}
+      size="m"
+      shape="circle"
+      color={theme.eui.euiColorLightestShade}
+      data-test-subj="endpoint-action-icon"
+    />
+  );
+});
+
+export const getActionAttachment = ({
+  comment,
+  userCanCrud,
+  isLoadingIds,
+  getCaseDetailHrefWithCommentId,
+  actionsNavigation,
+  action,
+}: {
+  comment: Comment & CommentRequestActionsType;
+  userCanCrud: boolean;
+  isLoadingIds: string[];
+  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  actionsNavigation?: ActionsNavigation;
+  action: CaseUserActions;
+}): EuiCommentProps => ({
+  username: (
+    <UserActionUsernameWithAvatar
+      username={comment.createdBy.username}
+      fullName={comment.createdBy.fullName}
+    />
+  ),
+  className: classNames('comment-action', { 'empty-comment': comment.comment.trim().length === 0 }),
+  event: (
+    <HostIsolationCommentEvent
+      type={comment.actions.type}
+      endpoints={comment.actions.targets}
+      href={actionsNavigation?.href}
+      onClick={actionsNavigation?.onClick}
+    />
+  ),
+  'data-test-subj': 'endpoint-action',
+  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timelineIcon: <ActionIcon actionType={comment.actions.type} />,
+  actions: (
+    <UserActionCopyLink
+      id={comment.id}
+      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+    />
+  ),
+  children: comment.comment.trim().length > 0 && (
+    <ContentWrapper data-test-subj="user-action-markdown">
+      <MarkdownRenderer>{comment.comment}</MarkdownRenderer>
+    </ContentWrapper>
   ),
 });
 

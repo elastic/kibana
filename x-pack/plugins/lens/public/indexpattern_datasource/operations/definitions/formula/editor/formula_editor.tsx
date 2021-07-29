@@ -24,7 +24,7 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useDebounceWithOptions } from '../../../../../shared_components';
+import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
 import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
@@ -622,7 +622,6 @@ export function FormulaEditor({
                 </EuiFlexItem>
 
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
-                  {/* TODO: Replace `bolt` with `fullScreenExit` icon (after latest EUI is deployed). */}
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
@@ -630,7 +629,7 @@ export function FormulaEditor({
                       setIsHelpOpen(!isFullscreen);
                       trackUiEvent('toggle_formula_fullscreen');
                     }}
-                    iconType={isFullscreen ? 'bolt' : 'fullScreen'}
+                    iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
                     size="xs"
                     color="text"
                     flush="right"
@@ -729,11 +728,16 @@ export function FormulaEditor({
                       </EuiLink>
                     </EuiToolTip>
                   ) : (
-                    <EuiToolTip
-                      content={i18n.translate('xpack.lens.formula.editorHelpOverlayToolTip', {
-                        defaultMessage: 'Function reference',
-                      })}
+                    <TooltipWrapper
+                      tooltipContent={i18n.translate(
+                        'xpack.lens.formula.editorHelpOverlayToolTip',
+                        {
+                          defaultMessage: 'Function reference',
+                        }
+                      )}
+                      condition={!isHelpOpen}
                       position="top"
+                      delay="regular"
                     >
                       <EuiPopover
                         panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
@@ -745,10 +749,14 @@ export function FormulaEditor({
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
-                            onClick={() => setIsHelpOpen(!isHelpOpen)}
+                            onClick={() => {
+                              if (!isHelpOpen) {
+                                trackUiEvent('open_formula_popover');
+                              }
+                              setIsHelpOpen(!isHelpOpen);
+                            }}
                             iconType="documentation"
                             color="text"
-                            size="s"
                             aria-label={i18n.translate(
                               'xpack.lens.formula.editorHelpInlineShowToolTip',
                               {
@@ -764,7 +772,7 @@ export function FormulaEditor({
                           operationDefinitionMap={visibleOperationsMap}
                         />
                       </EuiPopover>
-                    </EuiToolTip>
+                    </TooltipWrapper>
                   )}
                 </EuiFlexItem>
 

@@ -32,7 +32,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 245
+          "lineNumber": 246
         },
         "deprecated": false,
         "children": [
@@ -57,7 +57,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 249
+              "lineNumber": 250
             },
             "deprecated": false
           },
@@ -75,7 +75,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 254
+              "lineNumber": 255
             },
             "deprecated": false
           },
@@ -100,7 +100,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 259
+              "lineNumber": 260
             },
             "deprecated": false
           },
@@ -118,7 +118,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 266
+              "lineNumber": 267
             },
             "deprecated": false
           },
@@ -136,7 +136,30 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 272
+              "lineNumber": 273
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptions.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.IExecutionContextContainer",
+                "text": "IExecutionContextContainer"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 275
             },
             "deprecated": false
           }
@@ -171,7 +194,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 279
+          "lineNumber": 282
         },
         "deprecated": false,
         "children": [
@@ -184,7 +207,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 283
+              "lineNumber": 286
             },
             "deprecated": false
           }
@@ -200,7 +223,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 225
+          "lineNumber": 226
         },
         "deprecated": false,
         "children": [
@@ -218,7 +241,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 238
+              "lineNumber": 239
             },
             "deprecated": false
           }
@@ -236,26 +259,10 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 295
+          "lineNumber": 298
         },
         "deprecated": false,
         "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.HttpHandler.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 296
-            },
-            "deprecated": false
-          },
           {
             "parentPluginId": "core",
             "id": "def-public.HttpHandler.Unnamed",
@@ -300,7 +307,23 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 303
+              "lineNumber": 305
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpHandler.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 306
             },
             "deprecated": false
           }
@@ -318,7 +341,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 144
+          "lineNumber": 145
         },
         "deprecated": false,
         "children": [
@@ -334,7 +357,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 145
+              "lineNumber": 146
             },
             "deprecated": false
           }
@@ -352,7 +375,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 362
+          "lineNumber": 365
         },
         "deprecated": false,
         "children": [
@@ -402,7 +425,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 368
+              "lineNumber": 371
             },
             "deprecated": false,
             "children": [
@@ -426,7 +449,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 369
+                  "lineNumber": 372
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -449,7 +472,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 370
+                  "lineNumber": 373
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -503,7 +526,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 378
+              "lineNumber": 381
             },
             "deprecated": false,
             "children": [
@@ -525,7 +548,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 379
+                  "lineNumber": 382
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -548,7 +571,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 380
+                  "lineNumber": 383
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -602,7 +625,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 388
+              "lineNumber": 391
             },
             "deprecated": false,
             "children": [
@@ -625,7 +648,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 389
+                  "lineNumber": 392
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -648,7 +671,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 390
+                  "lineNumber": 393
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -702,7 +725,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 398
+              "lineNumber": 401
             },
             "deprecated": false,
             "children": [
@@ -724,7 +747,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 399
+                  "lineNumber": 402
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -747,7 +770,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 400
+                  "lineNumber": 403
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -767,7 +790,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 351
+          "lineNumber": 354
         },
         "deprecated": false,
         "children": [
@@ -795,11 +818,19 @@
                 "section": "def-public.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.IExecutionContextContainer",
+                "text": "IExecutionContextContainer"
+              },
+              " | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 352
+              "lineNumber": 355
             },
             "deprecated": false
           },
@@ -815,7 +846,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 353
+              "lineNumber": 356
             },
             "deprecated": false
           }
@@ -849,7 +880,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 346
+          "lineNumber": 349
         },
         "deprecated": false,
         "children": [
@@ -865,7 +896,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 347
+              "lineNumber": 350
             },
             "deprecated": false
           },
@@ -888,7 +919,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 348
+              "lineNumber": 351
             },
             "deprecated": false
           }
@@ -906,7 +937,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 154
+          "lineNumber": 155
         },
         "deprecated": false,
         "children": [
@@ -924,7 +955,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 158
+              "lineNumber": 159
             },
             "deprecated": false
           },
@@ -942,7 +973,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 164
+              "lineNumber": 165
             },
             "deprecated": false
           },
@@ -960,7 +991,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 170
+              "lineNumber": 171
             },
             "deprecated": false
           },
@@ -985,7 +1016,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 173
+              "lineNumber": 174
             },
             "deprecated": false
           },
@@ -1003,7 +1034,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 179
+              "lineNumber": 180
             },
             "deprecated": false
           },
@@ -1021,7 +1052,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 182
+              "lineNumber": 183
             },
             "deprecated": false
           },
@@ -1039,7 +1070,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 185
+              "lineNumber": 186
             },
             "deprecated": false
           },
@@ -1057,7 +1088,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 191
+              "lineNumber": 192
             },
             "deprecated": false
           },
@@ -1075,7 +1106,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 197
+              "lineNumber": 198
             },
             "deprecated": false
           },
@@ -1093,7 +1124,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 204
+              "lineNumber": 205
             },
             "deprecated": false
           },
@@ -1111,7 +1142,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 210
+              "lineNumber": 211
             },
             "deprecated": false
           },
@@ -1129,7 +1160,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 216
+              "lineNumber": 217
             },
             "deprecated": false
           },
@@ -1147,7 +1178,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 221
+              "lineNumber": 222
             },
             "deprecated": false
           }
@@ -1173,7 +1204,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 307
+          "lineNumber": 310
         },
         "deprecated": false,
         "children": [
@@ -1203,11 +1234,19 @@
                 "section": "def-public.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.IExecutionContextContainer",
+                "text": "IExecutionContextContainer"
+              },
+              " | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 309
+              "lineNumber": 312
             },
             "deprecated": false
           },
@@ -1225,7 +1264,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 311
+              "lineNumber": 314
             },
             "deprecated": false
           },
@@ -1243,7 +1282,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 313
+              "lineNumber": 316
             },
             "deprecated": false
           },
@@ -1261,7 +1300,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 315
+              "lineNumber": 318
             },
             "deprecated": false
           }
@@ -1277,7 +1316,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 13
+          "lineNumber": 14
         },
         "deprecated": false,
         "children": [
@@ -1301,7 +1340,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -1325,7 +1364,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -1347,7 +1386,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -1373,7 +1412,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             },
             "deprecated": false,
             "children": [
@@ -1397,7 +1436,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 32
+                  "lineNumber": 33
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1427,7 +1466,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "deprecated": false
           },
@@ -1451,7 +1490,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -1475,7 +1514,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -1499,7 +1538,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -1523,7 +1562,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -1547,7 +1586,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 45
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -1571,7 +1610,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -1595,7 +1634,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -1615,7 +1654,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 56
+              "lineNumber": 57
             },
             "deprecated": false,
             "children": [
@@ -1634,7 +1673,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 56
+                  "lineNumber": 57
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1658,7 +1697,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             },
             "deprecated": false,
             "children": [],
@@ -1678,7 +1717,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 127
+          "lineNumber": 128
         },
         "deprecated": false,
         "children": [
@@ -1696,7 +1735,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 131
+              "lineNumber": 132
             },
             "deprecated": false,
             "children": [
@@ -1712,7 +1751,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 131
+                  "lineNumber": 132
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1734,7 +1773,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 136
+              "lineNumber": 137
             },
             "deprecated": false,
             "children": [
@@ -1750,7 +1789,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 136
+                  "lineNumber": 137
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1772,7 +1811,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 74
+          "lineNumber": 75
         },
         "deprecated": false,
         "children": [
@@ -1790,7 +1829,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 78
+              "lineNumber": 79
             },
             "deprecated": false,
             "returnComment": [],
@@ -1810,7 +1849,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             },
             "deprecated": false,
             "returnComment": [],
@@ -1824,7 +1863,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 83
+                  "lineNumber": 84
                 },
                 "deprecated": false
               }
@@ -1844,7 +1883,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 88
+              "lineNumber": 89
             },
             "deprecated": false,
             "returnComment": [],
@@ -1858,7 +1897,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 88
+                  "lineNumber": 89
                 },
                 "deprecated": false
               }
@@ -1875,7 +1914,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -1893,7 +1932,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 104
+              "lineNumber": 105
             },
             "deprecated": false
           }
@@ -1911,7 +1950,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 111
+          "lineNumber": 112
         },
         "deprecated": false,
         "children": [
@@ -1929,7 +1968,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 121
+              "lineNumber": 122
             },
             "deprecated": false,
             "children": [
@@ -1945,7 +1984,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/http/types.ts",
-                  "lineNumber": 121
+                  "lineNumber": 122
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1975,7 +2014,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 330
+          "lineNumber": 333
         },
         "deprecated": false,
         "children": [
@@ -1988,7 +2027,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 331
+              "lineNumber": 334
             },
             "deprecated": false
           },
@@ -2004,7 +2043,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 332
+              "lineNumber": 335
             },
             "deprecated": false
           },
@@ -2020,7 +2059,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 333
+              "lineNumber": 336
             },
             "deprecated": false
           },
@@ -2038,7 +2077,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 337
+              "lineNumber": 340
             },
             "deprecated": true,
             "references": [
@@ -2072,7 +2111,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 341
+              "lineNumber": 344
             },
             "deprecated": true,
             "references": []
@@ -2089,7 +2128,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 342
+              "lineNumber": 345
             },
             "deprecated": false
           }
@@ -2107,7 +2146,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 408
+          "lineNumber": 411
         },
         "deprecated": false,
         "children": [
@@ -2122,7 +2161,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 410
+              "lineNumber": 413
             },
             "deprecated": false
           },
@@ -2140,7 +2179,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 412
+              "lineNumber": 415
             },
             "deprecated": false,
             "children": [],
@@ -2170,7 +2209,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 322
+          "lineNumber": 325
         },
         "deprecated": false,
         "children": [
@@ -2188,7 +2227,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 324
+              "lineNumber": 327
             },
             "deprecated": false
           },
@@ -2206,7 +2245,7 @@
             ],
             "source": {
               "path": "src/core/public/http/types.ts",
-              "lineNumber": 326
+              "lineNumber": 329
             },
             "deprecated": false
           }
@@ -2236,7 +2275,7 @@
         ],
         "source": {
           "path": "src/core/public/http/types.ts",
-          "lineNumber": 68
+          "lineNumber": 69
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3736,7 +3775,7 @@
         ],
         "source": {
           "path": "src/core/server/http/types.ts",
-          "lineNumber": 341
+          "lineNumber": 439
         },
         "deprecated": false,
         "children": [
@@ -3751,7 +3790,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 343
+              "lineNumber": 441
             },
             "deprecated": false
           },
@@ -3766,7 +3805,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 345
+              "lineNumber": 443
             },
             "deprecated": false
           },
@@ -3781,7 +3820,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 347
+              "lineNumber": 445
             },
             "deprecated": false
           },
@@ -3799,7 +3838,162 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 349
+              "lineNumber": 447
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.HttpServicePreboot",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpServicePreboot",
+        "description": [
+          "\nKibana HTTP Service provides an abstraction to work with the HTTP stack at the `preboot` stage. This functionality\nallows Kibana to serve user requests even before Kibana becomes fully operational. Only Core and `preboot` plugins\ncan define HTTP routes at this stage.\n"
+        ],
+        "source": {
+          "path": "src/core/server/http/types.ts",
+          "lineNumber": 120
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.HttpServicePreboot.registerRoutes",
+            "type": "Function",
+            "tags": [],
+            "label": "registerRoutes",
+            "description": [
+              "\nProvides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler\nfunctions for any number of nested routes.\n"
+            ],
+            "signature": [
+              "(path: string, callback: (router: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.IRouter",
+                "text": "IRouter"
+              },
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              ">) => void) => void"
+            ],
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 138
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.HttpServicePreboot.registerRoutes.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/core/server/http/types.ts",
+                  "lineNumber": 138
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.HttpServicePreboot.registerRoutes.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "(router: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.IRouter",
+                    "text": "IRouter"
+                  },
+                  "<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.RequestHandlerContext",
+                    "text": "RequestHandlerContext"
+                  },
+                  ">) => void"
+                ],
+                "source": {
+                  "path": "src/core/server/http/types.ts",
+                  "lineNumber": 138
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.HttpServicePreboot.basePath",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
+            ],
+            "signature": [
+              "{ remove: (path: string) => string; get: (request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.LegacyRequest",
+                "text": "LegacyRequest"
+              },
+              ") => string; set: (request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.LegacyRequest",
+                "text": "LegacyRequest"
+              },
+              ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+            ],
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 144
             },
             "deprecated": false
           }
@@ -3817,7 +4011,7 @@
         ],
         "source": {
           "path": "src/core/server/http/types.ts",
-          "lineNumber": 131
+          "lineNumber": 234
         },
         "deprecated": false,
         "children": [
@@ -3851,7 +4045,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 136
+              "lineNumber": 239
             },
             "deprecated": false,
             "returnComment": [],
@@ -3875,7 +4069,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 137
+                  "lineNumber": 240
                 },
                 "deprecated": false
               }
@@ -3903,7 +4097,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 150
+              "lineNumber": 253
             },
             "deprecated": false,
             "returnComment": [],
@@ -4068,7 +4262,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 150
+                  "lineNumber": 253
                 },
                 "deprecated": false
               }
@@ -4096,7 +4290,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 162
+              "lineNumber": 265
             },
             "deprecated": false,
             "returnComment": [],
@@ -4261,7 +4455,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 162
+                  "lineNumber": 265
                 },
                 "deprecated": false
               }
@@ -4289,7 +4483,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 174
+              "lineNumber": 277
             },
             "deprecated": false,
             "returnComment": [],
@@ -4514,7 +4708,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 174
+                  "lineNumber": 277
                 },
                 "deprecated": false
               }
@@ -4542,7 +4736,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 186
+              "lineNumber": 289
             },
             "deprecated": false,
             "returnComment": [],
@@ -4707,7 +4901,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 186
+                  "lineNumber": 289
                 },
                 "deprecated": false
               }
@@ -4735,7 +4929,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 198
+              "lineNumber": 301
             },
             "deprecated": false,
             "returnComment": [],
@@ -4776,7 +4970,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 198
+                  "lineNumber": 301
                 },
                 "deprecated": false
               }
@@ -4828,7 +5022,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 204
+              "lineNumber": 307
             },
             "deprecated": false
           },
@@ -4854,7 +5048,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 212
+              "lineNumber": 315
             },
             "deprecated": true,
             "references": []
@@ -4879,7 +5073,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 217
+              "lineNumber": 320
             },
             "deprecated": false
           },
@@ -4921,7 +5115,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 234
+              "lineNumber": 337
             },
             "deprecated": false,
             "returnComment": [],
@@ -4964,7 +5158,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 266
+              "lineNumber": 369
             },
             "deprecated": false,
             "returnComment": [],
@@ -4981,7 +5175,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 270
+                  "lineNumber": 373
                 },
                 "deprecated": false
               },
@@ -5179,7 +5373,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/http/types.ts",
-                  "lineNumber": 271
+                  "lineNumber": 374
                 },
                 "deprecated": false
               }
@@ -5206,7 +5400,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 277
+              "lineNumber": 380
             },
             "deprecated": false,
             "returnComment": [],
@@ -5224,7 +5418,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/http/types.ts",
-          "lineNumber": 310
+          "lineNumber": 408
         },
         "deprecated": false,
         "children": [
@@ -5274,7 +5468,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 315
+              "lineNumber": 413
             },
             "deprecated": false
           },
@@ -5298,7 +5492,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 321
+              "lineNumber": 419
             },
             "deprecated": false
           },
@@ -5323,7 +5517,7 @@
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
-              "lineNumber": 326
+              "lineNumber": 424
             },
             "deprecated": false,
             "returnComment": [],
@@ -8615,7 +8809,7 @@
             "plugin": "security",
             "link": {
               "path": "x-pack/plugins/security/server/saved_objects/index.ts",
-              "lineNumber": 34
+              "lineNumber": 47
             }
           }
         ],
@@ -12239,7 +12433,7 @@
           "\nThe set of supported parseable Content-Types"
         ],
         "signature": [
-          "\"application/json\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"multipart/form-data\" | \"text/*\""
+          "\"application/json\" | \"multipart/form-data\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"text/*\""
         ],
         "source": {
           "path": "src/core/server/http/router/route.ts",

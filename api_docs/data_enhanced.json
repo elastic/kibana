@@ -129,7 +129,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; pageSize: number; trackingInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
                 ],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
@@ -237,7 +237,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 54
+              "lineNumber": 59
             },
             "deprecated": false,
             "children": [
@@ -259,7 +259,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 54
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -276,7 +276,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 54
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -296,7 +296,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 60
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [],

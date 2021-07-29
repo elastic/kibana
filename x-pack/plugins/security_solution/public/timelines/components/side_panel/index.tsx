@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
-import styled, { StyledComponent } from 'styled-components';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
@@ -17,14 +16,6 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
-
-// TODO: EUI team follow up on complex types and styled-components `styled`
-// https://github.com/elastic/eui/issues/4855
-const StyledEuiFlyout: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
-  EuiFlyout
-)`
-  z-index: ${({ theme }) => theme.eui.euiZLevel7};
-`;
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -113,13 +104,14 @@ export const DetailsPanel = React.memo(
     }
 
     return isFlyoutView ? (
-      <StyledEuiFlyout
+      <EuiFlyout
         data-test-subj="timeline:details-panel:flyout"
         size={panelSize}
         onClose={closePanel}
+        ownFocus={false}
       >
         {visiblePanel}
-      </StyledEuiFlyout>
+      </EuiFlyout>
     ) : (
       visiblePanel
     );

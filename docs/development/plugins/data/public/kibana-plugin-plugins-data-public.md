@@ -31,6 +31,7 @@
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-public.bucket_types.md) |  |
 |  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.es_field_types.md) | \* |
+|  [IndexPatternType](./kibana-plugin-plugins-data-public.indexpatterntype.md) |  |
 |  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
@@ -42,8 +43,12 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [extractTimeRange(filters, timeFieldName)](./kibana-plugin-plugins-data-public.extracttimerange.md) |  |
+|  [generateFilters(filterManager, field, values, operation, index)](./kibana-plugin-plugins-data-public.generatefilters.md) | Generate filter objects, as a result of triggering a filter action on a specific index pattern field. |
 |  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
+|  [getDisplayValueFromFilter(filter, indexPatterns)](./kibana-plugin-plugins-data-public.getdisplayvaluefromfilter.md) |  |
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
+|  [getEsQueryConfig(config)](./kibana-plugin-plugins-data-public.getesqueryconfig.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
 |  [isEsError(e)](./kibana-plugin-plugins-data-public.iseserror.md) | Checks if a given errors originated from Elasticsearch. Those params are assigned to the attributes property of an error. |
@@ -61,11 +66,9 @@
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) | Data plugin public Start contract |
 |  [DataPublicPluginStartActions](./kibana-plugin-plugins-data-public.datapublicpluginstartactions.md) | utilities to generate filters from action context |
 |  [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) | Data plugin prewired UI components |
-|  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
-|  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
 |  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
 |  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
@@ -78,7 +81,6 @@
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
 |  [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) | search service |
 |  [ISearchStartSearchSource](./kibana-plugin-plugins-data-public.isearchstartsearchsource.md) | high level search service |
-|  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
 |  [QueryStateChange](./kibana-plugin-plugins-data-public.querystatechange.md) |  |
@@ -86,7 +88,6 @@
 |  [QuerySuggestionBasic](./kibana-plugin-plugins-data-public.querysuggestionbasic.md) | \* |
 |  [QuerySuggestionField](./kibana-plugin-plugins-data-public.querysuggestionfield.md) | \* |
 |  [QuerySuggestionGetFnArgs](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.md) | \* |
-|  [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md) |  |
 |  [Reason](./kibana-plugin-plugins-data-public.reason.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
@@ -110,14 +111,17 @@
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.es_search_strategy.md) |  |
-|  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) |  |
+|  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) | Filter helpers namespace: |
 |  [esKuery](./kibana-plugin-plugins-data-public.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-public.esquery.md) |  |
 |  [exporters](./kibana-plugin-plugins-data-public.exporters.md) |  |
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
+|  [FilterItem](./kibana-plugin-plugins-data-public.filteritem.md) |  |
+|  [FilterLabel](./kibana-plugin-plugins-data-public.filterlabel.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
+|  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-public.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
 |  [isCompleteResponse](./kibana-plugin-plugins-data-public.iscompleteresponse.md) |  |
@@ -149,6 +153,7 @@
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esaggsexpressionfunctiondefinition.md) |  |
 |  [EsdslExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esdslexpressionfunctiondefinition.md) |  |
+|  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
 |  [EsRawResponseExpressionTypeDefinition](./kibana-plugin-plugins-data-public.esrawresponseexpressiontypedefinition.md) |  |
 |  [ExecutionContextSearch](./kibana-plugin-plugins-data-public.executioncontextsearch.md) |  |
@@ -168,6 +173,7 @@
 |  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-public.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
+|  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
 |  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.indexpatternloadexpressionfunctiondefinition.md) |  |
@@ -179,16 +185,17 @@
 |  [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md) |  |
 |  [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md) |  |
 |  [KibanaContext](./kibana-plugin-plugins-data-public.kibanacontext.md) |  |
+|  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
 |  [MatchAllFilter](./kibana-plugin-plugins-data-public.matchallfilter.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-public.parsedinterval.md) |  |
 |  [PhraseFilter](./kibana-plugin-plugins-data-public.phrasefilter.md) |  |
 |  [PhrasesFilter](./kibana-plugin-plugins-data-public.phrasesfilter.md) |  |
-|  [Query](./kibana-plugin-plugins-data-public.query.md) |  |
 |  [QueryStart](./kibana-plugin-plugins-data-public.querystart.md) |  |
 |  [QuerySuggestion](./kibana-plugin-plugins-data-public.querysuggestion.md) | \* |
 |  [QuerySuggestionGetFn](./kibana-plugin-plugins-data-public.querysuggestiongetfn.md) |  |
 |  [RangeFilter](./kibana-plugin-plugins-data-public.rangefilter.md) |  |
 |  [RangeFilterMeta](./kibana-plugin-plugins-data-public.rangefiltermeta.md) |  |
+|  [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md) |  |
 |  [SavedQueryTimeFilter](./kibana-plugin-plugins-data-public.savedquerytimefilter.md) |  |
 |  [SearchBarProps](./kibana-plugin-plugins-data-public.searchbarprops.md) |  |
 |  [StatefulSearchBarProps](./kibana-plugin-plugins-data-public.statefulsearchbarprops.md) |  |

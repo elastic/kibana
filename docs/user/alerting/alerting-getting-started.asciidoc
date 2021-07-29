@@ -24,13 +24,16 @@ This section describes all of these elements and how they operate together.
 [float]
 === Rules
 
-A rule specifies a background task that runs on the {kib} server to check for specific conditions. It consists of three main parts: 
+A rule specifies a background task that runs on the {kib} server to check for specific conditions. {kib} provides two types of rules: stack rules that are built into {kib} and domain rules that are registered by Kibana apps. Refer to <<rule-types,Rule types>> for more information.
+
+A rule consists of three main parts: 
 
 * *Conditions*: what needs to be detected?
 * *Schedule*: when/how often should detection checks run?
 * *Actions*: what happens when a condition is detected?
 
-For example, when monitoring a set of servers, a rule might: 
+For example, when monitoring a set of servers, a rule might:
+
 * Check for average CPU usage > 0.9 on each server for the last two minutes (condition).
 * Check every minute (schedule).
 * Send a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
@@ -122,7 +125,7 @@ image::images/rule-concepts-summary.svg[Rules, connectors, alerts and actions wo
 [[alerting-concepts-differences]]
 == Differences from Watcher
 
-{kib} alerting and <<watcher-ui, {es} alerting>> are both used to detect conditions and can trigger actions in response, but they are completely independent alerting systems.
+{kib} alerting and <<watcher-ui,Watcher>> are both used to detect conditions and can trigger actions in response, but they are completely independent alerting systems.
 
 This section will clarify some of the important differences in the function and intent of the two systems.
 

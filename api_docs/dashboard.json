@@ -1059,8 +1059,8 @@
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 40
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
                 },
                 "deprecated": false
               },
@@ -1076,8 +1076,8 @@
                   "[]"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 40
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
                 },
                 "deprecated": false
               }
@@ -1129,8 +1129,8 @@
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 46
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 161
                 },
                 "deprecated": false
               }
@@ -1199,7 +1199,9 @@
         "parentPluginId": "dashboard",
         "id": "def-public.createDashboardUrlGenerator",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "createDashboardUrlGenerator",
         "description": [],
         "signature": [
@@ -1223,9 +1225,10 @@
         ],
         "source": {
           "path": "src/plugins/dashboard/public/url_generator.ts",
-          "lineNumber": 91
+          "lineNumber": 97
         },
-        "deprecated": false,
+        "deprecated": true,
+        "references": [],
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -1247,7 +1250,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 92
+              "lineNumber": 98
             },
             "deprecated": false,
             "isRequired": true
@@ -1258,6 +1261,285 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.DashboardAppLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DashboardAppLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dashboard",
+            "scope": "public",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-public.DashboardAppLocatorParams",
+            "text": "DashboardAppLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/dashboard/public/locator.ts",
+          "lineNumber": 29
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
+            "description": [
+              "\nIf given, the dashboard saved object with this id will be loaded. If not given,\na new, unsaved dashboard will be loaded up."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [
+              "\nOptionally set the time range in the time picker."
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 38
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.refreshInterval",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refreshInterval",
+            "description": [
+              "\nOptionally set the refresh interval."
+            ],
+            "signature": [
+              "(",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              " & ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ") | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
+            ],
+            "signature": [
+              "Filter",
+              "[] | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
+            ],
+            "signature": [
+              "Query",
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.useHash",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useHash",
+            "description": [
+              "\nIf not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines\nwhether to hash the data in the url to avoid url length issues."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 59
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.preserveSavedFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preserveSavedFilters",
+            "description": [
+              "\nWhen `true` filters from saved filters from destination dashboard as merged with applied filters\nWhen `false` applied filters take precedence and override saved filters\n\ntrue is default"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 67
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.viewMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "viewMode",
+            "description": [
+              "\nView mode of the dashboard."
+            ],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.ViewMode",
+                "text": "ViewMode"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 72
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [
+              "\nSearch search session ID to restore.\n(Background search)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 78
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.panels",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "panels",
+            "description": [
+              "\nList of dashboard panels"
+            ],
+            "signature": [
+              "(",
+              {
+                "pluginId": "dashboard",
+                "scope": "common",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-common.SavedDashboardPanel730ToLatest",
+                "text": "SavedDashboardPanel730ToLatest"
+              },
+              "[] & ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ") | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 83
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardAppLocatorParams.savedQuery",
+            "type": "string",
+            "tags": [],
+            "label": "savedQuery",
+            "description": [
+              "\nSaved query ID"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 88
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "dashboard",
         "id": "def-public.DashboardContainerInput",
@@ -1465,13 +1747,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "source": {
@@ -1547,7 +1823,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "lineNumber": 92
+          "lineNumber": 93
         },
         "deprecated": false,
         "children": [
@@ -1560,7 +1836,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 93
+              "lineNumber": 94
             },
             "deprecated": false
           }
@@ -1956,13 +2232,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              }
+              "Query"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
@@ -1981,13 +2251,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "source": {
@@ -2040,14 +2304,17 @@
         "parentPluginId": "dashboard",
         "id": "def-public.DashboardUrlGeneratorState",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "DashboardUrlGeneratorState",
         "description": [],
         "source": {
           "path": "src/plugins/dashboard/public/url_generator.ts",
-          "lineNumber": 29
+          "lineNumber": 32
         },
-        "deprecated": false,
+        "deprecated": true,
+        "references": [],
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -2063,7 +2330,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 34
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -2088,7 +2355,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 38
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -2113,7 +2380,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 43
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -2127,18 +2394,12 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 49
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -2152,18 +2413,12 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 54
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -2181,7 +2436,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 59
+              "lineNumber": 62
             },
             "deprecated": false
           },
@@ -2199,7 +2454,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 67
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -2224,7 +2479,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 72
+              "lineNumber": 75
             },
             "deprecated": false
           },
@@ -2242,7 +2497,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 78
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -2267,7 +2522,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 83
+              "lineNumber": 86
             },
             "deprecated": false
           },
@@ -2285,7 +2540,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 88
+              "lineNumber": 91
             },
             "deprecated": false
           }
@@ -2331,6 +2586,38 @@
       },
       {
         "parentPluginId": "dashboard",
+        "id": "def-public.DashboardAppLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardAppLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "dashboard",
+            "scope": "public",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-public.DashboardAppLocatorParams",
+            "text": "DashboardAppLocatorParams"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "src/plugins/dashboard/public/locator.ts",
+          "lineNumber": 91
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-public.DashboardUrlGenerator",
         "type": "Type",
         "tags": [],
@@ -2348,7 +2635,7 @@
         ],
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "lineNumber": 90
+          "lineNumber": 91
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2532,18 +2819,40 @@
     "setup": {
       "parentPluginId": "dashboard",
       "id": "def-public.DashboardSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "DashboardSetup",
       "description": [],
-      "signature": [
-        "void"
-      ],
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
-        "lineNumber": 124
+        "lineNumber": 125
       },
       "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "dashboard",
+          "id": "def-public.DashboardSetup.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "dashboard",
+              "scope": "public",
+              "docId": "kibDashboardPluginApi",
+              "section": "def-public.DashboardAppLocator",
+              "text": "DashboardAppLocator"
+            },
+            " | undefined"
+          ],
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 126
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2556,7 +2865,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
-        "lineNumber": 126
+        "lineNumber": 129
       },
       "deprecated": false,
       "children": [
@@ -2579,7 +2888,7 @@
           ],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 127
+            "lineNumber": 130
           },
           "deprecated": false,
           "returnComment": [],
@@ -2597,7 +2906,7 @@
           ],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 128
+            "lineNumber": 131
           },
           "deprecated": false,
           "returnComment": [],
@@ -2607,7 +2916,9 @@
           "parentPluginId": "dashboard",
           "id": "def-public.DashboardStart.dashboardUrlGenerator",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "dashboardUrlGenerator",
           "description": [],
           "signature": [
@@ -2622,7 +2933,39 @@
           ],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 131
+            "lineNumber": 142
+          },
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/public/overview/containers/overview_cti_links/index.tsx",
+                "lineNumber": 24
+              }
+            }
+          ]
+        },
+        {
+          "parentPluginId": "dashboard",
+          "id": "def-public.DashboardStart.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "dashboard",
+              "scope": "public",
+              "docId": "kibDashboardPluginApi",
+              "section": "def-public.DashboardAppLocator",
+              "text": "DashboardAppLocator"
+            },
+            " | undefined"
+          ],
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 143
           },
           "deprecated": false
         },
@@ -2644,7 +2987,7 @@
           ],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 132
+            "lineNumber": 144
           },
           "deprecated": false
         }

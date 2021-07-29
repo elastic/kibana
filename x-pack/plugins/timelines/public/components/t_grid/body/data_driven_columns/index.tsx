@@ -23,7 +23,6 @@ import {
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   ActionProps,
   CellValueElementProps,
@@ -135,7 +134,7 @@ const TgridActionTdCell = ({
   rowIndex,
   hasRowRenderers,
   onRuleChange,
-  selectedEventIds,
+  selectedEventIds = {},
   showCheckboxes,
   showNotes = false,
   tabType,
@@ -267,7 +266,7 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
     hasRowRenderers,
     onRuleChange,
     renderCellValue,
-    selectedEventIds,
+    selectedEventIds = {},
     showCheckboxes,
     tabType,
     timelineId,

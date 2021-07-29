@@ -31,7 +31,7 @@ import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
 import { TOOLTIP_MODES } from '../../../../../common/enums';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 import { renderEndzoneTooltip } from '../../../../../../charts/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
@@ -143,6 +143,7 @@ export const TimeSeries = ({
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
@@ -237,7 +238,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -262,7 +263,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}

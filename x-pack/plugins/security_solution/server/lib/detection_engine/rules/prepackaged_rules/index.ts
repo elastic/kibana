@@ -43,9 +43,9 @@ import rule30 from './defense_evasion_clearing_windows_event_logs.json';
 import rule31 from './defense_evasion_delete_volume_usn_journal_with_fsutil.json';
 import rule32 from './defense_evasion_deleting_backup_catalogs_with_wbadmin.json';
 import rule33 from './defense_evasion_disable_windows_firewall_rules_with_netsh.json';
-import rule34 from './defense_evasion_encoding_or_decoding_files_via_certutil.json';
-import rule35 from './defense_evasion_misc_lolbin_connecting_to_the_internet.json';
-import rule36 from './defense_evasion_msbuild_making_network_connections.json';
+import rule34 from './defense_evasion_misc_lolbin_connecting_to_the_internet.json';
+import rule35 from './defense_evasion_msbuild_making_network_connections.json';
+import rule36 from './defense_evasion_suspicious_certutil_commands.json';
 import rule37 from './defense_evasion_unusual_network_connection_via_rundll32.json';
 import rule38 from './defense_evasion_unusual_process_network_connection.json';
 import rule39 from './defense_evasion_via_filter_manager.json';
@@ -545,10 +545,39 @@ import rule532 from './command_and_control_tunneling_via_earthworm.json';
 import rule533 from './lateral_movement_evasion_rdp_shadowing.json';
 import rule534 from './threat_intel_module_match.json';
 import rule535 from './exfiltration_ec2_vm_export_failure.json';
-import rule536 from './defense_evasion_suspicious_execution_from_mounted_device.json';
-import rule537 from './defense_evasion_unusual_network_connection_via_dllhost.json';
-import rule538 from './defense_evasion_amsienable_key_mod.json';
-import rule539 from './persistence_via_bits_job_notify_command.json';
+import rule536 from './exfiltration_ec2_full_network_packet_capture_detected.json';
+import rule537 from './impact_azure_service_principal_credentials_added.json';
+import rule538 from './defense_evasion_disabling_windows_logs.json';
+import rule539 from './persistence_route_53_domain_transfer_lock_disabled.json';
+import rule540 from './persistence_route_53_domain_transferred_to_another_account.json';
+import rule541 from './credential_access_user_excessive_sso_logon_errors.json';
+import rule542 from './defense_evasion_suspicious_execution_from_mounted_device.json';
+import rule543 from './defense_evasion_unusual_network_connection_via_dllhost.json';
+import rule544 from './defense_evasion_amsienable_key_mod.json';
+import rule545 from './impact_rds_group_deletion.json';
+import rule546 from './persistence_rds_group_creation.json';
+import rule547 from './exfiltration_rds_snapshot_export.json';
+import rule548 from './persistence_rds_instance_creation.json';
+import rule549 from './ml_auth_rare_hour_for_a_user_to_logon.json';
+import rule550 from './ml_auth_rare_source_ip_for_a_user.json';
+import rule551 from './ml_auth_rare_user_logon.json';
+import rule552 from './ml_auth_spike_in_failed_logon_events.json';
+import rule553 from './ml_auth_spike_in_logon_events.json';
+import rule554 from './ml_auth_spike_in_logon_events_from_a_source_ip.json';
+import rule555 from './privilege_escalation_cyberarkpas_error_audit_event_promotion.json';
+import rule556 from './privilege_escalation_cyberarkpas_recommended_events_to_monitor_promotion.json';
+import rule557 from './privilege_escalation_printspooler_malicious_driver_file_changes.json';
+import rule558 from './privilege_escalation_printspooler_malicious_registry_modification.json';
+import rule559 from './privilege_escalation_printspooler_suspicious_file_deletion.json';
+import rule560 from './privilege_escalation_unusual_printspooler_childprocess.json';
+import rule561 from './defense_evasion_disabling_windows_defender_powershell.json';
+import rule562 from './defense_evasion_enable_network_discovery_with_netsh.json';
+import rule563 from './defense_evasion_execution_windefend_unusual_path.json';
+import rule564 from './defense_evasion_agent_spoofing_mismatched_id.json';
+import rule565 from './defense_evasion_agent_spoofing_multiple_hosts.json';
+import rule566 from './defense_evasion_parent_process_pid_spoofing.json';
+import rule567 from './defense_evasion_defender_exclusion_via_powershell.json';
+import rule568 from './persistence_via_bits_job_notify_command.json';
 
 export const rawRules = [
   rule1,
@@ -1090,4 +1119,33 @@ export const rawRules = [
   rule537,
   rule538,
   rule539,
+  rule540,
+  rule541,
+  rule542,
+  rule543,
+  rule544,
+  rule545,
+  rule546,
+  rule547,
+  rule548,
+  rule549,
+  rule550,
+  rule551,
+  rule552,
+  rule553,
+  rule554,
+  rule555,
+  rule556,
+  rule557,
+  rule558,
+  rule559,
+  rule560,
+  rule561,
+  rule562,
+  rule563,
+  rule564,
+  rule565,
+  rule566,
+  rule567,
+  rule568,
 ];

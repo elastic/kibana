@@ -11,7 +11,6 @@ import type { OnRowSelected } from '../../types';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';
 import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -58,7 +57,7 @@ export const EventColumnView = React.memo<Props>(
     hasRowRenderers,
     onRuleChange,
     renderCellValue,
-    selectedEventIds,
+    selectedEventIds = {},
     showCheckboxes,
     tabType,
     timelineId,
@@ -82,7 +81,6 @@ export const EventColumnView = React.memo<Props>(
           .join(' '),
       [columnHeaders, data]
     );
-
     const leadingActionCells = useMemo(
       () =>
         leadingControlColumns ? leadingControlColumns.map((column) => column.rowCellRender) : [],

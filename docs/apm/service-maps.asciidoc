@@ -108,6 +108,7 @@ Service maps are supported for the following Agent versions:
 
 [horizontal]
 Go agent:: ≥ v1.7.0
+iOS agent:: _Not yet supported_
 Java agent:: ≥ v1.13.0
 .NET agent:: ≥ v1.3.0
 Node.js agent:: ≥ v3.6.0

@@ -53,7 +53,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
-          "lineNumber": 47
+          "lineNumber": 51
         },
         "deprecated": false,
         "children": [
@@ -69,7 +69,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 58
+              "lineNumber": 63
             },
             "deprecated": false,
             "children": [
@@ -92,7 +92,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 58
+                  "lineNumber": 63
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -116,7 +116,15 @@
                 "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => ",
+              "<object, unknown>, plugins: { usageCollection?: ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              },
+              " | undefined; }) => ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -127,7 +135,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 65
+              "lineNumber": 70
             },
             "deprecated": false,
             "children": [
@@ -150,10 +158,48 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 65
+                  "lineNumber": 71
                 },
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.TaskManagerPlugin.setup.$2.plugins",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                  "lineNumber": 72
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "taskManager",
+                    "id": "def-server.TaskManagerPlugin.setup.$2.plugins.usageCollection",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "usageCollection",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "usageCollection",
+                        "scope": "server",
+                        "docId": "kibUsageCollectionPluginApi",
+                        "section": "def-server.UsageCollectionSetup",
+                        "text": "UsageCollectionSetup"
+                      },
+                      " | undefined"
+                    ],
+                    "source": {
+                      "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                      "lineNumber": 72
+                    },
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -185,7 +231,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 113
+              "lineNumber": 129
             },
             "deprecated": false,
             "children": [
@@ -207,7 +253,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 113
+                  "lineNumber": 129
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -259,6 +305,46 @@
       },
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.isEphemeralTaskRejectedDueToCapacityError",
+        "type": "Function",
+        "tags": [],
+        "label": "isEphemeralTaskRejectedDueToCapacityError",
+        "description": [],
+        "signature": [
+          "(error: Error | ",
+          "EphemeralTaskRejectedDueToCapacityError",
+          ") => boolean"
+        ],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+          "lineNumber": 44
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.isEphemeralTaskRejectedDueToCapacityError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | ",
+              "EphemeralTaskRejectedDueToCapacityError"
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+              "lineNumber": 45
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.isUnrecoverableError",
         "type": "Function",
         "tags": [],
@@ -271,7 +357,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-          "lineNumber": 21
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -288,7 +374,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-              "lineNumber": 21
+              "lineNumber": 35
             },
             "deprecated": false,
             "isRequired": true
@@ -309,7 +395,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-          "lineNumber": 25
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -325,7 +411,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-              "lineNumber": 25
+              "lineNumber": 39
             },
             "deprecated": false,
             "isRequired": true
@@ -587,6 +673,51 @@
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 37
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.RunNowResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "RunNowResult",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+          "lineNumber": 59
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunNowResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+              "lineNumber": 60
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunNowResult.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+              "lineNumber": 61
             },
             "deprecated": false
           }
@@ -861,6 +992,25 @@
     "misc": [
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.EphemeralTask",
+        "type": "Type",
+        "tags": [],
+        "label": "EphemeralTask",
+        "description": [
+          "\nA task instance that has an id and is ready for storage."
+        ],
+        "signature": [
+          "{ params: Record<string, any>; scope?: string[] | undefined; state: Record<string, any>; taskType: string; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 369
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.TaskRunCreatorFunction",
         "type": "Type",
         "tags": [],
@@ -903,7 +1053,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
-        "lineNumber": 31
+        "lineNumber": 35
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -919,13 +1069,13 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<",
+        ", \"schedule\" | \"runNow\" | \"ephemeralRunNow\" | \"ensureScheduled\"> & Pick<",
         "TaskStore",
-        ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; }"
+        ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
       ],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
-        "lineNumber": 39
+        "lineNumber": 43
       },
       "deprecated": false,
       "lifecycle": "start",

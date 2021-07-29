@@ -683,14 +683,14 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 47
+                  "lineNumber": 49
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 48
+                  "lineNumber": 50
                 }
               },
               {
@@ -718,14 +718,14 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 54
+                  "lineNumber": 57
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 55
+                  "lineNumber": 58
                 }
               },
               {
@@ -942,6 +942,48 @@
           "deprecated": true,
           "references": [
             {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/public/plugin.tsx",
+                "lineNumber": 86
+              }
+            },
+            {
+              "plugin": "licenseManagement",
+              "link": {
+                "path": "x-pack/plugins/license_management/public/plugin.ts",
+                "lineNumber": 61
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/public/application/license/check_license.tsx",
+                "lineNumber": 26
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/public/plugin.ts",
+                "lineNumber": 133
+              }
+            },
+            {
+              "plugin": "fleet",
+              "link": {
+                "path": "x-pack/plugins/fleet/public/plugin.ts",
+                "lineNumber": 101
+              }
+            },
+            {
+              "plugin": "apm",
+              "link": {
+                "path": "x-pack/plugins/apm/public/context/license/license_context.tsx",
+                "lineNumber": 19
+              }
+            },
+            {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.tsx",
@@ -965,50 +1007,15 @@
             {
               "plugin": "reporting",
               "link": {
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
-                "lineNumber": 116
+                "path": "x-pack/plugins/reporting/public/management/report_listing.tsx",
+                "lineNumber": 44
               }
             },
             {
               "plugin": "reporting",
               "link": {
-                "path": "x-pack/plugins/reporting/public/components/report_listing.tsx",
-                "lineNumber": 61
-              }
-            },
-            {
-              "plugin": "licenseManagement",
-              "link": {
-                "path": "x-pack/plugins/license_management/public/plugin.ts",
-                "lineNumber": 61
-              }
-            },
-            {
-              "plugin": "security",
-              "link": {
-                "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 84
-              }
-            },
-            {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/application/license/check_license.tsx",
-                "lineNumber": 26
-              }
-            },
-            {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/plugin.ts",
-                "lineNumber": 141
-              }
-            },
-            {
-              "plugin": "apm",
-              "link": {
-                "path": "x-pack/plugins/apm/public/context/license/license_context.tsx",
-                "lineNumber": 19
+                "path": "x-pack/plugins/reporting/public/plugin.ts",
+                "lineNumber": 127
               }
             },
             {
@@ -1016,13 +1023,6 @@
               "link": {
                 "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts",
                 "lineNumber": 75
-              }
-            },
-            {
-              "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 94
               }
             },
             {
@@ -2496,7 +2496,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 49
+          "lineNumber": 30
         },
         "deprecated": false,
         "children": [
@@ -2518,7 +2518,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 50
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -2534,7 +2534,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 51
+              "lineNumber": 32
             },
             "deprecated": false
           }
@@ -2772,14 +2772,14 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 47
+                  "lineNumber": 49
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 48
+                  "lineNumber": 50
                 }
               },
               {
@@ -2807,14 +2807,14 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 54
+                  "lineNumber": 57
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 55
+                  "lineNumber": 58
                 }
               },
               {
@@ -3022,7 +3022,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/licensing/server/types.ts",
-        "lineNumber": 67
+        "lineNumber": 48
       },
       "deprecated": false,
       "children": [
@@ -3045,7 +3045,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 72
+            "lineNumber": 53
           },
           "deprecated": true,
           "references": [
@@ -3053,7 +3053,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts",
-                "lineNumber": 431
+                "lineNumber": 437
               }
             },
             {
@@ -3074,7 +3074,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 229
+                "lineNumber": 228
               }
             },
             {
@@ -3095,14 +3095,14 @@
               "plugin": "actions",
               "link": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 169
+                "lineNumber": 172
               }
             },
             {
               "plugin": "alerting",
               "link": {
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
-                "lineNumber": 168
+                "lineNumber": 172
               }
             },
             {
@@ -3120,17 +3120,17 @@
               }
             },
             {
+              "plugin": "fleet",
+              "link": {
+                "path": "x-pack/plugins/fleet/server/plugin.ts",
+                "lineNumber": 208
+              }
+            },
+            {
               "plugin": "remoteClusters",
               "link": {
                 "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
                 "lineNumber": 73
-              }
-            },
-            {
-              "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 214
               }
             },
             {
@@ -3200,7 +3200,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.test.ts",
-                "lineNumber": 62
+                "lineNumber": 63
               }
             },
             {
@@ -3265,119 +3265,12 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 77
+            "lineNumber": 59
           },
           "deprecated": true,
           "references": [],
           "children": [],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "licensing",
-          "id": "def-server.LicensingPluginSetup.createLicensePoller",
-          "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "createLicensePoller",
-          "description": [
-            "\nCreates a license poller to retrieve a license data with.\nAllows a plugin to configure a cluster to retrieve data from at\ngiven polling frequency."
-          ],
-          "signature": [
-            "(clusterClient: Pick<",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.LegacyClusterClient",
-              "text": "LegacyClusterClient"
-            },
-            ", \"callAsInternalUser\" | \"asScoped\">, pollingFrequency: number) => { license$: ",
-            "Observable",
-            "<",
-            "ILicense",
-            ">; refresh(): Promise<",
-            "ILicense",
-            ">; }"
-          ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 84
-          },
-          "deprecated": true,
-          "references": [],
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "licensing",
-              "id": "def-server.clusterClient",
-              "type": "Object",
-              "tags": [],
-              "label": "clusterClient",
-              "description": [],
-              "signature": [
-                "{ callAsInternalUser: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.LegacyAPICaller",
-                  "text": "LegacyAPICaller"
-                },
-                "; asScoped: (request?: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
-                "<unknown, unknown, unknown, any> | ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.LegacyRequest",
-                  "text": "LegacyRequest"
-                },
-                " | ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.FakeRequest",
-                  "text": "FakeRequest"
-                },
-                " | undefined) => Pick<",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.LegacyScopedClusterClient",
-                  "text": "LegacyScopedClusterClient"
-                },
-                ", \"callAsCurrentUser\" | \"callAsInternalUser\">; }"
-              ],
-              "source": {
-                "path": "x-pack/plugins/licensing/server/types.ts",
-                "lineNumber": 85
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "licensing",
-              "id": "def-server.pollingFrequency",
-              "type": "number",
-              "tags": [],
-              "label": "pollingFrequency",
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/licensing/server/types.ts",
-                "lineNumber": 86
-              },
-              "deprecated": false
-            }
-          ]
         },
         {
           "parentPluginId": "licensing",
@@ -3399,7 +3292,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 91
+            "lineNumber": 64
           },
           "deprecated": false
         }
@@ -3416,7 +3309,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/licensing/server/types.ts",
-        "lineNumber": 95
+        "lineNumber": 68
       },
       "deprecated": false,
       "children": [
@@ -3437,7 +3330,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 99
+            "lineNumber": 72
           },
           "deprecated": false
         },
@@ -3457,7 +3350,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 103
+            "lineNumber": 77
           },
           "deprecated": false,
           "children": [],
@@ -3473,15 +3366,15 @@
             "\nCreates a license poller to retrieve a license data with.\nAllows a plugin to configure a cluster to retrieve data from at\ngiven polling frequency."
           ],
           "signature": [
-            "(clusterClient: Pick<",
+            "(clusterClient: ",
             {
               "pluginId": "core",
               "scope": "server",
               "docId": "kibCorePluginApi",
-              "section": "def-server.LegacyClusterClient",
-              "text": "LegacyClusterClient"
+              "section": "def-server.IClusterClient",
+              "text": "IClusterClient"
             },
-            ", \"callAsInternalUser\" | \"asScoped\">, pollingFrequency: number) => { license$: ",
+            ", pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
             "ILicense",
@@ -3491,7 +3384,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 109
+            "lineNumber": 84
           },
           "deprecated": false,
           "returnComment": [],
@@ -3504,51 +3397,17 @@
               "label": "clusterClient",
               "description": [],
               "signature": [
-                "{ callAsInternalUser: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
                   "docId": "kibCorePluginApi",
-                  "section": "def-server.LegacyAPICaller",
-                  "text": "LegacyAPICaller"
-                },
-                "; asScoped: (request?: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
-                "<unknown, unknown, unknown, any> | ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.LegacyRequest",
-                  "text": "LegacyRequest"
-                },
-                " | ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.FakeRequest",
-                  "text": "FakeRequest"
-                },
-                " | undefined) => Pick<",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.LegacyScopedClusterClient",
-                  "text": "LegacyScopedClusterClient"
-                },
-                ", \"callAsCurrentUser\" | \"callAsInternalUser\">; }"
+                  "section": "def-server.IClusterClient",
+                  "text": "IClusterClient"
+                }
               ],
               "source": {
                 "path": "x-pack/plugins/licensing/server/types.ts",
-                "lineNumber": 110
+                "lineNumber": 85
               },
               "deprecated": false
             },
@@ -3561,7 +3420,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/licensing/server/types.ts",
-                "lineNumber": 111
+                "lineNumber": 86
               },
               "deprecated": false
             }
@@ -3587,7 +3446,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 116
+            "lineNumber": 91
           },
           "deprecated": false
         }

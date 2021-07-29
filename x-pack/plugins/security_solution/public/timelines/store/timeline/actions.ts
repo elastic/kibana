@@ -15,6 +15,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 import { KqlMode, TimelineModel } from './model';
+import { InsertTimeline } from './types';
 import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
@@ -23,7 +24,6 @@ import {
   TimelinePersistInput,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
-import { InsertTimeline } from './types';
 import { tGridActions } from '../../../../../timelines/public';
 export const {
   applyDeltaToColumnWidth,
@@ -55,6 +55,10 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
+export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
+
+export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
+
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
 export const saveTimeline = actionCreator<TimelinePersistInput>('SAVE_TIMELINE');
@@ -68,8 +72,6 @@ export const removeProvider = actionCreator<{
   providerId: string;
   andProviderId?: string;
 }>('REMOVE_PROVIDER');
-
-export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
 export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
   'UPDATE_TIMELINE_GRAPH_EVENT_ID'
@@ -87,8 +89,6 @@ export const addTimeline = actionCreator<{
   timeline: TimelineModel;
   savedTimeline?: boolean;
 }>('ADD_TIMELINE');
-
-export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{
   id: string;

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DebugState } from '@elastic/charts';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -28,6 +29,8 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly elasticChart = this.ctx.getService('elasticChart');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
@@ -277,6 +280,13 @@ export class VisualBuilderPageObject extends FtrService {
     await this.comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
   }
 
+  public async setDrilldownUrl(value: string) {
+    const drilldownEl = await this.testSubjects.find('drilldownUrl');
+
+    await drilldownEl.clearValue();
+    await drilldownEl.type(value);
+  }
+
   /**
    * set duration formatter additional settings
    *
@@ -342,13 +352,19 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getGaugeLabel() {
-    const gaugeLabel = await this.find.byCssSelector('.tvbVisGauge__label');
+    const gaugeLabel = await this.testSubjects.find('gaugeLabel');
     return await gaugeLabel.getVisibleText();
   }
 
   public async getGaugeCount() {
-    const gaugeCount = await this.find.byCssSelector('.tvbVisGauge__value');
+    const gaugeCount = await this.testSubjects.find('gaugeValue');
     return await gaugeCount.getVisibleText();
+  }
+
+  public async getGaugeColor(isInner = false): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${isInner ? 'Inner' : ''}`);
+    return await gaugeColoredCircle.getAttribute('stroke');
   }
 
   public async clickTopN() {
@@ -363,6 +379,12 @@ export class VisualBuilderPageObject extends FtrService {
   public async getTopNCount() {
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
+  }
+
+  public async getTopNBarStyle(nth: number = 0): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const topNBars = await this.testSubjects.findAll('topNInnerBar');
+    return await topNBars[nth].getAttribute('style');
   }
 
   public async clickTable() {
@@ -435,6 +457,51 @@ export class VisualBuilderPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async clickAnnotationsTab() {
+    await this.testSubjects.click('timeSeriesEditorAnnotationsBtn');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async clickAnnotationsAddDataSourceButton() {
+    await this.testSubjects.click('addDataSourceButton');
+  }
+
+  public async setAnnotationFilter(query: string) {
+    const annotationQueryBar = await this.testSubjects.find('annotationQueryBar');
+    await annotationQueryBar.type(query);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setAnnotationFields(fields: string) {
+    const annotationFieldsInput = await this.testSubjects.find('annotationFieldsInput');
+    await annotationFieldsInput.type(fields);
+  }
+
+  public async setAnnotationRowTemplate(template: string) {
+    const annotationRowTemplateInput = await this.testSubjects.find('annotationRowTemplateInput');
+    await annotationRowTemplateInput.type(template);
+  }
+
+  public async getAnnotationsCount() {
+    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
+    return annotationsIcons.length;
+  }
+
+  public async clickAnnotationIcon(nth: number = 0) {
+    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
+    await annotationsIcons[nth].click();
+  }
+
+  public async getAnnotationTooltipHeader() {
+    const annotationTooltipHeader = await this.find.byClassName('echAnnotation__header');
+    return await annotationTooltipHeader.getVisibleText();
+  }
+
+  public async getAnnotationTooltipDetails() {
+    const annotationTooltipDetails = await this.find.byClassName('echAnnotation__details');
+    return await annotationTooltipDetails.getVisibleText();
+  }
+
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
     await this.testSubjects.click('switchIndexPatternSelectionModePopover');
     await this.testSubjects.setEuiSwitch(
@@ -447,11 +514,14 @@ export class VisualBuilderPageObject extends FtrService {
     const metricsIndexPatternInput = 'metricsIndexPatternInput';
 
     if (useKibanaIndices !== undefined) {
-      await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      await this.retry.try(async () => {
+        await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      });
     }
 
     if (useKibanaIndices === false) {
       const el = await this.testSubjects.find(metricsIndexPatternInput);
+      el.focus();
       await el.clearValue();
       if (value) {
         await el.type(value, { charByChar: true });
@@ -468,13 +538,21 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setIntervalValue(value: string) {
     const el = await this.testSubjects.find('metricsIndexPatternInterval');
-    await el.clearValue();
+    await el.clearValueWithKeyboard();
     await el.type(value);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setDropLastBucket(value: boolean) {
     const option = await this.testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
+    (await option.findByCssSelector('label')).click();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setOverrideIndexPattern(value: boolean) {
+    const option = await this.testSubjects.find(
+      `seriesOverrideIndexPattern-${value ? 'yes' : 'no'}`
+    );
     (await option.findByCssSelector('label')).click();
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -548,8 +626,8 @@ export class VisualBuilderPageObject extends FtrService {
     return (await label.findAllByTestSubject('comboBoxInput'))[1];
   }
 
-  public async clickColorPicker(): Promise<void> {
-    const picker = await this.find.byCssSelector('.tvbColorPicker button');
+  public async clickColorPicker(nth: number = 0): Promise<void> {
+    const picker = (await this.find.allByCssSelector('.tvbColorPicker button'))[nth];
     await picker.clickMouseButton();
   }
 
@@ -564,6 +642,48 @@ export class VisualBuilderPageObject extends FtrService {
   public async checkColorPickerPopUpIsPresent(): Promise<void> {
     this.log.debug(`Check color picker popup is present`);
     await this.testSubjects.existOrFail('euiColorPickerPopover', { timeout: 5000 });
+  }
+
+  public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
+    await this.clickColorPicker(nth);
+    await this.checkColorPickerPopUpIsPresent();
+    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.clickColorPicker(nth);
+    await this.visChart.waitForVisualizationRenderingStabilized();
+  }
+
+  public async setColorRuleOperator(condition: string): Promise<void> {
+    await this.retry.try(async () => {
+      await this.comboBox.clearInputField('colorRuleOperator');
+      await this.comboBox.set('colorRuleOperator', condition);
+    });
+  }
+
+  public async setColorRuleValue(value: number): Promise<void> {
+    await this.retry.try(async () => {
+      const colorRuleValueInput = await this.find.byCssSelector(
+        '[data-test-subj="colorRuleValue"]'
+      );
+      await colorRuleValueInput.type(value.toString());
+    });
+  }
+
+  public async getBackgroundStyle(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const visualization = await this.find.byClassName('tvbVis');
+    return await visualization.getAttribute('style');
+  }
+
+  public async getMetricValueStyle(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const metricValue = await this.testSubjects.find('tsvbMetricValue');
+    return await metricValue.getAttribute('style');
+  }
+
+  public async getGaugeValueStyle(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    const metricValue = await this.testSubjects.find('gaugeValue');
+    return await metricValue.getAttribute('style');
   }
 
   public async changePanelPreview(nth: number = 0): Promise<void> {
@@ -626,14 +746,35 @@ export class VisualBuilderPageObject extends FtrService {
     return await this.find.allByCssSelector('.tvbSeriesEditor');
   }
 
-  public async setMetricsGroupByTerms(field: string) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
-    await this.comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
+  public async setMetricsGroupBy(option: string) {
+    const groupBy = await this.testSubjects.find('groupBySelect');
+    await this.comboBox.setElement(groupBy, option, { clickWithMouse: true });
+  }
+
+  public async setMetricsGroupByTerms(
+    field: string,
+    filtering: { include?: string; exclude?: string } = {}
+  ) {
+    await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
     await this.comboBox.setElement(byField, field);
+
+    await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+  }
+
+  public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
+    const setFilterValue = async (value: string | undefined, subjectKey: string) => {
+      if (typeof value === 'string') {
+        const valueSubject = await this.testSubjects.find(subjectKey);
+
+        await valueSubject.clearValue();
+        await valueSubject.type(value);
+      }
+    };
+
+    await setFilterValue(include, 'groupByInclude');
+    await setFilterValue(exclude, 'groupByExclude');
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
@@ -641,6 +782,38 @@ export class VisualBuilderPageObject extends FtrService {
       '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
     );
     return await this.comboBox.isOptionSelected(groupBy, value);
+  }
+
+  public async addGroupByFilterRow() {
+    const addButton = await this.testSubjects.find('filterRowAddBtn');
+    await addButton.click();
+  }
+
+  public async setGroupByFilterQuery(query: string, nth: number = 0) {
+    const filterQueryInput = await this.testSubjects.findAll('filterItemsQueryBar');
+    await filterQueryInput[nth].type(query);
+  }
+
+  public async setGroupByFilterLabel(label: string, nth: number = 0) {
+    const filterLabelInput = await this.testSubjects.findAll('filterItemsLabel');
+    await filterLabelInput[nth].type(label);
+  }
+
+  public async setChartType(type: string, nth: number = 0) {
+    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
+    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+  }
+
+  public async setSeriesFilter(query: string) {
+    const seriesFilterQueryInput = await this.testSubjects.find('seriesConfigQueryBar');
+    await seriesFilterQueryInput.type(query);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setPanelFilter(query: string) {
+    const panelFilterQueryInput = await this.testSubjects.find('panelFilterQueryBar');
+    await panelFilterQueryInput.type(query);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setMetricsDataTimerangeMode(value: string) {
@@ -651,5 +824,56 @@ export class VisualBuilderPageObject extends FtrService {
   public async checkSelectedDataTimerangeMode(value: string) {
     const dataTimeRangeMode = await this.testSubjects.find('dataTimeRangeMode');
     return await this.comboBox.isOptionSelected(dataTimeRangeMode, value);
+  }
+
+  public async setTopHitAggregateWithOption(option: string): Promise<void> {
+    await this.comboBox.set('topHitAggregateWithComboBox', option);
+  }
+
+  public async setTopHitOrderByField(timeField: string) {
+    await this.retry.try(async () => {
+      await this.comboBox.clearInputField('topHitOrderByFieldSelect');
+      await this.comboBox.set('topHitOrderByFieldSelect', timeField);
+    });
+  }
+
+  public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
+    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
+    await optionInput.type(query);
+  }
+
+  public async toggleNewChartsLibraryWithDebug(enabled: boolean) {
+    await this.kibanaServer.uiSettings.update({
+      'visualization:visualize:legacyChartsLibrary': !enabled,
+    });
+    await this.elasticChart.setNewChartUiDebugFlag(enabled);
+  }
+
+  public async getChartDebugState(chartData?: DebugState) {
+    return chartData ?? (await this.elasticChart.getChartDebugData())!;
+  }
+
+  public async getXAxisTitle(chartData?: DebugState, nth: number = 0) {
+    const debugState = await this.getChartDebugState(chartData);
+    return debugState?.axes?.x[nth]?.title;
+  }
+
+  public async getLegendNames(chartData?: DebugState) {
+    const legendItems = (await this.getChartDebugState(chartData))?.legend?.items ?? [];
+    return legendItems.map(({ name }) => name);
+  }
+
+  public async getChartItems(chartData?: DebugState, itemType: 'areas' | 'bars' = 'areas') {
+    return (await this.getChartDebugState(chartData))?.[itemType];
+  }
+
+  public async getAreaChartColors(chartData?: DebugState) {
+    const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
+    return areas?.map(({ color }) => color);
+  }
+
+  public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
+    const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
+    return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
   }
 }

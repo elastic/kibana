@@ -161,7 +161,7 @@ export const SAVE = i18n.translate('xpack.cases.caseView.description.save', {
 });
 
 export const CONNECTORS = i18n.translate('xpack.cases.caseView.connectors', {
-  defaultMessage: 'External Incident Management System',
+  defaultMessage: 'External incident management system',
 });
 
 export const NO_CONNECTOR = i18n.translate('xpack.cases.common.noConnector', {
@@ -227,4 +227,14 @@ export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
 );
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
+});
+
+export const MAX_LENGTH_ERROR = (field: string, length: number) =>
+  i18n.translate('xpack.cases.createCase.maxLengthError', {
+    values: { field, length },
+    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+  });
+
+export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
+  defaultMessage: 'appropriate license',
 });

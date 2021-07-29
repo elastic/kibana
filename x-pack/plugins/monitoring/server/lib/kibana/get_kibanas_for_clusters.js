@@ -37,7 +37,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
     const params = {
       index: kbnIndexPattern,
       size: 0,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         query: createQuery({
           types: ['stats', 'kibana_stats'],

@@ -31,6 +31,13 @@ import { MetadataRequestContext } from './routes/metadata/handlers';
 import { LicenseService } from '../../common/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
+// A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
+// plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
+// file and not bundled with the application, adding a eslint disable below and using import from
+// a restricted path.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createCasesClientMock } from '../../../cases/server/client/mocks';
+import { EndpointMetadataService } from './services/metadata';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -59,7 +66,6 @@ export const createMockEndpointAppContextService = (
     getAgentService: jest.fn(),
     getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
-    getScopedSavedObjectsClient: jest.fn(),
   } as unknown) as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -69,12 +75,24 @@ export const createMockEndpointAppContextService = (
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<EndpointAppContextServiceStartContract> => {
   const factory = new AppClientFactory();
   const config = createMockConfig();
+  const casesClientMock = createCasesClientMock();
+  const savedObjectsStart = savedObjectsServiceMock.createStartContract();
+  const agentService = createMockAgentService();
+  const agentPolicyService = createMockAgentPolicyService();
+  const endpointMetadataService = new EndpointMetadataService(
+    savedObjectsStart,
+    agentService,
+    agentPolicyService
+  );
+
   factory.setup({ getSpaceId: () => 'mockSpace', config });
+
   return {
-    agentService: createMockAgentService(),
+    agentService,
+    agentPolicyService,
+    endpointMetadataService,
     packageService: createMockPackageService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
     security: securityMock.createStart(),
@@ -88,7 +106,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     exceptionListsClient: listMock.getExceptionListClient(),
     packagePolicyService: createPackagePolicyServiceMock(),
     cases: {
-      getCasesClientWithRequest: jest.fn(),
+      getCasesClientWithRequest: jest.fn(async () => casesClientMock),
     },
   };
 };
@@ -99,7 +117,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 
 export const createMockPackageService = (): jest.Mocked<PackageService> => {
   return {
-    getInstalledEsAssetReferences: jest.fn(),
+    getInstallation: jest.fn(),
   };
 };
 

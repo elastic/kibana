@@ -75,6 +75,9 @@ export const createPackagePolicyServiceMock = () => {
     listIds: jest.fn(),
     update: jest.fn(),
     runExternalCallbacks: jest.fn(),
+    upgrade: jest.fn(),
+    getUpgradeDryRunDiff: jest.fn(),
+    getUpgradePackagePolicyInfo: jest.fn(),
   } as jest.Mocked<PackagePolicyServiceInterface>;
 };
 
@@ -88,6 +91,7 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     list: jest.fn(),
     getDefaultAgentPolicyId: jest.fn(),
     getFullAgentPolicy: jest.fn(),
+    getByIds: jest.fn(),
   };
 };
 

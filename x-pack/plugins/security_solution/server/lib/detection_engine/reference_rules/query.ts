@@ -10,8 +10,9 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
-import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { buildEsQuery } from '@kbn/es-query';
 
+import type { IIndexPattern } from 'src/plugins/data/public';
 import {
   RuleDataClient,
   createPersistenceRuleTypeFactory,
@@ -43,6 +44,7 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
       context: [{ name: 'server', description: 'the server' }],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: false,
     producer: 'security-solution',
     async executor({
       services: { alertWithPersistence, findAlerts },
@@ -72,7 +74,6 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
         };
 
         const alerts = await findAlerts(query);
-        // console.log('alerts', alerts);
         alertWithPersistence(alerts).forEach((alert) => {
           alert.scheduleActions('default', { server: 'server-test' });
         });

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { SAVED_OBJECTS_MANAGEMENT_FEATURE_ID } from '../../../../../common/constants';
 import { Privilege } from '../../../containers/detection_engine/alerts/types';
 import { useUserData } from '../../user_info';
-import { useUserPrivileges } from '../../user_privileges';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const REQUIRED_INDEX_PRIVILIGES = ['read', 'write', 'view_index_metadata', 'maintenance'] as const;
 

@@ -179,7 +179,7 @@ describe('EventsViewer', () => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
     });
 
-    test('it renders the "Showing..." subtitle with the expected event count', () => {
+    test('it renders the "Showing..." subtitle with the expected event count by default', () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulEventsViewer {...testProps} />
@@ -190,13 +190,26 @@ describe('EventsViewer', () => {
       );
     });
 
+    test('should not render the "Showing..." subtitle with the expected event count if showTotalCount is set to false ', () => {
+      const disableSubTitle = {
+        ...eventsViewerDefaultProps,
+        showTotalCount: false,
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <EventsViewer {...disableSubTitle} graphEventId="a valid id" />
+        </TestProviders>
+      );
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual('');
+    });
+
     test('it renders the Fields Browser as a settings gear', () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulEventsViewer {...testProps} />
         </TestProviders>
       );
-      expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
+      expect(wrapper.find(`[data-test-subj="field-browser"]`).first().exists()).toBe(true);
     });
 
     test('it renders the footer containing the pagination', () => {

@@ -45,7 +45,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
           <div>
             <EuiButtonEmpty
               className="kbnOverviewDataAdd__actionButton"
-              flush="left"
+              flush="both"
               href={addBasePath('#/tutorial_directory/sampleData')}
               iconType="visTable"
               size="xs"

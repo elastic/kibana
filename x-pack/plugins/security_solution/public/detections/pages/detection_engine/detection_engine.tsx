@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { isTab } from '../../../../../timelines/public';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-
+import { isTab } from '../../../../../timelines/public';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -25,12 +23,10 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
-import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
-import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
+import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
@@ -59,6 +55,9 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
+import { useKibana } from '../../../common/lib/kibana';
+import { AlertsCountPanel } from '../../components/alerts_kpis/alerts_count_panel';
+import { CHART_HEIGHT } from '../../components/alerts_kpis/common/config';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -86,7 +85,7 @@ const DetectionEnginePageComponent = () => {
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
   const [
     {
@@ -103,12 +102,12 @@ const DetectionEnginePageComponent = () => {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
-  const history = useHistory();
   const [lastAlerts] = useAlertInfo({});
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
+  const { navigateToUrl } = useKibana().services.application;
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -130,9 +129,9 @@ const DetectionEnginePageComponent = () => {
   const goToRules = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getRulesUrl());
+      navigateToUrl(formatUrl(getRulesUrl()));
     },
-    [history]
+    [formatUrl, navigateToUrl]
   );
 
   const alertsHistogramDefaultFilters = useMemo(
@@ -252,18 +251,28 @@ const DetectionEnginePageComponent = () => {
                   {i18n.BUTTON_MANAGE_RULES}
                 </LinkButton>
               </DetectionEngineHeaderPage>
-              <AlertsHistogramPanel
-                deleteQuery={deleteQuery}
-                filters={alertsHistogramDefaultFilters}
-                from={from}
-                query={query}
-                setQuery={setQuery}
-                showTotalAlertsCount={true}
-                signalIndexName={signalIndexName}
-                stackByOptions={alertsHistogramOptions}
-                to={to}
-                updateDateRange={updateDateRangeCallback}
-              />
+              <EuiFlexGroup wrap>
+                <EuiFlexItem grow={2}>
+                  <AlertsHistogramPanel
+                    chartHeight={CHART_HEIGHT}
+                    filters={alertsHistogramDefaultFilters}
+                    query={query}
+                    showTotalAlertsCount={false}
+                    titleSize={'s'}
+                    signalIndexName={signalIndexName}
+                    updateDateRange={updateDateRangeCallback}
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={1}>
+                  <AlertsCountPanel
+                    filters={alertsHistogramDefaultFilters}
+                    query={query}
+                    signalIndexName={signalIndexName}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
               <EuiSpacer size="l" />
             </Display>
 
@@ -288,7 +297,6 @@ const DetectionEnginePageComponent = () => {
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-      <SpyRoute pageName={SecurityPageName.detections} />
     </>
   );
 };

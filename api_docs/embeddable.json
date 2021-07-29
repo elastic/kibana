@@ -29,7 +29,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-          "lineNumber": 23
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -45,7 +45,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -61,7 +61,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -77,7 +77,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "children": [
@@ -151,7 +151,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 28
+                  "lineNumber": 29
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -218,7 +218,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 29
+                  "lineNumber": 30
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -241,7 +241,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 30
+                  "lineNumber": 31
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -264,7 +264,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 31
+                  "lineNumber": 32
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -281,10 +281,29 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 32
+                  "lineNumber": 33
                 },
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.AddPanelAction.Unnamed.$6",
+                "type": "Function",
+                "tags": [],
+                "label": "reportUiCounter",
+                "description": [],
+                "signature": [
+                  "((appName: string, type: ",
+                  "UiCounterMetricType",
+                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
+                  "lineNumber": 34
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -301,7 +320,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 35
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [],
@@ -319,7 +338,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false,
             "children": [],
@@ -345,7 +364,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 45
+              "lineNumber": 47
             },
             "deprecated": false,
             "children": [
@@ -368,7 +387,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 45
+                  "lineNumber": 47
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -396,7 +415,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 50
+              "lineNumber": 52
             },
             "deprecated": false,
             "children": [
@@ -419,7 +438,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 50
+                  "lineNumber": 52
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2236,7 +2255,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
-              "lineNumber": 121
+              "lineNumber": 122
             },
             "deprecated": false,
             "children": [
@@ -2252,7 +2271,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
-                  "lineNumber": 121
+                  "lineNumber": 122
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3309,7 +3328,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-          "lineNumber": 89
+          "lineNumber": 108
         },
         "deprecated": false,
         "children": [
@@ -3325,7 +3344,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 96
+              "lineNumber": 115
             },
             "deprecated": false,
             "children": [
@@ -3341,7 +3360,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 96
+                  "lineNumber": 115
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3361,7 +3380,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 153
+              "lineNumber": 182
             },
             "deprecated": false,
             "children": [],
@@ -3379,7 +3398,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 187
+              "lineNumber": 216
             },
             "deprecated": false,
             "children": [],
@@ -3397,7 +3416,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 199
+              "lineNumber": 228
             },
             "deprecated": false,
             "children": [
@@ -3413,7 +3432,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 199
+                  "lineNumber": 228
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3433,7 +3452,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 203
+              "lineNumber": 232
             },
             "deprecated": false,
             "children": [
@@ -3449,7 +3468,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 203
+                  "lineNumber": 232
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3469,7 +3488,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 209
+              "lineNumber": 238
             },
             "deprecated": false,
             "children": [],
@@ -3487,7 +3506,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 251
+              "lineNumber": 285
             },
             "deprecated": false,
             "children": [],
@@ -3505,7 +3524,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 274
+              "lineNumber": 308
             },
             "deprecated": false,
             "children": [],
@@ -4708,7 +4727,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-          "lineNumber": 82
+          "lineNumber": 142
         },
         "deprecated": false,
         "children": [
@@ -4733,7 +4752,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-              "lineNumber": 83
+              "lineNumber": 143
             },
             "deprecated": false,
             "isRequired": true
@@ -5555,7 +5574,9 @@
             "section": "def-public.NotificationsStart",
             "text": "NotificationsStart"
           },
-          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; }) => ",
+          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: ",
+          "UiCounterMetricType",
+          ", eventNames: string | string[], count?: number | undefined) => void) | undefined; }) => ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -5566,7 +5587,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "children": [
@@ -5579,7 +5600,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-              "lineNumber": 16
+              "lineNumber": 17
             },
             "deprecated": false,
             "children": [
@@ -5618,7 +5639,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 17
+                  "lineNumber": 18
                 },
                 "deprecated": false
               },
@@ -5692,7 +5713,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 18
+                  "lineNumber": 19
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -5706,7 +5727,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/embeddable/public/plugin.tsx",
-                      "lineNumber": 81
+                      "lineNumber": 86
                     },
                     "deprecated": false
                   }
@@ -5774,7 +5795,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 19
+                  "lineNumber": 20
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -5798,7 +5819,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 20
+                  "lineNumber": 21
                 },
                 "deprecated": false
               },
@@ -5820,7 +5841,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 21
+                  "lineNumber": 22
                 },
                 "deprecated": false
               },
@@ -5836,7 +5857,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 22
+                  "lineNumber": 23
                 },
                 "deprecated": false
               },
@@ -5852,11 +5873,90 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 23
+                  "lineNumber": 24
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.openAddPanelFlyout.$1.options.reportUiCounter",
+                "type": "Function",
+                "tags": [],
+                "label": "reportUiCounter",
+                "description": [],
+                "signature": [
+                  "((appName: string, type: ",
+                  "UiCounterMetricType",
+                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
+                  "lineNumber": 25
                 },
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.useEmbeddableFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "useEmbeddableFactory",
+        "description": [],
+        "signature": [
+          "({\n  input,\n  factory,\n  onInputUpdated,\n}: EmbeddableRendererWithFactory<I>) => readonly [",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ErrorEmbeddable",
+            "text": "ErrorEmbeddable"
+          },
+          " | ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<I, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          "> | undefined, boolean, string | undefined]"
+        ],
+        "source": {
+          "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
+          "lineNumber": 43
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useEmbeddableFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  input,\n  factory,\n  onInputUpdated,\n}",
+            "description": [],
+            "signature": [
+              "EmbeddableRendererWithFactory<I>"
+            ],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
+              "lineNumber": 43
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -6385,6 +6485,24 @@
             "source": {
               "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
               "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableEditorState.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [
+              "\nPass current search session id when navigating to an editor,\nEditors could use it continue previous search session"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+              "lineNumber": 27
             },
             "deprecated": false
           }
@@ -7125,7 +7243,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
-          "lineNumber": 34
+          "lineNumber": 40
         },
         "deprecated": false,
         "children": [
@@ -7138,7 +7256,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
-              "lineNumber": 35
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -7173,7 +7291,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
-              "lineNumber": 36
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -7189,7 +7307,25 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
-              "lineNumber": 37
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePackageState.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [
+              "\nPass current search session id when navigating to an editor,\nEditors could use it continue previous search session"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+              "lineNumber": 49
             },
             "deprecated": false
           }
@@ -7205,7 +7341,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "lineNumber": 53
+          "lineNumber": 58
         },
         "deprecated": false,
         "children": [
@@ -7255,7 +7391,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/plugin.tsx",
-              "lineNumber": 54
+              "lineNumber": 59
             },
             "deprecated": false
           }
@@ -7271,7 +7407,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "lineNumber": 57
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [
@@ -7365,7 +7501,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/plugin.tsx",
-              "lineNumber": 58
+              "lineNumber": 63
             },
             "deprecated": false
           },
@@ -7387,7 +7523,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/plugin.tsx",
-              "lineNumber": 59
+              "lineNumber": 64
             },
             "deprecated": false
           }
@@ -8923,7 +9059,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-          "lineNumber": 17
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -9122,7 +9258,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "lineNumber": 98
+          "lineNumber": 103
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -9391,7 +9527,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/embeddable/public/plugin.tsx",
-        "lineNumber": 62
+        "lineNumber": 67
       },
       "deprecated": false,
       "children": [
@@ -9459,7 +9595,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 63
+            "lineNumber": 68
           },
           "deprecated": false,
           "returnComment": [],
@@ -9473,7 +9609,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 68
+                "lineNumber": 73
               },
               "deprecated": false
             },
@@ -9509,7 +9645,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 69
+                "lineNumber": 74
               },
               "deprecated": false
             }
@@ -9543,7 +9679,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 71
+            "lineNumber": 76
           },
           "deprecated": false,
           "returnComment": [],
@@ -9575,7 +9711,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 71
+                "lineNumber": 76
               },
               "deprecated": false
             }
@@ -9595,7 +9731,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 72
+            "lineNumber": 77
           },
           "deprecated": false,
           "returnComment": [],
@@ -9680,7 +9816,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 72
+                "lineNumber": 77
               },
               "deprecated": false
             }
@@ -9725,7 +9861,7 @@
       ],
       "source": {
         "path": "src/plugins/embeddable/public/plugin.tsx",
-        "lineNumber": 75
+        "lineNumber": 80
       },
       "deprecated": false,
       "children": [
@@ -9799,7 +9935,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 76
+            "lineNumber": 81
           },
           "deprecated": false,
           "returnComment": [],
@@ -9813,7 +9949,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 81
+                "lineNumber": 86
               },
               "deprecated": false
             }
@@ -9881,7 +10017,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 83
+            "lineNumber": 88
           },
           "deprecated": false,
           "returnComment": [],
@@ -9923,7 +10059,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 84
+            "lineNumber": 89
           },
           "deprecated": false,
           "returnComment": [],
@@ -9989,7 +10125,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 85
+            "lineNumber": 90
           },
           "deprecated": false,
           "returnComment": [],
@@ -10013,7 +10149,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 85
+                "lineNumber": 90
               },
               "deprecated": false
             }
@@ -10073,7 +10209,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/public/plugin.tsx",
-            "lineNumber": 86
+            "lineNumber": 91
           },
           "deprecated": false,
           "returnComment": [],
@@ -10087,7 +10223,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 93
+                "lineNumber": 98
               },
               "deprecated": false
             },
@@ -10104,7 +10240,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/public/plugin.tsx",
-                "lineNumber": 94
+                "lineNumber": 99
               },
               "deprecated": false
             }
@@ -10252,7 +10388,7 @@
       ],
       "source": {
         "path": "src/plugins/embeddable/server/plugin.ts",
-        "lineNumber": 28
+        "lineNumber": 33
       },
       "deprecated": false,
       "children": [
@@ -10284,7 +10420,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/server/plugin.ts",
-            "lineNumber": 29
+            "lineNumber": 34
           },
           "deprecated": false,
           "returnComment": [],
@@ -10316,7 +10452,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/server/plugin.ts",
-                "lineNumber": 29
+                "lineNumber": 34
               },
               "deprecated": false
             }
@@ -10350,7 +10486,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/server/plugin.ts",
-            "lineNumber": 30
+            "lineNumber": 35
           },
           "deprecated": false,
           "returnComment": [],
@@ -10382,7 +10518,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/server/plugin.ts",
-                "lineNumber": 30
+                "lineNumber": 35
               },
               "deprecated": false
             }
@@ -10390,17 +10526,24 @@
         },
         {
           "parentPluginId": "embeddable",
-          "id": "def-server.EmbeddableSetup.getMigrationVersions",
+          "id": "def-server.EmbeddableSetup.getAllMigrations",
           "type": "Function",
           "tags": [],
-          "label": "getMigrationVersions",
+          "label": "getAllMigrations",
           "description": [],
           "signature": [
-            "() => string[]"
+            "() => ",
+            {
+              "pluginId": "kibanaUtils",
+              "scope": "common",
+              "docId": "kibKibanaUtilsPluginApi",
+              "section": "def-common.MigrateFunctionsObject",
+              "text": "MigrateFunctionsObject"
+            }
           ],
           "source": {
             "path": "src/plugins/embeddable/server/plugin.ts",
-            "lineNumber": 31
+            "lineNumber": 36
           },
           "deprecated": false,
           "returnComment": [],
@@ -10437,7 +10580,7 @@
       ],
       "source": {
         "path": "src/plugins/embeddable/server/plugin.ts",
-        "lineNumber": 34
+        "lineNumber": 39
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -10661,26 +10804,18 @@
             "section": "def-common.CommonEmbeddableStartContract",
             "text": "CommonEmbeddableStartContract"
           },
-          ") => (state: ",
+          ") => ",
           {
-            "pluginId": "kibanaUtils",
+            "pluginId": "embeddable",
             "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
-          },
-          ", version: string) => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.MigrateFunction",
+            "text": "MigrateFunction"
           }
         ],
         "source": {
           "path": "src/plugins/embeddable/common/lib/migrate.ts",
-          "lineNumber": 13
+          "lineNumber": 15
         },
         "deprecated": false,
         "children": [
@@ -10702,7 +10837,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/common/lib/migrate.ts",
-              "lineNumber": 13
+              "lineNumber": 15
             },
             "deprecated": false,
             "isRequired": true
@@ -11269,6 +11404,38 @@
         "source": {
           "path": "src/plugins/embeddable/common/types.ts",
           "lineNumber": 65
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-common.MigrateFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "MigrateFunction",
+        "description": [],
+        "signature": [
+          "(state: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ", version: string) => ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/embeddable/common/lib/migrate.ts",
+          "lineNumber": 13
         },
         "deprecated": false,
         "initialIsOpen": false

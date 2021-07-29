@@ -445,6 +445,8 @@ module.exports = {
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__fixtures__/index.{js,mjs,ts,tsx}',
                 ],
                 allowSameFolder: true,
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
@@ -857,6 +859,18 @@ module.exports = {
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
+    {
+      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      rules: {
+        'react/function-component-definition': [
+          'off',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
 
     /**
      * Fleet overrides
@@ -881,7 +895,8 @@ module.exports = {
     {
       files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
       },
     },
 
@@ -898,6 +913,8 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -940,7 +957,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1011,6 +1028,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
       },
     },
 

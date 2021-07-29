@@ -87,18 +87,19 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         ).sort();
 
         expectSnapshot(serviceNames).toMatchInline(`
-            Array [
-              "kibana",
-              "kibana-frontend",
-              "opbeans-dotnet",
-              "opbeans-go",
-              "opbeans-java",
-              "opbeans-node",
-              "opbeans-python",
-              "opbeans-ruby",
-              "opbeans-rum",
-            ]
-          `);
+          Array [
+            "auditbeat",
+            "kibana",
+            "kibana-frontend",
+            "opbeans-dotnet",
+            "opbeans-go",
+            "opbeans-java",
+            "opbeans-node",
+            "opbeans-python",
+            "opbeans-ruby",
+            "opbeans-rum",
+          ]
+        `);
 
         const externalDestinations = uniq(
           elements
@@ -107,30 +108,18 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         ).sort();
 
         expectSnapshot(externalDestinations).toMatchInline(`
-            Array [
-              ">elasticsearch",
-              ">feeds.elastic.co:443",
-              ">postgresql",
-              ">redis",
-            ]
-          `);
+          Array [
+            ">8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243",
+            ">elasticsearch",
+            ">epr-snapshot.elastic.co:443",
+            ">feeds.elastic.co:443",
+            ">postgresql",
+            ">redis",
+            ">sqlite",
+          ]
+        `);
 
         expectSnapshot(elements).toMatch();
-      });
-
-      it('returns service map elements filtering by environment not defined', async () => {
-        const ENVIRONMENT_NOT_DEFINED = 'ENVIRONMENT_NOT_DEFINED';
-        const { body, status } = await supertest.get(
-          `/api/apm/service-map?start=${start}&end=${end}&environment=${ENVIRONMENT_NOT_DEFINED}`
-        );
-        expect(status).to.be(200);
-        const environments = new Set();
-        body.elements.forEach((element: { data: Record<string, any> }) => {
-          environments.add(element.data['service.environment']);
-        });
-
-        expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
-        expectSnapshot(body).toMatch();
       });
 
       describe('with ML data', () => {
@@ -145,7 +134,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
             );
 
-            expect(dataWithAnomalies).to.not.empty();
+            expect(dataWithAnomalies).not.to.be.empty();
 
             dataWithAnomalies.forEach(({ data }: any) => {
               expect(
@@ -159,53 +148,56 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
             );
 
-            expectSnapshot(dataWithAnomalies.length).toMatchInline(`8`);
+            expect(dataWithAnomalies).not.to.be.empty();
+
+            expectSnapshot(dataWithAnomalies.length).toMatchInline(`6`);
             expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
               Array [
                 Object {
                   "data": Object {
-                    "agent.name": "python",
-                    "id": "opbeans-python",
-                    "service.name": "opbeans-python",
-                    "serviceAnomalyStats": Object {
-                      "actualValue": 24282.2352941176,
-                      "anomalyScore": 0,
-                      "healthStatus": "healthy",
-                      "jobId": "apm-environment_not_defined-5626-high_mean_transaction_duration",
-                      "serviceName": "opbeans-python",
-                      "transactionType": "request",
-                    },
-                  },
-                },
-                Object {
-                  "data": Object {
                     "agent.name": "nodejs",
-                    "id": "opbeans-node",
-                    "service.environment": "testing",
-                    "service.name": "opbeans-node",
+                    "id": "kibana",
+                    "service.environment": "production",
+                    "service.name": "kibana",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 29300.5555555556,
+                      "actualValue": 635652.26283725,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
-                      "jobId": "apm-testing-384f-high_mean_transaction_duration",
-                      "serviceName": "opbeans-node",
+                      "jobId": "apm-production-802c-high_mean_transaction_duration",
+                      "serviceName": "kibana",
                       "transactionType": "request",
                     },
                   },
                 },
                 Object {
                   "data": Object {
-                    "agent.name": "rum-js",
-                    "id": "opbeans-rum",
-                    "service.environment": "testing",
-                    "service.name": "opbeans-rum",
+                    "agent.name": "ruby",
+                    "id": "opbeans-ruby",
+                    "service.environment": "production",
+                    "service.name": "opbeans-ruby",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 2386500,
+                      "actualValue": 24400.8867924528,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
-                      "jobId": "apm-testing-384f-high_mean_transaction_duration",
-                      "serviceName": "opbeans-rum",
-                      "transactionType": "page-load",
+                      "jobId": "apm-production-802c-high_mean_transaction_duration",
+                      "serviceName": "opbeans-ruby",
+                      "transactionType": "request",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "agent.name": "java",
+                    "id": "opbeans-java",
+                    "service.environment": "production",
+                    "service.name": "opbeans-java",
+                    "serviceAnomalyStats": Object {
+                      "actualValue": 19105.8492063492,
+                      "anomalyScore": 0,
+                      "healthStatus": "healthy",
+                      "jobId": "apm-production-802c-high_mean_transaction_duration",
+                      "serviceName": "opbeans-java",
+                      "transactionType": "request",
                     },
                   },
                 },

@@ -23,6 +23,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 export function CumulativeSumAgg(props) {
   const { model, siblings, fields, indexPattern } = props;
@@ -70,7 +71,7 @@ export function CumulativeSumAgg(props) {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
-              fields={fields[indexPattern]}
+              fields={fields[getIndexPatternKey(indexPattern)]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
             />

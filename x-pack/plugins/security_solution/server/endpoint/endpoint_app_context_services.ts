@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
-  Logger,
-  SavedObjectsServiceStart,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { KibanaRequest, Logger } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
@@ -20,7 +15,6 @@ import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
   FleetStartContract,
-  PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
@@ -30,14 +24,6 @@ import {
   getPackagePolicyUpdateCallback,
 } from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
-import { MetadataQueryStrategy } from './types';
-import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
-import {
-  metadataQueryStrategyV1,
-  metadataQueryStrategyV2,
-} from './routes/metadata/support/query_strategies';
-import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
-import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
 import { LicenseService } from '../../common/license';
@@ -45,46 +31,8 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
-
-export interface MetadataService {
-  queryStrategy(
-    savedObjectsClient: SavedObjectsClientContract,
-    version?: MetadataQueryStrategyVersions
-  ): Promise<MetadataQueryStrategy>;
-}
-
-export const createMetadataService = (packageService: PackageService): MetadataService => {
-  return {
-    async queryStrategy(
-      savedObjectsClient: SavedObjectsClientContract,
-      version?: MetadataQueryStrategyVersions
-    ): Promise<MetadataQueryStrategy> {
-      if (version === MetadataQueryStrategyVersions.VERSION_1) {
-        return metadataQueryStrategyV1();
-      }
-      if (!packageService) {
-        throw new Error('package service is uninitialized');
-      }
-
-      if (version === MetadataQueryStrategyVersions.VERSION_2 || !version) {
-        const assets = await packageService.getInstalledEsAssetReferences(
-          savedObjectsClient,
-          'endpoint'
-        );
-        const expectedTransformAssets = assets.filter(
-          (ref) =>
-            ref.type === ElasticsearchAssetType.transform &&
-            ref.id.startsWith(metadataTransformPrefix)
-        );
-        if (expectedTransformAssets && expectedTransformAssets.length === 1) {
-          return metadataQueryStrategyV2();
-        }
-        return metadataQueryStrategyV1();
-      }
-      return metadataQueryStrategyV1();
-    },
-  };
-};
+import { EndpointMetadataService } from './services/metadata';
+import { EndpointAppContentServicesNotStartedError } from './errors';
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<
@@ -93,13 +41,13 @@ export type EndpointAppContextServiceStartContract = Partial<
   >
 > & {
   logger: Logger;
+  endpointMetadataService: EndpointMetadataService;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
   security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
-  savedObjectsStart: SavedObjectsServiceStart;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
@@ -114,13 +62,11 @@ export class EndpointAppContextService {
   private manifestManager: ManifestManager | undefined;
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
-  private savedObjectsStart: SavedObjectsServiceStart | undefined;
-  private metadataService: MetadataService | undefined;
   private config: ConfigType | undefined;
   private license: LicenseService | undefined;
   public security: SecurityPluginStart | undefined;
   private cases: CasesPluginStartContract | undefined;
-
+  private endpointMetadataService: EndpointMetadataService | undefined;
   private experimentalFeatures: ExperimentalFeatures | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
@@ -128,13 +74,11 @@ export class EndpointAppContextService {
     this.packagePolicyService = dependencies.packagePolicyService;
     this.agentPolicyService = dependencies.agentPolicyService;
     this.manifestManager = dependencies.manifestManager;
-    this.savedObjectsStart = dependencies.savedObjectsStart;
-    this.metadataService = createMetadataService(dependencies.packageService!);
     this.config = dependencies.config;
     this.license = dependencies.licenseService;
     this.security = dependencies.security;
     this.cases = dependencies.cases;
-
+    this.endpointMetadataService = dependencies.endpointMetadataService;
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
@@ -145,6 +89,8 @@ export class EndpointAppContextService {
           this.manifestManager,
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
+          dependencies.config.prebuiltRulesFromFileSystem,
+          dependencies.config.prebuiltRulesFromSavedObjects,
           dependencies.security,
           dependencies.alerting,
           dependencies.licenseService,
@@ -165,6 +111,13 @@ export class EndpointAppContextService {
     return this.experimentalFeatures;
   }
 
+  public getEndpointMetadataService(): EndpointMetadataService {
+    if (!this.endpointMetadataService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.endpointMetadataService;
+  }
+
   public getAgentService(): AgentService | undefined {
     return this.agentService;
   }
@@ -177,31 +130,20 @@ export class EndpointAppContextService {
     return this.agentPolicyService;
   }
 
-  public getMetadataService(): MetadataService | undefined {
-    return this.metadataService;
-  }
-
   public getManifestManager(): ManifestManager | undefined {
     return this.manifestManager;
   }
 
-  public getScopedSavedObjectsClient(req: KibanaRequest): SavedObjectsClientContract {
-    if (!this.savedObjectsStart) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
-    }
-    return this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
-  }
-
   public getLicenseService(): LicenseService {
     if (!this.license) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+      throw new EndpointAppContentServicesNotStartedError();
     }
     return this.license;
   }
 
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
     if (!this.cases) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+      throw new EndpointAppContentServicesNotStartedError();
     }
     return this.cases.getCasesClientWithRequest(req);
   }

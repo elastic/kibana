@@ -5,22 +5,37 @@
  * 2.0.
  */
 
-import { Store } from 'redux';
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { Store } from 'redux';
+import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { TGridProps } from '../types';
-import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
+import type {
+  LastUpdatedAtProps,
+  LoadingPanelProps,
+  FieldBrowserWrappedProps,
+} from '../components';
+import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 
 const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
   props: TGridProps,
-  { store, storage, data }: { store?: Store; storage: Storage; data: DataPublicPluginStart }
+  {
+    store,
+    storage,
+    data,
+    setStore,
+  }: {
+    store?: Store;
+    storage: Storage;
+    data: DataPublicPluginStart;
+    setStore: (store: Store) => void;
+  }
 ) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <TimelineLazy {...props} store={store} storage={storage} data={data} />
+      <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
     </Suspense>
   );
 };
@@ -39,6 +54,27 @@ export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <LoadingPanelLazy {...props} />
+    </Suspense>
+  );
+};
+
+const FieldsBrowserLazy = lazy(() => import('../components/fields_browser'));
+export const getFieldsBrowserLazy = (
+  props: FieldBrowserWrappedProps,
+  { store }: { store: Store }
+) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <FieldsBrowserLazy {...props} store={store} />
+    </Suspense>
+  );
+};
+
+const AddToCaseLazy = lazy(() => import('../components/actions/timeline/cases/add_to_case_action'));
+export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <AddToCaseLazy {...props} />
     </Suspense>
   );
 };

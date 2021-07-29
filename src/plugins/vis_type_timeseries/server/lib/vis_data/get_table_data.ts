@@ -9,23 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-// not typed yet
-// @ts-expect-error
-import { buildRequestBody } from './table/build_request_body';
-// @ts-expect-error
+import { buildTableRequest } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
-// @ts-expect-error
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/fields_utils';
+
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
 import type { Panel } from '../../../common/types';
-import { getIntervalAndTimefield } from './get_interval_and_timefield';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -67,33 +63,24 @@ export async function getTableData(
     return panel.pivot_id;
   };
 
-  const buildSeriesMetaParams = async () => {
-    let index = panelIndex;
-
-    /** This part of code is required to try to get the default timefield for string indices.
-     *  The rest of the functionality available for Kibana indexes should not be active **/
-    if (!panel.use_kibana_indexes && index.indexPatternString) {
-      index = await services.cachedIndexPatternFetcher(index.indexPatternString, true);
-    }
-
-    return getIntervalAndTimefield(panel, index);
-  };
-
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
   };
 
+  const handleError = handleErrorResponse(panel);
+
   try {
-    const body = await buildRequestBody(
+    const body = await buildTableRequest({
       req,
       panel,
-      services.esQueryConfig,
-      panelIndex,
+      esQueryConfig: services.esQueryConfig,
+      seriesIndex: panelIndex,
       capabilities,
-      services.uiSettings,
-      buildSeriesMetaParams
-    );
+      uiSettings: services.uiSettings,
+      buildSeriesMetaParams: () =>
+        services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
+    });
 
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
@@ -111,9 +98,7 @@ export async function getTableData(
       []
     );
 
-    const series = await Promise.all(
-      buckets.map(processBucket(panel, req, searchStrategy, capabilities, extractFields))
-    );
+    const series = await Promise.all(buckets.map(processBucket({ panel, extractFields })));
 
     return {
       ...meta,
@@ -121,14 +106,9 @@ export async function getTableData(
       series,
     };
   } catch (err) {
-    if (err.body) {
-      err.response = err.body;
-
-      return {
-        ...meta,
-        ...handleErrorResponse(panel)(err),
-      };
-    }
-    return meta;
+    return {
+      ...meta,
+      ...handleError(err),
+    };
   }
 }

@@ -441,23 +441,17 @@
           },
           {
             "parentPluginId": "discoverEnhanced",
-            "id": "def-public.ExploreDataChartAction.getUrl",
+            "id": "def-public.ExploreDataChartAction.getLocation",
             "type": "Function",
             "tags": [],
-            "label": "getUrl",
+            "label": "getLocation",
             "description": [],
             "signature": [
               "(context: ",
               "ExploreDataChartActionContext",
               ") => Promise<",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.KibanaURL",
-                "text": "KibanaURL"
-              },
-              ">"
+              "KibanaLocation",
+              "<object>>"
             ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
@@ -467,7 +461,7 @@
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
-                "id": "def-public.ExploreDataChartAction.getUrl.$1",
+                "id": "def-public.ExploreDataChartAction.getLocation.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -573,21 +567,15 @@
           },
           {
             "parentPluginId": "discoverEnhanced",
-            "id": "def-public.ExploreDataContextMenuAction.getUrl",
+            "id": "def-public.ExploreDataContextMenuAction.getLocation",
             "type": "Function",
             "tags": [],
-            "label": "getUrl",
+            "label": "getLocation",
             "description": [],
             "signature": [
               "(context: EmbeddableQueryContext) => Promise<",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.KibanaURL",
-                "text": "KibanaURL"
-              },
-              ">"
+              "KibanaLocation",
+              "<object>>"
             ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
@@ -597,7 +585,7 @@
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
-                "id": "def-public.ExploreDataContextMenuAction.getUrl.$1",
+                "id": "def-public.ExploreDataContextMenuAction.getLocation.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -607,7 +595,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-                  "lineNumber": 43
+                  "lineNumber": 44
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -837,7 +825,7 @@
             "signature": [
               "{ dashboardConfig: ",
               "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
+              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",

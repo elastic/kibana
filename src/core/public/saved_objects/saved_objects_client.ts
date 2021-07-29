@@ -7,7 +7,6 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import { resolve as resolveUrl } from 'url';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
@@ -16,10 +15,14 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsResolveResponse,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
+import type { ResolvedSimpleSavedObject } from './types';
 import { HttpFetchOptions, HttpSetup } from '../http';
+
+export type { SavedObjectsResolveResponse };
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -117,7 +120,7 @@ interface BatchQueueEntry {
   reject: (reason?: any) => void;
 }
 
-const join = (...uriComponents: Array<string | undefined>) =>
+const joinUriComponents = (...uriComponents: Array<string | undefined>) =>
   uriComponents
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
@@ -422,6 +425,29 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Resolves a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns The resolve result for the saved object for the given type and id.
+   */
+  public resolve = <T = unknown>(
+    type: string,
+    id: string
+  ): Promise<ResolvedSimpleSavedObject<T>> => {
+    if (!type || !id) {
+      return Promise.reject(new Error('requires type and id'));
+    }
+
+    const path = `${this.getPath(['resolve'])}/${type}/${id}`;
+    const request: Promise<SavedObjectsResolveResponse<T>> = this.savedObjectsFetch(path, {});
+    return request.then(({ saved_object: object, outcome, aliasTargetId }) => {
+      const savedObject = new SimpleSavedObject<T>(this, object);
+      return { savedObject, outcome, aliasTargetId };
+    });
+  };
+
+  /**
    * Updates an object
    *
    * @param {string} type
@@ -484,7 +510,7 @@ export class SavedObjectsClient {
   }
 
   private getPath(path: Array<string | undefined>): string {
-    return resolveUrl(API_BASE_URL, join(...path));
+    return API_BASE_URL + joinUriComponents(...path);
   }
 
   /**

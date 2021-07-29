@@ -10,10 +10,15 @@ import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
 import { JobStatus } from '../../../common/types';
+
+import { ILM_POLICY_NAME } from '../../../common/constants';
+
 import { ReportTaskParams } from '../tasks';
+
+import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
-import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
+import { IlmPolicyManager } from './ilm_policy_manager';
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
@@ -24,6 +29,7 @@ export type ReportProcessingFields = Required<{
   browser_type: Report['browser_type'];
   attempts: Report['attempts'];
   started_at: Report['started_at'];
+  max_attempts: Report['max_attempts'];
   timeout: Report['timeout'];
   process_expiration: Report['process_expiration'];
 }>;
@@ -90,6 +96,7 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
+  private ilmPolicyManager?: IlmPolicyManager;
 
   constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
     const config = reportingCore.getConfig();
@@ -107,6 +114,15 @@ export class ReportingStore {
     return this.client;
   }
 
+  private async getIlmPolicyManager() {
+    if (!this.ilmPolicyManager) {
+      const client = await this.getClient();
+      this.ilmPolicyManager = IlmPolicyManager.create({ client });
+    }
+
+    return this.ilmPolicyManager;
+  }
+
   private async createIndex(indexName: string) {
     const client = await this.getClient();
     const { body: exists } = await client.indices.exists({ index: indexName });
@@ -115,19 +131,22 @@ export class ReportingStore {
       return exists;
     }
 
-    const indexSettings = {
-      number_of_shards: 1,
-      auto_expand_replicas: '0-1',
-    };
-    const body = {
-      settings: indexSettings,
-      mappings: {
-        properties: mapping,
-      },
-    };
-
     try {
-      await client.indices.create({ index: indexName, body });
+      await client.indices.create({
+        index: indexName,
+        body: {
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
+            lifecycle: {
+              name: ILM_POLICY_NAME,
+            },
+          },
+          mappings: {
+            properties: mapping,
+          },
+        },
+      });
 
       return true;
     } catch (error) {
@@ -174,6 +193,26 @@ export class ReportingStore {
     const client = await this.getClient();
 
     return client.indices.refresh({ index });
+  }
+
+  /**
+   * Function to be called during plugin start phase. This ensures the environment is correctly
+   * configured for storage of reports.
+   */
+  public async start() {
+    const ilmPolicyManager = await this.getIlmPolicyManager();
+    try {
+      if (await ilmPolicyManager.doesIlmPolicyExist()) {
+        this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
+        return;
+      }
+      this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
+      await ilmPolicyManager.createIlmPolicy();
+    } catch (e) {
+      this.logger.error('Error in start phase');
+      this.logger.error(e.body.error);
+      throw e;
+    }
   }
 
   public async addReport(report: Report): Promise<Report> {
@@ -402,5 +441,9 @@ export class ReportingStore {
     });
 
     return body.hits?.hits[0] as ReportRecordTimeout;
+  }
+
+  public getReportingIndexPattern(): string {
+    return `${this.indexPrefix}-*`;
   }
 }

@@ -8,10 +8,10 @@ import { merge } from 'lodash';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { configSchema, TaskManagerConfig } from '../config';
 import { HealthStatus } from '../monitoring';
-import { TaskPersistence } from '../monitoring/task_run_statistics';
 import { MonitoredHealth } from '../routes/health';
 import { logHealthMetrics, resetLastLogLevel } from './log_health_metrics';
 import { Logger } from '../../../../../src/core/server';
+import { TaskPersistence } from '../task_events';
 
 jest.mock('./calculate_health_status', () => ({
   calculateHealthStatus: jest.fn(),
@@ -360,7 +360,7 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
           non_recurring: 20,
           owner_ids: 2,
           estimated_schedule_density: [],
-          capacity_requirments: {
+          capacity_requirements: {
             per_minute: 150,
             per_hour: 360,
             per_day: 820,

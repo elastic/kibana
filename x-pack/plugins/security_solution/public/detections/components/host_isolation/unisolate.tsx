@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, ReactNode } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import {
   EndpointIsolatedFormProps,
-  EndpointIsolateSuccess,
   EndpointUnisolateForm,
+  ActionCompletionReturnButton,
 } from '../../../common/components/endpoint/host_isolation';
 import { useHostUnisolation } from '../../containers/detection_engine/alerts/use_host_unisolation';
 import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
@@ -21,15 +21,15 @@ export const UnisolateHost = React.memo(
   ({
     endpointId,
     hostName,
-    cases,
     casesInfo,
     cancelCallback,
+    successCallback,
   }: {
     endpointId: string;
     hostName: string;
-    cases: ReactNode;
     casesInfo: CasesFromAlertsResponse;
     cancelCallback: () => void;
+    successCallback?: () => void;
   }) => {
     const [comment, setComment] = useState('');
     const [isUnIsolated, setIsUnIsolated] = useState(false);
@@ -41,9 +41,13 @@ export const UnisolateHost = React.memo(
     const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
 
     const confirmHostUnIsolation = useCallback(async () => {
-      const hostIsolated = await unIsolateHost();
-      setIsUnIsolated(hostIsolated);
-    }, [unIsolateHost]);
+      const hostUnIsolated = await unIsolateHost();
+      setIsUnIsolated(hostUnIsolated);
+
+      if (hostUnIsolated && successCallback) {
+        successCallback();
+      }
+    }, [successCallback, unIsolateHost]);
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
@@ -54,20 +58,14 @@ export const UnisolateHost = React.memo(
 
     const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
 
-    const hostUnisolatedSuccess = useMemo(() => {
+    const hostUnisolatedSuccessButton = useMemo(() => {
       return (
-        <>
-          <EuiSpacer size="m" />
-          <EndpointIsolateSuccess
-            hostName={hostName}
-            isolateAction="unisolateHost"
-            completeButtonLabel={RETURN_TO_ALERT_DETAILS}
-            onComplete={backToAlertDetails}
-            additionalInfo={cases}
-          />
-        </>
+        <ActionCompletionReturnButton
+          onClick={backToAlertDetails}
+          buttonText={RETURN_TO_ALERT_DETAILS}
+        />
       );
-    }, [backToAlertDetails, hostName, cases]);
+    }, [backToAlertDetails]);
 
     const hostNotUnisolated = useMemo(() => {
       return (
@@ -102,7 +100,7 @@ export const UnisolateHost = React.memo(
       caseCount,
     ]);
 
-    return isUnIsolated ? hostUnisolatedSuccess : hostNotUnisolated;
+    return isUnIsolated ? hostUnisolatedSuccessButton : hostNotUnisolated;
   }
 );
 

@@ -23,12 +23,14 @@ import {
 import { ServiceStatusLevels } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
+import { FillPoolResult } from '../lib/fill_pool';
 
 jest.mock('../lib/log_health_metrics', () => ({
   logHealthMetrics: jest.fn(),
 }));
 
-describe('healthRoute', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/106388
+describe.skip('healthRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -106,6 +108,7 @@ describe('healthRoute', () => {
     const warnRuntimeStat = mockHealthStats();
     const warnConfigurationStat = mockHealthStats();
     const warnWorkloadStat = mockHealthStats();
+    const warnEphemeralStat = mockHealthStats();
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -130,8 +133,10 @@ describe('healthRoute', () => {
     stats$.next(warnConfigurationStat);
     await sleep(1001);
     stats$.next(warnWorkloadStat);
+    await sleep(1001);
+    stats$.next(warnEphemeralStat);
 
-    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics).toBeCalledTimes(4);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -156,6 +161,14 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({}))
       ),
     });
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(warnEphemeralStat, getTaskManagerConfig({}))
+      ),
+    });
   });
 
   it(`logs at an error level if the status is error`, async () => {
@@ -168,6 +181,7 @@ describe('healthRoute', () => {
     const errorRuntimeStat = mockHealthStats();
     const errorConfigurationStat = mockHealthStats();
     const errorWorkloadStat = mockHealthStats();
+    const errorEphemeralStat = mockHealthStats();
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -192,8 +206,10 @@ describe('healthRoute', () => {
     stats$.next(errorConfigurationStat);
     await sleep(1001);
     stats$.next(errorWorkloadStat);
+    await sleep(1001);
+    stats$.next(errorEphemeralStat);
 
-    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics).toBeCalledTimes(4);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -218,6 +234,14 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({}))
       ),
     });
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+      id,
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(errorEphemeralStat, getTaskManagerConfig({}))
+      ),
+    });
   });
 
   it('returns a error status if the overall stats have not been updated within the required hot freshness', async () => {
@@ -225,7 +249,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const serviceStatus$ = healthRoute(
+    const { serviceStatus$ } = healthRoute(
       router,
       stats$,
       loggingSystemMock.create().get(),
@@ -262,6 +286,9 @@ describe('healthRoute', () => {
                   timestamp: expect.any(String),
                 },
                 workload: {
+                  timestamp: expect.any(String),
+                },
+                ephemeral: {
                   timestamp: expect.any(String),
                 },
                 runtime: {
@@ -335,6 +362,9 @@ describe('healthRoute', () => {
                 workload: {
                   timestamp: expect.any(String),
                 },
+                ephemeral: {
+                  timestamp: expect.any(String),
+                },
                 runtime: {
                   timestamp: expect.any(String),
                   value: {
@@ -403,6 +433,9 @@ describe('healthRoute', () => {
                 workload: {
                   timestamp: expect.any(String),
                 },
+                ephemeral: {
+                  timestamp: expect.any(String),
+                },
                 runtime: {
                   timestamp: expect.any(String),
                   value: {
@@ -464,7 +497,7 @@ function mockHealthStats(overrides = {}) {
           non_recurring: 20,
           owner_ids: [0, 0, 0, 1, 2, 0, 0, 2, 2, 2, 1, 2, 1, 1],
           estimated_schedule_density: [],
-          capacity_requirments: {
+          capacity_requirements: {
             per_minute: 150,
             per_hour: 360,
             per_day: 820,
@@ -488,12 +521,23 @@ function mockHealthStats(overrides = {}) {
             duration: [500, 400, 3000],
             claim_conflicts: [0, 100, 75],
             claim_mismatches: [0, 100, 75],
+            claim_duration: [0, 100, 75],
             result_frequency_percent_as_number: [
-              'NoTasksClaimed',
-              'NoTasksClaimed',
-              'NoTasksClaimed',
+              FillPoolResult.NoTasksClaimed,
+              FillPoolResult.NoTasksClaimed,
+              FillPoolResult.NoTasksClaimed,
             ],
+            persistence: [],
           },
+        },
+      },
+      ephemeral: {
+        timestamp: new Date().toISOString(),
+        value: {
+          load: [],
+          executionsPerCycle: [],
+          queuedTasks: [],
+          delay: [],
         },
       },
     },

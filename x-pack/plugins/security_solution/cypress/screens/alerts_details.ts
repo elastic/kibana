@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const ALERT_FLYOUT = '[data-test-subj="timeline:details-panel:flyout"]';
+
 export const CELL_TEXT = '.euiText';
 
 export const JSON_CONTENT = '[data-test-subj="jsonView"]';
@@ -19,11 +21,11 @@ export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
 export const TABLE_ROWS = '.euiTableRow';
 
-export const THREAT_CONTENT = '[data-test-subj^=draggable-content-threat]';
+export const THREAT_CONTENT = '[data-test-subj^=draggable-content-]';
 
 export const THREAT_DETAILS_VIEW = '[data-test-subj="threat-details-view-0"]';
 
-export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
+export const ENRICHMENT_COUNT_NOTIFICATION = '[data-test-subj="enrichment-count-notification"]';
 
 export const THREAT_SUMMARY_VIEW = '[data-test-subj="threat-summary-view"]';
 

@@ -18,8 +18,9 @@ import {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,
 } from '../migrations/core/migrate_raw_docs';
+import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
 
-export type MigrationLogLevel = 'error' | 'info';
+export type MigrationLogLevel = 'error' | 'info' | 'warning';
 
 export interface MigrationLog {
   level: MigrationLogLevel;
@@ -108,11 +109,23 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
-  /* When reindexing we use a source query to exclude saved objects types which
+  /**
+   * When reindexing we use a source query to exclude saved objects types which
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
   readonly unusedTypesQuery: estypes.QueryDslQueryContainer;
+  /**
+   * The list of known SO types that are registered.
+   */
+  readonly knownTypes: string[];
+  /**
+   * All exclude filter hooks registered for types on this index. Keyed by type name.
+   */
+  readonly excludeFromUpgradeFilterHooks: Record<
+    string,
+    SavedObjectTypeExcludeFromUpgradeFilterHook
+  >;
 }
 
 export interface InitState extends BaseState {
@@ -154,9 +167,21 @@ export interface WaitForYellowSourceState extends BaseState {
   readonly sourceIndexMappings: IndexMapping;
 }
 
+export interface CheckUnknownDocumentsState extends BaseState {
+  /** Check if any unknown document is present in the source index */
+  readonly controlState: 'CHECK_UNKNOWN_DOCUMENTS';
+  readonly sourceIndex: Option.Some<string>;
+  readonly sourceIndexMappings: IndexMapping;
+}
+
 export interface SetSourceWriteBlockState extends PostInitState {
   /** Set a write block on the source index to prevent any further writes */
   readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
+  readonly sourceIndex: Option.Some<string>;
+}
+
+export interface CalculateExcludeFiltersState extends PostInitState {
+  readonly controlState: 'CALCULATE_EXCLUDE_FILTERS';
   readonly sourceIndex: Option.Some<string>;
 }
 
@@ -287,6 +312,7 @@ export interface OutdatedDocumentsTransform extends PostInitState {
   readonly transformErrors: TransformErrorObjects[];
   readonly progress: Progress;
 }
+
 export interface TransformedDocumentsBulkIndex extends PostInitState {
   /**
    * Write the up-to-date transformed documents to the target index
@@ -386,7 +412,9 @@ export type State = Readonly<
   | InitState
   | DoneState
   | WaitForYellowSourceState
+  | CheckUnknownDocumentsState
   | SetSourceWriteBlockState
+  | CalculateExcludeFiltersState
   | CreateNewTargetState
   | CreateReindexTempState
   | ReindexSourceToTempOpenPit

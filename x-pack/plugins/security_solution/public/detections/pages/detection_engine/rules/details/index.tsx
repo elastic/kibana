@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -54,8 +54,7 @@ import { useListsConfig } from '../../../../containers/detection_engine/lists/us
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
-import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
-import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
+import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
@@ -72,7 +71,6 @@ import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasPermissions } from '../helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_overflow';
@@ -86,7 +84,11 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
+import {
+  APP_ID,
+  DEFAULT_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
+} from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -115,6 +117,7 @@ import { getRuleStatusText } from '../../../../../../common/detection_engine/uti
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 import { BadgeOptions } from '../../../../../common/components/header_page/types';
+import { AlertsStackByField } from '../../../../components/alerts_kpis/common/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -153,6 +156,7 @@ const ruleDetailTabs = [
 ];
 
 const RuleDetailsPageComponent = () => {
+  const { navigateToApp } = useKibana().services.application;
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -168,7 +172,7 @@ const RuleDetailsPageComponent = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from } = useGlobalTime();
   const [
     {
       loading: userInfoLoading,
@@ -220,12 +224,14 @@ const RuleDetailsPageComponent = () => {
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
-  const history = useHistory();
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
 
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+
+  // TODO: Steph/ueba remove when past experimental
+  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -348,7 +354,14 @@ const RuleDetailsPageComponent = () => {
     ),
     [ruleDetailTab, setRuleDetailTab]
   );
-
+  const ruleIndices = useMemo(
+    () =>
+      rule?.index ??
+      (uebaEnabled
+        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
+        : DEFAULT_INDEX_PATTERN),
+    [rule?.index, uebaEnabled]
+  );
   const handleRefresh = useCallback(() => {
     if (fetchRuleStatus != null && ruleId != null) {
       fetchRuleStatus(ruleId);
@@ -442,9 +455,12 @@ const RuleDetailsPageComponent = () => {
   const goToEditRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getEditRuleUrl(ruleId ?? ''));
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getEditRuleUrl(ruleId ?? ''),
+      });
     },
-    [history, ruleId]
+    [navigateToApp, ruleId]
   );
 
   const editRule = useMemo(() => {
@@ -548,14 +564,14 @@ const RuleDetailsPageComponent = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
   }
 
-  const defaultRuleStackByOption: AlertsHistogramOption = {
-    text: 'event.category',
-    value: 'event.category',
-  };
+  const defaultRuleStackByOption: AlertsStackByField = 'event.category';
 
   return (
     <>
@@ -572,9 +588,9 @@ const RuleDetailsPageComponent = () => {
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 backOptions={{
-                  href: getRulesUrl(),
+                  path: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
-                  pageId: SecurityPageName.detections,
+                  pageId: SecurityPageName.rules,
                   dataTestSubj: 'ruleDetailsBackToAllRules',
                 }}
                 border
@@ -691,15 +707,10 @@ const RuleDetailsPageComponent = () => {
               <>
                 <Display show={!globalFullScreen}>
                   <AlertsHistogramPanel
-                    deleteQuery={deleteQuery}
                     filters={alertMergedFilters}
                     query={query}
-                    from={from}
                     signalIndexName={signalIndexName}
-                    setQuery={setQuery}
-                    stackByOptions={alertsHistogramOptions}
                     defaultStackByOption={defaultRuleStackByOption}
-                    to={to}
                     updateDateRange={updateDateRangeCallback}
                   />
                   <EuiSpacer />
@@ -726,7 +737,7 @@ const RuleDetailsPageComponent = () => {
               <ExceptionsViewer
                 ruleId={ruleId ?? ''}
                 ruleName={rule?.name ?? ''}
-                ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
+                ruleIndices={ruleIndices}
                 availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
                 exceptionListsMeta={exceptionLists.lists}
@@ -744,7 +755,7 @@ const RuleDetailsPageComponent = () => {
         </SecuritySolutionPageWrapper>
       )}
 
-      <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
+      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
   );
 };

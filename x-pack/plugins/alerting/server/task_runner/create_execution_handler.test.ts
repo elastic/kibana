@@ -16,7 +16,7 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../rule_type_registry';
 import {
   AlertTypeParams,
   AlertTypeState,
@@ -29,6 +29,7 @@ jest.mock('./inject_action_params', () => ({
 }));
 
 const alertType: NormalizedAlertType<
+  AlertTypeParams,
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -44,6 +45,7 @@ const alertType: NormalizedAlertType<
   ],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -58,6 +60,7 @@ const mockActionsPlugin = actionsMock.createStart();
 const mockEventLogger = eventLoggerMock.create();
 const createExecutionHandlerParams: jest.Mocked<
   CreateExecutionHandlerOptions<
+    AlertTypeParams,
     AlertTypeParams,
     AlertTypeState,
     AlertInstanceState,
@@ -95,6 +98,8 @@ const createExecutionHandlerParams: jest.Mocked<
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  supportsEphemeralTasks: false,
+  maxEphemeralActionsPerAlert: Promise.resolve(10),
 };
 
 beforeEach(() => {

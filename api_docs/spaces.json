@@ -682,7 +682,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-          "lineNumber": 29
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -716,7 +716,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-              "lineNumber": 34
+              "lineNumber": 40
             },
             "deprecated": false,
             "children": [
@@ -741,7 +741,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-                  "lineNumber": 34
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -771,7 +771,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-              "lineNumber": 40
+              "lineNumber": 46
             },
             "deprecated": false,
             "children": [
@@ -789,7 +789,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-                  "lineNumber": 40
+                  "lineNumber": 46
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -827,7 +827,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-              "lineNumber": 46
+              "lineNumber": 52
             },
             "deprecated": false,
             "children": [
@@ -851,7 +851,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-                  "lineNumber": 46
+                  "lineNumber": 52
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -889,7 +889,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-              "lineNumber": 53
+              "lineNumber": 59
             },
             "deprecated": false,
             "children": [
@@ -907,7 +907,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-                  "lineNumber": 53
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -932,7 +932,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-                  "lineNumber": 53
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -954,7 +954,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-              "lineNumber": 59
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [
@@ -972,13 +972,131 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-                  "lineNumber": 59
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.disableLegacyUrlAliases",
+            "type": "Function",
+            "tags": [],
+            "label": "disableLegacyUrlAliases",
+            "description": [
+              "\nDisables the specified legacy URL aliases."
+            ],
+            "signature": [
+              "(aliases: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.LegacyUrlAliasTarget",
+                "text": "LegacyUrlAliasTarget"
+              },
+              "[]) => Promise<void>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 71
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.disableLegacyUrlAliases.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "aliases",
+                "description": [
+                  "the aliases to disable."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.LegacyUrlAliasTarget",
+                    "text": "LegacyUrlAliasTarget"
+                  },
+                  "[]"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 71
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-server.LegacyUrlAliasTarget",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyUrlAliasTarget",
+        "description": [
+          "\nClient interface for interacting with legacy URL aliases."
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 57
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.LegacyUrlAliasTarget.targetSpace",
+            "type": "string",
+            "tags": [],
+            "label": "targetSpace",
+            "description": [
+              "\nThe namespace that the object existed in when it was converted."
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 61
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.LegacyUrlAliasTarget.targetType",
+            "type": "string",
+            "tags": [],
+            "label": "targetType",
+            "description": [
+              "\nThe type of the object when it was converted."
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 65
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.LegacyUrlAliasTarget.sourceId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceId",
+            "description": [
+              "\nThe original ID of the object, before it was converted."
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 69
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1203,7 +1321,7 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/plugin.ts",
-                  "lineNumber": 267
+                  "lineNumber": 266
                 }
               },
               {
@@ -1238,14 +1356,14 @@
                 "plugin": "infra",
                 "link": {
                   "path": "x-pack/plugins/infra/server/plugin.ts",
-                  "lineNumber": 153
+                  "lineNumber": 174
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 206
+                  "lineNumber": 187
                 }
               },
               {
@@ -1369,14 +1487,14 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 1000
+                  "lineNumber": 1004
                 }
               },
               {
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 1027
+                  "lineNumber": 1031
                 }
               },
               {
@@ -2002,28 +2120,28 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 60
+                "lineNumber": 59
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 267
+                "lineNumber": 266
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 285
+                "lineNumber": 284
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 301
+                "lineNumber": 300
               }
             },
             {
@@ -2079,14 +2197,14 @@
               "plugin": "infra",
               "link": {
                 "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 153
+                "lineNumber": 174
               }
             },
             {
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 206
+                "lineNumber": 187
               }
             }
           ]
@@ -2497,6 +2615,69 @@
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
               "lineNumber": 51
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-common.LegacyUrlAliasTarget",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyUrlAliasTarget",
+        "description": [
+          "\nClient interface for interacting with legacy URL aliases."
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 57
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.LegacyUrlAliasTarget.targetSpace",
+            "type": "string",
+            "tags": [],
+            "label": "targetSpace",
+            "description": [
+              "\nThe namespace that the object existed in when it was converted."
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 61
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.LegacyUrlAliasTarget.targetType",
+            "type": "string",
+            "tags": [],
+            "label": "targetType",
+            "description": [
+              "\nThe type of the object when it was converted."
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 65
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.LegacyUrlAliasTarget.sourceId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceId",
+            "description": [
+              "\nThe original ID of the object, before it was converted."
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 69
             },
             "deprecated": false
           }
