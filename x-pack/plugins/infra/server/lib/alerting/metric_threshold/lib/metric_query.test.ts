@@ -58,5 +58,4 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       );
     });
   });
-
 });
