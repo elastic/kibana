@@ -26,7 +26,6 @@ interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
 export const getUpdatedColumns = <Item extends ItemWithAnID>({
   columns,
   displayedItems,
-  // TODO v
   isActivelyEditing,
   canRemoveLastItem,
   isLoading = false,
@@ -55,6 +54,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
       render: (item: Item) => (
         <ActionColumn
           displayedItems={displayedItems}
+          isActivelyEditing={isActivelyEditing}
           isLoading={isLoading} // TODO This should be consistently optional or not optional
           canRemoveLastItem={canRemoveLastItem}
           lastItemWarning={lastItemWarning}

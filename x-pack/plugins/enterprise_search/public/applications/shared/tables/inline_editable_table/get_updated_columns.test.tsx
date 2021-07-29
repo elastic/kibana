@@ -79,6 +79,7 @@ describe('getUpdatedColumns', () => {
       const wrapper = shallow(<div>{renderResult}</div>);
       const actionColumn = wrapper.find(ActionColumn);
       expect(actionColumn.props()).toEqual({
+        isActivelyEditing: expect.any(Function),
         displayedItems,
         isLoading: false,
         canRemoveLastItem,
