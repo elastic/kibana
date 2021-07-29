@@ -7,18 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useUrlParams } from '../../../../../../../context/url_params_context/use_url_params';
-import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import {
   SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
   TRANSACTION_NAME,
 } from '../../../../../../../../common/elasticsearch_fieldnames';
+import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { ServiceOrTransactionsOverviewLink } from '../../../../../../shared/Links/apm/service_transactions_overview_link';
+import { useApmParams } from '../../../../../../../hooks/use_apm_params';
+import { BackendLink } from '../../../../../../shared/backend_link';
 import { TransactionDetailLink } from '../../../../../../shared/Links/apm/transaction_detail_link';
+import { ServiceLink } from '../../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
 
 interface Props {
@@ -27,9 +29,8 @@ interface Props {
 }
 
 export function StickySpanProperties({ span, transaction }: Props) {
-  const {
-    urlParams: { environment, latencyAggregationType },
-  } = useUrlParams();
+  const { query } = useApmParams('/services/:serviceName/transactions/view');
+  const { environment, latencyAggregationType } = query;
 
   const nextEnvironment = getNextEnvironmentUrlParam({
     requestedEnvironment: transaction?.service.environment,
@@ -37,6 +38,8 @@ export function StickySpanProperties({ span, transaction }: Props) {
   });
 
   const spanName = span.span.name;
+  const backendName = span.span.destination?.service.resource;
+
   const transactionStickyProperties = transaction
     ? [
         {
@@ -45,12 +48,11 @@ export function StickySpanProperties({ span, transaction }: Props) {
           }),
           fieldName: SERVICE_NAME,
           val: (
-            <ServiceOrTransactionsOverviewLink
+            <ServiceLink
+              agentName={transaction.agent.name}
+              query={{ ...query, environment: nextEnvironment }}
               serviceName={transaction.service.name}
-              environment={nextEnvironment}
-            >
-              {transaction.service.name}
-            </ServiceOrTransactionsOverviewLink>
+            />
           ),
           width: '25%',
         },
@@ -80,6 +82,29 @@ export function StickySpanProperties({ span, transaction }: Props) {
       ]
     : [];
 
+  const backendStickyProperties = backendName
+    ? [
+        {
+          label: i18n.translate(
+            'xpack.apm.transactionDetails.spanFlyout.backendLabel',
+            {
+              defaultMessage: 'Backend',
+            }
+          ),
+          fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
+          val: (
+            <BackendLink
+              backendName={backendName}
+              query={query}
+              subtype={span.span.subtype}
+              type={span.span.type}
+            />
+          ),
+          width: '25%',
+        },
+      ]
+    : [];
+
   const stickyProperties = [
     {
       label: i18n.translate(
@@ -89,10 +114,11 @@ export function StickySpanProperties({ span, transaction }: Props) {
         }
       ),
       fieldName: SPAN_NAME,
-      val: spanName || NOT_AVAILABLE_LABEL,
+      val: spanName ?? NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '25%',
     },
+    ...backendStickyProperties,
     ...transactionStickyProperties,
   ];
 

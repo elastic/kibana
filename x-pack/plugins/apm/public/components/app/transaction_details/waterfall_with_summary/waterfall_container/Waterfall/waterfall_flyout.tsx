@@ -9,7 +9,7 @@ import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { SpanFlyout } from './span_flyout';
-import { TransactionFlyout } from './TransactionFlyout';
+import { TransactionFlyout } from './transaction_flyout';
 import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 
 interface Props {
