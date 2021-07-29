@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from 'src/plugins/visualizations/public';
+import { Vis, VisToExpressionAstParams } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { TagCloudVisParams } from './types';
 
@@ -38,7 +38,7 @@ describe('tagcloud vis toExpressionAst function', () => {
   let vis: Vis<TagCloudVisParams>;
 
   beforeEach(() => {
-    vis = {
+    vis = ({
       isHierarchical: () => false,
       type: {},
       params: {
@@ -51,11 +51,11 @@ describe('tagcloud vis toExpressionAst function', () => {
           aggs: [],
         },
       },
-    } as any;
+    } as unknown) as Vis<TagCloudVisParams>;
   });
 
   it('should match snapshot without params', () => {
-    const actual = toExpressionAst(vis, {} as any);
+    const actual = toExpressionAst(vis, {} as VisToExpressionAstParams);
     expect(actual).toMatchSnapshot();
   });
 
@@ -70,9 +70,18 @@ describe('tagcloud vis toExpressionAst function', () => {
         type: 'palette',
         name: 'default',
       },
-      metric: { accessor: 0, format: { id: 'number' } },
+      metric: {
+        type: 'vis_dimension',
+        accessor: 0,
+        format: {
+          id: 'number',
+          params: {
+            id: 'number',
+          },
+        },
+      },
     };
-    const actual = toExpressionAst(vis, {} as any);
+    const actual = toExpressionAst(vis, {} as VisToExpressionAstParams);
     expect(actual).toMatchSnapshot();
   });
 });

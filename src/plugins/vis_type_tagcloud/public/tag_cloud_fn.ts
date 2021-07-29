@@ -92,7 +92,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
     },
   },
   fn(input, args, handlers) {
-    const visParams = {
+    const visParams: TagCloudVisParams = {
       scale: args.scale,
       orientation: args.orientation,
       minFontSize: args.minFontSize,
@@ -106,7 +106,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
         type: 'palette',
         name: args.palette,
       },
-    } as TagCloudVisParams;
+    };
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.logDatatable('default', input);

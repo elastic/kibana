@@ -19,9 +19,9 @@ import {
 } from '../../../expressions/public';
 import { getFormatService } from '../services';
 import { TagCloudVisRenderValue } from '../tag_cloud_fn';
+import { ExpressionValueVisDimension } from '../../../visualizations/public';
 
 import './tag_cloud.scss';
-import { ExpressionValueVisDimension } from '../../../visualizations/public';
 
 const MAX_TAG_COUNT = 200;
 
@@ -84,16 +84,12 @@ const isDatatableColumn = (datatableColumn: unknown): datatableColumn is Datatab
 const getColumn = (
   accessor: ExpressionValueVisDimension['accessor'],
   columns: Datatable['columns']
-): DatatableColumn | undefined => {
-  if (typeof accessor === 'number') {
-    return columns[accessor];
-  }
-
+): DatatableColumn => {
   if (isDatatableColumn(accessor)) {
     return columns.filter(({ id }) => id === accessor.id)[0];
   }
 
-  return;
+  return columns[accessor];
 };
 
 export const TagCloudChart = ({
@@ -109,20 +105,18 @@ export const TagCloudChart = ({
   const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
 
   const tagCloudData = useMemo(() => {
-    const tagColumnObject = bucket && getColumn(bucket.accessor, visData.columns);
-    const tagColumn = tagColumnObject?.id ?? -1;
-
-    const metricColumn = getColumn(metric.accessor, visData.columns)?.id ?? -1;
+    const tagColumn = bucket ? getColumn(bucket.accessor, visData.columns).id : null;
+    const metricColumn = getColumn(metric.accessor, visData.columns).id;
 
     const metrics = visData.rows.map((row) => row[metricColumn]);
-    const values = bucket ? visData.rows.map((row) => row[tagColumn]) : [];
+    const values = bucket && tagColumn !== null ? visData.rows.map((row) => row[tagColumn]) : [];
     const maxValue = Math.max(...metrics);
     const minValue = Math.min(...metrics);
 
     return visData.rows.map((row) => {
-      const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
+      const tag = tagColumn === null ? 'all' : row[tagColumn];
       return {
-        text: (bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag) as string,
+        text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
@@ -142,8 +136,8 @@ export const TagCloudChart = ({
   ]);
 
   const label = bucket
-    ? `${getColumn(bucket.accessor, visData.columns)?.name} - ${
-        getColumn(metric.accessor, visData.columns)?.name
+    ? `${getColumn(bucket.accessor, visData.columns).name} - ${
+        getColumn(metric.accessor, visData.columns).name
       }`
     : '';
 
@@ -165,12 +159,12 @@ export const TagCloudChart = ({
   );
 
   const handleWordClick = useCallback(
-    (d) => {
+    (elements) => {
       if (!bucket) {
         return;
       }
-      const termsBucketId = getColumn(bucket.accessor, visData.columns)?.id ?? -1;
-      const clickedValue = d[0][0].text;
+      const termsBucketId = getColumn(bucket.accessor, visData.columns).id;
+      const clickedValue = elements[0][0].text;
 
       const rowIndex = visData.rows.findIndex((row) => {
         const formattedValue = bucketFormatter

@@ -16,6 +16,6 @@ export const tagCloud: ElementFactory = () => ({
   | demodata 
   | head 150
   | ply by="country" expression={math "count(country)" | as "Count"}
-  | tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}
+  | tagcloud metric={visdimension "Count"} bucket={visdimension "country"}
   | render`,
 });

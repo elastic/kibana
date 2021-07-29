@@ -31,13 +31,11 @@ export type ExpressionValueVisDimension = ExpressionValueBoxed<
   }
 >;
 
-const getNumberAccessor = (accessor: number, columns: Datatable['columns']) =>
+const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
   columns.length > accessor ? accessor : undefined;
 
-const getDatatableColumnAccessor = (
-  accessor: DatatableColumn['id'],
-  columns: Datatable['columns']
-) => columns.find((c) => c.id === accessor);
+const getAccessorById = (accessor: DatatableColumn['id'], columns: Datatable['columns']) =>
+  columns.find((c) => c.id === accessor);
 
 export const visDimension = (): ExpressionFunctionDefinition<
   'visdimension',
@@ -77,8 +75,8 @@ export const visDimension = (): ExpressionFunctionDefinition<
   fn: (input, args) => {
     const accessor =
       typeof args.accessor === 'number'
-        ? getNumberAccessor(args.accessor, input.columns)
-        : getDatatableColumnAccessor(args.accessor, input.columns);
+        ? getAccessorByIndex(args.accessor, input.columns)
+        : getAccessorById(args.accessor, input.columns);
 
     if (accessor === undefined) {
       throw new Error(
