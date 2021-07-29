@@ -31,6 +31,7 @@ export const TakeActionDropdown = React.memo(
   ({
     detailsData,
     ecsData,
+    handleOnEventClosed,
     isHostIsolationPanelOpen,
     loadingEventDetails,
     nonEcsData,
@@ -42,6 +43,7 @@ export const TakeActionDropdown = React.memo(
   }: {
     detailsData: TimelineEventsDetailsItem[] | null;
     ecsData?: Ecs;
+    handleOnEventClosed: () => void;
     isHostIsolationPanelOpen: boolean;
     loadingEventDetails: boolean;
     nonEcsData?: TimelineNonEcsData[];
@@ -68,6 +70,11 @@ export const TakeActionDropdown = React.memo(
     const closePopoverHandler = useCallback(() => {
       setIsPopoverOpen(false);
     }, []);
+
+    const closePopoverAndFlyout = useCallback(() => {
+      handleOnEventClosed();
+      setIsPopoverOpen(false);
+    }, [handleOnEventClosed]);
 
     const handleOnAddIsolationStatusClick = useCallback(
       (action: 'isolateHost' | 'unisolateHost') => {
@@ -115,7 +122,7 @@ export const TakeActionDropdown = React.memo(
     const { statusActions } = useAlertsActions({
       ecsRowData: ecsData,
       timelineId,
-      closePopover: closePopoverHandler,
+      closePopover: closePopoverAndFlyout,
     });
 
     const { investigateInTimelineAction } = useInvestigateInTimeline({

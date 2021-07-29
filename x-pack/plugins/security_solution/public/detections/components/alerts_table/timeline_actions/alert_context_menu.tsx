@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/
 import styled from 'styled-components';
 import { indexOf } from 'lodash';
 
+import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -26,8 +27,8 @@ import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
 import { useAlertsActions } from './use_alerts_actions';
-import { useExceptionModal } from './use_add_exception_modal';
-import { useEventFilterModal } from './use_event_filter_modal';
+import { useExceptionActions, useExceptionModal } from './use_add_exception_modal';
+import { useEventFilterAction, useEventFilterModal } from './use_event_filter_modal';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -73,31 +74,24 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const {
     alertStatus,
-    disabledAddException,
-    disabledAddEndpointException,
     exceptionModalType,
     ruleId,
     ruleName,
     ruleIndices,
     onAddExceptionCancel,
     onAddExceptionConfirm,
-    handleAddExceptionClick,
-    handleAddEndpointExceptionClick,
+    onAddExceptionTypeClick,
   } = useExceptionModal({
-    ecsRowData,
+    ecsData: ecsRowData,
     refetch,
     timelineId,
-    onAddExceptionClick: closePopover,
-    onAddEndpointExceptionClick: closePopover,
   });
 
   const {
     closeAddEventFilterModal,
-    handleAddEventFilterClick,
     isAddEventFilterModalOpen,
-  } = useEventFilterModal({
-    onAddEventFilterClick: closePopover,
-  });
+    onAddEventFilterClick,
+  } = useEventFilterModal();
 
   const { statusActions } = useAlertsActions({
     ecsRowData,
@@ -105,45 +99,38 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closePopover,
   });
 
+  const handleOnAddExceptionTypeClick = useCallback(
+    (type: ExceptionListType) => {
+      onAddExceptionTypeClick(type);
+      closePopover();
+    },
+    [closePopover, onAddExceptionTypeClick]
+  );
+
+  const handleOnAddEventFilterClick = useCallback(() => {
+    onAddEventFilterClick();
+    closePopover();
+  }, [closePopover, onAddEventFilterClick]);
+
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
+
+  const exceptionActions = useExceptionActions({
+    ecsData: ecsRowData,
+    onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
+  });
+
+  const eventFilterActions = useEventFilterAction({
+    onAddEventFilterClick: handleOnAddEventFilterClick,
+  });
 
   const panels = useMemo(
     () => [
       {
         id: 0,
-        items:
-          !isEvent && ruleId
-            ? [
-                ...statusActions,
-                {
-                  name: i18n.ACTION_ADD_ENDPOINT_EXCEPTION,
-                  onClick: handleAddEndpointExceptionClick,
-                  disabled: disabledAddEndpointException,
-                },
-                {
-                  name: i18n.ACTION_ADD_EXCEPTION,
-                  onClick: handleAddExceptionClick,
-                  disabled: disabledAddException,
-                },
-              ]
-            : [
-                {
-                  name: i18n.ACTION_ADD_EVENT_FILTER,
-                  onClick: handleAddEventFilterClick,
-                },
-              ],
+        items: !isEvent && ruleId ? [...statusActions, ...exceptionActions] : [eventFilterActions],
       },
     ],
-    [
-      disabledAddEndpointException,
-      disabledAddException,
-      handleAddEndpointExceptionClick,
-      handleAddEventFilterClick,
-      handleAddExceptionClick,
-      isEvent,
-      ruleId,
-      statusActions,
-    ]
+    [eventFilterActions, exceptionActions, isEvent, ruleId, statusActions]
   );
 
   return (

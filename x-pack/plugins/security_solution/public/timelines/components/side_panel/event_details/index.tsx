@@ -210,6 +210,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       <EventDetailsFooter
         detailsData={detailsData}
         expandedEvent={expandedEvent}
+        handleOnEventClosed={handleOnEventClosed}
         isAlert={isAlert}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         loadingEventDetails={loading}

@@ -24,6 +24,7 @@ interface EventDetailsFooterProps {
     nonEcsData?: TimelineNonEcsData[];
     refetch?: () => void;
   };
+  handleOnEventClosed: () => void;
   isAlert: boolean;
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
@@ -35,6 +36,7 @@ export const EventDetailsFooter = React.memo(
   ({
     detailsData,
     expandedEvent,
+    handleOnEventClosed,
     isAlert,
     isHostIsolationPanelOpen,
     loadingEventDetails,
@@ -68,6 +70,7 @@ export const EventDetailsFooter = React.memo(
               <TakeActionDropdown
                 detailsData={detailsData}
                 ecsData={expandedEvent?.ecsData}
+                handleOnEventClosed={handleOnEventClosed}
                 isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                 loadingEventDetails={loadingEventDetails}
                 nonEcsData={expandedEvent?.nonEcsData}
