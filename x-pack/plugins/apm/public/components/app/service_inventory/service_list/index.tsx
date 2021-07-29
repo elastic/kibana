@@ -28,12 +28,12 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { truncate, unit } from '../../../../utils/style';
-import { AgentIcon } from '../../../shared/agent_icon';
+import { unit } from '../../../../utils/style';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 
@@ -50,19 +50,10 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = euiStyled(ServiceOrTransactionsOverviewLink)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM}
-  ${truncate('100%')};
-`;
-
 const ToolTipWrapper = euiStyled.span`
   width: 100%;
   .apmServiceList__serviceNameTooltip {
     width: 100%;
-    .apmServiceList__serviceNameContainer {
-      // removes 24px referent to the icon placed on the left side of the text.
-      width: calc(100% - 24px);
-    }
   }
 `;
 
@@ -74,8 +65,10 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 ];
 
 export function getServiceColumns({
+  query,
   showTransactionTypeColumn,
 }: {
+  query: Record<string, string | undefined>;
   showTransactionTypeColumn: boolean;
 }): Array<ITableColumn<ServiceListItem>> {
   return [
@@ -84,7 +77,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
         defaultMessage: 'Health',
       }),
-      width: unit * 6,
+      width: `${unit * 6}px`,
       sortable: true,
       render: (_, { healthStatus }) => {
         return (
@@ -101,31 +94,19 @@ export function getServiceColumns({
       }),
       width: '40%',
       sortable: true,
-      render: (_, { serviceName, agentName, transactionType }) => (
-        <ToolTipWrapper>
+      render: (_, { serviceName, agentName }) => (
+        <ToolTipWrapper data-test-subj="apmServiceListAppLink">
           <EuiToolTip
             delay="long"
             content={formatString(serviceName)}
             id="service-name-tooltip"
             anchorClassName="apmServiceList__serviceNameTooltip"
           >
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {agentName && (
-                <EuiFlexItem grow={false}>
-                  <AgentIcon agentName={agentName} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem className="apmServiceList__serviceNameContainer">
-                <AppLink
-                  data-test-subj="apmServiceListAppLink"
-                  serviceName={serviceName}
-                  transactionType={transactionType}
-                  className="eui-textTruncate"
-                >
-                  {formatString(serviceName)}
-                </AppLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ServiceLink
+              agentName={agentName}
+              query={query}
+              serviceName={serviceName}
+            />
           </EuiToolTip>
         </ToolTipWrapper>
       ),
@@ -135,7 +116,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
         defaultMessage: 'Environment',
       }),
-      width: unit * 10,
+      width: `${unit * 10}px`,
       sortable: true,
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
@@ -149,7 +130,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
             ),
-            width: unit * 10,
+            width: `${unit * 10}px`,
             sortable: true,
           },
         ]
@@ -169,7 +150,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: unit * 10,
+      width: `${unit * 10}px`,
     },
     {
       field: 'transactionsPerMinute',
@@ -186,7 +167,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: unit * 10,
+      width: `${unit * 10}px`,
     },
     {
       field: 'transactionErrorRate',
@@ -209,7 +190,7 @@ export function getServiceColumns({
         );
       },
       align: 'left',
-      width: unit * 10,
+      width: `${unit * 10}px`,
     },
   ];
 }
@@ -223,9 +204,11 @@ export function ServiceList({ items, noItemsMessage }: Props) {
       transactionType !== TRANSACTION_PAGE_LOAD
   );
 
+  const { query } = useApmParams('/services');
+
   const serviceColumns = useMemo(
-    () => getServiceColumns({ showTransactionTypeColumn }),
-    [showTransactionTypeColumn]
+    () => getServiceColumns({ query, showTransactionTypeColumn }),
+    [query, showTransactionTypeColumn]
   );
 
   const columns = displayHealthStatus

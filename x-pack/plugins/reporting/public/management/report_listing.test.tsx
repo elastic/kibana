@@ -11,14 +11,19 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
 import type { NotificationsSetup } from '../../../../../src/core/public';
-import { httpServiceMock, notificationServiceMock } from '../../../../../src/core/public/mocks';
+import {
+  applicationServiceMock,
+  httpServiceMock,
+  notificationServiceMock,
+} from '../../../../../src/core/public/mocks';
 import type { LocatorPublic, SharePluginSetup } from '../../../../../src/plugins/share/public';
 import type { ILicense } from '../../../licensing/public';
 import { IlmPolicyMigrationStatus, ReportApiJSON } from '../../common/types';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
 import { InternalApiClientClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
-import { Props, ReportListing } from './report_listing';
+import { KibanaContextProvider } from '../shared_imports';
+import { ListingProps as Props, ReportListing } from '.';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -70,6 +75,7 @@ const mockPollConfig = {
 
 describe('ReportListing', () => {
   let httpService: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let applicationService: ReturnType<typeof applicationServiceMock.createStartContract>;
   let ilmLocator: undefined | LocatorPublic<any>;
   let urlService: SharePluginSetup['url'];
   let testBed: UnwrapPromise<ReturnType<typeof setup>>;
@@ -77,22 +83,21 @@ describe('ReportListing', () => {
 
   const createTestBed = registerTestBed(
     (props?: Partial<Props>) => (
-      <InternalApiClientClientProvider
-        apiClient={reportingAPIClient as ReportingAPIClient}
-        http={httpService}
-      >
-        <IlmPolicyStatusContextProvider>
-          <ReportListing
-            license$={license$}
-            pollConfig={mockPollConfig}
-            redirect={jest.fn()}
-            navigateToUrl={jest.fn()}
-            urlService={urlService}
-            toasts={toasts}
-            {...props}
-          />
-        </IlmPolicyStatusContextProvider>
-      </InternalApiClientClientProvider>
+      <KibanaContextProvider services={{ http: httpService, application: applicationService }}>
+        <InternalApiClientClientProvider apiClient={reportingAPIClient as ReportingAPIClient}>
+          <IlmPolicyStatusContextProvider>
+            <ReportListing
+              license$={license$}
+              pollConfig={mockPollConfig}
+              redirect={jest.fn()}
+              navigateToUrl={jest.fn()}
+              urlService={urlService}
+              toasts={toasts}
+              {...props}
+            />
+          </IlmPolicyStatusContextProvider>
+        </InternalApiClientClientProvider>
+      </KibanaContextProvider>
     ),
     { memoryRouter: { wrapComponent: false } }
   );
@@ -127,6 +132,12 @@ describe('ReportListing', () => {
   beforeEach(async () => {
     toasts = notificationServiceMock.createSetupContract().toasts;
     httpService = httpServiceMock.createSetupContract();
+    applicationService = applicationServiceMock.createStartContract();
+    applicationService.capabilities = {
+      catalogue: {},
+      navLinks: {},
+      management: { data: { index_lifecycle_management: true } },
+    };
     ilmLocator = ({
       getUrl: jest.fn(),
     } as unknown) as LocatorPublic<any>;
@@ -254,6 +265,27 @@ describe('ReportListing', () => {
       expect(toasts.addError).toHaveBeenCalledTimes(1);
       expect(actions.hasIlmMigrationBanner()).toBe(true);
       expect(actions.hasIlmPolicyLink()).toBe(true);
+    });
+
+    it('only shows the link to the ILM policy if UI capabilities allow it', async () => {
+      applicationService.capabilities = {
+        catalogue: {},
+        navLinks: {},
+        management: { data: { index_lifecycle_management: false } },
+      };
+      await runSetup();
+
+      expect(testBed.actions.hasIlmPolicyLink()).toBe(false);
+
+      applicationService.capabilities = {
+        catalogue: {},
+        navLinks: {},
+        management: { data: { index_lifecycle_management: true } },
+      };
+
+      await runSetup();
+
+      expect(testBed.actions.hasIlmPolicyLink()).toBe(true);
     });
   });
 });

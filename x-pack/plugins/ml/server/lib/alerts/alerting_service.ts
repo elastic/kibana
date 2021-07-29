@@ -436,7 +436,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
-    const dataFeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+    const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
     const maxBucketInSeconds = resolveMaxTimeInterval(
       jobsResponse.map((v) => v.analysis_config.bucket_span)
@@ -448,7 +448,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
     }
 
     const lookBackTimeInterval: string =
-      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, dataFeeds ?? []);
+      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, datafeeds ?? []);
 
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
