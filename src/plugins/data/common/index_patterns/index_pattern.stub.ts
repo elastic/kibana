@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern } from '.';
+import { IndexPattern } from '.';
 import { stubFields } from './field.stub';
 
-export const stubIndexPattern: IIndexPattern = {
+export const stubIndexPattern = {
   id: 'logstash-*',
   fields: stubFields,
   title: 'logstash-*',
   timeFieldName: '@timestamp',
   getTimeField: () => ({ name: '@timestamp', type: 'date' }),
-};
+} as IndexPattern;
 
-export const stubIndexPatternWithFields: IIndexPattern = {
+export const stubIndexPatternWithFields = {
   id: '1234',
   title: 'logstash-*',
   fields: [
@@ -30,4 +30,4 @@ export const stubIndexPatternWithFields: IIndexPattern = {
       searchable: true,
     },
   ],
-};
+} as IndexPattern;
