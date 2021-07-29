@@ -29,7 +29,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
     restorePreviousUrl();
     const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
     if (!navigated) {
-      const bannerMessage = i18n.translate('dashboard.noMatchRoute.bannerTitleText', {
+      const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
         defaultMessage: 'Page not found',
       });
 
