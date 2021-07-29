@@ -39,6 +39,7 @@ export const AdditionalContent = styled.div`
 AdditionalContent.displayName = 'AdditionalContent';
 
 const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
+  min-width: 138px;
   padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
 

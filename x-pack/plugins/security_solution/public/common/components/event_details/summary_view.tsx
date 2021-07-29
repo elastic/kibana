@@ -13,7 +13,6 @@ import { SummaryRow } from './helpers';
 
 export const Indent = styled.div`
   padding: 0 4px;
-  background: #0a9dec;
 `;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

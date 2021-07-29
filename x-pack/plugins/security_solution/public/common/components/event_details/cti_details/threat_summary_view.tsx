@@ -7,7 +7,7 @@
 
 import styled from 'styled-components';
 import { get } from 'lodash/fp';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 
 import * as i18n from './translations';
@@ -60,15 +60,17 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
   value,
   provider,
   data,
+  index,
 }) => {
   if (!data || !value) return null;
+  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${provider}`;
   return (
-    <>
+    <Fragment key={key}>
       <RightMargin>
         <FieldValueCell
           contextId={timelineId}
           data={data}
-          eventId={eventId}
+          eventId={key}
           fieldFromBrowserField={browserField}
           values={[value]}
         />
@@ -91,13 +93,13 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
         <ActionCell
           data={data}
           contextId={timelineId}
-          eventId={eventId}
+          eventId={key}
           fieldFromBrowserField={browserField}
           timelineId={timelineId}
           values={[value]}
         />
       )}
-    </>
+    </Fragment>
   );
 };
 

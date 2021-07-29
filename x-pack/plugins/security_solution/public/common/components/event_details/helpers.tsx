@@ -7,6 +7,7 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import styled from 'styled-components';
 import React from 'react';
 import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
@@ -197,9 +198,13 @@ export const onEventDetailsTabKeyPressed = ({
   }
 };
 
+const StyledH5 = styled.h5`
+  line-height: 1.7rem;
+`;
+
 const getTitle = (title: string) => (
   <EuiTitle size="xxxs">
-    <h5>{title}</h5>
+    <StyledH5>{title}</StyledH5>
   </EuiTitle>
 );
 getTitle.displayName = 'getTitle';
