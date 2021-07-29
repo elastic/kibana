@@ -23,10 +23,10 @@ export function getUiSettings(
   return {
     [UI_SETTINGS.LEGACY_CHARTS_LIBRARY]: {
       name: i18n.translate('timelion.uiSettings.legacyChartsLibraryLabel', {
-        defaultMessage: 'Legacy charts library',
+        defaultMessage: 'Timelion legacy charts library',
       }),
       description: i18n.translate('timelion.uiSettings.legacyChartsLibraryDescription', {
-        defaultMessage: 'Enables legacy charts library for Timelion visualizations',
+        defaultMessage: 'Enables the legacy charts library for timelion charts in Visualize',
       }),
       deprecation: {
         message: i18n.translate('timelion.uiSettings.legacyChartsLibraryDeprication', {
