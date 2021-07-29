@@ -182,7 +182,7 @@ export class VisualizationsPlugin
       showNewVisModal,
       /**
        * creates new instance of Vis
-       * @param {IIndexPattern} indexPattern - index pattern to use
+       * @param {IndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
       createVis: async (visType: string, visState: SerializedVis) =>
