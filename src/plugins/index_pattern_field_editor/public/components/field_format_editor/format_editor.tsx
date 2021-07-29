@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent, Fragment } from 'react';
-import { FieldFormat } from 'src/plugins/data/public';
+import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import { memoize } from 'lodash';
+import React, { PureComponent, LazyExoticComponent } from 'react';
+import type { FieldFormat } from 'src/plugins/data/public';
+import { FieldFormatEditorFactory, FieldFormatEditor } from './editors';
 
 export interface FormatEditorProps {
   fieldType: string;
@@ -15,34 +18,34 @@ export interface FormatEditorProps {
   fieldFormatId: string;
   fieldFormatParams: { [key: string]: unknown };
   fieldFormatEditors: any;
-  onChange: (change: { fieldType: string; [key: string]: any }) => void;
+  onChange: (change: { [key: string]: any }) => void;
   onError: (error?: string) => void;
 }
 
-interface EditorComponentProps {
-  fieldType: FormatEditorProps['fieldType'];
-  format: FormatEditorProps['fieldFormat'];
-  formatParams: FormatEditorProps['fieldFormatParams'];
-  onChange: FormatEditorProps['onChange'];
-  onError: FormatEditorProps['onError'];
-}
-
 interface FormatEditorState {
-  EditorComponent: React.FC<EditorComponentProps>;
+  EditorComponent: LazyExoticComponent<FieldFormatEditor> | null;
   fieldFormatId?: string;
 }
+
+// use memoize to get stable reference
+const unwrapEditor = memoize(
+  (editorFactory: FieldFormatEditorFactory | null): FormatEditorState['EditorComponent'] => {
+    if (!editorFactory) return null;
+    return React.lazy(() => editorFactory().then((editor) => ({ default: editor })));
+  }
+);
 
 export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorState> {
   constructor(props: FormatEditorProps) {
     super(props);
     this.state = {
-      EditorComponent: props.fieldFormatEditors.getById(props.fieldFormatId),
+      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId)),
     };
   }
 
   static getDerivedStateFromProps(nextProps: FormatEditorProps) {
     return {
-      EditorComponent: nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId) || null,
+      EditorComponent: unwrapEditor(nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId)),
     };
   }
 
@@ -51,17 +54,29 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
     const { fieldType, fieldFormat, fieldFormatParams, onChange, onError } = this.props;
 
     return (
-      <Fragment>
+      <>
         {EditorComponent ? (
-          <EditorComponent
-            fieldType={fieldType}
-            format={fieldFormat}
-            formatParams={fieldFormatParams}
-            onChange={onChange}
-            onError={onError}
-          />
+          <React.Suspense
+            fallback={
+              // We specify minHeight to avoid too mitigate layout shifts while loading an editor
+              // ~430 corresponds to "4 lines" of EuiLoadingContent
+              <div style={{ minHeight: 430, marginTop: 8 }}>
+                <EuiDelayRender>
+                  <EuiLoadingContent lines={4} />
+                </EuiDelayRender>
+              </div>
+            }
+          >
+            <EditorComponent
+              fieldType={fieldType}
+              format={fieldFormat}
+              formatParams={fieldFormatParams}
+              onChange={onChange}
+              onError={onError}
+            />
+          </React.Suspense>
         ) : null}
-      </Fragment>
+      </>
     );
   }
 }
