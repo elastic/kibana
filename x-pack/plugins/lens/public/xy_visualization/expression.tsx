@@ -41,6 +41,7 @@ import type {
 import { EuiIcon, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import { groupBy } from 'lodash';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
 import { LayerArgs, layerTypes, SeriesType, XYChartProps } from '../../common/expressions';
@@ -825,7 +826,15 @@ export function XYChart({
         const table = data.tables[layerId];
         const colorAssignment = colorAssignments[palette.name];
 
-        return yConfigs.map((yConfig) => {
+        const row = table.rows[0];
+
+        const yConfigByValue = yConfigs.sort(
+          ({ forAccessor: idA }, { forAccessor: idB }) => row[idA] - row[idB]
+        );
+
+        const groupedByDirection = groupBy(yConfigByValue, 'fill');
+
+        return yConfigByValue.map((yConfig, i) => {
           const formatter = formatFactory(
             table?.columns.find((column) => column.id === yConfig.forAccessor)?.meta?.params || {
               id: 'number',
@@ -865,18 +874,29 @@ export function XYChart({
                 : 'left',
             marker: yConfig.icon ? <EuiIcon type={yConfig.icon} /> : undefined,
           };
-          if (yConfig.fill !== 'none') {
+          if (yConfig.fill && yConfig.fill !== 'none') {
             const isFillAbove = yConfig.fill === 'above';
+            const indexFromSameType = groupedByDirection[yConfig.fill].findIndex(
+              ({ forAccessor }) => forAccessor === yConfig.forAccessor
+            );
+            const shouldCheckNextThreshold =
+              indexFromSameType < groupedByDirection[yConfig.fill].length - 1;
             return (
               <RectAnnotation
                 {...props}
-                dataValues={data.tables[layerId].rows.map((row) => {
+                dataValues={table.rows.map(() => {
                   if (yConfig.axisMode === 'bottom') {
                     return {
                       coordinates: {
                         x0: isFillAbove ? row[yConfig.forAccessor] : undefined,
                         y0: undefined,
-                        x1: isFillAbove ? undefined : row[yConfig.forAccessor],
+                        x1: isFillAbove
+                          ? shouldCheckNextThreshold
+                            ? row[
+                                groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor
+                              ]
+                            : undefined
+                          : row[yConfig.forAccessor],
                         y1: undefined,
                       },
                       header: columnToLabelMap[yConfig.forAccessor],
@@ -888,7 +908,13 @@ export function XYChart({
                       x0: undefined,
                       y0: isFillAbove ? row[yConfig.forAccessor] : undefined,
                       x1: undefined,
-                      y1: isFillAbove ? undefined : row[yConfig.forAccessor],
+                      y1: isFillAbove
+                        ? shouldCheckNextThreshold
+                          ? row[
+                              groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor
+                            ]
+                          : undefined
+                        : row[yConfig.forAccessor],
                     },
                     header: columnToLabelMap[yConfig.forAccessor],
                     details: formatter.convert(row[yConfig.forAccessor]),
@@ -913,7 +939,7 @@ export function XYChart({
           return (
             <LineAnnotation
               {...props}
-              dataValues={data.tables[layerId].rows.map((row) => ({
+              dataValues={table.rows.map(() => ({
                 dataValue: row[yConfig.forAccessor],
                 header: columnToLabelMap[yConfig.forAccessor],
                 details: formatter.convert(row[yConfig.forAccessor]),
