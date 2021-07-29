@@ -14,6 +14,6 @@ export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 're
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [\_shards](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse._shards.md) | <code>ShardsResponse</code> |  |
+|  [\_shards](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse._shards.md) | <code>estypes.ShardStatistics</code> |  |
 |  [completion\_status](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse.completion_status.md) | <code>number</code> |  |
 
