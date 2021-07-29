@@ -223,15 +223,15 @@ export class Job {
 
   private getStatusTimestamp() {
     const status = this.status;
-    let statusTimestamp = this.created_at;
-
     if (status === PROCESSING && this.started_at) {
-      statusTimestamp = this.started_at;
-    } else if (this.completed_at && ([COMPLETED, FAILED, WARNINGS] as string[]).includes(status)) {
-      statusTimestamp = this.completed_at;
+      return this.started_at;
     }
 
-    return statusTimestamp;
+    if (this.completed_at && ([COMPLETED, FAILED, WARNINGS] as string[]).includes(status)) {
+      return this.completed_at;
+    }
+
+    return this.created_at;
   }
 }
 
