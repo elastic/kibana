@@ -14,7 +14,7 @@ import { Filter, Query } from '../filters';
 import { IndexPatternBase } from './types';
 
 /**
- * Configurations to be usd while constructing an ES query.
+ * Configurations to be used while constructing an ES query.
  * @public
  */
 export interface EsQueryConfig {

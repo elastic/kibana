@@ -378,7 +378,7 @@ export class AggConfigs {
     if (!this.hasTimeShifts()) {
       return this.timeFields
         .map((fieldName) => getTime(this.indexPattern, timeRange, { fieldName, forceNow }))
-        .filter(isRangeFilter);
+        .filter((f) => !!f && isRangeFilter(f));
     }
     return [
       {
@@ -402,7 +402,7 @@ export class AggConfigs {
                           fieldName,
                         ] as [RangeFilter | undefined, string]
                     )
-                    .filter(([filter]) => isRangeFilter(filter))
+                    .filter(([filter]) => !!filter && isRangeFilter(filter))
                     .map(([filter, field]) => ({
                       range: {
                         [field]: {
