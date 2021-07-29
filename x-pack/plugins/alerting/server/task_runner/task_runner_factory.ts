@@ -17,7 +17,7 @@ import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/se
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import {
   AlertTypeParams,
-  AlertTypeRegistry,
+  RuleTypeRegistry,
   GetServicesFunction,
   SpaceIdToNamespaceFunction,
   AlertTypeState,
@@ -26,20 +26,20 @@ import {
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
-import { AlertsClient } from '../alerts_client';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { RulesClient } from '../rules_client';
+import { NormalizedAlertType } from '../rule_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
   getServices: GetServicesFunction;
-  getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
-  alertTypeRegistry: AlertTypeRegistry;
+  ruleTypeRegistry: RuleTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerAlert: Promise<number>;

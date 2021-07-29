@@ -101,7 +101,7 @@ pageLoadAssetSize:
   stackAlerts: 29684
   presentationUtil: 94301
   spacesOss: 18817
-  indexPatternFieldEditor: 90489
+  indexPatternFieldEditor: 50000
   osquery: 107090
   fileUpload: 25664
   dataVisualizer: 27530
@@ -113,5 +113,8 @@ pageLoadAssetSize:
   expressionRevealImage: 25675
   cases: 144442
   expressionError: 22127
-  userSetup: 18532
+  expressionRepeatImage: 22341
+  expressionImage: 19288
+  expressionMetric: 22238
   expressionShape: 30033
+  userSetup: 18532

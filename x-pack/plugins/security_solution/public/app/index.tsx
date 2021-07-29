@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { OVERVIEW_PATH } from '../../common/constants';
 
-import { NotFoundPage } from '../app/404';
+import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import { RenderAppProps } from './types';
 
@@ -43,6 +43,8 @@ export const renderApp = ({
             ...subPlugins.exceptions.routes,
             ...subPlugins.hosts.routes,
             ...subPlugins.network.routes,
+            // will be undefined if enabledExperimental.uebaEnabled === false
+            ...(subPlugins.ueba != null ? subPlugins.ueba.routes : []),
             ...subPlugins.timelines.routes,
             ...subPlugins.cases.routes,
             ...subPlugins.management.routes,

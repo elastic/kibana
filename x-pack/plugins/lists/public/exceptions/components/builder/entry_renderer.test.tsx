@@ -20,6 +20,7 @@ import {
   isOperator,
 } from '@kbn/securitysolution-list-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { FieldSpec } from 'src/plugins/data/common';
 
 import {
   fields,
@@ -374,31 +375,33 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it uses "correspondingKeywordField" if it exists', () => {
+    const correspondingKeywordField: FieldSpec = {
+      aggregatable: true,
+      count: 0,
+      esTypes: ['keyword'],
+      name: 'extension',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: true,
+      type: 'string',
+    };
+    const field: FieldSpec = {
+      aggregatable: false,
+      count: 0,
+      esTypes: ['text'],
+      name: 'extension.text',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: false,
+      type: 'string',
+    };
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
         entry={{
-          correspondingKeywordField: {
-            aggregatable: true,
-            count: 0,
-            esTypes: ['keyword'],
-            name: 'extension',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: true,
-            type: 'string',
-          },
+          correspondingKeywordField,
           entryIndex: 0,
-          field: {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'extension.text',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: false,
-            type: 'string',
-          },
+          field,
           id: '123',
           nested: undefined,
           operator: isOneOfOperator,
@@ -538,10 +541,10 @@ describe('BuilderEntryItem', () => {
 
     ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
       onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    }).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '126.45.211.34' },
+      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '127.0.0.1' },
       0
     );
   });
@@ -576,10 +579,10 @@ describe('BuilderEntryItem', () => {
 
     ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
       onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    }).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
+      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['127.0.0.1'] },
       0
     );
   });
