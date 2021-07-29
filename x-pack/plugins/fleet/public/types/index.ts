@@ -15,6 +15,7 @@ export {
   NewAgentPolicy,
   SimplifiedAgentStatus,
   EnrollmentAPIKey,
+  InMemoryPackagePolicy,
   PackagePolicy,
   NewPackagePolicy,
   UpdatePackagePolicy,

@@ -22,7 +22,7 @@ import {
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
-import type { AgentPolicy, PackagePolicy } from '../../../../../types';
+import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
 import {
   useCapabilities,
@@ -30,13 +30,6 @@ import {
   usePackageInstallations,
   useStartServices,
 } from '../../../../../hooks';
-
-export interface InMemoryPackagePolicy extends PackagePolicy {
-  packageName?: string;
-  packageTitle?: string;
-  packageVersion?: string;
-  hasUpgrade: boolean;
-}
 
 interface Props {
   packagePolicies: PackagePolicy[];

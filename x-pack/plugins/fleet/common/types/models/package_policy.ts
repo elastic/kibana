@@ -77,6 +77,14 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   created_by: string;
 }
 
+// Used in list view tables where virtual/flattened fields are added
+export interface InMemoryPackagePolicy extends PackagePolicy {
+  packageName?: string;
+  packageTitle?: string;
+  packageVersion?: string;
+  hasUpgrade: boolean;
+}
+
 export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
 
 export type DryRunPackagePolicy = NewPackagePolicy & {

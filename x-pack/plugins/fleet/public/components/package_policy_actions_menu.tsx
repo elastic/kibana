@@ -10,11 +10,9 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
 import { useAgentPolicyRefresh, useCapabilities, useLink } from '../hooks';
-
-import type { InMemoryPackagePolicy } from '../applications/fleet/sections/agent_policy/details_page/components/package_policies/package_policies_table';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
