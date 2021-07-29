@@ -9,8 +9,9 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
-  const reason = fields[ALERT_REASON] ?? '';
-  const link = '/app/metrics/explorer';
+  const reason = fields[ALERT_REASON] ?? '-';
+  const link = '/app/metrics/explorer'; // TODO https://github.com/elastic/kibana/issues/106497 & https://github.com/elastic/kibana/issues/106958
+
   return {
     reason,
     link,
