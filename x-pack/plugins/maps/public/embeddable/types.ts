@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -41,5 +41,5 @@ export type MapByReferenceInput = SavedObjectEmbeddableInput & {
 export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 
 export type MapEmbeddableOutput = EmbeddableOutput & {
-  indexPatterns: IIndexPattern[];
+  indexPatterns: IndexPattern[];
 };
