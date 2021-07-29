@@ -34,6 +34,7 @@ import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory } from './factories';
 
+/* eslint-disable complexity */
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   indexAlias,
   lists,
@@ -99,8 +100,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           const index = params.index;
           const hasTimestampOverride = !!timestampOverride;
 
-          // TODO: Input Index
-          const inputIndices = ['test'];
+          const inputIndices = params.index ?? [];
 
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivilegesFromEsClient(esClient, inputIndices),
@@ -210,7 +210,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             },
           });
 
-          // TODO: AlertTypeState?
           const createdSignals = runResult.createdSignals.concat(runResult.createdSignals);
           const warningMessages = runResult.warningMessages.concat(runResult.warningMessages);
           result = {

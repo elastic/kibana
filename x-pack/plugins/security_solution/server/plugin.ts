@@ -255,6 +255,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           logger: this.logger,
           mergeStrategy: this.config.alertMergeStrategy,
           ruleDataClient,
+          version: this.context.env.packageInfo.version,
         })
       );
     }

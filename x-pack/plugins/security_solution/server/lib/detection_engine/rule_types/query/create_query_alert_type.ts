@@ -26,6 +26,7 @@ export const createQueryAlertType = (createOptions: {
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
+  version: string;
 }) => {
   const {
     experimentalFeatures,
@@ -34,6 +35,7 @@ export const createQueryAlertType = (createOptions: {
     logger,
     mergeStrategy,
     ruleDataClient,
+    version,
   } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     indexAlias,
@@ -100,7 +102,7 @@ export const createQueryAlertType = (createOptions: {
         searchAfterSize,
         services,
         tuple,
-        version: '1.0.0', // TODO: deprecated?
+        version,
         wrapHits,
       });
       return { ...result, state };
