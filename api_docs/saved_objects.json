@@ -21,10 +21,7 @@
           "SavedObjectFinderUiProps",
           ", SavedObjectFinderState, any>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-          "lineNumber": 104
-        },
+        "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
         "deprecated": false,
         "children": [
           {
@@ -34,10 +31,7 @@
             "tags": [],
             "label": "propTypes",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 108
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [
               {
@@ -51,10 +45,7 @@
                   "Requireable",
                   "<(...args: any[]) => any>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 109
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -68,10 +59,7 @@
                     "signature": [
                       "{ [key: string]: any; }"
                     ],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -81,10 +69,7 @@
                     "tags": [],
                     "label": "propName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -94,10 +79,7 @@
                     "tags": [],
                     "label": "componentName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -107,10 +89,7 @@
                     "tags": [],
                     "label": "location",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -120,10 +99,7 @@
                     "tags": [],
                     "label": "propFullName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -141,10 +117,7 @@
                   "ReactNodeLike",
                   ">"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 110
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -158,10 +131,7 @@
                     "signature": [
                       "{ [key: string]: any; }"
                     ],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -171,10 +141,7 @@
                     "tags": [],
                     "label": "propName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -184,10 +151,7 @@
                     "tags": [],
                     "label": "componentName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -197,10 +161,7 @@
                     "tags": [],
                     "label": "location",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -210,10 +171,7 @@
                     "tags": [],
                     "label": "propFullName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -229,10 +187,7 @@
                   "Validator",
                   "<any[]>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 111
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -246,10 +201,7 @@
                     "signature": [
                       "{ [key: string]: any; }"
                     ],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -259,10 +211,7 @@
                     "tags": [],
                     "label": "propName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -272,10 +221,7 @@
                     "tags": [],
                     "label": "componentName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -285,10 +231,7 @@
                     "tags": [],
                     "label": "location",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -298,10 +241,7 @@
                     "tags": [],
                     "label": "propFullName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -317,10 +257,7 @@
                   "Requireable",
                   "<number>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 112
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -334,10 +271,7 @@
                     "signature": [
                       "{ [key: string]: any; }"
                     ],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -347,10 +281,7 @@
                     "tags": [],
                     "label": "propName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -360,10 +291,7 @@
                     "tags": [],
                     "label": "componentName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -373,10 +301,7 @@
                     "tags": [],
                     "label": "location",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -386,10 +311,7 @@
                     "tags": [],
                     "label": "propFullName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -405,10 +327,7 @@
                   "Requireable",
                   "<number>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 113
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -422,10 +341,7 @@
                     "signature": [
                       "{ [key: string]: any; }"
                     ],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -435,10 +351,7 @@
                     "tags": [],
                     "label": "propName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -448,10 +361,7 @@
                     "tags": [],
                     "label": "componentName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -461,10 +371,7 @@
                     "tags": [],
                     "label": "location",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -474,10 +381,7 @@
                     "tags": [],
                     "label": "propFullName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -493,10 +397,7 @@
                   "Requireable",
                   "<boolean>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 114
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -510,10 +411,7 @@
                     "signature": [
                       "{ [key: string]: any; }"
                     ],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -523,10 +421,7 @@
                     "tags": [],
                     "label": "propName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -536,10 +431,7 @@
                     "tags": [],
                     "label": "componentName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -549,10 +441,7 @@
                     "tags": [],
                     "label": "location",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -562,10 +451,7 @@
                     "tags": [],
                     "label": "propFullName",
                     "description": [],
-                    "source": {
-                      "path": "node_modules/@types/prop-types/index.d.ts",
-                      "lineNumber": 41
-                    },
+                    "path": "node_modules/@types/prop-types/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -582,10 +468,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 174
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [
               {
@@ -598,10 +481,7 @@
                 "signature": [
                   "SavedObjectFinderUiProps"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 174
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -618,10 +498,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 189
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -636,10 +513,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 194
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -654,10 +528,7 @@
             "signature": [
               "() => JSX.Element"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 199
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -674,221 +545,128 @@
         ],
         "label": "SavedObjectLoader",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-          "lineNumber": 33
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
         "deprecated": true,
         "references": [
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 16
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 35
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
-              "lineNumber": 10
-            }
+            "path": "src/plugins/discover/public/saved_searches/saved_searches.ts"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
-              "lineNumber": 20
-            }
+            "path": "src/plugins/discover/public/saved_searches/saved_searches.ts"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/plugin.tsx",
-              "lineNumber": 33
-            }
+            "path": "src/plugins/discover/public/plugin.tsx"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/plugin.tsx",
-              "lineNumber": 121
-            }
+            "path": "src/plugins/discover/public/plugin.tsx"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts",
-              "lineNumber": 10
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts",
-              "lineNumber": 28
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts",
-              "lineNumber": 85
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/services.ts",
-              "lineNumber": 26
-            }
+            "path": "src/plugins/visualizations/public/services.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/services.ts",
-              "lineNumber": 72
-            }
+            "path": "src/plugins/visualizations/public/services.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/services/saved_objects.ts",
-              "lineNumber": 13
-            }
+            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboards.ts",
-              "lineNumber": 12
-            }
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboards.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboards.ts",
-              "lineNumber": 31
-            }
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboards.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/types.ts",
-              "lineNumber": 33
-            }
+            "path": "src/plugins/dashboard/public/types.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/types.ts",
-              "lineNumber": 186
-            }
+            "path": "src/plugins/dashboard/public/types.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 42
-            }
+            "path": "src/plugins/dashboard/public/plugin.tsx"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 130
-            }
+            "path": "src/plugins/dashboard/public/plugin.tsx"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 19
-            }
+            "path": "src/plugins/dashboard/public/url_generator.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 101
-            }
+            "path": "src/plugins/dashboard/public/url_generator.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
-              "lineNumber": 10
-            }
+            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
-              "lineNumber": 14
-            }
+            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 12
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 24
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 239
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 260
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts",
-              "lineNumber": 13
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts",
-              "lineNumber": 20
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx",
-              "lineNumber": 23
-            }
+            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx",
-              "lineNumber": 31
-            }
+            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
           }
         ],
         "children": [
@@ -899,10 +677,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false
           },
           {
@@ -912,10 +687,7 @@
             "tags": [],
             "label": "lowercaseType",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false
           },
           {
@@ -928,10 +700,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false
           },
           {
@@ -944,10 +713,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false,
             "children": [
               {
@@ -960,10 +726,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 40
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -985,10 +748,7 @@
                   },
                   ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1007,10 +767,7 @@
             "signature": [
               "(opts?: string | Record<string, unknown> | undefined) => Promise<any>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 61
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false,
             "children": [
               {
@@ -1023,10 +780,7 @@
                 "signature": [
                   "string | Record<string, unknown> | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 61
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1043,10 +797,7 @@
             "signature": [
               "(id: string) => string"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 69
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false,
             "children": [
               {
@@ -1059,10 +810,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 69
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1079,10 +827,7 @@
             "signature": [
               "(ids: string | string[]) => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 73
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false,
             "children": [
               {
@@ -1095,10 +840,7 @@
                 "signature": [
                   "string | string[]"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 73
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1119,10 +861,7 @@
               "SavedObjectReference",
               "[]) => Record<string, unknown>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 92
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false,
             "children": [
               {
@@ -1135,10 +874,7 @@
                 "signature": [
                   "Record<string, unknown>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 93
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1152,10 +888,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 94
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1170,10 +903,7 @@
                   "SavedObjectReference",
                   "[]"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 95
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1196,10 +926,7 @@
               "SavedObjectReference",
               "[] | undefined; }) => Record<string, unknown>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 109
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false,
             "children": [
               {
@@ -1209,10 +936,7 @@
                 "tags": [],
                 "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 113
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "children": [
                   {
@@ -1225,10 +949,7 @@
                     "signature": [
                       "{ [x: string]: unknown; }"
                     ],
-                    "source": {
-                      "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 114
-                    },
+                    "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                     "deprecated": false
                   },
                   {
@@ -1238,10 +959,7 @@
                     "tags": [],
                     "label": "id",
                     "description": [],
-                    "source": {
-                      "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 115
-                    },
+                    "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                     "deprecated": false
                   },
                   {
@@ -1255,10 +973,7 @@
                       "SavedObjectReference",
                       "[] | undefined"
                     ],
-                    "source": {
-                      "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 116
-                    },
+                    "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                     "deprecated": false
                   }
                 ]
@@ -1286,10 +1001,7 @@
               },
               ") => Promise<{ total: number; hits: Record<string, unknown>[]; }>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 153
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false,
             "children": [
               {
@@ -1302,10 +1014,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 153
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1326,10 +1035,7 @@
                     "text": "SavedObjectLoaderFindOptions"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 153
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1366,88 +1072,52 @@
           },
           ", any>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-          "lineNumber": 70
-        },
+        "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
         "deprecated": true,
         "references": [
           {
             "plugin": "embeddable",
-            "link": {
-              "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
-              "lineNumber": 13
-            }
+            "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx"
           },
           {
             "plugin": "embeddable",
-            "link": {
-              "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
-              "lineNumber": 165
-            }
+            "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
-              "lineNumber": 11
-            }
+            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
-              "lineNumber": 133
-            }
+            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "presentationUtil",
-            "link": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 13
-            }
+            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
             "plugin": "presentationUtil",
-            "link": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 103
-            }
+            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/services/saved_objects.ts",
-              "lineNumber": 16
-            }
+            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx",
-              "lineNumber": 15
-            }
+            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx",
-              "lineNumber": 146
-            }
+            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
           },
           {
             "plugin": "graph",
-            "link": {
-              "path": "x-pack/plugins/graph/public/components/save_modal.tsx",
-              "lineNumber": 11
-            }
+            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
           },
           {
             "plugin": "graph",
-            "link": {
-              "path": "x-pack/plugins/graph/public/components/save_modal.tsx",
-              "lineNumber": 40
-            }
+            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
           }
         ],
         "children": [
@@ -1458,10 +1128,7 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 72
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
             "children": [
               {
@@ -1471,10 +1138,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 73
-                },
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
                 "deprecated": false
               },
               {
@@ -1484,10 +1148,7 @@
                 "tags": [],
                 "label": "copyOnSave",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 74
-                },
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
                 "deprecated": false
               },
               {
@@ -1497,10 +1158,7 @@
                 "tags": [],
                 "label": "isTitleDuplicateConfirmed",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 75
-                },
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
                 "deprecated": false
               },
               {
@@ -1510,10 +1168,7 @@
                 "tags": [],
                 "label": "hasTitleDuplicate",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 76
-                },
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
                 "deprecated": false
               },
               {
@@ -1523,10 +1178,7 @@
                 "tags": [],
                 "label": "isLoading",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 77
-                },
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
                 "deprecated": false
               },
               {
@@ -1536,10 +1188,7 @@
                 "tags": [],
                 "label": "visualizationDescription",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 78
-                },
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
                 "deprecated": false
               }
             ]
@@ -1554,10 +1203,7 @@
             "signature": [
               "() => JSX.Element"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 81
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1589,10 +1235,7 @@
           "SavedObjectKibanaServices",
           ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
         "children": [
           {
@@ -1613,10 +1256,7 @@
               },
               ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1630,10 +1270,7 @@
             "signature": [
               "boolean"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1647,10 +1284,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -1666,10 +1300,7 @@
               "SavedObjectKibanaServices",
               ", \"savedObjectsClient\" | \"overlays\">"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1705,10 +1336,7 @@
           "SavedObjectFinderProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-          "lineNumber": 527
-        },
+        "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
         "deprecated": false,
         "children": [
           {
@@ -1727,10 +1355,7 @@
                 "text": "SavedObjectsStart"
               }
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 527
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "isRequired": true
           },
@@ -1750,10 +1375,7 @@
                 "text": "IUiSettingsClient"
               }
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 527
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -1773,10 +1395,7 @@
         "signature": [
           "(error: { message: string; }) => boolean"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts",
         "deprecated": false,
         "children": [
           {
@@ -1786,10 +1405,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts",
             "deprecated": false,
             "children": [
               {
@@ -1799,10 +1415,7 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts",
-                  "lineNumber": 23
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts",
                 "deprecated": false
               }
             ]
@@ -1829,10 +1442,7 @@
           },
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
         "deprecated": false,
         "children": [
           {
@@ -1851,10 +1461,7 @@
                 "text": "OriginSaveModalProps"
               }
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -1912,10 +1519,7 @@
           "SavedObjectAttributes",
           ">>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-          "lineNumber": 33
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
         "deprecated": false,
         "children": [
           {
@@ -1930,10 +1534,7 @@
             "signature": [
               "SavedObjectAttributes"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1944,10 +1545,7 @@
             "tags": [],
             "label": "savedObject",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
             "children": [
               {
@@ -1960,10 +1558,7 @@
                 "signature": [
                   "() => string"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-                  "lineNumber": 36
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false,
                 "children": [],
                 "returnComment": []
@@ -1975,10 +1570,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-                  "lineNumber": 37
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
               },
               {
@@ -1988,10 +1580,7 @@
                 "tags": [],
                 "label": "displayName",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-                  "lineNumber": 38
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
               }
             ]
@@ -2014,10 +1603,7 @@
                 "text": "SavedObjectsCreateOptions"
               }
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2028,10 +1614,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
             "children": [
               {
@@ -2158,10 +1741,7 @@
                   },
                   "<unknown>>; }"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
               },
               {
@@ -2180,10 +1760,7 @@
                     "text": "OverlayStart"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
               }
             ]
@@ -2204,10 +1781,7 @@
         "signature": [
           "(saveModal: React.ReactElement<MinimalSaveModalProps, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>, I18nContext: ({ children }: { children: React.ReactNode; }) => JSX.Element, Wrapper: React.FC<{}> | undefined) => void"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-          "lineNumber": 32
-        },
+        "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
         "children": [
           {
@@ -2220,10 +1794,7 @@
             "signature": [
               "React.ReactElement<MinimalSaveModalProps, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,
             "isRequired": true
           },
@@ -2237,10 +1808,7 @@
             "signature": [
               "({ children }: { children: React.ReactNode; }) => JSX.Element"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,
             "isRequired": true
           },
@@ -2254,10 +1822,7 @@
             "signature": [
               "React.FC<{}> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,
             "isRequired": false
           }
@@ -2274,10 +1839,7 @@
         "tags": [],
         "label": "OnSaveProps",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
         "deprecated": false,
         "children": [
           {
@@ -2287,10 +1849,7 @@
             "tags": [],
             "label": "newTitle",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -2300,10 +1859,7 @@
             "tags": [],
             "label": "newCopyOnSave",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -2313,10 +1869,7 @@
             "tags": [],
             "label": "isTitleDuplicateConfirmed",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -2329,10 +1882,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2344,10 +1894,7 @@
             "tags": [],
             "label": "newDescription",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           }
         ],
@@ -2360,10 +1907,7 @@
         "tags": [],
         "label": "OriginSaveModalProps",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-          "lineNumber": 22
-        },
+        "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
         "deprecated": false,
         "children": [
           {
@@ -2376,10 +1920,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
           },
           {
@@ -2392,10 +1933,7 @@
             "signature": [
               "((appId: string) => string | undefined) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
           },
           {
@@ -2408,10 +1946,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
           },
           {
@@ -2424,10 +1959,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
           },
           {
@@ -2440,10 +1972,7 @@
             "signature": [
               "SaveModalDocumentInfo"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
           },
           {
@@ -2453,10 +1982,7 @@
             "tags": [],
             "label": "objectType",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
           },
           {
@@ -2469,10 +1995,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2495,10 +2018,7 @@
               },
               ") => React.ReactNode) | null | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
           },
           {
@@ -2519,10 +2039,7 @@
               },
               " & { returnToOrigin: boolean; }) => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2543,10 +2060,7 @@
                   },
                   " & { returnToOrigin: boolean; }"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-                  "lineNumber": 31
-                },
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
                 "deprecated": false
               }
             ]
@@ -2563,186 +2077,108 @@
         ],
         "label": "SavedObject",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 25
-        },
+        "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": true,
         "references": [
           {
             "plugin": "savedObjectsTaggingOss",
-            "link": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 14
-            }
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 9
-            }
+            "path": "src/plugins/visualizations/public/types.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 41
-            }
+            "path": "src/plugins/visualizations/public/types.ts"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
-              "lineNumber": 9
-            }
+            "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
           },
           {
             "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
-              "lineNumber": 61
-            }
+            "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 16
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 105
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 114
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
           },
           {
             "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 124
-            }
+            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
           },
           {
             "plugin": "savedObjectsTaggingOss",
-            "link": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
-              "lineNumber": 9
-            }
+            "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts"
           },
           {
             "plugin": "savedObjectsTaggingOss",
-            "link": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
-              "lineNumber": 14
-            }
+            "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts"
           },
           {
             "plugin": "savedObjectsTaggingOss",
-            "link": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 14
-            }
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "savedObjectsTaggingOss",
-            "link": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 75
-            }
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/services/saved_objects.ts",
-              "lineNumber": 11
-            }
+            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-              "lineNumber": 10
-            }
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-              "lineNumber": 19
-            }
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts",
-              "lineNumber": 10
-            }
+            "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts",
-              "lineNumber": 15
-            }
+            "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx",
-              "lineNumber": 14
-            }
+            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx",
-              "lineNumber": 98
-            }
+            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx",
-              "lineNumber": 126
-            }
+            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 12
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 125
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 223
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "link": {
-              "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts",
-              "lineNumber": 233
-            }
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           }
         ],
         "children": [
@@ -2760,10 +2196,7 @@
               "SavedObjectReference",
               "[]; }"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2778,10 +2211,7 @@
             "signature": [
               "{ [x: string]: unknown; }"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -2802,10 +2232,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2819,10 +2246,7 @@
                 "signature": [
                   "{ [x: string]: any; }"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/types.ts",
-                  "lineNumber": 28
-                },
+                "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false
               }
             ]
@@ -2834,10 +2258,7 @@
             "tags": [],
             "label": "copyOnSave",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -2852,10 +2273,7 @@
               "SavedObjectCreationOpts",
               ") => Record<string, unknown>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2869,10 +2287,7 @@
                 "signature": [
                   "SavedObjectCreationOpts"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/types.ts",
-                  "lineNumber": 30
-                },
+                "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false
               }
             ]
@@ -2887,10 +2302,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -2903,10 +2315,7 @@
             "signature": [
               "(() => Promise<{}>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -2919,10 +2328,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2937,10 +2343,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2955,10 +2358,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2973,10 +2373,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2999,10 +2396,7 @@
               },
               " | null>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3015,10 +2409,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3039,10 +2430,7 @@
               },
               ">) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3052,10 +2440,7 @@
             "tags": [],
             "label": "isSaving",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3068,10 +2453,7 @@
             "signature": [
               "() => boolean"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -3083,10 +2465,7 @@
             "tags": [],
             "label": "lastSavedTitle",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3099,10 +2478,7 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 43
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3123,10 +2499,7 @@
               },
               ") => Promise<string>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3146,10 +2519,7 @@
                     "text": "SavedObjectSaveOpts"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/types.ts",
-                  "lineNumber": 44
-                },
+                "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false
               }
             ]
@@ -3172,10 +2542,7 @@
               },
               ", \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3195,10 +2562,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3208,10 +2572,7 @@
             "tags": [],
             "label": "showInRecentlyAccessed",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 47
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3221,10 +2582,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 48
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3238,10 +2596,7 @@
               "SavedObjectReference",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 49
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           }
         ],
@@ -3254,10 +2609,7 @@
         "tags": [],
         "label": "SavedObjectConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 77
-        },
+        "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3286,10 +2638,7 @@
               },
               ">) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 79
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3302,10 +2651,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 80
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3322,10 +2668,7 @@
               "SavedObjectAttributesAndRefs",
               ") | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 81
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3348,10 +2691,7 @@
               "SavedObjectReference",
               "[]) => void) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 82
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3364,10 +2704,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 83
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3380,10 +2717,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 84
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3403,10 +2737,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 85
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3419,10 +2750,7 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 86
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3435,10 +2763,7 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 87
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3451,10 +2776,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 88
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3475,10 +2797,7 @@
               },
               ", \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 89
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -3491,10 +2810,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 90
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           }
         ],
@@ -3517,10 +2833,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3535,10 +2848,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -3563,10 +2873,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3586,10 +2893,7 @@
                     "text": "SavedObjectConfig"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-                  "lineNumber": 21
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
                 "deprecated": false
               }
             ]
@@ -3606,10 +2910,7 @@
             "signature": [
               "(object: T) => void"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3623,10 +2924,7 @@
                 "signature": [
                   "T"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-                  "lineNumber": 28
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
                 "deprecated": false
               }
             ]
@@ -3651,10 +2949,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
         "deprecated": false,
         "children": [
           {
@@ -3666,10 +2961,7 @@
             "description": [
               "\nThe id of the decorator"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
             "deprecated": false
           },
           {
@@ -3681,10 +2973,7 @@
             "description": [
               "\nHighest priority will be called **last**\n(the decoration will be at the highest level)"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
             "deprecated": false
           },
           {
@@ -3709,10 +2998,7 @@
               },
               "<T>"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3726,10 +3012,7 @@
                 "signature": [
                   "SavedObjectKibanaServices"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-                  "lineNumber": 32
-                },
+                "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
                 "deprecated": false
               }
             ]
@@ -3744,10 +3027,7 @@
         "tags": [],
         "label": "SavedObjectLoaderFindOptions",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-          "lineNumber": 18
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
         "deprecated": false,
         "children": [
           {
@@ -3760,10 +3040,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false
           },
           {
@@ -3776,10 +3053,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false
           },
           {
@@ -3799,10 +3073,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
             "deprecated": false
           }
         ],
@@ -3825,10 +3096,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-          "lineNumber": 43
-        },
+        "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
         "deprecated": false,
         "children": [
           {
@@ -3838,10 +3106,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false
           },
           {
@@ -3851,10 +3116,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false
           },
           {
@@ -3876,10 +3138,7 @@
               "<T>) => ",
               "IconType"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [
               {
@@ -3899,10 +3158,7 @@
                   },
                   "<T>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 46
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3927,10 +3183,7 @@
               },
               "<T>) => string) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 47
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [
               {
@@ -3950,10 +3203,7 @@
                   },
                   "<T>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 47
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3978,10 +3228,7 @@
               },
               "<T>) => boolean) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 48
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [
               {
@@ -4001,10 +3248,7 @@
                   },
                   "<T>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 48
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4029,10 +3273,7 @@
               },
               "<T>) => string) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 49
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "children": [
               {
@@ -4052,10 +3293,7 @@
                   },
                   "<T>"
                 ],
-                "source": {
-                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 49
-                },
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4072,10 +3310,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 50
-            },
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false
           }
         ],
@@ -4088,10 +3323,7 @@
         "tags": [],
         "label": "SavedObjectSaveOpts",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 52
-        },
+        "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4104,10 +3336,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 53
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -4120,10 +3349,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 54
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -4136,10 +3362,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 55
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           },
           {
@@ -4152,10 +3375,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 56
-            },
+            "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
           }
         ],
@@ -4168,10 +3388,7 @@
         "tags": [],
         "label": "SaveModalState",
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-          "lineNumber": 58
-        },
+        "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
         "deprecated": false,
         "children": [
           {
@@ -4181,10 +3398,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 59
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -4194,10 +3408,7 @@
             "tags": [],
             "label": "copyOnSave",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 60
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -4207,10 +3418,7 @@
             "tags": [],
             "label": "isTitleDuplicateConfirmed",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 61
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -4220,10 +3428,7 @@
             "tags": [],
             "label": "hasTitleDuplicate",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 62
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -4233,10 +3438,7 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 63
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           },
           {
@@ -4246,10 +3448,7 @@
             "tags": [],
             "label": "visualizationDescription",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 64
-            },
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false
           }
         ],
@@ -4268,10 +3467,7 @@
         "signature": [
           "\"savedObjects:listingLimit\""
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/common/index.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/saved_objects/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4285,10 +3481,7 @@
         "signature": [
           "\"savedObjects:perPage\""
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/common/index.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/saved_objects/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4312,10 +3505,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-          "lineNumber": 31
-        },
+        "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4331,10 +3521,7 @@
         "signature": [
           "{ id?: string | undefined; } | { error: Error; }"
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4347,10 +3534,7 @@
       "tags": [],
       "label": "SavedObjectsStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/saved_objects/public/plugin.ts",
-        "lineNumber": 25
-      },
+      "path": "src/plugins/saved_objects/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -4372,32 +3556,20 @@
               "text": "SavedObject"
             }
           ],
-          "source": {
-            "path": "src/plugins/saved_objects/public/plugin.ts",
-            "lineNumber": 27
-          },
+          "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
           "references": [
             {
               "plugin": "discover",
-              "link": {
-                "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
-                "lineNumber": 12
-              }
+              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts"
             },
             {
               "plugin": "visualizations",
-              "link": {
-                "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-                "lineNumber": 71
-              }
+              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
             },
             {
               "plugin": "dashboard",
-              "link": {
-                "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-                "lineNumber": 42
-              }
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
             }
           ]
         },
@@ -4413,46 +3585,28 @@
           "signature": [
             "{ getPerPage: () => number; getListingLimit: () => number; }"
           ],
-          "source": {
-            "path": "src/plugins/saved_objects/public/plugin.ts",
-            "lineNumber": 29
-          },
+          "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
           "references": [
             {
               "plugin": "dashboard",
-              "link": {
-                "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 91
-              }
+              "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx"
             },
             {
               "plugin": "dashboard",
-              "link": {
-                "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 176
-              }
+              "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx"
             },
             {
               "plugin": "maps",
-              "link": {
-                "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx",
-                "lineNumber": 94
-              }
+              "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
             },
             {
               "plugin": "maps",
-              "link": {
-                "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx",
-                "lineNumber": 136
-              }
+              "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
             },
             {
               "plugin": "maps",
-              "link": {
-                "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx",
-                "lineNumber": 138
-              }
+              "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
             }
           ]
         }
@@ -4467,10 +3621,7 @@
       "tags": [],
       "label": "SavedObjectSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/saved_objects/public/plugin.ts",
-        "lineNumber": 21
-      },
+      "path": "src/plugins/saved_objects/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -4491,10 +3642,7 @@
             },
             "<any>) => void"
           ],
-          "source": {
-            "path": "src/plugins/saved_objects/public/plugin.ts",
-            "lineNumber": 22
-          },
+          "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -4515,10 +3663,7 @@
                 },
                 "<any>"
               ],
-              "source": {
-                "path": "src/plugins/saved_objects/public/plugin.ts",
-                "lineNumber": 22
-              },
+              "path": "src/plugins/saved_objects/public/plugin.ts",
               "deprecated": false
             }
           ]
@@ -4552,10 +3697,7 @@
         "signature": [
           "\"savedObjects:listingLimit\""
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/common/index.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/saved_objects/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4569,10 +3711,7 @@
         "signature": [
           "\"savedObjects:perPage\""
         ],
-        "source": {
-          "path": "src/plugins/saved_objects/common/index.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/saved_objects/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

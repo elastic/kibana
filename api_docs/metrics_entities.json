@@ -22,10 +22,7 @@
       "tags": [],
       "label": "MetricsEntitiesPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/metrics_entities/server/types.ts",
-        "lineNumber": 14
-      },
+      "path": "x-pack/plugins/metrics_entities/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -47,10 +44,7 @@
             ") => ",
             "MetricsEntitiesClient"
           ],
-          "source": {
-            "path": "x-pack/plugins/metrics_entities/server/types.ts",
-            "lineNumber": 15
-          },
+          "path": "x-pack/plugins/metrics_entities/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -64,7 +58,7 @@
               "signature": [
                 "Pick<",
                 "KibanaClient",
-                ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"helpers\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -74,10 +68,7 @@
                 "ApiResponse",
                 "<Record<string, any>, unknown>>; }; }"
               ],
-              "source": {
-                "path": "x-pack/plugins/metrics_entities/server/types.ts",
-                "lineNumber": 12
-              },
+              "path": "x-pack/plugins/metrics_entities/server/types.ts",
               "deprecated": false
             }
           ]
@@ -96,10 +87,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "x-pack/plugins/metrics_entities/server/types.ts",
-        "lineNumber": 18
-      },
+      "path": "x-pack/plugins/metrics_entities/server/types.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -123,10 +111,7 @@
         "signature": [
           "\"estc\""
         ],
-        "source": {
-          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -139,10 +124,7 @@
         "description": [
           "\nTransforms route"
         ],
-        "source": {
-          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -158,10 +140,7 @@
         "signature": [
           "\"/api/metrics_entities\""
         ],
-        "source": {
-          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -175,10 +154,7 @@
         "signature": [
           "\"metricsEntities\""
         ],
-        "source": {
-          "path": "x-pack/plugins/metrics_entities/common/index.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/metrics_entities/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -192,10 +168,7 @@
         "signature": [
           "\"metrics_entities\""
         ],
-        "source": {
-          "path": "x-pack/plugins/metrics_entities/common/index.ts",
-          "lineNumber": 9
-        },
+        "path": "x-pack/plugins/metrics_entities/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

@@ -22,10 +22,7 @@
           "FieldFormatInstanceType",
           ")[]"
         ],
-        "source": {
-          "path": "src/plugins/data/public/field_formats/constants.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/data/public/field_formats/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -45,14 +42,11 @@
             "section": "def-common.FieldFormatsRegistry",
             "text": "FieldFormatsRegistry"
           },
-          ", \"init\" | \"register\" | \"deserialize\" | \"getDefaultConfig\" | \"getType\" | \"getTypeWithoutMetaParams\" | \"getDefaultType\" | \"getTypeNameByEsTypes\" | \"getDefaultTypeName\" | \"getInstance\" | \"getDefaultInstancePlain\" | \"getDefaultInstanceCacheResolver\" | \"getByFieldType\" | \"getDefaultInstance\" | \"parseDefaultTypeMap\"> & { deserialize: ",
+          ", \"deserialize\" | \"getDefaultConfig\" | \"getType\" | \"getTypeWithoutMetaParams\" | \"getDefaultType\" | \"getTypeNameByEsTypes\" | \"getDefaultTypeName\" | \"getInstance\" | \"getDefaultInstancePlain\" | \"getDefaultInstanceCacheResolver\" | \"getByFieldType\" | \"getDefaultInstance\" | \"parseDefaultTypeMap\" | \"has\"> & { deserialize: ",
           "FormatFactory",
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/field_formats/field_formats_service.ts",
-          "lineNumber": 55
-        },
+        "path": "src/plugins/data/public/field_formats/field_formats_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -93,10 +87,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
         "deprecated": false,
         "children": [
           {
@@ -115,10 +106,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
             "deprecated": false
           },
           {
@@ -128,10 +116,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
             "deprecated": false
           },
           {
@@ -151,10 +136,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
             "deprecated": false
           },
           {
@@ -167,10 +149,7 @@
             "signature": [
               "(value: any) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
             "deprecated": false,
             "children": [
               {
@@ -183,10 +162,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
-                  "lineNumber": 22
-                },
+                "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -214,10 +190,7 @@
           " extends ",
           "NumeralFormat"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
         "deprecated": false,
         "children": [
           {
@@ -236,10 +209,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
             "deprecated": false
           },
           {
@@ -249,10 +219,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
             "deprecated": false
           },
           {
@@ -271,10 +238,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
             "deprecated": false
           },
           {
@@ -284,10 +248,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
             "deprecated": false
           },
           {
@@ -297,10 +258,7 @@
             "tags": [],
             "label": "allowsNumericalAggregations",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
             "deprecated": false
           }
         ],
@@ -330,10 +288,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-          "lineNumber": 19
-        },
+        "path": "src/plugins/data/common/field_formats/converters/color.tsx",
         "deprecated": false,
         "children": [
           {
@@ -352,10 +307,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/data/common/field_formats/converters/color.tsx",
             "deprecated": false
           },
           {
@@ -365,10 +317,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/data/common/field_formats/converters/color.tsx",
             "deprecated": false
           },
           {
@@ -388,10 +337,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/common/field_formats/converters/color.tsx",
             "deprecated": false
           },
           {
@@ -404,10 +350,7 @@
             "signature": [
               "() => { fieldType: null; colors: { range: string; regex: string; text: string; background: string; }[]; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/data/common/field_formats/converters/color.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -422,10 +365,7 @@
             "signature": [
               "(val: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/data/common/field_formats/converters/color.tsx",
             "deprecated": false,
             "children": [
               {
@@ -438,10 +378,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-                  "lineNumber": 33
-                },
+                "path": "src/plugins/data/common/field_formats/converters/color.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -458,10 +395,7 @@
             "signature": [
               "(val: any) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-              "lineNumber": 52
-            },
+            "path": "src/plugins/data/common/field_formats/converters/color.tsx",
             "deprecated": false,
             "children": [
               {
@@ -474,10 +408,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/color.tsx",
-                  "lineNumber": 52
-                },
+                "path": "src/plugins/data/common/field_formats/converters/color.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -511,10 +442,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-          "lineNumber": 211
-        },
+        "path": "src/plugins/data/common/field_formats/converters/duration.ts",
         "deprecated": false,
         "children": [
           {
@@ -533,10 +461,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 212
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false
           },
           {
@@ -546,10 +471,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 213
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false
           },
           {
@@ -568,10 +490,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 216
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false
           },
           {
@@ -584,10 +503,7 @@
             "signature": [
               "{ text: string; kind: string; }[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 217
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false
           },
           {
@@ -600,10 +516,7 @@
             "signature": [
               "({ text: string; method: string; shortText?: undefined; } | { text: string; shortText: string; method: string; })[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 218
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false
           },
           {
@@ -613,10 +526,7 @@
             "tags": [],
             "label": "allowsNumericalAggregations",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 219
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false
           },
           {
@@ -629,10 +539,7 @@
             "signature": [
               "() => boolean"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 221
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -647,10 +554,7 @@
             "signature": [
               "() => boolean"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 225
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -665,10 +569,7 @@
             "signature": [
               "() => { inputFormat: string; outputFormat: string; outputPrecision: number; includeSpaceWithSuffix: boolean; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 229
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -683,10 +584,7 @@
             "signature": [
               "(val: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 238
-            },
+            "path": "src/plugins/data/common/field_formats/converters/duration.ts",
             "deprecated": false,
             "children": [
               {
@@ -699,10 +597,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-                  "lineNumber": 238
-                },
+                "path": "src/plugins/data/common/field_formats/converters/duration.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -719,10 +614,7 @@
         "tags": [],
         "label": "FieldFormat",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/field_format.ts",
-          "lineNumber": 26
-        },
+        "path": "src/plugins/data/common/field_formats/field_format.ts",
         "deprecated": false,
         "children": [
           {
@@ -735,10 +627,22 @@
             ],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FieldFormat.hidden",
+            "type": "boolean",
+            "tags": [
+              "property",
+              "static"
+            ],
+            "label": "hidden",
+            "description": [
+              "\nHidden field formats can only be accessed directly by id,\nThey won't appear in field format editor UI,\nBut they can be accessed and used from code internally.\n"
+            ],
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -751,10 +655,7 @@
             ],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -770,10 +671,7 @@
             "signature": [
               "string | string[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -790,10 +688,7 @@
               "FieldFormatConvert",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 52
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -810,10 +705,7 @@
               "HtmlContextTypeConvert",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 60
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -830,10 +722,7 @@
               "TextContextTypeConvert",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 68
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -849,10 +738,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 74
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -865,10 +751,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 75
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -881,10 +764,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -904,10 +784,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 78
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false
           },
           {
@@ -920,10 +797,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 80
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [
               {
@@ -936,10 +810,7 @@
                 "signature": [
                   "IFieldFormatMetaParams"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 80
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -960,10 +831,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 80
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -994,10 +862,7 @@
               "HtmlContextTypeOptions",
               " | undefined) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 98
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [
               {
@@ -1010,10 +875,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 99
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1035,10 +897,7 @@
                     "text": "FieldFormatsContentType"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 100
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1054,10 +913,7 @@
                   "HtmlContextTypeOptions",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 101
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1089,10 +945,7 @@
               ") => ",
               "FieldFormatConvertFunction"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 118
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [
               {
@@ -1111,10 +964,7 @@
                     "text": "FieldFormatsContentType"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 119
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1137,10 +987,7 @@
             "signature": [
               "() => Record<string, any>"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 133
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [],
             "returnComment": [
@@ -1161,10 +1008,7 @@
             "signature": [
               "(name: string) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 144
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [
               {
@@ -1179,10 +1023,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 144
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1203,10 +1044,7 @@
             "signature": [
               "() => Record<string, any>"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 161
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1225,10 +1063,7 @@
             "signature": [
               "() => { id: any; params: any; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 172
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1246,10 +1081,7 @@
               ") => ",
               "FieldFormatInstanceType"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 193
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [
               {
@@ -1262,10 +1094,7 @@
                 "signature": [
                   "FieldFormatConvertFunction"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 193
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1283,10 +1112,7 @@
               "() => ",
               "FieldFormatConvert"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 197
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1308,10 +1134,7 @@
                 "text": "FieldFormat"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_format.ts",
-              "lineNumber": 204
-            },
+            "path": "src/plugins/data/common/field_formats/field_format.ts",
             "deprecated": false,
             "children": [
               {
@@ -1324,10 +1147,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_format.ts",
-                  "lineNumber": 204
-                },
+                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1354,10 +1174,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/errors.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/data/common/field_formats/errors.ts",
         "deprecated": false,
         "children": [
           {
@@ -1367,10 +1184,7 @@
             "tags": [],
             "label": "formatId",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/errors.ts",
-              "lineNumber": 10
-            },
+            "path": "src/plugins/data/common/field_formats/errors.ts",
             "deprecated": false
           },
           {
@@ -1383,10 +1197,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/errors.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/common/field_formats/errors.ts",
             "deprecated": false,
             "children": [
               {
@@ -1399,10 +1210,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/errors.ts",
-                  "lineNumber": 11
-                },
+                "path": "src/plugins/data/common/field_formats/errors.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1416,10 +1224,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/errors.ts",
-                  "lineNumber": 11
-                },
+                "path": "src/plugins/data/common/field_formats/errors.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1436,10 +1241,7 @@
         "tags": [],
         "label": "FieldFormatsRegistry",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-          "lineNumber": 28
-        },
+        "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
         "deprecated": false,
         "children": [
           {
@@ -1454,10 +1256,7 @@
               "FieldFormatInstanceType",
               ">"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false
           },
           {
@@ -1467,10 +1266,7 @@
             "tags": [],
             "label": "defaultMap",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": []
           },
@@ -1481,10 +1277,7 @@
             "tags": [],
             "label": "metaParamsOptions",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": []
           },
@@ -1505,10 +1298,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false
           },
           {
@@ -1536,10 +1326,7 @@
                 "text": "FieldFormat"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -1559,10 +1346,7 @@
                   },
                   "<Record<string, any>> | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 34
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1589,10 +1373,7 @@
               "FieldFormatInstanceType",
               "[]) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 51
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -1611,10 +1392,7 @@
                     "text": "GetConfigFn"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 52
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1628,10 +1406,7 @@
                 "signature": [
                   "Record<string, any>"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1646,10 +1421,7 @@
                   "FieldFormatInstanceType",
                   "[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 54
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1693,10 +1465,7 @@
                 "text": "FieldFormatConfig"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 71
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -1717,10 +1486,7 @@
                     "text": "KBN_FIELD_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 72
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1743,10 +1509,7 @@
                   },
                   "[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 73
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1769,10 +1532,7 @@
               "FieldFormatInstanceType",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 88
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -1787,10 +1547,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 88
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1809,10 +1566,7 @@
               "FieldFormatInstanceType",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 102
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -1825,10 +1579,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 102
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1867,10 +1618,7 @@
               "FieldFormatInstanceType",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 115
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -1889,10 +1637,7 @@
                     "text": "KBN_FIELD_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 116
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1915,10 +1660,7 @@
                   },
                   "[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 117
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1955,10 +1697,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 131
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -1980,10 +1719,7 @@
                   },
                   "[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 131
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2035,10 +1771,7 @@
                 "text": "ES_FIELD_TYPES"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 147
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -2057,10 +1790,7 @@
                     "text": "KBN_FIELD_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 148
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2081,10 +1811,7 @@
                   },
                   "[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 149
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2113,10 +1840,7 @@
               },
               ") & _.MemoizedFunction"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 162
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2127,10 +1851,7 @@
                 "tags": [],
                 "label": "formatId",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 163
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false
               },
               {
@@ -2143,10 +1864,7 @@
                 "signature": [
                   "{ [x: string]: any; }"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 163
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false
               }
             ]
@@ -2188,10 +1906,7 @@
                 "text": "FieldFormat"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 186
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -2210,10 +1925,7 @@
                     "text": "KBN_FIELD_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 187
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2234,10 +1946,7 @@
                   },
                   "[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 188
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": false
               },
@@ -2251,10 +1960,7 @@
                 "signature": [
                   "Record<string, any>"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 189
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2291,10 +1997,7 @@
               },
               "[]) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 210
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -2313,10 +2016,7 @@
                     "text": "KBN_FIELD_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 210
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2337,10 +2037,7 @@
                   },
                   "[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 210
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2356,7 +2053,7 @@
             ],
             "label": "getByFieldType",
             "description": [
-              "\nGet filtered list of field formats by format type\n"
+              "\nGet filtered list of field formats by format type,\nSkips hidden field formats\n"
             ],
             "signature": [
               "(fieldType: ",
@@ -2371,10 +2068,7 @@
               "FieldFormatInstanceType",
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 223
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -2393,10 +2087,7 @@
                     "text": "KBN_FIELD_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 223
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2441,10 +2132,7 @@
               },
               ") & _.MemoizedFunction"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 242
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2464,10 +2152,7 @@
                     "text": "KBN_FIELD_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 187
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false
               },
               {
@@ -2487,10 +2172,7 @@
                   },
                   "[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 188
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false
               },
               {
@@ -2503,10 +2185,7 @@
                 "signature": [
                   "{ [x: string]: any; }"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 189
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false
               }
             ]
@@ -2521,10 +2200,7 @@
             "signature": [
               "(value: any) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 244
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -2537,10 +2213,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 244
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2559,10 +2232,7 @@
               "FieldFormatInstanceType",
               "[]) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-              "lineNumber": 255
-            },
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
             "deprecated": false,
             "children": [
               {
@@ -2576,10 +2246,39 @@
                   "FieldFormatInstanceType",
                   "[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
-                  "lineNumber": 255
-                },
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FieldFormatsRegistry.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [
+              "\nChecks if field format with id already registered"
+            ],
+            "signature": [
+              "(id: string) => boolean"
+            ],
+            "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.FieldFormatsRegistry.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2613,10 +2312,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
         "deprecated": false,
         "children": [
           {
@@ -2635,10 +2331,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false
           },
           {
@@ -2657,10 +2350,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false
           },
           {
@@ -2670,10 +2360,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false
           },
           {
@@ -2692,10 +2379,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false
           },
           {
@@ -2705,10 +2389,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false
           },
           {
@@ -2718,10 +2399,7 @@
             "tags": [],
             "label": "allowsNumericalAggregations",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false
           },
           {
@@ -2734,10 +2412,7 @@
             "signature": [
               "() => { id: string; params: {}; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2752,10 +2427,7 @@
             "signature": [
               "(val: any) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
             "deprecated": false,
             "children": [
               {
@@ -2768,10 +2440,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
-                  "lineNumber": 36
-                },
+                "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2805,10 +2474,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/ip.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/data/common/field_formats/converters/ip.ts",
         "deprecated": false,
         "children": [
           {
@@ -2827,10 +2493,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/ip.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/data/common/field_formats/converters/ip.ts",
             "deprecated": false
           },
           {
@@ -2840,10 +2503,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/ip.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/common/field_formats/converters/ip.ts",
             "deprecated": false
           },
           {
@@ -2862,10 +2522,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/ip.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/data/common/field_formats/converters/ip.ts",
             "deprecated": false
           },
           {
@@ -2878,10 +2535,7 @@
             "signature": [
               "(val: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/ip.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/data/common/field_formats/converters/ip.ts",
             "deprecated": false,
             "children": [
               {
@@ -2894,10 +2548,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/ip.ts",
-                  "lineNumber": 21
-                },
+                "path": "src/plugins/data/common/field_formats/converters/ip.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2925,10 +2576,7 @@
           " extends ",
           "NumeralFormat"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/number.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/data/common/field_formats/converters/number.ts",
         "deprecated": false,
         "children": [
           {
@@ -2947,10 +2595,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/number.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/data/common/field_formats/converters/number.ts",
             "deprecated": false
           },
           {
@@ -2960,10 +2605,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/number.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/data/common/field_formats/converters/number.ts",
             "deprecated": false
           },
           {
@@ -2982,10 +2624,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/number.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/data/common/field_formats/converters/number.ts",
             "deprecated": false
           },
           {
@@ -2995,10 +2634,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/number.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/data/common/field_formats/converters/number.ts",
             "deprecated": false
           },
           {
@@ -3008,10 +2644,7 @@
             "tags": [],
             "label": "allowsNumericalAggregations",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/number.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/data/common/field_formats/converters/number.ts",
             "deprecated": false
           }
         ],
@@ -3035,10 +2668,7 @@
           " extends ",
           "NumeralFormat"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/data/common/field_formats/converters/percent.ts",
         "deprecated": false,
         "children": [
           {
@@ -3057,10 +2687,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/data/common/field_formats/converters/percent.ts",
             "deprecated": false
           },
           {
@@ -3070,10 +2697,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/common/field_formats/converters/percent.ts",
             "deprecated": false
           },
           {
@@ -3092,10 +2716,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/data/common/field_formats/converters/percent.ts",
             "deprecated": false
           },
           {
@@ -3105,10 +2726,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/data/common/field_formats/converters/percent.ts",
             "deprecated": false
           },
           {
@@ -3118,10 +2736,7 @@
             "tags": [],
             "label": "allowsNumericalAggregations",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/data/common/field_formats/converters/percent.ts",
             "deprecated": false
           },
           {
@@ -3134,10 +2749,7 @@
             "signature": [
               "() => { pattern: any; fractional: boolean; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/common/field_formats/converters/percent.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -3152,10 +2764,7 @@
             "signature": [
               "(val: any) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/common/field_formats/converters/percent.ts",
             "deprecated": false,
             "children": [
               {
@@ -3168,10 +2777,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/percent.ts",
-                  "lineNumber": 29
-                },
+                "path": "src/plugins/data/common/field_formats/converters/percent.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3205,10 +2811,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
         "deprecated": false,
         "children": [
           {
@@ -3227,10 +2830,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
             "deprecated": false
           },
           {
@@ -3240,10 +2840,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
             "deprecated": false
           },
           {
@@ -3262,10 +2859,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
             "deprecated": false
           },
           {
@@ -3278,10 +2872,7 @@
             "signature": [
               "(val: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
             "deprecated": false,
             "children": [
               {
@@ -3294,10 +2885,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
-                  "lineNumber": 22
-                },
+                "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3331,10 +2919,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-          "lineNumber": 38
-        },
+        "path": "src/plugins/data/common/field_formats/converters/source.tsx",
         "deprecated": false,
         "children": [
           {
@@ -3353,10 +2938,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/data/common/field_formats/converters/source.tsx",
             "deprecated": false
           },
           {
@@ -3366,10 +2948,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/data/common/field_formats/converters/source.tsx",
             "deprecated": false
           },
           {
@@ -3388,10 +2967,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/data/common/field_formats/converters/source.tsx",
             "deprecated": false
           },
           {
@@ -3404,10 +2980,7 @@
             "signature": [
               "(value: any) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-              "lineNumber": 43
-            },
+            "path": "src/plugins/data/common/field_formats/converters/source.tsx",
             "deprecated": false,
             "children": [
               {
@@ -3420,10 +2993,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-                  "lineNumber": 43
-                },
+                "path": "src/plugins/data/common/field_formats/converters/source.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3442,10 +3012,7 @@
               "HtmlContextTypeOptions",
               " | undefined) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/data/common/field_formats/converters/source.tsx",
             "deprecated": false,
             "children": [
               {
@@ -3458,10 +3025,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-                  "lineNumber": 45
-                },
+                "path": "src/plugins/data/common/field_formats/converters/source.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -3476,10 +3040,7 @@
                   "HtmlContextTypeOptions",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
-                  "lineNumber": 45
-                },
+                "path": "src/plugins/data/common/field_formats/converters/source.tsx",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -3513,10 +3074,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
-          "lineNumber": 24
-        },
+        "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
         "deprecated": false,
         "children": [
           {
@@ -3535,10 +3093,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
             "deprecated": false
           },
           {
@@ -3548,10 +3103,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
             "deprecated": false
           },
           {
@@ -3571,10 +3123,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
             "deprecated": false
           },
           {
@@ -3587,10 +3136,7 @@
             "signature": [
               "() => { lookupEntries: {}[]; unknownKeyValue: null; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -3605,10 +3151,7 @@
             "signature": [
               "(val: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
-              "lineNumber": 43
-            },
+            "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
             "deprecated": false,
             "children": [
               {
@@ -3621,10 +3164,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
-                  "lineNumber": 43
-                },
+                "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3658,10 +3198,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/string.ts",
-          "lineNumber": 67
-        },
+        "path": "src/plugins/data/common/field_formats/converters/string.ts",
         "deprecated": false,
         "children": [
           {
@@ -3680,10 +3217,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 68
-            },
+            "path": "src/plugins/data/common/field_formats/converters/string.ts",
             "deprecated": false
           },
           {
@@ -3693,10 +3227,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 69
-            },
+            "path": "src/plugins/data/common/field_formats/converters/string.ts",
             "deprecated": false
           },
           {
@@ -3716,10 +3247,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 72
-            },
+            "path": "src/plugins/data/common/field_formats/converters/string.ts",
             "deprecated": false
           },
           {
@@ -3732,10 +3260,7 @@
             "signature": [
               "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 88
-            },
+            "path": "src/plugins/data/common/field_formats/converters/string.ts",
             "deprecated": false
           },
           {
@@ -3748,10 +3273,7 @@
             "signature": [
               "() => { transform: boolean; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 90
-            },
+            "path": "src/plugins/data/common/field_formats/converters/string.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -3766,10 +3288,7 @@
             "signature": [
               "(val: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 110
-            },
+            "path": "src/plugins/data/common/field_formats/converters/string.ts",
             "deprecated": false,
             "children": [
               {
@@ -3782,10 +3301,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/string.ts",
-                  "lineNumber": 110
-                },
+                "path": "src/plugins/data/common/field_formats/converters/string.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3804,10 +3320,7 @@
               "HtmlContextTypeOptions",
               " | undefined) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 132
-            },
+            "path": "src/plugins/data/common/field_formats/converters/string.ts",
             "deprecated": false,
             "children": [
               {
@@ -3820,10 +3333,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/string.ts",
-                  "lineNumber": 132
-                },
+                "path": "src/plugins/data/common/field_formats/converters/string.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -3838,10 +3348,7 @@
                   "HtmlContextTypeOptions",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/string.ts",
-                  "lineNumber": 132
-                },
+                "path": "src/plugins/data/common/field_formats/converters/string.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -3875,10 +3382,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
         "deprecated": false,
         "children": [
           {
@@ -3897,10 +3401,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
             "deprecated": false
           },
           {
@@ -3910,10 +3411,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
             "deprecated": false
           },
           {
@@ -3932,10 +3430,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
             "deprecated": false
           },
           {
@@ -3948,10 +3443,7 @@
             "signature": [
               "(val: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
             "deprecated": false,
             "children": [
               {
@@ -3964,10 +3456,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
-                  "lineNumber": 24
-                },
+                "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4001,10 +3490,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/converters/url.ts",
-          "lineNumber": 46
-        },
+        "path": "src/plugins/data/common/field_formats/converters/url.ts",
         "deprecated": false,
         "children": [
           {
@@ -4023,10 +3509,7 @@
                 "text": "FIELD_FORMAT_IDS"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 47
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false
           },
           {
@@ -4036,10 +3519,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 48
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false
           },
           {
@@ -4059,10 +3539,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 51
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false
           },
           {
@@ -4075,10 +3552,7 @@
             "signature": [
               "{ kind: string; text: string; }[]"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 61
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false
           },
           {
@@ -4091,10 +3565,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 63
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false,
             "children": [
               {
@@ -4107,10 +3578,7 @@
                 "signature": [
                   "IFieldFormatMetaParams"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/url.ts",
-                  "lineNumber": 63
-                },
+                "path": "src/plugins/data/common/field_formats/converters/url.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4127,10 +3595,7 @@
             "signature": [
               "() => { type: string; urlTemplate: null; labelTemplate: null; width: null; height: null; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 68
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -4145,10 +3610,7 @@
             "signature": [
               "(value: any) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 131
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false,
             "children": [
               {
@@ -4161,10 +3623,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/url.ts",
-                  "lineNumber": 131
-                },
+                "path": "src/plugins/data/common/field_formats/converters/url.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4183,10 +3642,7 @@
               "HtmlContextTypeOptions",
               " | undefined) => string"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/converters/url.ts",
-              "lineNumber": 133
-            },
+            "path": "src/plugins/data/common/field_formats/converters/url.ts",
             "deprecated": false,
             "children": [
               {
@@ -4199,10 +3655,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/url.ts",
-                  "lineNumber": 133
-                },
+                "path": "src/plugins/data/common/field_formats/converters/url.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -4217,10 +3670,7 @@
                   "HtmlContextTypeOptions",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/url.ts",
-                  "lineNumber": 133
-                },
+                "path": "src/plugins/data/common/field_formats/converters/url.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -4242,10 +3692,7 @@
         "signature": [
           "(query: any, shouldHighlight: boolean) => { pre_tags: string[]; post_tags: string[]; fields: { '*': {}; }; fragment_size: number; } | undefined"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
         "deprecated": false,
         "children": [
           {
@@ -4258,10 +3705,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -4275,10 +3719,7 @@
             "signature": [
               "boolean"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4295,10 +3736,7 @@
         "tags": [],
         "label": "FieldFormatConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 62
-        },
+        "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4308,10 +3746,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 63
-            },
+            "path": "src/plugins/data/common/field_formats/types.ts",
             "deprecated": false
           },
           {
@@ -4324,10 +3759,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 64
-            },
+            "path": "src/plugins/data/common/field_formats/types.ts",
             "deprecated": false
           },
           {
@@ -4340,10 +3772,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 65
-            },
+            "path": "src/plugins/data/common/field_formats/types.ts",
             "deprecated": false
           }
         ],
@@ -4358,10 +3787,7 @@
         "tags": [],
         "label": "FIELD_FORMAT_IDS",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 42
-        },
+        "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4378,10 +3804,7 @@
           "FieldFormatInstanceType",
           "[]"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/constants/base_formatters.ts",
-          "lineNumber": 28
-        },
+        "path": "src/plugins/data/common/field_formats/constants/base_formatters.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4397,10 +3820,7 @@
         "signature": [
           "string"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 75
-        },
+        "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4414,10 +3834,7 @@
         "signature": [
           "\"html\" | \"text\""
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4431,10 +3848,7 @@
         "signature": [
           "<T = any>(key: string, defaultOverride?: T | undefined) => T"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 68
-        },
+        "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4446,19 +3860,7 @@
         "label": "FieldFormatsStartCommon",
         "description": [],
         "signature": [
-          "{ init: (getConfig: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.GetConfigFn",
-            "text": "GetConfigFn"
-          },
-          ", metaParamsOptions?: Record<string, any>, defaultFieldConverters?: ",
-          "FieldFormatInstanceType",
-          "[]) => void; register: (fieldFormats: ",
-          "FieldFormatInstanceType",
-          "[]) => void; deserialize: ",
+          "{ deserialize: ",
           "FormatFactory",
           "; getDefaultConfig: (fieldType: ",
           {
@@ -4636,12 +4038,9 @@
             "section": "def-common.FieldFormat",
             "text": "FieldFormat"
           },
-          ") & _.MemoizedFunction; parseDefaultTypeMap: (value: any) => void; }"
+          ") & _.MemoizedFunction; parseDefaultTypeMap: (value: any) => void; has: (id: string) => boolean; }"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 97
-        },
+        "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4655,10 +4054,7 @@
         "signature": [
           "\"html\" | \"text\""
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/content_types/html_content_type.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/data/common/field_formats/content_types/html_content_type.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4678,10 +4074,7 @@
             "text": "FieldFormat"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 70
-        },
+        "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4883,12 +4276,9 @@
             "section": "def-common.FieldFormat",
             "text": "FieldFormat"
           },
-          ") & _.MemoizedFunction; parseDefaultTypeMap: (value: any) => void; }"
+          ") & _.MemoizedFunction; parseDefaultTypeMap: (value: any) => void; has: (id: string) => boolean; }"
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/index.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/field_formats/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4902,10 +4292,7 @@
         "signature": [
           "\"html\" | \"text\""
         ],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/content_types/text_content_type.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/data/common/field_formats/content_types/text_content_type.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4918,10 +4305,7 @@
         "tags": [],
         "label": "DEFAULT_CONVERTER_COLOR",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
         "deprecated": false,
         "children": [
           {
@@ -4931,10 +4315,7 @@
             "tags": [],
             "label": "range",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
-              "lineNumber": 10
-            },
+            "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
             "deprecated": false
           },
           {
@@ -4944,10 +4325,7 @@
             "tags": [],
             "label": "regex",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
             "deprecated": false
           },
           {
@@ -4957,10 +4335,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
             "deprecated": false
           },
           {
@@ -4970,10 +4345,7 @@
             "tags": [],
             "label": "background",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
             "deprecated": false
           }
         ],

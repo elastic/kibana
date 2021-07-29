@@ -11,10 +11,7 @@
         "tags": [],
         "label": "ChromeBadge",
         "description": [],
-        "source": {
-          "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 19
-        },
+        "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -24,10 +21,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -37,10 +31,7 @@
             "tags": [],
             "label": "tooltip",
             "description": [],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 21
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -53,10 +44,7 @@
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 22
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           }
         ],
@@ -69,10 +57,7 @@
         "tags": [],
         "label": "ChromeBrand",
         "description": [],
-        "source": {
-          "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 26
-        },
+        "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -85,10 +70,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 27
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -101,10 +83,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 28
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           }
         ],
@@ -119,10 +98,7 @@
         "description": [
           "\nAPIs for accessing and updating the document title.\n"
         ],
-        "source": {
-          "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-          "lineNumber": 32
-        },
+        "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -137,10 +113,7 @@
             "signature": [
               "(newTitle: string | string[]) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-              "lineNumber": 45
-            },
+            "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -155,10 +128,7 @@
                 "signature": [
                   "string | string[]"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-                  "lineNumber": 45
-                },
+                "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -177,10 +147,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-              "lineNumber": 50
-            },
+            "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -195,10 +162,7 @@
         "tags": [],
         "label": "ChromeHelpExtension",
         "description": [],
-        "source": {
-          "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 45
-        },
+        "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -210,10 +174,7 @@
             "description": [
               "\nProvide your plugin's name to create a header for separation"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 49
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -235,10 +196,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 53
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -253,10 +211,7 @@
             "signature": [
               "((element: HTMLDivElement) => () => void) | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 57
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           }
         ],
@@ -303,10 +258,7 @@
           "CommonEuiButtonEmptyProps",
           " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
         ],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 82
-        },
+        "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
         "children": [
           {
@@ -321,10 +273,7 @@
             "signature": [
               "\"custom\""
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 86
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           },
           {
@@ -336,10 +285,7 @@
             "description": [
               "\nURL of the link"
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 90
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           },
           {
@@ -354,10 +300,7 @@
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 94
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           }
         ],
@@ -404,10 +347,7 @@
           "CommonEuiButtonEmptyProps",
           " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
         ],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 56
-        },
+        "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
         "children": [
           {
@@ -422,10 +362,7 @@
             "signature": [
               "\"discuss\""
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 60
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           },
           {
@@ -437,10 +374,7 @@
             "description": [
               "\nURL to discuss page.\ni.e. `https://discuss.elastic.co/c/${appName}`"
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 65
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           }
         ],
@@ -487,10 +421,7 @@
           "CommonEuiButtonEmptyProps",
           " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
         ],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 69
-        },
+        "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
         "children": [
           {
@@ -505,10 +436,7 @@
             "signature": [
               "\"documentation\""
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 73
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           },
           {
@@ -520,10 +448,7 @@
             "description": [
               "\nURL to documentation page.\ni.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,"
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 78
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           }
         ],
@@ -570,10 +495,7 @@
           "CommonEuiButtonEmptyProps",
           " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
         ],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 40
-        },
+        "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
         "children": [
           {
@@ -588,10 +510,7 @@
             "signature": [
               "\"github\""
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 44
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           },
           {
@@ -606,10 +525,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 48
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           },
           {
@@ -624,10 +540,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 52
-            },
+            "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
           }
         ],
@@ -640,10 +553,7 @@
         "tags": [],
         "label": "ChromeNavControl",
         "description": [],
-        "source": {
-          "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-          "lineNumber": 15
-        },
+        "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -656,10 +566,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 16
-            },
+            "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
             "deprecated": false
           },
           {
@@ -679,10 +586,7 @@
                 "text": "UnmountCallback"
               }
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 17
-            },
+            "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -696,10 +600,7 @@
                 "signature": [
                   "T"
                 ],
-                "source": {
-                  "path": "src/core/public/types.ts",
-                  "lineNumber": 25
-                },
+                "path": "src/core/public/types.ts",
                 "deprecated": false
               }
             ]
@@ -716,10 +617,7 @@
         "description": [
           "\n{@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.\n"
         ],
-        "source": {
-          "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-          "lineNumber": 36
-        },
+        "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -742,10 +640,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 38
-            },
+            "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -764,10 +659,7 @@
                     "text": "ChromeNavControl"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-                  "lineNumber": 38
-                },
+                "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -794,10 +686,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 40
-            },
+            "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -816,10 +705,7 @@
                     "text": "ChromeNavControl"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-                  "lineNumber": 40
-                },
+                "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -846,10 +732,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 42
-            },
+            "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -868,10 +751,7 @@
                     "text": "ChromeNavControl"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-                  "lineNumber": 42
-                },
+                "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -888,10 +768,7 @@
         "tags": [],
         "label": "ChromeNavLink",
         "description": [],
-        "source": {
-          "path": "src/core/public/chrome/nav_links/nav_link.ts",
-          "lineNumber": 14
-        },
+        "path": "src/core/public/chrome/nav_links/nav_link.ts",
         "deprecated": false,
         "children": [
           {
@@ -903,10 +780,7 @@
             "description": [
               "\nA unique identifier for looking up links."
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 18
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -918,10 +792,7 @@
             "description": [
               "\nThe title of the application."
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 23
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -937,10 +808,7 @@
               "AppCategory",
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 28
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -952,10 +820,7 @@
             "description": [
               "\nThe base route used to open the root of an application."
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 33
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -967,10 +832,7 @@
             "description": [
               "\nThe route used to open the default path and the deep links of an application."
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 38
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -985,10 +847,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 43
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -1003,10 +862,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 48
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -1021,10 +877,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 54
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -1039,10 +892,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 60
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -1054,10 +904,7 @@
             "description": [
               "\nSettled state between `url`, `baseUrl`, and `active`"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 65
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -1072,10 +919,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 74
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           },
           {
@@ -1090,10 +934,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 79
-            },
+            "path": "src/core/public/chrome/nav_links/nav_link.ts",
             "deprecated": false
           }
         ],
@@ -1108,10 +949,7 @@
         "description": [
           "\n{@link ChromeNavLinks | APIs} for manipulating nav links.\n"
         ],
-        "source": {
-          "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-          "lineNumber": 28
-        },
+        "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -1136,10 +974,7 @@
               },
               ">[]>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 32
-            },
+            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1164,10 +999,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 38
-            },
+            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -1180,10 +1012,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 38
-                },
+                "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1210,10 +1039,7 @@
               },
               ">[]"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 43
-            },
+            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1230,10 +1056,7 @@
             "signature": [
               "(id: string) => boolean"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 49
-            },
+            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -1246,10 +1069,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 49
-                },
+                "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1268,10 +1088,7 @@
             "signature": [
               "(id: string) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 59
-            },
+            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -1284,10 +1101,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1306,10 +1120,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 73
-            },
+            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1328,10 +1139,7 @@
               "Observable",
               "<boolean>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 78
-            },
+            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1348,10 +1156,7 @@
         "description": [
           "\n{@link ChromeRecentlyAccessed | APIs} for recently accessed history."
         ],
-        "source": {
-          "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-          "lineNumber": 58
-        },
+        "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -1366,10 +1171,7 @@
             "signature": [
               "(link: string, label: string, id: string) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 71
-            },
+            "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -1384,10 +1186,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-                  "lineNumber": 71
-                },
+                "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1403,10 +1202,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-                  "lineNumber": 71
-                },
+                "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1422,10 +1218,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-                  "lineNumber": 71
-                },
+                "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1452,10 +1245,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 81
-            },
+            "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1482,10 +1272,7 @@
               },
               "[]>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 91
-            },
+            "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1500,10 +1287,7 @@
         "tags": [],
         "label": "ChromeRecentlyAccessedHistoryItem",
         "description": [],
-        "source": {
-          "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-          "lineNumber": 16
-        },
+        "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -1513,10 +1297,7 @@
             "tags": [],
             "label": "link",
             "description": [],
-            "source": {
-              "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 17
-            },
+            "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
             "deprecated": false
           },
           {
@@ -1526,10 +1307,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "source": {
-              "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 18
-            },
+            "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
             "deprecated": false
           },
           {
@@ -1539,10 +1317,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 19
-            },
+            "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
             "deprecated": false
           }
         ],
@@ -1557,10 +1332,7 @@
         "description": [
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
-        "source": {
-          "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 86
-        },
+        "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1581,10 +1353,7 @@
                 "text": "ChromeNavLinks"
               }
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 88
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -1605,10 +1374,7 @@
                 "text": "ChromeNavControls"
               }
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 90
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -1629,10 +1395,7 @@
                 "text": "ChromeRecentlyAccessed"
               }
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 92
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -1653,10 +1416,7 @@
                 "text": "ChromeDocTitle"
               }
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 94
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false
           },
           {
@@ -1671,10 +1431,7 @@
             "signature": [
               "(appTitle: string) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 103
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1687,10 +1444,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 103
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1719,10 +1473,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 108
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1747,10 +1498,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 128
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1769,10 +1517,7 @@
                     "text": "ChromeBrand"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 128
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1793,10 +1538,7 @@
               "Observable",
               "<boolean>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 133
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1813,10 +1555,7 @@
             "signature": [
               "(isVisible: boolean) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 140
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1829,10 +1568,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 140
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1853,10 +1589,7 @@
               "Observable",
               "<string[]>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 145
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1873,10 +1606,7 @@
             "signature": [
               "(className: string) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 150
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1889,10 +1619,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 150
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1911,10 +1638,7 @@
             "signature": [
               "(className: string) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 155
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1927,10 +1651,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 155
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1959,10 +1680,7 @@
               },
               " | undefined>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 160
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1987,10 +1705,7 @@
               },
               " | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 165
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2010,10 +1725,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 165
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2036,10 +1748,7 @@
               "EuiBreadcrumb",
               "[]>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 170
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2058,10 +1767,7 @@
               "EuiBreadcrumb",
               "[]) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 175
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2075,10 +1781,7 @@
                   "EuiBreadcrumb",
                   "[]"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 175
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2101,10 +1804,7 @@
               "ChromeBreadcrumbsAppendExtension",
               " | undefined>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 180
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2123,10 +1823,7 @@
               "ChromeBreadcrumbsAppendExtension",
               " | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 185
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2140,10 +1837,7 @@
                   "ChromeBreadcrumbsAppendExtension",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 186
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2172,10 +1866,7 @@
               },
               "> | undefined>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 192
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2200,10 +1891,7 @@
               },
               "> | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 197
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2224,10 +1912,7 @@
                   },
                   "> | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 197
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2256,10 +1941,7 @@
               },
               " | undefined>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 202
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2284,10 +1966,7 @@
               },
               " | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 207
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2307,10 +1986,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 207
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2329,10 +2005,7 @@
             "signature": [
               "(url: string) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 213
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2347,10 +2020,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 213
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2371,10 +2041,7 @@
               "Observable",
               "<boolean>"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 218
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2399,10 +2066,7 @@
               },
               " | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 225
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2422,10 +2086,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 225
-                },
+                "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2442,10 +2103,7 @@
         "tags": [],
         "label": "ChromeUserBanner",
         "description": [],
-        "source": {
-          "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 40
-        },
+        "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2465,10 +2123,7 @@
                 "text": "UnmountCallback"
               }
             ],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 41
-            },
+            "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2482,10 +2137,7 @@
                 "signature": [
                   "T"
                 ],
-                "source": {
-                  "path": "src/core/public/types.ts",
-                  "lineNumber": 25
-                },
+                "path": "src/core/public/types.ts",
                 "deprecated": false
               }
             ]
@@ -2507,10 +2159,7 @@
           "CommonProps",
           " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; }"
         ],
-        "source": {
-          "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 32
-        },
+        "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2524,10 +2173,7 @@
         "signature": [
           "{ iconType?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; 'data-test-subj'?: string | undefined; target?: string | undefined; rel?: string | undefined; }"
         ],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 34
-        },
+        "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2571,10 +2217,7 @@
             "text": "ChromeHelpExtensionMenuCustomLink"
           }
         ],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 98
-        },
+        "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2588,10 +2231,7 @@
         "signature": [
           "\"modern\" | \"legacy\""
         ],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/types.ts",
-          "lineNumber": 10
-        },
+        "path": "src/core/public/chrome/ui/header/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

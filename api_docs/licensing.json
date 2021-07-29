@@ -11,10 +11,7 @@
         "tags": [],
         "label": "ILicense",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 97
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -29,10 +26,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 101
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -47,10 +41,7 @@
             "signature": [
               "\"invalid\" | \"active\" | \"expired\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 106
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -62,10 +53,7 @@
             "description": [
               "\nDetermine if the status of the license is active."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 111
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -80,10 +68,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 116
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -98,10 +83,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 121
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -118,10 +100,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 127
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "references": []
           },
@@ -134,10 +113,7 @@
             "description": [
               "\nSignature of the license content."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 132
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -149,10 +125,7 @@
             "description": [
               "\nDetermine if the license container has information."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 137
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -168,10 +141,7 @@
               "() => ",
               "PublicLicenseJSON"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 142
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -188,10 +158,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 147
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -206,10 +173,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 152
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -226,10 +190,7 @@
             "signature": [
               "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 158
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -244,10 +205,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 158
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -267,10 +225,7 @@
               "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
               "LicenseCheck"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 165
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -285,10 +240,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -304,10 +256,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -327,10 +276,7 @@
               "(name: string) => ",
               "LicenseFeature"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 171
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -345,10 +291,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 171
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -365,10 +308,7 @@
         "tags": [],
         "label": "LicenseCheck",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 85
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -383,10 +323,7 @@
             "signature": [
               "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 89
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -401,10 +338,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 93
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           }
         ],
@@ -417,10 +351,7 @@
         "tags": [],
         "label": "LicenseFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -430,10 +361,7 @@
             "tags": [],
             "label": "isAvailable",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -443,10 +371,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           }
         ],
@@ -461,10 +386,7 @@
         "description": [
           "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 36
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -476,10 +398,7 @@
             "description": [
               "\nUID for license."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -494,10 +413,7 @@
             "signature": [
               "\"invalid\" | \"active\" | \"expired\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -509,10 +425,7 @@
             "description": [
               "\nUnix epoch of the expiration date of the license."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -527,10 +440,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -547,200 +457,116 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 60
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 19
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 36
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 53
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 70
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 87
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 104
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 122
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 139
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 156
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 173
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 190
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 207
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
-                  "lineNumber": 169
-                }
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
-                  "lineNumber": 194
-                }
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
-                  "lineNumber": 219
-                }
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 22
-                }
+                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 23
-                }
+                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 24
-                }
+                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 49
-                }
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 50
-                }
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 42
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 43
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 44
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 57
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 58
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 159
-                }
+                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 161
-                }
+                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
           }
@@ -756,10 +582,7 @@
         "description": [
           "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 74
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -773,10 +596,7 @@
               "PublicLicense",
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -791,10 +611,7 @@
               "LicenseFeature",
               "> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 76
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -804,10 +621,7 @@
             "tags": [],
             "label": "signature",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 77
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           }
         ],
@@ -822,10 +636,7 @@
         "tags": [],
         "label": "LICENSE_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -841,10 +652,7 @@
         "signature": [
           "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -858,10 +666,7 @@
         "signature": [
           "\"invalid\" | \"active\" | \"expired\""
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -875,10 +680,7 @@
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -896,10 +698,7 @@
           "LicenseFeature",
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 67
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -912,10 +711,7 @@
       "tags": [],
       "label": "LicensingPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/licensing/public/types.ts",
-        "lineNumber": 14
-      },
+      "path": "x-pack/plugins/licensing/public/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -935,151 +731,88 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 19
-          },
+          "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
           "references": [
             {
               "plugin": "security",
-              "link": {
-                "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 86
-              }
+              "path": "x-pack/plugins/security/public/plugin.tsx"
             },
             {
               "plugin": "licenseManagement",
-              "link": {
-                "path": "x-pack/plugins/license_management/public/plugin.ts",
-                "lineNumber": 61
-              }
+              "path": "x-pack/plugins/license_management/public/plugin.ts"
             },
             {
               "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/application/license/check_license.tsx",
-                "lineNumber": 26
-              }
+              "path": "x-pack/plugins/ml/public/application/license/check_license.tsx"
             },
             {
               "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/plugin.ts",
-                "lineNumber": 133
-              }
+              "path": "x-pack/plugins/ml/public/plugin.ts"
             },
             {
               "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 101
-              }
+              "path": "x-pack/plugins/fleet/public/plugin.ts"
             },
             {
               "plugin": "apm",
-              "link": {
-                "path": "x-pack/plugins/apm/public/context/license/license_context.tsx",
-                "lineNumber": 19
-              }
+              "path": "x-pack/plugins/apm/public/context/license/license_context.tsx"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.tsx",
-                "lineNumber": 40
-              }
+              "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.tsx"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/share_context_menu/register_csv_reporting.tsx",
-                "lineNumber": 33
-              }
+              "path": "x-pack/plugins/reporting/public/share_context_menu/register_csv_reporting.tsx"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/share_context_menu/register_pdf_png_reporting.tsx",
-                "lineNumber": 81
-              }
+              "path": "x-pack/plugins/reporting/public/share_context_menu/register_pdf_png_reporting.tsx"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/management/report_listing.tsx",
-                "lineNumber": 44
-              }
+              "path": "x-pack/plugins/reporting/public/management/report_listing.tsx"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
-                "lineNumber": 127
-              }
+              "path": "x-pack/plugins/reporting/public/plugin.ts"
             },
             {
               "plugin": "crossClusterReplication",
-              "link": {
-                "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts",
-                "lineNumber": 75
-              }
+              "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts"
             },
             {
               "plugin": "logstash",
-              "link": {
-                "path": "x-pack/plugins/logstash/public/plugin.ts",
-                "lineNumber": 36
-              }
+              "path": "x-pack/plugins/logstash/public/plugin.ts"
             },
             {
               "plugin": "painlessLab",
-              "link": {
-                "path": "x-pack/plugins/painless_lab/public/plugin.tsx",
-                "lineNumber": 81
-              }
+              "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
             },
             {
               "plugin": "painlessLab",
-              "link": {
-                "path": "x-pack/plugins/painless_lab/public/plugin.tsx",
-                "lineNumber": 105
-              }
+              "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
             },
             {
               "plugin": "searchprofiler",
-              "link": {
-                "path": "x-pack/plugins/searchprofiler/public/plugin.ts",
-                "lineNumber": 54
-              }
+              "path": "x-pack/plugins/searchprofiler/public/plugin.ts"
             },
             {
               "plugin": "searchprofiler",
-              "link": {
-                "path": "x-pack/plugins/searchprofiler/public/plugin.ts",
-                "lineNumber": 67
-              }
+              "path": "x-pack/plugins/searchprofiler/public/plugin.ts"
             },
             {
               "plugin": "watcher",
-              "link": {
-                "path": "x-pack/plugins/watcher/public/plugin.ts",
-                "lineNumber": 65
-              }
+              "path": "x-pack/plugins/watcher/public/plugin.ts"
             },
             {
               "plugin": "watcher",
-              "link": {
-                "path": "x-pack/plugins/watcher/public/plugin.ts",
-                "lineNumber": 106
-              }
+              "path": "x-pack/plugins/watcher/public/plugin.ts"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.test.ts",
-                "lineNumber": 38
-              }
+              "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.test.ts"
             }
           ]
         },
@@ -1099,10 +832,7 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 24
-          },
+          "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
           "references": [],
           "children": [],
@@ -1120,10 +850,7 @@
           "signature": [
             "FeatureUsageServiceSetup"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 28
-          },
+          "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false
         }
       ],
@@ -1137,10 +864,7 @@
       "tags": [],
       "label": "LicensingPluginStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/licensing/public/types.ts",
-        "lineNumber": 32
-      },
+      "path": "x-pack/plugins/licensing/public/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -1158,10 +882,7 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 36
-          },
+          "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false
         },
         {
@@ -1178,10 +899,7 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 40
-          },
+          "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false,
           "children": [],
           "returnComment": []
@@ -1198,10 +916,7 @@
           "signature": [
             "FeatureUsageServiceStart"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 44
-          },
+          "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false
         }
       ],
@@ -1594,10 +1309,7 @@
           "KibanaResponse",
           "<undefined>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
         "deprecated": false,
         "children": [
           {
@@ -1616,10 +1328,7 @@
                 "text": "CheckLicense"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1814,10 +1523,7 @@
               "KibanaResponse",
               "<undefined>; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1844,10 +1550,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/licensing/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1860,10 +1563,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/licensing/server/types.ts",
             "deprecated": false
           }
         ],
@@ -1876,10 +1576,7 @@
         "tags": [],
         "label": "FeatureUsageServiceSetup",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -1894,10 +1591,7 @@
             "signature": [
               "(featureName: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -1910,10 +1604,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 16
-                },
+                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1927,10 +1618,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 16
-                },
+                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1947,10 +1635,7 @@
         "tags": [],
         "label": "FeatureUsageServiceStart",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -1965,10 +1650,7 @@
             "signature": [
               "(featureName: string, usedAt?: number | Date | undefined) => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -1983,10 +1665,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 33
-                },
+                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2002,10 +1681,7 @@
                 "signature": [
                   "number | Date | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 33
-                },
+                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2026,10 +1702,7 @@
               "LastFeatureUsage",
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2044,10 +1717,7 @@
         "tags": [],
         "label": "ILicense",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 97
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2062,10 +1732,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 101
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2080,10 +1747,7 @@
             "signature": [
               "\"invalid\" | \"active\" | \"expired\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 106
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2095,10 +1759,7 @@
             "description": [
               "\nDetermine if the status of the license is active."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 111
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2113,10 +1774,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 116
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2131,10 +1789,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 121
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2151,10 +1806,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 127
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "references": []
           },
@@ -2167,10 +1819,7 @@
             "description": [
               "\nSignature of the license content."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 132
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2182,10 +1831,7 @@
             "description": [
               "\nDetermine if the license container has information."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 137
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2201,10 +1847,7 @@
               "() => ",
               "PublicLicenseJSON"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 142
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2221,10 +1864,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 147
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2239,10 +1879,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 152
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -2259,10 +1896,7 @@
             "signature": [
               "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 158
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2277,10 +1911,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 158
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2300,10 +1931,7 @@
               "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
               "LicenseCheck"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 165
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2318,10 +1946,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2337,10 +1962,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2360,10 +1982,7 @@
               "(name: string) => ",
               "LicenseFeature"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 171
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2378,10 +1997,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 171
-                },
+                "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2398,10 +2014,7 @@
         "tags": [],
         "label": "LicenseCheck",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 85
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2416,10 +2029,7 @@
             "signature": [
               "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 89
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2434,10 +2044,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 93
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           }
         ],
@@ -2450,10 +2057,7 @@
         "tags": [],
         "label": "LicenseFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2463,10 +2067,7 @@
             "tags": [],
             "label": "isAvailable",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2476,10 +2077,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           }
         ],
@@ -2494,10 +2092,7 @@
         "description": [
           "\nThe APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing."
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/licensing/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2516,10 +2111,7 @@
                 "text": "FeatureUsageServiceStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/licensing/server/types.ts",
             "deprecated": false
           },
           {
@@ -2532,10 +2124,7 @@
             "signature": [
               "ILicense"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/licensing/server/types.ts",
             "deprecated": false
           }
         ],
@@ -2550,10 +2139,7 @@
         "description": [
           "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 36
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2565,10 +2151,7 @@
             "description": [
               "\nUID for license."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2583,10 +2166,7 @@
             "signature": [
               "\"invalid\" | \"active\" | \"expired\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2598,10 +2178,7 @@
             "description": [
               "\nUnix epoch of the expiration date of the license."
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2616,10 +2193,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2636,200 +2210,116 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 60
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 19
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 36
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 53
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 70
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 87
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 104
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 122
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 139
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 156
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 173
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 190
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "apm",
-                "link": {
-                  "path": "x-pack/plugins/apm/common/license_check.test.ts",
-                  "lineNumber": 207
-                }
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
-                  "lineNumber": 169
-                }
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
-                  "lineNumber": 194
-                }
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/common/licensing/license_service.test.ts",
-                  "lineNumber": 219
-                }
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 22
-                }
+                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 23
-                }
+                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts",
-                  "lineNumber": 24
-                }
+                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 49
-                }
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
-                  "lineNumber": 50
-                }
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 42
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 43
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
-                  "lineNumber": 44
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 57
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
-                  "lineNumber": 58
-                }
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 159
-                }
+                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts",
-                  "lineNumber": 161
-                }
+                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
           }
@@ -2845,10 +2335,7 @@
         "description": [
           "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 74
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2862,10 +2349,7 @@
               "PublicLicense",
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2880,10 +2364,7 @@
               "LicenseFeature",
               "> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 76
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           },
           {
@@ -2893,10 +2374,7 @@
             "tags": [],
             "label": "signature",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 77
-            },
+            "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
           }
         ],
@@ -2911,10 +2389,7 @@
         "tags": [],
         "label": "LICENSE_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2932,10 +2407,7 @@
           "ILicense",
           ") => { valid: false; message: string; } | { valid: true; message: null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2949,10 +2421,7 @@
         "signature": [
           "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2966,10 +2435,7 @@
         "signature": [
           "\"invalid\" | \"active\" | \"expired\""
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2983,10 +2449,7 @@
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3004,10 +2467,7 @@
           "LicenseFeature",
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 67
-        },
+        "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -3020,10 +2480,7 @@
       "tags": [],
       "label": "LicensingPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/licensing/server/types.ts",
-        "lineNumber": 48
-      },
+      "path": "x-pack/plugins/licensing/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -3043,207 +2500,120 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 53
-          },
+          "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
           "references": [
             {
               "plugin": "spaces",
-              "link": {
-                "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts",
-                "lineNumber": 437
-              }
+              "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
             },
             {
               "plugin": "spaces",
-              "link": {
-                "path": "x-pack/plugins/spaces/server/plugin.ts",
-                "lineNumber": 139
-              }
+              "path": "x-pack/plugins/spaces/server/plugin.ts"
             },
             {
               "plugin": "spaces",
-              "link": {
-                "path": "x-pack/plugins/spaces/server/plugin.ts",
-                "lineNumber": 145
-              }
+              "path": "x-pack/plugins/spaces/server/plugin.ts"
             },
             {
               "plugin": "security",
-              "link": {
-                "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 228
-              }
+              "path": "x-pack/plugins/security/server/plugin.ts"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/server/usage/reporting_usage_collector.ts",
-                "lineNumber": 49
-              }
+              "path": "x-pack/plugins/reporting/server/usage/reporting_usage_collector.ts"
             },
             {
               "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 226
-              }
+              "path": "x-pack/plugins/reporting/server/core.ts"
             },
             {
               "plugin": "actions",
-              "link": {
-                "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 172
-              }
+              "path": "x-pack/plugins/actions/server/plugin.ts"
             },
             {
               "plugin": "alerting",
-              "link": {
-                "path": "x-pack/plugins/alerting/server/plugin.ts",
-                "lineNumber": 172
-              }
+              "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
               "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/server/plugin.ts",
-                "lineNumber": 134
-              }
+              "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {
               "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/server/plugin.ts",
-                "lineNumber": 139
-              }
+              "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {
               "plugin": "fleet",
-              "link": {
-                "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 208
-              }
+              "path": "x-pack/plugins/fleet/server/plugin.ts"
             },
             {
               "plugin": "remoteClusters",
-              "link": {
-                "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-                "lineNumber": 73
-              }
+              "path": "x-pack/plugins/remote_clusters/server/plugin.ts"
             },
             {
               "plugin": "graph",
-              "link": {
-                "path": "x-pack/plugins/graph/server/plugin.ts",
-                "lineNumber": 36
-              }
+              "path": "x-pack/plugins/graph/server/plugin.ts"
             },
             {
               "plugin": "indexLifecycleManagement",
-              "link": {
-                "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts",
-                "lineNumber": 41
-              }
+              "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts"
             },
             {
               "plugin": "maps",
-              "link": {
-                "path": "x-pack/plugins/maps/server/plugin.ts",
-                "lineNumber": 167
-              }
+              "path": "x-pack/plugins/maps/server/plugin.ts"
             },
             {
               "plugin": "painlessLab",
-              "link": {
-                "path": "x-pack/plugins/painless_lab/server/services/license.ts",
-                "lineNumber": 40
-              }
+              "path": "x-pack/plugins/painless_lab/server/services/license.ts"
             },
             {
               "plugin": "rollup",
-              "link": {
-                "path": "x-pack/plugins/rollup/server/services/license.ts",
-                "lineNumber": 37
-              }
+              "path": "x-pack/plugins/rollup/server/services/license.ts"
             },
             {
               "plugin": "searchprofiler",
-              "link": {
-                "path": "x-pack/plugins/searchprofiler/server/plugin.ts",
-                "lineNumber": 32
-              }
+              "path": "x-pack/plugins/searchprofiler/server/plugin.ts"
             },
             {
               "plugin": "snapshotRestore",
-              "link": {
-                "path": "x-pack/plugins/snapshot_restore/server/services/license.ts",
-                "lineNumber": 40
-              }
+              "path": "x-pack/plugins/snapshot_restore/server/services/license.ts"
             },
             {
               "plugin": "transform",
-              "link": {
-                "path": "x-pack/plugins/transform/server/services/license.ts",
-                "lineNumber": 42
-              }
+              "path": "x-pack/plugins/transform/server/services/license.ts"
             },
             {
               "plugin": "upgradeAssistant",
-              "link": {
-                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.ts",
-                "lineNumber": 506
-              }
+              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
             },
             {
               "plugin": "spaces",
-              "link": {
-                "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.test.ts",
-                "lineNumber": 63
-              }
+              "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.test.ts"
             },
             {
               "plugin": "upgradeAssistant",
-              "link": {
-                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts",
-                "lineNumber": 79
-              }
+              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
             },
             {
               "plugin": "upgradeAssistant",
-              "link": {
-                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts",
-                "lineNumber": 97
-              }
+              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
             },
             {
               "plugin": "actions",
-              "link": {
-                "path": "x-pack/plugins/actions/server/lib/license_state.test.ts",
-                "lineNumber": 32
-              }
+              "path": "x-pack/plugins/actions/server/lib/license_state.test.ts"
             },
             {
               "plugin": "actions",
-              "link": {
-                "path": "x-pack/plugins/actions/server/lib/license_state.test.ts",
-                "lineNumber": 49
-              }
+              "path": "x-pack/plugins/actions/server/lib/license_state.test.ts"
             },
             {
               "plugin": "alerting",
-              "link": {
-                "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts",
-                "lineNumber": 32
-              }
+              "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts"
             },
             {
               "plugin": "alerting",
-              "link": {
-                "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts",
-                "lineNumber": 49
-              }
+              "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts"
             }
           ]
         },
@@ -3263,10 +2633,7 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 59
-          },
+          "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
           "references": [],
           "children": [],
@@ -3290,10 +2657,7 @@
               "text": "FeatureUsageServiceSetup"
             }
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 64
-          },
+          "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false
         }
       ],
@@ -3307,10 +2671,7 @@
       "tags": [],
       "label": "LicensingPluginStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/licensing/server/types.ts",
-        "lineNumber": 68
-      },
+      "path": "x-pack/plugins/licensing/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -3328,10 +2689,7 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 72
-          },
+          "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false
         },
         {
@@ -3348,10 +2706,7 @@
             "ILicense",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 77
-          },
+          "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
           "children": [],
           "returnComment": []
@@ -3382,10 +2737,7 @@
             "ILicense",
             ">; }"
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 84
-          },
+          "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -3405,10 +2757,7 @@
                   "text": "IClusterClient"
                 }
               ],
-              "source": {
-                "path": "x-pack/plugins/licensing/server/types.ts",
-                "lineNumber": 85
-              },
+              "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false
             },
             {
@@ -3418,10 +2767,7 @@
               "tags": [],
               "label": "pollingFrequency",
               "description": [],
-              "source": {
-                "path": "x-pack/plugins/licensing/server/types.ts",
-                "lineNumber": 86
-              },
+              "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false
             }
           ]
@@ -3444,10 +2790,7 @@
               "text": "FeatureUsageServiceStart"
             }
           ],
-          "source": {
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 91
-          },
+          "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false
         }
       ],

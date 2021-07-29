@@ -24,10 +24,7 @@
           ") => data is ",
           "SeriesData"
         ],
-        "source": {
-          "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -40,10 +37,7 @@
             "signature": [
               "TimeseriesVisData"
             ],
-            "source": {
-              "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -64,10 +58,7 @@
           ") => data is ",
           "TableData"
         ],
-        "source": {
-          "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -80,10 +71,7 @@
             "signature": [
               "TimeseriesVisData"
             ],
-            "source": {
-              "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -107,10 +95,7 @@
           " | ",
           "TableData"
         ],
-        "source": {
-          "path": "src/plugins/vis_type_timeseries/common/types/vis_data.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/vis_type_timeseries/common/types/vis_data.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -123,10 +108,7 @@
       "tags": [],
       "label": "VisTypeTimeseriesSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-        "lineNumber": 54
-      },
+      "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -151,10 +133,7 @@
             "TimeseriesVisData",
             ">"
           ],
-          "source": {
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-            "lineNumber": 55
-          },
+          "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -168,10 +147,7 @@
               "signature": [
                 "DataRequestHandlerContext"
               ],
-              "source": {
-                "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-                "lineNumber": 56
-              },
+              "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
               "deprecated": false
             },
             {
@@ -191,10 +167,7 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "source": {
-                "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-                "lineNumber": 57
-              },
+              "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
               "deprecated": false
             },
             {
@@ -207,10 +180,7 @@
               "signature": [
                 "any"
               ],
-              "source": {
-                "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-                "lineNumber": 59
-              },
+              "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
               "deprecated": false
             }
           ]

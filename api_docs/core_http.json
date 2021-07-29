@@ -30,10 +30,7 @@
             "text": "HttpRequestInit"
           }
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 246
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -55,10 +52,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 250
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -73,10 +67,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 255
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -98,10 +89,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 260
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -116,10 +104,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 267
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -134,10 +119,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 273
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -157,10 +139,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 275
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -192,10 +171,7 @@
             "text": "HttpFetchOptions"
           }
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 282
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -205,10 +181,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 286
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -221,10 +194,7 @@
         "tags": [],
         "label": "HttpFetchQuery",
         "description": [],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 226
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -239,10 +209,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 239
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -257,10 +224,7 @@
         "description": [
           "\nA function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and\n{@link HttpResponse} for the response.\n"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 298
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -273,10 +237,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 299
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -289,10 +250,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 302
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -305,10 +263,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 305
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -321,10 +276,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 306
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -339,10 +291,7 @@
         "description": [
           "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 145
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -355,10 +304,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 146
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -373,10 +319,7 @@
         "description": [
           "\nAn object that may define global interceptor functions for different parts of the request and response lifecycle.\nSee {@link IHttpInterceptController}.\n"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 365
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -423,10 +366,7 @@
               },
               ">>) | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 371
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -447,10 +387,7 @@
                   },
                   ">"
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 372
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -470,10 +407,7 @@
                     "text": "IHttpInterceptController"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 373
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -524,10 +458,7 @@
               },
               ">>) | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 381
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -546,10 +477,7 @@
                     "text": "HttpInterceptorRequestError"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 382
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -569,10 +497,7 @@
                     "text": "IHttpInterceptController"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 383
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -623,10 +548,7 @@
               },
               "<any>>) | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 391
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -646,10 +568,7 @@
                   },
                   "<any>"
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 392
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -669,10 +588,7 @@
                     "text": "IHttpInterceptController"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 393
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -723,10 +639,7 @@
               },
               "<any>>) | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 401
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -745,10 +658,7 @@
                     "text": "HttpInterceptorResponseError"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 402
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -768,10 +678,7 @@
                     "text": "IHttpInterceptController"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 403
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -788,10 +695,7 @@
         "tags": [],
         "label": "HttpInterceptorRequestError",
         "description": [],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 354
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -828,10 +732,7 @@
               },
               " | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 355
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -844,10 +745,7 @@
             "signature": [
               "Error"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 356
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -878,10 +776,7 @@
           },
           "<any>"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 349
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -894,10 +789,7 @@
             "signature": [
               "{ readonly cache: RequestCache; readonly credentials: RequestCredentials; readonly destination: RequestDestination; readonly headers: Headers; readonly integrity: string; readonly isHistoryNavigation: boolean; readonly isReloadNavigation: boolean; readonly keepalive: boolean; readonly method: string; readonly mode: RequestMode; readonly redirect: RequestRedirect; readonly referrer: string; readonly referrerPolicy: ReferrerPolicy; readonly signal: AbortSignal; readonly url: string; readonly clone: () => Request; readonly body: ReadableStream<Uint8Array> | null; readonly bodyUsed: boolean; readonly arrayBuffer: () => Promise<ArrayBuffer>; readonly blob: () => Promise<Blob>; readonly formData: () => Promise<FormData>; readonly json: () => Promise<any>; readonly text: () => Promise<string>; }"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 350
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -917,10 +809,7 @@
                 "text": "IHttpFetchError"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 351
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -935,10 +824,7 @@
         "description": [
           "\nFetch API options available to {@link HttpHandler}s.\n"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 155
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -953,10 +839,7 @@
             "signature": [
               "string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 159
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -971,10 +854,7 @@
             "signature": [
               "\"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 165
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -989,10 +869,7 @@
             "signature": [
               "\"include\" | \"omit\" | \"same-origin\" | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 171
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1014,10 +891,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 174
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1032,10 +906,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 180
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1050,10 +921,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 183
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1068,10 +936,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 186
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1086,10 +951,7 @@
             "signature": [
               "\"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 192
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1104,10 +966,7 @@
             "signature": [
               "\"error\" | \"follow\" | \"manual\" | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 198
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1122,10 +981,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 205
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1140,10 +996,7 @@
             "signature": [
               "\"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 211
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1158,10 +1011,7 @@
             "signature": [
               "AbortSignal | null | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 217
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1176,10 +1026,7 @@
             "signature": [
               "null | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 222
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -1202,10 +1049,7 @@
           },
           "<TResponseBody>"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 310
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1244,10 +1088,7 @@
               },
               " | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 312
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1262,10 +1103,7 @@
             "signature": [
               "{ readonly cache: RequestCache; readonly credentials: RequestCredentials; readonly destination: RequestDestination; readonly headers: Headers; readonly integrity: string; readonly isHistoryNavigation: boolean; readonly isReloadNavigation: boolean; readonly keepalive: boolean; readonly method: string; readonly mode: RequestMode; readonly redirect: RequestRedirect; readonly referrer: string; readonly referrerPolicy: ReferrerPolicy; readonly signal: AbortSignal; readonly url: string; readonly clone: () => Request; readonly body: ReadableStream<Uint8Array> | null; readonly bodyUsed: boolean; readonly arrayBuffer: () => Promise<ArrayBuffer>; readonly blob: () => Promise<Blob>; readonly formData: () => Promise<FormData>; readonly json: () => Promise<any>; readonly text: () => Promise<string>; }"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 314
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1280,10 +1118,7 @@
             "signature": [
               "Readonly<Response> | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 316
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1298,10 +1133,7 @@
             "signature": [
               "TResponseBody | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 318
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -1314,10 +1146,7 @@
         "tags": [],
         "label": "HttpSetup",
         "description": [],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 14
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1338,10 +1167,7 @@
                 "text": "IBasePath"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 19
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1362,10 +1188,7 @@
                 "text": "IAnonymousPaths"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 24
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1384,10 +1207,7 @@
                 "text": "IExternalUrl"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 26
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1410,10 +1230,7 @@
               },
               ") => () => void"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 33
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1434,10 +1251,7 @@
                     "text": "HttpInterceptor"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 33
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1464,10 +1278,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 36
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1488,10 +1299,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 38
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1512,10 +1320,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 40
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1536,10 +1341,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 42
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1560,10 +1362,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 44
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1584,10 +1383,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 46
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1608,10 +1404,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 48
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1632,10 +1425,7 @@
                 "text": "HttpHandler"
               }
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 50
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1652,10 +1442,7 @@
               "Observable",
               "<number>) => void"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 57
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1671,10 +1458,7 @@
                   "Observable",
                   "<number>"
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 57
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1695,10 +1479,7 @@
               "Observable",
               "<number>"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 62
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1715,10 +1496,7 @@
         "description": [
           "\nAPIs for denoting paths as not requiring authentication"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 128
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1733,10 +1511,7 @@
             "signature": [
               "(path: string) => boolean"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 132
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1749,10 +1524,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 132
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1771,10 +1543,7 @@
             "signature": [
               "(path: string) => void"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 137
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1787,10 +1556,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 137
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1809,10 +1575,7 @@
         "description": [
           "\nAPIs for manipulating the basePath on URL segments."
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 75
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1827,10 +1590,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 79
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -1847,10 +1607,7 @@
             "signature": [
               "(url: string) => string"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 84
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1861,10 +1618,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 84
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -1881,10 +1635,7 @@
             "signature": [
               "(url: string) => string"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 89
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1895,10 +1646,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 89
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -1912,10 +1660,7 @@
             "description": [
               "\nReturns the server's root basePath as configured, without any namespace prefix.\n\nSee {@link BasePath.get} for getting the basePath value for a specific request"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 96
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -1930,10 +1675,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 105
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -1948,10 +1690,7 @@
         "description": [
           "\nAPIs for working with external URLs.\n"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 112
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1966,10 +1705,7 @@
             "signature": [
               "(relativeOrAbsoluteUrl: string) => URL | null"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 122
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1982,10 +1718,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/http/types.ts",
-                  "lineNumber": 122
-                },
+                "path": "src/core/public/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2012,10 +1745,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 333
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2025,10 +1755,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 334
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -2041,10 +1768,7 @@
             "signature": [
               "Request"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 335
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -2057,10 +1781,7 @@
             "signature": [
               "Response | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 336
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -2075,25 +1796,16 @@
             "signature": [
               "Request"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 340
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts",
-                  "lineNumber": 44
-                }
+                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
               },
               {
                 "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts",
-                  "lineNumber": 58
-                }
+                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
               }
             ]
           },
@@ -2109,10 +1821,7 @@
             "signature": [
               "Response | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 344
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": true,
             "references": []
           },
@@ -2126,10 +1835,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 345
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -2144,10 +1850,7 @@
         "description": [
           "\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 411
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2159,10 +1862,7 @@
             "description": [
               "Whether or not this chain has been halted."
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 413
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -2177,10 +1877,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 415
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2207,10 +1904,7 @@
           },
           "<TResponseBody>"
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 325
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2225,10 +1919,7 @@
             "signature": [
               "Readonly<Response> | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 327
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           },
           {
@@ -2243,10 +1934,7 @@
             "signature": [
               "TResponseBody | undefined"
             ],
-            "source": {
-              "path": "src/core/public/http/types.ts",
-              "lineNumber": 329
-            },
+            "path": "src/core/public/http/types.ts",
             "deprecated": false
           }
         ],
@@ -2273,10 +1961,7 @@
             "text": "HttpSetup"
           }
         ],
-        "source": {
-          "path": "src/core/public/http/types.ts",
-          "lineNumber": 69
-        },
+        "path": "src/core/public/http/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2294,10 +1979,7 @@
         "description": [
           "\nAccess or manipulate the Kibana base path\n"
         ],
-        "source": {
-          "path": "src/core/server/http/base_path_service.ts",
-          "lineNumber": 18
-        },
+        "path": "src/core/server/http/base_path_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -2309,10 +1991,7 @@
             "description": [
               "\nreturns the server's basePath\n\nSee {@link BasePath.get} for getting the basePath value for a specific request"
             ],
-            "source": {
-              "path": "src/core/server/http/base_path_service.ts",
-              "lineNumber": 26
-            },
+            "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false
           },
           {
@@ -2327,10 +2006,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/base_path_service.ts",
-              "lineNumber": 34
-            },
+            "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false
           },
           {
@@ -2361,10 +2037,7 @@
               },
               ") => string"
             ],
-            "source": {
-              "path": "src/core/server/http/base_path_service.ts",
-              "lineNumber": 45
-            },
+            "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -2391,10 +2064,7 @@
                     "text": "LegacyRequest"
                   }
                 ],
-                "source": {
-                  "path": "src/core/server/http/base_path_service.ts",
-                  "lineNumber": 45
-                },
+                "path": "src/core/server/http/base_path_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2431,10 +2101,7 @@
               },
               ", requestSpecificBasePath: string) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/base_path_service.ts",
-              "lineNumber": 55
-            },
+            "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -2461,10 +2128,7 @@
                     "text": "LegacyRequest"
                   }
                 ],
-                "source": {
-                  "path": "src/core/server/http/base_path_service.ts",
-                  "lineNumber": 55
-                },
+                "path": "src/core/server/http/base_path_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2478,10 +2142,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/server/http/base_path_service.ts",
-                  "lineNumber": 55
-                },
+                "path": "src/core/server/http/base_path_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2500,10 +2161,7 @@
             "signature": [
               "(path: string) => string"
             ],
-            "source": {
-              "path": "src/core/server/http/base_path_service.ts",
-              "lineNumber": 69
-            },
+            "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -2516,10 +2174,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/server/http/base_path_service.ts",
-                  "lineNumber": 69
-                },
+                "path": "src/core/server/http/base_path_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2538,10 +2193,7 @@
             "signature": [
               "(path: string) => string"
             ],
-            "source": {
-              "path": "src/core/server/http/base_path_service.ts",
-              "lineNumber": 81
-            },
+            "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -2554,10 +2206,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/server/http/base_path_service.ts",
-                  "lineNumber": 81
-                },
+                "path": "src/core/server/http/base_path_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2586,10 +2235,7 @@
           },
           "<Params, Query, Body, Method>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/request.ts",
-          "lineNumber": 90
-        },
+        "path": "src/core/server/http/router/request.ts",
         "deprecated": false,
         "children": [
           {
@@ -2601,10 +2247,7 @@
             "description": [
               "\nA identifier to identify this request.\n"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 144
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2616,10 +2259,7 @@
             "description": [
               "\nA UUID to identify this request.\n"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 152
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2634,10 +2274,7 @@
             "signature": [
               "URL"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 154
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2664,10 +2301,7 @@
               },
               "<Method>>; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 156
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2682,10 +2316,7 @@
             "signature": [
               "{ accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; date?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; range?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; warning?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 162
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2697,10 +2328,7 @@
             "description": [
               "\nWhether or not the request is a \"system request\" rather than an application-level request.\nCan be set on the client using the `HttpFetchOptions#asSystemRequest` option."
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 167
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2721,10 +2349,7 @@
                 "text": "IKibanaSocket"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 170
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2745,10 +2370,7 @@
                 "text": "KibanaRequestEvents"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 172
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2761,10 +2383,7 @@
             "signature": [
               "{ isAuthenticated: boolean; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 173
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2780,10 +2399,7 @@
               "URL",
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 181
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -2796,10 +2412,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 186
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false,
             "children": [
               {
@@ -2812,10 +2425,7 @@
                 "signature": [
                   "Request"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 187
-                },
+                "path": "src/core/server/http/router/request.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2829,10 +2439,7 @@
                 "signature": [
                   "Params"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 188
-                },
+                "path": "src/core/server/http/router/request.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2846,10 +2453,7 @@
                 "signature": [
                   "Query"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 189
-                },
+                "path": "src/core/server/http/router/request.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2863,10 +2467,7 @@
                 "signature": [
                   "Body"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 190
-                },
+                "path": "src/core/server/http/router/request.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2880,10 +2481,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 193
-                },
+                "path": "src/core/server/http/router/request.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2913,10 +2511,7 @@
           " extends ",
           "SchemaTypeError"
         ],
-        "source": {
-          "path": "src/core/server/http/router/validator/validator_error.ts",
-          "lineNumber": 15
-        },
+        "path": "src/core/server/http/router/validator/validator_error.ts",
         "deprecated": false,
         "children": [
           {
@@ -2929,10 +2524,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/server/http/router/validator/validator_error.ts",
-              "lineNumber": 16
-            },
+            "path": "src/core/server/http/router/validator/validator_error.ts",
             "deprecated": false,
             "children": [
               {
@@ -2945,10 +2537,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/validator/validator_error.ts",
-                  "lineNumber": 16
-                },
+                "path": "src/core/server/http/router/validator/validator_error.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2962,10 +2551,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/validator/validator_error.ts",
-                  "lineNumber": 16
-                },
+                "path": "src/core/server/http/router/validator/validator_error.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3002,10 +2588,7 @@
             "text": "AuthResultParams"
           }
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 29
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -3025,10 +2608,7 @@
               },
               ".authenticated"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 30
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
           }
         ],
@@ -3041,10 +2621,7 @@
         "tags": [],
         "label": "AuthNotHandled",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 34
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -3064,10 +2641,7 @@
               },
               ".notHandled"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 35
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
           }
         ],
@@ -3097,10 +2671,7 @@
             "text": "AuthRedirectedParams"
           }
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 39
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -3120,10 +2691,7 @@
               },
               ".redirected"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 40
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
           }
         ],
@@ -3138,10 +2706,7 @@
         "description": [
           "\nResult of auth redirection."
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 109
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -3156,10 +2721,7 @@
             "signature": [
               "({ location: string; } & Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 114
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
           }
         ],
@@ -3174,10 +2736,7 @@
         "description": [
           "\nResult of successful authentication."
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 88
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -3192,10 +2751,7 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 92
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
           },
           {
@@ -3210,10 +2766,7 @@
             "signature": [
               "Record<string, string | string[]> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 97
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
           },
           {
@@ -3228,10 +2781,7 @@
             "signature": [
               "Record<string, string | string[]> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 102
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
           }
         ],
@@ -3244,10 +2794,7 @@
         "tags": [],
         "label": "AuthToolkit",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 121
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -3277,10 +2824,7 @@
                 "text": "AuthResult"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 123
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3301,10 +2845,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/server/http/lifecycle/auth.ts",
-                  "lineNumber": 123
-                },
+                "path": "src/core/server/http/lifecycle/auth.ts",
                 "deprecated": false
               }
             ]
@@ -3328,10 +2869,7 @@
                 "text": "AuthResult"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 129
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -3355,10 +2893,7 @@
                 "text": "AuthResult"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/auth.ts",
-              "lineNumber": 134
-            },
+            "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3372,10 +2907,7 @@
                 "signature": [
                   "({ location: string; } & Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)"
                 ],
-                "source": {
-                  "path": "src/core/server/http/lifecycle/auth.ts",
-                  "lineNumber": 134
-                },
+                "path": "src/core/server/http/lifecycle/auth.ts",
                 "deprecated": false
               }
             ]
@@ -3402,10 +2934,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 79
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "children": [
           {
@@ -3420,10 +2949,7 @@
             "signature": [
               "T | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 81
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -3438,10 +2964,7 @@
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 83
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -3456,10 +2979,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 85
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -3469,10 +2989,7 @@
             "tags": [],
             "label": "statusCode",
             "description": [],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 86
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           }
         ],
@@ -3487,10 +3004,7 @@
         "description": [
           "\nHTTP response parameters"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 103
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "children": [
           {
@@ -3505,10 +3019,7 @@
             "signature": [
               "string | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 105
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -3523,10 +3034,7 @@
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 107
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           }
         ],
@@ -3539,10 +3047,7 @@
         "tags": [],
         "label": "HttpAuth",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/types.ts",
-          "lineNumber": 46
-        },
+        "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3581,10 +3086,7 @@
               },
               "; state: T; }"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 51
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3612,10 +3114,7 @@
                     "text": "LegacyRequest"
                   }
                 ],
-                "source": {
-                  "path": "src/core/server/http/auth_state_storage.ts",
-                  "lineNumber": 36
-                },
+                "path": "src/core/server/http/auth_state_storage.ts",
                 "deprecated": false
               }
             ]
@@ -3648,10 +3147,7 @@
               },
               ") => boolean"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 56
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3679,10 +3175,7 @@
                     "text": "LegacyRequest"
                   }
                 ],
-                "source": {
-                  "path": "src/core/server/http/auth_state_storage.ts",
-                  "lineNumber": 44
-                },
+                "path": "src/core/server/http/auth_state_storage.ts",
                 "deprecated": false
               }
             ]
@@ -3699,10 +3192,7 @@
         "description": [
           "\nHTTP response parameters"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 60
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "children": [
           {
@@ -3719,10 +3209,7 @@
               "Stream",
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 62
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -3737,10 +3224,7 @@
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 64
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -3755,10 +3239,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 66
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           }
         ],
@@ -3773,10 +3254,7 @@
         "description": [
           "\nInformation about what hostname, port, and protocol the server process is\nrunning on. Note that this may not match the URL that end-users access\nKibana at. For the public URL, see {@link BasePath.publicBaseUrl}."
         ],
-        "source": {
-          "path": "src/core/server/http/types.ts",
-          "lineNumber": 439
-        },
+        "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3788,10 +3266,7 @@
             "description": [
               "The name of the Kibana server"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 441
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           },
           {
@@ -3803,10 +3278,7 @@
             "description": [
               "The hostname of the server"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 443
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           },
           {
@@ -3818,10 +3290,7 @@
             "description": [
               "The port the server is listening on"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 445
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           },
           {
@@ -3836,10 +3305,7 @@
             "signature": [
               "\"http\" | \"https\" | \"socket\""
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 447
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           }
         ],
@@ -3854,10 +3320,7 @@
         "description": [
           "\nKibana HTTP Service provides an abstraction to work with the HTTP stack at the `preboot` stage. This functionality\nallows Kibana to serve user requests even before Kibana becomes fully operational. Only Core and `preboot` plugins\ncan define HTTP routes at this stage.\n"
         ],
-        "source": {
-          "path": "src/core/server/http/types.ts",
-          "lineNumber": 120
-        },
+        "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3888,10 +3351,7 @@
               },
               ">) => void) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 138
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -3904,10 +3364,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 138
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -3937,10 +3394,7 @@
                   },
                   ">) => void"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 138
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3973,7 +3427,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ") => string; set: (request: ",
+              ") => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3989,12 +3443,9 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 144
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           }
         ],
@@ -4009,10 +3460,7 @@
         "description": [
           "\nKibana HTTP Service provides own abstraction for work with HTTP stack.\nPlugins don't have direct access to `hapi` server and its primitives anymore. Moreover,\nplugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood.\nThis gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins.\nIf the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.\n"
         ],
-        "source": {
-          "path": "src/core/server/http/types.ts",
-          "lineNumber": 234
-        },
+        "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4043,10 +3491,7 @@
               },
               "<T>>"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 239
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -4067,10 +3512,7 @@
                   },
                   "<T>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 240
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -4095,10 +3537,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 253
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -4260,10 +3699,7 @@
                   "KibanaResponse",
                   "<any>>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 253
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -4288,10 +3724,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 265
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -4453,10 +3886,7 @@
                   "KibanaResponse",
                   "<any> | Next>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 265
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -4481,10 +3911,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 277
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -4706,10 +4133,7 @@
                   },
                   ">"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 277
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -4734,10 +4158,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 289
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -4899,10 +4320,7 @@
                   "KibanaResponse",
                   "<any> | Next>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 289
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -4927,10 +4345,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 301
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -4968,10 +4383,7 @@
                   },
                   ") => Render | Next | Promise<OnPreResponseResult>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 301
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -5002,7 +4414,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ") => string; set: (request: ",
+              ") => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5018,12 +4430,9 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 307
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           },
           {
@@ -5046,10 +4455,7 @@
                 "text": "HttpAuth"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 315
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": true,
             "references": []
           },
@@ -5071,10 +4477,7 @@
                 "text": "ICspConfig"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 320
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           },
           {
@@ -5113,10 +4516,7 @@
               },
               "<Context>"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 337
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -5156,10 +4556,7 @@
                 "text": "IContextContainer"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 369
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -5173,10 +4570,7 @@
                 "signature": [
                   "ContextName"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 373
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               },
               {
@@ -5371,10 +4765,7 @@
                   "KibanaResponse",
                   "<undefined>; }) => Context[ContextName] | Promise<Context[ContextName]>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/types.ts",
-                  "lineNumber": 374
-                },
+                "path": "src/core/server/http/types.ts",
                 "deprecated": false
               }
             ]
@@ -5398,10 +4789,7 @@
                 "text": "HttpServerInfo"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 380
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -5416,10 +4804,7 @@
         "tags": [],
         "label": "HttpServiceStart",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/types.ts",
-          "lineNumber": 408
-        },
+        "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -5448,7 +4833,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ") => string; set: (request: ",
+              ") => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5464,12 +4849,9 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 413
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           },
           {
@@ -5490,10 +4872,7 @@
                 "text": "HttpAuth"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 419
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false
           },
           {
@@ -5515,10 +4894,7 @@
                 "text": "HttpServerInfo"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/types.ts",
-              "lineNumber": 424
-            },
+            "path": "src/core/server/http/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -5545,10 +4921,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 33
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "children": [
           {
@@ -5558,10 +4931,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 34
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -5574,10 +4944,7 @@
             "signature": [
               "T | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 35
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -5596,10 +4963,7 @@
                 "text": "HttpResponseOptions"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 36
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           }
         ],
@@ -5614,10 +4978,7 @@
         "description": [
           "\nA tiny abstraction for TCP socket."
         ],
-        "source": {
-          "path": "src/core/server/http/router/socket.ts",
-          "lineNumber": 17
-        },
+        "path": "src/core/server/http/router/socket.ts",
         "deprecated": false,
         "children": [
           {
@@ -5638,10 +4999,7 @@
               "PeerCertificate",
               " | null; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/socket.ts",
-              "lineNumber": 18
-            },
+            "path": "src/core/server/http/router/socket.ts",
             "deprecated": false,
             "children": [
               {
@@ -5654,10 +5012,7 @@
                 "signature": [
                   "true"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/socket.ts",
-                  "lineNumber": 18
-                },
+                "path": "src/core/server/http/router/socket.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -5682,10 +5037,7 @@
               "PeerCertificate",
               " | null; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/socket.ts",
-              "lineNumber": 19
-            },
+            "path": "src/core/server/http/router/socket.ts",
             "deprecated": false,
             "children": [
               {
@@ -5698,10 +5050,7 @@
                 "signature": [
                   "false"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/socket.ts",
-                  "lineNumber": 19
-                },
+                "path": "src/core/server/http/router/socket.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -5728,10 +5077,7 @@
               "PeerCertificate",
               " | null; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/socket.ts",
-              "lineNumber": 29
-            },
+            "path": "src/core/server/http/router/socket.ts",
             "deprecated": false,
             "children": [
               {
@@ -5746,10 +5092,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/socket.ts",
-                  "lineNumber": 29
-                },
+                "path": "src/core/server/http/router/socket.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -5770,10 +5113,7 @@
             "signature": [
               "() => string | null"
             ],
-            "source": {
-              "path": "src/core/server/http/router/socket.ts",
-              "lineNumber": 36
-            },
+            "path": "src/core/server/http/router/socket.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -5790,10 +5130,7 @@
             "signature": [
               "(options: { rejectUnauthorized?: boolean | undefined; requestCert?: boolean | undefined; }) => Promise<void>"
             ],
-            "source": {
-              "path": "src/core/server/http/router/socket.ts",
-              "lineNumber": 43
-            },
+            "path": "src/core/server/http/router/socket.ts",
             "deprecated": false,
             "children": [
               {
@@ -5803,10 +5140,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/socket.ts",
-                  "lineNumber": 43
-                },
+                "path": "src/core/server/http/router/socket.ts",
                 "deprecated": false,
                 "children": [
                   {
@@ -5819,10 +5153,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/server/http/router/socket.ts",
-                      "lineNumber": 43
-                    },
+                    "path": "src/core/server/http/router/socket.ts",
                     "deprecated": false
                   },
                   {
@@ -5835,10 +5166,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/server/http/router/socket.ts",
-                      "lineNumber": 43
-                    },
+                    "path": "src/core/server/http/router/socket.ts",
                     "deprecated": false
                   }
                 ]
@@ -5860,10 +5188,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/socket.ts",
-              "lineNumber": 49
-            },
+            "path": "src/core/server/http/router/socket.ts",
             "deprecated": false
           },
           {
@@ -5878,10 +5203,7 @@
             "signature": [
               "Error | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/socket.ts",
-              "lineNumber": 55
-            },
+            "path": "src/core/server/http/router/socket.ts",
             "deprecated": false
           }
         ],
@@ -5906,10 +5228,7 @@
           },
           "<Context>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/router.ts",
-          "lineNumber": 62
-        },
+        "path": "src/core/server/http/router/router.ts",
         "deprecated": false,
         "children": [
           {
@@ -5921,10 +5240,7 @@
             "description": [
               "\nResulted path"
             ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 66
-            },
+            "path": "src/core/server/http/router/router.ts",
             "deprecated": false
           },
           {
@@ -6129,10 +5445,7 @@
               "KibanaResponse",
               "<undefined>; }>) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 73
-            },
+            "path": "src/core/server/http/router/router.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -6153,10 +5466,7 @@
                   },
                   "<P, Q, B, Method>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 52
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               },
               {
@@ -6367,10 +5677,7 @@
                   },
                   "<any>>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               }
             ]
@@ -6577,10 +5884,7 @@
               "KibanaResponse",
               "<undefined>; }>) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 80
-            },
+            "path": "src/core/server/http/router/router.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -6601,10 +5905,7 @@
                   },
                   "<P, Q, B, Method>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 52
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               },
               {
@@ -6815,10 +6116,7 @@
                   },
                   "<any>>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               }
             ]
@@ -7025,10 +6323,7 @@
               "KibanaResponse",
               "<undefined>; }>) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 87
-            },
+            "path": "src/core/server/http/router/router.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -7049,10 +6344,7 @@
                   },
                   "<P, Q, B, Method>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 52
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               },
               {
@@ -7263,10 +6555,7 @@
                   },
                   "<any>>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               }
             ]
@@ -7473,10 +6762,7 @@
               "KibanaResponse",
               "<undefined>; }>) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 94
-            },
+            "path": "src/core/server/http/router/router.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -7497,10 +6783,7 @@
                   },
                   "<P, Q, B, Method>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 52
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               },
               {
@@ -7711,10 +6994,7 @@
                   },
                   "<any>>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               }
             ]
@@ -7921,10 +7201,7 @@
               "KibanaResponse",
               "<undefined>; }>) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 101
-            },
+            "path": "src/core/server/http/router/router.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -7945,10 +7222,7 @@
                   },
                   "<P, Q, B, Method>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 52
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               },
               {
@@ -8159,10 +7433,7 @@
                   },
                   "<any>>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               }
             ]
@@ -8567,10 +7838,7 @@
               },
               "<P, Q, B, Context, Method, ResponseFactory>"
             ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 107
-            },
+            "path": "src/core/server/http/router/router.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -8608,10 +7876,7 @@
                   },
                   "<any>>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/router.ts",
-                  "lineNumber": 385
-                },
+                "path": "src/core/server/http/router/router.ts",
                 "deprecated": false
               }
             ]
@@ -8628,10 +7893,7 @@
         "description": [
           "\nRequest events."
         ],
-        "source": {
-          "path": "src/core/server/http/router/request.ts",
-          "lineNumber": 62
-        },
+        "path": "src/core/server/http/router/request.ts",
         "deprecated": false,
         "children": [
           {
@@ -8647,10 +7909,7 @@
               "Observable",
               "<void>"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 66
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -8666,10 +7925,7 @@
               "Observable",
               "<void>"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 76
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           }
         ],
@@ -8694,10 +7950,7 @@
           },
           "<Method>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/request.ts",
-          "lineNumber": 52
-        },
+        "path": "src/core/server/http/router/request.ts",
         "deprecated": false,
         "children": [
           {
@@ -8707,10 +7960,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 53
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -8723,10 +7973,7 @@
             "signature": [
               "Method"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 54
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           },
           {
@@ -8763,10 +8010,7 @@
               },
               "<Method>>"
             ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 55
-            },
+            "path": "src/core/server/http/router/request.ts",
             "deprecated": false
           }
         ],
@@ -8792,25 +8036,16 @@
           " extends ",
           "Request"
         ],
-        "source": {
-          "path": "src/core/server/http/router/request.ts",
-          "lineNumber": 84
-        },
+        "path": "src/core/server/http/router/request.ts",
         "deprecated": true,
         "references": [
           {
             "plugin": "security",
-            "link": {
-              "path": "x-pack/plugins/security/server/saved_objects/index.ts",
-              "lineNumber": 8
-            }
+            "path": "x-pack/plugins/security/server/saved_objects/index.ts"
           },
           {
             "plugin": "security",
-            "link": {
-              "path": "x-pack/plugins/security/server/saved_objects/index.ts",
-              "lineNumber": 47
-            }
+            "path": "x-pack/plugins/security/server/saved_objects/index.ts"
           }
         ],
         "children": [],
@@ -8823,10 +8058,7 @@
         "tags": [],
         "label": "OnPostAuthToolkit",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_post_auth.ts",
-          "lineNumber": 42
-        },
+        "path": "src/core/server/http/lifecycle/on_post_auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -8841,10 +8073,7 @@
             "signature": [
               "() => Next"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_post_auth.ts",
-              "lineNumber": 44
-            },
+            "path": "src/core/server/http/lifecycle/on_post_auth.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -8859,10 +8088,7 @@
         "tags": [],
         "label": "OnPreAuthToolkit",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
-          "lineNumber": 42
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
         "deprecated": false,
         "children": [
           {
@@ -8877,10 +8103,7 @@
             "signature": [
               "() => Next"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
-              "lineNumber": 44
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -8897,10 +8120,7 @@
         "description": [
           "\nAdditional data to extend a response."
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-          "lineNumber": 56
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "children": [
           {
@@ -8915,10 +8135,7 @@
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-              "lineNumber": 58
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false
           }
         ],
@@ -8933,10 +8150,7 @@
         "description": [
           "\nResponse status code."
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-          "lineNumber": 65
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "children": [
           {
@@ -8946,10 +8160,7 @@
             "tags": [],
             "label": "statusCode",
             "description": [],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-              "lineNumber": 66
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false
           }
         ],
@@ -8964,10 +8175,7 @@
         "description": [
           "\nAdditional data to extend a response when rendering a new body"
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-          "lineNumber": 45
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "children": [
           {
@@ -8982,10 +8190,7 @@
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-              "lineNumber": 47
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false
           },
           {
@@ -8997,10 +8202,7 @@
             "description": [
               "the body to use in the response"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-              "lineNumber": 49
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false
           }
         ],
@@ -9015,10 +8217,7 @@
         "description": [
           "\nA tool set defining an outcome of OnPreResponse interceptor for incoming request."
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-          "lineNumber": 88
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "children": [
           {
@@ -9041,10 +8240,7 @@
               },
               ") => OnPreResponseResult"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-              "lineNumber": 90
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -9064,10 +8260,7 @@
                     "text": "OnPreResponseRender"
                   }
                 ],
-                "source": {
-                  "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-                  "lineNumber": 90
-                },
+                "path": "src/core/server/http/lifecycle/on_pre_response.ts",
                 "deprecated": false
               }
             ]
@@ -9092,10 +8285,7 @@
               },
               " | undefined) => OnPreResponseResult"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-              "lineNumber": 92
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -9116,10 +8306,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-                  "lineNumber": 92
-                },
+                "path": "src/core/server/http/lifecycle/on_pre_response.ts",
                 "deprecated": false
               }
             ]
@@ -9134,10 +8321,7 @@
         "tags": [],
         "label": "OnPreRoutingToolkit",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
-          "lineNumber": 55
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
         "deprecated": false,
         "children": [
           {
@@ -9152,10 +8336,7 @@
             "signature": [
               "() => OnPreRoutingResult"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
-              "lineNumber": 57
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -9172,10 +8353,7 @@
             "signature": [
               "(url: string) => OnPreRoutingResult"
             ],
-            "source": {
-              "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
-              "lineNumber": 59
-            },
+            "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -9186,10 +8364,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "source": {
-                  "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
                 "deprecated": false
               }
             ]
@@ -9216,10 +8391,7 @@
           },
           "<P, Q, B, Method>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 157
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "children": [
           {
@@ -9231,10 +8403,7 @@
             "description": [
               "\nThe endpoint _within_ the router path to register the route.\n"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 171
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9257,10 +8426,7 @@
               },
               "<P, Q, B>"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 229
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9282,10 +8448,7 @@
               },
               "<Method> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 234
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           }
         ],
@@ -9310,10 +8473,7 @@
           },
           "<Method>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 106
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "children": [
           {
@@ -9328,10 +8488,7 @@
             "signature": [
               "boolean | \"optional\" | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 116
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9346,10 +8503,7 @@
             "signature": [
               "(Method extends \"get\" ? never : boolean) | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 125
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9364,10 +8518,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 130
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9398,10 +8549,7 @@
               },
               ") | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 135
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9424,10 +8572,7 @@
               },
               " ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 140
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           }
         ],
@@ -9442,10 +8587,7 @@
         "description": [
           "\nAdditional body options for a route"
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 55
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "children": [
           {
@@ -9468,10 +8610,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 68
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9486,10 +8625,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 75
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9504,10 +8640,7 @@
             "signature": [
               "\"data\" | \"stream\" | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 88
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           },
           {
@@ -9522,10 +8655,7 @@
             "signature": [
               "boolean | \"gunzip\" | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 99
-            },
+            "path": "src/core/server/http/router/route.ts",
             "deprecated": false
           }
         ],
@@ -9540,10 +8670,7 @@
         "description": [
           "\nValidation result factory to be used in the custom validation function to return the valid data or validation errors\n\nSee {@link RouteValidationFunction}.\n"
         ],
-        "source": {
-          "path": "src/core/server/http/router/validator/validator.ts",
-          "lineNumber": 20
-        },
+        "path": "src/core/server/http/router/validator/validator.ts",
         "deprecated": false,
         "children": [
           {
@@ -9556,10 +8683,7 @@
             "signature": [
               "<T>(value: T) => { value: T; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/validator/validator.ts",
-              "lineNumber": 21
-            },
+            "path": "src/core/server/http/router/validator/validator.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -9573,10 +8697,7 @@
                 "signature": [
                   "T"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/validator/validator.ts",
-                  "lineNumber": 21
-                },
+                "path": "src/core/server/http/router/validator/validator.ts",
                 "deprecated": false
               }
             ]
@@ -9599,10 +8720,7 @@
               },
               "; }"
             ],
-            "source": {
-              "path": "src/core/server/http/router/validator/validator.ts",
-              "lineNumber": 22
-            },
+            "path": "src/core/server/http/router/validator/validator.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -9616,10 +8734,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/validator/validator.ts",
-                  "lineNumber": 22
-                },
+                "path": "src/core/server/http/router/validator/validator.ts",
                 "deprecated": false
               },
               {
@@ -9632,10 +8747,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/validator/validator.ts",
-                  "lineNumber": 22
-                },
+                "path": "src/core/server/http/router/validator/validator.ts",
                 "deprecated": false
               }
             ]
@@ -9662,10 +8774,7 @@
           },
           "<P, Q, B>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/validator/validator.ts",
-          "lineNumber": 87
-        },
+        "path": "src/core/server/http/router/validator/validator.ts",
         "deprecated": false,
         "children": [
           {
@@ -9691,10 +8800,7 @@
               },
               "<P> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/validator/validator.ts",
-              "lineNumber": 92
-            },
+            "path": "src/core/server/http/router/validator/validator.ts",
             "deprecated": false
           },
           {
@@ -9720,10 +8826,7 @@
               },
               "<Q> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/validator/validator.ts",
-              "lineNumber": 97
-            },
+            "path": "src/core/server/http/router/validator/validator.ts",
             "deprecated": false
           },
           {
@@ -9749,10 +8852,7 @@
               },
               "<B> | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/validator/validator.ts",
-              "lineNumber": 102
-            },
+            "path": "src/core/server/http/router/validator/validator.ts",
             "deprecated": false
           }
         ],
@@ -9767,10 +8867,7 @@
         "description": [
           "\nAdditional options for the RouteValidator class to modify its default behaviour.\n"
         ],
-        "source": {
-          "path": "src/core/server/http/router/validator/validator.ts",
-          "lineNumber": 110
-        },
+        "path": "src/core/server/http/router/validator/validator.ts",
         "deprecated": false,
         "children": [
           {
@@ -9785,10 +8882,7 @@
             "signature": [
               "{ params?: boolean | undefined; query?: boolean | undefined; body?: boolean | undefined; } | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/router/validator/validator.ts",
-              "lineNumber": 115
-            },
+            "path": "src/core/server/http/router/validator/validator.ts",
             "deprecated": false
           }
         ],
@@ -9803,10 +8897,7 @@
         "description": [
           "\nReturn type from a function to validate cookie contents."
         ],
-        "source": {
-          "path": "src/core/server/http/cookie_session_storage.ts",
-          "lineNumber": 48
-        },
+        "path": "src/core/server/http/cookie_session_storage.ts",
         "deprecated": false,
         "children": [
           {
@@ -9818,10 +8909,7 @@
             "description": [
               "\nWhether the cookie is valid or not."
             ],
-            "source": {
-              "path": "src/core/server/http/cookie_session_storage.ts",
-              "lineNumber": 52
-            },
+            "path": "src/core/server/http/cookie_session_storage.ts",
             "deprecated": false
           },
           {
@@ -9836,10 +8924,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/cookie_session_storage.ts",
-              "lineNumber": 56
-            },
+            "path": "src/core/server/http/cookie_session_storage.ts",
             "deprecated": false
           }
         ],
@@ -9864,10 +8949,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/core/server/http/session_storage.ts",
-          "lineNumber": 14
-        },
+        "path": "src/core/server/http/session_storage.ts",
         "deprecated": false,
         "children": [
           {
@@ -9882,10 +8964,7 @@
             "signature": [
               "() => Promise<T | null>"
             ],
-            "source": {
-              "path": "src/core/server/http/session_storage.ts",
-              "lineNumber": 18
-            },
+            "path": "src/core/server/http/session_storage.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -9902,10 +8981,7 @@
             "signature": [
               "(sessionValue: T) => void"
             ],
-            "source": {
-              "path": "src/core/server/http/session_storage.ts",
-              "lineNumber": 23
-            },
+            "path": "src/core/server/http/session_storage.ts",
             "deprecated": false,
             "children": [
               {
@@ -9920,10 +8996,7 @@
                 "signature": [
                   "T"
                 ],
-                "source": {
-                  "path": "src/core/server/http/session_storage.ts",
-                  "lineNumber": 23
-                },
+                "path": "src/core/server/http/session_storage.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -9942,10 +9015,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/server/http/session_storage.ts",
-              "lineNumber": 27
-            },
+            "path": "src/core/server/http/session_storage.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -9972,10 +9042,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/core/server/http/cookie_session_storage.ts",
-          "lineNumber": 20
-        },
+        "path": "src/core/server/http/cookie_session_storage.ts",
         "deprecated": false,
         "children": [
           {
@@ -9987,10 +9054,7 @@
             "description": [
               "\nName of the session cookie."
             ],
-            "source": {
-              "path": "src/core/server/http/cookie_session_storage.ts",
-              "lineNumber": 24
-            },
+            "path": "src/core/server/http/cookie_session_storage.ts",
             "deprecated": false
           },
           {
@@ -10002,10 +9066,7 @@
             "description": [
               "\nA key used to encrypt a cookie's value. Should be at least 32 characters long."
             ],
-            "source": {
-              "path": "src/core/server/http/cookie_session_storage.ts",
-              "lineNumber": 28
-            },
+            "path": "src/core/server/http/cookie_session_storage.ts",
             "deprecated": false
           },
           {
@@ -10027,10 +9088,7 @@
                 "text": "SessionCookieValidationResult"
               }
             ],
-            "source": {
-              "path": "src/core/server/http/cookie_session_storage.ts",
-              "lineNumber": 32
-            },
+            "path": "src/core/server/http/cookie_session_storage.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -10044,10 +9102,7 @@
                 "signature": [
                   "T | T[]"
                 ],
-                "source": {
-                  "path": "src/core/server/http/cookie_session_storage.ts",
-                  "lineNumber": 32
-                },
+                "path": "src/core/server/http/cookie_session_storage.ts",
                 "deprecated": false
               }
             ]
@@ -10061,10 +9116,7 @@
             "description": [
               "\nFlag indicating whether the cookie should be sent only via a secure connection."
             ],
-            "source": {
-              "path": "src/core/server/http/cookie_session_storage.ts",
-              "lineNumber": 36
-            },
+            "path": "src/core/server/http/cookie_session_storage.ts",
             "deprecated": false
           },
           {
@@ -10079,10 +9131,7 @@
             "signature": [
               "\"None\" | \"Strict\" | \"Lax\" | undefined"
             ],
-            "source": {
-              "path": "src/core/server/http/cookie_session_storage.ts",
-              "lineNumber": 41
-            },
+            "path": "src/core/server/http/cookie_session_storage.ts",
             "deprecated": false
           }
         ],
@@ -10107,10 +9156,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/core/server/http/session_storage.ts",
-          "lineNumber": 33
-        },
+        "path": "src/core/server/http/session_storage.ts",
         "deprecated": false,
         "children": [
           {
@@ -10139,10 +9185,7 @@
               },
               "<T>"
             ],
-            "source": {
-              "path": "src/core/server/http/session_storage.ts",
-              "lineNumber": 34
-            },
+            "path": "src/core/server/http/session_storage.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -10163,10 +9206,7 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/session_storage.ts",
-                  "lineNumber": 34
-                },
+                "path": "src/core/server/http/session_storage.ts",
                 "deprecated": false
               }
             ]
@@ -10183,10 +9223,7 @@
         "tags": [],
         "label": "AuthResultType",
         "description": [],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 22
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10199,10 +9236,7 @@
         "description": [
           "\nStatus indicating an outcome of the authentication."
         ],
-        "source": {
-          "path": "src/core/server/http/auth_state_storage.ts",
-          "lineNumber": 15
-        },
+        "path": "src/core/server/http/auth_state_storage.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -10428,10 +9462,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 147
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10447,10 +9478,7 @@
         "signature": [
           "{ [x: string]: string | string[]; }"
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 82
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10486,10 +9514,7 @@
             "text": "AuthRedirected"
           }
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/auth.ts",
-          "lineNumber": 44
-        },
+        "path": "src/core/server/http/lifecycle/auth.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10505,10 +9530,7 @@
         "signature": [
           "\"post\" | \"put\" | \"delete\" | \"patch\""
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 19
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10542,10 +9564,7 @@
           },
           ") => Record<string, string | string[]> | undefined"
         ],
-        "source": {
-          "path": "src/core/server/http/auth_headers_storage.ts",
-          "lineNumber": 18
-        },
+        "path": "src/core/server/http/auth_headers_storage.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10585,10 +9604,7 @@
           },
           "; state: T; }"
         ],
-        "source": {
-          "path": "src/core/server/http/auth_state_storage.ts",
-          "lineNumber": 35
-        },
+        "path": "src/core/server/http/auth_state_storage.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10604,10 +9620,7 @@
         "signature": [
           "{ accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; date?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; range?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; warning?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
-        "source": {
-          "path": "src/core/server/http/router/headers.ts",
-          "lineNumber": 40
-        },
+        "path": "src/core/server/http/router/headers.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10625,10 +9638,7 @@
           "Stream",
           " | undefined"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 73
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10658,7 +9668,7 @@
             "section": "def-server.LegacyRequest",
             "text": "LegacyRequest"
           },
-          ") => string; set: (request: ",
+          ") => string; prepend: (path: string) => string; set: (request: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -10674,12 +9684,9 @@
             "section": "def-server.LegacyRequest",
             "text": "LegacyRequest"
           },
-          ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+          ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
         ],
-        "source": {
-          "path": "src/core/server/http/base_path_service.ts",
-          "lineNumber": 104
-        },
+        "path": "src/core/server/http/base_path_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10711,10 +9718,7 @@
           },
           ") => boolean"
         ],
-        "source": {
-          "path": "src/core/server/http/auth_state_storage.ts",
-          "lineNumber": 44
-        },
+        "path": "src/core/server/http/auth_state_storage.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10754,10 +9758,7 @@
           },
           "<Method>>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/request.ts",
-          "lineNumber": 44
-        },
+        "path": "src/core/server/http/router/request.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10947,10 +9948,7 @@
           "KibanaResponse",
           "<undefined>; }"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 323
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10966,10 +9964,7 @@
         "signature": [
           "\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\""
         ],
-        "source": {
-          "path": "src/core/server/http/router/headers.ts",
-          "lineNumber": 34
-        },
+        "path": "src/core/server/http/router/headers.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11113,10 +10108,7 @@
           "Stream",
           ">; }"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 329
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11280,10 +10272,7 @@
           "KibanaResponse",
           "<any> | Next>"
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_post_auth.ts",
-          "lineNumber": 51
-        },
+        "path": "src/core/server/http/lifecycle/on_post_auth.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11447,10 +10436,7 @@
           "KibanaResponse",
           "<any> | Next>"
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
-          "lineNumber": 55
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11490,10 +10476,7 @@
           },
           ") => Render | Next | Promise<OnPreResponseResult>"
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
-          "lineNumber": 104
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11657,10 +10640,7 @@
           "KibanaResponse",
           "<any>>"
         ],
-        "source": {
-          "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
-          "lineNumber": 71
-        },
+        "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11683,10 +10663,7 @@
           },
           " & { headers: { location: string; }; }"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 93
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11726,10 +10703,7 @@
           },
           "<any>>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/router.ts",
-          "lineNumber": 351
-        },
+        "path": "src/core/server/http/router/router.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11751,10 +10725,7 @@
             "text": "IContextContainer"
           }
         ],
-        "source": {
-          "path": "src/core/server/http/types.ts",
-          "lineNumber": 30
-        },
+        "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11952,10 +10923,7 @@
           "KibanaResponse",
           "<undefined>; }) => Context[ContextName] | Promise<Context[ContextName]>"
         ],
-        "source": {
-          "path": "src/core/server/http/types.ts",
-          "lineNumber": 38
-        },
+        "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12359,10 +11327,7 @@
           },
           "<P, Q, B, Context, Method, ResponseFactory>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/router.ts",
-          "lineNumber": 377
-        },
+        "path": "src/core/server/http/router/router.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12378,10 +11343,7 @@
         "signature": [
           "string | Error | { message: string | Error; attributes?: Record<string, any> | undefined; }"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 21
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12397,10 +11359,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 16
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12416,10 +11375,7 @@
         "signature": [
           "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/headers.ts",
-          "lineNumber": 48
-        },
+        "path": "src/core/server/http/router/headers.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12435,10 +11391,7 @@
         "signature": [
           "\"application/json\" | \"multipart/form-data\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"text/*\""
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 43
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12454,10 +11407,7 @@
         "signature": [
           "\"get\" | \"options\" | \"post\" | \"put\" | \"delete\" | \"patch\""
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 31
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12663,10 +11613,7 @@
           "KibanaResponse",
           "<undefined>; }>) => void"
         ],
-        "source": {
-          "path": "src/core/server/http/router/router.ts",
-          "lineNumber": 48
-        },
+        "path": "src/core/server/http/router/router.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12698,10 +11645,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "src/core/server/http/router/validator/validator.ts",
-          "lineNumber": 50
-        },
+        "path": "src/core/server/http/router/validator/validator.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12728,10 +11672,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/core/server/http/router/validator/validator.ts",
-          "lineNumber": 70
-        },
+        "path": "src/core/server/http/router/validator/validator.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12761,10 +11702,7 @@
             "text": "RouteValidatorOptions"
           }
         ],
-        "source": {
-          "path": "src/core/server/http/router/validator/validator.ts",
-          "lineNumber": 126
-        },
+        "path": "src/core/server/http/router/validator/validator.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12780,10 +11718,7 @@
         "signature": [
           "\"get\" | \"options\""
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 25
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -12798,10 +11733,7 @@
         "description": [
           "\nSet of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.\nShould be returned as a result of {@link RequestHandler} execution.\n"
         ],
-        "source": {
-          "path": "src/core/server/http/router/response.ts",
-          "lineNumber": 293
-        },
+        "path": "src/core/server/http/router/response.ts",
         "deprecated": false,
         "children": [
           {
@@ -12814,10 +11746,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 294
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -12830,10 +11759,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 295
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -12846,10 +11772,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 296
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false
           },
           {
@@ -12876,10 +11799,7 @@
               "KibanaResponse",
               "<T>"
             ],
-            "source": {
-              "path": "src/core/server/http/router/response.ts",
-              "lineNumber": 301
-            },
+            "path": "src/core/server/http/router/response.ts",
             "deprecated": false,
             "children": [
               {
@@ -12899,10 +11819,7 @@
                   },
                   "<T>"
                 ],
-                "source": {
-                  "path": "src/core/server/http/router/response.ts",
-                  "lineNumber": 302
-                },
+                "path": "src/core/server/http/router/response.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -12924,10 +11841,7 @@
         "signature": [
           "readonly [\"data\", \"stream\"]"
         ],
-        "source": {
-          "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 37
-        },
+        "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

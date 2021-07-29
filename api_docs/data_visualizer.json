@@ -11,10 +11,7 @@
         "tags": [],
         "label": "IndexDataVisualizerViewProps",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-          "lineNumber": 122
-        },
+        "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
         "deprecated": false,
         "children": [
           {
@@ -33,10 +30,7 @@
                 "text": "IndexPattern"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-              "lineNumber": 123
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false
           },
           {
@@ -56,10 +50,7 @@
               },
               " | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-              "lineNumber": 124
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false
           },
           {
@@ -79,10 +70,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-              "lineNumber": 125
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false
           }
         ],
@@ -95,10 +83,7 @@
         "tags": [],
         "label": "ResultLink",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
         "deprecated": false,
         "children": [
           {
@@ -108,10 +93,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false
           },
           {
@@ -124,10 +106,7 @@
             "signature": [
               "\"index\" | \"file\""
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false
           },
           {
@@ -137,10 +116,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false
           },
           {
@@ -150,10 +126,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false
           },
           {
@@ -163,10 +136,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false
           },
           {
@@ -179,10 +149,7 @@
             "signature": [
               "(params?: any) => Promise<string>"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "children": [
               {
@@ -195,10 +162,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-                  "lineNumber": 29
-                },
+                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -215,10 +179,7 @@
             "signature": [
               "(params?: any) => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "children": [
               {
@@ -231,10 +192,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-                  "lineNumber": 30
-                },
+                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -251,10 +209,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false
           }
         ],
@@ -273,10 +228,7 @@
         "signature": [
           "React.FunctionComponent<Props>"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -298,10 +250,7 @@
           },
           "[]; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
-          "lineNumber": 35
-        },
+        "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -325,10 +274,7 @@
         },
         "[]; }>>; getMaxBytesFormatted: () => string; }"
       ],
-      "source": {
-        "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
-        "lineNumber": 40
-      },
+      "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -353,10 +299,7 @@
         "tags": [],
         "label": "DataVisualizerTableState",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -366,10 +309,7 @@
             "tags": [],
             "label": "pageSize",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
             "deprecated": false
           },
           {
@@ -379,10 +319,7 @@
             "tags": [],
             "label": "pageIndex",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
             "deprecated": false
           },
           {
@@ -392,10 +329,7 @@
             "tags": [],
             "label": "sortField",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
             "deprecated": false
           },
           {
@@ -405,10 +339,7 @@
             "tags": [],
             "label": "sortDirection",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
             "deprecated": false
           },
           {
@@ -421,10 +352,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
             "deprecated": false
           },
           {
@@ -437,10 +365,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
             "deprecated": false
           },
           {
@@ -450,10 +375,7 @@
             "tags": [],
             "label": "showDistributions",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
             "deprecated": false
           }
         ],
@@ -466,10 +388,7 @@
         "tags": [],
         "label": "DocumentCountBuckets",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
         "deprecated": false,
         "children": [
           {
@@ -482,10 +401,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           }
         ],
@@ -498,10 +414,7 @@
         "tags": [],
         "label": "DocumentCounts",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
         "deprecated": false,
         "children": [
           {
@@ -521,10 +434,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -537,10 +447,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           }
         ],
@@ -553,10 +460,7 @@
         "tags": [],
         "label": "FieldRequestConfig",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
         "deprecated": false,
         "children": [
           {
@@ -569,10 +473,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -585,10 +486,7 @@
             "signature": [
               "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\" | \"histogram\""
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -598,10 +496,7 @@
             "tags": [],
             "label": "cardinality",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           }
         ],
@@ -614,10 +509,7 @@
         "tags": [],
         "label": "FieldVisStats",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-          "lineNumber": 31
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
         "deprecated": false,
         "children": [
           {
@@ -630,10 +522,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -646,10 +535,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -662,10 +548,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -678,10 +561,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -694,10 +574,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -710,10 +587,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -726,10 +600,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -750,10 +621,7 @@
               },
               " | undefined; interval?: number | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -766,10 +634,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 43
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -790,10 +655,7 @@
               },
               "[]; maxPercentile: number; minPercentile: 0; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -806,10 +668,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -822,10 +681,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -838,10 +694,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 51
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -854,10 +707,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 52
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -870,10 +720,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 53
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -886,10 +733,7 @@
             "signature": [
               "{ key: React.ReactText; doc_count: number; }[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -902,10 +746,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -918,10 +759,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -934,10 +772,7 @@
             "signature": [
               "(string | object)[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -950,10 +785,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 58
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -966,10 +798,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 59
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           }
         ],
@@ -982,10 +811,7 @@
         "tags": [],
         "label": "Percentile",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
         "deprecated": false,
         "children": [
           {
@@ -995,10 +821,7 @@
             "tags": [],
             "label": "percent",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -1008,10 +831,7 @@
             "tags": [],
             "label": "minValue",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 12
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
           {
@@ -1021,10 +841,7 @@
             "tags": [],
             "label": "maxValue",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           }
         ],
@@ -1043,10 +860,7 @@
         "signature": [
           "1073741274"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1060,10 +874,7 @@
         "signature": [
           "\"0,0.[0] b\""
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1077,10 +888,7 @@
         "signature": [
           "\"file-data-visualizer\""
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1094,10 +902,7 @@
         "signature": [
           "any[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1111,10 +916,7 @@
         "signature": [
           "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\" | \"histogram\""
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
-          "lineNumber": 9
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1128,10 +930,7 @@
         "signature": [
           "\"100MB\""
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1145,10 +944,7 @@
         "signature": [
           "104857600"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1159,10 +955,7 @@
         "tags": [],
         "label": "MB",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1176,10 +969,7 @@
         "signature": [
           "string[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 49
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1200,10 +990,7 @@
           },
           "<any>"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1217,10 +1004,7 @@
         "signature": [
           "\"fileUpload:maxFileSize\""
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1236,10 +1020,7 @@
         "signature": [
           "{ readonly BOOLEAN: \"boolean\"; readonly DATE: \"date\"; readonly GEO_POINT: \"geo_point\"; readonly GEO_SHAPE: \"geo_shape\"; readonly IP: \"ip\"; readonly KEYWORD: \"keyword\"; readonly NUMBER: \"number\"; readonly TEXT: \"text\"; readonly HISTOGRAM: \"histogram\"; readonly UNKNOWN: \"unknown\"; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1250,10 +1031,7 @@
         "tags": [],
         "label": "JOB_FIELD_TYPES_OPTIONS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 36
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "children": [
           {
@@ -1263,10 +1041,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.BOOLEAN]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1276,10 +1051,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 37
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1289,10 +1061,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 37
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1304,10 +1073,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.DATE]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1317,10 +1083,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 38
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1330,10 +1093,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 38
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1345,10 +1105,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.GEO_POINT]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1358,10 +1115,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 39
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1371,10 +1125,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 39
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1386,10 +1137,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.GEO_SHAPE]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1399,10 +1147,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 40
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1412,10 +1157,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 40
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1427,10 +1169,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.IP]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 41
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1440,10 +1179,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 41
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1453,10 +1189,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 41
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1468,10 +1201,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.KEYWORD]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 42
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1481,10 +1211,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1494,10 +1221,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1509,10 +1233,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.NUMBER]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 43
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1522,10 +1243,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 43
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1535,10 +1253,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 43
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1550,10 +1265,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.TEXT]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1563,10 +1275,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 44
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1576,10 +1285,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 44
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1591,10 +1297,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.HISTOGRAM]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1604,10 +1307,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 45
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               },
               {
@@ -1617,10 +1317,7 @@
                 "tags": [],
                 "label": "icon",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 45
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1632,10 +1329,7 @@
             "tags": [],
             "label": "[JOB_FIELD_TYPES.UNKNOWN]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -1645,10 +1339,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                  "lineNumber": 46
-                },
+                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
                 "deprecated": false
               }
             ]
@@ -1666,10 +1357,7 @@
         "signature": [
           "Set<string>"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-          "lineNumber": 51
-        },
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

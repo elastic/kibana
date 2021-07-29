@@ -21,10 +21,7 @@
           },
           " extends React.PureComponent<Props, State, any>"
         ],
-        "source": {
-          "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-          "lineNumber": 40
-        },
+        "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
         "deprecated": false,
         "children": [
           {
@@ -34,10 +31,7 @@
             "tags": [],
             "label": "_isMounted",
             "description": [],
-            "source": {
-              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false
           },
           {
@@ -47,10 +41,7 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "source": {
-              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-              "lineNumber": 43
-            },
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
             "children": [
               {
@@ -63,10 +54,7 @@
                 "signature": [
                   "null"
                 ],
-                "source": {
-                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                  "lineNumber": 44
-                },
+                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                 "deprecated": false
               },
               {
@@ -79,10 +67,7 @@
                 "signature": [
                   "true"
                 ],
-                "source": {
-                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                  "lineNumber": 45
-                },
+                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                 "deprecated": false
               },
               {
@@ -95,10 +80,7 @@
                 "signature": [
                   "false"
                 ],
-                "source": {
-                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                  "lineNumber": 46
-                },
+                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                 "deprecated": false
               }
             ]
@@ -113,10 +95,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-              "lineNumber": 49
-            },
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -131,10 +110,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-              "lineNumber": 70
-            },
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -149,10 +125,7 @@
             "signature": [
               "({ data, isLoading, hasPrivilegeToRead }: State) => JSX.Element"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-              "lineNumber": 74
-            },
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
             "children": [
               {
@@ -165,10 +138,7 @@
                 "signature": [
                   "State"
                 ],
-                "source": {
-                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                  "lineNumber": 74
-                },
+                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -185,10 +155,7 @@
             "signature": [
               "() => JSX.Element"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-              "lineNumber": 124
-            },
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -209,10 +176,7 @@
       "tags": [],
       "label": "TelemetryManagementSectionPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-        "lineNumber": 37
-      },
+      "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
       "deprecated": false,
       "children": [
         {
@@ -225,10 +189,7 @@
           "signature": [
             "(enabled: boolean) => void"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-            "lineNumber": 38
-          },
+          "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -239,10 +200,7 @@
               "tags": [],
               "label": "enabled",
               "description": [],
-              "source": {
-                "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-                "lineNumber": 38
-              },
+              "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
               "deprecated": false
             }
           ]

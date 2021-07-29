@@ -11,10 +11,7 @@
         "tags": [],
         "label": "ConfigSchema",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/apm/public/index.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/apm/public/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -24,10 +21,7 @@
             "tags": [],
             "label": "serviceMapEnabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/apm/public/index.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/apm/public/index.ts",
             "deprecated": false
           },
           {
@@ -37,10 +31,7 @@
             "tags": [],
             "label": "profilingEnabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/apm/public/index.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/apm/public/index.ts",
             "deprecated": false
           },
           {
@@ -53,10 +44,7 @@
             "signature": [
               "{ enabled: boolean; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/public/index.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/apm/public/index.ts",
             "deprecated": false
           }
         ],
@@ -76,10 +64,7 @@
       "signature": [
         "{}"
       ],
-      "source": {
-        "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 52
-      },
+      "path": "x-pack/plugins/apm/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -94,10 +79,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 54
-      },
+      "path": "x-pack/plugins/apm/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -142,10 +124,7 @@
           "APMPluginStartDependencies",
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 56
-        },
+        "path": "x-pack/plugins/apm/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -158,10 +137,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -181,10 +157,7 @@
                   },
                   "<unknown>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 66
-                },
+                "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -235,10 +208,7 @@
               "ValuesType",
               "<TParams[\"apm\"][\"events\"]>>, ESSearchRequestOf<TParams>, {}>>; }>; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 70
-            },
+            "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -260,10 +230,7 @@
                   "APMPluginStartDependencies",
                   ", unknown>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 71
-                },
+                "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -279,10 +246,7 @@
                   "APMPluginSetupDependencies",
                   ", \"data\" | \"security\" | \"home\" | \"features\" | \"fleet\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 72
-                },
+                "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -307,10 +271,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 302
-            },
+            "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -329,10 +290,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 302
-                },
+                "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -349,10 +307,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 321
-            },
+            "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -376,10 +331,7 @@
           "SearchAggregatedTransactionSetting",
           "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/apm/server/index.ts",
-          "lineNumber": 62
-        },
+        "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -392,10 +344,7 @@
             "signature": [
               "Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/index.ts",
-              "lineNumber": 63
-            },
+            "path": "x-pack/plugins/apm/server/index.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -411,10 +360,7 @@
               "SearchAggregatedTransactionSetting",
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; maxServiceEnvironments: number; maxServiceSelection: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/index.ts",
-              "lineNumber": 64
-            },
+            "path": "x-pack/plugins/apm/server/index.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -431,10 +377,7 @@
         "tags": [],
         "label": "APMRouteHandlerResources",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/apm/server/routes/typings.ts",
-          "lineNumber": 55
-        },
+        "path": "x-pack/plugins/apm/server/routes/typings.ts",
         "deprecated": false,
         "children": [
           {
@@ -454,10 +397,7 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -470,10 +410,7 @@
             "signature": [
               "ApmPluginRequestHandlerContext"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -486,10 +423,7 @@
             "signature": [
               "{ query: { _inspect: boolean; }; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 58
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -504,10 +438,7 @@
               "SearchAggregatedTransactionSetting",
               "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 63
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -520,10 +451,7 @@
             "signature": [
               "Logger"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 64
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -552,10 +480,7 @@
               },
               ">; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 65
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -792,10 +717,7 @@
               },
               ">; } | undefined; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 69
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -814,10 +736,7 @@
                 "text": "RuleDataClient"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           },
           {
@@ -837,10 +756,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 76
-            },
+            "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
           }
         ],
@@ -855,10 +771,7 @@
         "tags": [],
         "label": "ProcessorEvent",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/apm/common/processor_event.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/apm/common/processor_event.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -874,10 +787,7 @@
         "signature": [
           "\"apm\""
         ],
-        "source": {
-          "path": "x-pack/plugins/apm/common/alert_types.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/apm/common/alert_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -893,10 +803,7 @@
           "SearchAggregatedTransactionSetting",
           "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/apm/server/index.ts",
-          "lineNumber": 59
-        },
+        "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3817,10 +3724,7 @@
           "APMRouteCreateOptions",
           ">; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/apm/server/routes/get_global_apm_server_route_repository.ts",
-          "lineNumber": 66
-        },
+        "path": "x-pack/plugins/apm/server/routes/get_global_apm_server_route_repository.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3836,10 +3740,7 @@
           "SearchAggregatedTransactionSetting",
           "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly maxServiceEnvironments: number; readonly maxServiceSelection: number; readonly profilingEnabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/apm/server/index.ts",
-          "lineNumber": 58
-        },
+        "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3853,10 +3754,7 @@
         "signature": [
           "{ response: any; duration: number; requestType: string; requestParams: Record<string, unknown>; esError: Error; operationName: string; }[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/apm/server/routes/typings.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/apm/server/routes/typings.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -3869,10 +3767,7 @@
       "tags": [],
       "label": "APMPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/apm/server/types.ts",
-        "lineNumber": 55
-      },
+      "path": "x-pack/plugins/apm/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -3888,10 +3783,7 @@
             "SearchAggregatedTransactionSetting",
             "; 'xpack.apm.metricsInterval': number; 'xpack.apm.agent.migrations.enabled': boolean; }>"
           ],
-          "source": {
-            "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 56
-          },
+          "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false
         },
         {
@@ -3906,10 +3798,7 @@
             "ApmIndicesConfig",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 57
-          },
+          "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": []
@@ -3940,10 +3829,7 @@
             "ValuesType",
             "<TParams[\"apm\"][\"events\"]>>, ESSearchRequestOf<TParams>, {}>>; }>"
           ],
-          "source": {
-            "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 58
-          },
+          "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -3967,10 +3853,7 @@
                 "ApmPluginRequestHandlerContext",
                 "; }"
               ],
-              "source": {
-                "path": "x-pack/plugins/apm/server/types.ts",
-                "lineNumber": 58
-              },
+              "path": "x-pack/plugins/apm/server/types.ts",
               "deprecated": false
             }
           ]

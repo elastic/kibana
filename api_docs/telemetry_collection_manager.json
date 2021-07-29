@@ -19,10 +19,7 @@
         "tags": [],
         "label": "ClusterDetails",
         "description": [],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 52
-        },
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -32,10 +29,7 @@
             "tags": [],
             "label": "clusterUuid",
             "description": [],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 53
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           }
         ],
@@ -48,10 +42,7 @@
         "tags": [],
         "label": "StatsCollectionConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 56
-        },
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -70,10 +61,7 @@
                 "text": "UsageCollectionSetup"
               }
             ],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 57
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           },
           {
@@ -86,7 +74,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"helpers\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -96,10 +84,7 @@
               "ApiResponse",
               "<Record<string, any>, unknown>>; }; }"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 58
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           },
           {
@@ -412,10 +397,7 @@
               },
               "; }"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 59
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           },
           {
@@ -435,10 +417,7 @@
               },
               "<unknown, unknown, unknown, any> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 60
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           }
         ],
@@ -451,10 +430,7 @@
         "tags": [],
         "label": "StatsCollectionContext",
         "description": [],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 77
-        },
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -468,10 +444,7 @@
               "Logger",
               " | Console"
             ],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 78
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           },
           {
@@ -481,10 +454,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 79
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           }
         ],
@@ -508,10 +478,7 @@
           " extends ",
           "BasicStatsPayload"
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 73
-        },
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -521,10 +488,7 @@
             "tags": [],
             "label": "collectionSource",
             "description": [],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 74
-            },
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           }
         ],
@@ -567,10 +531,7 @@
           },
           "[]>"
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 83
-        },
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -608,10 +569,7 @@
           },
           ") => Promise<T[]>"
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 87
-        },
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -627,10 +585,7 @@
           " | ",
           "EncryptedStatsGetterConfig"
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 82
-        },
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -643,10 +598,7 @@
       "tags": [],
       "label": "TelemetryCollectionManagerPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-        "lineNumber": 18
-      },
+      "path": "src/plugins/telemetry_collection_manager/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -663,10 +615,7 @@
             "CollectionStrategyConfig",
             "<T>) => void"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 19
-          },
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -681,10 +630,7 @@
                 "CollectionStrategyConfig",
                 "<T>"
               ],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-                "lineNumber": 20
-              },
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "deprecated": false
             }
           ]
@@ -707,10 +653,7 @@
             },
             ") => Promise<string[] | { cluster_uuid: string; opt_in_status: boolean; }[]>"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 22
-          },
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -721,10 +664,7 @@
               "tags": [],
               "label": "optInStatus",
               "description": [],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
+              "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
               "deprecated": false
             },
             {
@@ -739,10 +679,7 @@
                 " | ",
                 "EncryptedStatsGetterConfig"
               ],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
+              "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
               "deprecated": false
             }
           ]
@@ -769,10 +706,7 @@
             "EncryptedStatsGetterConfig",
             "): Promise<string[]>; }"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 23
-          },
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false
         },
         {
@@ -785,10 +719,7 @@
           "signature": [
             "() => Promise<boolean | undefined>"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 24
-          },
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": []
@@ -804,10 +735,7 @@
       "tags": [],
       "label": "TelemetryCollectionManagerPluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-        "lineNumber": 27
-      },
+      "path": "src/plugins/telemetry_collection_manager/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -828,10 +756,7 @@
             },
             ") => Promise<string[] | { cluster_uuid: string; opt_in_status: boolean; }[]>"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 28
-          },
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -842,10 +767,7 @@
               "tags": [],
               "label": "optInStatus",
               "description": [],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
+              "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
               "deprecated": false
             },
             {
@@ -860,10 +782,7 @@
                 " | ",
                 "EncryptedStatsGetterConfig"
               ],
-              "source": {
-                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
-                "lineNumber": 165
-              },
+              "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
               "deprecated": false
             }
           ]
@@ -890,10 +809,7 @@
             "EncryptedStatsGetterConfig",
             "): Promise<string[]>; }"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 29
-          },
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false
         },
         {
@@ -906,10 +822,7 @@
           "signature": [
             "() => Promise<boolean | undefined>"
           ],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 30
-          },
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": []
