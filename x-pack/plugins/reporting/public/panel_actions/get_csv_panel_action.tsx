@@ -120,7 +120,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       searchSource,
       columns,
       title: savedSearch.title,
-      objectType: 'downloadCsv',
+      objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 
     this.isDownloading = true;

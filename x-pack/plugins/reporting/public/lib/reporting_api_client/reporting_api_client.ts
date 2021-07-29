@@ -28,6 +28,13 @@ import {
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
+/*
+ * For convenience, apps do not have to provide the browserTimezone and Kibana version.
+ * Those fields are added in this client as part of the service.
+ * TODO: export a type like this to other plugins: https://github.com/elastic/kibana/issues/107085
+ */
+type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
+
 export interface DiagnoseResponse {
   help: string[];
   success: boolean;
@@ -160,13 +167,12 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(resp.job);
   }
 
-  public async createImmediateReport(params: BaseParams) {
+  public async createImmediateReport(baseParams: BaseParams) {
+    const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
     return this.http.post(`${API_GENERATE_IMMEDIATE}`, { body: JSON.stringify(params) });
   }
 
-  public getDecoratedJobParams<T extends Omit<BaseParams, 'browserTimezone' | 'version'>>(
-    baseParams: T
-  ): BaseParams {
+  public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
     // to the export API.
