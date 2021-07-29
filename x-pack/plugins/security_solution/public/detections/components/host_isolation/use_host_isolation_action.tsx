@@ -4,56 +4,97 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { TimelineEventsDetailsItem } from '../../../../common';
+import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
+import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
+import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
+import { getFieldValue } from '../../../timelines/components/side_panel/event_details';
+import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 interface UseHostIsolationProps {
-  agentStatus: HostStatus | undefined;
   closePopover: () => void;
-  isEndpointAlert: boolean;
+  detailsData: TimelineEventsDetailsItem[] | null;
   isHostIsolationPanelOpen: boolean;
-  isIsolationAllowed: boolean;
-  isolationStatus: boolean;
-  isolationSupported: boolean;
-  loadingHostIsolationStatus: boolean;
-  onIsolationStatusChange: (action: 'isolateHost' | 'unisolateHost') => void;
+  onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
 }
 
 export const useHostIsolationAction = ({
-  agentStatus,
   closePopover,
-  onIsolationStatusChange,
-  isEndpointAlert,
-  isIsolationAllowed,
-  isolationStatus,
-  isolationSupported,
+  detailsData,
   isHostIsolationPanelOpen,
-  loadingHostIsolationStatus,
+  onAddIsolationStatusClick,
 }: UseHostIsolationProps) => {
+  const isEndpointAlert = useMemo(() => {
+    return endpointAlertCheck({ data: detailsData || [] });
+  }, [detailsData]);
+
+  const agentId = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+    [detailsData]
+  );
+
+  const hostOsFamily = useMemo(
+    () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
+    [detailsData]
+  );
+
+  const agentVersion = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.version' }, detailsData),
+    [detailsData]
+  );
+
+  const isolationSupported = isIsolationSupported({
+    osName: hostOsFamily,
+    version: agentVersion,
+  });
+
+  const {
+    loading: loadingHostIsolationStatus,
+    isIsolated: isolationStatus,
+    agentStatus,
+  } = useHostIsolationStatus({
+    agentId,
+  });
+
+  const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
+
   const isolateHostHandler = useCallback(() => {
     closePopover();
     if (isolationStatus === false) {
-      onIsolationStatusChange('isolateHost');
+      onAddIsolationStatusClick('isolateHost');
     } else {
-      onIsolationStatusChange('unisolateHost');
+      onAddIsolationStatusClick('unisolateHost');
     }
-  }, [closePopover, isolationStatus, onIsolationStatusChange]);
+  }, [closePopover, isolationStatus, onAddIsolationStatusClick]);
 
   const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
 
-  const hostIsolationAction =
-    isIsolationAllowed &&
-    isEndpointAlert &&
-    isolationSupported &&
-    isHostIsolationPanelOpen === false
-      ? [
-          {
-            name: isolateHostTitle,
-            onClick: isolateHostHandler,
-            disabled: loadingHostIsolationStatus || agentStatus === HostStatus.UNENROLLED,
-          },
-        ]
-      : [];
-
-  return { hostIsolationAction };
+  const hostIsolationAction = useMemo(
+    () =>
+      isIsolationAllowed &&
+      isEndpointAlert &&
+      isolationSupported &&
+      isHostIsolationPanelOpen === false
+        ? [
+            {
+              name: isolateHostTitle,
+              onClick: isolateHostHandler,
+              disabled: loadingHostIsolationStatus || agentStatus === HostStatus.UNENROLLED,
+            },
+          ]
+        : [],
+    [
+      agentStatus,
+      isEndpointAlert,
+      isHostIsolationPanelOpen,
+      isIsolationAllowed,
+      isolateHostHandler,
+      isolateHostTitle,
+      isolationSupported,
+      loadingHostIsolationStatus,
+    ]
+  );
+  return hostIsolationAction;
 };

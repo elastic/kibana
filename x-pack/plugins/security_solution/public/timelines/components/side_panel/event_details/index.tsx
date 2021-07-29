@@ -26,7 +26,6 @@ import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
@@ -37,6 +36,7 @@ import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_chec
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
+import { EventDetailsFooter } from './footer';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -52,7 +52,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
-const getFieldValue = (
+export const getFieldValue = (
   {
     category,
     field,
@@ -122,27 +122,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
 
-  const isEndpointAlert = useMemo(() => {
-    return endpointAlertCheck({ data: detailsData || [] });
-  }, [detailsData]);
-
   const ruleName = useMemo(
     () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
-    [detailsData]
-  );
-
-  const agentId = useMemo(
-    () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
-    [detailsData]
-  );
-
-  const hostOsFamily = useMemo(
-    () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
-    [detailsData]
-  );
-
-  const agentVersion = useMemo(
-    () => getFieldValue({ category: 'agent', field: 'agent.version' }, detailsData),
     [detailsData]
   );
 
@@ -154,11 +135,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
     [detailsData]
   );
-
-  const isolationSupported = isIsolationSupported({
-    osName: hostOsFamily,
-    version: agentVersion,
-  });
 
   const backToAlertDetailsLink = useMemo(() => {
     return (
@@ -230,29 +206,16 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <TakeActionDropdown
-                agentId={agentId}
-                eventId={expandedEvent?.eventId}
-                ecsData={expandedEvent?.ecsData}
-                nonEcsData={expandedEvent?.nonEcsData}
-                isAlert={isAlert}
-                isEndpointAlert={isEndpointAlert}
-                isolationSupported={isolationSupported}
-                isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-                loadingEventDetails={loading}
-                onChange={showHostIsolationPanel}
-                timelineId={timelineId}
-                refetch={expandedEvent?.refetch}
-                handleOnEventClosed={handleOnEventClosed}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      }
+
+      <EventDetailsFooter
+        detailsData={detailsData}
+        expandedEvent={expandedEvent}
+        isAlert={isAlert}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        loadingEventDetails={loading}
+        onAddIsolationStatusClick={showHostIsolationPanel}
+        timelineId={timelineId}
+      />
     </>
   ) : (
     <>

@@ -5,29 +5,33 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { ACTION_ADD_EVENT_FILTER } from '../translations';
 
-export const useEventFilterModal = ({
-  onAddEventFilterClick,
-}: {
-  onAddEventFilterClick: () => void;
-}) => {
+export const useEventFilterModal = () => {
   const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
 
+  const onAddEventFilterClick = useCallback((): void => {
+    setIsAddEventFilterModalOpen(true);
+  }, []);
   const closeAddEventFilterModal = useCallback((): void => {
     setIsAddEventFilterModalOpen(false);
   }, []);
 
-  const openAddEventFilterModal = useCallback((): void => {
-    setIsAddEventFilterModalOpen(true);
-  }, []);
+  return { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick };
+};
 
-  const handleAddEventFilterClick = useCallback((): void => {
-    if (onAddEventFilterClick) {
-      onAddEventFilterClick();
-    }
-    openAddEventFilterModal();
-  }, [onAddEventFilterClick, openAddEventFilterModal]);
-
-  return { closeAddEventFilterModal, handleAddEventFilterClick, isAddEventFilterModalOpen };
+export const useEventFilterAction = ({
+  onAddEventFilterClick,
+}: {
+  onAddEventFilterClick: () => void;
+}) => {
+  const eventFilterActions = useMemo(
+    () => ({
+      name: ACTION_ADD_EVENT_FILTER,
+      onClick: onAddEventFilterClick,
+    }),
+    [onAddEventFilterClick]
+  );
+  return eventFilterActions;
 };

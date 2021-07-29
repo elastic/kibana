@@ -19,133 +19,152 @@ import { Status } from '../../../../../common/detection_engine/schemas/common/sc
 import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
 import { useUserData } from '../../user_info';
+import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 
 interface UseExceptionModalProps {
-  ecsRowData: Ecs | null | undefined;
-  refetch: inputsModel.Refetch;
+  ecsData: Ecs | null | undefined;
+  refetch?: inputsModel.Refetch;
   timelineId: string;
-  onAddExceptionClick?: () => void;
-  onAddEndpointExceptionClick?: () => void;
 }
 interface UseExceptionModal {
   alertStatus: Status | undefined;
-  disabledAddException: boolean;
-  disabledAddEndpointException: boolean;
   exceptionModalType: ExceptionListType | null;
-  handleAddExceptionClick: () => void;
-  handleAddEndpointExceptionClick: () => void;
   ruleId: string | null;
   ruleName: string;
   ruleIndices: string[];
+  onAddExceptionTypeClick: (type: ExceptionListType) => void;
   onAddExceptionCancel: () => void;
   onAddExceptionConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
 }
 
 export const useExceptionModal = ({
-  ecsRowData,
+  ecsData,
   refetch,
   timelineId,
-  onAddExceptionClick,
-  onAddEndpointExceptionClick,
 }: UseExceptionModalProps): UseExceptionModal => {
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
 
   // TODO: Steph/ueba remove when past experimental
   const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
 
   const ruleId = useMemo(
     (): string | null =>
-      (ecsRowData?.signal?.rule && ecsRowData.signal.rule.id && ecsRowData.signal.rule.id[0]) ??
-      null,
-    [ecsRowData]
+      (ecsData?.signal?.rule && ecsData.signal.rule.id && ecsData.signal.rule.id[0]) ?? null,
+    [ecsData]
   );
   const ruleName = useMemo(
     (): string =>
-      (ecsRowData?.signal?.rule && ecsRowData.signal.rule.name && ecsRowData.signal.rule.name[0]) ??
-      '',
-    [ecsRowData]
+      (ecsData?.signal?.rule && ecsData.signal.rule.name && ecsData.signal.rule.name[0]) ?? '',
+    [ecsData]
   );
 
   const ruleIndices = useMemo((): string[] => {
     if (
-      ecsRowData?.signal?.rule &&
-      ecsRowData.signal.rule.index &&
-      ecsRowData.signal.rule.index.length > 0
+      ecsData?.signal?.rule &&
+      ecsData.signal.rule.index &&
+      ecsData.signal.rule.index.length > 0
     ) {
-      return ecsRowData?.signal.rule.index;
+      return ecsData?.signal.rule.index;
     } else {
       return uebaEnabled
         ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
         : DEFAULT_INDEX_PATTERN;
     }
-  }, [ecsRowData?.signal?.rule, uebaEnabled]);
+  }, [ecsData, uebaEnabled]);
 
   const alertStatus = useMemo(() => {
-    return ecsRowData?.signal?.status && (ecsRowData?.signal.status[0] as Status);
-  }, [ecsRowData]);
+    return ecsData?.signal?.status && (ecsData?.signal.status[0] as Status);
+  }, [ecsData]);
 
-  const closeAddExceptionModal = useCallback((): void => {
-    setOpenAddExceptionModal(null);
-  }, []);
-
-  const handleOpenExceptionModal = useCallback((exceptionListType: ExceptionListType): void => {
+  const onAddExceptionTypeClick = useCallback((exceptionListType: ExceptionListType): void => {
     setOpenAddExceptionModal(exceptionListType);
   }, []);
 
   const onAddExceptionCancel = useCallback(() => {
-    closeAddExceptionModal();
-  }, [closeAddExceptionModal]);
+    setOpenAddExceptionModal(null);
+  }, []);
 
   const onAddExceptionConfirm = useCallback(
     (didCloseAlert: boolean, didBulkCloseAlert) => {
-      closeAddExceptionModal();
-      if (timelineId !== TimelineId.active || didBulkCloseAlert) {
+      if (refetch && (timelineId !== TimelineId.active || didBulkCloseAlert)) {
         refetch();
       }
+      setOpenAddExceptionModal(null);
     },
-    [closeAddExceptionModal, refetch, timelineId]
+    [refetch, timelineId]
   );
-
-  const handleAddExceptionClick = useCallback((): void => {
-    if (onAddExceptionClick) {
-      onAddExceptionClick();
-    }
-    handleOpenExceptionModal('detection');
-  }, [handleOpenExceptionModal, onAddExceptionClick]);
-
-  const handleAddEndpointExceptionClick = useCallback((): void => {
-    if (onAddEndpointExceptionClick) {
-      onAddEndpointExceptionClick();
-    }
-    handleOpenExceptionModal('endpoint');
-  }, [handleOpenExceptionModal, onAddEndpointExceptionClick]);
-
-  const isEndpointAlert = useMemo((): boolean => {
-    if (ecsRowData == null) {
-      return false;
-    }
-
-    const eventModules = getOr([], 'signal.original_event.module', ecsRowData);
-    const kinds = getOr([], 'signal.original_event.kind', ecsRowData);
-
-    return eventModules.includes('endpoint') && kinds.includes('alert');
-  }, [ecsRowData]);
-
-  const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
-  const disabledAddException = !canUserCRUD || !hasIndexWrite;
 
   return {
     alertStatus,
-    disabledAddException,
-    disabledAddEndpointException,
     exceptionModalType,
     ruleId,
     ruleName,
     ruleIndices,
+    onAddExceptionTypeClick,
     onAddExceptionCancel,
     onAddExceptionConfirm,
-    handleAddExceptionClick,
-    handleAddEndpointExceptionClick,
   };
+};
+
+interface UseExceptionAction {
+  name: string;
+  onClick: () => void;
+  disabled: boolean;
+}
+
+interface UseExceptionActionProps {
+  ecsData?: Ecs;
+  onAddExceptionTypeClick: (type: ExceptionListType) => void;
+}
+
+export const useExceptionActions = ({
+  ecsData,
+  onAddExceptionTypeClick,
+}: UseExceptionActionProps): UseExceptionAction[] => {
+  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+
+  const handleDetectionExceptionModal = useCallback(() => {
+    onAddExceptionTypeClick('detection');
+  }, [onAddExceptionTypeClick]);
+
+  const handleEndpointExceptionModal = useCallback(() => {
+    onAddExceptionTypeClick('endpoint');
+  }, [onAddExceptionTypeClick]);
+
+  const isEndpointAlert = useMemo((): boolean => {
+    if (ecsData == null) {
+      return false;
+    }
+
+    const eventModules = getOr([], 'signal.original_event.module', ecsData);
+    const kinds = getOr([], 'signal.original_event.kind', ecsData);
+
+    return eventModules.includes('endpoint') && kinds.includes('alert');
+  }, [ecsData]);
+
+  const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
+  const disabledAddException = !canUserCRUD || !hasIndexWrite;
+
+  const exceptionActions = useMemo(
+    () => [
+      {
+        name: ACTION_ADD_ENDPOINT_EXCEPTION,
+        onClick: handleEndpointExceptionModal,
+        disabled: disabledAddEndpointException,
+      },
+      {
+        name: ACTION_ADD_EXCEPTION,
+        onClick: handleDetectionExceptionModal,
+        disabled: disabledAddException,
+      },
+    ],
+    [
+      disabledAddEndpointException,
+      disabledAddException,
+      handleDetectionExceptionModal,
+      handleEndpointExceptionModal,
+    ]
+  );
+
+  return exceptionActions;
 };

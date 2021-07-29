@@ -7,18 +7,15 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
-import { indexOf, noop } from 'lodash';
+import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { indexOf } from 'lodash';
 
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
-import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
-import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
 
-import { TimelineNonEcsData } from '../../../../common';
+import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
 import { Ecs } from '../../../../common/ecs';
-import { useExceptionModal } from '../alerts_table/timeline_actions/use_add_exception_modal';
+import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_modal';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
-import { AddExceptionModalWrapper } from '../alerts_table/timeline_actions/alert_context_menu';
-import { EventFiltersModal } from '../../../management/pages/event_filters/view/components/modal';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
 /* import {
     ACTION_ADD_TO_CASE
@@ -26,50 +23,34 @@ import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_i
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
 import { addToCaseActionItem } from './helpers'; */
-import { useEventFilterModal } from '../alerts_table/timeline_actions/use_event_filter_modal';
+import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_modal';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import {
-  CHANGE_ALERT_STATUS,
-  ACTION_ADD_ENDPOINT_EXCEPTION,
-  ACTION_ADD_EXCEPTION,
-  ACTION_ADD_EVENT_FILTER,
-} from './translations';
+import { CHANGE_ALERT_STATUS } from './translations';
 
 export const TakeActionDropdown = React.memo(
   ({
-    onChange,
-    agentId,
-    eventId,
+    detailsData,
     ecsData,
-    nonEcsData,
-    isAlert,
-    isEndpointAlert,
-    isolationSupported,
     isHostIsolationPanelOpen,
     loadingEventDetails,
-    timelineId,
+    nonEcsData,
+    onAddEventFilterClick,
+    onAddExceptionTypeClick,
+    onAddIsolationStatusClick,
     refetch,
-    handleOnEventClosed,
+    timelineId,
   }: {
-    onChange: (action: 'isolateHost' | 'unisolateHost') => void;
-    agentId: string;
-    eventId: string;
+    detailsData: TimelineEventsDetailsItem[] | null;
     ecsData?: Ecs;
-    nonEcsData?: TimelineNonEcsData[];
-    isAlert: boolean;
-    isEndpointAlert: boolean;
-    isolationSupported: boolean;
     isHostIsolationPanelOpen: boolean;
     loadingEventDetails: boolean;
-    timelineId: string;
+    nonEcsData?: TimelineNonEcsData[];
     refetch: (() => void) | undefined;
-    handleOnEventClosed: () => void;
+    onAddEventFilterClick: () => void;
+    onAddExceptionTypeClick: (type: ExceptionListType) => void;
+    onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
+    timelineId: string;
   }) => {
-    const { loading, isIsolated: isolationStatus, agentStatus } = useHostIsolationStatus({
-      agentId,
-    });
-
-    const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
     /* Add to case status
     const casePermissions = useGetUserCasesPermissions();
     const { timelines: timelinesUi } = useKibana().services;
@@ -88,44 +69,47 @@ export const TakeActionDropdown = React.memo(
       setIsPopoverOpen(false);
     }, []);
 
-    const { hostIsolationAction } = useHostIsolationAction({
-      agentStatus,
+    const handleOnAddIsolationStatusClick = useCallback(
+      (action: 'isolateHost' | 'unisolateHost') => {
+        onAddIsolationStatusClick(action);
+        setIsPopoverOpen(false);
+      },
+      [onAddIsolationStatusClick]
+    );
+
+    const hostIsolationAction = useHostIsolationAction({
       closePopover: closePopoverHandler,
-      onIsolationStatusChange: onChange,
-      isEndpointAlert,
-      isIsolationAllowed,
-      isolationStatus,
-      isolationSupported,
+      detailsData,
+      onAddIsolationStatusClick: handleOnAddIsolationStatusClick,
       isHostIsolationPanelOpen,
-      loadingHostIsolationStatus: loading,
     });
 
-    const {
-      alertStatus,
-      disabledAddException,
-      disabledAddEndpointException,
-      exceptionModalType,
-      ruleId,
-      ruleName,
-      ruleIndices,
-      onAddExceptionCancel,
-      onAddExceptionConfirm,
-      handleAddExceptionClick,
-      handleAddEndpointExceptionClick,
-    } = useExceptionModal({
-      ecsRowData: ecsData,
-      refetch: refetch ?? noop,
-      timelineId,
-      onAddExceptionClick: closePopoverHandler,
-      onAddEndpointExceptionClick: closePopoverHandler,
+    const handleOnAddExceptionTypeClick = useCallback(
+      (type: ExceptionListType) => {
+        onAddExceptionTypeClick(type);
+        setIsPopoverOpen(false);
+      },
+      [onAddExceptionTypeClick]
+    );
+
+    const exceptionActions = useExceptionActions({
+      ecsData,
+      onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 
-    const {
-      closeAddEventFilterModal,
-      handleAddEventFilterClick,
-      isAddEventFilterModalOpen,
-    } = useEventFilterModal({
-      onAddEventFilterClick: closePopoverHandler,
+    const ruleId = useMemo(
+      (): string | null =>
+        (ecsData?.signal?.rule && ecsData.signal.rule.id && ecsData.signal.rule.id[0]) ?? null,
+      [ecsData]
+    );
+
+    const handleOnAddEventFilterClick = useCallback(() => {
+      onAddEventFilterClick();
+      setIsPopoverOpen(false);
+    }, [onAddEventFilterClick]);
+
+    const eventFilterActions = useEventFilterAction({
+      onAddEventFilterClick: handleOnAddEventFilterClick,
     });
 
     const { statusActions } = useAlertsActions({
@@ -148,32 +132,10 @@ export const TakeActionDropdown = React.memo(
                 name: CHANGE_ALERT_STATUS,
                 panel: 1,
               },
-              {
-                name: ACTION_ADD_ENDPOINT_EXCEPTION,
-                onClick: handleAddEndpointExceptionClick,
-                disabled: disabledAddEndpointException,
-              },
-              {
-                name: ACTION_ADD_EXCEPTION,
-                onClick: handleAddExceptionClick,
-                disabled: disabledAddException,
-              },
+              ...exceptionActions,
             ]
-          : [
-              {
-                name: ACTION_ADD_EVENT_FILTER,
-                onClick: handleAddEventFilterClick,
-              },
-            ],
-      [
-        disabledAddEndpointException,
-        disabledAddException,
-        handleAddEndpointExceptionClick,
-        handleAddEventFilterClick,
-        handleAddExceptionClick,
-        isEvent,
-        ruleId,
-      ]
+          : [eventFilterActions],
+      [eventFilterActions, exceptionActions, isEvent, ruleId]
     );
 
     const panels = useMemo(
@@ -231,24 +193,7 @@ export const TakeActionDropdown = React.memo(
         >
           <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
         </EuiPopover>
-        {exceptionModalType != null && ruleId != null && ecsData != null && (
-          <AddExceptionModalWrapper
-            ruleName={ruleName}
-            ruleId={ruleId}
-            ruleIndices={ruleIndices}
-            exceptionListType={exceptionModalType}
-            ecsData={ecsData}
-            onCancel={onAddExceptionCancel}
-            onConfirm={onAddExceptionConfirm}
-            alertStatus={alertStatus}
-          />
-        )}
-        {isAddEventFilterModalOpen && ecsData != null && (
-          <EventFiltersModal data={ecsData} onCancel={closeAddEventFilterModal} />
-        )}
       </>
     ) : null;
   }
 );
-
-TakeActionDropdown.displayName = 'TakeActionDropdown';
