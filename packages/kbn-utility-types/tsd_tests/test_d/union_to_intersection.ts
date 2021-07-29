@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { UnionToIntersection } from '../../index';
+import { UnionToIntersection } from '../../src';
 
 type INTERSECTED = UnionToIntersection<{ foo: 'bar' } | { baz: 'qux' }>;
 

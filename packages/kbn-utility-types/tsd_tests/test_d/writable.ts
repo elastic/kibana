@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { Writable } from '../../index';
+import { Writable } from '../../src';
 
 type WritableArray = Writable<readonly string[]>;
 expectAssignable<WritableArray>(['1']);

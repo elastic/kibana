@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { UnwrapObservable, ObservableLike } from '../../index';
+import { UnwrapObservable, ObservableLike } from '../../src';
 
 type STRING = UnwrapObservable<ObservableLike<string>>;
 

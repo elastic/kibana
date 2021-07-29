@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { PublicContract } from '../../index';
+import { PublicContract } from '../../src';
 
 class Test {
   public str: string = '';

@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { MethodKeysOf } from '../../index';
+import { MethodKeysOf } from '../../src';
 
 class Test {
   public name: string = '';

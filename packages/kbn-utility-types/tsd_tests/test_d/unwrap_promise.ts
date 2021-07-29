@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { UnwrapPromise } from '../../index';
+import { UnwrapPromise } from '../../src';
 
 type STRING = UnwrapPromise<Promise<string>>;
 type TUPLE = UnwrapPromise<Promise<[number, number]>>;

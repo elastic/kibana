@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { Values } from '../../index';
+import { Values } from '../../src';
 
 // Arrays
 type STRING = Values<string[]>;

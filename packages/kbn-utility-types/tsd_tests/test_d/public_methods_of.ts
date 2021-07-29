@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable, expectNotAssignable } from 'tsd';
-import { PublicMethodsOf } from '../../index';
+import { PublicMethodsOf } from '../../src';
 
 class Test {
   public name: string = '';

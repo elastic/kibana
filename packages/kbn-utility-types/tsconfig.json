@@ -1,22 +1,22 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "outDir": "./target",
-    "stripInternal": true,
     "declaration": true,
     "declarationMap": true,
-    "rootDir": "./",
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "outDir": "./target_types",
+    "rootDir": "./src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-utility-types",
+    "stripInternal": true,
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "index.ts",
-    "jest/**/*",
+    "src/**/*",
     "tsd_tests/**/*"
   ]
 }
