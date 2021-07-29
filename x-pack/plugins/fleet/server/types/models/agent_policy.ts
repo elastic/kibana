@@ -22,6 +22,8 @@ export const AgentPolicyBaseSchema = {
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  default_output: schema.string({ defaultValue: 'default' }),
+  monitoring_output: schema.maybe(schema.string({ defaultValue: 'default' })),
 };
 
 export const NewAgentPolicySchema = schema.object({

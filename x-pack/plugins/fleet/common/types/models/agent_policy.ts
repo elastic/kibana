@@ -23,6 +23,8 @@ export interface NewAgentPolicy {
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
   is_preconfigured?: boolean;
+  default_output: string; // TODO 12345 add migration
+  monitoring_output: string; // TODO 12345 add migration
 }
 
 export interface AgentPolicy extends NewAgentPolicy {

@@ -8,7 +8,11 @@
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
+import type {
+  GetOneOutputRequestSchema,
+  PostOutputRequestSchema,
+  PutOutputRequestSchema,
+} from '../../types';
 import type { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
 import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -50,6 +54,25 @@ export const getOneOuputHandler: RequestHandler<
       });
     }
 
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const postOutputHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostOutputRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const output = await outputService.create(soClient, { ...request.body, is_default: false });
+
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
 };

@@ -399,13 +399,15 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { namespace, monitoring_enabled } = baseAgentPolicy;
+    const { namespace, monitoring_enabled, default_output, monitoring_output } = baseAgentPolicy;
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
       {
         namespace,
         monitoring_enabled,
+        default_output,
+        monitoring_output,
         ...newAgentPolicyProps,
       },
       options
@@ -697,7 +699,7 @@ class AgentPolicyService {
     id: string,
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
-    let agentPolicy;
+    let agentPolicy: AgentPolicy | null | undefined;
     const standalone = options?.standalone;
 
     try {
@@ -717,16 +719,42 @@ class AgentPolicyService {
       throw new Error('Default output is not setup');
     }
     const defaultOutput = await outputService.get(soClient, defaultOutputId);
+    const outputs = await Promise.all(
+      Array.from(
+        new Set<string>(
+          [agentPolicy.default_output, agentPolicy.monitoring_output].map((outputId: string) => {
+            if (!outputId) {
+              outputId = 'default';
+            }
+            if (outputId === 'default') {
+              return defaultOutputId;
+            }
+
+            return outputId;
+          })
+        )
+      ).map((outputId) => outputService.get(soClient, outputId))
+    );
+
+    const policyDefaultOutput = outputs.find(
+      (output) =>
+        agentPolicy &&
+        ((agentPolicy.default_output === 'default' && output.id === defaultOutputId) ||
+          output.id === agentPolicy.default_output)
+    );
+
+    if (!policyDefaultOutput) {
+      throw new Error('Output not found');
+    }
 
     const fullAgentPolicy: FullAgentPolicy = {
       id: agentPolicy.id,
       outputs: {
-        // TEMPORARY as we only support a default output
-        ...[defaultOutput].reduce<FullAgentPolicy['outputs']>(
+        ...outputs.reduce<FullAgentPolicy['outputs']>(
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
+          (acc, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
             const configJs = config_yaml ? safeLoad(config_yaml) : {};
-            outputs[name] = {
+            acc[name] = {
               type,
               hosts,
               ca_sha256,
@@ -735,17 +763,20 @@ class AgentPolicyService {
             };
 
             if (options?.standalone) {
-              delete outputs[name].api_key;
-              outputs[name].username = 'ES_USERNAME';
-              outputs[name].password = 'ES_PASSWORD';
+              delete acc[name].api_key;
+              acc[name].username = 'ES_USERNAME';
+              acc[name].password = 'ES_PASSWORD';
             }
 
-            return outputs;
+            return acc;
           },
           {}
         ),
       },
-      inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
+      inputs: storedPackagePoliciesToAgentInputs(
+        agentPolicy.package_policies as PackagePolicy[],
+        policyDefaultOutput
+      ),
       revision: agentPolicy.revision,
       ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
         ? {

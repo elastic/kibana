@@ -45,6 +45,7 @@ import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout 
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
+import { OutputsApp } from './sections/outputs';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 
@@ -309,6 +310,10 @@ export const AppRoutes = memo(
           </Route>
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <DataStreamApp />
+          </Route>
+
+          <Route path="/outputs">
+            <OutputsApp />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}

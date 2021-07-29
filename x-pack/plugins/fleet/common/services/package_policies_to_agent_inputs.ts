@@ -7,11 +7,16 @@
 
 import { merge } from 'lodash';
 
-import type { PackagePolicy, FullAgentPolicyInput, FullAgentPolicyInputStream } from '../types';
-import { DEFAULT_OUTPUT } from '../constants';
+import type {
+  PackagePolicy,
+  FullAgentPolicyInput,
+  FullAgentPolicyInputStream,
+  Output,
+} from '../types';
 
 export const storedPackagePoliciesToAgentInputs = (
-  packagePolicies: PackagePolicy[]
+  packagePolicies: PackagePolicy[],
+  defaultOutput: Pick<Output, 'name'>
 ): FullAgentPolicyInput[] => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -32,7 +37,7 @@ export const storedPackagePoliciesToAgentInputs = (
         data_stream: {
           namespace: packagePolicy.namespace || 'default',
         },
-        use_output: DEFAULT_OUTPUT.name,
+        use_output: defaultOutput.name,
         ...(input.compiled_input || {}),
         ...(input.streams.length
           ? {

@@ -73,14 +73,27 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const submitUpdateAgentPolicy = async () => {
       setIsLoading(true);
       try {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { name, description, namespace, monitoring_enabled, unenroll_timeout } = agentPolicy;
+        const {
+          name,
+          description,
+          namespace,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          monitoring_enabled,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          unenroll_timeout,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          default_output,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          monitoring_output,
+        } = agentPolicy;
         const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
           description,
           namespace,
           monitoring_enabled,
           unenroll_timeout,
+          default_output,
+          monitoring_output,
         });
         if (data) {
           notifications.toasts.addSuccess(

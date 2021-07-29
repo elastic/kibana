@@ -64,6 +64,7 @@ export const AGENT_POLICY_API_ROUTES = {
 // Output API routes
 export const OUTPUT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/outputs`,
+  CREATE_PATTERN: `${API_ROOT}/outputs`,
   INFO_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
 };

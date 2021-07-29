@@ -69,6 +69,15 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         },
         {
           name: (
+            <FormattedMessage id="xpack.fleet.appNavigation.outputsText" defaultMessage="Outputs" />
+          ),
+          isSelected: section === 'outputs',
+          href: '/app/fleet/outputs',
+          // href: getHref('outputs'),
+          'data-test-subj': 'fleet-outputs-tab',
+        },
+        {
+          name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.dataStreamsLinkText"
               defaultMessage="Data streams"

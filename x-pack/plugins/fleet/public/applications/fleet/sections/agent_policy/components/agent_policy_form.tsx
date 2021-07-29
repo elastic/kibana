@@ -22,6 +22,7 @@ import {
   EuiButton,
   EuiLink,
   EuiFieldNumber,
+  EuiSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +31,7 @@ import styled from 'styled-components';
 import { dataTypes } from '../../../../../../common';
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { isValidNamespace } from '../../../services';
-import { useStartServices } from '../../../hooks';
+import { useGetOutputs, useStartServices } from '../../../hooks';
 
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
@@ -95,6 +96,13 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   onDelete = () => {},
 }) => {
   const { docLinks } = useStartServices();
+  const getOutputs = useGetOutputs();
+
+  const outputsOptions = useMemo(
+    () => getOutputs.data?.items.map((output) => ({ text: output.name, value: output.id } ?? [])),
+    [getOutputs.data]
+  );
+
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const fields: Array<{
     name: 'name' | 'description' | 'namespace';
@@ -344,6 +352,40 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             }}
             isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
             onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.dataOutputLabel"
+              defaultMessage="Data output"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.dataOutputDescription"
+            defaultMessage="Default output for data ingestion."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+        >
+          <EuiSelect
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.default_output}
+            options={outputsOptions}
+            onChange={(e) => updateAgentPolicy({ default_output: e.target.value })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

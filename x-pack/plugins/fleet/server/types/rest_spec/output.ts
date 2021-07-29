@@ -26,3 +26,14 @@ export const PutOutputRequestSchema = {
     config_yaml: schema.maybe(schema.string()),
   }),
 };
+
+export const PostOutputRequestSchema = {
+  body: schema.object({
+    name: schema.string(),
+    type: schema.oneOf([schema.literal('elasticsearch')]),
+    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
+    ca_sha256: schema.maybe(schema.string()),
+    config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    config_yaml: schema.maybe(schema.string()),
+  }),
+};

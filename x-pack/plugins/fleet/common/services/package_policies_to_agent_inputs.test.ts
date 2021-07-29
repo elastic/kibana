@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_OUTPUT } from '../constants';
 import type { PackagePolicy, PackagePolicyInput } from '../types';
 
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
@@ -78,44 +79,53 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   };
 
   it('returns no inputs for package policy with no inputs, or only disabled inputs', () => {
-    expect(storedPackagePoliciesToAgentInputs([mockPackagePolicy])).toEqual([]);
+    expect(storedPackagePoliciesToAgentInputs([mockPackagePolicy], DEFAULT_OUTPUT)).toEqual([]);
 
     expect(
-      storedPackagePoliciesToAgentInputs([
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'mock-package',
-            title: 'Mock package',
-            version: '0.0.0',
+      storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock-package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
           },
-        },
-      ])
+        ],
+        DEFAULT_OUTPUT
+      )
     ).toEqual([]);
 
     expect(
-      storedPackagePoliciesToAgentInputs([
-        {
-          ...mockPackagePolicy,
-          inputs: [{ ...mockInput, enabled: false }],
-        },
-      ])
+      storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [{ ...mockInput, enabled: false }],
+          },
+        ],
+        DEFAULT_OUTPUT
+      )
     ).toEqual([]);
   });
 
   it('returns agent inputs with streams', () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'mock-package',
-            title: 'Mock package',
-            version: '0.0.0',
+      storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock-package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [mockInput],
           },
-          inputs: [mockInput],
-        },
-      ])
+        ],
+        DEFAULT_OUTPUT
+      )
     ).toEqual([
       {
         id: 'some-uuid',
@@ -148,25 +158,28 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns agent inputs without streams', () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'mock-package',
-            title: 'Mock package',
-            version: '0.0.0',
-          },
-          inputs: [
-            {
-              ...mockInput,
-              compiled_input: {
-                inputVar: 'input-value',
-              },
-              streams: [],
+      storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock-package',
+              title: 'Mock package',
+              version: '0.0.0',
             },
-          ],
-        },
-      ])
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        DEFAULT_OUTPUT
+      )
     ).toEqual([
       {
         id: 'some-uuid',
@@ -188,17 +201,20 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns agent inputs without disabled streams', () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
-        {
-          ...mockPackagePolicy,
-          inputs: [
-            {
-              ...mockInput,
-              streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
-            },
-          ],
-        },
-      ])
+      storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+              },
+            ],
+          },
+        ],
+        DEFAULT_OUTPUT
+      )
     ).toEqual([
       {
         id: 'some-uuid',
@@ -221,46 +237,49 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns agent inputs with deeply merged config values', () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
-        {
-          ...mockPackagePolicy,
-          inputs: [
-            {
-              ...mockInput,
-              compiled_input: {
-                agent_input_template_group1_vars: {
-                  inputVar: 'input-value',
-                },
-                agent_input_template_group2_vars: {
-                  inputVar3: {
-                    testFieldGroup: {
-                      subField1: 'subfield1',
-                    },
-                    testField: 'test',
+      storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  agent_input_template_group1_vars: {
+                    inputVar: 'input-value',
                   },
-                },
-              },
-              config: {
-                agent_input_template_group1_vars: {
-                  value: {
-                    inputVar2: {},
-                  },
-                },
-                agent_input_template_group2_vars: {
-                  value: {
+                  agent_input_template_group2_vars: {
                     inputVar3: {
                       testFieldGroup: {
-                        subField2: 'subfield2',
+                        subField1: 'subfield1',
                       },
+                      testField: 'test',
                     },
-                    inputVar4: '',
+                  },
+                },
+                config: {
+                  agent_input_template_group1_vars: {
+                    value: {
+                      inputVar2: {},
+                    },
+                  },
+                  agent_input_template_group2_vars: {
+                    value: {
+                      inputVar3: {
+                        testFieldGroup: {
+                          subField2: 'subfield2',
+                        },
+                      },
+                      inputVar4: '',
+                    },
                   },
                 },
               },
-            },
-          ],
-        },
-      ])
+            ],
+          },
+        ],
+        DEFAULT_OUTPUT
+      )
     ).toEqual([
       {
         id: 'some-uuid',
