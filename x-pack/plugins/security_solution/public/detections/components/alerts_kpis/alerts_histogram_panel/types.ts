@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { inputsModel } from '../../../common/store';
-
-export interface AlertsHistogramOption {
-  text: string;
-  value: string;
-}
+import type { inputsModel } from '../../../../common/store';
 
 export interface HistogramData {
   x: number;
