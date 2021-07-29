@@ -15,7 +15,9 @@ import { renderApp as renderReactApp } from './index';
 export async function renderApp(moduleName: string, element: HTMLElement) {
   await import('./angular');
   const app = mountDiscoverApp(moduleName, element);
-  return () => { app(); };
+  return () => {
+    app();
+  };
 }
 
 function mountDiscoverApp(moduleName: string, element: HTMLElement) {
@@ -23,6 +25,7 @@ function mountDiscoverApp(moduleName: string, element: HTMLElement) {
   const appWrapper = document.createElement('div');
   appWrapper.setAttribute('ng-view', '');
   mountpoint.appendChild(appWrapper);
+  // @ts-expect-error
   const app = renderReactApp({ element: appWrapper });
   element.appendChild(mountpoint);
   return app;
