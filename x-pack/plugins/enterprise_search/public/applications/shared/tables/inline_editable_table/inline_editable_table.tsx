@@ -16,10 +16,12 @@ import { i18n } from '@kbn/i18n';
 
 import { ReorderableTable } from '../reorderable_table';
 
+import { ItemWithAnID } from '../types';
+
 import { EMPTY_ITEM } from './constants';
 import { getUpdatedColumns } from './get_updated_columns';
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
-import { FormErrors, InlineEditableTableColumn, ItemWithAnID } from './types';
+import { FormErrors, InlineEditableTableColumn } from './types';
 
 import './inline_editable_tables.scss';
 

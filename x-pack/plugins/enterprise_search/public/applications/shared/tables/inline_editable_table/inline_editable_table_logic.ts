@@ -7,7 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { FormErrors, InlineEditableTableColumn, ItemWithAnID } from './types';
+import { ItemWithAnID } from '../types';
+
+import { FormErrors, InlineEditableTableColumn } from './types';
 
 interface InlineEditableTableActions<Item extends ItemWithAnID> {
   deleteItem(item: Item): { item: Item };

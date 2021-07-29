@@ -8,14 +8,11 @@
 import React from 'react';
 
 import { Column } from '../reorderable_table/types';
+import { ItemWithAnID } from '../types';
 
 export interface FormErrors {
   [key: string]: string | undefined;
 }
-
-export type ItemWithAnID = {
-  id: number | null;
-} & object;
 
 export interface EditingRenderFlags {
   isInvalid: boolean;
