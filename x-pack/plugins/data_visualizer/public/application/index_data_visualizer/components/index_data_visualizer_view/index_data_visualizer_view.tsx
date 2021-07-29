@@ -85,7 +85,7 @@ const defaultSearchQuery = {
   match_all: {},
 };
 
-function getDefaultPageState(): DataVisualizerPageState {
+export function getDefaultPageState(): DataVisualizerPageState {
   return {
     overallStats: {
       totalCount: 0,
