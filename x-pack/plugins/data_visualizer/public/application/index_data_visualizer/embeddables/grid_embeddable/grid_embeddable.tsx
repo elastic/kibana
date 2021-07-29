@@ -74,7 +74,7 @@ export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 const restorableDefaults = getDefaultDataVisualizerListState();
 const defaults = getDefaultPageState();
 
-// @todo: consolidate this hook with the view
+// @todo: consolidate this hook with main view
 const useDataVisualizerGridData = (
   input: DataVisualizerGridEmbeddableInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>

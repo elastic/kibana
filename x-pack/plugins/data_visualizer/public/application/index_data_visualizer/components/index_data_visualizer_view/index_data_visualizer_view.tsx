@@ -103,7 +103,9 @@ export function getDefaultPageState(): DataVisualizerPageState {
     documentCountStats: undefined,
   };
 }
-export const getDefaultDataVisualizerListState = (): Required<DataVisualizerIndexBasedAppState> => ({
+export const getDefaultDataVisualizerListState = (
+  overrides?: Partial<DataVisualizerIndexBasedAppState>
+): Required<DataVisualizerIndexBasedAppState> => ({
   pageIndex: 0,
   pageSize: 10,
   sortField: 'fieldName',
@@ -117,6 +119,7 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
+  ...overrides,
 });
 
 export interface IndexDataVisualizerViewProps {
