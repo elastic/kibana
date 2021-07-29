@@ -71,7 +71,6 @@ import { MatchAllFilter as MatchAllFilter_2 } from '@kbn/es-query';
 import { MaybePromise } from '@kbn/utility-types';
 import { Moment } from 'moment';
 import moment from 'moment';
-import { NameList } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
@@ -2516,7 +2515,7 @@ export interface SearchSourceFields {
     // Warning: (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
     fields?: SearchFieldValue[];
     // @deprecated
-    fieldsFromSource?: NameList;
+    fieldsFromSource?: estypes.Fields;
     // (undocumented)
     filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
     // (undocumented)
@@ -2544,7 +2543,7 @@ export interface SearchSourceFields {
     // (undocumented)
     sort?: EsQuerySortValue | EsQuerySortValue[];
     // (undocumented)
-    source?: NameList;
+    source?: boolean | estypes.Fields;
     // (undocumented)
     terminate_after?: number;
     // (undocumented)
