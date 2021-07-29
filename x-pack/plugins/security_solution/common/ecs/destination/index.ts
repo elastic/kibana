@@ -12,8 +12,6 @@ export interface DestinationEcs {
 
   ip?: string[];
 
-  address?: string[];
-
   port?: number[];
 
   domain?: string[];

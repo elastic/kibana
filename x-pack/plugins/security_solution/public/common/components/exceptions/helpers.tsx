@@ -658,16 +658,22 @@ export const getPrepopulatedBehaviorException = ({
       value: process?.executable ?? '',
     },
     {
-      field: 'process.hash.sha256',
+      field: 'process.command_line',
       operator: 'included' as const,
       type: 'match' as const,
-      value: process?.hash?.sha256 ?? '',
+      value: process?.command_line ?? '',
     },
     {
-      field: 'process.pe.original_file_name',
+      field: 'process.parent.executable',
       operator: 'included' as const,
       type: 'match' as const,
-      value: process?.pe?.original_file_name ?? '',
+      value: process?.parent?.executable ?? '',
+    },
+    {
+      field: 'process.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.code_signature?.subject_name ?? '',
     },
     {
       field: 'file.path',
@@ -682,10 +688,10 @@ export const getPrepopulatedBehaviorException = ({
       value: alertEcsData.file?.name ?? '',
     },
     {
-      field: 'source.address',
+      field: 'source.ip',
       operator: 'included' as const,
       type: 'match' as const,
-      value: alertEcsData.source?.address ?? '',
+      value: alertEcsData.source?.ip ?? '',
     },
     {
       field: 'source.port',
@@ -694,22 +700,16 @@ export const getPrepopulatedBehaviorException = ({
       value: String(alertEcsData.source?.port ?? ''),
     },
     {
-      field: 'destination.address',
+      field: 'destination.ip',
       operator: 'included' as const,
       type: 'match' as const,
-      value: alertEcsData.destination?.address ?? '',
+      value: alertEcsData.destination?.ip ?? '',
     },
     {
       field: 'destination.port',
       operator: 'included' as const,
       type: 'match' as const,
       value: String(alertEcsData.destination?.port ?? ''),
-    },
-    {
-      field: 'network.type',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: alertEcsData.network?.type ?? '',
     },
     {
       field: 'registry.path',
@@ -724,10 +724,16 @@ export const getPrepopulatedBehaviorException = ({
       value: alertEcsData.registry?.value ?? '',
     },
     {
-      field: 'registry.strings',
+      field: 'registry.data.strings',
       operator: 'included' as const,
       type: 'match' as const,
-      value: alertEcsData.registry?.strings ?? '',
+      value: alertEcsData.registry?.data?.strings ?? '',
+    },
+    {
+      field: 'user.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.user?.id ?? '',
     },
   ];
   return {
