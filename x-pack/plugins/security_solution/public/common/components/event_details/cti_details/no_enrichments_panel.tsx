@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiHorizontalRule,
+  EuiLink,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useKibana } from '../../../lib/kibana';
+import { EnrichmentRangePicker, RangeCallback } from './enrichment_range_picker';
 
 import * as i18n from './translations';
 
@@ -37,10 +45,15 @@ NoEnrichmentsPanelView.displayName = 'NoEnrichmentsPanelView';
 export const NoEnrichmentsPanel: React.FC<{
   isIndicatorMatchesPresent: boolean;
   isInvestigationTimeEnrichmentsPresent: boolean;
-}> = ({ isIndicatorMatchesPresent, isInvestigationTimeEnrichmentsPresent }) => {
+  onRangeChange: RangeCallback;
+}> = ({ isIndicatorMatchesPresent, isInvestigationTimeEnrichmentsPresent, onRangeChange }) => {
   const threatIntelDocsUrl = `${
     useKibana().services.docLinks.links.filebeat.base
   }/filebeat-module-threatintel.html`;
+
+  const [showPicker, setShowPicker] = useState(false);
+  const handleSearchClick = useCallback(() => setShowPicker((show) => !show), []);
+
   const noIntelligenceCTA = (
     <>
       {i18n.IF_CTI_NOT_ENABLED}
@@ -79,6 +92,14 @@ export const NoEnrichmentsPanel: React.FC<{
     return (
       <>
         <EuiHorizontalRule margin="s" />
+        {showPicker && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup justifyContent="center">
+              <EnrichmentRangePicker onChange={onRangeChange} />
+            </EuiFlexGroup>
+          </>
+        )}
         <NoEnrichmentsPanelView
           title={<h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE}</h2>}
           description={
@@ -87,6 +108,12 @@ export const NoEnrichmentsPanel: React.FC<{
             </p>
           }
         />
+        <EuiLink
+          data-test-subj="change-enrichment-lookback-query-button"
+          onClick={handleSearchClick}
+        >
+          {i18n.CHANGE_ENRICHMENT_LOOKBACK}
+        </EuiLink>
       </>
     );
   } else {

@@ -9,6 +9,15 @@ export const ALERT_FLYOUT = '[data-test-subj="timeline:details-panel:flyout"]';
 
 export const CELL_TEXT = '.euiText';
 
+export const CHANGE_ENRICHMENT_RANGE_BUTTON =
+  '[data-test-subj="change-enrichment-lookback-query-button"]';
+
+export const ENRICHMENT_QUERY_RANGE_PICKER = '[data-test-subj="enrichment-query-range-picker"]';
+
+export const ENRICHMENT_QUERY_START_INPUT = '.start-picker';
+
+export const ENRICHMENT_QUERY_END_INPUT = '.end-picker';
+
 export const JSON_CONTENT = '[data-test-subj="jsonView"]';
 
 export const JSON_LINES = '.ace_line';

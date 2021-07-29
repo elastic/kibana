@@ -106,3 +106,24 @@ export const INVESTIGATION_QUERY_TITLE = i18n.translate(
     defaultMessage: 'Enrichment with Threat Intelligence',
   }
 );
+
+export const CHANGE_ENRICHMENT_LOOKBACK = i18n.translate(
+  'xpack.securitySolution.alertDetails.changeEnrichmentQueryLookback',
+  {
+    defaultMessage: 'search a different time range',
+  }
+);
+
+export const ENRICHMENT_LOOKBACK_START_DATE = i18n.translate(
+  'xpack.securitySolution.alertDetails.enrichmentQueryStartDate',
+  {
+    defaultMessage: 'Start date',
+  }
+);
+
+export const ENRICHMENT_LOOKBACK_END_DATE = i18n.translate(
+  'xpack.securitySolution.alertDetails.enrichmentQueryEndDate',
+  {
+    defaultMessage: 'End date',
+  }
+);

@@ -115,6 +115,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   const {
     loading: enrichmentsLoading,
     result: enrichmentsResponse,
+    setRange,
   } = useInvestigationTimeEnrichment(eventFields);
 
   const allEnrichments = useMemo(() => {
@@ -204,6 +205,7 @@ const EventDetailsComponent: React.FC<Props> = ({
               <>
                 <ThreatDetailsView enrichments={allEnrichments} />
                 <NoEnrichmentsPanel
+                  onRangeChange={setRange}
                   isInvestigationTimeEnrichmentsPresent={
                     enrichmentCount > existingEnrichments.length
                   }
@@ -213,7 +215,14 @@ const EventDetailsComponent: React.FC<Props> = ({
             ),
           }
         : undefined,
-    [allEnrichments, enrichmentCount, enrichmentsLoading, existingEnrichments.length, isAlert]
+    [
+      allEnrichments,
+      setRange,
+      enrichmentCount,
+      enrichmentsLoading,
+      existingEnrichments.length,
+      isAlert,
+    ]
   );
 
   const tableTab = useMemo(
