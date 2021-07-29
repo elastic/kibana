@@ -14,10 +14,10 @@ import {
   CaseResponse,
   CaseStatuses,
   ExternalServiceResponse,
-  ESCaseAttributes,
   CaseType,
   ENABLE_CASE_CONNECTOR,
   CasesConfigureAttributes,
+  CaseAttributes,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
@@ -34,7 +34,7 @@ import { casesConnectors } from '../../connectors';
  */
 function shouldCloseByPush(
   configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
-  caseInfo: SavedObject<ESCaseAttributes>
+  caseInfo: SavedObject<CaseAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&

@@ -27,12 +27,7 @@ import {
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { Operations } from '../../authorization';
-import {
-  createCaseError,
-  flattenCaseSavedObject,
-  transformCaseConnectorToEsConnector,
-  transformNewCase,
-} from '../../common';
+import { createCaseError, flattenCaseSavedObject, transformNewCase } from '../../common';
 import { CasesClientArgs } from '..';
 
 /**
@@ -97,8 +92,7 @@ export const create = async (
         username,
         full_name,
         email,
-        // TODO: refactor this so it doesn't need to convert
-        connector: transformCaseConnectorToEsConnector(query.connector),
+        connector: query.connector,
       }),
       id: savedObjectID,
     });

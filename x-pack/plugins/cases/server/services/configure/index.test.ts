@@ -11,7 +11,6 @@ import {
   CasesConfigurePatch,
   CASE_CONFIGURE_SAVED_OBJECT,
   ConnectorTypes,
-  ESCaseConnector,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
@@ -21,7 +20,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { connectorIDReferenceName } from '..';
+import { connectorIDReferenceName, ESCaseConnector } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { CaseConfigureService, ESCasesConfigureAttributes } from '.';

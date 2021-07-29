@@ -19,11 +19,10 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  ESCaseConnectorNoID,
   noneConnectorId,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { connectorIDReferenceName } from '..';
+import { connectorIDReferenceName, ESCaseConnectorNoID } from '..';
 import {
   transformFieldsToESModel,
   transformESConnector,
@@ -51,7 +50,10 @@ interface PatchCaseConfigureArgs extends ClientArgs {
   updatedAttributes: Partial<CasesConfigureAttributes>;
 }
 
-// TODO: add comment
+/**
+ * This type should only be used within the configure service. It represents how the configure saved object will be layed
+ * out in ES.
+ */
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
   connector: ESCaseConnectorNoID;
 };

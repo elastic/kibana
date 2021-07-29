@@ -6,14 +6,10 @@
  */
 
 import { SavedObjectReference } from 'kibana/server';
-import {
-  CaseConnector,
-  ConnectorTypeFields,
-  ESCaseConnectorNoID,
-  ESConnectorFields,
-} from '../../common';
+import { CaseConnector, ConnectorTypeFields } from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 import { getNoneCaseConnector } from '../common';
+import { ESCaseConnectorNoID, ESConnectorFields } from '.';
 
 export function findConnectorIDReference(
   name: string,

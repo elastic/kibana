@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { ConnectorTypes } from '../../common';
 
 export { CasesService } from './cases';
 export { CaseConfigureService } from './configure';
@@ -16,6 +17,25 @@ export { AttachmentService } from './attachments';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+}
+
+export type ESConnectorFields = Array<{
+  key: string;
+  value: unknown;
+}>;
+
+export interface ESCaseConnector {
+  id: string;
+  name: string;
+  type: ConnectorTypes;
+  fields: ESConnectorFields | null;
+}
+
+// TODO: clean up
+export interface ESCaseConnectorNoID {
+  name: string;
+  type: ConnectorTypes;
+  fields: ESConnectorFields | null;
 }
 
 /**

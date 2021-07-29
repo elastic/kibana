@@ -34,13 +34,12 @@ import {
   CommentAttributes,
   CommentType,
   ENABLE_CASE_CONNECTOR,
-  ESCaseAttributes,
-  ESCasePatchRequest,
   excess,
   MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
   throwErrors,
   MAX_TITLE_LENGTH,
+  CaseAttributes,
 } from '../../../common';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
@@ -51,7 +50,6 @@ import {
   createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
-  transformCaseConnectorToEsConnector,
 } from '../../common';
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientInternal } from '../client_internal';
@@ -62,8 +60,8 @@ import { Operations, OwnerEntity } from '../../authorization';
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
  */
 function throwIfUpdateStatusOfCollection(
-  requests: ESCasePatchRequest[],
-  casesMap: Map<string, SavedObject<ESCaseAttributes>>
+  requests: CasePatchRequest[],
+  casesMap: Map<string, SavedObject<CaseAttributes>>
 ) {
   const requestsUpdatingStatusOfCollection = requests.filter(
     (req) =>
@@ -82,8 +80,8 @@ function throwIfUpdateStatusOfCollection(
  * Throws an error if any of the requests attempt to update a collection style case to an individual one.
  */
 function throwIfUpdateTypeCollectionToIndividual(
-  requests: ESCasePatchRequest[],
-  casesMap: Map<string, SavedObject<ESCaseAttributes>>
+  requests: CasePatchRequest[],
+  casesMap: Map<string, SavedObject<CaseAttributes>>
 ) {
   const requestsUpdatingTypeCollectionToInd = requests.filter(
     (req) =>
@@ -102,7 +100,7 @@ function throwIfUpdateTypeCollectionToIndividual(
 /**
  * Throws an error if any of the requests attempt to update the type of a case.
  */
-function throwIfUpdateType(requests: ESCasePatchRequest[]) {
+function throwIfUpdateType(requests: CasePatchRequest[]) {
   const requestsUpdatingType = requests.filter((req) => req.type !== undefined);
 
   if (requestsUpdatingType.length > 0) {
@@ -118,7 +116,7 @@ function throwIfUpdateType(requests: ESCasePatchRequest[]) {
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
-function throwIfUpdateOwner(requests: ESCasePatchRequest[]) {
+function throwIfUpdateOwner(requests: CasePatchRequest[]) {
   const requestsUpdatingOwner = requests.filter((req) => req.owner !== undefined);
 
   if (requestsUpdatingOwner.length > 0) {
@@ -136,11 +134,11 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
   caseService,
   unsecuredSavedObjectsClient,
 }: {
-  requests: ESCasePatchRequest[];
+  requests: CasePatchRequest[];
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }) {
-  const getAlertsForID = async (caseToUpdate: ESCasePatchRequest) => {
+  const getAlertsForID = async (caseToUpdate: CasePatchRequest) => {
     const alerts = await caseService.getAllCaseComments({
       unsecuredSavedObjectsClient,
       id: caseToUpdate.id,
@@ -163,7 +161,7 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
   };
 
   const requestsUpdatingTypeField = requests.filter((req) => req.type === CaseType.collection);
-  const getAlertsMapper = async (caseToUpdate: ESCasePatchRequest) => getAlertsForID(caseToUpdate);
+  const getAlertsMapper = async (caseToUpdate: CasePatchRequest) => getAlertsForID(caseToUpdate);
   // Ensuring we don't too many concurrent get running.
   const casesAlertTotals = await pMap(requestsUpdatingTypeField, getAlertsMapper, {
     concurrency: MAX_CONCURRENT_SEARCHES,
@@ -185,7 +183,7 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
 /**
  * Throws an error if any of the requests updates a title and the length is over MAX_TITLE_LENGTH.
  */
-function throwIfTitleIsInvalid(requests: ESCasePatchRequest[]) {
+function throwIfTitleIsInvalid(requests: CasePatchRequest[]) {
   const requestsInvalidTitle = requests.filter(
     (req) => req.title !== undefined && req.title.length > MAX_TITLE_LENGTH
   );
@@ -218,7 +216,7 @@ async function getAlertComments({
   caseService,
   unsecuredSavedObjectsClient,
 }: {
-  casesToSync: ESCasePatchRequest[];
+  casesToSync: CasePatchRequest[];
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
@@ -315,9 +313,9 @@ async function updateAlerts({
   unsecuredSavedObjectsClient,
   casesClientInternal,
 }: {
-  casesWithSyncSettingChangedToOn: ESCasePatchRequest[];
-  casesWithStatusChangedAndSynced: ESCasePatchRequest[];
-  casesMap: Map<string, SavedObject<ESCaseAttributes>>;
+  casesWithSyncSettingChangedToOn: CasePatchRequest[];
+  casesWithStatusChangedAndSynced: CasePatchRequest[];
+  casesMap: Map<string, SavedObject<CaseAttributes>>;
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   casesClientInternal: CasesClientInternal;
@@ -376,7 +374,7 @@ async function updateAlerts({
 }
 
 function partitionPatchRequest(
-  casesMap: Map<string, SavedObject<ESCaseAttributes>>,
+  casesMap: Map<string, SavedObject<CaseAttributes>>,
   patchReqCases: CasePatchRequest[]
 ): {
   nonExistingCases: CasePatchRequest[];
@@ -441,7 +439,7 @@ export const update = async (
     const casesMap = myCases.saved_objects.reduce((acc, so) => {
       acc.set(so.id, so);
       return acc;
-    }, new Map<string, SavedObject<ESCaseAttributes>>());
+    }, new Map<string, SavedObject<CaseAttributes>>());
 
     const { nonExistingCases, conflictedCases, casesToAuthorize } = partitionPatchRequest(
       casesMap,
@@ -469,17 +467,12 @@ export const update = async (
       );
     }
 
-    const updateCases: ESCasePatchRequest[] = query.cases.map((updateCase) => {
+    const updateCases: CasePatchRequest[] = query.cases.map((updateCase) => {
       const currentCase = myCases.saved_objects.find((c) => c.id === updateCase.id);
-      const { connector, ...thisCase } = updateCase;
+      const { id, version } = updateCase;
       return currentCase != null
-        ? getCaseToUpdate(currentCase.attributes, {
-            ...thisCase,
-            ...(connector != null
-              ? { connector: transformCaseConnectorToEsConnector(connector) }
-              : {}),
-          })
-        : { id: thisCase.id, version: thisCase.version };
+        ? getCaseToUpdate(currentCase.attributes, updateCase)
+        : { id, version };
     });
 
     const updateFilterCases = updateCases.filter((updateCase) => {

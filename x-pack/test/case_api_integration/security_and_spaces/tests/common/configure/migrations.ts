@@ -90,9 +90,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           expect(configuration[0].connector.id).to.be('d68508f0-cf9d-11eb-a603-13e7747d215c');
-
-          const configurationFromES = await getConfigureSavedObjectsFromES({ es });
-          expect(configurationFromES);
         });
 
         it('removes the connector id field in the saved object', async () => {

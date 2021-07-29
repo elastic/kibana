@@ -104,23 +104,3 @@ export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorService
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;
-
-export type ESConnectorFields = Array<{
-  key: string;
-  value: unknown;
-}>;
-
-export type ESCaseConnectorTypes = ConnectorTypes;
-export interface ESCaseConnector {
-  id: string;
-  name: string;
-  type: ESCaseConnectorTypes;
-  fields: ESConnectorFields | null;
-}
-
-// TODO: clean up
-export interface ESCaseConnectorNoID {
-  name: string;
-  type: ESCaseConnectorTypes;
-  fields: ESConnectorFields | null;
-}

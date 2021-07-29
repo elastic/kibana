@@ -16,6 +16,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsBulkResponse,
   SavedObjectsFindResult,
+  SavedObjectsBulkUpdateResponse,
+  SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -43,7 +45,6 @@ import {
   SubCaseResponse,
   User,
   CaseAttributes,
-  ESCaseConnectorNoID,
   CaseExternalServiceBasicRt,
 } from '../../../common';
 import {
@@ -54,15 +55,16 @@ import {
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
 import { defaultPage, defaultPerPage } from '../../routes/api';
-import { ClientArgs } from '..';
+import { ClientArgs, ESCaseConnectorNoID } from '..';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
 import {
-  transformCaseArrayResponseToExternalModel,
-  transformCaseSavedObjectToExternalModel,
+  transformArrayResponseToExternalModel,
+  transformSavedObjectToExternalModel,
   transformAttributesToESModel,
   transformUpdateResponseToExternalModel,
+  transformUpdateResponsesToExternalModels,
 } from './transform';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
@@ -178,7 +180,7 @@ interface FindCommentsByAssociationArgs {
 }
 
 interface Collection {
-  case: SavedObjectsFindResult<ESCaseAttributes>;
+  case: SavedObjectsFindResult<CaseAttributes>;
   subCases?: SubCaseResponse[];
 }
 
@@ -222,12 +224,23 @@ const transformNewSubCase = ({
   };
 };
 
-// TODO: add comments
+/**
+ * This type should only be used within the cases service and its helper functions (e.g. the transforms).
+ *
+ * The type represents how the external services portion of the object will be layed out when stored in ES. The external_service will have its
+ * connector_id field removed and placed within the references field.
+ */
 export type ExternalServicesWithoutConnectorID = Omit<
   rt.TypeOf<typeof CaseExternalServiceBasicRt>,
   'connector_id'
 >;
 
+/**
+ * This type should only be used within the cases service and its helper functions (e.g. the transforms).
+ *
+ * The type represents how the Cases object will be layed out in ES. It will not have connector.id or external_service.connector_id.
+ * Instead those fields will be transformed into the references field.
+ */
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> & {
   connector: ESCaseConnectorNoID;
   external_service: ExternalServicesWithoutConnectorID | null;
@@ -741,7 +754,7 @@ export class CasesService {
         CASE_SAVED_OBJECT,
         caseId
       );
-      return transformCaseSavedObjectToExternalModel(caseSavedObject);
+      return transformSavedObjectToExternalModel(caseSavedObject);
     } catch (error) {
       this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;
@@ -784,7 +797,7 @@ export class CasesService {
       const cases = await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
-      return transformCaseArrayResponseToExternalModel(cases);
+      return transformArrayResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;
@@ -802,7 +815,7 @@ export class CasesService {
         ...options,
         type: CASE_SAVED_OBJECT,
       });
-      return transformCaseArrayResponseToExternalModel(cases);
+      return transformArrayResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
       throw error;
@@ -1068,7 +1081,11 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({ unsecuredSavedObjectsClient, attributes, id }: PostCaseArgs) {
+  public async postNewCase({
+    unsecuredSavedObjectsClient,
+    attributes,
+    id,
+  }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);
@@ -1077,7 +1094,7 @@ export class CasesService {
         transformedAttributes.attributes,
         { id, references: transformedAttributes.references }
       );
-      return transformCaseSavedObjectToExternalModel(createdCase);
+      return transformSavedObjectToExternalModel(createdCase);
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);
       throw error;
@@ -1089,7 +1106,7 @@ export class CasesService {
     caseId,
     updatedAttributes,
     version,
-  }: PatchCaseArgs) {
+  }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
       const transformedAttributes = transformAttributesToESModel(updatedAttributes);
@@ -1106,17 +1123,28 @@ export class CasesService {
     }
   }
 
-  public async patchCases({ unsecuredSavedObjectsClient, cases }: PatchCasesArgs) {
+  public async patchCases({
+    unsecuredSavedObjectsClient,
+    cases,
+  }: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
-      return await unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
-        cases.map((c) => ({
+
+      const bulkUpdate = cases.map(({ caseId, updatedAttributes, version }) => {
+        const { attributes, references } = transformAttributesToESModel(updatedAttributes);
+        return {
           type: CASE_SAVED_OBJECT,
-          id: c.caseId,
-          attributes: c.updatedAttributes,
-          version: c.version,
-        }))
+          id: caseId,
+          attributes,
+          references,
+          version,
+        };
+      });
+
+      const updatedCases = await unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
+        bulkUpdate
       );
+      return transformUpdateResponsesToExternalModels(updatedCases);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
       throw error;

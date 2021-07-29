@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CaseConnector, ConnectorTypes, ESCaseConnector } from '../../common';
+import { ESCaseConnector } from '.';
+import { CaseConnector, ConnectorTypes } from '../../common';
 
 /**
  * This file contains utility functions to aid unit test development

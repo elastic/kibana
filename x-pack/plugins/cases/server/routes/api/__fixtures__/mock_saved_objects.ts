@@ -180,7 +180,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
   },
 ];
 
-export const mockCaseNoConnectorId: SavedObject<Partial<ESCaseAttributes>> = {
+export const mockCaseNoConnectorId: SavedObject<Partial<CaseAttributes>> = {
   type: 'cases',
   id: 'mock-no-connector_id',
   attributes: {

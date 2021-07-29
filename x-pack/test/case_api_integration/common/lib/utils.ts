@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
+import * as rt from 'io-ts';
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
@@ -48,7 +49,9 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
-  ESCasesConfigureAttributes,
+  CasesConfigureAttributes,
+  CaseAttributes,
+  CaseExternalServiceBasicRt,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -606,8 +609,19 @@ export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) =
   return mappings;
 };
 
+type ESConnectorFields = Array<{
+  key: string;
+  value: unknown;
+}>;
+
 interface ConfigureSavedObject {
-  'cases-configure': ESCasesConfigureAttributes;
+  'cases-configure': Omit<CasesConfigureAttributes, 'connector'> & {
+    connector: {
+      name: string;
+      type: ConnectorTypes;
+      fields: ESConnectorFields | null;
+    };
+  };
 }
 
 /**
@@ -621,6 +635,39 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient 
         term: {
           type: {
             value: 'cases-configure',
+          },
+        },
+      },
+    },
+  });
+
+  return configure;
+};
+
+type ExternalServicesWithoutConnectorID = Omit<
+  rt.TypeOf<typeof CaseExternalServiceBasicRt>,
+  'connector_id'
+>;
+
+type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> & {
+  connector: {
+    name: string;
+    type: ConnectorTypes;
+    fields: ESConnectorFields | null;
+  };
+  external_service: ExternalServicesWithoutConnectorID | null;
+};
+
+export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
+  const configure: ApiResponse<
+    estypes.SearchResponse<{ cases: ESCaseAttributes }>
+  > = await es.search({
+    index: '.kibana',
+    body: {
+      query: {
+        term: {
+          type: {
+            value: 'cases',
           },
         },
       },

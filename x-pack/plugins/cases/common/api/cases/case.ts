@@ -11,7 +11,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt, ESCaseConnector, ESCaseConnectorNoID } from '../connectors';
+import { CaseConnectorRt } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
 
 const BucketsAggs = rt.array(
@@ -322,16 +322,6 @@ export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
 export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
-
-// TODO: remove, This is being moved to the case service since that's the only place it should be referenced
-// export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & {
-//   connector: ESCaseConnectorNoID;
-// };
-
-// TODO: should not need this anymore since we can just pass the external model through to the service layer
-// export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
-//   connector?: ESCaseConnector;
-// };
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;

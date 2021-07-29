@@ -11,6 +11,7 @@ import {
   SavedObject,
   SavedObjectReference,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
@@ -24,6 +25,18 @@ import {
   transformESConnectorOrUseDefault,
   transformESConnector,
 } from '../transform';
+
+export function transformUpdateResponsesToExternalModels(
+  response: SavedObjectsBulkUpdateResponse<ESCaseAttributes>
+): SavedObjectsBulkUpdateResponse<CaseAttributes> {
+  return {
+    ...response,
+    saved_objects: response.saved_objects.map((so) => ({
+      ...so,
+      ...transformUpdateResponseToExternalModel(so),
+    })),
+  };
+}
 
 export function transformUpdateResponseToExternalModel(
   updatedCase: SavedObjectsUpdateResponse<ESCaseAttributes>
@@ -86,6 +99,8 @@ export function transformAttributesToESModel(
       ...transformedAttributes,
       external_service: restExternalService,
     };
+  } else if (external_service === null) {
+    transformedAttributes = { ...transformedAttributes, external_service: null };
   }
 
   if (connector) {
@@ -122,25 +137,25 @@ function buildReferences(
   return references.length > 0 ? references : undefined;
 }
 
-export function transformCaseArrayResponseToExternalModel(
+export function transformArrayResponseToExternalModel(
   response: SavedObjectsFindResponse<ESCaseAttributes>
 ): SavedObjectsFindResponse<CaseAttributes>;
-export function transformCaseArrayResponseToExternalModel(
+export function transformArrayResponseToExternalModel(
   response: SavedObjectsBulkResponse<ESCaseAttributes>
 ): SavedObjectsBulkResponse<CaseAttributes>;
-export function transformCaseArrayResponseToExternalModel(
+export function transformArrayResponseToExternalModel(
   response: SavedObjectsBulkResponse<ESCaseAttributes> | SavedObjectsFindResponse<ESCaseAttributes>
 ): SavedObjectsBulkResponse<CaseAttributes> | SavedObjectsFindResponse<CaseAttributes> {
   return {
     ...response,
     saved_objects: response.saved_objects.map((so) => ({
       ...so,
-      ...transformCaseSavedObjectToExternalModel(so),
+      ...transformSavedObjectToExternalModel(so),
     })),
   };
 }
 
-export function transformCaseSavedObjectToExternalModel(
+export function transformSavedObjectToExternalModel(
   caseSavedObject: SavedObject<ESCaseAttributes>
 ): SavedObject<CaseAttributes> {
   const connector = transformESConnectorOrUseDefault(
