@@ -218,7 +218,7 @@ export class SavedObjectsErrorHelpers {
     return (
       isSavedObjectsClientError(error) &&
       error[code] === CODE_ES_UNAVAILABLE &&
-      error.message.startsWith('x-elastic-product not present or not recognized:')
+      error.message.startsWith('x-elastic-product not present or not recognized')
     );
   }
 }

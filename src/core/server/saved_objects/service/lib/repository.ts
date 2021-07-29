@@ -665,9 +665,9 @@ export class SavedObjectsRepository {
 
     const deleteDocNotFound = body.result === 'not_found';
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
-    const esHeaderFound = isEsHeaderValid(headers);
+    const esServerSupported = isSupportedEsServer(headers);
     if (deleteDocNotFound || deleteIndexNotFound) {
-      if (esHeaderFound) {
+      if (esServerSupported) {
         // see "404s from missing index" above
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       } else {
@@ -975,7 +975,7 @@ export class SavedObjectsRepository {
       : undefined;
 
     // // initial header check to ensure the response is from Elasticsearch
-    // if (bulkGetResponse && !isEsHeaderValid(bulkGetResponse.headers)) {
+    // if (bulkGetResponse && !isSupportedEsServer(bulkGetResponse.headers)) {
     //   throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     // }
 
@@ -1030,7 +1030,7 @@ export class SavedObjectsRepository {
     );
     const indexNotFound = statusCode === 404;
     // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
-    if (!isFoundGetResponse(body) && !isEsHeaderValid(headers)) {
+    if (!isFoundGetResponse(body) && !isSupportedEsServer(headers)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
     if (
@@ -1260,9 +1260,9 @@ export class SavedObjectsRepository {
       })
       .then((res) => {
         const indexNotFound = res.statusCode === 404;
-        const esHeaderFound = isEsHeaderValid(res.headers);
+        const esServerSupported = isSupportedEsServer(res.headers);
         // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearchq
-        if (indexNotFound && !esHeaderFound) {
+        if (indexNotFound && !esServerSupported) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
         }
         return res;
@@ -2111,9 +2111,9 @@ export class SavedObjectsRepository {
     const indexFound = statusCode !== 404;
 
     // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
-    const esHeaderFound = isEsHeaderValid(headers);
+    const esServerSupported = isSupportedEsServer(headers);
 
-    if (!isFoundGetResponse(body) && !esHeaderFound) {
+    if (!isFoundGetResponse(body) && !esServerSupported) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
 
@@ -2233,8 +2233,13 @@ const isFoundGetResponse = <TDocument = unknown>(
  * @param headers Response headers
  * @returns boolean
  */
-const isEsHeaderValid = (headers: Record<string, unknown> | null) => {
-  return headers && headers['x-elastic-product']
-    ? headers['x-elastic-product'] === 'Elasticsearch'
-    : false;
+const isSupportedEsServer = (headers: Record<string, unknown> | null) => {
+  return !!headers && esXProductMatches(headers);
+};
+
+const esXProductMatches = (headers: Record<string, unknown>) => {
+  const esXProductHeaderKey = Object.keys(headers).find(
+    (key: string) => key.toLowerCase() === 'x-elastic-product'
+  );
+  return !!esXProductHeaderKey && headers[esXProductHeaderKey] === 'Elasticsearch';
 };
