@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getId as rawGetId } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { getId as rawGetId } from '../get_id';
+
 import { insideAABB, landmarkPoint, shapesAt } from './geometry';
 
 import {

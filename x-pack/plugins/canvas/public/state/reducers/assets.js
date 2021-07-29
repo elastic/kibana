@@ -9,7 +9,7 @@ import { handleActions, combineActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { createAsset, setAssetValue, removeAsset, setAssets, resetAssets } from '../actions/assets';
-import { getId } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { getId } from '../../lib/get_id';
 
 const { set, assign, del } = immutable;
 

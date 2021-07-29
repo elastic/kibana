@@ -7,7 +7,7 @@
 
 import React, { Fragment, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { getId } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { getId } from '../../lib/get_id';
 import { Tag } from '../tag';
 import { TagSpec } from '../../lib/tag';
 

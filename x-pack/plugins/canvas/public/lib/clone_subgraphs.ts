@@ -7,7 +7,7 @@
 
 // @ts-expect-error untyped local
 import { arrayToMap } from './aeroelastic/functional';
-import { getId } from '../../../../../src/plugins/presentation_util/common/lib';
+import { getId } from './get_id';
 import { PositionedElement } from '../../types';
 
 export const cloneSubgraphs = (nodes: PositionedElement[]) => {

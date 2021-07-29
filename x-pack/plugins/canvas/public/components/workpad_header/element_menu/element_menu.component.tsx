@@ -15,7 +15,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getId } from '../../../../../../../src/plugins/presentation_util/common/lib';
+import { getId } from '../../../lib/get_id';
 import { Popover, ClosePopoverFn } from '../../popover';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';

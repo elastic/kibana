@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { keymap } from '../../lib/keymap';
 import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
 import { getClientPlatform } from '../../lib/get_client_platform';
-import { getId } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
 
 const strings = {

@@ -7,7 +7,7 @@
 
 import { tagsRegistry } from '../lib/tags_registry';
 import { getDefaultWorkpad } from '../state/defaults';
-import { getId } from '../../../../../src/plugins/presentation_util/common/lib';
+import { getId } from './get_id';
 
 const defaultWorkpad = getDefaultWorkpad();
 

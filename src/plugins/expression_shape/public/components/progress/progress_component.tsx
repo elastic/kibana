@@ -12,8 +12,9 @@ import { IInterpreterRenderHandlers } from '../../../../expressions';
 import { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
 import { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';
 import { getShapeContentElement } from '../reusable/shape_factory';
-import { getId, withSuspense } from '../../../../presentation_util/public';
+import { withSuspense } from '../../../../presentation_util/public';
 import { getTextAttributes, getViewBox } from './utils';
+import { getId } from '../../../common/lib';
 import { getDefaultShapeData } from '../reusable';
 import { LazyProgressDrawer } from '../..';
 
