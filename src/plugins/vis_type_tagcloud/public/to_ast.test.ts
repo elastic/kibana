@@ -10,7 +10,7 @@ import { Vis, VisToExpressionAstParams } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { TagCloudVisParams } from './types';
 
-const mockSchemas = {
+const mockedSchemas = {
   metric: [{ accessor: 1, format: { id: 'number' }, params: {}, label: 'Count', aggType: 'count' }],
   segment: [
     {
@@ -31,7 +31,7 @@ const mockSchemas = {
 };
 
 jest.mock('../../visualizations/public', () => ({
-  getVisSchemas: () => mockSchemas,
+  getVisSchemas: () => mockedSchemas,
 }));
 
 describe('tagcloud vis toExpressionAst function', () => {
@@ -59,7 +59,7 @@ describe('tagcloud vis toExpressionAst function', () => {
     expect(actual).toMatchSnapshot();
   });
 
-  it('should match snapshot params fulfilled', () => {
+  it('should match snapshot params fulfilled with number vis_dimension.accessor at metric', () => {
     vis.params = {
       scale: 'linear',
       orientation: 'single',
@@ -73,6 +73,36 @@ describe('tagcloud vis toExpressionAst function', () => {
       metric: {
         type: 'vis_dimension',
         accessor: 0,
+        format: {
+          id: 'number',
+          params: {
+            id: 'number',
+          },
+        },
+      },
+    };
+    const actual = toExpressionAst(vis, {} as VisToExpressionAstParams);
+    expect(actual).toMatchSnapshot();
+  });
+
+  it('should match snapshot params fulfilled with DatatableColumn vis_dimension.accessor at metric', () => {
+    vis.params = {
+      scale: 'linear',
+      orientation: 'single',
+      minFontSize: 5,
+      maxFontSize: 15,
+      showLabel: true,
+      palette: {
+        type: 'palette',
+        name: 'default',
+      },
+      metric: {
+        type: 'vis_dimension',
+        accessor: {
+          id: 'count',
+          name: 'count',
+          meta: { type: 'number' },
+        },
         format: {
           id: 'number',
           params: {
