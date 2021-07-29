@@ -87,7 +87,7 @@ export class ESTooltipProperty implements ITooltipProperty {
       existsFilter.meta.negate = true;
       return [existsFilter];
     } else {
-      return [esFilters.buildPhraseFilter(indexPatternField, value, this._indexPattern)];
+      return [esFilters.buildPhraseFilter(indexPatternField, value as string, this._indexPattern)];
     }
   }
 }
