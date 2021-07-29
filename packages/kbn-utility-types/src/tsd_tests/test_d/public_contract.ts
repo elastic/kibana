@@ -8,17 +8,16 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { MethodKeysOf } from '../../src';
+import { PublicContract } from '../..';
 
 class Test {
-  public name: string = '';
-  getName() {
-    return this.name;
-  }
+  public str: string = '';
   // @ts-ignore
-  private getDoubleName() {
-    return this.name.repeat(2);
-  }
+  private num: number = 0;
 }
 
-expectType<MethodKeysOf<Test>>('getName');
+type CONTRACT = PublicContract<Test>;
+
+expectType<CONTRACT>({
+  str: 'foo',
+});

@@ -7,8 +7,8 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { expectAssignable, expectNotAssignable } from 'tsd';
-import { PublicMethodsOf } from '../../src';
+import { expectType } from 'tsd';
+import { MethodKeysOf } from '../..';
 
 class Test {
   public name: string = '';
@@ -21,20 +21,4 @@ class Test {
   }
 }
 
-expectAssignable<PublicMethodsOf<Test>>({
-  getName() {
-    return '';
-  },
-});
-
-expectNotAssignable<PublicMethodsOf<Test>>({
-  getName() {
-    return 1;
-  },
-});
-
-expectNotAssignable<PublicMethodsOf<Test>>({
-  getDoubleName() {
-    return 1;
-  },
-});
+expectType<MethodKeysOf<Test>>('getName');

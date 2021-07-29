@@ -7,17 +7,12 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { expectType } from 'tsd';
-import { PublicContract } from '../../src';
+import { expectAssignable } from 'tsd';
+import { UnionToIntersection } from '../..';
 
-class Test {
-  public str: string = '';
-  // @ts-ignore
-  private num: number = 0;
-}
+type INTERSECTED = UnionToIntersection<{ foo: 'bar' } | { baz: 'qux' }>;
 
-type CONTRACT = PublicContract<Test>;
-
-expectType<CONTRACT>({
-  str: 'foo',
+expectAssignable<INTERSECTED>({
+  foo: 'bar',
+  baz: 'qux',
 });

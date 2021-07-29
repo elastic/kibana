@@ -7,13 +7,15 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { expectAssignable } from 'tsd';
-import { Writable } from '../../src';
+import { expectType } from 'tsd';
+import { PublicKeys } from '../..';
 
-type WritableArray = Writable<readonly string[]>;
-expectAssignable<WritableArray>(['1']);
+class Test {
+  public str: string = '';
+  // @ts-ignore
+  private num: number = 0;
+}
 
-type WritableObject = Writable<{
-  readonly name: string;
-}>;
-expectAssignable<WritableObject>({ name: '1' });
+type KEYS = PublicKeys<Test>;
+
+expectType<KEYS>('str');

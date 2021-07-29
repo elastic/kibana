@@ -17,6 +17,5 @@
   },
   "include": [
     "src/**/*",
-    "tsd_tests/**/*"
   ]
 }
