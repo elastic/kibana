@@ -111,6 +111,8 @@ export interface SignalSource {
     };
     rule: {
       id: string;
+      false_positives?: string[];
+      immutable?: boolean;
     };
     /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;

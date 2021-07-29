@@ -240,4 +240,4 @@ export const technicalRuleFieldMap = {
   },
 } as const;
 
-export type TechnicalRuleFieldMaps = typeof technicalRuleFieldMap;
+export type TechnicalRuleFieldMap = typeof technicalRuleFieldMap;

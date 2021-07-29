@@ -11,7 +11,7 @@ import { buildEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { buildRuleWithOverrides } from '../../../signals/build_rule';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
 import { AlertAttributes, SignalSourceHit } from '../../../signals/types';
-import { RACAlert, RACAlertSignalWithRule } from '../../types';
+import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 
 /**
@@ -34,15 +34,11 @@ export const buildBulkBody = (
     threshold_result: null,
   };
   const event = buildEventTypeSignal(mergedDoc);
-  const alert: RACAlertSignalWithRule = {
-    ...buildAlert([mergedDoc], rule),
-    ...additionalAlertFields(mergedDoc),
-  };
-  const signalHit = {
+  return {
     ...filteredSource,
-    '@timestamp': new Date().toISOString(), // Needs to be after `...filteredSource`
+    ...buildAlert(mergedDoc, rule),
+    ...additionalAlertFields(mergedDoc),
     event,
-    signal: alert,
+    '@timestamp': new Date().toISOString(),
   };
-  return signalHit;
 };

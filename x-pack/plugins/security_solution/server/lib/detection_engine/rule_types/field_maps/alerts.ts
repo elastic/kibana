@@ -34,7 +34,7 @@ export const alertsFieldMap: FieldMap = {
     required: true,
   },
   'kibana.alert.depth': {
-    type: 'integer', // TODO: should be 'long'?
+    type: 'long',
     array: false,
     required: true,
   },
@@ -156,41 +156,43 @@ export const alertsFieldMap: FieldMap = {
   'kibana.alert.threshold_result.cardinality': {
     type: 'object',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.threshold_result.cardinality.field': {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.threshold_result.cardinality.value': {
     type: 'long',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.threshold_result.count': {
     type: 'long',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.threshold_result.from': {
     type: 'date',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.threshold_result.terms': {
     type: 'object',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.threshold_result.terms.field': {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.threshold_result.terms.value': {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
-};
+} as const;
+
+export type AlertsFieldMap = typeof alertsFieldMap;

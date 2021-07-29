@@ -8,7 +8,7 @@
 import { EventSchema, Event } from './schema_types';
 import { FieldMap, runtimeTypeFromFieldMap, mergeFieldMaps } from '../../../common/field_map';
 import {
-  TechnicalRuleFieldMaps,
+  TechnicalRuleFieldMap,
   technicalRuleFieldMap,
 } from '../../../common/assets/field_maps/technical_rule_field_map';
 
@@ -27,13 +27,13 @@ export abstract class Schema {
     return createSchema(combinedFields);
   }
 
-  public static getBase(): EventSchema<TechnicalRuleFieldMaps> {
+  public static getBase(): EventSchema<TechnicalRuleFieldMap> {
     return baseSchema;
   }
 
   public static extendBase<TMap extends FieldMap>(
     fields: TMap
-  ): EventSchema<TechnicalRuleFieldMaps & TMap> {
+  ): EventSchema<TechnicalRuleFieldMap & TMap> {
     const extensionSchema = createSchema(fields);
     return this.combine(baseSchema, extensionSchema);
   }

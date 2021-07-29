@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
-import { Ancestor, BaseSignalHit, ThresholdResult } from '../../../signals/types';
+import {
+  Ancestor,
+  BaseSignalHit,
+  SignalHit,
+  SignalSourceHit,
+  ThresholdResult,
+} from '../../../signals/types';
 import { getValidDateFromDoc } from '../../../signals/utils';
-import { RACAlertSignalWithRule } from '../../types';
 import { invariant } from '../../../../../../common/utils/invariant';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 
 /**
  * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
@@ -79,19 +85,39 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
  * @param docs The parent signals/events of the new signal to be built.
  * @param rule The rule that is generating the new signal.
  */
-export const buildAlert = (docs: BaseSignalHit[], rule: RulesSchema): RACAlertSignalWithRule => {
-  const removedClashes = docs.map(removeClashes);
-  const parents = removedClashes.map(buildParent);
-  const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
-  const ancestors = removedClashes.reduce(
-    (acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)),
-    []
-  );
+export const buildAlert = (doc: SignalSourceHit, rule: RulesSchema) => {
+  const removedClashes = removeClashes(doc);
+  const parent = buildParent(removedClashes);
+  const ancestors = buildAncestors(removedClashes);
+  const immutable = doc._source?.signal?.rule.immutable ? 'true' : 'false';
+
+  const source = doc._source as SignalHit;
+  const signal = source?.signal;
+  const signalRule = signal?.rule;
+
   return {
     'kibana.alert.ancestors': ancestors as object[],
+    [ALERT_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS]: 'open',
-    'kibana.alert.depth': depth,
+    'kibana.alert.depth': parent.depth,
+    'kibana.alert.rule.false_positives': signalRule?.false_positives ?? [],
     'kibana.alert.rule.id': rule.id,
+    'kibana.alert.rule.immutable': immutable,
+    'kibana.alert.rule.index': signalRule?.index ?? [],
+    'kibana.alert.rule.language': signalRule?.language ?? 'kuery',
+    'kibana.alert.rule.max_signals': signalRule?.max_signals ?? DEFAULT_MAX_SIGNALS,
+    'kibana.alert.rule.query': signalRule?.query ?? '*:*',
+    'kibana.alert.rule.saved_id': signalRule?.saved_id ?? '',
+    'kibana.alert.rule.threat_index': signalRule?.threat_index,
+    'kibana.alert.rule.threat_indicator_path': signalRule?.threat_indicator_path,
+    'kibana.alert.rule.threat_language': signalRule?.threat_language,
+    'kibana.alert.rule.threat_mapping.field': '', // TODO
+    'kibana.alert.rule.threat_mapping.value': '', // TODO
+    'kibana.alert.rule.threat_mapping.type': '', // TODO
+    'kibana.alert.rule.threshold.field': signalRule?.threshold?.field,
+    'kibana.alert.rule.threshold.value': signalRule?.threshold?.value,
+    'kibana.alert.rule.threshold.cardinality.field': '', // TODO
+    'kibana.alert.rule.threshold.cardinality.value': 0, // TODO
   };
 };
 
@@ -117,9 +143,5 @@ export const additionalAlertFields = (doc: BaseSignalHit) => {
     'kibana.alert.original_time': originalTime != null ? originalTime.toISOString() : undefined,
     'kibana.alert.original_event': doc._source?.event ?? undefined,
     'kibana.alert.threshold_result': thresholdResult,
-    /*
-    original_signal:
-      doc._source?.signal != null && !isEventTypeSignal(doc) ? doc._source?.signal : undefined,
-    */
   };
 };
