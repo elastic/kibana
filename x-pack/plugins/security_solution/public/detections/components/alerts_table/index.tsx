@@ -67,7 +67,7 @@ interface OwnProps {
   showOnlyThreatIndicatorAlerts: boolean;
   timelineId: TimelineIdLiteral;
   to: string;
-  filterGroup: Status;
+  filterGroup?: Status;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
@@ -93,7 +93,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   showOnlyThreatIndicatorAlerts,
   timelineId,
   to,
-  filterGroup,
+  filterGroup = 'open',
 }) => {
   const dispatch = useDispatch();
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);

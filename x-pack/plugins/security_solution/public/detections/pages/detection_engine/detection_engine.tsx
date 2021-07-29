@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiWindowEvent,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -294,7 +300,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   {i18n.BUTTON_MANAGE_RULES}
                 </LinkButton>
               </DetectionEngineHeaderPage>
+              <EuiHorizontalRule margin="m" />
               <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+              <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
                 <EuiFlexItem grow={2}>
                   <AlertsHistogramPanel
