@@ -16,12 +16,12 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { useTheme, UpdateDateRange } from '../../../common/components/charts/common';
-import { histogramDateTimeFormatter } from '../../../common/components/utils';
-import { DraggableLegend } from '../../../common/components/charts/draggable_legend';
-import { LegendItem } from '../../../common/components/charts/draggable_legend_item';
+import { useTheme, UpdateDateRange } from '../../../../common/components/charts/common';
+import { histogramDateTimeFormatter } from '../../../../common/components/utils';
+import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
+import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 
-import { HistogramData } from './types';
+import type { HistogramData } from './types';
 
 const DEFAULT_CHART_HEIGHT = 174;
 
