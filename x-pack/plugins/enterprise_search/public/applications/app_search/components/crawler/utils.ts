@@ -10,6 +10,8 @@ import {
   CrawlerDomainFromServer,
   CrawlerData,
   CrawlerDataFromServer,
+  CrawlerDomainValidationResultFromServer,
+  CrawlerDomainValidationStep,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -51,5 +53,31 @@ export function crawlerDataServerToClient(payload: CrawlerDataFromServer): Crawl
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
+  };
+}
+
+export function crawlDomainValidationToResult(
+  data: CrawlerDomainValidationResultFromServer
+): CrawlerDomainValidationStep {
+  if (!data.valid) {
+    return {
+      state: 'invalid',
+      blockingFailure: true,
+      message: data.results.find((result) => result.result === 'failure')?.comment,
+    };
+  }
+
+  const warningResult = data.results.find((result) => result.result === 'warning');
+
+  if (warningResult) {
+    return {
+      state: 'invalid',
+      blockingFailure: !data.valid,
+      message: warningResult.comment,
+    };
+  }
+
+  return {
+    state: 'valid',
   };
 }

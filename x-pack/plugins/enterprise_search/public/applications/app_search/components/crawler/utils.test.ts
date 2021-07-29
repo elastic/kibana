@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { CrawlerPolicies, CrawlerRules, CrawlRule, CrawlerDomainFromServer } from './types';
+import {
+  CrawlerPolicies,
+  CrawlerRules,
+  CrawlRule,
+  CrawlerDomainFromServer,
+  CrawlerDomainValidationStep,
+  CrawlerDomainValidationResultFromServer,
+} from './types';
 
-import { crawlerDomainServerToClient, crawlerDataServerToClient } from './utils';
+import {
+  crawlerDomainServerToClient,
+  crawlerDataServerToClient,
+  crawlDomainValidationToResult,
+} from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
   id: '-',
@@ -89,5 +100,62 @@ describe('crawlerDataServerToClient', () => {
     expect(output.domains).toHaveLength(2);
     expect(output.domains[0]).toEqual(crawlerDomainServerToClient(domains[0]));
     expect(output.domains[1]).toEqual(crawlerDomainServerToClient(domains[1]));
+  });
+});
+
+describe('crawlDomainValidationToResult', () => {
+  test('with warning', () => {
+    const data: CrawlerDomainValidationResultFromServer = {
+      valid: true,
+      results: [
+        {
+          name: '-',
+          result: 'warning',
+          comment: 'A warning, not failure',
+        },
+      ],
+    };
+
+    expect(crawlDomainValidationToResult(data)).toEqual({
+      blockingFailure: false,
+      state: 'invalid',
+      message: 'A warning, not failure',
+    } as CrawlerDomainValidationStep);
+  });
+
+  test('valid, without warning', () => {
+    const data: CrawlerDomainValidationResultFromServer = {
+      valid: true,
+      results: [
+        {
+          name: '-',
+          result: 'ok',
+          comment: 'Something happened',
+        },
+      ],
+    };
+
+    expect(crawlDomainValidationToResult(data)).toEqual({
+      state: 'valid',
+    } as CrawlerDomainValidationStep);
+  });
+
+  test('invalid', () => {
+    const data: CrawlerDomainValidationResultFromServer = {
+      valid: false,
+      results: [
+        {
+          name: '-',
+          result: 'failure',
+          comment: 'Something unexpected happened',
+        },
+      ],
+    };
+
+    expect(crawlDomainValidationToResult(data)).toEqual({
+      blockingFailure: true,
+      state: 'invalid',
+      message: 'Something unexpected happened',
+    } as CrawlerDomainValidationStep);
   });
 });
