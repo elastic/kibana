@@ -35,6 +35,18 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
+function getRemoveOperation(
+  activeVisualization: Visualization,
+  visualizationState: ConfigPanelWrapperProps['visualizationState'],
+  layerId: string,
+  layerCount: number
+) {
+  if (activeVisualization.getRemoveOperation) {
+    return activeVisualization.getRemoveOperation(visualizationState, layerId);
+  }
+  // fallback to generic count check
+  return layerCount === 1 ? 'clear' : 'remove';
+}
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeDatasourceId: string;
@@ -147,15 +159,26 @@ export function LayerPanels(
             updateDatasource={updateDatasource}
             updateDatasourceAsync={updateDatasourceAsync}
             updateAll={updateAll}
-            isOnlyLayer={layerIds.length === 1}
+            isOnlyLayer={
+              getRemoveOperation(
+                activeVisualization,
+                visualizationState,
+                layerId,
+                layerIds.length
+              ) === 'clear'
+            }
             onRemoveLayer={() => {
               dispatchLens(
                 updateState({
                   subType: 'REMOVE_OR_CLEAR_LAYER',
                   updater: (state) => {
-                    const isOnlyLayer = activeVisualization
-                      .getLayerIds(state.visualization.state)
-                      .every((id) => id === layerId);
+                    const isOnlyLayer =
+                      getRemoveOperation(
+                        activeVisualization,
+                        state.visualization.state,
+                        layerId,
+                        layerIds.length
+                      ) === 'clear';
 
                     return {
                       ...state,

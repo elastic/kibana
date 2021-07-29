@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiPopover, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
@@ -24,8 +24,22 @@ export function LayerSettings({
   const [isOpen, setIsOpen] = useState(false);
 
   if (!activeVisualization.renderLayerContextMenu) {
-    return null;
+    return <p>TODO: {activeVisualization.getDescription(layerConfigProps.state).label}</p>;
   }
+
+  // @TODO: Handle threshold layer title
+  // if (activeVisualization.isSpecialLayer(layerConfigProps.state)) {
+  //   const thresholdInfo = activeVisualization
+  //     .getLayerTypes(layerConfigProps.state)
+  //     ?.find(({ type }) => type === layerType);
+  //   if (thresholdInfo) {
+  //     return (
+  //       <p>
+  //         {thresholdInfo.icon && <EuiIcon type={thresholdInfo.icon} />} {thresholdInfo.label}
+  //       </p>
+  //     );
+  //   }
+  // }
 
   const a11yText = (chartType?: string) => {
     if (chartType) {

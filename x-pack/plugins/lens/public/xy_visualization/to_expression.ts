@@ -11,7 +11,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { ValidLayer, XYLayerConfig } from '../../common/expressions';
+import { layerTypes, ValidLayer, XYLayerConfig } from '../../common/expressions';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -303,12 +303,17 @@ export const buildExpression = (
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
                                 color: yConfig.color ? [yConfig.color] : [],
+                                lineStyle: yConfig.lineStyle ? [yConfig.lineStyle] : [],
+                                lineWidth: yConfig.lineWidth ? [yConfig.lineWidth] : [],
+                                fill: [yConfig.fill || 'none'],
+                                icon: yConfig.icon ? [yConfig.icon] : [],
                               },
                             },
                           ],
                         }))
                       : [],
                     seriesType: [layer.seriesType],
+                    layerType: [layer.layerType || layerTypes.DATA],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
                     ...(layer.palette

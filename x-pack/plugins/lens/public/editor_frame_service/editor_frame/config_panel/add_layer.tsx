@@ -56,14 +56,18 @@ export function AddLayerButton({
             fullWidth
             size="s"
             data-test-subj="lnsLayerAddButton"
-            aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+            aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
               defaultMessage: 'Add layer',
             })}
             fill
             color="text"
             onClick={() => onAddLayerClick(layerTypes[0].type)}
-            iconType="plusInCircleFilled"
-          />
+            iconType="layers"
+          >
+            {i18n.translate('xpack.lens.configPanel.addLayerButton', {
+              defaultMessage: 'Add layer',
+            })}
+          </EuiButton>
         </EuiToolTip>
       </EuiFlexItem>
     );
@@ -78,7 +82,7 @@ export function AddLayerButton({
             fullWidth
             size="s"
             data-test-subj="lnsLayerAddButton"
-            aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+            aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
               defaultMessage: 'Add layer',
             })}
             fill
@@ -86,7 +90,7 @@ export function AddLayerButton({
             onClick={() => toggleLayersChoice(!showLayersChoice)}
             iconType="layers"
           >
-            {i18n.translate('xpack.lens.xyChart.addLayerButton', {
+            {i18n.translate('xpack.lens.configPanel.addLayerButton', {
               defaultMessage: 'Add layer',
             })}
           </EuiButton>
@@ -98,7 +102,7 @@ export function AddLayerButton({
       >
         <EuiContextMenuPanel
           size="s"
-          items={layerTypes.map(({ type, label, icon }) => {
+          items={layerTypes.map(({ type, label, icon, disabled, tooltipContent }) => {
             return (
               <EuiContextMenuItem
                 key={type}
@@ -108,6 +112,8 @@ export function AddLayerButton({
                   toggleLayersChoice(false);
                 }}
                 icon={icon && <EuiIcon size="m" type={icon} />}
+                disabled={disabled}
+                toolTipContent={tooltipContent}
               >
                 {label}
               </EuiContextMenuItem>

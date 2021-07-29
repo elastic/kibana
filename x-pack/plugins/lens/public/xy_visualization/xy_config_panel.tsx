@@ -21,7 +21,7 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiComboBox,
-  EuiFieldNumber,
+  EuiRange,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
@@ -38,6 +38,8 @@ import type {
   AxesSettingsConfig,
   AxisExtentConfig,
   YConfig,
+  LineStyle,
+  FillStyle,
 } from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -798,11 +800,7 @@ const ThresholdPanel = (
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-  const isHorizontal = isHorizontalChart(state.layers);
-  const axisMode =
-    (layer.yConfig &&
-      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
-    'left';
+
   function setYConfig(yConfig: Partial<YConfig>) {
     const newYConfigs = [...(layer.yConfig || [])];
     const existingIndex = newYConfigs.findIndex(
@@ -822,83 +820,21 @@ const ThresholdPanel = (
   const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
   return (
     <>
+      <ColorPicker {...props} />
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-          defaultMessage: 'Axis side',
-        })}
-      >
-        <EuiButtonGroup
-          isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-            defaultMessage: 'Axis side',
-          })}
-          data-test-subj="lnsXY_axisSide_groups"
-          name="axisSide"
-          buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}left`,
-              label: isHorizontal
-                ? i18n.translate('xpack.lens.xyChart.axisSide.bottom', {
-                    defaultMessage: 'Bottom',
-                  })
-                : i18n.translate('xpack.lens.xyChart.axisSide.left', {
-                    defaultMessage: 'Left',
-                  }),
-              'data-test-subj': 'lnsXY_axisSide_groups_left',
-            },
-            {
-              id: `${idPrefix}right`,
-              label: isHorizontal
-                ? i18n.translate('xpack.lens.xyChart.axisSide.top', {
-                    defaultMessage: 'Top',
-                  })
-                : i18n.translate('xpack.lens.xyChart.axisSide.right', {
-                    defaultMessage: 'Right',
-                  }),
-              'data-test-subj': 'lnsXY_axisSide_groups_right',
-            },
-          ]}
-          idSelected={`${idPrefix}${axisMode}`}
-          onChange={(id) => {
-            const newMode = id.replace(idPrefix, '') as 'left' | 'right';
-            setYConfig({ axisMode: newMode });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-          defaultMessage: 'Line width',
-        })}
-      >
-        <EuiFieldNumber
-          fullWidth
-          data-test-subj="lnsXY_lineWidth"
-          value={currentYConfig?.lineWidth || 1}
-          onChange={(e) => {
-            // TODO proper number input handling
-            setYConfig({ lineWidth: Number(e.target.value) });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+        label={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
           defaultMessage: 'Line style',
         })}
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          legend={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
             defaultMessage: 'Line style',
           })}
           data-test-subj="lnsXY_line_style"
-          name="axisSide"
+          name="lineStyle"
           buttonSize="compressed"
           options={[
             {
@@ -919,12 +855,73 @@ const ThresholdPanel = (
           ]}
           idSelected={`${idPrefix}${currentYConfig?.lineStyle || 'solid'}`}
           onChange={(id) => {
-            const newMode = id.replace(idPrefix, '') as 'solid' | 'dashed' | 'dotted';
+            const newMode = id.replace(idPrefix, '') as LineStyle;
             setYConfig({ lineStyle: newMode });
           }}
         />
       </EuiFormRow>
-      <ColorPicker {...props} />
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.lineThickness.label', {
+          defaultMessage: 'Line thickness',
+        })}
+      >
+        <EuiRange
+          fullWidth
+          data-test-subj="lnsXY_lineThickness"
+          value={currentYConfig?.lineWidth || 1}
+          onChange={(e) => {
+            // TODO proper number input handling
+            setYConfig({ lineWidth: Number(e.currentTarget.value) });
+          }}
+          min={1}
+          max={50}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.fillThreshold.label', {
+          defaultMessage: 'Fill',
+        })}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.xyChart.fillThreshold.label', {
+            defaultMessage: 'Fill',
+          })}
+          data-test-subj="lnsXY_fill_threshold"
+          name="fill"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `${idPrefix}none`,
+              label: 'None',
+              'data-test-subj': 'lnsXY_fill_none',
+            },
+            {
+              id: `${idPrefix}above`,
+              label: i18n.translate('xpack.lens.xyChart.fillThreshold.above', {
+                defaultMessage: 'Above',
+              }),
+              'data-test-subj': 'lnsXY_fill_above',
+            },
+            {
+              id: `${idPrefix}below`,
+              label: i18n.translate('xpack.lens.xyChart.fillThreshold.below', {
+                defaultMessage: 'Below',
+              }),
+              'data-test-subj': 'lnsXY_fill_below',
+            },
+          ]}
+          idSelected={`${idPrefix}${currentYConfig?.fill || 'none'}`}
+          onChange={(id) => {
+            const newMode = id.replace(idPrefix, '') as FillStyle;
+            setYConfig({ fill: newMode });
+          }}
+        />
+      </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
         fullWidth

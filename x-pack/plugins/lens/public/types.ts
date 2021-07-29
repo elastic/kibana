@@ -449,6 +449,7 @@ interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
+  frame: Pick<FramePublicAPI, 'datasourceLayers'>;
 }
 
 /**
@@ -601,12 +602,16 @@ export interface Visualization<T = unknown> {
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string, type: string) => T;
+
+  /** Retrieve a list of supported layer types with initialization data */
   getLayerTypes: (
     state: T
   ) => Array<{
     type: string;
     label: string;
     icon?: IconType;
+    disabled?: boolean;
+    tooltipContent?: string;
     initialDimensions?: Array<{
       groupId: string;
       columnId: string;
@@ -615,6 +620,8 @@ export interface Visualization<T = unknown> {
       staticValue: unknown;
     }>;
   }>;
+  /* returns the type of removal operation to perform for the specific layer in the current state */
+  getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized

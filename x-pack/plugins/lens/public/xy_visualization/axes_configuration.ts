@@ -6,7 +6,7 @@
  */
 
 import { FormatFactory } from '../../common';
-import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
+import { AxisExtentConfig, XYLayerConfig, YAxisMode } from '../../common/expressions';
 import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 
@@ -36,10 +36,11 @@ export function getAxesConfiguration(
   tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {
-  const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
+  const series: Record<YAxisMode, FormattedMetric[]> = {
     auto: [],
     left: [],
     right: [],
+    bottom: [],
   };
 
   layers?.forEach((layer) => {
