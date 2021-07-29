@@ -119,6 +119,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
     });
 
+    describe('services/detailed_statistics', function () {
+      loadTestFile(require.resolve('./services/services_detailed_statistics'));
+    });
+
     // Settinges
     describe('settings/anomaly_detection/basic', function () {
       loadTestFile(require.resolve('./settings/anomaly_detection/basic'));

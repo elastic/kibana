@@ -89,6 +89,10 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       kuery,
     });
 
+    if (!serviceNames.length) {
+      throw Boom.badRequest(`serviceNames cannot be empty`);
+    }
+
     return getServicesDetailedStatistics({
       environment,
       kuery,
