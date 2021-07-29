@@ -32,7 +32,7 @@ export const lookup: Record<string, string> = {
     defaultMessage: 'Percentile',
   }),
   percentile_rank: i18n.translate('visTypeTimeseries.aggLookup.percentileRankLabel', {
-    defaultMessage: 'Percentile Rank',
+    defaultMessage: 'Percentile rank',
   }),
   cardinality: i18n.translate('visTypeTimeseries.aggLookup.cardinalityLabel', {
     defaultMessage: 'Cardinality',

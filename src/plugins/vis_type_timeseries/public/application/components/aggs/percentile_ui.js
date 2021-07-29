@@ -23,10 +23,11 @@ import {
   EuiFlexGrid,
   EuiPanel,
 } from '@elastic/eui';
+import { ColorPicker } from '../color_picker';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const newPercentile = (opts) => {
-  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
+  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2, color: '#68BC00' }, opts);
 };
 
 export class Percentiles extends Component {
@@ -39,8 +40,15 @@ export class Percentiles extends Component {
     };
   }
 
+  handleColorChange(item) {
+    return (val) => {
+      const handleChange = collectionActions.handleChange.bind(null, this.props);
+      handleChange(_.assign({}, item, val));
+    };
+  }
+
   renderRow = (row, i, items) => {
-    const defaults = { value: '', percentile: '', shade: '' };
+    const defaults = { value: '', percentile: '', shade: '', color: '' };
     const model = { ...defaults, ...row };
     const { panel } = this.props;
     const flexItemStyle = { minWidth: 100 };
@@ -106,7 +114,15 @@ export class Percentiles extends Component {
         <EuiPanel>
           <EuiFlexGroup key={model.id} alignItems="center">
             <EuiFlexItem>
-              <EuiFlexGrid columns={2}>
+              <EuiFlexGrid columns={3}>
+                <EuiFlexItem grow={false}>
+                  <ColorPicker
+                    disableTrash={true}
+                    onChange={this.handleColorChange(model)}
+                    value={model.color}
+                    name="color"
+                  />
+                </EuiFlexItem>
                 {percentileFieldNumber}
                 <EuiFlexItem style={flexItemStyle}>
                   <EuiFormRow

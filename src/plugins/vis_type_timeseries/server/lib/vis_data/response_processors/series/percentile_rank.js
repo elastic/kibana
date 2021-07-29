@@ -34,7 +34,7 @@ export function percentileRank(resp, panel, series, meta, extractFields) {
         results.push({
           data,
           id: `${split.id}:${percentileRank}:${index}`,
-          label: `${split.label} (${percentileRank || 0})`,
+          label: `(${percentileRank || 0}) ${split.label}`,
           color: split.color,
           ...getDefaultDecoration(series),
         });
