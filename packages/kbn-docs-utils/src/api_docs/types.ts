@@ -228,13 +228,22 @@ export interface ApiReference {
   link: SourceLink;
 }
 
-export interface ReferencedDeprecations {
+// A mapping of plugin id to a list of every deprecated API it uses, and where it's referenced.
+export interface ReferencedDeprecationsByPlugin {
+  // Key is the plugin id.
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }
+
+// A mapping of deprecated API id to the places that are still referencing it.
+export interface ReferencedDeprecationsByAPI {
+  [key: string]: { deprecatedApi: ApiDeclaration; references: ApiReference[] };
+}
+
 export interface ApiStats {
   missingComments: ApiDeclaration[];
   isAnyType: ApiDeclaration[];
   noReferences: ApiDeclaration[];
   apiCount: number;
   missingExports: number;
+  deprecatedAPIsReferencedCount: number;
 }
