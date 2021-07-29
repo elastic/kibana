@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   eventHasNotes,
   getEventType,
@@ -52,13 +53,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onEventDetailsPanelOpened,
   onRowSelected,
   refetch,
-  onRuleChange,
   showCheckboxes,
+  onRuleChange,
   showNotes,
   timelineId,
   toggleShowNotes,
 }) => {
   const dispatch = useDispatch();
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { timelines: timelinesUi } = useKibana().services;
@@ -81,6 +83,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }),
     [eventId, onRowSelected]
   );
+
   const handlePinClicked = useCallback(
     () =>
       getPinOnClick({
@@ -113,7 +116,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   }, [ariaRowindex, ecsData, casePermissions, insertTimelineHook, columnValues]);
   return (
     <ActionsContainer>
-      {showCheckboxes && (
+      {showCheckboxes && !tGridEnabled && (
         <div key="select-event-container" data-test-subj="select-event-container">
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
             {loadingEventIds.includes(eventId) ? (
