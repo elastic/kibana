@@ -76,8 +76,8 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.customRule",
       "message": "hello world security",
-      "kibana.rac.alert.owner": "siem",
-      "kibana.rac.alert.status": "open",
+      "kibana.alert.owner": "siem",
+      "kibana.alert.status": "open",
       "kibana.space_ids": ["space1", "space2"]
     }
   }

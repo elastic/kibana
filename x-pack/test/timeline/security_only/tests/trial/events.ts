@@ -39,10 +39,10 @@ export default ({ getService }: FtrProviderContext) => {
         field: '@timestamp',
       },
       {
-        field: 'kibana.rac.alert.owner',
+        field: 'kibana.alert.owner',
       },
       {
-        field: 'kibana.rac.alert.id',
+        field: 'kibana.alert.id',
       },
       {
         field: 'event.kind',
@@ -52,8 +52,8 @@ export default ({ getService }: FtrProviderContext) => {
     fieldRequested: [
       '@timestamp',
       'message',
-      'kibana.rac.alert.owner',
-      'kibana.rac.alert.id',
+      'kibana.alert.owner',
+      'kibana.alert.id',
       'event.kind',
     ],
     fields: [],

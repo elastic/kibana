@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
   ALERT_ID,
   ALERT_OWNER,
   ALERT_PRODUCER,
@@ -360,25 +362,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "kibana.alert.duration.us": Array [
+            "${ALERT_DURATION}": Array [
               0,
             ],
-            "kibana.alert.evaluation.threshold": Array [
+            "${ALERT_EVALUATION_THRESHOLD}": Array [
               30,
             ],
-            "kibana.alert.evaluation.value": Array [
+            "${ALERT_EVALUATION_VALUE}": Array [
               50,
             ],
-            ${ALERT_ID}: Array [
+            "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            ${ALERT_OWNER}: Array [
+            "${ALERT_OWNER}": Array [
               "apm",
             ],
-            ${ALERT_PRODUCER}: Array [
+            "${ALERT_PRODUCER}": Array [
               "apm",
             ],
-            ${ALERT_STATUS}: Array [
+            "${ALERT_STATUS}": Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -436,25 +438,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "kibana.alert.duration.us": Array [
+            "${ALERT_DURATION}": Array [
               0,
             ],
-            "kibana.alert.evaluation.threshold": Array [
+            "${ALERT_EVALUATION_THRESHOLD}": Array [
               30,
             ],
-            "kibana.alert.evaluation.value": Array [
+            "${ALERT_EVALUATION_VALUE}": Array [
               50,
             ],
-            ${ALERT_ID}: Array [
+            "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            ${ALERT_OWNER}: Array [
+            "${ALERT_OWNER}": Array [
               "apm",
             ],
-            ${ALERT_PRODUCER}: Array [
+            "${ALERT_PRODUCER}": Array [
               "apm",
             ],
-            ${ALERT_STATUS}: Array [
+            "${ALERT_STATUS}": Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -543,22 +545,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "kibana.alert.evaluation.threshold": Array [
+            "${ALERT_EVALUATION_THRESHOLD}": Array [
               30,
             ],
-            "kibana.alert.evaluation.value": Array [
+            "${ALERT_EVALUATION_VALUE}": Array [
               50,
             ],
-            ${ALERT_ID}: Array [
+            "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            ${ALERT_OWNER}: Array [
+            "${ALERT_OWNER}": Array [
               "apm",
             ],
-            ${ALERT_PRODUCER}: Array [
+            "${ALERT_PRODUCER}": Array [
               "apm",
             ],
-            ${ALERT_STATUS}: Array [
+            "${ALERT_STATUS}": Array [
               "closed",
             ],
             "kibana.space_ids": Array [

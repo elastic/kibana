@@ -34,7 +34,7 @@ export const filterDuplicateSignals = (
   } else if (isWrappedRACAlert(signals, isRuleRegistryEnabled)) {
     return signals.filter(
       (doc) =>
-        !(doc._source.signal['kibana.alert.ancestors'] as Ancestor[]).some(
+        !(doc._source['kibana.alert.ancestors'] as Ancestor[]).some(
           (ancestor) => ancestor.rule === ruleId
         )
     );
