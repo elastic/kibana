@@ -16,7 +16,6 @@ import { ActionColumn } from './action_column';
 const requiredParams = {
   displayedItems: [],
   isActivelyEditing: () => false,
-  isLoading: false,
   item: { id: 1 },
 };
 

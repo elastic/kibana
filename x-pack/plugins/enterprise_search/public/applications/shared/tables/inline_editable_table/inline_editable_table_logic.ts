@@ -62,7 +62,7 @@ type InlineEditableTableLogicType<Item extends ItemWithAnID> = MakeLogicType<
 >;
 
 export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWithAnID>>({
-  path: (key: string) => ['enterprise_search', 'app_search', 'inline_editable_table_logic', key],
+  path: (key: string) => ['enterprise_search', 'inline_editable_table_logic', key],
   key: (props) => props.instanceId,
   actions: () => ({
     deleteItem: (item) => ({ item }),
