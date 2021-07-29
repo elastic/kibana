@@ -107,7 +107,8 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
 
   const updatedColumns = getUpdatedColumns({
     columns,
-    displayedItems, // TODO empty items are {} which do not have ids
+    // TODO We shouldn't need this cast here
+    displayedItems: displayedItems as Item[],
     isActivelyEditing,
     canRemoveLastItem,
     isLoading,

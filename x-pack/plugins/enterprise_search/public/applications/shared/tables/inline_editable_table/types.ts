@@ -14,9 +14,7 @@ export interface FormErrors {
 }
 
 export type ItemWithAnID = {
-  // TODO This should really be id: number | null, but we can't because we have a separate
-  // editingItemId and editingItemValue in state, currently
-  id?: number;
+  id: number | null;
 } & object;
 
 export interface EditingRenderFlags {
