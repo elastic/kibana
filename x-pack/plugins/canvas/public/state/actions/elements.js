@@ -279,6 +279,18 @@ export const setFilter = createThunk(
   }
 );
 
+export const setInput = createThunk(
+  'setInput',
+  ({ dispatch }, input, elementId, doRender = true) => {
+    const _setInput = createAction('setInput');
+    dispatch(_setInput({ input, elementId }));
+
+    if (doRender === true) {
+      dispatch(fetchAllRenderables());
+    }
+  }
+);
+
 export const setExpression = createThunk('setExpression', setExpressionFn);
 function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, doRender = true) {
   // dispatch action to update the element in state

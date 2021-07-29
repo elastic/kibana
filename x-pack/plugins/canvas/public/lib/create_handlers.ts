@@ -11,7 +11,7 @@ import {
   IInterpreterRenderHandlers,
 } from 'src/plugins/expressions/public';
 // @ts-expect-error untyped local
-import { setFilter } from '../state/actions/elements';
+import { setFilter, setInput } from '../state/actions/elements';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
 
@@ -39,6 +39,9 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
   getFilter() {
     return '';
   },
+  getInput() {
+    return '';
+  },
 
   onComplete(fn: () => void) {
     this.done = fn;
@@ -57,6 +60,7 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
 
   resize(_size: { height: number; width: number }) {},
   setFilter() {},
+  setInput() {},
 });
 
 export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers =>
@@ -110,6 +114,14 @@ export const createDispatchedHandlerFactory = (
 
       getFilter() {
         return element.filter || '';
+      },
+
+      setInput(input: string) {
+        dispatch(setInput(input, element.id, true));
+      },
+
+      getInput() {
+        return element.input || '';
       },
 
       onComplete(fn: () => void) {

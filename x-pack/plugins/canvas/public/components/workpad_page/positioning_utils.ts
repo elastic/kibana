@@ -53,15 +53,13 @@ export const elementToShape = (
   b: position.height / 2, // more regular math (like ellipsis radii rather than diameters)
 });
 
-const simplePosition = (
-  { id, position, filter }: { id: string; position: ElementPosition; filter: string },
-  z: number
-) => ({
+const simplePosition = ({ id, position, filter, input }: PositionedElement, z: number) => ({
   ...headerData(id),
   width: position.width,
   height: position.height,
   transformMatrix: transformData(position, z),
   filter,
+  input,
 });
 
 export const simplePositioning = ({ elements }: { elements: PositionedElement[] }) => ({

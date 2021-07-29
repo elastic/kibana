@@ -25,6 +25,7 @@ export const getDefaultElement = () => {
       | plot defaultStyle={seriesStyle points=5}
     `,
     filter: null,
+    input: null,
   };
 };
 

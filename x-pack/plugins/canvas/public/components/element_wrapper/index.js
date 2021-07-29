@@ -44,6 +44,7 @@ function selectorFactory(dispatch) {
         id: element.id,
         filter: element.filter,
         expression: element.expression,
+        input: element.input,
       },
     };
 
@@ -85,5 +86,6 @@ ElementWrapper.propTypes = {
     // so element properties can not be marked as required
     expression: PropTypes.string,
     filter: PropTypes.string,
+    input: PropTypes.string,
   }).isRequired,
 };

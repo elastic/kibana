@@ -7,6 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { isEqual } from 'lodash';
 import { CoreStart } from '../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
 import {
@@ -27,14 +28,17 @@ const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
 
+const encode = (input: EmbeddableInput) => btoa(JSON.stringify(input));
+const decode = (serializedInput: string) => JSON.parse(atob(serializedInput));
+
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
-  return (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
+  return (embeddableObject: IEmbeddable) => {
     return (
       <div
         className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
           <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
@@ -61,6 +65,13 @@ export const embeddableRendererFactory = (
         'labs:canvas:byValueEmbeddable'
       );
 
+      const serializedInput = handlers.getInput();
+
+      const embeddableInput =
+        isByValueEnabled && serializedInput !== ''
+          ? { ...decode(serializedInput), ...input }
+          : input;
+
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
           (embeddableFactory) => embeddableFactory.type === embeddableType
@@ -72,7 +83,7 @@ export const embeddableRendererFactory = (
         }
 
         const embeddablePromise = factory
-          .createFromSavedObject(input.id, input)
+          .createFromSavedObject(input.id, embeddableInput)
           .then((embeddable) => {
             embeddablesRegistry[uniqueId] = embeddable;
             return embeddable;
@@ -94,20 +105,21 @@ export const embeddableRendererFactory = (
             isByValueEnabled
           );
 
-          if (updatedExpression) {
-            handlers.onEmbeddableInputChange(updatedExpression);
+          const oldSerializedInput = handlers.getInput();
+          const oldInput = oldSerializedInput ? { ...decode(oldSerializedInput), ...input } : input;
+
+          if (!isEqual(oldInput, updatedInput)) {
+            console.log('not equal');
+            if (isByValueEnabled) {
+              handlers.setInput(encode(updatedInput));
+            }
+            if (updatedExpression) {
+              handlers.onEmbeddableInputChange(updatedExpression);
+            }
           }
         });
 
-        ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-          handlers.done()
-        );
-
-        handlers.onResize(() => {
-          ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-            handlers.done()
-          );
-        });
+        ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
 
         handlers.onDestroy(() => {
           subscription.unsubscribe();
@@ -121,7 +133,7 @@ export const embeddableRendererFactory = (
         const embeddable = embeddablesRegistry[uniqueId];
 
         if ('updateInput' in embeddable) {
-          embeddable.updateInput(input);
+          embeddable.updateInput(embeddableInput);
           embeddable.reload();
         }
       }

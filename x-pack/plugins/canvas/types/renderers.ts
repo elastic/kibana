@@ -16,6 +16,8 @@ export interface CanvasSpecificRendererHandlers {
   getElementId: () => string;
   /** Retrieves the value of the filter property on the element object persisted on the workpad */
   getFilter: () => string;
+  /** Retrieves the value of the input property on the element object persisted on the workpad */
+  getInput: () => string;
   /** Handler to invoke when a renderer is considered complete */
   onComplete: (fn: () => void) => void;
   /** Handler to invoke when a rendered embeddable is destroyed */
@@ -28,6 +30,8 @@ export interface CanvasSpecificRendererHandlers {
   resize: (size: { height: number; width: number }) => void;
   /** Sets the value of the filter property on the element object persisted on the workpad */
   setFilter: (filter: string) => void;
+  /** Sets the value of the input property on the element object persisted on the workpad */
+  setInput: (input: string) => void;
 }
 
 export type RendererHandlers = IInterpreterRenderHandlers & CanvasSpecificRendererHandlers;
