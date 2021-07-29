@@ -20,14 +20,14 @@ const resources = [
   {
     iconType: 'editorComment',
     label: i18n.translate('xpack.observability.resources.forum', {
-      defaultMessage: 'Discuss forum',
+      defaultMessage: 'Discuss Forum',
     }),
     href: 'https://ela.st/observability-discuss',
   },
   {
     iconType: 'training',
     label: i18n.translate('xpack.observability.resources.training', {
-      defaultMessage: 'Observability fundamentals',
+      defaultMessage: 'Free Observability Course',
     }),
     href: 'https://ela.st/observability-training',
   },
