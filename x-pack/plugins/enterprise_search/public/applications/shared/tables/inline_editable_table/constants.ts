@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export interface DraggableUXStyles {
-  alignItems?: string;
-  flexBasis?: string;
-  flexGrow?: number;
-}
-export interface Column<Item> extends DraggableUXStyles {
-  name?: string;
-  render: (item: Item) => React.ReactNode;
-}
+export const EMPTY_ITEM = { id: null };
