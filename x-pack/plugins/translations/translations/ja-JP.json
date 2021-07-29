@@ -10011,7 +10011,6 @@
     "xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy": "エージェントポリシーの読み込みエラー",
     "xpack.fleet.policyDetails.packagePoliciesTable.actionsColumnTitle": "アクション",
     "xpack.fleet.policyDetails.packagePoliciesTable.deleteActionTitle": "統合の削除",
-    "xpack.fleet.policyDetails.packagePoliciesTable.descriptionColumnTitle": "説明",
     "xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle": "統合の編集",
     "xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle": "名前",
     "xpack.fleet.policyDetails.packagePoliciesTable.namespaceColumnTitle": "名前空間",

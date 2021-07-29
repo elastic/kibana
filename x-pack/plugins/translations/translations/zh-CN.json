@@ -10102,7 +10102,6 @@
     "xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy": "加载代理策略时出错",
     "xpack.fleet.policyDetails.packagePoliciesTable.actionsColumnTitle": "操作",
     "xpack.fleet.policyDetails.packagePoliciesTable.deleteActionTitle": "删除集成",
-    "xpack.fleet.policyDetails.packagePoliciesTable.descriptionColumnTitle": "描述",
     "xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle": "编辑集成",
     "xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle": "名称",
     "xpack.fleet.policyDetails.packagePoliciesTable.namespaceColumnTitle": "命名空间",
