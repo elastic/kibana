@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mount } from 'enzyme';
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { coreMock } from 'src/core/public/mocks';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ScreenCapturePanelContent, Props } from './screen_capture_panel_content';
+import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 
 const { http, uiSettings, ...coreSetup } = coreMock.createSetup();
 uiSettings.get.mockImplementation((key: string) => {
@@ -21,58 +22,81 @@ uiSettings.get.mockImplementation((key: string) => {
 });
 const apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0');
 
-let jobParams: BaseParams;
+const getJobParamsDefault: () => BaseParams = () => ({
+  objectType: 'test-object-type',
+  title: 'Test Report Title',
+  browserTimezone: 'America/New_York',
+});
 
-describe('ScreenCapturePanelContent', () => {
-  beforeEach(() => {
-    jobParams = {
-      objectType: 'test-object-type',
-      title: 'Test Report Title',
-    };
-  });
-
-  const mountComponent = (newProps: Partial<Props>) =>
-    mountWithIntl(
+test('ScreenCapturePanelContent renders the default view properly', () => {
+  const component = mount(
+    <IntlProvider locale="en">
       <ScreenCapturePanelContent
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
-        toasts={coreSetup.notifications.toasts}
         uiSettings={uiSettings}
-        getJobParams={() => jobParams}
-        {...newProps}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
       />
-    );
+    </IntlProvider>
+  );
+  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.text()).not.toMatch('Full page layout');
+  expect(component.text()).not.toMatch('Optimize for printing');
+});
 
-  test('renders the default view properly', () => {
-    const component = mountComponent({});
-    expect(component.find('EuiForm')).toMatchSnapshot();
-    expect(component.text()).not.toMatch('Full page layout');
-    expect(component.text()).not.toMatch('Optimize for printing');
-  });
+test('ScreenCapturePanelContent properly renders a view with "canvas" layout option', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="canvas"
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+      />
+    </IntlProvider>
+  );
+  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.text()).toMatch('Full page layout');
+});
 
-  test('properly renders a view with "canvas" layout option', () => {
-    const component = mountComponent({
-      layoutOption: 'canvas',
-    });
-    expect(component.find('EuiForm')).toMatchSnapshot();
-    expect(component.text()).toMatch('Full page layout');
-  });
+test('ScreenCapturePanelContent properly renders a view with "print" layout option', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="print"
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+      />
+    </IntlProvider>
+  );
+  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.text()).toMatch('Optimize for printing');
+});
 
-  test('properly renders a view with "print" layout option', () => {
-    const component = mountComponent({
-      layoutOption: 'print',
-    });
-    expect(component.find('EuiForm')).toMatchSnapshot();
-    expect(component.text()).toMatch('Optimize for printing');
-  });
+test('ScreenCapturePanelContent decorated job params are visible in the POST URL', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+      />
+    </IntlProvider>
+  );
 
-  test('decorated job params are visible in the POST URL', () => {
-    jobParams.layout = { id: 'canvas' };
-    const component = mountComponent({ layoutOption: 'canvas' });
-
-    expect(component.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-      `"http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28layout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Acanvas%2Cselectors%3A%28itemsCountAttribute%3Adata-shared-items-count%2CrenderComplete%3A%5Bdata-shared-item%5D%2Cscreenshot%3A%5Bdata-shared-items-container%5D%2CtimefilterDurationAttribute%3Adata-shared-timefilter-duration%29%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"`
-    );
-  });
+  expect(component.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
+    `"http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Apreserve_layout%2Cselectors%3A%28itemsCountAttribute%3Adata-shared-items-count%2CrenderComplete%3A%5Bdata-shared-item%5D%2Cscreenshot%3A%5Bdata-shared-items-container%5D%2CtimefilterDurationAttribute%3Adata-shared-timefilter-duration%29%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"`
+  );
 });

@@ -8,23 +8,12 @@
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
 import { getDefaultLayoutSelectors } from '../../common';
 import { BaseParams, LayoutParams } from '../../common/types';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ReportingPanelContent } from './reporting_panel_content';
+import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
-export interface Props {
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  uiSettings: IUiSettingsClient;
-  reportType: string;
+export interface Props extends ReportingPanelProps {
   layoutOption?: 'canvas' | 'print';
-  objectId?: string;
-  getJobParams: () => BaseParams;
-  requiresSavedState: boolean;
-  isDirty?: boolean;
-  onClose?: () => void;
 }
 
 interface State {
@@ -37,8 +26,8 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     super(props);
 
     this.state = {
-      usePrintLayout: props.layoutOption === 'print',
-      useCanvasLayout: props.layoutOption === 'canvas',
+      usePrintLayout: false,
+      useCanvasLayout: false,
     };
   }
 

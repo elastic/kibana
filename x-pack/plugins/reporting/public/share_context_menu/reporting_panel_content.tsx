@@ -25,7 +25,7 @@ import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-export interface Props {
+export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   uiSettings: IUiSettingsClient;
@@ -38,8 +38,9 @@ export interface Props {
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
-  intl: InjectedIntl;
 }
+
+type Props = ReportingPanelProps & { intl: InjectedIntl };
 
 interface State {
   isStale: boolean;

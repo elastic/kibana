@@ -13,7 +13,7 @@ import {
   uiSettingsServiceMock,
 } from 'src/core/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ReportingPanelContent, Props } from './reporting_panel_content';
+import { ReportingPanelContent, ReportingPanelProps as Props } from './reporting_panel_content';
 
 describe('ReportingPanelContent', () => {
   const props: Partial<Props> = {

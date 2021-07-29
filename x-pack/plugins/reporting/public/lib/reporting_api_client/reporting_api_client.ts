@@ -12,6 +12,7 @@ import moment from 'moment';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
+  API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
@@ -41,7 +42,7 @@ export interface DiagnoseResponse {
 interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
-  getReportingJobPath(exportType: string, jobParams: BaseParams): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+  getReportingJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
   createReportingJob(exportType: string, jobParams: any): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
@@ -156,11 +157,15 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(resp.job);
   }
 
-  public getDecoratedJobParams(baseParams: BaseParams): DecoratedBaseParams {
+  public async createImmediateReport(params: DecoratedBaseParams) {
+    return this.http.post(`${API_GENERATE_IMMEDIATE}`, { body: JSON.stringify(params) });
+  }
+
+  public getDecoratedJobParams<T extends BaseParams>(baseParams: T): DecoratedBaseParams {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
     // to the export API.
-    const browserTimezone =
+    const browserTimezone: string =
       this.uiSettings.get('dateFormat:tz') === 'Browser'
         ? moment.tz.guess()
         : this.uiSettings.get('dateFormat:tz');
