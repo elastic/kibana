@@ -25,7 +25,7 @@ import { FormErrors, InlineEditableTableColumn } from './types';
 
 import './inline_editable_tables.scss';
 
-interface InlineEditableTableProps<Item extends ItemWithAnID> {
+export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
   title: string;

@@ -13,7 +13,7 @@ import { HttpLogic } from '../../http';
 
 import { ItemWithAnID } from '../types';
 
-type EndpointRoute<Item> = (item: Item) => string;
+import { EndpointRoute } from './types';
 
 interface GenericEndpointInlineEditableTableValues {
   isLoading: boolean;
@@ -33,8 +33,8 @@ interface GenericEndpointInlineEditableTableActions<Item extends ItemWithAnID> {
 
 interface GenericEndpointInlineEditableTablePropsWithoutReordering<Item extends ItemWithAnID> {
   dataProperty: string;
-  instanceId: string;
   addRoute: string;
+  instanceId: string;
   deleteRoute: EndpointRoute<Item>;
   updateRoute: EndpointRoute<Item>;
   onAdd(item: Item, items: Item[]): void;
@@ -45,8 +45,8 @@ interface GenericEndpointInlineEditableTablePropsWithoutReordering<Item extends 
 type GenericEndpointInlineEditableTablePropsWithReordering<
   Item extends ItemWithAnID
 > = GenericEndpointInlineEditableTablePropsWithoutReordering<Item> & {
-  reorderRoute: string;
-  onReorder(items: Item[]): void;
+  reorderRoute?: string;
+  onReorder?(items: Item[]): void;
 };
 
 type GenericEndpointInlineEditableTableProps<Item extends ItemWithAnID> =
@@ -70,10 +70,8 @@ const stripIdAndCreatedAtFromItem = (item: object) => {
 function hasReorderProps<Item extends ItemWithAnID>(
   props: GenericEndpointInlineEditableTableProps<Item>
 ): props is GenericEndpointInlineEditableTablePropsWithReordering<Item> {
-  return (
-    (props as GenericEndpointInlineEditableTablePropsWithReordering<Item>).reorderRoute !==
-    undefined
-  );
+  const castedProps = props as GenericEndpointInlineEditableTablePropsWithReordering<Item>;
+  return castedProps.reorderRoute !== undefined && castedProps.onReorder !== undefined;
 }
 
 const saveAndCallback = async <Item extends ItemWithAnID>(
@@ -87,6 +85,7 @@ const saveAndCallback = async <Item extends ItemWithAnID>(
   onFinally: () => void
 ) => {
   try {
+    // @ts-ignore The response should have responseDataProperty
     const { [responseDataProperty]: itemsFromResponse } = await httpCall(route, requestData);
     callback(item, itemsFromResponse);
     onSuccess();
@@ -171,18 +170,22 @@ export const GenericEndpointInlineEditableTableLogic = kea<
 
       if (hasReorderProps(props)) {
         const reorderedItemIds = items.map(({ id }, itemIndex) => ({ id, order: itemIndex }));
+        // @ts-ignore We know reorderRoute exists because we checked for it
         props.onReorder(items);
 
         try {
           // TODO it clears loading later but it never sets the loading state to true
 
+          // @ts-ignore We know reorderRoute exists because we checked for it
           const { [props.dataProperty]: itemsFromResponse } = await http.put(props.reorderRoute, {
             body: JSON.stringify({ [props.dataProperty]: reorderedItemIds }),
           });
 
+          // @ts-ignore We know reorderRoute exists because we checked for it
           props.onReorder(itemsFromResponse);
           onSuccess();
         } catch (e) {
+          // @ts-ignore We know reorderRoute exists because we checked for it
           props.onReorder(oldItems);
           flashAPIErrors(e);
         }
