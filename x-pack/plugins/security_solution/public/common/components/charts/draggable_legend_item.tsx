@@ -46,7 +46,6 @@ const DraggableLegendItemComponent: React.FC<{
               data-test-subj={`legend-item-${dataProviderId}`}
               field={field}
               id={dataProviderId}
-              isDraggable={false}
               timelineId={timelineId}
               value={value}
             />

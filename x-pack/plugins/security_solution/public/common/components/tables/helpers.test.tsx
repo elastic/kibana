@@ -55,7 +55,7 @@ describe('Table Helpers', () => {
         displayCount: 0,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
         '(Empty String)'
       );
     });
@@ -81,7 +81,7 @@ describe('Table Helpers', () => {
         render: renderer,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
         'Hi item1 renderer'
       );
     });
@@ -116,7 +116,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
         '(Empty String)'
       );
     });
@@ -163,7 +163,7 @@ describe('Table Helpers', () => {
         displayCount: 2,
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="withHoverActionsButton"]').hostNodes().length).toBe(2);
+      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').hostNodes().length).toBe(2);
     });
 
     test('it uses custom renderer', () => {
@@ -175,7 +175,7 @@ describe('Table Helpers', () => {
         render: renderer,
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
         'Hi item1 renderer'
       );
     });

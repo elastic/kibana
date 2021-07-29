@@ -245,7 +245,7 @@ describe('EventFieldsBrowser', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').at(0).text()).toEqual(
+      expect(wrapper.find('[data-test-subj="draggable-content-@timestamp"]').at(0).text()).toEqual(
         'Feb 28, 2019 @ 16:50:54.621'
       );
     });

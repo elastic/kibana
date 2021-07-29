@@ -67,7 +67,6 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
             "2018-11-12T19:03:25.836Z",
           ]
         }
-        isDraggable={true}
         networkBytes={
           Array [
             100,

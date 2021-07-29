@@ -340,9 +340,13 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
       const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
         stackByField
       )}-${escapeDataProviderId(datum.key)}`;
-      expect(wrapper.find(`div[data-provider-id="${dataProviderId}"]`).first().text()).toEqual(
-        datum.key
-      );
+
+      expect(
+        wrapper
+          .find(`[draggableId="${dataProviderId}"] [data-test-subj="providerContainer"]`)
+          .first()
+          .text()
+      ).toEqual(datum.key);
     });
   });
 });

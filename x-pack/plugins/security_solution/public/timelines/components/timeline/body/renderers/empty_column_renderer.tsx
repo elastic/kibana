@@ -60,7 +60,6 @@ export const emptyColumnRenderer: ColumnRenderer = {
           kqlQuery: '',
           and: [],
         }}
-        isDraggable={isDraggable}
         key={`empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (

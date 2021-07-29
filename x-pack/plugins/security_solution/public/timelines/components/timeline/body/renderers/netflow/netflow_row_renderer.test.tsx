@@ -38,7 +38,6 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields,
       data: getMockNetflowData(),
-      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -108,7 +107,6 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: getMockNetflowData(),
-      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
