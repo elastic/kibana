@@ -21,7 +21,7 @@ import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
 import { CrawlerDataFromServer, CrawlerDomain } from '../../types';
 import { crawlerDataServerToClient } from '../../utils';
 
-import { extractDomainAndEntryPointFromUrl } from './utils';
+import { extractDomainAndEntryPointFromUrl, getDomainWithProtocol } from './utils';
 
 export interface AddDomainLogicValues {
   addDomainFormInputValue: string;
@@ -156,11 +156,14 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         actions.onSubmitNewDomainError(errorMessages);
       }
     },
-    validateDomain: () => {
+    validateDomain: async () => {
       const { domain, entryPoint } = extractDomainAndEntryPointFromUrl(
         values.addDomainFormInputValue.trim()
       );
-      actions.onValidateDomain(domain, entryPoint);
+
+      const domainWithProtocol = await getDomainWithProtocol(domain);
+
+      actions.onValidateDomain(domainWithProtocol, entryPoint);
     },
   }),
 });

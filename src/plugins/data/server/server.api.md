@@ -52,7 +52,6 @@ import { Logger as Logger_2 } from 'kibana/server';
 import { LoggerFactory } from '@kbn/logging';
 import { Moment } from 'moment';
 import moment from 'moment';
-import { NameList } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
@@ -73,7 +72,6 @@ import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
-import { ShardsResponse } from 'elasticsearch';
 import { SharedGlobalConfig as SharedGlobalConfig_2 } from 'kibana/server';
 import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -312,7 +310,7 @@ export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 're
     // (undocumented)
     completion_status: number;
     // (undocumented)
-    _shards: ShardsResponse;
+    _shards: estypes.ShardStatistics;
 }
 
 // Warning: (ae-missing-release-tag) "BUCKET_TYPES" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1064,6 +1062,7 @@ export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest
     // (undocumented)
     asScoped: (request: KibanaRequest) => IScopedSearchClient;
     getSearchStrategy: (name?: string) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
+    searchAsInternalUser: ISearchStrategy;
     // (undocumented)
     searchSource: {
         asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
@@ -1486,6 +1485,7 @@ export const UI_SETTINGS: {
     readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
     readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
     readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
+    readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: "autocomplete:valueSuggestionMethod";
 };
 
 // Warning: (ae-missing-release-tag) "usageProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1532,7 +1532,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:223:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:224:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:81:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/search/types.ts:115:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/search/types.ts:120:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

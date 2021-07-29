@@ -172,6 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // reset to persisted state
+        await queryBar.clearQuery();
         await PageObjects.discover.clickResetSavedSearchButton();
         const expectedHitCount = '14,004';
         await retry.try(async function () {
