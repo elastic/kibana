@@ -48,6 +48,7 @@ export const Customize: React.FC = () => {
                   isInvalid={false}
                   required
                   value={orgNameInputValue}
+                  aria-label={CUSTOMIZE_NAME_LABEL}
                   data-test-subj="OrgNameInput"
                   onChange={(e) => onOrgNameInputChange(e.target.value)}
                 />
