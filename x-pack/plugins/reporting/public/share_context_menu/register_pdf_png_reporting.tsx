@@ -12,7 +12,18 @@ import { checkLicense } from '../lib/license_check';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 
-const getPdfJobParams = (opts: JobParamsProviderOptions) => () => {
+const getJobParams = (opts: JobParamsProviderOptions, type: 'pdf' | 'png') => () => {
+  const {
+    objectType,
+    sharingData: { title, layout },
+  } = opts;
+
+  const baseParams = {
+    objectType,
+    layout,
+    title,
+  };
+
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
@@ -20,27 +31,13 @@ const getPdfJobParams = (opts: JobParamsProviderOptions) => () => {
     ''
   );
 
-  return {
-    ...opts,
-    title: opts.sharingData.title,
-    layout: opts.sharingData.layout,
-    relativeUrls: [relativeUrl], // multi URL for PDF
-  };
-};
+  if (type === 'pdf') {
+    // multi URL for PDF
+    return { ...baseParams, relativeUrls: [relativeUrl] };
+  }
 
-const getPngJobParams = (opts: JobParamsProviderOptions) => () => {
-  // Replace hashes with original RISON values.
-  const relativeUrl = opts.shareableUrl.replace(
-    window.location.origin + opts.apiClient.getServerBasePath(),
-    ''
-  );
-
-  return {
-    ...opts,
-    title: opts.sharingData.title,
-    layout: opts.sharingData.layout,
-    relativeUrl, // single URL for PNG
-  };
+  // single URL for PNG
+  return { ...baseParams, relativeUrl };
 };
 
 export const reportingScreenshotShareProvider = ({
@@ -129,12 +126,15 @@ export const reportingScreenshotShareProvider = ({
             reportType="png"
             objectId={objectId}
             requiresSavedState={true}
-            getJobParams={getPngJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              sharingData,
-            })}
+            getJobParams={getJobParams(
+              {
+                shareableUrl,
+                apiClient,
+                objectType,
+                sharingData,
+              },
+              'png'
+            )}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -167,12 +167,15 @@ export const reportingScreenshotShareProvider = ({
             objectId={objectId}
             requiresSavedState={true}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getPdfJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              sharingData,
-            })}
+            getJobParams={getJobParams(
+              {
+                shareableUrl,
+                apiClient,
+                objectType,
+                sharingData,
+              },
+              'pdf'
+            )}
             isDirty={isDirty}
             onClose={onClose}
           />
