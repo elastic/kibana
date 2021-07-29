@@ -76,14 +76,15 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse) => {
     .concat(deprecations.node_settings);
 
   return combinedDeprecations.map((deprecation) => {
+    const { _meta: metadata, ...deprecationInfo } = deprecation;
     return {
-      ...deprecation,
-      correctiveAction: getCorrectiveAction(deprecation.message),
+      ...deprecationInfo,
+      correctiveAction: getCorrectiveAction(deprecation.message, metadata),
     };
   }) as EnrichedDeprecationInfo[];
 };
 
-const getCorrectiveAction = (message: string) => {
+const getCorrectiveAction = (message: string, metadata?: { [key: string]: string }) => {
   const indexSettingDeprecation = Object.values(indexSettingDeprecations).find(
     ({ deprecationMessage }) => deprecationMessage === message
   );
@@ -105,19 +106,12 @@ const getCorrectiveAction = (message: string) => {
   }
 
   if (requiresMlAction) {
-    // This logic is brittle, as we are expecting the message to be in a particular format to extract the snapshot ID and job ID
-    // Implementing https://github.com/elastic/elasticsearch/issues/73089 in ES should address this concern
-    const regex = /(?<=\[).*?(?=\])/g;
-    const matches = message.match(regex);
+    const { snapshot_id: snapshotId, job_id: jobId } = metadata!;
 
-    if (matches?.length === 2) {
-      return {
-        type: 'mlSnapshot',
-        snapshotId: matches[0],
-        jobId: matches[1],
-      };
-    }
+    return {
+      type: 'mlSnapshot',
+      snapshotId,
+      jobId,
+    };
   }
-
-  return undefined;
 };
