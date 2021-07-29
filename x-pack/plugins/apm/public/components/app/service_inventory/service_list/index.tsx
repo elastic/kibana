@@ -95,7 +95,7 @@ export function getServiceColumns({
       width: '40%',
       sortable: true,
       render: (_, { serviceName, agentName }) => (
-        <ToolTipWrapper>
+        <ToolTipWrapper data-test-subj="apmServiceListAppLink">
           <EuiToolTip
             delay="long"
             content={formatString(serviceName)}
