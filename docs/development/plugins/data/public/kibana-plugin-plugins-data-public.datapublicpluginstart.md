@@ -18,7 +18,7 @@ export interface DataPublicPluginStart
 |  --- | --- | --- |
 |  [actions](./kibana-plugin-plugins-data-public.datapublicpluginstart.actions.md) | <code>DataPublicPluginStartActions</code> | filter creation utilities [DataPublicPluginStartActions](./kibana-plugin-plugins-data-public.datapublicpluginstartactions.md) |
 |  [autocomplete](./kibana-plugin-plugins-data-public.datapublicpluginstart.autocomplete.md) | <code>AutocompleteStart</code> | autocomplete service [AutocompleteStart](./kibana-plugin-plugins-data-public.autocompletestart.md) |
-|  [fieldFormats](./kibana-plugin-plugins-data-public.datapublicpluginstart.fieldformats.md) | <code>FieldFormatsStart</code> | field formats service [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md) |
+|  [fieldFormats](./kibana-plugin-plugins-data-public.datapublicpluginstart.fieldformats.md) | <code>FieldFormatsStart</code> |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.datapublicpluginstart.indexpatterns.md) | <code>IndexPatternsContract</code> | index patterns service [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |
 |  [nowProvider](./kibana-plugin-plugins-data-public.datapublicpluginstart.nowprovider.md) | <code>NowProviderPublicContract</code> |  |
 |  [query](./kibana-plugin-plugins-data-public.datapublicpluginstart.query.md) | <code>QueryStart</code> | query service [QueryStart](./kibana-plugin-plugins-data-public.querystart.md) |

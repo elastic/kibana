@@ -5,6 +5,4 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { getFieldFormatsRegistry } from '../../field_formats/public/mocks';
-export { getStubIndexPattern, StubIndexPattern } from './index_patterns/index_pattern.stub';
+export * from '@kbn/field-types';

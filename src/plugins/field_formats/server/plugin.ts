@@ -14,12 +14,11 @@ import {
   Plugin,
   IUiSettingsClient,
 } from '../../../core/server';
-import { FieldFormatsPluginSetup, FieldFormatsPluginStart } from './types';
+import { FieldFormatsStart, FieldFormatsSetup } from './types';
 import { DateFormat, DateNanosFormat } from './lib/converters';
 import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
 
-export class FieldFormatsPlugin
-  implements Plugin<FieldFormatsPluginSetup, FieldFormatsPluginStart> {
+export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {
   private readonly fieldFormats: FieldFormatInstanceType[] = [
     DateFormat,
     DateNanosFormat,

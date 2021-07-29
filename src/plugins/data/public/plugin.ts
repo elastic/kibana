@@ -119,10 +119,9 @@ export class DataPublicPlugin
       }))
     );
 
-    const fieldFormats = this.fieldFormatsService.setup(core);
     fieldFormats.register(
       getAggsFormats((serializedFieldFormat) =>
-        startServices().self.fieldFormats.deserialize(serializedFieldFormat)
+        startServices().plugins.fieldFormats.deserialize(serializedFieldFormat)
       )
     );
 

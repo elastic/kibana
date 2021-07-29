@@ -13,4 +13,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new FieldFormatsPlugin(initializerContext);
 }
 
-export { FieldFormatsPluginSetup, FieldFormatsPluginStart } from './types';
+export { FieldFormatsSetup, FieldFormatsStart } from './types';

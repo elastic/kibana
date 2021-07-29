@@ -13,7 +13,6 @@
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
 |  [DataPlugin](./kibana-plugin-plugins-data-public.dataplugin.md) |  |
 |  [DuplicateIndexPatternError](./kibana-plugin-plugins-data-public.duplicateindexpatternerror.md) |  |
-|  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-public.indexpattern.md) |  |
 |  [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md) |  |
@@ -30,9 +29,7 @@
 |  Enumeration | Description |
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-public.bucket_types.md) |  |
-|  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.es_field_types.md) | \* |
 |  [IndexPatternType](./kibana-plugin-plugins-data-public.indexpatterntype.md) |  |
-|  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-public.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
 |  [SearchSessionState](./kibana-plugin-plugins-data-public.searchsessionstate.md) | Possible state that current session can be in |
@@ -66,7 +63,6 @@
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) | Data plugin public Start contract |
 |  [DataPublicPluginStartActions](./kibana-plugin-plugins-data-public.datapublicpluginstartactions.md) | utilities to generate filters from action context |
 |  [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) | Data plugin prewired UI components |
-|  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
@@ -106,8 +102,6 @@
 |  [AggGroupLabels](./kibana-plugin-plugins-data-public.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
 |  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-data-public.apply_filter_trigger.md) |  |
-|  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
-|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.es_search_strategy.md) |  |
@@ -116,11 +110,9 @@
 |  [esQuery](./kibana-plugin-plugins-data-public.esquery.md) |  |
 |  [exporters](./kibana-plugin-plugins-data-public.exporters.md) |  |
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
-|  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
 |  [FilterItem](./kibana-plugin-plugins-data-public.filteritem.md) |  |
 |  [FilterLabel](./kibana-plugin-plugins-data-public.filterlabel.md) |  |
-|  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-public.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
@@ -161,17 +153,11 @@
 |  [ExpressionFunctionKibana](./kibana-plugin-plugins-data-public.expressionfunctionkibana.md) |  |
 |  [ExpressionFunctionKibanaContext](./kibana-plugin-plugins-data-public.expressionfunctionkibanacontext.md) |  |
 |  [ExpressionValueSearchContext](./kibana-plugin-plugins-data-public.expressionvaluesearchcontext.md) |  |
-|  [FieldFormatId](./kibana-plugin-plugins-data-public.fieldformatid.md) |  id type is needed for creating custom converters. |
-|  [FieldFormatsContentType](./kibana-plugin-plugins-data-public.fieldformatscontenttype.md) | \* |
-|  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-public.fieldformatsgetconfigfn.md) |  |
-|  [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-public.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-public.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
 |  [IAggType](./kibana-plugin-plugins-data-public.iaggtype.md) |  |
 |  [IEsError](./kibana-plugin-plugins-data-public.ieserror.md) |  |
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-public.iessearchresponse.md) |  |
-|  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
-|  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-public.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |

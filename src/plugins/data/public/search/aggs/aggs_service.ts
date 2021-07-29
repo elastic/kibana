@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsStart } from '../../../../field_formats/public';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,

@@ -9,7 +9,7 @@
 import { FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
 import { IUiSettingsClient } from '../../../core/server';
 
-export interface FieldFormatsPluginSetup {
+export interface FieldFormatsSetup {
   /**
    * Register a server side field formatter
    * @param fieldFormat {@link FieldFormatInstanceType}
@@ -17,7 +17,7 @@ export interface FieldFormatsPluginSetup {
   register: (fieldFormat: FieldFormatInstanceType) => void;
 }
 
-export interface FieldFormatsPluginStart {
+export interface FieldFormatsStart {
   /**
    * Create a field format registry
    * @param uiSettings - {@link IUiSettingsClient}

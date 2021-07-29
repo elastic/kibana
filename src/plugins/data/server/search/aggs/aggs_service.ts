@@ -22,7 +22,7 @@ import {
   calculateBounds,
   TimeRange,
 } from '../../../common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsStart } from '../../../../field_formats/server';
 import { IndexPatternsServiceStart } from '../../index_patterns';
 import { AggsSetup, AggsStart } from './types';
 

@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getFieldFormatsRegistry } from '../../field_formats/public/mocks';
-export { getStubIndexPattern, StubIndexPattern } from './index_patterns/index_pattern.stub';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/field_formats'],
+};
