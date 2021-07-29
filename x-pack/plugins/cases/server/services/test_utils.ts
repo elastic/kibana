@@ -6,7 +6,7 @@
  */
 
 import { ESConnectorFields } from '.';
-import { CaseConnector, ConnectorTypes } from '../../common';
+import { CaseConnector, CaseFullExternalService, ConnectorTypes } from '../../common';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -64,3 +64,20 @@ export const createJiraConnector = (setFieldsToNull?: boolean): CaseConnector =>
         },
   };
 };
+
+export const createExternalService = (
+  overrides?: Partial<CaseFullExternalService>
+): CaseFullExternalService => ({
+  connector_id: '100',
+  connector_name: '.jira',
+  external_id: '100',
+  external_title: 'awesome',
+  external_url: 'http://www.google.com',
+  pushed_at: '2019-11-25T21:54:48.952Z',
+  pushed_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  ...(overrides && { ...overrides }),
+});

@@ -28,7 +28,12 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { getNoneCaseConnector } from '../../common';
 import { CasesService, ESCaseAttributes } from '.';
-import { createESConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
+import {
+  createESConnector,
+  createJiraConnector,
+  ESCaseConnectorWithId,
+  createExternalService,
+} from '../test_utils';
 
 const basicCaseFields = {
   closed_at: null,
@@ -156,22 +161,7 @@ const createSOResponse = ({
   };
 };
 
-const createExternalService = (
-  overrides?: Partial<CaseFullExternalService>
-): CaseFullExternalService => ({
-  connector_id: '100',
-  connector_name: '.jira',
-  external_id: '100',
-  external_title: 'awesome',
-  external_url: 'http://www.google.com',
-  pushed_at: '2019-11-25T21:54:48.952Z',
-  pushed_by: {
-    full_name: 'elastic',
-    email: 'testemail@elastic.co',
-    username: 'elastic',
-  },
-  ...(overrides && { ...overrides }),
-});
+// exporting for other tests
 
 const createFindSO = (
   params: {

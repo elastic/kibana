@@ -128,9 +128,18 @@ function buildReferences(
     connectorId && connectorId !== noneConnectorId
       ? [{ id: connectorId, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE }]
       : [];
-  const pushConnectorRef = pushConnectorId
-    ? [{ id: pushConnectorId, name: pushConnectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE }]
-    : [];
+
+  // I doubt the push connector will ever be `none` but we'll check just in case
+  const pushConnectorRef =
+    pushConnectorId && pushConnectorId !== noneConnectorId
+      ? [
+          {
+            id: pushConnectorId,
+            name: pushConnectorIdReferenceName,
+            type: ACTION_SAVED_OBJECT_TYPE,
+          },
+        ]
+      : [];
 
   const references = [...connectorRef, ...pushConnectorRef];
 
