@@ -8,9 +8,9 @@
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicAlertInstance } from './alert_instance';
-import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
+import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { AlertsClient } from './alerts_client';
+import { RulesClient } from './rules_client';
 export * from '../common';
 import {
   IScopedClusterClient,
@@ -44,8 +44,8 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
-  getAlertsClient: () => AlertsClient;
-  listTypes: AlertTypeRegistry['list'];
+  getRulesClient: () => RulesClient;
+  listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
 }
@@ -252,4 +252,4 @@ export interface InvalidatePendingApiKey {
   createdAt: string;
 }
 
-export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;
+export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
