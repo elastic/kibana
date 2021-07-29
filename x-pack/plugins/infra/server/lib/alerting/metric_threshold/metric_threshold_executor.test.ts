@@ -157,7 +157,7 @@ describe('The metric threshold alert type', () => {
   });
 
   describe('querying with a groupBy parameter', () => {
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -201,12 +201,14 @@ describe('The metric threshold alert type', () => {
       comparator: Comparator,
       thresholdA: number[],
       thresholdB: number[],
-      groupBy: string = ''
+      groupBy: string = '',
+      sourceId: string = 'default'
     ) =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           groupBy,
           criteria: [
             {
@@ -256,18 +258,17 @@ describe('The metric threshold alert type', () => {
   });
   describe('querying with the count aggregator', () => {
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...baseCountCriterion,
               comparator,
               threshold,
-              aggType: 'count',
-              metric: undefined,
             } as CountMetricExpressionParams,
           ],
         },
@@ -281,7 +282,7 @@ describe('The metric threshold alert type', () => {
   });
   describe('querying with the p99 aggregator', () => {
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -291,7 +292,7 @@ describe('The metric threshold alert type', () => {
               ...baseNonCountCriterion,
               comparator,
               threshold,
-              aggType: 'p99',
+              aggType: Aggregators.P99,
               metric: 'test.metric.2',
             },
           ],
@@ -306,17 +307,18 @@ describe('The metric threshold alert type', () => {
   });
   describe('querying with the p95 aggregator', () => {
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
               ...baseNonCountCriterion,
               comparator,
               threshold,
-              aggType: 'p95',
+              aggType: Aggregators.P95,
               metric: 'test.metric.1',
             },
           ],
@@ -331,16 +333,17 @@ describe('The metric threshold alert type', () => {
   });
   describe("querying a metric that hasn't reported data", () => {
     const instanceID = '*';
-    const execute = (alertOnNoData: boolean) =>
+    const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
               ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: 1,
+              threshold: [1],
               metric: 'test.metric.3',
             },
           ],
@@ -359,7 +362,7 @@ describe('The metric threshold alert type', () => {
 
   describe("querying a rate-aggregated metric that hasn't reported data", () => {
     const instanceID = '*';
-    const execute = () =>
+    const execute = (sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -368,9 +371,9 @@ describe('The metric threshold alert type', () => {
             {
               ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: 1,
+              threshold: [1],
               metric: 'test.metric.3',
-              aggType: 'rate',
+              aggType: Aggregators.RATE,
             },
           ],
           alertOnNoData: true,
@@ -398,7 +401,7 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
               threshold,
             },
