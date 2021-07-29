@@ -35,7 +35,7 @@ describe('Swimlane Service', () => {
   const config = {
     apiUrl: 'https://test.swimlane.com/',
     appId: 'bcq16kdTbz5jlwM6h',
-    connectorType: 'all',
+    connectorType: 'all' as const,
     mappings,
   };
   const apiToken = 'token';

@@ -10,21 +10,21 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
-import { getAlertType as getLogsAlertType } from './alerting/log_threshold';
+import { createLogThresholdAlertType } from './alerting/log_threshold';
+import { createMetricThresholdAlertType } from './alerting/metric_threshold';
+import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
+import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
+import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import {
-  InfraClientSetupDeps,
-  InfraClientStartDeps,
   InfraClientCoreSetup,
   InfraClientCoreStart,
   InfraClientPluginClass,
+  InfraClientSetupDeps,
+  InfraClientStartDeps,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
-import { createMetricsHasData, createMetricsFetchData } from './metrics_overview_fetchers';
-import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
-import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 
 export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
@@ -34,9 +34,14 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createInventoryMetricAlertType()
+    );
+
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdAlertType()
+    );
+    pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(createMetricThresholdAlertType());
 
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',

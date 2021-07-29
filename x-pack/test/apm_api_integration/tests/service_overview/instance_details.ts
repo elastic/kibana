@@ -10,11 +10,14 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { getServiceNodeIds } from './get_service_node_ids';
+import { createApmApiSupertest } from '../../common/apm_api_supertest';
 
 type ServiceOverviewInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const apmApiSupertest = createApmApiSupertest(supertest);
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -31,7 +34,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
-                transactionType: 'request',
               },
             })
           );
@@ -53,15 +55,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           body: ServiceOverviewInstanceDetails;
         };
 
+        let serviceNodeIds: string[];
+
         before(async () => {
+          serviceNodeIds = await getServiceNodeIds({ apmApiSupertest, start, end });
           response = await supertest.get(
             url.format({
-              pathname:
-                '/api/apm/services/opbeans-java/service_overview_instances/details/02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c',
+              pathname: `/api/apm/services/opbeans-java/service_overview_instances/details/${serviceNodeIds[0]}`,
               query: {
                 start,
                 end,
-                transactionType: 'request',
               },
             })
           );
@@ -89,7 +92,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              transactionType: 'request',
             },
           })
         );

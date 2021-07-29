@@ -219,8 +219,14 @@ export const useDashboardAppState = ({
           const unsavedChanges =
             current.viewMode === ViewMode.EDIT ? diffDashboardState(lastSaved, current) : {};
 
+          let savedTimeChanged = false;
+
+          /**
+           * changes to the time filter should only be considered 'unsaved changes' when
+           * editing the dashboard
+           */
           if (current.viewMode === ViewMode.EDIT) {
-            const savedTimeChanged =
+            savedTimeChanged =
               lastSaved.timeRestore &&
               !areTimeRangesEqual(
                 {
@@ -229,9 +235,9 @@ export const useDashboardAppState = ({
                 },
                 timefilter.getTime()
               );
-            const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
-            setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
           }
+          const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
+          setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
           unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
           dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);

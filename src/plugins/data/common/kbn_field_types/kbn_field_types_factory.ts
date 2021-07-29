@@ -22,6 +22,7 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
       ES_FIELD_TYPES.STRING,
       ES_FIELD_TYPES.TEXT,
       ES_FIELD_TYPES.KEYWORD,
+      ES_FIELD_TYPES.VERSION,
       ES_FIELD_TYPES._TYPE,
       ES_FIELD_TYPES._ID,
     ],

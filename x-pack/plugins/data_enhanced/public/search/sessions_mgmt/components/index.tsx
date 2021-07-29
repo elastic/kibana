@@ -20,9 +20,9 @@ export const TableText = ({ children, ...props }: EuiTextProps) => {
 };
 
 export interface IClickActionDescriptor {
-  label: string | React.ReactElement;
+  label: React.ReactNode;
   iconType: 'trash' | 'cancel' | typeof extendSessionIcon;
-  textColor: EuiTextProps['color'];
+  onClick: () => Promise<void> | void;
 }
 
 export interface IHrefActionDescriptor {

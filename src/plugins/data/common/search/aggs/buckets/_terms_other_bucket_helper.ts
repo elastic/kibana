@@ -8,7 +8,7 @@
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
-import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IBucketAggConfig } from './bucket_agg_type';

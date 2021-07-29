@@ -2,16 +2,30 @@
 
 ## Overview
 
-This plugin's goal is to provide a Kibana user interface to the Enterprise Search solution's products (App Search and Workplace Search). In it's current MVP state, the plugin provides the following with the goal of gathering user feedback and raising product awareness:
+This plugin provides beta Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
-- **App Search:** A basic engines overview with links into the product.
-- **Workplace Search:** A simple app overview with basic statistics, links to the sources, users (if standard auth), and product settings.
+> :warning: The Kibana interface for Enterprise Search is a beta feature. It is subject to change and is not covered by the same level of support as generally available features. This interface will become the sole management panel for Enterprise Search with the 8.0 release. Until then, the standalone Enterprise Search UI remains available and supported.
+
+### App Search
+
+<img src="./public/applications/enterprise_search/assets/app_search.png" width="400" height="255">
+
+Add rich, relevant search to your apps and websites. https://www.elastic.co/app-search/
+
+### Workplace Search
+
+<img src="./public/applications/enterprise_search/assets/workplace_search.png" width="400" height="255">
+
+Unify all your team's content into a personalized search experience. https://www.elastic.co/workplace-search/
 
 ## Development
 
 1. When developing locally, Enterprise Search should be running locally alongside Kibana on `localhost:3002`.
 2. Update `config/kibana.dev.yml` with `enterpriseSearch.host: 'http://localhost:3002'`
-3. For faster QA/development, run Enterprise Search on [elasticsearch-native auth](https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm) and log in as the `elastic` superuser on Kibana.
+
+Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/enterprise-search-frontend for questions or our in-depth Getting Started developer guide.
+
+Don't forget to read Kibana's [contributing documentation](https://github.com/elastic/kibana/#building-and-running-kibana-andor-contributing-code) and developer guides for more general info on the Kibana ecosystem.
 
 ### Kea
 
@@ -53,3 +67,5 @@ sh jest.sh public/applications/shared/flash_messages/flash_messages_logic.test.t
 ### E2E tests
 
 See [our functional test runner README](../../test/functional_enterprise_search).
+
+Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/enterprise_search.ts).

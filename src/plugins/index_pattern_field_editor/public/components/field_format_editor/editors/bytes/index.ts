@@ -5,5 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { formatId } from './constants';
+import { FieldFormatEditorFactory } from '../types';
 
-export { BytesFormatEditor } from './bytes';
+export type { BytesFormatEditor } from './bytes';
+export const bytesFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./bytes').then((m) => m.BytesFormatEditor);
+bytesFormatEditorFactory.formatId = formatId;

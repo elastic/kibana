@@ -125,7 +125,7 @@ export const overallMetric: ExpressionFunctionOverallMetric = {
     const valueCounter: Partial<Record<string, number>> = {};
     input.rows.forEach((row) => {
       const bucketIdentifier = getBucketIdentifier(row, by);
-      const accumulatorValue = accumulators[bucketIdentifier] ?? 0;
+      const accumulatorValue = accumulators[bucketIdentifier];
 
       const currentValue = row[inputColumnId];
       if (currentValue != null) {
@@ -135,22 +135,35 @@ export const overallMetric: ExpressionFunctionOverallMetric = {
             valueCounter[bucketIdentifier] =
               (valueCounter[bucketIdentifier] ?? 0) + currentNumberValues.length;
           case 'sum':
-            accumulators[bucketIdentifier] =
-              accumulatorValue + currentNumberValues.reduce((a, b) => a + b, 0);
+            accumulators[bucketIdentifier] = currentNumberValues.reduce(
+              (a, b) => a + b,
+              accumulatorValue || 0
+            );
             break;
           case 'min':
-            accumulators[bucketIdentifier] = Math.min(accumulatorValue, ...currentNumberValues);
+            if (typeof accumulatorValue !== 'undefined') {
+              accumulators[bucketIdentifier] = Math.min(accumulatorValue, ...currentNumberValues);
+            } else {
+              accumulators[bucketIdentifier] = Math.min(...currentNumberValues);
+            }
             break;
           case 'max':
-            accumulators[bucketIdentifier] = Math.max(accumulatorValue, ...currentNumberValues);
+            if (typeof accumulatorValue !== 'undefined') {
+              accumulators[bucketIdentifier] = Math.max(accumulatorValue, ...currentNumberValues);
+            } else {
+              accumulators[bucketIdentifier] = Math.max(...currentNumberValues);
+            }
             break;
         }
       }
     });
     if (metric === 'average') {
       Object.keys(accumulators).forEach((bucketIdentifier) => {
-        accumulators[bucketIdentifier] =
-          accumulators[bucketIdentifier]! / valueCounter[bucketIdentifier]!;
+        const accumulatorValue = accumulators[bucketIdentifier];
+        const valueCount = valueCounter[bucketIdentifier];
+        if (typeof accumulatorValue !== 'undefined' && typeof valueCount !== 'undefined') {
+          accumulators[bucketIdentifier] = accumulatorValue / valueCount;
+        }
       });
     }
     return {

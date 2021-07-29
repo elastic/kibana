@@ -6,11 +6,14 @@
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
+import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
+import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
+import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
@@ -26,6 +29,7 @@ interface Aggregation {
       aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
       doc_count: number;
       to_as_string: string;
+      from_as_string: string;
       key_as_string: string;
     }>;
   };
@@ -92,6 +96,8 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   );
 };
 
+const MINIMUM_BUCKETS = 5;
+
 const getMetric: (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
@@ -109,14 +115,34 @@ const getMetric: (
   filterQuery,
   timeframe
 ) {
-  const { aggType } = params;
+  const { aggType, timeSize, timeUnit } = params;
   const hasGroupBy = groupBy && groupBy.length;
+
+  const interval = `${timeSize}${timeUnit}`;
+  const intervalAsSeconds = getIntervalInSeconds(interval);
+  const intervalAsMS = intervalAsSeconds * 1000;
+
+  const to = moment(timeframe ? timeframe.end : Date.now())
+    .add(1, timeUnit)
+    .startOf(timeUnit)
+    .valueOf();
+
+  // We need enough data for 5 buckets worth of data. We also need
+  // to convert the intervalAsSeconds to milliseconds.
+  // TODO: We only need to get 5 buckets for the rate query, so this logic should move there.
+  const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
+
+  const from = roundTimestamp(
+    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
+    timeUnit
+  );
+
   const searchBody = getElasticsearchMetricQuery(
     params,
     timefield,
+    { start: from, end: to },
     hasGroupBy ? groupBy : undefined,
-    filterQuery,
-    timeframe
+    filterQuery
   );
 
   try {
@@ -140,7 +166,11 @@ const getMetric: (
           ...result,
           [Object.values(bucket.key)
             .map((value) => value)
-            .join(', ')]: getValuesFromAggregations(bucket, aggType),
+            .join(', ')]: getValuesFromAggregations(bucket, aggType, {
+            from,
+            to,
+            bucketSizeInMillis: intervalAsMS,
+          }),
         }),
         {}
       );
@@ -153,7 +183,8 @@ const getMetric: (
     return {
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
         (result.aggregations! as unknown) as Aggregation,
-        aggType
+        aggType,
+        { from, to, bucketSizeInMillis: intervalAsMS }
       ),
     };
   } catch (e) {
@@ -173,16 +204,35 @@ const getMetric: (
   }
 };
 
+interface DropPartialBucketOptions {
+  from: number;
+  to: number;
+  bucketSizeInMillis: number;
+}
+
+const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) => (
+  row: {
+    key: string;
+    value: number;
+  } | null
+) => {
+  if (row == null) return null;
+  const timestamp = new Date(row.key).valueOf();
+  return timestamp >= from && timestamp + bucketSizeInMillis <= to;
+};
+
 const getValuesFromAggregations = (
   aggregations: Aggregation,
-  aggType: MetricExpressionParams['aggType']
+  aggType: MetricExpressionParams['aggType'],
+  dropPartialBucketsOptions: DropPartialBucketOptions
 ) => {
   try {
     const { buckets } = aggregations.aggregatedIntervals;
     if (!buckets.length) return null; // No Data state
+
     if (aggType === Aggregators.COUNT) {
       return buckets.map((bucket) => ({
-        key: bucket.to_as_string,
+        key: bucket.from_as_string,
         value: bucket.doc_count,
       }));
     }
@@ -191,11 +241,28 @@ const getValuesFromAggregations = (
         const values = bucket.aggregatedValue?.values || [];
         const firstValue = first(values);
         if (!firstValue) return null;
-        return { key: bucket.to_as_string, value: firstValue.value };
+        return { key: bucket.from_as_string, value: firstValue.value };
       });
     }
+
+    if (aggType === Aggregators.AVERAGE) {
+      return buckets.map((bucket) => ({
+        key: bucket.key_as_string ?? bucket.from_as_string,
+        value: bucket.aggregatedValue?.value ?? null,
+      }));
+    }
+
+    if (aggType === Aggregators.RATE) {
+      return buckets
+        .map((bucket) => ({
+          key: bucket.key_as_string ?? bucket.from_as_string,
+          value: bucket.aggregatedValue?.value ?? null,
+        }))
+        .filter(dropPartialBuckets(dropPartialBucketsOptions));
+    }
+
     return buckets.map((bucket) => ({
-      key: bucket.key_as_string ?? bucket.to_as_string,
+      key: bucket.key_as_string ?? bucket.from_as_string,
       value: bucket.aggregatedValue?.value ?? null,
     }));
   } catch (e) {

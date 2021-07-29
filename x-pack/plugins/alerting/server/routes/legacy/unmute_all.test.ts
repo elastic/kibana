@@ -9,10 +9,10 @@ import { unmuteAllAlertRoute } from './unmute_all';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { alertsClientMock } from '../../alerts_client.mock';
+import { rulesClientMock } from '../../rules_client.mock';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -32,10 +32,10 @@ describe('unmuteAllAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_unmute_all"`);
 
-    alertsClient.unmuteAll.mockResolvedValueOnce();
+    rulesClient.unmuteAll.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           id: '1',
@@ -46,8 +46,8 @@ describe('unmuteAllAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(alertsClient.unmuteAll).toHaveBeenCalledTimes(1);
-    expect(alertsClient.unmuteAll.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.unmuteAll).toHaveBeenCalledTimes(1);
+    expect(rulesClient.unmuteAll.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -66,9 +66,9 @@ describe('unmuteAllAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.unmuteAll.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.unmuteAll.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);

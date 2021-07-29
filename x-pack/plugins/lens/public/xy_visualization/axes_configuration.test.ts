@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LayerArgs } from './types';
+import { LayerArgs } from '../../common/expressions';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
 

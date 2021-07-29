@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newThreatIndicatorRule } from '../../objects/rule';
+import { getNewThreatIndicatorRule } from '../../objects/rule';
 import { cleanKibana, reload } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -15,7 +15,7 @@ import {
   TABLE_ROWS,
   THREAT_CONTENT,
   THREAT_DETAILS_VIEW,
-  THREAT_INTEL_TAB,
+  ENRICHMENT_COUNT_NOTIFICATION,
   THREAT_SUMMARY_VIEW,
   TITLE,
 } from '../../screens/alerts_details';
@@ -39,7 +39,7 @@ describe('CTI Enrichment', () => {
     esArchiverLoad('suspicious_source_event');
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     goToManageAlertsDetectionRules();
-    createCustomIndicatorRule(newThreatIndicatorRule);
+    createCustomIndicatorRule(getNewThreatIndicatorRule());
     reload();
   });
 
@@ -56,9 +56,9 @@ describe('CTI Enrichment', () => {
 
   it('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
-      'threat.indicator.matched.atomic': newThreatIndicatorRule.atomic,
+      'threat.indicator.matched.atomic': getNewThreatIndicatorRule().atomic,
       'threat.indicator.matched.type': 'indicator_match_rule',
-      'threat.indicator.matched.field': newThreatIndicatorRule.indicatorMappingField,
+      'threat.indicator.matched.field': getNewThreatIndicatorRule().indicatorMappingField,
     };
     const fields = Object.keys(expectedFields) as Array<keyof typeof expectedFields>;
 
@@ -141,7 +141,7 @@ describe('CTI Enrichment', () => {
     expandFirstAlert();
     openThreatIndicatorDetails();
 
-    cy.get(THREAT_INTEL_TAB).should('have.text', 'Threat Intel (1)');
+    cy.get(ENRICHMENT_COUNT_NOTIFICATION).should('have.text', '1');
     cy.get(THREAT_DETAILS_VIEW).within(() => {
       cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
       expectedThreatIndicatorData.forEach((row, index) => {
@@ -155,7 +155,8 @@ describe('CTI Enrichment', () => {
     });
   });
 
-  describe('with additional indicators', () => {
+  // https://github.com/elastic/kibana/pull/106889
+  describe.skip('with additional indicators', () => {
     before(() => {
       esArchiverLoad('threat_indicator2');
     });

@@ -39,6 +39,7 @@ import type {
   TransformedDocumentsBulkIndex,
   ReindexSourceToTempIndexBulk,
   CheckUnknownDocumentsState,
+  CalculateExcludeFiltersState,
 } from '../types';
 import { SavedObjectsRawDoc } from '../../serialization';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../../migrations/core';
@@ -91,6 +92,7 @@ describe('migrations v2 model', () => {
       },
     },
     knownTypes: ['dashboard', 'config'],
+    excludeFromUpgradeFilterHooks: {},
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -715,7 +717,7 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs are found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -723,7 +725,7 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({});
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({ unknownDocs: [] });
         const newState = model(checkUnknownDocumentsSourceState, res);
         expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
@@ -758,9 +760,12 @@ describe('migrations v2 model', () => {
             },
           }
         `);
+
+        // No log message gets appended
+        expect(newState.logs).toEqual([]);
       });
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action fails and unknown docs were found', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK and adds log if action succeeds and unknown docs were found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -768,20 +773,51 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.left({
-          type: 'unknown_docs_found',
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
           unknownDocs: [
             { id: 'dashboard:12', type: 'dashboard' },
             { id: 'foo:17', type: 'foo' },
           ],
         });
         const newState = model(checkUnknownDocumentsSourceState, res);
-        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
         expect(newState).toMatchObject({
-          controlState: 'FATAL',
-          reason: expect.stringContaining(
-            'Migration failed because documents were found for unknown saved object types'
+          controlState: 'SET_SOURCE_WRITE_BLOCK',
+          sourceIndex: Option.some('.kibana_3'),
+          targetIndex: '.kibana_7.11.0_001',
+        });
+
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
+
+        expect(newState.logs[0]).toMatchObject({
+          level: 'warning',
+          message: expect.stringContaining(
+            'Upgrades will fail for 8.0+ because documents were found for unknown saved object types'
           ),
         });
       });
@@ -805,14 +841,69 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('SET_SOURCE_WRITE_BLOCK -> CREATE_REINDEX_TEMP if action succeeds with set_write_block_succeeded', () => {
+      test('SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
           'set_write_block_succeeded'
         );
         const newState = model(setWriteBlockState, res);
-        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
+        expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+    });
+
+    describe('CALCULATE_EXCLUDE_FILTERS', () => {
+      const state: CalculateExcludeFiltersState = {
+        ...baseState,
+        controlState: 'CALCULATE_EXCLUDE_FILTERS',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        tempIndexMappings: { properties: {} },
+      };
+      test('CALCULATE_EXCLUDE_FILTERS -> CALCULATE_EXCLUDE_FILTERS if action fails with retryable error', () => {
+        const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.left({
+          type: 'retryable_es_client_error',
+          message: 'Something temporarily broke!',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
+      });
+      test('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
+        const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
+          excludeFilter: { bool: { must: { term: { fieldA: 'abc' } } } },
+          errorsByType: { type1: new Error('an error!') },
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
+        expect(newState.unusedTypesQuery).toEqual({
+          // New filter should be combined unused type query and filter from response
+          bool: {
+            filter: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      term: {
+                        type: 'unused-fleet-agent-events',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: { must: { term: { fieldA: 'abc' } } },
+              },
+            ],
+          },
+        });
+        // Logs should be added for any errors encountered from excludeOnUpgrade hooks
+        expect(newState.logs).toEqual([
+          {
+            level: 'warning',
+            message: `Ignoring excludeOnUpgrade hook on type [type1] that failed with error: "Error: an error!"`,
+          },
+        ]);
       });
     });
 
