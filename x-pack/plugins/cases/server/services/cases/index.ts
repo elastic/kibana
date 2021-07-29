@@ -55,7 +55,7 @@ import {
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
 import { defaultPage, defaultPerPage } from '../../routes/api';
-import { ClientArgs, ESCaseConnectorNoID } from '..';
+import { ClientArgs, ESCaseConnector } from '..';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
@@ -242,7 +242,7 @@ export type ExternalServicesWithoutConnectorID = Omit<
  * Instead those fields will be transformed into the references field.
  */
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> & {
-  connector: ESCaseConnectorNoID;
+  connector: ESCaseConnector;
   external_service: ExternalServicesWithoutConnectorID | null;
 };
 

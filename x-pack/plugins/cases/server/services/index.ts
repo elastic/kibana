@@ -25,14 +25,6 @@ export type ESConnectorFields = Array<{
 }>;
 
 export interface ESCaseConnector {
-  id: string;
-  name: string;
-  type: ConnectorTypes;
-  fields: ESConnectorFields | null;
-}
-
-// TODO: clean up
-export interface ESCaseConnectorNoID {
   name: string;
   type: ConnectorTypes;
   fields: ESConnectorFields | null;

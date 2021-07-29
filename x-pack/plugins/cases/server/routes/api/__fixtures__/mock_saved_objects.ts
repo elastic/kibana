@@ -180,38 +180,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
   },
 ];
 
-export const mockCaseNoConnectorId: SavedObject<Partial<CaseAttributes>> = {
-  type: 'cases',
-  id: 'mock-no-connector_id',
-  attributes: {
-    closed_at: null,
-    closed_by: null,
-    created_at: '2019-11-25T21:54:48.952Z',
-    created_by: {
-      full_name: 'elastic',
-      email: 'testemail@elastic.co',
-      username: 'elastic',
-    },
-    description: 'This is a brand new case of a bad meanie defacing data',
-    external_service: null,
-    title: 'Super Bad Security Issue',
-    status: CaseStatuses.open,
-    tags: ['defacement'],
-    updated_at: '2019-11-25T21:54:48.952Z',
-    updated_by: {
-      full_name: 'elastic',
-      email: 'testemail@elastic.co',
-      username: 'elastic',
-    },
-    settings: {
-      syncAlerts: true,
-    },
-  },
-  references: [],
-  updated_at: '2019-11-25T21:54:48.952Z',
-  version: 'WzAsMV0=',
-};
-
 export const mockCasesErrorTriggerData = [
   {
     id: 'valid-id',

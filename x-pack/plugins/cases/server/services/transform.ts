@@ -9,7 +9,7 @@ import { SavedObjectReference } from 'kibana/server';
 import { CaseConnector, ConnectorTypeFields } from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 import { getNoneCaseConnector } from '../common';
-import { ESCaseConnectorNoID, ESConnectorFields } from '.';
+import { ESCaseConnector, ESConnectorFields } from '.';
 
 export function findConnectorIDReference(
   name: string,
@@ -19,7 +19,7 @@ export function findConnectorIDReference(
 }
 
 export function transformESConnector(
-  connector: ESCaseConnectorNoID | undefined,
+  connector: ESCaseConnector | undefined,
   references: SavedObjectReference[] | undefined,
   referenceName: string
 ): CaseConnector | undefined {
@@ -28,7 +28,7 @@ export function transformESConnector(
 }
 
 function formatStoredConnectorFields(
-  connector?: ESCaseConnectorNoID,
+  connector?: ESCaseConnector,
   connectorID?: string
 ): CaseConnector | undefined {
   if (!connector) {
@@ -64,7 +64,7 @@ function formatStoredConnectorFields(
 }
 
 export function transformESConnectorOrUseDefault(
-  connector: ESCaseConnectorNoID | undefined,
+  connector: ESCaseConnector | undefined,
   references: SavedObjectReference[] | undefined,
   referenceName: string
 ): CaseConnector {

@@ -13,12 +13,13 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 import { getNoneCaseConnector } from '../../common';
-import { connectorIDReferenceName, ESCaseConnector } from '../../services';
+import { connectorIDReferenceName } from '../../services';
+import { ESCaseConnectorWithId } from '../../services/test_utils';
 import { ESCasesConfigureAttributes } from '../../services/configure';
 import { configureConnectorIdMigration } from './configuration';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const create_7_14_0_configSchema = (connector?: ESCaseConnector) => ({
+const create_7_14_0_configSchema = (connector?: ESCaseConnectorWithId) => ({
   type: CASE_CONFIGURE_SAVED_OBJECT,
   id: '1',
   attributes: {

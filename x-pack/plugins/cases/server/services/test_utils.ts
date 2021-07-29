@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { ESCaseConnector } from '.';
+import { ESConnectorFields } from '.';
 import { CaseConnector, ConnectorTypes } from '../../common';
+
+/**
+ * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
+ * have the id field. Instead it will be moved to the references array.
+ */
+export interface ESCaseConnectorWithId {
+  id: string;
+  name: string;
+  type: ConnectorTypes;
+  fields: ESConnectorFields | null;
+}
 
 /**
  * This file contains utility functions to aid unit test development
@@ -18,7 +29,9 @@ import { CaseConnector, ConnectorTypes } from '../../common';
  * @param overrides fields used to override the default jira connector
  * @returns a jira Elasticsearch connector (it has key value pairs for the fields) by default
  */
-export const createESConnector = (overrides?: Partial<ESCaseConnector>): ESCaseConnector => {
+export const createESConnector = (
+  overrides?: Partial<ESCaseConnectorWithId>
+): ESCaseConnectorWithId => {
   return {
     id: '1',
     name: ConnectorTypes.jira,

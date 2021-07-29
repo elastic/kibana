@@ -22,7 +22,7 @@ import {
   noneConnectorId,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { connectorIDReferenceName, ESCaseConnectorNoID } from '..';
+import { connectorIDReferenceName, ESCaseConnector } from '..';
 import {
   transformFieldsToESModel,
   transformESConnector,
@@ -55,7 +55,7 @@ interface PatchCaseConfigureArgs extends ClientArgs {
  * out in ES.
  */
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
-  connector: ESCaseConnectorNoID;
+  connector: ESCaseConnector;
 };
 
 export class CaseConfigureService {

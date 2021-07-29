@@ -23,12 +23,12 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { connectorIDReferenceName, ESCaseConnector, pushConnectorIDReferenceName } from '..';
+import { connectorIDReferenceName, pushConnectorIDReferenceName } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { getNoneCaseConnector } from '../../common';
 import { CasesService, ESCaseAttributes } from '.';
-import { createESConnector, createJiraConnector } from '../test_utils';
+import { createESConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
 
 const basicCaseFields = {
   closed_at: null,
@@ -60,7 +60,7 @@ const createReferences = ({
   connector,
   externalService,
 }: {
-  connector?: ESCaseConnector;
+  connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
 } = {}): SavedObjectReference[] => [
   ...(connector && connector.id !== noneConnectorId
@@ -87,7 +87,7 @@ const createUpdateSOResponse = ({
   connector,
   externalService,
 }: {
-  connector?: ESCaseConnector;
+  connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
 } = {}): SavedObjectsUpdateResponse<ESCaseAttributes> => {
   const references: SavedObjectReference[] = createReferences({ connector, externalService });
@@ -118,7 +118,7 @@ const createSOResponse = ({
   connector,
   externalService,
 }: {
-  connector?: ESCaseConnector;
+  connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
 } = {}): SavedObject<ESCaseAttributes> => {
   const references: SavedObjectReference[] = createReferences({ connector, externalService });
@@ -175,7 +175,7 @@ const createExternalService = (
 
 const createFindSO = (
   params: {
-    connector?: ESCaseConnector;
+    connector?: ESCaseConnectorWithId;
     externalService?: CaseFullExternalService;
   } = {}
 ): SavedObjectsFindResult<ESCaseAttributes> => ({
