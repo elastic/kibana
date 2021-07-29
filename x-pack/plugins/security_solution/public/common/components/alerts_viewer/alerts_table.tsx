@@ -106,6 +106,7 @@ const AlertsTableComponent: React.FC<Props> = ({
       defaultModel={alertsDefaultModel}
       end={endDate}
       id={timelineId}
+      currentFilter={status}
       renderCellValue={DefaultCellRenderer}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.default}

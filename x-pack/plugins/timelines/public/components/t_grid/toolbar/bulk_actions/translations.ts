@@ -8,21 +8,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const SELECTED_ALERTS = (selectedAlertsFormatted: string, selectedAlerts: number) =>
-  i18n.translate('xpack.timelines.toolbar.batchActions.selectedAlertsTitle', {
+  i18n.translate('xpack.timelines.toolbar.bulkActions.selectedAlertsTitle', {
     values: { selectedAlertsFormatted, selectedAlerts },
     defaultMessage:
       'Selected {selectedAlertsFormatted} {selectedAlerts, plural, =1 {alert} other {alerts}}',
   });
 
 export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: number) =>
-  i18n.translate('xpack.timelines.toolbar.batchActions.selectAllAlertsTitle', {
+  i18n.translate('xpack.timelines.toolbar.bulkActions.selectAllAlertsTitle', {
     values: { totalAlertsFormatted, totalAlerts },
     defaultMessage:
       'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
 
 export const CLEAR_SELECTION = i18n.translate(
-  'xpack.timelines.toolbar.batchActions.clearSelectionTitle',
+  'xpack.timelines.toolbar.bulkActions.clearSelectionTitle',
   {
     defaultMessage: 'Clear selection',
   }

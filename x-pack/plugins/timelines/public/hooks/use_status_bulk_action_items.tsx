@@ -24,7 +24,7 @@ export interface SetEventsDeletedProps {
 
 export interface StatusBulkActionsProps {
   eventIds: string[];
-  currentStatus: AlertStatus;
+  currentStatus?: AlertStatus;
   query?: string;
   setEventsLoading: (param: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;

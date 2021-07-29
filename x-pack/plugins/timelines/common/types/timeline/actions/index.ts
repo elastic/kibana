@@ -94,7 +94,7 @@ export type ControlColumnProps = Omit<
 export type BulkActionsProp =
   | boolean
   | {
-      defaultActions: boolean;
+      statusActions: boolean;
       additionalActions: JSX.Element;
     };
 

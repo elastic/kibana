@@ -55,7 +55,7 @@ export interface OwnProps {
   showTotalCount?: boolean;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
-  currentFilter: string;
+  currentFilter?: string;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];

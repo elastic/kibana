@@ -68,7 +68,7 @@ interface OwnProps {
   totalPages: number;
   totalItems: number;
   additionalBulkActions?: JSX.Element[];
-  filterStatus: AlertStatus;
+  filterStatus?: AlertStatus;
   unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
   refetch: Refetch;

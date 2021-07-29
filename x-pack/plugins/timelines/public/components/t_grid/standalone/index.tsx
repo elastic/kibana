@@ -339,13 +339,13 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
-                    // batchActions={false} // default true
-                    // or
-                    // batchActions={{
-                    //   defaultActions: false, // default true
+                    // bulkActions={false} // default true
+                    // // or
+                    // bulkActions={{
+                    //   statusActions: false, // default true
                     //   additionalActions: [
-                    //     <></>,
-                    //     <></>,
+                    //     <AdditionalBulkAction/>,
+                    //     <AdditionalBulkAction2/>,
                     //   ]
                     // }}
                     unit={unit}

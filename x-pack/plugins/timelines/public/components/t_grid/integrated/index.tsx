@@ -112,7 +112,7 @@ export interface TGridIntegratedProps {
   filters: Filter[];
   globalFullScreen: boolean;
   headerFilterGroup?: React.ReactNode;
-  filterStatus: AlertStatus;
+  filterStatus?: AlertStatus;
   height?: number;
   id: TimelineId;
   indexNames: string[];
