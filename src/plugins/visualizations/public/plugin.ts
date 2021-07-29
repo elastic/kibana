@@ -31,8 +31,8 @@ import {
   createVisEmbeddableFromObject,
 } from './embeddable';
 import { TypesService } from './vis_types/types_service';
-import { range as rangeExpressionFunction } from './expression_functions/range';
-import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
+import { range as rangeExpressionFunction } from '../common/expression_functions/range';
+import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 
 import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
