@@ -46,7 +46,8 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
     wrappedDocs.map((doc) => ({
       id: doc._id,
       fields: doc.fields ?? {},
-    }))
+    })),
+    refreshForBulkCreate
   );
 
   const end = performance.now();

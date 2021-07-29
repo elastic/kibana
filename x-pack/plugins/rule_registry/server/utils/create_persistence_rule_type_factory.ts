@@ -19,7 +19,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
         ...options,
         services: {
           ...options.services,
-          alertWithPersistence: async (alerts) => {
+          alertWithPersistence: async (alerts, refresh) => {
             const numAlerts = alerts.length;
             logger.debug(`Found ${numAlerts} alerts.`);
 

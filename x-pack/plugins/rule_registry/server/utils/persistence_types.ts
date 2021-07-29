@@ -26,7 +26,8 @@ export type PersistenceAlertService<
   alerts: Array<{
     id: string;
     fields: Record<string, unknown>;
-  }>
+  }>,
+  refresh: boolean | 'wait_for'
 ) => Promise<ApiResponse<BulkResponse, unknown>>;
 
 export type PersistenceAlertQueryService = (
