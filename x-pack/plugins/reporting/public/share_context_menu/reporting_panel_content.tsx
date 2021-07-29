@@ -45,7 +45,7 @@ export type Props = ReportingPanelProps & { intl: InjectedIntl };
 interface State {
   isStale: boolean;
   absoluteUrl: string;
-  layoutId?: string;
+  layoutId: string;
   objectType: string;
 }
 
@@ -61,7 +61,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.state = {
       isStale: false,
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
-      layoutId: this.props.layoutId,
+      layoutId: '',
       objectType,
     };
   }
