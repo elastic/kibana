@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  esFilters,
-  IndexPatternsContract,
-} from '../../../public';
+import { esFilters, IndexPatternsContract } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
 import {
   createFiltersFromValueClickAction,
   ValueClickDataContext,
 } from './create_filters_from_value_click';
+import { FieldFormatsGetConfigFn, BytesFormat } from '../../../../field_formats/common';
 
 const mockField = {
   name: 'bytes',
@@ -72,8 +68,7 @@ describe('createFiltersFromValueClick', () => {
           getByName: () => mockField,
           filter: () => [mockField],
         },
-        getFormatterForField: () =>
-          new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+        getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
     } as unknown) as IndexPatternsContract);
   });

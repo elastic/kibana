@@ -9,7 +9,7 @@
 import { createFilterIpRange } from './ip_range';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { IpFormat } from '../../../../../common';
+import { IpFormat } from '../../../../../../field_formats/common';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 
