@@ -6,7 +6,8 @@
  */
 
 import type { Ecs } from '../../common/ecs';
-import type { TimelineItem } from '../../common/search_strategy';
+import { Direction, TimelineItem } from '../../common/search_strategy';
+import { TGridModel } from '../types';
 
 export const mockTimelineData: TimelineItem[] = [
   {
@@ -1508,4 +1509,78 @@ export const mockEndpointRegistryModificationEvent: Ecs = {
   message: ['Endpoint registry event'],
   timestamp: '2021-02-04T13:44:31.559Z',
   _id: '4cxLbXcBGrBB52F2uOfF',
+};
+
+export const mockTgridModel: TGridModel = {
+  columns: [
+    {
+      columnHeaderType: 'not-filtered',
+      id: '@timestamp',
+      initialWidth: 190,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'message',
+      initialWidth: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'event.category',
+      initialWidth: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'host.name',
+      initialWidth: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'source.ip',
+      initialWidth: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'destination.ip',
+      initialWidth: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'user.name',
+      initialWidth: 180,
+    },
+  ],
+  dataProviders: [],
+  defaultColumns: [],
+  queryFields: [],
+  dateRange: {
+    end: '2020-03-18T13:52:38.929Z',
+    start: '2020-03-18T13:46:38.929Z',
+  },
+  deletedEventIds: [],
+  excludedRowRendererIds: [],
+  expandedDetail: {},
+  documentType: '',
+  selectAll: false,
+  id: 'ef579e40-jibber-jabber',
+  indexNames: [],
+  isLoading: false,
+  isSelectAllChecked: false,
+  kqlQuery: {
+    filterQuery: null,
+  },
+  itemsPerPage: 25,
+  itemsPerPageOptions: [10, 25, 50, 100],
+  loadingEventIds: [],
+  savedObjectId: 'ef579e40-jibber-jabber',
+  selectedEventIds: {},
+  showCheckboxes: false,
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'number',
+      sortDirection: Direction.desc,
+    },
+  ],
+  title: 'Test rule',
+  version: '1',
 };
