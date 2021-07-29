@@ -22,6 +22,7 @@ import { buildEventTypeSignal } from './build_event_type_signal';
 import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 import type { ConfigType } from '../../../config';
+import { BuildReasonMessage } from './reason_formatters';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -35,7 +36,8 @@ import type { ConfigType } from '../../../config';
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
@@ -43,16 +45,25 @@ export const buildBulkBody = (
     ...buildSignal([mergedDoc], rule),
     ...additionalSignalFields(mergedDoc),
   };
-  const event = buildEventTypeSignal(mergedDoc);
   // Filter out any kibana.* fields from the generated signal - kibana.* fields are aliases
   // in siem-signals so we can't write to them, but for signals-on-signals they'll be returned
   // in the fields API response and merged into the mergedDoc source
   const { threshold_result: thresholdResult, kibana, ...filteredSource } = mergedDoc._source || {
     threshold_result: null,
   };
+  const timestamp = new Date().toISOString();
+  const reason = buildReasonMessage({
+    alertName: 'Alert Name',
+    alertRiskScore: ruleSO.attributes.params.riskScore,
+    alertSeverity: ruleSO.attributes.params.severity,
+    hostName: 'someHost',
+    timestamp,
+    userName: ruleSO.attributes.params.author[0],
+  });
+  const event = buildEventTypeSignal(mergedDoc, reason);
   const signalHit: SignalHit = {
     ...filteredSource,
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': timestamp,
     event,
     signal,
   };

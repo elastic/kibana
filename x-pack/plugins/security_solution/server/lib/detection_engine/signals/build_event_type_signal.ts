@@ -6,9 +6,9 @@
  */
 import { BaseSignalHit } from './types';
 
-export const buildEventTypeSignal = (doc: BaseSignalHit): object => {
+export const buildEventTypeSignal = (doc: BaseSignalHit, reason: string): object => {
   if (doc._source?.event != null && doc._source?.event instanceof Object) {
-    return { ...doc._source!.event, kind: 'signal' };
+    return { ...doc._source!.event, kind: 'signal', reason };
   } else {
     return { kind: 'signal' };
   }
