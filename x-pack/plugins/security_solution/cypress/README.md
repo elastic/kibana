@@ -4,7 +4,16 @@ The `security_solution/cypress` directory contains functional UI tests that exec
 
 Currently with Cypress you can develop `functional` tests and coming soon `CCS` and `Upgrade` functional tests.
 
-If you are still having doubts, questions or queries, please feel free to ping our Cypress champions Gloria Hornero (@Glo) and Patryk Kopycinsky (@patryk.kopycinski).
+If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
+
+- Functional Tests:
+  - Gloria Hornero (@Glo) and Patryk Kopycinsky (@patryk.kopycinski) 
+  
+- CCS Tests:
+  - Technical questions around the https://github.com/elastic/integration-test repo:
+     - Domenico Andreoli (@dom)
+  - Doubts regarding testing CCS and Cypress best practices:
+     - Gloria Hornero (@Glo)       
 
 ## Table of Contents
 
@@ -23,7 +32,6 @@ If you are still having doubts, questions or queries, please feel free to ping o
 [**Test Artifacts**](#test-artifacts)
 
 [**Linting**](#linting)
-
 
 ## How to add a new Cypress test
 
@@ -414,6 +422,11 @@ taken into consideration until another solution is implemented:
 - All tests in a spec file must be order-independent.
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
+
+### CCS test specific
+When testing CCS we want to put our focus in making sure that our `Source` instance is receiving properly the data that comes from the `Remote` instances, as well as the data is displayed as we expect on the `Source`.
+
+For that reason and in order to make our test more stable, use the API to execute all the actions needed before the assertions.
 
 ## Test Artifacts
 
