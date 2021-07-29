@@ -23,6 +23,7 @@ function getUnconnectedKibanLink() {
   };
 
   return shallow(
+    // @ts-ignore
     <UnconnectedKibanaLink
       location={{ search: '' } as Location}
       pathname={'/app/kibana'}
@@ -94,6 +95,7 @@ describe('UnconnectedKibanaLink', () => {
     };
 
     const wrapper = shallow(
+      // @ts-ignore
       <UnconnectedKibanaLink
         location={{ search: '' } as Location}
         pathname={'/app/kibana'}

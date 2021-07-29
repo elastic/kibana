@@ -291,9 +291,11 @@ function getESResponse(buckets: ESBucket[]): ESResponse {
         buckets: buckets.map(bucket => {
           return {
             ...bucket,
-            lower: { value: oc(bucket).lower.value(null) },
-            upper: { value: oc(bucket).upper.value(null) },
-            anomaly_score: { value: oc(bucket).anomaly_score.value(null) }
+            lower: { value: oc(bucket).lower.value(null) || null },
+            upper: { value: oc(bucket).upper.value(null) || null },
+            anomaly_score: {
+              value: oc(bucket).anomaly_score.value(null) || null
+            }
           };
         })
       }

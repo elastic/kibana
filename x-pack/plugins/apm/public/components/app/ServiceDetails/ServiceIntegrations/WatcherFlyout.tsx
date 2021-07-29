@@ -253,6 +253,7 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
+          // @ts-ignore
           <UnconnectedKibanaLink
             location={this.props.location}
             pathname={'/app/kibana'}

@@ -160,6 +160,7 @@ class SpaceSelectorUI extends Component<Props, State> {
     }
     return (
       <EuiFlexItem className="spcSpaceSelector__searchHolder">
+        // @ts-ignore
         <EuiFieldSearch
           className="spcSpaceSelector__searchField"
           placeholder={intl.formatMessage({
@@ -167,7 +168,6 @@ class SpaceSelectorUI extends Component<Props, State> {
             defaultMessage: 'Find a space',
           })}
           incremental={true}
-          // @ts-ignore
           onSearch={this.onSearch}
         />
       </EuiFlexItem>

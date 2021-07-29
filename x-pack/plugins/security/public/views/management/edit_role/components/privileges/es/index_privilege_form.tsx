@@ -196,6 +196,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       <EuiFlexGroup direction="column">
         {!this.props.isReservedRole && (
           <EuiFlexItem>
+            // @ts-ignore
             <EuiSwitch
               data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
               label={
@@ -204,7 +205,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   defaultMessage="Grant read privileges to specific documents"
                 />
               }
-              // @ts-ignore
               compressed={true}
               checked={this.state.queryExpanded}
               onChange={this.toggleDocumentQuery}

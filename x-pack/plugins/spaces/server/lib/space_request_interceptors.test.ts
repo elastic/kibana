@@ -18,6 +18,9 @@ describe('interceptors', () => {
   };
   let server: any;
   let request: any;
+  interface Config {
+    [key: string]: any;
+  }
 
   beforeEach(() => {
     teardowns.push(() => sandbox.restore());
@@ -26,13 +29,10 @@ describe('interceptors', () => {
       setupFn: (ser: any) => void = () => {
         return;
       },
-      testConfig = {}
+      testConfig: Config = {}
     ) => {
       server = new Server();
 
-      interface Config {
-        [key: string]: any;
-      }
       const config: Config = {
         'server.basePath': '/foo',
         ...testConfig,

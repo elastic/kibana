@@ -106,14 +106,13 @@ class SpacesMenuUI extends Component<Props, State> {
     const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
+        // @ts-ignore FIXME needs updated typedef
         <EuiFieldSearch
           placeholder={intl.formatMessage({
             id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
             defaultMessage: 'Find a space',
           })}
           incremental={true}
-          // FIXME needs updated typedef
-          // @ts-ignore
           onSearch={this.onSearch}
           onKeyDown={this.onSearchKeyDown}
           onFocus={this.onSearchFocus}

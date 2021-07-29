@@ -346,7 +346,7 @@ export const RangeDatePicker = injectI18n(
       });
     };
 
-    private closePopover = (type: string, from?: string, to?: string) => {
+    private closePopover = (type?: string, from?: string, to?: string) => {
       const { startDate, endDate, recentlyUsed } = this.managedStartEndDateFromType(type, from, to);
       this.setState(
         {
@@ -364,7 +364,7 @@ export const RangeDatePicker = injectI18n(
       );
     };
 
-    private managedStartEndDateFromType(type: string, from?: string, to?: string) {
+    private managedStartEndDateFromType(type?: string, from?: string, to?: string) {
       const { intl } = this.props;
       let { startDate, endDate } = this.state;
       let recentlyUsed: RecentlyUsed[] = this.state.recentlyUsed;
@@ -433,7 +433,7 @@ export const RangeDatePicker = injectI18n(
         type === 'date-range' || !type ? type : get(find(commonDates, { id: type }), 'label');
 
       if (textJustUsed !== undefined && !find(recentlyUsed, ['text', textJustUsed])) {
-        recentlyUsed.unshift({ type, text: textJustUsed });
+        recentlyUsed.unshift({ type: type as string, text: textJustUsed });
         recentlyUsed = recentlyUsed.slice(0, 5);
       }
 

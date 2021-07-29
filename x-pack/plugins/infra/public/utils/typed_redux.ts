@@ -65,6 +65,6 @@ type PlainActionCreator<WrappedActionCreator> = WrappedActionCreator extends () 
 export const bindPlainActionCreators = <WrappedActionCreators extends ActionCreators>(
   actionCreators: WrappedActionCreators
 ) => (dispatch: Dispatch) =>
-  bindActionCreators(actionCreators, dispatch) as {
+  (bindActionCreators(actionCreators, dispatch) as unknown) as {
     [P in keyof WrappedActionCreators]: PlainActionCreator<WrappedActionCreators[P]>
   };
