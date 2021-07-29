@@ -69,6 +69,7 @@ import {
 import { EMSSettings } from '../common/ems_settings';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import type { MapsSetupApi } from './api/setup_api';
 import {
   MapsAppLocatorDefinition,
   MapsAppRegionMapLocatorDefinition,
@@ -125,19 +126,19 @@ export type MapsPluginStart = ReturnType<MapsPlugin['start']>;
 /** @internal */
 export class MapsPlugin
   implements
-    Plugin<
-      MapsPluginSetup,
-      MapsPluginStart,
-      MapsPluginSetupDependencies,
-      MapsPluginStartDependencies
-    > {
+  Plugin<
+  MapsPluginSetup,
+  MapsPluginStart,
+  MapsPluginSetupDependencies,
+  MapsPluginStartDependencies
+  > {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -193,6 +194,11 @@ export class MapsPlugin
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);
+
+    return {
+      registerLayerWizard,
+      registerSource,
+    };
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {

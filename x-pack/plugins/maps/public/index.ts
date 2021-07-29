@@ -22,6 +22,20 @@ export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 export type { RenderTooltipContentParams } from './classes/tooltips/tooltip_property';
 
 export { MapsStartApi } from './api';
+export { MapsSetupApi } from './api';
+
+// ML - required additions
+export { IVectorSource, GeoJsonWithMeta } from './classes/sources/vector_source/vector_source';
+export { LICENSED_FEATURES } from './licensed_features';
+export { Attribution, ImmutableSourceProperty, PreIndexedShape } from './classes/sources/source';
+export { BoundsFilters, SourceTooltipConfig } from './classes/sources/vector_source/vector_source';
+export { IField } from './classes/fields/field';
+export { VectorStyle } from './classes/styles/vector/vector_style';
+export { LayerWizard, RenderWizardArguments } from './classes/layers/layer_wizard_registry';
+export { VectorLayer } from './classes/layers/vector_layer/vector_layer';
+export { ITooltipProperty } from './classes/tooltips/tooltip_property';
+export { SourceEditorArgs } from './classes/sources/source';
+export { DataRequest } from './classes/util/data_request';
 
 export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
 

@@ -41,11 +41,11 @@ export type ESSearchSourceSyncMeta = {
   topHitsSize: number;
 };
 
-type ESGeoGridSourceSyncMeta = {
+export type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-type ESGeoLineSourceSyncMeta = {
+export type ESGeoLineSourceSyncMeta = {
   splitField: string;
   sortField: string;
 };
@@ -57,6 +57,11 @@ export type VectorSourceSyncMeta =
   | ESGeoGridSourceSyncMeta
   | ESGeoLineSourceSyncMeta
   | ESTermSourceSyncMeta
+  | {
+    // todo : needs to be extensible
+    jobId: string;
+    typicalActual: 'typical' | 'actual';
+  }
   | null;
 
 export type VectorSourceRequestMeta = DataFilters & {
@@ -108,11 +113,11 @@ export type VectorTileLayerMeta = {
 // Partial because objects are justified downstream in constructors
 export type DataRequestMeta = Partial<
   VectorSourceRequestMeta &
-    VectorJoinSourceRequestMeta &
-    VectorStyleRequestMeta &
-    ESSearchSourceResponseMeta &
-    ESGeoLineSourceResponseMeta &
-    VectorTileLayerMeta
+  VectorJoinSourceRequestMeta &
+  VectorStyleRequestMeta &
+  ESSearchSourceResponseMeta &
+  ESGeoLineSourceResponseMeta &
+  VectorTileLayerMeta
 >;
 
 type NumericalStyleFieldData = {
