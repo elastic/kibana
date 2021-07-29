@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
-import { IndexPattern, IFieldType } from '../../../../../kibana_services';
+import { IndexPattern, IndexPatternField } from '../../../../../kibana_services';
 
 function getMockIndexPattern() {
   return ({
@@ -29,7 +29,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: true,
-        } as IFieldType;
+        } as IndexPatternField;
       } else {
         return {
           name,
@@ -38,7 +38,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: false,
-        } as IFieldType;
+        } as IndexPatternField;
       }
     },
   } as unknown) as IndexPattern;
