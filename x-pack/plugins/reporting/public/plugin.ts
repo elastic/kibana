@@ -12,10 +12,10 @@ import {
   CoreSetup,
   CoreStart,
   HttpSetup,
+  IUiSettingsClient,
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
-  IUiSettingsClient,
 } from 'src/core/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
@@ -34,15 +34,14 @@ import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_ha
 import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
 import { getSharedComponents } from './shared';
-import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
-import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-
 import type {
   SharePluginSetup,
   SharePluginStart,
   UiActionsSetup,
   UiActionsStart,
 } from './shared_imports';
+import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };

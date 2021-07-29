@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SearchSourceFields } from 'src/plugins/data/common';
+import { ExportPanelShareOpts } from '.';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
-import { ExportPanelShareOpts } from '.';
 
 export const ReportingCsvShareProvider = ({
   apiClient,

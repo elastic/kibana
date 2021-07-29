@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { stringify } from 'query-string';
 import rison, { RisonObject } from 'rison-node';
 import { HttpSetup, IUiSettingsClient } from 'src/core/public';
-import moment from 'moment';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,

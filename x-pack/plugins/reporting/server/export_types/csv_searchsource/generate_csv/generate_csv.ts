@@ -12,6 +12,7 @@ import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
+  cellHasFormulas,
   ES_SEARCH_STRATEGY,
   FieldFormat,
   FieldFormatConfig,
@@ -22,7 +23,6 @@ import {
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
-  cellHasFormulas,
 } from '../../../../../../../src/plugins/data/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
