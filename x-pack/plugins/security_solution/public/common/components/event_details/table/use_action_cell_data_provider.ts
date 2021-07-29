@@ -33,7 +33,7 @@ export interface UseActionCellDataProvider {
   eventId?: string;
   field: string;
   fieldFormat?: string;
-  fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField?: BrowserField;
   fieldType?: string;
   isObjectArray?: boolean;
   isThreatMatch?: boolean;

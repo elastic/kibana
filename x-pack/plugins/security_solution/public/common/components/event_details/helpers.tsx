@@ -21,6 +21,7 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
+import { FieldsData } from './types';
 
 import * as i18n from './translations';
 import { ColumnHeaderOptions, TimelineEventsDetailsItem } from '../../../../common';
@@ -55,9 +56,9 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    data: TimelineEventsDetailsItem;
+    data: FieldsData;
     eventId: string;
-    fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
+    fieldFromBrowserField?: BrowserField;
     linkValue: string | undefined;
     timelineId: string;
     values: string[] | null | undefined;

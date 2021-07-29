@@ -9,17 +9,17 @@ import React, { useCallback, useState, useRef } from 'react';
 import { getDraggableId } from '@kbn/securitysolution-t-grid';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
-import { EventFieldsData } from '../types';
+import { EventFieldsData, FieldsData } from '../types';
 import { useGetTimelineId } from '../../drag_and_drop/draggable_wrapper_hover_content';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { BrowserField } from '../../../containers/source';
 
 interface Props {
   contextId: string;
-  data: EventFieldsData;
+  data: FieldsData | EventFieldsData;
   disabled?: boolean;
   eventId: string;
-  fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField?: BrowserField;
   getLinkValue?: (field: string) => string | null;
   isThreatMatch?: boolean;
   linkValue?: string | null | undefined;
