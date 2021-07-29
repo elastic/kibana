@@ -91,11 +91,13 @@ export type ControlColumnProps = Omit<
 > &
   Partial<AdditionalControlColumnProps>;
 
-export type BulkActionsProp =
-  | boolean
-  | {
-      statusActions: boolean;
-      additionalActions: JSX.Element;
-    };
+export type OnAlertStatusActionSuccess = (status: AlertStatus) => void;
+export type OnAlertStatusActionFailure = (status: AlertStatus, error: string) => void;
+export interface BulkActionsObjectProp {
+  alertStatusActions?: boolean;
+  onAlertStatusActionSuccess?: OnAlertStatusActionSuccess;
+  onAlertStatusActionFailure?: OnAlertStatusActionFailure;
+}
+export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
 export type AlertStatus = 'open' | 'closed' | 'in-progress';

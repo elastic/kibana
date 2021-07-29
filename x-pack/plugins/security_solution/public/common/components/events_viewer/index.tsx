@@ -16,7 +16,7 @@ import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
-import type { AlertStatus } from '../../../../../timelines/common';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -55,7 +55,7 @@ export interface OwnProps {
   showTotalCount?: boolean;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
-  currentFilter?: string;
+  currentFilter?: Status;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -163,7 +163,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               sort,
               utilityBar,
               graphEventId,
-              filterStatus: currentFilter as AlertStatus,
+              filterStatus: currentFilter,
               leadingControlColumns,
               trailingControlColumns,
             })

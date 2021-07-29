@@ -39,7 +39,7 @@ import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
-import { AlertCount, SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
 import * as i18n from '../translations';
 import { InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
@@ -235,13 +235,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [deletedEventIds.length, totalCount]
   );
 
-  const subtitle = useMemo(
-    () => `${totalCountMinusDeleted.toLocaleString()} ${unit && unit(totalCountMinusDeleted)}`,
-    [totalCountMinusDeleted, unit]
-  );
-
-  const additionalControls = useMemo(() => <AlertCount>{subtitle}</AlertCount>, [subtitle]);
-
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
     events,
@@ -323,7 +316,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     activePage={pageInfo.activePage}
-                    additionalControls={additionalControls}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
                     id={STANDALONE_ID}
@@ -338,15 +330,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
-                    // bulkActions={false} // default true
-                    // // or
-                    // bulkActions={{
-                    //   statusActions: false, // default true
-                    //   additionalActions: [
-                    //     <AdditionalBulkAction/>,
-                    //     <AdditionalBulkAction2/>,
-                    //   ]
-                    // }}
                     unit={unit}
                     filterStatus={filterStatus}
                     leadingControlColumns={leadingControlColumns}

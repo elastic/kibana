@@ -11,13 +11,22 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { ComponentType, useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import React, {
+  ComponentType,
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { BulkActionsProp, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -35,21 +44,17 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
-import type {
-  SetEventsDeletedProps,
-  SetEventsLoadingProps,
-} from '../../../hooks/use_status_bulk_action_items';
-// eslint-disable-next-line no-duplicate-imports
-import { useStatusBulkActionItems } from '../../../hooks/use_status_bulk_action_items';
-import { StatefulFieldsBrowser, BulkActions } from '../../../';
+import { StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../toolbar/fields_browser/helpers';
 import * as i18n from './translations';
-import * as i18nTimeline from '../translations';
 import { AlertCount } from '../styles';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
+
+const StatefulAlertStatusBulkActions = lazy(
+  () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
+);
 
 interface OwnProps {
   activePage: number;
@@ -66,7 +71,7 @@ interface OwnProps {
   trailingControlColumns?: ControlColumnProps[];
   totalPages: number;
   totalItems: number;
-  additionalBulkActions?: JSX.Element[];
+  bulkActions?: BulkActionsProp;
   filterStatus?: AlertStatus;
   unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
@@ -187,16 +192,12 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     totalPages,
     totalItems,
     filterStatus,
-    additionalBulkActions,
+    bulkActions = true,
     unit = basicUnit,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     refetch,
   }) => {
-    const dispatch = useDispatch();
-    const { addSuccess, addError, addWarning } = useAppToasts();
-    const [showClearSelection, setShowClearSelection] = useState(false);
-
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
@@ -245,132 +246,61 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectPage, selectAll]);
 
-    // Catches state change isSelectAllChecked->false (page checkbox) upon user selection change to reset toolbar select all
-    useEffect(() => {
-      if (isSelectAllChecked) {
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
-      } else {
-        setShowClearSelection(false);
+    const onAlertStatusActionSuccess = useMemo(() => {
+      if (bulkActions && bulkActions !== true) {
+        return bulkActions.onAlertStatusActionSuccess;
       }
-    }, [dispatch, isSelectAllChecked, id]);
+    }, [bulkActions]);
 
-    // Callback for selecting all events on all pages from toolbar
-    // Dispatches to stateful_body's selectAll via TimelineTypeContext props
-    // as scope of response data required to actually set selectedEvents
-    const onSelectAll = useCallback(() => {
-      dispatch(tGridActions.setTGridSelectAll({ id, selectAll: true }));
-      setShowClearSelection(true);
-    }, [dispatch, id]);
+    const onAlertStatusActionFailure = useMemo(() => {
+      if (bulkActions && bulkActions !== true) {
+        return bulkActions.onAlertStatusActionFailure;
+      }
+    }, [bulkActions]);
 
-    // Callback for clearing entire selection from toolbar
-    const onClearSelection = useCallback(() => {
-      clearSelected!({ id });
-      dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
-      setShowClearSelection(false);
-    }, [clearSelected, dispatch, id]);
-
-    const onAlertStatusUpdateSuccess = useCallback(
-      (updated: number, conflicts: number, newStatus: AlertStatus) => {
-        if (conflicts > 0) {
-          // Partial failure
-          addWarning({
-            title: i18nTimeline.UPDATE_ALERT_STATUS_FAILED(conflicts),
-            text: i18nTimeline.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
-          });
-        } else {
-          let title: string;
-          switch (newStatus) {
-            case 'closed':
-              title = i18nTimeline.CLOSED_ALERT_SUCCESS_TOAST(updated);
-              break;
-            case 'open':
-              title = i18nTimeline.OPENED_ALERT_SUCCESS_TOAST(updated);
-              break;
-            case 'in-progress':
-              title = i18nTimeline.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
-          }
-          addSuccess({ title });
-        }
-        refetch();
-      },
-      [addSuccess, addWarning, refetch]
-    );
-
-    const onAlertStatusUpdateFailure = useCallback(
-      (newStatus: AlertStatus, error: Error) => {
-        let title: string;
-        switch (newStatus) {
-          case 'closed':
-            title = i18nTimeline.CLOSED_ALERT_FAILED_TOAST;
-            break;
-          case 'open':
-            title = i18nTimeline.OPENED_ALERT_FAILED_TOAST;
-            break;
-          case 'in-progress':
-            title = i18nTimeline.IN_PROGRESS_ALERT_FAILED_TOAST;
-        }
-        addError(error.message, { title });
-        refetch();
-      },
-      [addError, refetch]
-    );
-
-    const setEventsLoading = useCallback(
-      ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading }));
-      },
-      [dispatch, id]
-    );
-
-    const setEventsDeleted = useCallback(
-      ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-        dispatch(tGridActions.setEventsDeleted({ id, eventIds, isDeleted }));
-      },
-      [dispatch, id]
-    );
-
-    const statusBulkActionItems = useStatusBulkActionItems({
-      currentStatus: filterStatus,
-      eventIds: Object.keys(selectedEventIds),
-      setEventsLoading,
-      setEventsDeleted,
-      onUpdateSuccess: onAlertStatusUpdateSuccess,
-      onUpdateFailure: onAlertStatusUpdateFailure,
-    });
+    const showBulkActions = useMemo(() => {
+      if (selectedCount === 0 || !showCheckboxes) {
+        return false;
+      }
+      if (typeof bulkActions === 'boolean') {
+        return bulkActions;
+      }
+      return bulkActions.alertStatusActions ?? true;
+    }, [selectedCount, showCheckboxes, bulkActions]);
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
-        additionalControls:
-          selectedCount > 0 ? (
-            <>
-              <AlertCount>{subtitle}</AlertCount>
-              <BulkActions
+        additionalControls: showBulkActions ? (
+          <>
+            <AlertCount>{subtitle}</AlertCount>
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <StatefulAlertStatusBulkActions
                 data-test-subj="bulk-actions"
-                timelineId={id}
-                selectedCount={selectedCount}
+                id={id}
                 totalItems={totalItems}
-                showClearSelection={showClearSelection}
-                onSelectAll={onSelectAll}
-                onClearSelection={onClearSelection}
-                bulkActionItems={statusBulkActionItems}
+                filterStatus={filterStatus}
+                onActionSuccess={onAlertStatusActionSuccess}
+                onActionFailure={onAlertStatusActionFailure}
+                refetch={refetch}
               />
-              {additionalControls ?? null}
-            </>
-          ) : (
-            <>
-              <AlertCount>{subtitle}</AlertCount>
-              {additionalControls ?? null}
-              <StatefulFieldsBrowser
-                data-test-subj="field-browser"
-                height={FIELD_BROWSER_HEIGHT}
-                width={FIELD_BROWSER_WIDTH}
-                browserFields={browserFields}
-                timelineId={id}
-                columnHeaders={columnHeaders}
-              />
-            </>
-          ),
-        ...(selectedCount > 0
+            </Suspense>
+            {additionalControls ?? null}
+          </>
+        ) : (
+          <>
+            <AlertCount>{subtitle}</AlertCount>
+            {additionalControls ?? null}
+            <StatefulFieldsBrowser
+              data-test-subj="field-browser"
+              height={FIELD_BROWSER_HEIGHT}
+              width={FIELD_BROWSER_WIDTH}
+              browserFields={browserFields}
+              timelineId={id}
+              columnHeaders={columnHeaders}
+            />
+          </>
+        ),
+        ...(showBulkActions
           ? {
               showColumnSelector: false,
               showSortSelector: false,
@@ -384,17 +314,17 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         showStyleSelector: false,
       }),
       [
-        selectedCount,
         id,
         subtitle,
         totalItems,
+        filterStatus,
         browserFields,
         columnHeaders,
         additionalControls,
-        statusBulkActionItems,
-        showClearSelection,
-        onSelectAll,
-        onClearSelection,
+        showBulkActions,
+        onAlertStatusActionSuccess,
+        onAlertStatusActionFailure,
+        refetch,
       ]
     );
 
