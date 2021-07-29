@@ -83,7 +83,7 @@ export type RangeFilter = Filter &
  *
  * @public
  */
-export const isRangeFilter = (filter: FieldFilter): filter is RangeFilter => get(filter, 'range');
+export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => get(filter, 'range');
 
 /**
  *
