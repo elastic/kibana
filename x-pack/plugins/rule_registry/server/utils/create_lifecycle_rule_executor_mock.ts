@@ -11,8 +11,9 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
 } from '../../../../plugins/alerting/server';
+import { AlertExecutorOptionsWithExtraServices } from '../types';
 
-import { LifecycleRuleExecutor } from './create_lifecycle_executor';
+import { LifecycleAlertServices, LifecycleRuleExecutor } from './create_lifecycle_executor';
 
 export const createLifecycleRuleExecutorMock = <
   Params extends AlertTypeParams = never,
@@ -22,4 +23,13 @@ export const createLifecycleRuleExecutorMock = <
   ActionGroupIds extends string = never
 >(
   executor: LifecycleRuleExecutor<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => async (options: any) => await executor(options);
+) => async (
+  options: AlertExecutorOptionsWithExtraServices<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
+  >
+) => await executor(options);
