@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, xor } from 'lodash';
+import { isArray, isEmpty, xor } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
 
@@ -31,6 +31,7 @@ export interface ScheduledQueryGroupFormData {
   interval: number;
   platform?: string | undefined;
   version?: string[] | undefined;
+  ecs_mapping?: Record<string, string> | undefined;
 }
 
 export const useScheduledQueryGroupQueryForm = ({
@@ -76,6 +77,9 @@ export const useScheduledQueryGroupQueryForm = ({
             draft.version = draft.version[0];
           }
         }
+        if (isEmpty(draft.ecs_mapping)) {
+          delete draft.ecs_mapping;
+        }
         return draft;
       }),
     deserializer: (payload) => {
@@ -87,6 +91,7 @@ export const useScheduledQueryGroupQueryForm = ({
         interval: parseInt(payload.interval.value, 10),
         platform: payload.platform?.value,
         version: payload.version?.value ? [payload.version?.value] : [],
+        ecs_mapping: payload.ecs_mapping?.value ?? {},
       };
     },
     schema: formSchema,

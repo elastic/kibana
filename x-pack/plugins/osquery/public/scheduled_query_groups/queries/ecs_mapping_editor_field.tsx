@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-/* eslint-disable */
-
+import { produce } from 'immer';
 import { find } from 'lodash';
 import sqlSummary from 'sql-summary';
 import { isEmpty, pickBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -28,7 +28,24 @@ import styled from 'styled-components';
 import ECSSchema from './ecs_schema.json';
 import osquerySchema from '../../editor/osquery_schema/v4.8.0.json';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
+import { FieldIcon } from '../../common/lib/kibana';
+import {
+  FIELD_TYPES,
+  Form,
+  FieldHook,
+  getFieldValidityAndErrorMessage,
+  useForm,
+  Field,
+  getUseField,
+} from '../../shared_imports';
+
+export const CommonUseField = getUseField({ component: Field });
+
+// const TABLE_NAMES_REGEX = /(?<=from|join)\s+(\w+)/g;
+
+const StyledFieldIcon = styled(FieldIcon)`
+  width: 32px;
+`;
 
 const FormWrapper = styled.div`
   ${({ theme }) => `
@@ -47,20 +64,134 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
 
 // const OsquerySchemaOptions = osquerySchema.map((osquery) =>
 
+export const ECSComboboxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+  const [selectedOptions, setSelected] = useState([]);
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
+
+  const handleChange = (selectedOptions) => {
+    // onChange(
+    //   produce((current) => {
+    //     console.error('currenmt', current, selectedOptions);
+    //     if (selectedOptions.length === 0) {
+    //       // TODO: Fix in FORM
+    //       return current;
+    //     }
+    //     if (!current) {
+    //       return {
+    //         [selectedOptions[0].value.field]: null,
+    //       };
+    //     }
+    //     current[selectedOptions[0].value.field] = null;
+    //     return current;
+    //   })
+    // );
+    setSelected(selectedOptions);
+  };
+
+  const onCreateOption = (searchValue = []) => {
+    const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+    if (!normalizedSearchValue) {
+      return;
+    }
+
+    const newOption = {
+      label: searchValue,
+    };
+
+    // Select the option.
+    setSelected([newOption]);
+  };
+
+  const renderOption = useCallback((option, searchValue, contentClassName) => {
+    // const { color, label, value } = option;
+    // const dotColor = visColors[visColorsBehindText.indexOf(color)];
+    return (
+      <div className={contentClassName}>
+        <FieldIcon type={option.value.type} />
+        {option.value.field} {option.value.description}
+      </div>
+    );
+  }, []);
+
+  return (
+    <EuiFormRow
+      label={field.label}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      fullWidth
+      describedByIds={describedByIds}
+      {...rest}
+    >
+      <EuiComboBox
+        prepend={<StyledFieldIcon type={selectedOptions[0]?.value?.type} />}
+        fullWidth
+        placeholder="Select a single option"
+        singleSelection={{ asPlainText: true }}
+        options={ECSSchemaOptions}
+        selectedOptions={selectedOptions}
+        onChange={handleChange}
+        onCreateOption={onCreateOption}
+        customOptionText="Add {searchValue} as your occupation"
+        renderOption={renderOption}
+        rowHeight={32}
+        {...euiFieldProps}
+      />
+    </EuiFormRow>
+  );
+};
+
 interface Props {
   field: FieldHook<string>;
   euiFieldProps?: Record<string, unknown>;
   idAria?: string;
   [key: string]: unknown;
 }
-export const ECSMappingEditorForm = ({ osquerySchemaOptions }) => {
+export const ECSMappingEditorForm = ({ osquerySchemaOptions, defaultValue, onChange }: Props) => {
   const [selectedOptions, setSelected] = useState([]);
   const [selectedOsqueryOptions, setSelectedOsquery] = useState([]);
 
-  console.error('ECSSchema', ECSSchema);
+  const formSchema = {
+    key: {
+      type: FIELD_TYPES.COMBO_BOX,
+      validations: [],
+    },
+    value: {
+      type: FIELD_TYPES.COMBO_BOX,
+    },
+  };
 
-  const onChange = (selectedOptions) => {
-    // We should only get back either 0 or 1 options.
+  const { form } = useForm({
+    schema: formSchema,
+    onSubmit: (payload, isValid) => {
+      console.error('smuit', payload);
+      return payload;
+    },
+    defaultValue: {
+      key: [],
+      value: [],
+    },
+  });
+
+  const handleChange = (selectedOptions) => {
+    onChange(
+      produce((current) => {
+        console.error('currenmt', current, selectedOptions);
+        if (selectedOptions.length === 0) {
+          // TODO: Fix in FORM
+          return current;
+        }
+        if (!current) {
+          return {
+            [selectedOptions[0].value.field]: null,
+          };
+        }
+        current[selectedOptions[0].value.field] = null;
+        return current;
+      })
+    );
     setSelected(selectedOptions);
   };
 
@@ -94,18 +225,14 @@ export const ECSMappingEditorForm = ({ osquerySchemaOptions }) => {
     setSelectedOsquery([newOption]);
   };
 
-  // const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
-
   const renderOption = (option, searchValue, contentClassName) => {
     // const { color, label, value } = option;
     // const dotColor = visColors[visColorsBehindText.indexOf(color)];
     return (
-      <EuiSuggestItem
-        type={{ iconType: 'kqlField', color: 'tint5' }}
-        labelDisplay="expand"
-        label={option.value.field}
-        description={option.value.description}
-      />
+      <div className={contentClassName}>
+        <FieldIcon type={option.value.type} />
+        {option.value.field} {option.value.description}
+      </div>
     );
   };
 
@@ -113,23 +240,11 @@ export const ECSMappingEditorForm = ({ osquerySchemaOptions }) => {
     // const { color, label, value } = option;
     // const dotColor = visColors[visColorsBehindText.indexOf(color)];
     return (
-      <EuiSuggestItem
-        type={{ iconType: 'kqlValue', color: 'tint0' }}
-        labelDisplay="expand"
-        label={option.value.name}
-        description={option.value.description}
-      />
+      <div className={contentClassName}>
+        {option.value.name} {option.value.description}
+      </div>
     );
   };
-
-  // useEffect(() => {
-  //   setCheckboxIdToSelectedMap(() =>
-  //     (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
-  //       acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
-  //       return acc;
-  //     }, {} as Record<string, boolean>)
-  //   );
-  // }, [field.value, options]);
 
   return (
     // <EuiFormRow
@@ -141,46 +256,39 @@ export const ECSMappingEditorForm = ({ osquerySchemaOptions }) => {
     //   describedByIds={describedByIds}
     //   {...rest}
     // >
-    <FormWrapper>
-      <EuiFlexGroup>
+    <Form form={form}>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiComboBox
-                fullWidth
-                placeholder="Select a single option"
-                singleSelection={{ asPlainText: true }}
-                options={ECSSchemaOptions}
-                selectedOptions={selectedOptions}
-                onChange={onChange}
-                onCreateOption={onCreateOption}
-                customOptionText="Add {searchValue} as your occupation"
-                renderOption={renderOption}
-                rowHeight={40}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{'<='}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiComboBox
-                fullWidth
-                placeholder="Select a single option"
-                singleSelection={{ asPlainText: true }}
-                options={osquerySchemaOptions}
-                selectedOptions={selectedOsqueryOptions}
-                onChange={setSelectedOsquery}
-                onCreateOption={onCreateOsqueryOption}
-                customOptionText="Add {searchValue} as your occupation"
-                renderOption={renderOsqueryOption}
-                rowHeight={40}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton>{'Add field'}</EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <CommonUseField path="key" component={ECSComboboxField} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{'<='}</EuiFlexItem>
+        <EuiFlexItem>
+          <CommonUseField
+            path="value"
+            fullWidth
+            placeholder="Select a single option"
+            singleSelection={
+              selectedOptions[0]?.value.normalization !== 'array' && { asPlainText: true }
+            }
+            options={osquerySchemaOptions}
+            selectedOptions={selectedOsqueryOptions}
+            onChange={setSelectedOsquery}
+            onCreateOption={onCreateOsqueryOption}
+            customOptionText="Add {searchValue} as your occupation"
+            renderOption={renderOsqueryOption}
+            rowHeight={32}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {defaultValue ? (
+            <EuiButtonIcon iconType="trash" color="danger" />
+          ) : (
+            <EuiButtonIcon iconType="plus" color="primary" />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </FormWrapper>
+      <EuiSpacer />
+    </Form>
   );
 };
 
@@ -190,10 +298,25 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
   const [selectedOptions, setSelected] = useState([]);
   const [selectedOsqueryOptions, setSelectedOsquery] = useState([]);
 
-  console.error('ECSSchema', ECSSchema);
+  // console.error('ECSSchema', ECSSchema);
 
   const onChange = (selectedOptions) => {
-    // We should only get back either 0 or 1 options.
+    field.setValue(
+      produce((current) => {
+        console.error('currenmt', current, selectedOptions);
+        if (selectedOptions.length === 0) {
+          // TODO: Fix in FORM
+          return current;
+        }
+        if (!current) {
+          return {
+            [selectedOptions[0].value.field]: null,
+          };
+        }
+        current[selectedOptions[0].value.field] = null;
+        return current;
+      })
+    );
     setSelected(selectedOptions);
   };
 
@@ -227,18 +350,14 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
     setSelectedOsquery([newOption]);
   };
 
-  const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
-
   const renderOption = (option, searchValue, contentClassName) => {
     // const { color, label, value } = option;
     // const dotColor = visColors[visColorsBehindText.indexOf(color)];
     return (
-      <EuiSuggestItem
-        type={{ iconType: 'kqlField', color: 'tint5' }}
-        labelDisplay="expand"
-        label={option.value.field}
-        description={option.value.description}
-      />
+      <div className={contentClassName}>
+        <FieldIcon type={option.value.type} />
+        {option.value.field} {option.value.description}
+      </div>
     );
   };
 
@@ -246,12 +365,9 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
     // const { color, label, value } = option;
     // const dotColor = visColors[visColorsBehindText.indexOf(color)];
     return (
-      <EuiSuggestItem
-        type={{ iconType: 'kqlValue', color: 'tint0' }}
-        labelDisplay="expand"
-        label={option.value.name}
-        description={option.value.description}
-      />
+      <div className={contentClassName}>
+        {option.value.name} {option.value.description}
+      </div>
     );
   };
 
@@ -271,6 +387,8 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
     });
   }, [rest.query]);
 
+  // console.error('sss', selectedOptions);
+
   // useEffect(() => {
   //   setCheckboxIdToSelectedMap(() =>
   //     (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
@@ -279,6 +397,8 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
   //     }, {} as Record<string, boolean>)
   //   );
   // }, [field.value, options]);
+
+  console.error(';fee', field.value);
 
   return (
     // <EuiFormRow
@@ -290,41 +410,7 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
     //   describedByIds={describedByIds}
     //   {...rest}
     // >
-    <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiComboBox
-            fullWidth
-            placeholder="Select a single option"
-            singleSelection={{ asPlainText: true }}
-            options={ECSSchemaOptions}
-            selectedOptions={selectedOptions}
-            onChange={onChange}
-            onCreateOption={onCreateOption}
-            customOptionText="Add {searchValue} as your occupation"
-            renderOption={renderOption}
-            rowHeight={40}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{'<='}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiComboBox
-            fullWidth
-            placeholder="Select a single option"
-            singleSelection={{ asPlainText: true }}
-            options={osquerySchemaOptions}
-            selectedOptions={selectedOsqueryOptions}
-            onChange={setSelectedOsquery}
-            onCreateOption={onCreateOsqueryOption}
-            customOptionText="Add {searchValue} as your occupation"
-            renderOption={renderOsqueryOption}
-            rowHeight={40}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <ECSMappingEditorForm osquerySchemaOptions={osquerySchemaOptions} />
-    </>
+    <ECSMappingEditorForm osquerySchemaOptions={osquerySchemaOptions} onChange={field.setValue} />
   );
 };
 

@@ -41,6 +41,11 @@ export interface OsqueryManagerPackagePolicyConfigRecord {
   interval: OsqueryManagerPackagePolicyConfigRecordEntry;
   platform?: OsqueryManagerPackagePolicyConfigRecordEntry;
   version?: OsqueryManagerPackagePolicyConfigRecordEntry;
+  ecs_mapping?: {
+    type: string;
+    value: Record<string, string>;
+    frozen?: boolean;
+  };
 }
 
 export interface OsqueryManagerPackagePolicyInputStream
