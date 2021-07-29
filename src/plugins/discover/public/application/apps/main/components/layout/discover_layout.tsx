@@ -252,7 +252,6 @@ export function DiscoverLayout({
           services={services}
           stateContainer={stateContainer}
           updateQuery={onUpdateQuery}
-          columns={columns}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
