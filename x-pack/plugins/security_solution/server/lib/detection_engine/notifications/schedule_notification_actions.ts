@@ -11,7 +11,6 @@ import { RuleParams } from '../schemas/rule_schemas';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;
-  index?: string[] | undefined;
   name: string;
 };
 

@@ -244,7 +244,7 @@ export const createLifecycleExecutor = (
       [EVENT_KIND]: 'signal',
       [ALERT_OWNER]: rule.consumer,
       [ALERT_ID]: alertId,
-    } as ParsedTechnicalFields; // TODO: runtime validation?
+    } as ParsedTechnicalFields;
 
     const isNew = !state.trackedAlerts[alertId];
     const isRecovered = !currentAlerts[alertId];

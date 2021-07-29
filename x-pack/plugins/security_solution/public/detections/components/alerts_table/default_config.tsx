@@ -150,7 +150,7 @@ export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => 
     },
     query: {
       term: {
-        ALERT_STATUS: status,
+        [ALERT_STATUS]: status,
       },
     },
   },

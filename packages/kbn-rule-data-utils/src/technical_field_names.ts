@@ -8,12 +8,12 @@
 
 import { ValuesType } from 'utility-types';
 
-const KIBANA_NAMESPACE = 'kibana';
+const KIBANA_NAMESPACE = 'kibana' as const;
 
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
 
-const CONSUMERS = `${KIBANA_NAMESPACE}.consumers`;
+const CONSUMERS = `${KIBANA_NAMESPACE}.consumers` as const;
 const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
@@ -25,7 +25,7 @@ const RULE_UUID = 'rule.uuid' as const;
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
 const TAGS = 'tags' as const;
 const TIMESTAMP = '@timestamp' as const;
-const VERSION = `${KIBANA_NAMESPACE}.version`;
+const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
