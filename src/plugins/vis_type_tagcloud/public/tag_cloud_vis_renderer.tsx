@@ -33,6 +33,8 @@ export const getTagCloudVisRenderer: (
     });
     const palettesRegistry = await palettes.getPalettes();
 
+    const showNoResult = config.visData.rows.length === 0;
+
     render(
       <I18nProvider>
         <ClassNames>
@@ -40,6 +42,7 @@ export const getTagCloudVisRenderer: (
             <VisualizationContainer
               handlers={handlers}
               className={cx('tagCloudContainer', css(tagCloudVisClass))}
+              showNoResult={showNoResult}
             >
               <TagCloudChart
                 {...config}

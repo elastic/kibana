@@ -7,14 +7,14 @@
  */
 
 import { Range } from '../../expressions/public';
-import { SchemaConfig } from '../../visualizations/public';
+import { ExpressionValueVisDimension } from '../../visualizations/public';
 import { ColorMode, Labels, Style, ColorSchemas } from '../../charts/public';
 
 export const visType = 'metric';
 
 export interface DimensionsVisParam {
-  metrics: SchemaConfig[];
-  bucket?: SchemaConfig;
+  metrics: ExpressionValueVisDimension[];
+  bucket?: ExpressionValueVisDimension;
 }
 
 export interface MetricVisParam {

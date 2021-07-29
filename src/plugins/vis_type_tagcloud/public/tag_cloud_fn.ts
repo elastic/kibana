@@ -111,6 +111,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.logDatatable('default', input);
     }
+
     return {
       type: 'render',
       as: 'tagloud_vis',

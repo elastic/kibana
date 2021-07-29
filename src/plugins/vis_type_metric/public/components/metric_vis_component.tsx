@@ -16,7 +16,7 @@ import { Datatable } from '../../../expressions/public';
 import { getHeatmapColors } from '../../../charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';
-import { SchemaConfig } from '../../../visualizations/public';
+import { ExpressionValueVisDimension } from '../../../visualizations/public';
 import { Range } from '../../../expressions/public';
 
 import './metric_vis.scss';
@@ -98,6 +98,16 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     return fieldFormatter.convert(value, format);
   };
 
+  private getColumn(
+    accessor: ExpressionValueVisDimension['accessor'],
+    columns: Datatable['columns'] = []
+  ) {
+    if (typeof accessor === 'number') {
+      return columns[accessor];
+    }
+    return columns.filter(({ id }) => accessor.id === id)[0];
+  }
+
   private processTableGroups(table: Datatable) {
     const config = this.props.visParams.metric;
     const dimensions = this.props.visParams.dimensions;
@@ -112,13 +122,12 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     let bucketFormatter: IFieldFormat;
 
     if (dimensions.bucket) {
-      bucketColumnId = table.columns[dimensions.bucket.accessor].id;
+      bucketColumnId = this.getColumn(dimensions.bucket.accessor, table.columns).id;
       bucketFormatter = getFormatService().deserialize(dimensions.bucket.format);
     }
 
-    dimensions.metrics.forEach((metric: SchemaConfig) => {
-      const columnIndex = metric.accessor;
-      const column = table?.columns[columnIndex];
+    dimensions.metrics.forEach((metric: ExpressionValueVisDimension) => {
+      const column = this.getColumn(metric.accessor, table?.columns);
       const formatter = getFormatService().deserialize(metric.format);
       table.rows.forEach((row, rowIndex) => {
         let title = column.name;
