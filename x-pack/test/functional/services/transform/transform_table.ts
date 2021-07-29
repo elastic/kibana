@@ -214,25 +214,21 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async assertTransformExpandedRow() {
+      await this.ensureDetailsOpen();
       await retry.tryForTime(30 * 1000, async () => {
-        await this.ensureDetailsOpen();
-
         // The expanded row should show the details tab content by default
-        await testSubjects.existOrFail('transformDetailsTab');
-        await testSubjects.existOrFail('~transformDetailsTabContent');
+        await testSubjects.existOrFail('transformDetailsTab', { timeout: 1000 });
+        await testSubjects.existOrFail('~transformDetailsTabContent', { timeout: 1000 });
 
         // Walk through the rest of the tabs and check if the corresponding content shows up
-        await testSubjects.existOrFail('transformJsonTab');
         await testSubjects.click('transformJsonTab');
-        await testSubjects.existOrFail('~transformJsonTabContent');
+        await testSubjects.existOrFail('~transformJsonTabContent', { timeout: 1000 });
 
-        await testSubjects.existOrFail('transformMessagesTab');
         await testSubjects.click('transformMessagesTab');
-        await testSubjects.existOrFail('~transformMessagesTabContent');
+        await testSubjects.existOrFail('~transformMessagesTabContent', { timeout: 1000 });
 
-        await testSubjects.existOrFail('transformPreviewTab');
         await testSubjects.click('transformPreviewTab');
-        await testSubjects.existOrFail('~transformPivotPreview');
+        await testSubjects.existOrFail('~transformPivotPreview', { timeout: 1000 });
       });
     }
 
