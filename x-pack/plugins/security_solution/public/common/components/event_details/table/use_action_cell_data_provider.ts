@@ -38,7 +38,6 @@ export interface UseActionCellDataProvider {
   fieldFromBrowserField?: BrowserField;
   fieldType?: string;
   isObjectArray?: boolean;
-  isThreatMatch?: boolean;
   linkValue?: string | null;
   values: string[] | null | undefined;
 }

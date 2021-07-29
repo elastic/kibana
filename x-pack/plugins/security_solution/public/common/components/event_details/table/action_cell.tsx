@@ -20,7 +20,6 @@ interface Props {
   eventId: string;
   fieldFromBrowserField?: BrowserField;
   getLinkValue?: (field: string) => string | null;
-  isThreatMatch?: boolean;
   linkValue?: string | null | undefined;
   onFilterAdded?: () => void;
   timelineId?: string;
@@ -35,7 +34,6 @@ export const ActionCell: React.FC<Props> = React.memo(
     eventId,
     fieldFromBrowserField,
     getLinkValue,
-    isThreatMatch,
     linkValue,
     onFilterAdded,
     timelineId,
@@ -50,7 +48,6 @@ export const ActionCell: React.FC<Props> = React.memo(
       fieldFromBrowserField,
       fieldType: data.type,
       isObjectArray: data.isObjectArray,
-      isThreatMatch,
       linkValue: (getLinkValue && getLinkValue(data.field)) ?? linkValue,
       values,
     });
