@@ -134,7 +134,7 @@ export const Overview: React.FC = () => {
     return (
       <>
         <EuiTitle size="xs">
-          <h4>{CONTENT_SUMMARY_TITLE}</h4>
+          <h3>{CONTENT_SUMMARY_TITLE}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         {!summary && <ComponentLoader text="Loading summary details..." />}
@@ -219,7 +219,7 @@ export const Overview: React.FC = () => {
     return (
       <>
         <EuiTitle size="xs">
-          <h3>{RECENT_ACTIVITY_TITLE}</h3>
+          <h4>{RECENT_ACTIVITY_TITLE}</h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         {activities.length === 0 ? emptyState : activitiesTable}
@@ -229,9 +229,9 @@ export const Overview: React.FC = () => {
 
   const groupsSummary = (
     <>
-      <EuiText>
-        <h4>{GROUP_ACCESS_TITLE}</h4>
-      </EuiText>
+      <EuiTitle size="xs">
+        <h5>{GROUP_ACCESS_TITLE}</h5>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
         {groups.map((group, index) => (
@@ -255,9 +255,9 @@ export const Overview: React.FC = () => {
   const detailsSummary = (
     <>
       <EuiSpacer size="l" />
-      <EuiText>
-        <h4>{CONFIGURATION_TITLE}</h4>
-      </EuiText>
+      <EuiTitle size="xs">
+        <h3>{CONFIGURATION_TITLE}</h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiPanel hasShadow={false} color="subdued">
         <EuiText size="s">
@@ -428,7 +428,7 @@ export const Overview: React.FC = () => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
-        <h4>{title}</h4>
+        <span>{title}</span>
       </EuiTitle>
       <EuiText size="s">{children}</EuiText>
     </EuiPanel>
@@ -439,7 +439,7 @@ export const Overview: React.FC = () => {
       <LicenseBadge />
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
-        <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
+        <span>{DOCUMENT_PERMISSIONS_TITLE}</span>
       </EuiTitle>
       <EuiText size="s">
         <p>{DOC_PERMISSIONS_DESCRIPTION}</p>

@@ -180,9 +180,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
     return (
       <>
         <EuiTitle size="s">
-          <h3>
-            <strong>{INCLUDED_FEATURES_TITLE}</strong>
-          </h3>
+          <h2>{INCLUDED_FEATURES_TITLE}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup>
