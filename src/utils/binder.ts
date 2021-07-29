@@ -31,8 +31,8 @@ export class BinderBase {
     const on = emitter.on || emitter.addListener;
     const off = emitter.off || emitter.removeListener;
 
-    on.apply(emitter, args);
-    this.disposal.push(() => off.apply(emitter, args));
+    on.call(emitter, args[0]);
+    this.disposal.push(() => off.call(emitter, args[0]));
   }
 
   public destroy() {

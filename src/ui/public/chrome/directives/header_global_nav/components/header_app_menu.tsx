@@ -72,12 +72,12 @@ class HeaderAppMenuUI extends Component<Props, State> {
     );
 
     return (
+      // @ts-ignore
       <EuiPopover
         id="headerAppMenu"
         button={button}
         isOpen={this.state.isOpen}
         anchorPosition="downRight"
-        // @ts-ignore
         repositionOnScroll
         closePopover={this.closeMenu}
       >
