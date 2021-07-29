@@ -230,8 +230,8 @@ export class RuleDataPluginService {
     feature: ValidFeatureId,
     assetName: string,
     initialize: () => Promise<void>,
-    componentTemplateNames:  string[],
-    secondaryAlias?: string,
+    componentTemplateNames: string[],
+    secondaryAlias?: string
   ) {
     return new RuleDataClient({
       alias: this.getFullAssetName(assetName),

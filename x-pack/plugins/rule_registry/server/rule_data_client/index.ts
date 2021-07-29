@@ -113,20 +113,29 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  createNamespacedIndexTemplate(primaryNamespacedAlias: string, secondaryNamespacedAlias?: string): IndicesPutIndexTemplateRequest {
+  createNamespacedIndexTemplate({
+    primaryNamespacedAlias,
+    secondaryNamespacedAlias,
+    namespace,
+  }: {
+    primaryNamespacedAlias: string;
+    secondaryNamespacedAlias?: string;
+    namespace?: string;
+  }): IndicesPutIndexTemplateRequest {
     return {
       name: primaryNamespacedAlias,
       body: {
         index_patterns: [`${primaryNamespacedAlias}*`],
-        composed_of: [
-          ...this.options.componentTemplateNames,
-        ],
+        composed_of: [...this.options.componentTemplateNames],
         template: {
-          aliases: secondaryNamespacedAlias != null ? {
-            [secondaryNamespacedAlias]: {
-              is_write_index: false,
-            }
-          } : undefined,
+          aliases:
+            secondaryNamespacedAlias != null
+              ? {
+                  [secondaryNamespacedAlias]: {
+                    is_write_index: false,
+                  },
+                }
+              : undefined,
           settings: {
             'index.lifecycle': {
               name: DEFAULT_ILM_POLICY_ID,
@@ -136,42 +145,51 @@ export class RuleDataClient implements IRuleDataClient {
             },
           },
         },
-      }
+        _meta: {
+          namespace,
+        },
+      },
     };
   }
 
   async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {
-    const namespacedAlias = getNamespacedAlias({ alias: this.options.alias, namespace });
+    const primaryNamespacedAlias = getNamespacedAlias({ alias: this.options.alias, namespace });
 
     const clusterClient = await this.getClusterClient();
-    const secondaryNamespacedAlias = this.options.secondaryAlias != null ? 
-      getNamespacedAlias({ alias: this.options.secondaryAlias, namespace })
-      : undefined;
-    const template = this.createNamespacedIndexTemplate(namespacedAlias, secondaryNamespacedAlias);
-    // TODO: need a way to update this template if/when we decide to make changes to the 
-    // built in index template. Probably do it as part of updateIndexMappingsForAsset?
-    // (Before upgrading any indices, find and upgrade all namespaced index templates - component templates
-    // will already have been upgraded by solutions or rule registry, in the case of technical/ECS templates)
-    // With the current structure, it's tricky because the index template creation
-    // depends on both the namespace and secondary alias, both of which are not currently available
-    // to updateIndexMappingsForAsset. We can make the secondary alias available since
-    // it's known at plugin startup time, but
-    // the namespace values can really only come from the existing templates that we're trying to update
-    // - maybe we want to store the namespace as a _meta field on the index template for easy retrieval
-    await clusterClient.indices.putIndexTemplate(template);
+
     const { body: aliasExists } = await clusterClient.indices.existsAlias({
-      name: namespacedAlias,
+      name: primaryNamespacedAlias,
     });
 
-    const concreteIndexName = `${namespacedAlias}-000001`;
+    const concreteIndexName = `${primaryNamespacedAlias}-000001`;
 
     if (!aliasExists) {
+      const secondaryNamespacedAlias =
+        this.options.secondaryAlias != null
+          ? getNamespacedAlias({ alias: this.options.secondaryAlias, namespace })
+          : undefined;
+      const template = this.createNamespacedIndexTemplate({
+        primaryNamespacedAlias,
+        secondaryNamespacedAlias,
+        namespace,
+      });
+      // TODO: need a way to update this template if/when we decide to make changes to the
+      // built in index template. Probably do it as part of updateIndexMappingsForAsset?
+      // (Before upgrading any indices, find and upgrade all namespaced index templates - component templates
+      // will already have been upgraded by solutions or rule registry, in the case of technical/ECS templates)
+      // With the current structure, it's tricky because the index template creation
+      // depends on both the namespace and secondary alias, both of which are not currently available
+      // to updateIndexMappingsForAsset. We can make the secondary alias available since
+      // it's known at plugin startup time, but
+      // the namespace values can really only come from the existing templates that we're trying to update
+      // - maybe we want to store the namespace as a _meta field on the index template for easy retrieval
+      await clusterClient.indices.putIndexTemplate(template);
       try {
         await clusterClient.indices.create({
           index: concreteIndexName,
           body: {
             aliases: {
-              [namespacedAlias]: {
+              [primaryNamespacedAlias]: {
                 is_write_index: true,
               },
             },

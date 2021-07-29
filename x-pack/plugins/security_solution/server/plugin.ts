@@ -217,7 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
         });
 
-        /*await ruleDataService.createOrUpdateIndexTemplate({
+        /* await ruleDataService.createOrUpdateIndexTemplate({
           name: ruleDataService.getFullAssetName('security.alerts-index-template'),
           body: {
             index_patterns: [alertsIndexPattern],
@@ -245,7 +245,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
           componentTemplateName,
         ],
-        config.signalsIndex,
+        config.signalsIndex
       );
 
       // sec
