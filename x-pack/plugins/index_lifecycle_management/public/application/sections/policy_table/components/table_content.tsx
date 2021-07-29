@@ -20,7 +20,6 @@ import {
   EuiTablePagination,
   EuiTableRow,
   EuiTableRowCell,
-  EuiText,
   Pager,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -254,19 +253,18 @@ export const TableContent: React.FunctionComponent<Props> = ({
         </EuiLink>
       );
     } else if (fieldName === 'indices') {
-      return (
-        <EuiText>
-          <b>{value ? (value as string[]).length : '0'}</b>
-        </EuiText>
-      );
+      return value ? (value as string[]).length : '0';
     } else if (fieldName === 'indexTemplates' && policy) {
-      return (
+      return value && (value as string[]).length > 0 ? (
         <EuiButtonEmpty
+          flush="left"
           data-test-subj="viewIndexTemplates"
           onClick={() => setConfirmModal(renderIndexTemplatesFlyout(policy))}
         >
-          {value ? (value as string[]).length : '0'}
+          {(value as string[]).length}
         </EuiButtonEmpty>
+      ) : (
+        '0'
       );
     } else if (fieldName === 'modifiedDate' && value) {
       return moment(value).format('YYYY-MM-DD HH:mm:ss');

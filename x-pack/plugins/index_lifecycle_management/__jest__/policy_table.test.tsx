@@ -193,7 +193,7 @@ describe('policy table', () => {
   });
   test('displays policy properties', () => {
     const rendered = mountWithIntl(component);
-    const firstRow = findTestSubject(rendered, 'policyTableRow').at(0).text();
+    const firstRow = findTestSubject(rendered, 'policyTableRow-testy0').text();
     const numberOfIndices = testPolicy.indices.length;
     const numberOfIndexTemplates = testPolicy.indexTemplates.length;
     expect(firstRow).toBe(
