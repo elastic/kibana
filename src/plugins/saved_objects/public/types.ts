@@ -15,7 +15,7 @@ import {
 } from 'kibana/public';
 import {
   DataPublicPluginStart,
-  IIndexPattern,
+  IndexPattern,
   IndexPatternsContract,
   ISearchSource,
   SearchSourceFields,
@@ -34,7 +34,7 @@ export interface SavedObject {
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<null | IIndexPattern>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
   id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
@@ -82,7 +82,7 @@ export interface SavedObjectConfig {
   injectReferences?: <T extends SavedObject>(object: T, references: SavedObjectReference[]) => void;
   id?: string;
   init?: () => void;
-  indexPattern?: IIndexPattern;
+  indexPattern?: IndexPattern;
   mapping?: Record<string, any>;
   migrationVersion?: Record<string, any>;
   path?: string;
