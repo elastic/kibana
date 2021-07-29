@@ -4,23 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import styled from 'styled-components';
 import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiToolTip,
   EuiLink,
   EuiText,
-  EuiTextColor,
+  EuiAccordion,
+  EuiTitle,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import React from 'react';
+import { groupBy } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
-import { FIRSTSEEN, EVENT_URL, EVENT_REFERENCE } from '../../../../../common/cti/constants';
+import {
+  FIRSTSEEN,
+  EVENT_URL,
+  EVENT_REFERENCE,
+  ENRICHMENT_TYPES,
+} from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
@@ -30,9 +37,9 @@ import {
   getEnrichmentIdentifiers,
 } from './helpers';
 import * as i18n from './translations';
-import { EnrichmentIcon } from './enrichment_icon';
 import { QUERY_ID } from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
 import { InspectButton } from '../../inspect';
+import { EnrichmentButtonContent } from './enrichment_button_content';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
@@ -40,44 +47,15 @@ const getFirstSeen = (enrichment: CtiEnrichment): number => {
   return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
 };
 
-const ThreatDetailsHeader: React.FC<{
-  field: string | undefined;
-  value: string | undefined;
-  provider: string | undefined;
-  type: string | undefined;
-}> = ({ field, value, provider, type }) => (
-  <>
-    <EuiTextColor color="subdued">
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="xs" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <span>{field}</span> <span>{value}</span>
-          </EuiText>
-        </EuiFlexItem>
-        {provider && (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                {i18n.PROVIDER_PREPOSITION} {provider}
-              </EuiText>
-            </EuiFlexItem>
-          </>
-        )}
-        <EuiFlexItem grow={false}>
-          <EnrichmentIcon type={type} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        {isInvestigationTimeEnrichment(type) && (
-          <EuiFlexItem grow={false}>
-            <InspectButton queryId={QUERY_ID} title={i18n.INVESTIGATION_QUERY_TITLE} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiTextColor>
-  </>
-);
+const StyledEuiAccordion = styled(EuiAccordion)`
+  .euiAccordion__triggerWrapper {
+    background: ${({ theme }) => theme.eui.euiColorLightestShade};
+    height: ${({ theme }) => theme.eui.paddingSizes.xl};
+    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
+    padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  }
+`;
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
@@ -125,31 +103,115 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
       };
     });
 
+const EnrichmentAccordion: React.FC<{
+  enrichment: CtiEnrichment;
+  index: number;
+  enrichmentsLength: number;
+}> = ({ enrichment, index, enrichmentsLength }) => {
+  const { id = `threat-details-item`, field, provider, type, value } = getEnrichmentIdentifiers(
+    enrichment
+  );
+  const accordionId = `${id}${field}`;
+  return (
+    <StyledEuiAccordion
+      id={accordionId}
+      key={accordionId}
+      initialIsOpen={true}
+      arrowDisplay={'right'}
+      buttonContent={<EnrichmentButtonContent field={field} provider={provider} value={value} />}
+      extraAction={
+        isInvestigationTimeEnrichment(type) && (
+          <EuiFlexItem grow={false}>
+            <InspectButton queryId={QUERY_ID} title={i18n.INVESTIGATION_QUERY_TITLE} />
+          </EuiFlexItem>
+        )
+      }
+    >
+      <StyledEuiInMemoryTable
+        columns={columns}
+        compressed
+        data-test-subj={`threat-details-view-${index}`}
+        items={buildThreatDetailsItems(enrichment)}
+      />
+      {index < enrichmentsLength - 1 && <EuiSpacer size="m" />}
+    </StyledEuiAccordion>
+  );
+};
+
+const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[] }> = ({ enrichments }) => (
+  <>
+    {enrichments
+      .sort((a, b) => getFirstSeen(b) - getFirstSeen(a))
+      .map((enrichment, index) => (
+        <EnrichmentAccordion
+          enrichment={enrichment}
+          index={index}
+          enrichmentsLength={enrichments.length}
+        />
+      ))}
+  </>
+);
+
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
 }> = ({ enrichments }) => {
-  const sortedEnrichments = enrichments.sort((a, b) => getFirstSeen(b) - getFirstSeen(a));
+  const {
+    [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
+    [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
+    undefined: matchesWithNoType,
+  } = groupBy(enrichments, 'matched.type');
 
   return (
     <>
       <EuiSpacer size="m" />
-      {sortedEnrichments.map((enrichment, index) => {
-        const { id, field, provider, type, value } = getEnrichmentIdentifiers(enrichment);
-
-        return (
-          <Fragment key={id}>
-            <ThreatDetailsHeader field={field} provider={provider} value={value} type={type} />
-            <EuiSpacer size="m" />
-            <StyledEuiInMemoryTable
-              columns={columns}
-              compressed
-              data-test-subj={`threat-details-view-${index}`}
-              items={buildThreatDetailsItems(enrichment)}
+      {indicatorMatches && (
+        <div data-test-subj={'threat-match-detected'}>
+          <EuiTitle size="xxxs">
+            <h5>{i18n.INDICATOR_TOOLTIP_TITLE}</h5>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.securitySolution.alertDetails.threatDetails.threatMatchSubtitle"
+              defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} matched a threat intelligence indicator with a rule you created."
+              values={{
+                totalCount: indicatorMatches.length,
+              }}
             />
-            {index < sortedEnrichments.length - 1 && <EuiSpacer size="m" />}
-          </Fragment>
-        );
-      })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EnrichmentSection enrichments={indicatorMatches} />
+        </div>
+      )}
+      {threatIntelEnrichments && (
+        <div data-test-subj={'enriched-with-threat-intel'}>
+          {indicatorMatches && <EuiSpacer size="l" />}
+          <>
+            <EuiTitle size="xxxs">
+              <h5>{i18n.INVESTIGATION_TOOLTIP_TITLE}</h5>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            {/* TODO: Date form */}
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle"
+                defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} has additional information available from threat intelligence sources we searched in the past 30 days by default."
+                values={{
+                  totalCount: threatIntelEnrichments.length,
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EnrichmentSection enrichments={threatIntelEnrichments} />
+          </>
+        </div>
+      )}
+      {matchesWithNoType && (
+        <div data-test-subj={'matches-with-no-type'}>
+          {indicatorMatches && <EuiSpacer size="l" />}
+          <EnrichmentSection enrichments={matchesWithNoType} />
+        </div>
+      )}
     </>
   );
 };
