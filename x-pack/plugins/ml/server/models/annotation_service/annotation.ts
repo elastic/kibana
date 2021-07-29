@@ -46,6 +46,7 @@ export interface IndexAnnotationArgs {
   fields?: FieldToBucket[];
   detectorIndex?: number;
   entities?: any[];
+  event?: Annotation['event'];
 }
 
 export interface AggTerm {
@@ -116,6 +117,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     fields,
     detectorIndex,
     entities,
+    event,
   }: IndexAnnotationArgs) {
     const obj: GetResponse = {
       success: true,
@@ -189,6 +191,12 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     boolCriteria.push({
       exists: { field: 'annotation' },
     });
+
+    if (event) {
+      boolCriteria.push({
+        term: { event },
+      });
+    }
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
@@ -349,3 +357,5 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     deleteAnnotation,
   };
 }
+
+export type AnnotationService = ReturnType<typeof annotationProvider>;

@@ -12,6 +12,7 @@ import { PluginSetupContract as AlertingSetup } from '../../../../alerting/publi
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
+import { validateLookbackInterval } from '../validators';
 
 export function registerJobsHealthAlertingRule(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -32,6 +33,7 @@ export function registerJobsHealthAlertingRule(
         errors: {
           includeJobs: new Array<string>(),
           testsConfig: new Array<string>(),
+          delayedData: new Array<string>(),
         } as Record<keyof MlAnomalyDetectionJobsHealthRuleParams, string[]>,
       };
 
@@ -50,6 +52,31 @@ export function registerJobsHealthAlertingRule(
           i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.errorMessage', {
             defaultMessage: 'At least one health check must be enabled.',
           })
+        );
+      }
+
+      if (
+        !!resultTestConfig.delayedData.timeInterval &&
+        validateLookbackInterval(resultTestConfig.delayedData.timeInterval)
+      ) {
+        validationResult.errors.delayedData.push(
+          i18n.translate(
+            'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.timeIntervalErrorMessage',
+            {
+              defaultMessage: 'Time interval is invalid',
+            }
+          )
+        );
+      }
+
+      if (resultTestConfig.delayedData.docsCount === 0) {
+        validationResult.errors.delayedData.push(
+          i18n.translate(
+            'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountErrorMessage',
+            {
+              defaultMessage: 'Number of documents is invalid',
+            }
+          )
         );
       }
 
