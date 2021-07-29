@@ -24,5 +24,5 @@ resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions
 
 `Promise<SavedObjectsResolveResponse<T>>`
 
-{<!-- -->promise<!-- -->} - { saved\_object, outcome }
+{<!-- -->promise<!-- -->} - { savedObject, outcome }
 

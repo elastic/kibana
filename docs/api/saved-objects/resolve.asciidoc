@@ -52,7 +52,7 @@ The API returns the following:
 [source,sh]
 --------------------------------------------------
 {
-  "saved_object": {
+  "savedObject": {
     "id": "my-pattern",
     "type": "index-pattern",
     "version": 1,
@@ -67,8 +67,8 @@ The API returns the following:
 The `outcome` field may be any of the following:
 
 * `"exactMatch"` -- One document exactly matched the given ID.
-* `"aliasMatch"` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different than the given ID.
-* `"conflict"` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
+* `"aliasMatch"` -- One document with a legacy URL alias matched the given ID; in this case the `savedObject.id` field is different than the given ID.
+* `"conflict"` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the `savedObject` object is the exact match, and the `savedObject.id` field is the same as the given ID.
 
 Retrieve a dashboard object in the `testspace` by ID:
 
@@ -83,7 +83,7 @@ The API returns the following:
 [source,sh]
 --------------------------------------------------
 {
-  "saved_object": {
+  "savedObject": {
     "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
     "type": "dashboard",
     "updated_at": "2019-07-23T00:11:07.059Z",

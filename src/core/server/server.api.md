@@ -3035,7 +3035,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 export interface SavedObjectsResolveResponse<T = unknown> {
     aliasTargetId?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-    saved_object: SavedObject<T>;
+    savedObject: SavedObject<T>;
 }
 
 // @public

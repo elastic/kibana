@@ -38,24 +38,24 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/api/saved_objects/resolve/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
           .expect(200)
           .then((resp) => {
-            resp.body.saved_object.updated_at = '2015-01-01T00:00:00.000Z';
+            resp.body.savedObject.updated_at = '2015-01-01T00:00:00.000Z';
 
             expect(resp.body).to.eql({
-              saved_object: {
+              savedObject: {
                 id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                 type: 'visualization',
                 updated_at: '2015-01-01T00:00:00.000Z',
-                version: resp.body.saved_object.version,
-                migrationVersion: resp.body.saved_object.migrationVersion,
+                version: resp.body.savedObject.version,
+                migrationVersion: resp.body.savedObject.migrationVersion,
                 coreMigrationVersion: KIBANA_VERSION,
                 attributes: {
                   title: 'Count of requests',
                   description: '',
                   version: 1,
                   // cheat for some of the more complex attributes
-                  visState: resp.body.saved_object.attributes.visState,
-                  uiStateJSON: resp.body.saved_object.attributes.uiStateJSON,
-                  kibanaSavedObjectMeta: resp.body.saved_object.attributes.kibanaSavedObjectMeta,
+                  visState: resp.body.savedObject.attributes.visState,
+                  uiStateJSON: resp.body.savedObject.attributes.uiStateJSON,
+                  kibanaSavedObjectMeta: resp.body.savedObject.attributes.kibanaSavedObjectMeta,
                 },
                 references: [
                   {
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               outcome: 'exactMatch',
             });
-            expect(resp.body.saved_object.migrationVersion).to.be.ok();
+            expect(resp.body.savedObject.migrationVersion).to.be.ok();
           }));
 
       describe('doc does not exist', () => {

@@ -3360,7 +3360,7 @@ describe('SavedObjectsRepository', () => {
           expect(client.mget).not.toHaveBeenCalled();
           expectIncrementCounter(1, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
           expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id }),
+            savedObject: expect.objectContaining({ type, id }),
             outcome: 'exactMatch',
           });
         });
@@ -3380,7 +3380,7 @@ describe('SavedObjectsRepository', () => {
             expect(client.mget).not.toHaveBeenCalled();
             expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
             expect(result).toEqual({
-              saved_object: expect.objectContaining({ type, id }),
+              savedObject: expect.objectContaining({ type, id }),
               outcome: 'exactMatch',
             });
           };
@@ -3415,7 +3415,7 @@ describe('SavedObjectsRepository', () => {
             expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
             expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
             expect(result).toEqual({
-              saved_object: expect.objectContaining({ type, id }),
+              savedObject: expect.objectContaining({ type, id }),
               outcome: 'exactMatch',
             });
           };
@@ -3457,7 +3457,7 @@ describe('SavedObjectsRepository', () => {
           expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
           expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
           expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id: aliasTargetId }),
+            savedObject: expect.objectContaining({ type, id: aliasTargetId }),
             outcome: 'aliasMatch',
             aliasTargetId,
           });
@@ -3499,7 +3499,7 @@ describe('SavedObjectsRepository', () => {
           expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
           expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
           expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id }),
+            savedObject: expect.objectContaining({ type, id }),
             outcome: 'conflict',
             aliasTargetId,
           });

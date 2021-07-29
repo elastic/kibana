@@ -1520,7 +1520,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 export interface SavedObjectsResolveResponse<T = unknown> {
     aliasTargetId?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-    saved_object: SavedObject<T>;
+    savedObject: SavedObject<T>;
 }
 
 // @public (undocumented)

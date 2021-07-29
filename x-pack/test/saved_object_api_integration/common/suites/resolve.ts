@@ -79,7 +79,7 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
       await expectSavedObjectForbidden(testCase.type)(response);
     } else {
       // permitted
-      const object = response.body.saved_object || response.body; // errors do not have a saved_object field
+      const object = response.body.savedObject || response.body; // errors do not have a savedObject field
       const { expectedId: id, expectedOutcome, expectedAliasTargetId } = testCase;
       await expectResponses.permitted(object, { ...testCase, ...(id && { id }) });
       if (!testCase.failure) {

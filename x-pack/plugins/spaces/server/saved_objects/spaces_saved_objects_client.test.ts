@@ -118,7 +118,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = {
-          saved_object: createMockResponse(),
+          savedObject: createMockResponse(),
           outcome: 'exactMatch' as 'exactMatch', // outcome doesn't matter, just including it for type safety
         };
         baseClient.resolve.mockReturnValue(Promise.resolve(expectedReturnValue));

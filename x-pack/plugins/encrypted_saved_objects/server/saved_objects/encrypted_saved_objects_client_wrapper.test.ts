@@ -1457,7 +1457,7 @@ describe('#get', () => {
 describe('#resolve', () => {
   it('redirects request to underlying base client and does not alter response if type is not registered', async () => {
     const mockedResponse = {
-      saved_object: {
+      savedObject: {
         id: 'some-id',
         type: 'unknown-type',
         attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
@@ -1478,7 +1478,7 @@ describe('#resolve', () => {
 
   it('redirects request to underlying base client and strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
     const mockedResponse = {
-      saved_object: {
+      savedObject: {
         id: 'some-id',
         type: 'known-type',
         attributes: {
@@ -1497,8 +1497,8 @@ describe('#resolve', () => {
     const options = { namespace: 'some-ns' };
     await expect(wrapper.resolve('known-type', 'some-id', options)).resolves.toEqual({
       ...mockedResponse,
-      saved_object: {
-        ...mockedResponse.saved_object,
+      savedObject: {
+        ...mockedResponse.savedObject,
         attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
       },
     });
@@ -1523,7 +1523,7 @@ describe('#resolve', () => {
 
   it('includes both attributes and error with modified outcome if decryption fails.', async () => {
     const mockedResponse = {
-      saved_object: {
+      savedObject: {
         id: 'some-id',
         type: 'known-type',
         attributes: {
@@ -1552,8 +1552,8 @@ describe('#resolve', () => {
     const options = { namespace: 'some-ns' };
     await expect(wrapper.resolve('known-type', 'some-id', options)).resolves.toEqual({
       ...mockedResponse,
-      saved_object: {
-        ...mockedResponse.saved_object,
+      savedObject: {
+        ...mockedResponse.savedObject,
         attributes: { attrOne: 'one', attrThree: 'three' },
         error: decryptionError,
       },

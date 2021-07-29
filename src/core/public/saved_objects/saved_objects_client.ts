@@ -441,7 +441,7 @@ export class SavedObjectsClient {
 
     const path = `${this.getPath(['resolve'])}/${type}/${id}`;
     const request: Promise<SavedObjectsResolveResponse<T>> = this.savedObjectsFetch(path, {});
-    return request.then(({ saved_object: object, outcome, aliasTargetId }) => {
+    return request.then(({ savedObject: object, outcome, aliasTargetId }) => {
       const savedObject = new SimpleSavedObject<T>(this, object);
       return { savedObject, outcome, aliasTargetId };
     });

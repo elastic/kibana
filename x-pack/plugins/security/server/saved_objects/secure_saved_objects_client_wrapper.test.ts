@@ -965,7 +965,7 @@ describe('#resolve', () => {
   const id = `${type}-id`;
   const namespace = 'some-ns';
   const resolvedId = 'another-id'; // success audit records include the resolved ID, not the requested ID
-  const mockResult = { saved_object: { id: resolvedId } }; // mock result needs to have ID for audit logging
+  const mockResult = { savedObject: { id: resolvedId } }; // mock result needs to have ID for audit logging
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.resolve, { type, id });
@@ -1001,13 +1001,13 @@ describe('#resolve', () => {
     );
 
     const namespaces = ['some-other-namespace', '*', namespace];
-    const returnValue = { saved_object: { namespaces, id: resolvedId, foo: 'bar' } };
+    const returnValue = { savedObject: { namespaces, id: resolvedId, foo: 'bar' } };
     clientOpts.baseClient.resolve.mockReturnValue(returnValue as any);
 
     const result = await client.resolve(type, id, options);
     // we will never redact the "All Spaces" ID
     expect(result).toEqual({
-      saved_object: expect.objectContaining({ namespaces: ['*', namespace, '?'] }),
+      savedObject: expect.objectContaining({ namespaces: ['*', namespace, '?'] }),
     });
 
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);

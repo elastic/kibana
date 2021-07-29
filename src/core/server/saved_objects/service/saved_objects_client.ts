@@ -314,15 +314,15 @@ export interface SavedObjectsResolveResponse<T = unknown> {
   /**
    * The saved object that was found.
    */
-  saved_object: SavedObject<T>;
+  savedObject: SavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
    *
    *  * `'exactMatch'` -- One document exactly matched the given ID.
-   *  * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different
+   *  * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `savedObject.id` field is different
    *    than the given ID.
    *  * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the
-   *    `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
+   *    `savedObject` object is the exact match, and the `savedObject.id` field is the same as the given ID.
    */
   outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
   /**
