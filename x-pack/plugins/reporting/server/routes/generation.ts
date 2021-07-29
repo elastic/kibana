@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors as elasticsearchErrors } from 'elasticsearch';
 import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
@@ -15,8 +14,6 @@ import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
 import { HandlerFunction } from './types';
-
-const esErrors = elasticsearchErrors as Record<string, any>;
 
 const getDownloadBaseUrl = (reporting: ReportingCore) => {
   const config = reporting.getConfig();
@@ -74,24 +71,6 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       return res.customError({
         statusCode: err.output.statusCode,
         body: err.output.payload.message,
-      });
-    }
-
-    if (err instanceof esErrors['401']) {
-      return res.unauthorized({
-        body: `Sorry, you aren't authenticated`,
-      });
-    }
-
-    if (err instanceof esErrors['403']) {
-      return res.forbidden({
-        body: `Sorry, you are not authorized`,
-      });
-    }
-
-    if (err instanceof esErrors['404']) {
-      return res.notFound({
-        body: err.message,
       });
     }
 
