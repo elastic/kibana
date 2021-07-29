@@ -11,6 +11,7 @@ import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, ThresholdResult } from '../../../signals/types';
 import { getValidDateFromDoc } from '../../../signals/utils';
 import { RACAlertSignalWithRule } from '../../types';
+import { invariant } from '../../../../../../common/utils/invariant';
 
 /**
  * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
@@ -60,7 +61,7 @@ export const buildAncestors = (doc: BaseSignalHit): Ancestor[] => {
  * @param doc The source index doc to a signal.
  */
 export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
-  // @ts-expect-error @elastic/elasticsearch _source is optional
+  invariant(doc._source, '_source field not found');
   const { signal, ...noSignal } = doc._source;
   if (signal == null || isEventTypeSignal(doc)) {
     return doc;
