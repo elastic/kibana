@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -103,6 +105,8 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
   ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
+
+const SECURITY_ALERTS_CONSUMERS = [ALERTS_CONSUMERS.SIEM];
 
 export interface TGridIntegratedProps {
   browserFields: BrowserFields;
@@ -237,6 +241,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
     fields,
     filterQuery: combinedQueries!.filterQuery,

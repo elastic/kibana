@@ -17,7 +17,8 @@ export enum TimelineEventsQueries {
   lastEventTime = 'eventsLastEventTime',
 }
 
-export enum EntityType {
-  ALERTS = 'alerts',
-  EVENTS = 'events',
-}
+export const EntityType = {
+  ALERTS: 'alerts',
+  EVENTS: 'events',
+} as const;
+export type EntityType = typeof EntityType[keyof typeof EntityType];
