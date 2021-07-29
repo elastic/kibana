@@ -39,15 +39,7 @@ export const BottomDrawer: React.FC<{
   return (
     <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
       <BottomActionTopBar ref={isOpen ? null : measureRef}>
-        <EuiFlexItem grow={false}>
-          <ShowHideButton
-            aria-expanded={isOpen}
-            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-            onClick={onClick}
-          >
-            {isOpen ? hideHistory : showHistory}
-          </ShowHideButton>
-        </EuiFlexItem>
+        <LeftSideSpacer />
         <EuiFlexItem
           grow={false}
           style={{
@@ -58,7 +50,16 @@ export const BottomDrawer: React.FC<{
         >
           {children}
         </EuiFlexItem>
-        <RightSideSpacer />
+
+        <EuiFlexItem grow={false}>
+          <ShowHideButton
+            aria-expanded={isOpen}
+            iconType={isOpen ? 'eyeClosed' : 'eye'}
+            onClick={onClick}
+          >
+            {isOpen ? hideHistory : showHistory}
+          </ShowHideButton>
+        </EuiFlexItem>
       </BottomActionTopBar>
       <EuiFlexGroup style={{ marginTop: 0 }}>
         <Timeline isVisible={isOpen} interval={interval} yAxisFormatter={formatter} />
@@ -89,6 +90,6 @@ const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
   width: 140px;
 `;
 
-const RightSideSpacer = euiStyled(EuiSpacer).attrs({ size: 'xs' })`
+const LeftSideSpacer = euiStyled(EuiSpacer).attrs({ size: 'xs' })`
   width: 140px;
 `;
