@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType } from '../../../../../../plugins/data/public';
+import { IndexPatternField } from '../../../../../../plugins/data/public';
 
-export interface IndexedFieldItem extends IFieldType {
+export interface IndexedFieldItem extends IndexPatternField {
   info: string[];
   excluded: boolean;
   kbnType: string;

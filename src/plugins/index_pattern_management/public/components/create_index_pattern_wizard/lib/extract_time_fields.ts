@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IFieldType } from '../../../../../../plugins/data/public';
+import { IndexPatternField } from '../../../../../../plugins/data/public';
 
-export function extractTimeFields(fields: IFieldType[]) {
+export function extractTimeFields(fields: IndexPatternField[]) {
   const dateFields = fields.filter((field) => field.type === 'date');
   const label = i18n.translate(
     'indexPatternManagement.createIndexPattern.stepTime.noTimeFieldsLabel',
