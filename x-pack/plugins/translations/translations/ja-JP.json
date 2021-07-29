@@ -22539,7 +22539,6 @@
     "xpack.securitySolution.timeline.autosave.warning.title": "更新されるまで自動保存は無効です",
     "xpack.securitySolution.timeline.body.actions.addNotesForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のイベントのメモをタイムラインに追加",
     "xpack.securitySolution.timeline.body.actions.attachAlertToCaseForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のアラートまたはイベントをケースに追加",
-    "xpack.securitySolution.timeline.body.actions.checkboxForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のアラートまたはイベントのチェックボックスを{checked, select, false {オフ} true {オン}}",
     "xpack.securitySolution.timeline.body.actions.collapseAriaLabel": "縮小",
     "xpack.securitySolution.timeline.body.actions.expandEventTooltip": "詳細を表示",
     "xpack.securitySolution.timeline.body.actions.investigateInResolverDisabledTooltip": "このイベントを分析できません。フィールドマッピングの互換性がありません",

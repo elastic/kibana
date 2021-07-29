@@ -23064,7 +23064,6 @@
     "xpack.securitySolution.timeline.autosave.warning.title": "刷新后才会启用自动保存",
     "xpack.securitySolution.timeline.body.actions.addNotesForRowAriaLabel": "将事件第 {ariaRowindex} 行的备注添加到时间线，其中列为 {columnValues}",
     "xpack.securitySolution.timeline.body.actions.attachAlertToCaseForRowAriaLabel": "将第 {ariaRowindex} 行的告警或事件附加到案例，其中列为 {columnValues}",
-    "xpack.securitySolution.timeline.body.actions.checkboxForRowAriaLabel": "告警或事件第 {ariaRowindex} 行的{checked, select, false {已取消选中} true {已选中}}复选框，其中列为 {columnValues}",
     "xpack.securitySolution.timeline.body.actions.collapseAriaLabel": "折叠",
     "xpack.securitySolution.timeline.body.actions.expandEventTooltip": "查看详情",
     "xpack.securitySolution.timeline.body.actions.investigateInResolverDisabledTooltip": "无法分析此事件，因为其包含不兼容的字段映射",
