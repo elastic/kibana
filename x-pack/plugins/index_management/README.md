@@ -1,5 +1,16 @@
 # Index Management UI
 
+## Indices tab
+
+### Quick steps for testing
+
+Create an index with special characters and verify it renders correctly:
+
+```
+# Renders as %{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23
+PUT %25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23
+```
+
 ## Data streams tab
 
 ### Quick steps for testing
@@ -21,6 +32,23 @@ POST ds/_doc
 }
 ```
 
+Create a data stream with special characters and verify it renders correctly:
+
+```
+# Configure template for creating a data stream
+PUT _index_template/special_ds
+{
+  "index_patterns": ["%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23"],
+  "data_stream": {}
+}
+
+# Add a document to the data stream, which will render as %{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23
+POST %25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23/_doc
+{
+  "@timestamp": "2020-01-27"
+}
+```
+
 ## Index templates tab
 
 ### Quick steps for testing
@@ -33,3 +61,25 @@ PUT _template/template_1
   "index_patterns": ["foo*"]
 }
 ```
+
+To test **Cloud-managed templates**:
+
+1. Add `cluster.metadata.managed_index_templates` setting via Dev Tools:
+```
+PUT /_cluster/settings
+{
+  "persistent": {
+    "cluster.metadata.managed_index_templates": ".cloud-"
+  }
+}
+```
+
+2. Create a template with the format: `.cloud-<template_name>` via Dev Tools.
+```
+PUT _template/.cloud-example
+{
+  "index_patterns": [ "foobar*"]
+}
+```
+
+The UI will now prevent you from editing or deleting this template.
