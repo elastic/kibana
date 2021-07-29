@@ -70,15 +70,18 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
       lastError = attempt.error;
     }
 
-    if (lastError && onFailureBlock) {
-      const before = await runAttempt(onFailureBlock);
-      if ('error' in before) {
-        log.debug(`--- onRetryBlock error: ${before.error.message}`);
-      }
-    }
-
     if (Date.now() - start + retryDelay < timeout) {
       await delay(retryDelay);
+
+      // This should probably be _before_ the delay, but it was originally run _after_ the delay
+      // and lots of tests have been written with that assumption
+      // Also, being here, it doesn't run after the the final error, but this also matches the original behavior
+      if (lastError && onFailureBlock) {
+        const before = await runAttempt(onFailureBlock);
+        if ('error' in before) {
+          log.debug(`--- onRetryBlock error: ${before.error.message}`);
+        }
+      }
     } else {
       // Another delay would put us over the timeout, so we should stop here
       if (lastError) {
