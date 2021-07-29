@@ -9,10 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { render } from 'react-dom';
-import { take } from 'rxjs/operators';
-import { ApplicationStart } from 'kibana/public';
 import {
   EuiIcon,
   EuiFlexItem,
@@ -20,95 +18,96 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlyoutHeader,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
   EuiLink,
+  EuiForm,
+  EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable, EmbeddableStateTransfer } from '../..';
-import { goToApp } from '../../lib/go_to_app';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../..';
 
 const EDITOR_CONTAINER_ID = 'kbnQuickEditEditorContainer';
 
 interface Props {
-  onClose: () => void;
-  initialInput: EmbeddableInput;
+  onSave: (newState: Partial<EmbeddableInput>) => void;
+  onCancel: () => void;
+  goToApp: () => void;
+
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-  application: ApplicationStart;
-  stateTransferService?: EmbeddableStateTransfer;
+
+  EditorComponent?: JSX.Element;
 }
 
-export class QuickEditFlyout extends React.Component<Props> {
-  private currentAppId: string | undefined;
-  private onSave: () => void;
+export function QuickEditFlyout(props: Props) {
+  const {
+    EditorComponent,
+    embeddable,
 
-  constructor(props: Props) {
-    super(props);
+    onSave,
+    onCancel,
+    goToApp,
+  } = props;
 
-    // temporary no-op
-    this.onSave = () => {};
-
-    const { embeddable, application } = this.props;
-    if (embeddable.getQuickEditor) {
-      embeddable.getQuickEditor()?.then(({ component, onSave }) => {
-        if (component) {
-          render(component, document.getElementById(EDITOR_CONTAINER_ID));
-        }
-
-        this.onSave = onSave;
-      });
+  // Mount the editor component in the tree
+  useEffect(() => {
+    if (EditorComponent) {
+      render(EditorComponent, document.getElementById(EDITOR_CONTAINER_ID));
     }
+  }, [EditorComponent]);
 
-    if (application?.currentAppId$) {
-      application.currentAppId$
-        .pipe(take(1))
-        .subscribe((appId: string | undefined) => (this.currentAppId = appId));
-    }
-  }
+  const [input, setInput] = useState({ title: embeddable.getTitle() });
 
-  public render() {
-    const { embeddable, stateTransferService, application, initialInput, onClose } = this.props;
+  const enhancedAriaLabel = i18n.translate('embeddableApi.quickEdit.flyout.titleLabel', {
+    defaultMessage: 'Edit {title}',
+    values: { title: input.title },
+  });
 
-    const enhancedAriaLabel = i18n.translate('embeddableApi.quickEdit.flyout.titleLabel', {
-      defaultMessage: 'Edit {title}',
-      values: { title: embeddable.getTitle() },
-    });
+  const enhancedAriaNoTitleLabel = i18n.translate('embeddableApi.quickEdit.flyout.noTitleLabel', {
+    defaultMessage: 'Edit panel',
+  });
+  const label = !input.title ? enhancedAriaNoTitleLabel : enhancedAriaLabel;
+  const editApp = embeddable.getOutput().editApp;
 
-    const enhancedAriaNoTitleLabel = i18n.translate('embeddableApi.quickEdit.flyout.noTitleLabel', {
-      defaultMessage: 'Edit panel',
-    });
-    const label = !embeddable.getTitle() ? enhancedAriaNoTitleLabel : enhancedAriaLabel;
-
-    const editApp = embeddable.getOutput().editApp;
-    return (
-      <>
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2>
-                  <span>{label}</span>
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiLink
-              onClick={() => {
-                // Restore embeddable to original state before navigating away
-                embeddable.updateInput(initialInput);
-
-                goToApp(embeddable, this.currentAppId || '', { stateTransferService, application });
-                onClose();
+  return (
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2>
+                <span>{label}</span>
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiLink
+            onClick={() => {
+              goToApp();
+            }}
+            external={true}
+          >
+            <FormattedMessage
+              id="embeddableApi.quickEdit.flyout.openAppLabel"
+              defaultMessage="Open in {editApp}"
+              values={{ editApp }}
+            />
+            <EuiIcon size="s" className="euiLink__externalIcon" type="popout" />
+          </EuiLink>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiForm>
+          <EuiFormRow label="Panel Title">
+            <EuiFieldText
+              name="title"
+              value={input.title}
+              onChange={(e) => {
+                setInput({ title: e.currentTarget.value });
               }}
-              external={true}
-            >
-              <FormattedMessage
-                id="embeddableApi.quickEdit.flyout.openAppLabel"
-                defaultMessage="Open in {editApp}"
-                values={{ editApp }}
-              />
-              <EuiIcon size="s" className="euiLink__externalIcon" type="popout" />
-            </EuiLink>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
+            />
+          </EuiFormRow>
+        </EuiForm>
         <div style={{ width: '100%', height: '100%' }}>
           <EuiFlexGroup direction="column" style={{ height: '100%' }}>
             <EuiFlexItem grow={true}>
@@ -116,43 +115,38 @@ export class QuickEditFlyout extends React.Component<Props> {
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={() => {
-                  // Restore embeddable state if we cancel
-                  embeddable.updateInput(initialInput);
-                  embeddable.reload();
-
-                  onClose();
-                }}
-                flush="left"
-              >
-                <FormattedMessage
-                  id="embeddableApi.quickEdit.flyout.cancelLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={() => {
-                  this.onSave();
-                  onClose();
-                }}
-                fill
-              >
-                <FormattedMessage
-                  id="embeddableApi.quickEdit.flyout.saveLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </>
-    );
-  }
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={() => {
+                onCancel();
+              }}
+              flush="left"
+            >
+              <FormattedMessage
+                id="embeddableApi.quickEdit.flyout.cancelLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                onSave(input);
+              }}
+              fill
+            >
+              <FormattedMessage
+                id="embeddableApi.quickEdit.flyout.saveLabel"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
+  );
 }
