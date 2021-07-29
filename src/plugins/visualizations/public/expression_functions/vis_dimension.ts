@@ -14,7 +14,7 @@ import {
   DatatableColumn,
 } from '../../../expressions/public';
 
-interface Arguments {
+export interface Arguments {
   accessor: string | number;
   format?: string;
   formatParams?: string;
