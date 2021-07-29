@@ -9,6 +9,7 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -28,12 +29,16 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   actionTypeRegistry: ActionTypeRegistry,
-  taskManagerIndex: string
+  taskManagerIndex: string,
+  kibanaVersion: string
 ) {
-  savedObjects.registerType({
+  const useSharableSavedObjectNamespaceType = kibanaVersion === '8.0.0';
+  const namespaceType = useSharableSavedObjectNamespaceType ? 'multiple-isolated' : 'single';
+
+  const actionType: SavedObjectsType<RawAction> = {
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'multiple-isolated',
+    namespaceType,
     convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
@@ -49,13 +54,17 @@ export function setupSavedObjects(
       ) {
         return transformConnectorsForExport(objects, actionTypeRegistry);
       },
-      onImport(connectors) {
+      onImport(connectors: Array<SavedObject<RawAction>>) {
         return {
           warnings: getImportWarnings(connectors as Array<SavedObject<RawAction>>),
         };
       },
     },
-  });
+  };
+  if (useSharableSavedObjectNamespaceType) {
+    actionType.convertToMultiNamespaceTypeVersion = '8.0.0';
+  }
+  savedObjects.registerType(actionType);
 
   // Encrypted attributes
   // - `secrets` properties will be encrypted
@@ -67,10 +76,10 @@ export function setupSavedObjects(
     attributesToExcludeFromAAD: new Set(['name']),
   });
 
-  savedObjects.registerType({
+  const actionTaskParamsType: SavedObjectsType<RawAction> = {
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'multiple-isolated',
+    namespaceType,
     convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
@@ -87,7 +96,11 @@ export function setupSavedObjects(
         },
       };
     },
-  });
+  };
+  if (useSharableSavedObjectNamespaceType) {
+    actionTaskParamsType.convertToMultiNamespaceTypeVersion = '8.0.0';
+  }
+  savedObjects.registerType(actionTaskParamsType);
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),

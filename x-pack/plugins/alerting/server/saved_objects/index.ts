@@ -10,6 +10,7 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
 import mappings from './mappings.json';
@@ -48,13 +49,15 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   ruleTypeRegistry: RuleTypeRegistry,
-  logger: Logger
+  logger: Logger,
+  kibanaVersion: string
 ) {
-  savedObjects.registerType({
+  const useSharableSavedObjectNamespaceType = kibanaVersion === '8.0.0';
+  const namespaceType = useSharableSavedObjectNamespaceType ? 'multiple-isolated' : 'single';
+  const type: SavedObjectsType<RawAlert> = {
     name: 'alert',
     hidden: true,
-    namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
+    namespaceType,
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {
@@ -62,7 +65,7 @@ export function setupSavedObjects(
       getTitle(ruleSavedObject: SavedObject<RawAlert>) {
         return `Rule: [${ruleSavedObject.attributes.name}]`;
       },
-      onImport(ruleSavedObjects) {
+      onImport(ruleSavedObjects: Array<SavedObject<RawAlert>>) {
         return {
           warnings: getImportWarnings(ruleSavedObjects),
         };
@@ -77,7 +80,11 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
-  });
+  };
+  if (useSharableSavedObjectNamespaceType) {
+    type.convertToMultiNamespaceTypeVersion = '8.0.0';
+  }
+  savedObjects.registerType(type);
 
   savedObjects.registerType({
     name: 'api_key_pending_invalidation',

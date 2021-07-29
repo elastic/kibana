@@ -150,6 +150,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOCanEncrypt?: boolean;
+  private kibanaVersion: string;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
@@ -163,6 +164,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
     this.kibanaIndexConfig = initContext.config.legacy.get();
+    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   public setup(
@@ -229,7 +231,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
-      plugins.taskManager.index
+      plugins.taskManager.index,
+      this.kibanaVersion
     );
 
     registerBuiltInActionTypes({
