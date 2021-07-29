@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Filter, FilterMeta } from './types';
+import { get } from 'lodash';
+import type { FieldFilter, Filter, FilterMeta } from './types';
 
 export interface MatchAllFilterMeta extends FilterMeta {
-  field: any;
+  field: string;
   formattedValue: string;
 }
 
@@ -18,5 +19,11 @@ export type MatchAllFilter = Filter & {
   match_all: any;
 };
 
-export const isMatchAllFilter = (filter: any): filter is MatchAllFilter =>
-  filter && filter.match_all;
+/**
+ * @param filter
+ * @returns `true` if a filter is an `MatchAllFilter`
+ *
+ * @public
+ */
+export const isMatchAllFilter = (filter: FieldFilter): filter is MatchAllFilter =>
+  get(filter, 'match_all');

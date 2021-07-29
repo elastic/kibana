@@ -6,8 +6,41 @@
  * Side Public License, v 1.
  */
 
-import type { Filter } from './types';
+import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
 
+/** @public */
 export type CustomFilter = Filter & {
   query: any;
 };
+
+/**
+ *
+ * @param indexPatternString
+ * @param queryDsl
+ * @param disabled
+ * @param negate
+ * @param alias
+ * @param store
+ * @returns
+ *
+ * @public
+ */
+export function buildCustomFilter(
+  indexPatternString: string,
+  queryDsl: any,
+  disabled: boolean,
+  negate: boolean,
+  alias: string | null,
+  store: FilterStateStore
+): Filter {
+  const meta: FilterMeta = {
+    index: indexPatternString,
+    type: FILTERS.CUSTOM,
+    disabled,
+    negate,
+    alias,
+  };
+  const filter: Filter = { ...queryDsl, meta };
+  filter.$state = { store };
+  return filter;
+}

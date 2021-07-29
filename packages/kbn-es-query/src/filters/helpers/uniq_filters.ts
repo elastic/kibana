@@ -15,8 +15,8 @@ import { dedupFilters } from './dedup_filters';
  *
  * @param {array} filters The filters to remove duplicates from
  * @param {object} comparatorOptions - Parameters to use for comparison
-
  * @returns {object} The original filters array with duplicates removed
+ * @public
  */
 export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
   let results: Filter[] = [];

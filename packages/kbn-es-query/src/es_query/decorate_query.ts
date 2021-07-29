@@ -16,6 +16,8 @@ import { DslQuery, isEsQueryString } from './es_query_dsl';
  * @param queryStringOptions query:queryString:options from UI settings
  * @param dateFormatTZ dateFormat:tz from UI settings
  * @returns {object}
+ *
+ * @public
  */
 
 export function decorateQuery(

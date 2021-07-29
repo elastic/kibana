@@ -28,7 +28,7 @@ esFilters: {
     isPhraseFilter: (filter: any) => filter is import("@kbn/es-query").PhraseFilter;
     isExistsFilter: (filter: any) => filter is import("@kbn/es-query").ExistsFilter;
     isPhrasesFilter: (filter: any) => filter is import("@kbn/es-query").PhrasesFilter;
-    isRangeFilter: (filter: any) => filter is import("@kbn/es-query").RangeFilter;
+    isRangeFilter: (filter?: import("@kbn/es-query").ExistsFilter | import("@kbn/es-query").GeoPolygonFilter | import("@kbn/es-query").PhrasesFilter | import("@kbn/es-query").PhraseFilter | import("@kbn/es-query").MatchAllFilter | import("@kbn/es-query").MissingFilter | import("@kbn/es-query").RangeFilter | import("@kbn/es-query").GeoBoundingBoxFilter | undefined) => filter is import("@kbn/es-query").RangeFilter;
     isMatchAllFilter: (filter: any) => filter is import("@kbn/es-query").MatchAllFilter;
     isMissingFilter: (filter: any) => filter is import("@kbn/es-query").MissingFilter;
     isQueryStringFilter: (filter: any) => filter is import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;

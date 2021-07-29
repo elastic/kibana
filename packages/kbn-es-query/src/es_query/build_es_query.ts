@@ -13,6 +13,10 @@ import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query } from '../filters';
 import { IndexPatternBase } from './types';
 
+/**
+ * Configurations to be usd while constructing an ES query.
+ * @public
+ */
 export interface EsQueryConfig {
   allowLeadingWildcards: boolean;
   queryStringOptions: Record<string, any>;
@@ -33,6 +37,8 @@ function removeMatchAll<T>(filters: T[]) {
  * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
  * settings in form of { allowLeadingWildcards, queryStringOptions }
  * config contains dateformat:tz
+ *
+ * @public
  */
 export function buildEsQuery(
   indexPattern: IndexPatternBase | undefined,

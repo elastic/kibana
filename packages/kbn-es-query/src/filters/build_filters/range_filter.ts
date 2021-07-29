@@ -32,6 +32,10 @@ const dateComparators = {
   lt: 'boolean lt(Supplier s, def v) {return s.get().toInstant().isBefore(Instant.parse(v))}',
 };
 
+/**
+ * An interface for all possible range filter params
+ * @public
+ */
 export interface RangeFilterParams {
   from?: number | string;
   to?: number | string;
@@ -49,7 +53,7 @@ const hasRangeKeys = (params: RangeFilterParams) =>
 
 export type RangeFilterMeta = FilterMeta & {
   params: RangeFilterParams;
-  field?: any;
+  field?: string;
   formattedValue?: string;
 };
 
@@ -57,6 +61,9 @@ export interface EsRangeFilter {
   range: { [key: string]: RangeFilterParams };
 }
 
+/**
+ * @public
+ */
 export type RangeFilter = Filter &
   EsRangeFilter & {
     meta: RangeFilterMeta;
@@ -64,20 +71,36 @@ export type RangeFilter = Filter &
       script: {
         params: any;
         lang: estypes.ScriptLanguage;
-        source: any;
+        source: string;
       };
     };
     match_all?: any;
   };
 
-export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => get(filter, 'range');
+/**
+ * @param filter
+ * @returns `true` if a filter is an `RangeFilter`
+ *
+ * @public
+ */
+export const isRangeFilter = (filter: FieldFilter): filter is RangeFilter => get(filter, 'range');
 
-export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
+/**
+ *
+ * @param filter
+ * @returns `true` if a filter is a scripted `RangeFilter`
+ *
+ * @public
+ */
+export const isScriptedRangeFilter = (filter: FieldFilter): filter is RangeFilter => {
   const params: RangeFilterParams = get(filter, 'script.script.params', {});
 
   return hasRangeKeys(params);
 };
 
+/**
+ * @internal
+ */
 export const getRangeFilterField = (filter: RangeFilter) => {
   return filter.range && Object.keys(filter.range)[0];
 };
@@ -85,8 +108,18 @@ export const getRangeFilterField = (filter: RangeFilter) => {
 const formatValue = (params: any[]) =>
   map(params, (val: any, key: string) => get(operators, key) + val).join(' ');
 
-// Creates a filter where the value for the given field is in the given range
-// params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
+/**
+ * Creates a filter where the value for the given field is in the given range
+ * params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
+ *
+ * @param field
+ * @param params
+ * @param indexPattern
+ * @param formattedValue
+ * @returns
+ *
+ * @public
+ */
 export const buildRangeFilter = (
   field: IndexPatternFieldBase,
   params: RangeFilterParams,
@@ -134,6 +167,9 @@ export const buildRangeFilter = (
   return filter as RangeFilter;
 };
 
+/**
+ * @internal
+ */
 export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilterParams) => {
   const knownParams = mapValues(
     pickBy(params, (val, key: any) => key in operators),

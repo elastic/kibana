@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Filter, FilterMeta, LatLon } from './types';
+import { get } from 'lodash';
+import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
 
 export type GeoBoundingBoxFilterMeta = FilterMeta & {
   params: {
@@ -20,9 +21,18 @@ export type GeoBoundingBoxFilter = Filter & {
   geo_bounding_box: any;
 };
 
-export const isGeoBoundingBoxFilter = (filter: any): filter is GeoBoundingBoxFilter =>
-  filter && filter.geo_bounding_box;
+/**
+ * @param filter
+ * @returns `true` if a filter is an `GeoBoundingBoxFilter`
+ *
+ * @public
+ */
+export const isGeoBoundingBoxFilter = (filter: FieldFilter): filter is GeoBoundingBoxFilter =>
+  get(filter, 'geo_bounding_box');
 
+/**
+ * @internal
+ */
 export const getGeoBoundingBoxFilterField = (filter: GeoBoundingBoxFilter) => {
   return (
     filter.geo_bounding_box &&

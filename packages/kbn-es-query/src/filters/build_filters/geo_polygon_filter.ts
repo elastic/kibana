@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Filter, FilterMeta, LatLon } from './types';
+import { get } from 'lodash';
+import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
 
 export type GeoPolygonFilterMeta = FilterMeta & {
   params: {
@@ -19,9 +20,18 @@ export type GeoPolygonFilter = Filter & {
   geo_polygon: any;
 };
 
-export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
-  filter && filter.geo_polygon;
+/**
+ * @param filter
+ * @returns `true` if a filter is an `GeoPolygonFilter`
+ *
+ * @public
+ */
+export const isGeoPolygonFilter = (filter: FieldFilter): filter is GeoPolygonFilter =>
+  get(filter, 'geo_polygon');
 
+/**
+ * @internal
+ */
 export const getGeoPolygonFilterField = (filter: GeoPolygonFilter) => {
   return (
     filter.geo_polygon && Object.keys(filter.geo_polygon).find((key) => key !== 'ignore_unmapped')

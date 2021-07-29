@@ -6,26 +6,42 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
-import type { Filter, FilterMeta } from './types';
+import type { FieldFilter, Filter, FilterMeta } from './types';
 
-export type ExistsFilterMeta = FilterMeta;
-
-export interface FilterExistsProperty {
-  field: any;
-}
-
+/** @public */
 export type ExistsFilter = Filter & {
-  meta: ExistsFilterMeta;
-  exists?: FilterExistsProperty;
+  meta: FilterMeta;
+  exists?: {
+    field: string;
+  };
 };
 
-export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
+/**
+ * @param filter
+ * @returns `true` if a filter is an `ExistsFilter`
+ *
+ * @public
+ */
+export const isExistsFilter = (filter: FieldFilter): filter is ExistsFilter =>
+  get(filter, 'exists');
 
+/**
+ * @internal
+ */
 export const getExistsFilterField = (filter: ExistsFilter) => {
   return filter.exists && filter.exists.field;
 };
 
+/**
+ * Builds an `ExistsFilter`
+ * @param field field to validate the existence of
+ * @param indexPattern index pattern to look for the field in
+ * @returns An `ExistsFilter`
+ *
+ * @public
+ */
 export const buildExistsFilter = (field: IndexPatternFieldBase, indexPattern: IndexPatternBase) => {
   return {
     meta: {

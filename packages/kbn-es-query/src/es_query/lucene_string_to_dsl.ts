@@ -9,6 +9,13 @@
 import { isString } from 'lodash';
 import { DslQuery } from './es_query_dsl';
 
+/**
+ *
+ * @param query
+ * @returns
+ *
+ * @public
+ */
 export function luceneStringToDsl(query: string | any): DslQuery {
   if (isString(query)) {
     if (query.trim() === '') {

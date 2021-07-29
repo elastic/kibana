@@ -52,6 +52,10 @@ interface KQLSyntaxErrorExpected {
   type: string;
 }
 
+/**
+ * A type of error indicating KQL syntax errors
+ * @public
+ */
 export class KQLSyntaxError extends Error {
   shortMessage: string;
 

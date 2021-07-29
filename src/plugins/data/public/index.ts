@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-/*
- * esQuery and esKuery:
- */
-
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
+
+export * from './deprecated';
 
 /*
  * Filters:
  */
-
-export * from './deprecated';
 
 export { getEsQueryConfig } from '../common';
 export { FilterLabel, FilterItem } from './ui';
