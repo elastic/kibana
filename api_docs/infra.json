@@ -12,7 +12,13 @@
         "description": [],
         "signature": [
           "(props: React.PropsWithChildren<",
-          "LogStreamProps",
+          {
+            "pluginId": "infra",
+            "scope": "public",
+            "docId": "kibInfraPluginApi",
+            "section": "def-public.LogStreamProps",
+            "text": "LogStreamProps"
+          },
           ">) => JSX.Element"
         ],
         "source": {
@@ -30,7 +36,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "LogStreamProps",
+              {
+                "pluginId": "infra",
+                "scope": "public",
+                "docId": "kibInfraPluginApi",
+                "section": "def-public.LogStreamProps",
+                "text": "LogStreamProps"
+              },
               ">"
             ],
             "source": {
@@ -45,7 +57,50 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "infra",
+        "id": "def-public.LogStreamProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogStreamProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "infra",
+            "scope": "public",
+            "docId": "kibInfraPluginApi",
+            "section": "def-public.LogStreamProps",
+            "text": "LogStreamProps"
+          },
+          " extends LogStreamContentProps"
+        ],
+        "source": {
+          "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
+          "lineNumber": 61
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "infra",
+            "id": "def-public.LogStreamProps.height",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
+              "lineNumber": 62
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "parentPluginId": "infra",
@@ -316,7 +371,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/infra/server/plugin.ts",
-          "lineNumber": 65
+          "lineNumber": 68
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -351,7 +406,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/infra/server/plugin.ts",
-        "lineNumber": 75
+        "lineNumber": 78
       },
       "deprecated": false,
       "children": [
@@ -369,7 +424,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/infra/server/plugin.ts",
-            "lineNumber": 76
+            "lineNumber": 79
           },
           "deprecated": false,
           "returnComment": [],
@@ -383,7 +438,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 77
+                "lineNumber": 80
               },
               "deprecated": false
             },
@@ -399,7 +454,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 78
+                "lineNumber": 81
               },
               "deprecated": false
             }

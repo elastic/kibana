@@ -100,7 +100,7 @@ const eventFiltersChangeForm: CaseReducer<EventFiltersChangeForm> = (state, acti
     ...state,
     form: {
       ...state.form,
-      entry: action.payload.entry,
+      entry: action.payload.entry !== undefined ? action.payload.entry : state.form.entry,
       hasItemsError:
         action.payload.hasItemsError !== undefined
           ? action.payload.hasItemsError

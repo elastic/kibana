@@ -335,6 +335,9 @@ export class AlertingPlugin {
       async getSpace(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getActiveSpace(request);
       },
+      getSpaceId(request: KibanaRequest) {
+        return plugins.spaces?.spacesService.getSpaceId(request);
+      },
       features: plugins.features,
     });
 

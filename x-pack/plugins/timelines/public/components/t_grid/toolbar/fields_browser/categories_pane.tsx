@@ -14,7 +14,6 @@ import {
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
 } from '../../../../../common';
-// eslint-disable-next-line no-duplicate-imports
 import type { BrowserFields } from '../../../../../common';
 import { getCategoryColumns } from './category_columns';
 import { CATEGORIES_PANE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
