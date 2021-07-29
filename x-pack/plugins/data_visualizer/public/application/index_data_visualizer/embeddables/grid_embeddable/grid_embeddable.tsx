@@ -13,6 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
+import { Required } from 'utility-types';
 import {
   Embeddable,
   EmbeddableInput,
@@ -47,7 +48,11 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 import { extractErrorProperties } from '../../utils/error_utils';
 import { DataLoader } from '../../data_loader/data_loader';
 import { useTimefilter } from '../../hooks/use_time_filter';
-import { FieldRequestConfig, JOB_FIELD_TYPES } from '../../../../../common';
+import {
+  DataVisualizerTableState,
+  FieldRequestConfig,
+  JOB_FIELD_TYPES,
+} from '../../../../../common';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { TimeBuckets } from '../../services/time_buckets';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
@@ -69,9 +74,10 @@ export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 const restorableDefaults = getDefaultDataVisualizerListState();
 const defaults = getDefaultPageState();
 
+// @todo: consolidate this hook with the view
 const useDataVisualizerGridData = (
   input: DataVisualizerGridEmbeddableInput,
-  dataVisualizerListState: DataVisualizerIndexBasedAppState
+  dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>
 ) => {
   const { services } = useDataVisualizerKibana();
   const { notifications, uiSettings } = services;
@@ -625,11 +631,13 @@ const useDataVisualizerGridData = (
 };
 
 export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddableInput }) => {
-  const [
-    dataVisualizerListState,
-    setDataVisualizerListState,
-  ] = useState<DataVisualizerIndexBasedAppState>(restorableDefaults);
+  const [dataVisualizerListState, setDataVisualizerListState] = useState<
+    Required<DataVisualizerIndexBasedAppState>
+  >(restorableDefaults);
 
+  const onTableChange = (update: DataVisualizerTableState) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, ...update });
+  };
   const { configs, searchQueryLanguage, searchString, extendedColumns } = useDataVisualizerGridData(
     input,
     dataVisualizerListState
@@ -657,7 +665,7 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
     <DataVisualizerTable<FieldVisConfig>
       items={configs}
       pageState={dataVisualizerListState}
-      updatePageState={setDataVisualizerListState}
+      updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
     />
@@ -670,7 +678,6 @@ export const IndexDataVisualizerViewWrapper = (props: {
   id: string;
   embeddableContext: InstanceType<IDataVisualizerGridEmbeddable>;
   embeddableInput: Readonly<Observable<DataVisualizerGridEmbeddableInput>>;
-  // refresh: Observable<any>;
 }) => {
   const { embeddableInput } = props;
 
@@ -695,17 +702,6 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
-    this.initializeOutput(initialInput);
-  }
-
-  private async initializeOutput(initialInput: DataVisualizerGridEmbeddableInput) {
-    try {
-      // do something
-    } catch (e) {
-      // Unable to find and load index pattern but we can ignore the error
-      // as we only load it to support the filter & query bar
-      // the visualizations should still work correctly
-    }
   }
 
   public render(node: HTMLElement) {
@@ -722,7 +718,6 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
               id={this.input.id}
               embeddableContext={this}
               embeddableInput={this.getInput$()}
-              // refresh={this.reload$.asObservable()}
             />
           </Suspense>
         </KibanaContextProvider>
