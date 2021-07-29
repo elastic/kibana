@@ -46,7 +46,7 @@ describe('ThreatDetailsView', () => {
     expect(wrapper.find('a').length).toEqual(2);
   });
 
-  it('orders enrichments by first_seen descending', () => {
+  it('sorts same type of enrichments by first_seen descending', () => {
     const mostRecentDate = '2021-04-25T18:17:00.000Z';
     const olderDate = '2021-03-25T18:17:00.000Z';
     // this simulates a legacy enrichment from the old indicator match rule,
@@ -75,5 +75,24 @@ describe('ThreatDetailsView', () => {
       `first_seen${mostRecentDate}`,
       `first_seen${olderDate}`,
     ]);
+  });
+
+  it('groups enrichments by matched type', () => {
+    const indicatorMatch = buildEventEnrichmentMock({
+      'matched.type': ['indicator_match_rule'],
+    });
+    const investigationEnrichment = buildEventEnrichmentMock({
+      'matched.type': ['investigation_time'],
+    });
+    const enrichments = [indicatorMatch, investigationEnrichment];
+
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={enrichments} />
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('[data-test-subj="threat-match-detected"]')).toEqual(true);
+    expect(wrapper.exists('[data-test-subj="enriched-with-threat-intel"]')).toEqual(true);
   });
 });

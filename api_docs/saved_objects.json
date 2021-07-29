@@ -719,7 +719,7 @@
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/plugin.tsx",
-              "lineNumber": 122
+              "lineNumber": 121
             }
           },
           {
@@ -1425,14 +1425,14 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx",
-              "lineNumber": 14
+              "lineNumber": 15
             }
           },
           {
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx",
-              "lineNumber": 145
+              "lineNumber": 146
             }
           },
           {
@@ -4423,14 +4423,14 @@
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 92
+                "lineNumber": 91
               }
             },
             {
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 177
+                "lineNumber": 176
               }
             },
             {

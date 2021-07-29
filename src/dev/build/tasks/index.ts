@@ -8,6 +8,7 @@
 
 export * from './bin';
 export * from './build_kibana_platform_plugins';
+export * from './build_kibana_example_plugins';
 export * from './build_packages_task';
 export * from './clean_tasks';
 export * from './copy_source_task';

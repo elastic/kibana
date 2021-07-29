@@ -100,6 +100,7 @@ beforeAll(() => {
 
   const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
   const pluginStats: ApiStats = {
+    deprecatedAPIsReferencedCount: 0,
     missingComments: [],
     isAnyType: [],
     noReferences: [],
