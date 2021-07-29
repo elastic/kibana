@@ -9,12 +9,16 @@ import styled from 'styled-components';
 import React from 'react';
 import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 
+import { get } from 'lodash/fp';
 import * as i18n from './translations';
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers } from './helpers';
 import { EnrichmentIcon } from './enrichment_icon';
+import { FieldsData } from '../types';
+import { ActionCell } from '../table/action_cell';
+import { BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
 
 export interface ThreatSummaryItem {
   title: {
@@ -28,6 +32,7 @@ export interface ThreatSummaryItem {
     index: number;
     value: string | undefined;
     provider: string | undefined;
+    data: FieldsData | undefined;
   };
 }
 
@@ -53,8 +58,10 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
   index,
   value,
   provider,
+  data,
 }) => {
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}-${index}-${provider}`;
+
   return (
     <>
       <RightMargin>
@@ -80,18 +87,39 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
           </RightMargin>
         </>
       )}
+      {data && value && (
+        <ActionCell
+          data={data}
+          contextId={timelineId}
+          eventId={eventId}
+          isThreatMatch={true}
+          timelineId={timelineId}
+          values={value ? [value] : []}
+        />
+      )}
     </>
   );
 };
 
 const buildThreatSummaryItems = (
+  browserFields: BrowserFields,
+  data: TimelineEventsDetailsItem[],
   enrichments: CtiEnrichment[],
   timelineId: string,
   eventId: string
 ) => {
   return enrichments.map((enrichment, index) => {
     const { field, type, value, provider } = getEnrichmentIdentifiers(enrichment);
+    const eventData = data.find((item) => item.field === field);
+    const category = eventData?.category ?? '';
+    const browserField = get([category, 'fields', field ?? ''], browserFields);
 
+    const fieldsData = {
+      field,
+      format: browserField?.format ?? '',
+      type: browserField?.type ?? '',
+      isObjectArray: eventData?.isObjectArray,
+    };
     return {
       title: {
         title: field,
@@ -104,6 +132,7 @@ const buildThreatSummaryItems = (
         provider,
         timelineId,
         value,
+        data: fieldsData,
       },
     };
   });
@@ -129,12 +158,14 @@ const ThreatSummaryViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   timelineId: string;
   eventId: string;
-}> = ({ enrichments, timelineId, eventId }) => (
+  data: TimelineEventsDetailsItem[];
+  browserFields: BrowserFields;
+}> = ({ enrichments, timelineId, eventId, data, browserFields }) => (
   <StyledEuiInMemoryTable
     columns={columns}
     compressed
     data-test-subj="threat-summary-view"
-    items={buildThreatSummaryItems(enrichments, timelineId, eventId)}
+    items={buildThreatSummaryItems(browserFields, data, enrichments, timelineId, eventId)}
   />
 );
 

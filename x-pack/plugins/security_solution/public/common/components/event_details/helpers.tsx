@@ -24,6 +24,7 @@ import {
 
 import * as i18n from './translations';
 import { ColumnHeaderOptions, TimelineEventsDetailsItem } from '../../../../common';
+import { FieldsData } from './types';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -55,9 +56,9 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    data: TimelineEventsDetailsItem;
+    data: FieldsData;
     eventId: string;
-    fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
+    fieldFromBrowserField?: BrowserField;
     linkValue: string | undefined;
     timelineId: string;
     values: string[] | null | undefined;
