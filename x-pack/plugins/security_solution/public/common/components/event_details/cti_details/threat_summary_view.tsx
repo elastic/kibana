@@ -12,13 +12,13 @@ import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { Indent, StyledEuiInMemoryTable } from '../summary_view';
-import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers } from './helpers';
 import { EnrichmentIcon } from './enrichment_icon';
 import { FieldsData } from '../types';
 import { ActionCell } from '../table/action_cell';
-import { BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
+import { BrowserField, BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
+import { FieldValueCell } from '../table/field_value_cell';
 
 export interface ThreatSummaryItem {
   title: {
@@ -33,6 +33,7 @@ export interface ThreatSummaryItem {
     value: string | undefined;
     provider: string | undefined;
     data: FieldsData | undefined;
+    browserField: BrowserField;
   };
 }
 
@@ -55,22 +56,21 @@ const EnrichmentTitle: React.FC<ThreatSummaryItem['title']> = ({ title, type }) 
 const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
   timelineId,
   eventId,
-  fieldName,
-  index,
+  browserField,
   value,
   provider,
   data,
 }) => {
-  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}-${index}-${provider}`;
+  if (!data || !value) return null;
   return (
     <>
       <RightMargin>
-        <FormattedFieldValue
-          key={key}
-          contextId={key}
+        <FieldValueCell
+          contextId={timelineId}
+          data={data}
           eventId={eventId}
-          fieldName={fieldName || 'unknown'}
-          value={value}
+          fieldFromBrowserField={browserField}
+          values={[value]}
         />
       </RightMargin>
       {provider && (
@@ -87,14 +87,14 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
           </RightMargin>
         </>
       )}
-      {data && value && (
+      {value && (
         <ActionCell
           data={data}
           contextId={timelineId}
           eventId={eventId}
-          isThreatMatch={true}
+          fieldFromBrowserField={browserField}
           timelineId={timelineId}
-          values={value ? [value] : []}
+          values={[value]}
         />
       )}
     </>
@@ -134,6 +134,7 @@ const buildThreatSummaryItems = (
         timelineId,
         value,
         data: fieldsData,
+        browserField,
       },
     };
   });
