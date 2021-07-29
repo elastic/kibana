@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -120,8 +120,8 @@ export const useAddOrUpdateException = ({
 
       try {
         setIsLoading(true);
-        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
-        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        let alertIdResponse: estypes.UpdateByQueryResponse | undefined;
+        let bulkResponse: estypes.UpdateByQueryResponse | undefined;
         if (alertIdToClose != null) {
           alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),

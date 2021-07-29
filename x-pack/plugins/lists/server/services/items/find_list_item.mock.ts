@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
@@ -14,7 +14,7 @@ import { getShardMock } from '../../schemas/common/get_shard.mock';
 
 import { FindListItemOptions } from './find_list_item';
 
-export const getFindCount = (): ReturnType<Client['count']> => {
+export const getFindCount = (): Promise<estypes.CountResponse> => {
   return Promise.resolve({
     _shards: getShardMock(),
     count: 1,

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 
 import {
@@ -75,17 +75,17 @@ const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
       return [];
     }
     const alertResponse = await KibanaServices.get().http.fetch<
-      SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
+      estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery(fetchAlertIds ?? [])),
     });
     return (
       alertResponse?.hits.hits.reduce<Ecs[]>(
-        (acc, { _id, _index, _source }) => [
+        (acc, { _id, _index, _source = {} }) => [
           ...acc,
           {
-            ...formatAlertToEcsSignal(_source as {}),
+            ...formatAlertToEcsSignal(_source),
             _id,
             _index,
             timestamp: _source['@timestamp'],
