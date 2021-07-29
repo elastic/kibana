@@ -42,7 +42,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({ policy, close }
           <h2>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText"
-              defaultMessage="Index templates linked to policy {policyName}"
+              defaultMessage="Index templates that apply {policyName}"
               values={{ policyName: policy.name }}
             />
           </h2>
