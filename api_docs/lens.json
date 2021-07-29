@@ -12,8 +12,8 @@
         "label": "AxesSettingsConfig",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 83
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+          "lineNumber": 13
         },
         "deprecated": false,
         "children": [
@@ -25,8 +25,8 @@
             "label": "x",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 84
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+              "lineNumber": 14
             },
             "deprecated": false
           },
@@ -38,8 +38,8 @@
             "label": "yLeft",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 85
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+              "lineNumber": 15
             },
             "deprecated": false
           },
@@ -51,8 +51,8 @@
             "label": "yRight",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 86
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+              "lineNumber": 16
             },
             "deprecated": false
           }
@@ -119,7 +119,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-          "lineNumber": 51
+          "lineNumber": 27
         },
         "deprecated": false,
         "children": [
@@ -136,7 +136,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 52
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -149,7 +149,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 53
+              "lineNumber": 29
             },
             "deprecated": false
           },
@@ -166,7 +166,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 54
+              "lineNumber": 30
             },
             "deprecated": false
           }
@@ -513,8 +513,8 @@
         "label": "LegendConfig",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 26
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+          "lineNumber": 11
         },
         "deprecated": false,
         "children": [
@@ -528,8 +528,8 @@
               "\nFlag whether the legend should be shown. If there is just a single series, it will be hidden"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 30
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+              "lineNumber": 15
             },
             "deprecated": false
           },
@@ -546,8 +546,8 @@
               "\"top\" | \"bottom\" | \"left\" | \"right\""
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 34
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -564,8 +564,80 @@
               "boolean | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 38
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegendConfig.isInside",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInside",
+            "description": [
+              "\nFlag whether the legend is inside the chart"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegendConfig.horizontalAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "horizontalAlignment",
+            "description": [
+              "\nHorizontal Alignment of the legend when it is set inside chart"
+            ],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | \"near\" | \"far\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegendConfig.verticalAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verticalAlignment",
+            "description": [
+              "\nVertical Alignment of the legend when it is set inside chart"
+            ],
+            "signature": [
+              "\"top\" | \"bottom\" | \"middle\" | \"near\" | \"far\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegendConfig.floatingColumns",
+            "type": "number",
+            "tags": [],
+            "label": "floatingColumns",
+            "description": [
+              "\nNumber of columns when legend is set inside chart"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+              "lineNumber": 39
             },
             "deprecated": false
           }
@@ -581,7 +653,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/plugin.ts",
-          "lineNumber": 89
+          "lineNumber": 103
         },
         "deprecated": false,
         "children": [
@@ -617,7 +689,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 98
+              "lineNumber": 112
             },
             "deprecated": false
           },
@@ -635,13 +707,13 @@
             "signature": [
               "React.ComponentClass<Pick<",
               "SaveModalContainerProps",
-              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"isVisible\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">, any> | React.FunctionComponent<Pick<",
+              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">, any> | React.FunctionComponent<Pick<",
               "SaveModalContainerProps",
-              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"isVisible\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">>"
+              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">>"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 107
+              "lineNumber": 121
             },
             "deprecated": false
           },
@@ -669,7 +741,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 116
+              "lineNumber": 130
             },
             "deprecated": false,
             "returnComment": [],
@@ -688,7 +760,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/public/plugin.ts",
-                  "lineNumber": 116
+                  "lineNumber": 130
                 },
                 "deprecated": false
               },
@@ -704,7 +776,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/public/plugin.ts",
-                  "lineNumber": 116
+                  "lineNumber": 130
                 },
                 "deprecated": false
               }
@@ -724,7 +796,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 120
+              "lineNumber": 134
             },
             "deprecated": false,
             "returnComment": [],
@@ -746,7 +818,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 125
+              "lineNumber": 139
             },
             "deprecated": false,
             "returnComment": [],
@@ -828,7 +900,7 @@
         "label": "MetricState",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/metric_visualization/types.ts",
+          "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
           "lineNumber": 8
         },
         "deprecated": false,
@@ -841,7 +913,7 @@
             "label": "layerId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/lens/public/metric_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
               "lineNumber": 9
             },
             "deprecated": false
@@ -857,7 +929,7 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/metric_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
               "lineNumber": 10
             },
             "deprecated": false
@@ -874,7 +946,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 372
+          "lineNumber": 369
         },
         "deprecated": false,
         "children": [
@@ -890,7 +962,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 374
+              "lineNumber": 371
             },
             "deprecated": false
           },
@@ -903,7 +975,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 377
+              "lineNumber": 374
             },
             "deprecated": false
           },
@@ -921,7 +993,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 383
+              "lineNumber": 380
             },
             "deprecated": false
           }
@@ -1001,7 +1073,7 @@
         "label": "PieVisualizationState",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+          "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
           "lineNumber": 26
         },
         "deprecated": false,
@@ -1017,7 +1089,7 @@
               "\"donut\" | \"pie\" | \"treemap\""
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 27
             },
             "deprecated": false
@@ -1030,17 +1102,11 @@
             "label": "layers",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.PieLayerState",
-                "text": "PieLayerState"
-              },
+              "PieLayerState",
               "[]"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 28
             },
             "deprecated": false
@@ -1063,7 +1129,7 @@
               "<unknown> | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 29
             },
             "deprecated": false
@@ -1148,7 +1214,7 @@
         "label": "SharedPieLayerState",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+          "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
           "lineNumber": 11
         },
         "deprecated": false,
@@ -1164,7 +1230,7 @@
               "string[]"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 12
             },
             "deprecated": false
@@ -1180,7 +1246,7 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 13
             },
             "deprecated": false
@@ -1196,7 +1262,7 @@
               "\"percent\" | \"hidden\" | \"value\""
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 14
             },
             "deprecated": false
@@ -1212,7 +1278,7 @@
               "\"default\" | \"hide\" | \"inside\""
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 15
             },
             "deprecated": false
@@ -1228,7 +1294,7 @@
               "\"default\" | \"hide\" | \"show\""
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 16
             },
             "deprecated": false
@@ -1244,7 +1310,7 @@
               "\"top\" | \"bottom\" | \"left\" | \"right\" | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 17
             },
             "deprecated": false
@@ -1260,7 +1326,7 @@
               "boolean | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 18
             },
             "deprecated": false
@@ -1276,7 +1342,7 @@
               "number | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
               "lineNumber": 19
             },
             "deprecated": false
@@ -1357,8 +1423,8 @@
         "label": "XYLayerConfig",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 424
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+          "lineNumber": 13
         },
         "deprecated": false,
         "children": [
@@ -1373,8 +1439,8 @@
               "boolean | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 425
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 14
             },
             "deprecated": false
           },
@@ -1386,8 +1452,8 @@
             "label": "layerId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 426
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 15
             },
             "deprecated": false
           },
@@ -1402,8 +1468,8 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 427
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -1418,8 +1484,8 @@
               "string[]"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 428
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 17
             },
             "deprecated": false
           },
@@ -1431,18 +1497,12 @@
             "label": "yConfig",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.YConfig",
-                "text": "YConfig"
-              },
+              "YConfig",
               "[] | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 429
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -1457,8 +1517,8 @@
               "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 430
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -1473,8 +1533,8 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 431
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -1496,8 +1556,8 @@
               "<unknown> | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 432
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
+              "lineNumber": 21
             },
             "deprecated": false
           }
@@ -1513,7 +1573,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 475
+          "lineNumber": 34
         },
         "deprecated": false,
         "children": [
@@ -1529,7 +1589,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 476
+              "lineNumber": 35
             },
             "deprecated": false
           },
@@ -1541,17 +1601,11 @@
             "label": "legend",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.LegendConfig",
-                "text": "LegendConfig"
-              }
+              "LegendConfig"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 477
+              "lineNumber": 36
             },
             "deprecated": false
           },
@@ -1567,7 +1621,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 478
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -1583,7 +1637,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 479
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -1600,7 +1654,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 480
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -1617,7 +1671,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 481
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -1629,18 +1683,12 @@
             "label": "layers",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.XYLayerConfig",
-                "text": "XYLayerConfig"
-              },
+              "XYLayerConfig",
               "[]"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 482
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -1656,7 +1704,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 483
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -1672,7 +1720,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 484
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -1688,7 +1736,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 485
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -1700,18 +1748,12 @@
             "label": "axisTitlesVisibilitySettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
-                "text": "AxesSettingsConfig"
-              },
+              "AxesSettingsConfig",
               " | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 486
+              "lineNumber": 45
             },
             "deprecated": false
           },
@@ -1723,18 +1765,12 @@
             "label": "tickLabelsVisibilitySettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
-                "text": "AxesSettingsConfig"
-              },
+              "AxesSettingsConfig",
               " | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 487
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -1746,18 +1782,29 @@
             "label": "gridlinesVisibilitySettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
-                "text": "AxesSettingsConfig"
-              },
+              "AxesSettingsConfig",
               " | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 488
+              "lineNumber": 47
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYState.labelsOrientation",
+            "type": "Object",
+            "tags": [],
+            "label": "labelsOrientation",
+            "description": [],
+            "signature": [
+              "LabelsOrientationConfig",
+              " | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -1773,7 +1820,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 489
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -1789,7 +1836,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 490
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -1805,7 +1852,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 491
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -1821,7 +1868,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 492
+              "lineNumber": 52
             },
             "deprecated": false
           }
@@ -1836,8 +1883,8 @@
         "label": "YConfig",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 418
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+          "lineNumber": 32
         },
         "deprecated": false,
         "children": [
@@ -1849,8 +1896,8 @@
             "label": "forAccessor",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 419
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -1865,8 +1912,8 @@
               "\"left\" | \"right\" | \"auto\" | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 420
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -1881,8 +1928,8 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 421
+              "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+              "lineNumber": 35
             },
             "deprecated": false
           }
@@ -1996,7 +2043,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 361
+          "lineNumber": 358
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2040,13 +2087,7 @@
             "text": "XYState"
           },
           "> | LensAttributes<\"lnsPie\", ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.PieVisualizationState",
-            "text": "PieVisualizationState"
-          },
+          "PieVisualizationState",
           "> | LensAttributes<\"lnsDatatable\", ",
           {
             "pluginId": "lens",
@@ -2056,13 +2097,7 @@
             "text": "DatatableVisualizationState"
           },
           "> | LensAttributes<\"lnsMetric\", ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.MetricState",
-            "text": "MetricState"
-          },
+          "MetricState",
           ">; } & { withActions?: boolean | undefined; }) | (",
           {
             "pluginId": "embeddable",
@@ -2074,7 +2109,7 @@
           " & LensBaseEmbeddableInput & { withActions?: boolean | undefined; })"
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
+          "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
           "lineNumber": 54
         },
         "deprecated": false,
@@ -2293,8 +2328,8 @@
           "LensByReferenceInput"
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable.tsx",
-          "lineNumber": 82
+          "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+          "lineNumber": 83
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2431,7 +2466,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/overall_metric.tsx",
-          "lineNumber": 19
+          "lineNumber": 22
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2477,17 +2512,11 @@
         "label": "PieLayerState",
         "description": [],
         "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.SharedPieLayerState",
-            "text": "SharedPieLayerState"
-          },
+          "SharedPieLayerState",
           " & { layerId: string; }"
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+          "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
           "lineNumber": 22
         },
         "deprecated": false,
@@ -2504,8 +2533,8 @@
           "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 402
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/series_type.ts",
+          "lineNumber": 8
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2557,13 +2586,7 @@
             "text": "XYState"
           },
           "> | LensAttributes<\"lnsPie\", ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.PieVisualizationState",
-            "text": "PieVisualizationState"
-          },
+          "PieVisualizationState",
           "> | LensAttributes<\"lnsDatatable\", ",
           {
             "pluginId": "lens",
@@ -2573,17 +2596,11 @@
             "text": "DatatableVisualizationState"
           },
           "> | LensAttributes<\"lnsMetric\", ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.MetricState",
-            "text": "MetricState"
-          },
+          "MetricState",
           ">; }"
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
+          "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
           "lineNumber": 46
         },
         "deprecated": false,
@@ -2600,8 +2617,8 @@
           "\"hide\" | \"inside\" | \"outside\""
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 416
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/xy_args.ts",
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2617,8 +2634,8 @@
           "\"LINEAR\" | \"CURVE_MONOTONE_X\""
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 472
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/xy_args.ts",
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2634,8 +2651,8 @@
           "\"left\" | \"right\" | \"auto\""
         ],
         "source": {
-          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 414
+          "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+          "lineNumber": 30
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2672,7 +2689,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 34
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -2688,7 +2705,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 38
+              "lineNumber": 40
             },
             "deprecated": false,
             "children": [
@@ -2711,7 +2728,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 38
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2755,7 +2772,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 42
+              "lineNumber": 44
             },
             "deprecated": false,
             "children": [
@@ -2786,7 +2803,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 42
+                  "lineNumber": 44
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2809,7 +2826,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 42
+                  "lineNumber": 44
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2845,7 +2862,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 63
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [
@@ -2867,7 +2884,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 63
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2890,7 +2907,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/server/plugin.tsx",
-                  "lineNumber": 63
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2910,7 +2927,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 70
+              "lineNumber": 72
             },
             "deprecated": false,
             "children": [],
@@ -2931,7 +2948,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 23
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -2954,7 +2971,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -2977,7 +2994,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -2999,7 +3016,177 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 26
+              "lineNumber": 27
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.PluginSetupContract.expressions",
+            "type": "Object",
+            "tags": [],
+            "label": "expressions",
+            "description": [],
+            "signature": [
+              "{ readonly getType: (name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              " | undefined; readonly registerType: (typeDefinition: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionTypeDefinition",
+                "text": "AnyExpressionTypeDefinition"
+              },
+              " | (() => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionTypeDefinition",
+                "text": "AnyExpressionTypeDefinition"
+              },
+              ")) => void; readonly getFunction: (name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              " | undefined; readonly getFunctions: () => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">; readonly getRenderer: (name: string) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown> | null; readonly getRenderers: () => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionRenderer",
+                "text": "ExpressionRenderer"
+              },
+              "<unknown>>; readonly getTypes: () => Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionType",
+                "text": "ExpressionType"
+              },
+              ">; readonly registerFunction: (functionDefinition: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionFunctionDefinition",
+                "text": "AnyExpressionFunctionDefinition"
+              },
+              " | (() => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionFunctionDefinition",
+                "text": "AnyExpressionFunctionDefinition"
+              },
+              ")) => void; readonly registerRenderer: (definition: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionRenderDefinition",
+                "text": "AnyExpressionRenderDefinition"
+              },
+              " | (() => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.AnyExpressionRenderDefinition",
+                "text": "AnyExpressionRenderDefinition"
+              },
+              ")) => void; readonly run: <Input, Output>(ast: string | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ", input: Input, params?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionExecutionParams",
+                "text": "ExpressionExecutionParams"
+              },
+              " | undefined) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionResult",
+                "text": "ExecutionResult"
+              },
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<\"error\", { error: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ErrorLike",
+                "text": "ErrorLike"
+              },
+              "; info?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              " | undefined; }> | Output>>; readonly fork: () => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionsService",
+                "text": "ExpressionsService"
+              },
+              "; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 28
             },
             "deprecated": false
           }
@@ -3015,7 +3202,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/server/plugin.tsx",
-          "lineNumber": 29
+          "lineNumber": 31
         },
         "deprecated": false,
         "children": [
@@ -3038,7 +3225,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 30
+              "lineNumber": 32
             },
             "deprecated": false
           },
@@ -3060,7 +3247,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/server/plugin.tsx",
-              "lineNumber": 31
+              "lineNumber": 33
             },
             "deprecated": false
           }
@@ -3246,6 +3433,238 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-common.ColorStop",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColorStop",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 40
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.ColorStop.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.ColorStop.stop",
+            "type": "number",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.CustomPaletteParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomPaletteParams",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 45
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.reverse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "reverse",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 47
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.rangeType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rangeType",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 48
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.progression",
+            "type": "string",
+            "tags": [],
+            "label": "progression",
+            "description": [],
+            "signature": [
+              "\"fixed\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 50
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 51
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 52
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.stops",
+            "type": "Array",
+            "tags": [],
+            "label": "stops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[] | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 53
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.colorStops",
+            "type": "Array",
+            "tags": [],
+            "label": "colorStops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[] | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.CustomPaletteParams.steps",
+            "type": "number",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 55
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-common.DateRange",
         "type": "Interface",
         "tags": [],
@@ -3253,7 +3672,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/common/types.ts",
-          "lineNumber": 15
+          "lineNumber": 18
         },
         "deprecated": false,
         "children": [
@@ -3266,7 +3685,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/common/types.ts",
-              "lineNumber": 16
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -3279,7 +3698,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/common/types.ts",
-              "lineNumber": 17
+              "lineNumber": 20
             },
             "deprecated": false
           }
@@ -3295,7 +3714,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 13
         },
         "deprecated": false,
         "children": [
@@ -3308,7 +3727,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/common/types.ts",
-              "lineNumber": 11
+              "lineNumber": 14
             },
             "deprecated": false
           },
@@ -3324,7 +3743,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/common/types.ts",
-              "lineNumber": 12
+              "lineNumber": 15
             },
             "deprecated": false
           }
@@ -3453,6 +3872,78 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-common.LensMultiTable",
+        "type": "Interface",
+        "tags": [],
+        "label": "LensMultiTable",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.LensMultiTable.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"lens_multitable\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.LensMultiTable.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "tables",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.LensMultiTable.dateRange",
+            "type": "Object",
+            "tags": [],
+            "label": "dateRange",
+            "description": [],
+            "signature": [
+              "{ fromDate: Date; toDate: Date; } | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-common.NumberStatsResult",
         "type": "Interface",
         "tags": [],
@@ -3542,17 +4033,11 @@
             "text": "PersistableFilter"
           },
           " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          }
+          "Filter"
         ],
         "source": {
           "path": "x-pack/plugins/lens/common/types.ts",
-          "lineNumber": 24
+          "lineNumber": 27
         },
         "deprecated": false,
         "children": [
@@ -3574,7 +4059,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/common/types.ts",
-              "lineNumber": 25
+              "lineNumber": 28
             },
             "deprecated": false
           }
@@ -3597,17 +4082,11 @@
             "text": "PersistableFilterMeta"
           },
           " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.FilterMeta",
-            "text": "FilterMeta"
-          }
+          "FilterMeta"
         ],
         "source": {
           "path": "x-pack/plugins/lens/common/types.ts",
-          "lineNumber": 20
+          "lineNumber": 23
         },
         "deprecated": false,
         "children": [
@@ -3623,7 +4102,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/common/types.ts",
-              "lineNumber": 21
+              "lineNumber": 24
             },
             "deprecated": false
           }
@@ -3738,6 +4217,38 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-common.FormatFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "FormatFactory",
+        "description": [],
+        "signature": [
+          "(mapping?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>> | undefined) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataFieldFormatsPluginApi",
+            "section": "def-common.FieldFormat",
+            "text": "FieldFormat"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-common.LENS_EDIT_BY_VALUE",
         "type": "string",
         "tags": [],
@@ -3800,6 +4311,39 @@
         "source": {
           "path": "x-pack/plugins/lens/common/constants.ts",
           "lineNumber": 11
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.RequiredPaletteParamTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "RequiredPaletteParamTypes",
+        "description": [],
+        "signature": [
+          "{ name: string; reverse: boolean; rangeType: \"number\" | \"percent\"; continuity: \"above\" | \"below\" | \"all\" | \"none\"; progression: \"fixed\"; rangeMin: number; rangeMax: number; stops: ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[]; colorStops: ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[]; steps: number; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 58
         },
         "deprecated": false,
         "initialIsOpen": false

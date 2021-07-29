@@ -33,7 +33,6 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 const { nodeTypes } = esKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
-
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -3808,6 +3807,25 @@ describe('SavedObjectsRepository', () => {
                 params: expect.objectContaining({
                   counterFieldNames: [counterFields[0]],
                   counts: [3],
+                }),
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('does not increment counter when incrementBy is 0', async () => {
+        await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 0 }]);
+
+        expect(client.update).toBeCalledTimes(1);
+        expect(client.update).toBeCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: expect.objectContaining({
+                  counterFieldNames: [counterFields[0]],
+                  counts: [0],
                 }),
               }),
             }),

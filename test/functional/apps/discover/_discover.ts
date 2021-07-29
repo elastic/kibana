@@ -38,8 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104409
-    describe.skip('query', function () {
+    describe('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
@@ -173,6 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // reset to persisted state
+        await queryBar.clearQuery();
         await PageObjects.discover.clickResetSavedSearchButton();
         const expectedHitCount = '14,004';
         await retry.try(async function () {

@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { SIGNIFICANT_VALUE_DIGITS } from './constants';
@@ -28,7 +28,7 @@ interface ResponseHit {
 }
 
 export const getTransactionDurationPercentilesRequest = (
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   percents?: number[],
   fieldName?: string,
   fieldValue?: string
@@ -38,6 +38,7 @@ export const getTransactionDurationPercentilesRequest = (
   return {
     index: params.index,
     body: {
+      track_total_hits: true,
       query,
       size: 0,
       aggs: {
@@ -57,11 +58,11 @@ export const getTransactionDurationPercentilesRequest = (
 
 export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   percents?: number[],
   fieldName?: string,
   fieldValue?: string
-): Promise<Record<string, number>> => {
+): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationPercentilesRequest(
       params,
@@ -71,14 +72,22 @@ export const fetchTransactionDurationPercentiles = async (
     )
   );
 
+  // return early with no results if the search didn't return any documents
+  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+    return { totalDocs: 0, percentiles: {} };
+  }
+
   if (resp.body.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationPercentiles failed, did not return aggregations.'
     );
   }
-  return (
-    (resp.body.aggregations
-      .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
-      .values ?? {}
-  );
+
+  return {
+    totalDocs: (resp.body.hits.total as estypes.SearchTotalHits).value,
+    percentiles:
+      (resp.body.aggregations
+        .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate)
+        .values ?? {},
+  };
 };

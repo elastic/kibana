@@ -41,6 +41,5 @@ export const columns: Array<
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.reason',
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    initialWidth: 644,
   },
 ];

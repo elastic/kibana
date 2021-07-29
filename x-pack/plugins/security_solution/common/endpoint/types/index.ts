@@ -864,6 +864,8 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields;
+    memory_protection: ProtectionFields & SupportedFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -874,6 +876,14 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       ransomware: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -929,7 +939,14 @@ export interface UIPolicyConfig {
    */
   windows: Pick<
     PolicyConfig['windows'],
-    'events' | 'malware' | 'ransomware' | 'popup' | 'antivirus_registration' | 'advanced'
+    | 'events'
+    | 'malware'
+    | 'ransomware'
+    | 'popup'
+    | 'antivirus_registration'
+    | 'advanced'
+    | 'memory_protection'
+    | 'behavior_protection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI

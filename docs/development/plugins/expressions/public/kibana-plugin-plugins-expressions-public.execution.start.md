@@ -11,7 +11,7 @@ N.B. `input` is initialized to `null` rather than `undefined` for legacy reasons
 <b>Signature:</b>
 
 ```typescript
-start(input?: Input): Observable<ExecutionResult<Output | ExpressionValueError>>;
+start(input?: Input, isSubExpression?: boolean): Observable<ExecutionResult<Output | ExpressionValueError>>;
 ```
 
 ## Parameters
@@ -19,6 +19,7 @@ start(input?: Input): Observable<ExecutionResult<Output | ExpressionValueError>>
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  input | <code>Input</code> |  |
+|  isSubExpression | <code>boolean</code> |  |
 
 <b>Returns:</b>
 
