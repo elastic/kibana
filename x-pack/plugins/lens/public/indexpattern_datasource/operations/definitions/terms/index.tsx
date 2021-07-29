@@ -19,11 +19,7 @@ import {
 import { uniq } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { FieldStatsResponse } from '../../../../../common';
-import {
-  AggFunctionsMapping,
-  esQuery,
-  IIndexPattern,
-} from '../../../../../../../../src/plugins/data/public';
+import { AggFunctionsMapping, esQuery } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType, FramePublicAPI } from '../../../../types';
@@ -99,7 +95,7 @@ function getDisallowedTermsMessage(
               body: JSON.stringify({
                 fieldName,
                 dslQuery: esQuery.buildEsQuery(
-                  indexPattern as IIndexPattern,
+                  indexPattern,
                   frame.query,
                   frame.filters,
                   esQuery.getEsQueryConfig(core.uiSettings)

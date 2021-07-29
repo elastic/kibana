@@ -16,7 +16,7 @@ import {
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { esFilters, IFieldType, IndexPattern } from '../../../../../../src/plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
@@ -291,7 +291,7 @@ describe('suggestion_panel', () => {
     (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
     const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
     mountWithProvider(
