@@ -685,11 +685,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Next page, {page}',
         values: { page },
       }),
-    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) =>
-      i18n.translate('core.euiPagination.pageOfTotalCompressed', {
-        defaultMessage: '{page} of {total}',
-        values: { page, total },
-      }),
+    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiPagination.pageOfTotalCompressed"
+        defaultMessage="{page} of {total}"
+        values={{ page, total }}
+      />
+    ),
     'euiPagination.previousPage': ({ page }: EuiValues) =>
       i18n.translate('core.euiPagination.previousPage', {
         defaultMessage: 'Previous page, {page}',
