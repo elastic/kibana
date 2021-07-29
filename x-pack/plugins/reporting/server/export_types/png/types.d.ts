@@ -6,7 +6,7 @@
  */
 
 import { LayoutParams } from '../../lib/layouts';
-import { BaseParams, BasePayload } from '../../types';
+import { DecoratedBaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPNG {
   layout: LayoutParams;
@@ -15,7 +15,7 @@ interface BaseParamsPNG {
 }
 
 // Job params: structure of incoming user request data
-export type JobParamsPNG = BaseParamsPNG & BaseParams;
+export type JobParamsPNG = BaseParamsPNG & DecoratedBaseParams;
 
 // Job payload: structure of stored job data provided by create_job
 export type TaskPayloadPNG = BaseParamsPNG & BasePayload;

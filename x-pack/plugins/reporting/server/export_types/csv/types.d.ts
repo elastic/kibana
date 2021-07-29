@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseParams, BasePayload } from '../../types';
+import { DecoratedBaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
@@ -27,7 +27,7 @@ interface BaseParamsDeprecatedCSV {
 }
 
 export type JobParamsDeprecatedCSV = BaseParamsDeprecatedCSV &
-  BaseParams & {
+  DecoratedBaseParams & {
     indexPatternId: string;
   };
 
