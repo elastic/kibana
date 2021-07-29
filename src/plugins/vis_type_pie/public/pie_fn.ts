@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/common';
 import { PieVisParams, PieVisConfig } from './types';
-import { prepareLogTable } from '../../visualizations/common';
+import { prepareLogTable } from '../../visualizations/public';
 
 export const vislibPieName = 'pie_vis';
 
