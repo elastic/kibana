@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-/** @public types */
-export * from './types';
-export * from './prepare_log_table';
-export * from './expression_functions';
+export * from './range';
+export * from './vis_dimension';
