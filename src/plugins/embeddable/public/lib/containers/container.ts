@@ -53,6 +53,16 @@ export abstract class Container<
       });
   }
 
+  public setChildLoaded(embeddable: IEmbeddable) {
+    this.children[embeddable.id] = embeddable;
+    this.updateOutput({
+      embeddableLoaded: {
+        ...this.output.embeddableLoaded,
+        [embeddable.id]: true,
+      },
+    } as Partial<TContainerOutput>);
+  }
+
   public updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(
     id: string,
     changes: Partial<EEI>
@@ -313,13 +323,9 @@ export abstract class Container<
         return;
       }
 
-      this.children[embeddable.id] = embeddable;
-      this.updateOutput({
-        embeddableLoaded: {
-          ...this.output.embeddableLoaded,
-          [panel.explicitInput.id]: true,
-        },
-      } as Partial<TContainerOutput>);
+      if (!embeddable.deferEmbeddableLoad) {
+        this.setChildLoaded(embeddable);
+      }
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }

@@ -107,6 +107,8 @@ export class Embeddable
   implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
   type = DOC_TYPE;
 
+  deferEmbeddableLoad = true;
+
   private expressionRenderer: ReactExpressionRendererType;
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
@@ -484,6 +486,11 @@ export class Embeddable
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns,
     });
+
+    // communicate to the parent that this embeddable's initialization is done.
+    if (this.parent?.isContainer) {
+      this.parent.setChildLoaded(this);
+    }
   }
 
   private getIsEditable() {

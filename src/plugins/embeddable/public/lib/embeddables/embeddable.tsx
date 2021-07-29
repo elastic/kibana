@@ -30,6 +30,7 @@ export abstract class Embeddable<
 
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
+  public readonly deferEmbeddableLoad: boolean = false;
   public abstract readonly type: string;
   public readonly id: string;
   public fatalError?: Error;
@@ -210,6 +211,11 @@ export abstract class Embeddable<
   protected onFatalError(e: Error) {
     this.fatalError = e;
     this.output$.error(e);
+    // if the container is waiting for this embeddable to complete loading,
+    // a fatal error counts as complete.
+    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
+      this.parent.setChildLoaded(this);
+    }
   }
 
   private onResetInput(newInput: TEmbeddableInput) {
