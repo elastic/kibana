@@ -10,9 +10,11 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy, PackagePolicy } from '../types';
+import type { AgentPolicy } from '../types';
 
 import { useAgentPolicyRefresh, useCapabilities, useLink } from '../hooks';
+
+import type { InMemoryPackagePolicy } from '../applications/fleet/sections/agent_policy/details_page/components/package_policies/package_policies_table';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -21,7 +23,7 @@ import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
-  packagePolicy: PackagePolicy;
+  packagePolicy: InMemoryPackagePolicy;
   viewDataStep?: EuiStepProps;
   showAddAgent?: boolean;
 }> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent }) => {
@@ -77,6 +79,19 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
         defaultMessage="Edit integration"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      disabled={!packagePolicy.hasUpgrade}
+      icon="refresh"
+      href={`${getHref('edit_integration', {
+        policyId: agentPolicy.id,
+        packagePolicyId: packagePolicy.id,
+      })}?upgrade=true`}
+    >
+      <FormattedMessage
+        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
+        defaultMessage="Upgrade Policy"
       />
     </EuiContextMenuItem>,
     // FIXME: implement Copy package policy action

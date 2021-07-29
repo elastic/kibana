@@ -26,7 +26,7 @@ import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
 import { useCapabilities, usePackageInstallations, useStartServices } from '../../../../../hooks';
 
-interface InMemoryPackagePolicy extends PackagePolicy {
+export interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
   packageTitle?: string;
   packageVersion?: string;
