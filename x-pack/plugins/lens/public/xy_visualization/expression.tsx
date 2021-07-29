@@ -616,7 +616,7 @@ export function XYChart({
               for (const column of table.columns) {
                 const record = newRow[column.id];
                 if (
-                  record !== null &&
+                  record != null &&
                   // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
                   (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
                 ) {
