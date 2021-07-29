@@ -527,20 +527,103 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('migrates unencrypted fields on saved objects', async () => {
-        const { body: decryptedResponse } = await supertest
-          .get(
-            `/api/saved_objects/get-decrypted-as-internal-user/saved-object-with-migration/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
-          )
-          .expect(200);
+      function getGetApiUrl({ objectId, spaceId }: { objectId: string; spaceId?: string }) {
+        const spacePrefix = spaceId ? `/s/${spaceId}` : '';
+        return `${spacePrefix}/api/saved_objects/get-decrypted-as-internal-user/saved-object-with-migration/${objectId}`;
+      }
 
-        expect(decryptedResponse.attributes).to.eql({
-          // ensures the encrypted field can still be decrypted after the migration
-          encryptedAttribute: 'this is my secret api key',
-          // ensures the non-encrypted field has been migrated in 7.8.0
-          nonEncryptedAttribute: 'elastic-migrated',
-          // ensures the non-encrypted field has been migrated into a new encrypted field in 7.9.0
-          additionalEncryptedAttribute: 'elastic-migrated-encrypted',
+      // For brevity, each encrypted saved object has the same decrypted attributes after migrations/conversion.
+      // An assertion based on this ensures all encrypted fields can still be decrypted after migrations/conversion have been applied.
+      const expectedDecryptedAttributes = {
+        encryptedAttribute: 'this is my secret api key',
+        nonEncryptedAttribute: 'elastic-migrated', // this field was migrated in 7.8.0
+        additionalEncryptedAttribute: 'elastic-migrated-encrypted', // this field was added in 7.9.0
+      };
+
+      // In these test cases, we simulate a scenario where some existing objects that are migrated when Kibana starts up. Note that when a
+      // document migration is triggered, the saved object "convert" transform is also applied by the Core migration algorithm.
+      describe('handles index migration correctly', () => {
+        describe('in the default space', () => {
+          it('for a saved object that needs to be migrated before it is converted', async () => {
+            const getApiUrl = getGetApiUrl({ objectId: '74f3e6d7-b7bb-477d-ac28-92ee22728e6e' });
+            const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+            expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
+          });
+
+          it('for a saved object that does not need to be migrated before it is converted', async () => {
+            const getApiUrl = getGetApiUrl({ objectId: '362828f0-eef2-11eb-9073-11359682300a' });
+            const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+            expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
+          });
+        });
+
+        describe('in a custom space', () => {
+          const spaceId = 'custom-space';
+
+          it('for a saved object that needs to be migrated before it is converted', async () => {
+            const getApiUrl = getGetApiUrl({
+              objectId: 'a98e22f8-530e-5d69-baf7-97526796f3a6', // This ID is not found in the data.json file, it is dynamically generated when the object is converted; the original ID is a67c6950-eed8-11eb-9a62-032b4e4049d1
+              spaceId,
+            });
+            const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+            expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
+          });
+
+          it('for a saved object that does not need to be migrated before it is converted', async () => {
+            const getApiUrl = getGetApiUrl({
+              objectId: '41395c74-da7a-5679-9535-412d550a6cf7', // This ID is not found in the data.json file, it is dynamically generated when the object is converted; the original ID is 36448a90-eef2-11eb-9073-11359682300a
+              spaceId,
+            });
+            const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+            expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
+          });
+        });
+      });
+
+      // In these test cases, we simulate a scenario where new objects are migrated upon creation. This happens because an outdated
+      // `migrationVersion` field is included below. Note that when a document migration is triggered, the saved object "convert" transform
+      // is *not* applied by the Core migration algorithm.
+      describe('handles document migration correctly', () => {
+        function getCreateApiUrl({ spaceId }: { spaceId?: string } = {}) {
+          const spacePrefix = spaceId ? `/s/${spaceId}` : '';
+          return `${spacePrefix}/api/saved_objects/saved-object-with-migration`;
+        }
+
+        const objectToCreate = {
+          attributes: {
+            encryptedAttribute: 'this is my secret api key',
+            nonEncryptedAttribute: 'elastic',
+          },
+          migrationVersion: { 'saved-object-with-migration': '7.7.0' },
+        };
+
+        it('in the default space', async () => {
+          const createApiUrl = getCreateApiUrl();
+          const { body: savedObject } = await supertest
+            .post(createApiUrl)
+            .set('kbn-xsrf', 'xxx')
+            .send(objectToCreate)
+            .expect(200);
+          const { id: objectId } = savedObject;
+
+          const getApiUrl = getGetApiUrl({ objectId });
+          const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+          expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
+        });
+
+        it('in a custom space', async () => {
+          const spaceId = 'custom-space';
+          const createApiUrl = getCreateApiUrl({ spaceId });
+          const { body: savedObject } = await supertest
+            .post(createApiUrl)
+            .set('kbn-xsrf', 'xxx')
+            .send(objectToCreate)
+            .expect(200);
+          const { id: objectId } = savedObject;
+
+          const getApiUrl = getGetApiUrl({ objectId, spaceId });
+          const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
+          expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
         });
       });
     });

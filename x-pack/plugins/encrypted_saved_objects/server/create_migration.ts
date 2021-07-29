@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import semver from 'semver';
+
 import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
@@ -77,19 +79,44 @@ export const getCreateMigration = (
       return encryptedDoc;
     }
 
+    // After it is converted, the object's old ID is stored in the `originId` field. In addition, objects that are imported a certain way
+    // may have this field set, but it would not be necessary to use this to decrypt saved object attributes.
+    const { type, id, originId } = encryptedDoc;
+
+    // If an object is slated to be converted, it should be decrypted flexibly:
+    // * If this is an index migration:
+    //   a. If there is one or more pending migration _before_ the conversion, the object will be decrypted and re-encrypted with its
+    //      namespace in the descriptor. Then, after the conversion, the object will be decrypted with its namespace and old ID in the
+    //      descriptor and re-encrypted with its new ID (without a namespace) in the descriptor.
+    //   b. If there are no pending migrations before the conversion, then after the conversion the object will be decrypted with its
+    //      namespace and old ID in the descriptor and re-encrypted with its new ID (without a namespace) in the descriptor.
+    // * If this is *not* an index migration, then it is a single document migration. In that case, the object will be decrypted and
+    //   re-encrypted without a namespace in the descriptor.
+    // To account for these different scenarios, when this field is set, the ESO service will attempt several different permutations of
+    // the descriptor when decrypting the object.
+    const isTypeBeingConverted =
+      !!context.convertToMultiNamespaceTypeVersion &&
+      semver.lte(context.migrationVersion, context.convertToMultiNamespaceTypeVersion);
+
+    // This approximates the behavior of getDescriptorNamespace(); the intent is that if there is ever a case where a multi-namespace object
+    // has the `namespace` field, it will not be encrypted with that field in its descriptor. It would be preferable to rely on
+    // getDescriptorNamespace() here, but that requires the SO type registry which can only be retrieved from a promise, and this is not an
+    // async function
+    const descriptorNamespace = context.isSingleNamespaceType ? encryptedDoc.namespace : undefined;
+    let decryptDescriptorNamespace = descriptorNamespace;
+
     // If an object has been converted right before this migration function is called, it will no longer have a `namespace` field, but it
     // will have a `namespaces` field; in that case, the first/only element in that array should be used as the namespace in the descriptor
     // during decryption.
-    const convertToMultiNamespaceType =
-      context.convertToMultiNamespaceTypeVersion === context.migrationVersion;
-    const decryptDescriptorNamespace = convertToMultiNamespaceType
-      ? normalizeNamespace(encryptedDoc.namespaces?.[0]) // `namespaces` contains string values, but we need to normalize this to the namespace ID representation
-      : encryptedDoc.namespace;
+    if (isTypeBeingConverted) {
+      decryptDescriptorNamespace = encryptedDoc.namespaces?.length
+        ? normalizeNamespace(encryptedDoc.namespaces[0]) // `namespaces` contains string values, but we need to normalize this to the namespace ID representation
+        : encryptedDoc.namespace;
+    }
 
-    const { id, type } = encryptedDoc;
     // These descriptors might have a `namespace` that is undefined. That is expected for multi-namespace and namespace-agnostic types.
     const decryptDescriptor = { id, type, namespace: decryptDescriptorNamespace };
-    const encryptDescriptor = { id, type, namespace: encryptedDoc.namespace };
+    const encryptDescriptor = { id, type, namespace: descriptorNamespace };
 
     // decrypt the attributes using the input type definition
     // if an error occurs during decryption, use the shouldMigrateIfDecryptionFails flag
@@ -98,7 +125,8 @@ export const getCreateMigration = (
     const documentToMigrate = mapAttributes(encryptedDoc, (inputAttributes) => {
       try {
         return inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
-          convertToMultiNamespaceType,
+          isTypeBeingConverted,
+          originId,
         });
       } catch (err) {
         if (!shouldMigrateIfDecryptionFails || !(err instanceof EncryptionError)) {
@@ -109,7 +137,8 @@ export const getCreateMigration = (
           `Decryption failed for encrypted Saved Object "${encryptedDoc.id}" of type "${encryptedDoc.type}" with error: ${err.message}. Encrypted attributes have been stripped from the original document and migration will be applied but this may cause errors later on.`
         );
         return inputService.stripOrDecryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
-          convertToMultiNamespaceType,
+          isTypeBeingConverted,
+          originId,
         }).attributes;
       }
     });
