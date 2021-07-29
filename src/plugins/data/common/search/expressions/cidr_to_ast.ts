@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export interface ExtendedBounds {
-  min: number;
-  max: number;
-}
+import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { ExpressionFunctionCidr, Cidr } from './cidr';
+
+export const cidrToAst = (cidr: Cidr) => {
+  return buildExpression([buildExpressionFunction<ExpressionFunctionCidr>('cidr', cidr)]).toAst();
+};
