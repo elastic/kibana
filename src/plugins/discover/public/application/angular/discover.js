@@ -10,7 +10,7 @@ import { getAngularModule, getServices } from '../../kibana_services';
 
 const services = getServices();
 
-const { data, history: getHistory } = getServices();
+const { history: getHistory } = getServices();
 
 const app = getAngularModule();
 
