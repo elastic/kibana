@@ -24,7 +24,12 @@ import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
-import { useCapabilities, usePackageInstallations, useStartServices } from '../../../../../hooks';
+import {
+  useCapabilities,
+  useLink,
+  usePackageInstallations,
+  useStartServices,
+} from '../../../../../hooks';
 
 export interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
@@ -57,6 +62,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
   const { updatableIntegrations } = usePackageInstallations();
+  const { getHref } = useLink();
 
   // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
@@ -151,19 +157,36 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       defaultMessage="v{version}"
                       values={{ version: packagePolicy.package.version }}
                     />
-
-                    {packagePolicy.hasUpgrade && (
-                      <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
-                          { defaultMessage: 'Upgrade Available' }
-                        )}
-                      >
-                        <EuiIcon type="alert" color="warning" />
-                      </EuiToolTip>
-                    )}
                   </EuiText>
                 </EuiFlexItem>
+              )}
+              {packagePolicy.hasUpgrade && (
+                <>
+                  <EuiFlexItem>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
+                        { defaultMessage: 'Upgrade Available' }
+                      )}
+                    >
+                      <EuiIcon type="alert" color="warning" />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton
+                      size="s"
+                      href={`${getHref('edit_integration', {
+                        policyId: agentPolicy.id,
+                        packagePolicyId: packagePolicy.id,
+                      })}?upgrade=true`}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
+                        defaultMessage="Upgrade"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </>
               )}
             </EuiFlexGroup>
           );
@@ -196,7 +219,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [agentPolicy]
+    [agentPolicy, getHref]
   );
 
   return (

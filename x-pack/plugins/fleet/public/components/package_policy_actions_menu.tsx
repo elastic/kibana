@@ -91,7 +91,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
-        defaultMessage="Upgrade Policy"
+        defaultMessage="Upgrade package policy"
       />
     </EuiContextMenuItem>,
     // FIXME: implement Copy package policy action
