@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
-import { DeletePackagePoliciesResponse, NewPackagePolicy, UpdatePackagePolicy } from '../../common';
+import type { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+
+import type {
+  DeletePackagePoliciesResponse,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../../common';
 
 /**
  * Callbacks supported by the Fleet plugin
