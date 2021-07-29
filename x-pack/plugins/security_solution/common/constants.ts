@@ -7,6 +7,7 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
+import { metadataTransformPattern } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -309,3 +310,5 @@ export const showAllOthersBucket: string[] = [
  * than use it from here.
  */
 export const ELASTIC_NAME = 'estc';
+
+export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;
