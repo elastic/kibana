@@ -972,7 +972,7 @@ describe('successful migrations', () => {
   });
 
   describe('7.14.1', () => {
-    test('security solution author field is migrated to array', () => {
+    test('security solution author field is migrated to array if it is undefined', () => {
       const migration7141 = getMigrations(encryptedSavedObjectsSetup)['7.14.1'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
@@ -985,6 +985,28 @@ describe('successful migrations', () => {
           ...alert.attributes,
           params: {
             author: [],
+          },
+        },
+      });
+    });
+
+    test('security solution author field does not override existing values if they exist', () => {
+      const migration7141 = getMigrations(encryptedSavedObjectsSetup)['7.14.1'];
+      const alert = getMockData({
+        alertTypeId: 'siem.signals',
+        params: {
+          note: 'some note',
+          author: ['author 1'],
+        },
+      });
+
+      expect(migration7141(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          params: {
+            note: 'some note',
+            author: ['author 1'],
           },
         },
       });
