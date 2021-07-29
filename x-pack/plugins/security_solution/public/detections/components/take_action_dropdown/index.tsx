@@ -8,12 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
 import { indexOf, noop } from 'lodash';
-import {
-  CHANGE_ALERT_STATUS,
-  ACTION_ADD_ENDPOINT_EXCEPTION,
-  ACTION_ADD_EXCEPTION,
-  ACTION_ADD_EVENT_FILTER,
-} from './translations';
+
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
@@ -32,7 +27,13 @@ import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kiban
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
 import { addToCaseActionItem } from './helpers'; */
 import { useEventFilterModal } from '../alerts_table/timeline_actions/use_event_filter_modal';
-import { useHostIsolationAction } from './use_host_isolation_action';
+import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
+import {
+  CHANGE_ALERT_STATUS,
+  ACTION_ADD_ENDPOINT_EXCEPTION,
+  ACTION_ADD_EXCEPTION,
+  ACTION_ADD_EVENT_FILTER,
+} from './translations';
 
 export const TakeActionDropdown = React.memo(
   ({

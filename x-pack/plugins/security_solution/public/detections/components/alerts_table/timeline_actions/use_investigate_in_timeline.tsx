@@ -102,18 +102,20 @@ export const useInvestigateInTimeline = ({
     updateTimelineIsLoading,
   ]);
   const eventType = ecsRowData != null ? getEventType(ecsRowData) : null;
+  const showInvestigateInTimelineAction = eventType === 'signal' && ecsRowData != null;
 
-  const investigateInTimelineAction =
-    eventType === 'signal' && ecsRowData != null
-      ? [
-          {
-            name: ACTION_INVESTIGATE_IN_TIMELINE,
-            onClick: investigateInTimelineAlertClick,
-          },
-        ]
-      : [];
+  const investigateInTimelineAction = showInvestigateInTimelineAction
+    ? [
+        {
+          name: ACTION_INVESTIGATE_IN_TIMELINE,
+          onClick: investigateInTimelineAlertClick,
+        },
+      ]
+    : [];
 
   return {
     investigateInTimelineAction,
+    investigateInTimelineAlertClick,
+    showInvestigateInTimelineAction,
   };
 };

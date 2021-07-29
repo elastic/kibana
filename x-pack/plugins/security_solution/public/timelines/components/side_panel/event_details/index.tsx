@@ -26,7 +26,7 @@ import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
+import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
