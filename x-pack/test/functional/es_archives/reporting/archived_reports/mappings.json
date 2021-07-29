@@ -7,6 +7,561 @@
     "mappings": {
       "properties": {
         "attempts": {
+          "type": "long"
+        },
+        "browser_type": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "completed_at": {
+          "type": "date"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "jobtype": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "kibana_id": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "kibana_name": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "max_attempts": {
+          "type": "long"
+        },
+        "meta": {
+          "properties": {
+            "layout": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "objectType": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "output": {
+          "properties": {
+            "content": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "content_type": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "csv_contains_formulas": {
+              "type": "boolean"
+            },
+            "max_size_reached": {
+              "type": "boolean"
+            },
+            "size": {
+              "type": "long"
+            }
+          }
+        },
+        "payload": {
+          "properties": {
+            "basePath": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "browserTimezone": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "fields": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "forceNow": {
+              "type": "date"
+            },
+            "headers": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "indexPatternId": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "indexPatternSavedObject": {
+              "properties": {
+                "attributes": {
+                  "properties": {
+                    "fieldFormatMap": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "fields": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "timeFieldName": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "title": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "id": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "migrationVersion": {
+                  "properties": {
+                    "index-pattern": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "type": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "updated_at": {
+                  "type": "date"
+                },
+                "version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "dimensions": {
+                  "properties": {
+                    "height": {
+                      "type": "long"
+                    },
+                    "width": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "id": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "metaFields": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "objectType": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "relativeUrl": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "relativeUrls": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "searchRequest": {
+              "properties": {
+                "body": {
+                  "properties": {
+                    "_source": {
+                      "type": "object"
+                    },
+                    "docvalue_fields": {
+                      "properties": {
+                        "field": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "format": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "query": {
+                      "properties": {
+                        "bool": {
+                          "properties": {
+                            "filter": {
+                              "properties": {
+                                "match_all": {
+                                  "type": "object"
+                                },
+                                "range": {
+                                  "properties": {
+                                    "order_date": {
+                                      "properties": {
+                                        "format": {
+                                          "fields": {
+                                            "keyword": {
+                                              "ignore_above": 256,
+                                              "type": "keyword"
+                                            }
+                                          },
+                                          "type": "text"
+                                        },
+                                        "gte": {
+                                          "type": "date"
+                                        },
+                                        "lte": {
+                                          "type": "date"
+                                        }
+                                      }
+                                    },
+                                    "timestamp": {
+                                      "properties": {
+                                        "format": {
+                                          "fields": {
+                                            "keyword": {
+                                              "ignore_above": 256,
+                                              "type": "keyword"
+                                            }
+                                          },
+                                          "type": "text"
+                                        },
+                                        "gte": {
+                                          "type": "date"
+                                        },
+                                        "lte": {
+                                          "type": "date"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "script_fields": {
+                      "properties": {
+                        "hour_of_day": {
+                          "properties": {
+                            "script": {
+                              "properties": {
+                                "lang": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "source": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sort": {
+                      "properties": {
+                        "order_date": {
+                          "properties": {
+                            "order": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "unmapped_type": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "timestamp": {
+                          "properties": {
+                            "order": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "unmapped_type": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "stored_fields": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "version": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "index": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "title": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "type": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "priority": {
+          "type": "long"
+        },
+        "process_expiration": {
+          "type": "date"
+        },
+        "started_at": {
+          "type": "date"
+        },
+        "status": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "timeout": {
+          "type": "long"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".reporting-2021-07-18",
+    "mappings": {
+      "properties": {
+        "attempts": {
           "type": "short"
         },
         "browser_type": {
@@ -55,6 +610,9 @@
             }
           }
         },
+        "migration_version": {
+          "type": "keyword"
+        },
         "output": {
           "properties": {
             "content": {
@@ -72,6 +630,15 @@
             },
             "size": {
               "type": "long"
+            },
+            "warnings": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             }
           }
         },
