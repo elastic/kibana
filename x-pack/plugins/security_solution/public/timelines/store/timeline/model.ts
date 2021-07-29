@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { EqlOptionsSelected } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
@@ -26,8 +25,6 @@ export type TimelineModel = TGridModelForTimeline & {
   prevActiveTab: TimelineTabs;
   /** Timeline saved object owner */
   createdBy?: string;
-  /** The sources of the event data shown in the timeline */
-  dataProviders: DataProvider[];
   /** A summary of the events and notes in this timeline */
   description: string;
   eqlOptions: EqlOptionsSelected;

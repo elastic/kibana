@@ -78,7 +78,23 @@ describe('Histogram Agg', () => {
                 true,
               ],
               "extended_bounds": Array [
-                "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "max": Array [
+                          "",
+                        ],
+                        "min": Array [
+                          "",
+                        ],
+                      },
+                      "function": "extendedBounds",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
               ],
               "field": Array [
                 "field",
