@@ -7,7 +7,7 @@
 
 import { AlertInstanceContext, AlertInstanceState } from '../../../alerting/server';
 import { alertsMock } from '../../../alerting/server/mocks';
-import { LifecycleAlertServices } from './create_lifecycle_rule_type_factory';
+import { LifecycleAlertServices } from './create_lifecycle_executor';
 
 /**
  * This wraps the alerts to enable the preservation of the generic type

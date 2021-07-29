@@ -6,7 +6,6 @@
  */
 
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import { Comparator } from './types';
 import * as mocks from './test_mocks';
 // import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
@@ -21,6 +20,12 @@ import { InfraSources } from '../../sources';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
+import {
+  Aggregators,
+  Comparator,
+  CountMetricExpressionParams,
+  NonCountMetricExpressionParams,
+} from './types';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -30,11 +35,33 @@ interface AlertTestInstance {
 
 let persistAlertInstances = false; // eslint-disable-line prefer-const
 
+type TestRuleState = Record<string, unknown> & {
+  aRuleStateKey: string;
+};
+
+const initialRuleState: TestRuleState = {
+  aRuleStateKey: 'INITIAL_RULE_STATE_VALUE',
+};
+
 const mockOptions = {
   alertId: '',
   startedAt: new Date(),
   previousStartedAt: null,
-  state: {},
+  state: {
+    wrapped: initialRuleState,
+    trackedAlerts: {
+      TEST_ALERT_0: {
+        alertId: 'TEST_ALERT_0',
+        alertUuid: 'TEST_ALERT_0_UUID',
+        started: '2020-01-01T12:00:00.000Z',
+      },
+      TEST_ALERT_1: {
+        alertId: 'TEST_ALERT_1',
+        alertUuid: 'TEST_ALERT_1_UUID',
+        started: '2020-01-02T12:00:00.000Z',
+      },
+    },
+  },
   spaceId: '',
   name: '',
   tags: [],
@@ -66,12 +93,13 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
+        ...mockOptions,
         services,
         params: {
           sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
             },
@@ -137,7 +165,7 @@ describe('The metric threshold alert type', () => {
           groupBy: 'something',
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
             },
@@ -182,12 +210,12 @@ describe('The metric threshold alert type', () => {
           groupBy,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold: thresholdA,
             },
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold: thresholdB,
               metric: 'test.metric.2',
@@ -235,12 +263,12 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
               aggType: 'count',
               metric: undefined,
-            },
+            } as CountMetricExpressionParams,
           ],
         },
       });
@@ -260,7 +288,7 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
               aggType: 'p99',
@@ -285,7 +313,7 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
               aggType: 'p95',
@@ -310,7 +338,7 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
               threshold: 1,
               metric: 'test.metric.3',
@@ -338,7 +366,7 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
               threshold: 1,
               metric: 'test.metric.3',
@@ -417,7 +445,7 @@ describe('The metric threshold alert type', () => {
           sourceId: 'default',
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               metric: 'test.metric.pct',
               comparator: Comparator.GT,
               threshold: [0.75],
@@ -535,9 +563,18 @@ function mostRecentAction(id: string) {
   return alertInstances.get(id)!.actionQueue.pop();
 }
 
-const baseCriterion = {
-  aggType: 'avg',
+const baseNonCountCriterion: Pick<
+  NonCountMetricExpressionParams,
+  'aggType' | 'metric' | 'timeSize' | 'timeUnit'
+> = {
+  aggType: Aggregators.AVERAGE,
   metric: 'test.metric.1',
+  timeSize: 1,
+  timeUnit: 'm',
+};
+
+const baseCountCriterion: Pick<CountMetricExpressionParams, 'aggType' | 'timeSize' | 'timeUnit'> = {
+  aggType: Aggregators.COUNT,
   timeSize: 1,
   timeUnit: 'm',
 };
