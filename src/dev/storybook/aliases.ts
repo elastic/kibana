@@ -19,6 +19,7 @@ export const storybookAliases = {
   embeddable: 'src/plugins/embeddable/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
   expression_image: 'src/plugins/expression_image/.storybook',
+  expression_metric: 'src/plugins/expression_metric/.storybook',
   expression_repeat_image: 'src/plugins/expression_repeat_image/.storybook',
   expression_reveal_image: 'src/plugins/expression_reveal_image/.storybook',
   expression_shape: 'src/plugins/expression_shape/.storybook',
