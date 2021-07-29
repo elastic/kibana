@@ -36,7 +36,7 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-function isClearable(index) {
+export function isClearable(index) {
   if (typeof index === 'string') {
     const match = index.match(/\d{6}$/);
     return match !== null && match.length && Number(match[match.length - 1]) >= 2;
@@ -135,13 +135,13 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
 
     if (body.hits.total.value > 0) {
       let notificationIndex;
-      messages = body.hits.hits.map((hit) => {
+      body.hits.hits.forEach((hit) => {
         if (notificationIndex !== hit._index && isClearable(hit._index)) {
           notificationIndices.push(hit._index);
           notificationIndex = hit._index;
         }
 
-        return hit._source;
+        messages.push(hit._source);
       });
     }
     messages = await jobSavedObjectService.filterJobsForSpace(

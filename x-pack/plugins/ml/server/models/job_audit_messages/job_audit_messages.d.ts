@@ -10,6 +10,8 @@ import type { MlClient } from '../../lib/ml_client';
 import type { JobSavedObjectService } from '../../saved_objects';
 import { JobMessage } from '../../../common/types/audit_message';
 
+export function isClearable(index?: string): boolean;
+
 export function jobAuditMessagesProvider(
   client: IScopedClusterClient,
   mlClient: MlClient
@@ -24,5 +26,8 @@ export function jobAuditMessagesProvider(
     }
   ) => { messages: JobMessage[]; notificationIndices: string[] };
   getAuditMessagesSummary: (jobIds?: string[]) => any;
-  clearJobAuditMessages: (jobId: string, notificationIndices: string[]) => any;
+  clearJobAuditMessages: (
+    jobId: string,
+    notificationIndices: string[]
+  ) => { success: boolean; last_cleared: number };
 };

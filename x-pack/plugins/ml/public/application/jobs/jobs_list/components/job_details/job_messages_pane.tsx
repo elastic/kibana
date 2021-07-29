@@ -81,7 +81,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
           })
         );
       }
-    }, [jobId, notificationIndices.length]);
+    }, [jobId, JSON.stringify(notificationIndices)]);
 
     useEffect(() => {
       fetchMessages();
