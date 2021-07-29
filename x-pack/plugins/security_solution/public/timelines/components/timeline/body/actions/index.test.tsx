@@ -20,6 +20,14 @@ jest.mock('../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
 }));
 
+jest.mock('../../../../../common/lib/kibana', () => {
+  const useKibana = jest.requireActual('../../../../../common/lib/kibana');
+  return {
+    ...useKibana,
+    useGetUserCasesPermissions: jest.fn(),
+  };
+});
+
 describe('Actions', () => {
   beforeEach(() => {
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);

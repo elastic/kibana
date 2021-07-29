@@ -73,11 +73,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(errorGroupMainStatistics.error_groups.map(({ name }) => name))
           .toMatchInline(`
           Array [
-            "Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue() (through reference chain: co.elastic.apm.opbeans.repositories.Stats[\\"numbers\\"]->com.sun.proxy.$Proxy132[\\"revenue\\"])",
-            "java.io.IOException: Connection reset by peer",
-            "java.io.IOException: Connection reset by peer",
-            "Could not write JSON: Unable to find co.elastic.apm.opbeans.model.Customer with id 7173; nested exception is com.fasterxml.jackson.databind.JsonMappingException: Unable to find co.elastic.apm.opbeans.model.Customer with id 7173 (through reference chain: co.elastic.apm.opbeans.model.Customer_$$_jvst101_3[\\"email\\"])",
+            "Response status 404",
+            "No converter found for return value of type: class com.sun.proxy.$Proxy162",
+            "Response status 404",
+            "Connection reset by peer",
             "Request method 'POST' not supported",
+            "java.io.IOException: Broken pipe",
           ]
         `);
 
@@ -89,10 +90,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(occurences).toMatchInline(`
           Array [
-            5,
+            12,
+            11,
             3,
             2,
-            1,
+            2,
             1,
           ]
         `);
@@ -101,10 +103,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "group_id": "051f95eabf120ebe2f8b0399fe3e54c5",
-            "last_seen": 1607437366098,
-            "name": "Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue() (through reference chain: co.elastic.apm.opbeans.repositories.Stats[\\"numbers\\"]->com.sun.proxy.$Proxy132[\\"revenue\\"])",
-            "occurrences": 5,
+            "group_id": "d16d39e7fa133b8943cea035430a7b4e",
+            "last_seen": 1627374613628,
+            "name": "Response status 404",
+            "occurrences": 12,
           }
         `);
       });

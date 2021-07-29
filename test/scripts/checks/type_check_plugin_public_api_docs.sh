@@ -14,4 +14,4 @@ checks-reporter-with-killswitch "Check Types" \
   node scripts/type_check
 
 echo " -- building api docs"
-node scripts/build_api_docs
+node --max-old-space-size=12000 scripts/build_api_docs

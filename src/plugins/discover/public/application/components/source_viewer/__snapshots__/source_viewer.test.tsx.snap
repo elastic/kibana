@@ -546,7 +546,6 @@ exports[`Source Viewer component renders json code editor 1`] = `
                 aria-label="Read only JSON view of an elasticsearch document"
                 editorDidMount={[Function]}
                 languageId="xjson"
-                onChange={[Function]}
                 options={
                   Object {
                     "automaticLayout": true,
