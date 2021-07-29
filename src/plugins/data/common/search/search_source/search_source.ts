@@ -314,7 +314,8 @@ export class SearchSource {
 
   /**
    * Fetch this source and reject the returned Promise on error
-   * @deprecated Use fetch$ instead
+   * @deprecated Use the `fetch$` method instead
+   * @removeBy 8.0
    */
   fetch(options: ISearchOptions = {}) {
     return this.fetch$(options)

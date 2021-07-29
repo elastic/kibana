@@ -25,6 +25,7 @@ import type { DataPluginRouter } from '../types';
  * legacy ES client.
  *
  * @deprecated
+ * @removeBy 8.0
  */
 export function registerMsearchRoute(
   router: DataPluginRouter,

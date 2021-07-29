@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use IndexPatternField or FieldSpec instead
+> Use `IndexPatternField` or `FieldSpec` instead  8.0
 > 
 
 <b>Signature:</b>

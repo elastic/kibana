@@ -23,8 +23,9 @@ import {
   buildQueryFromFilters,
 } from '../common';
 /*
- * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
  * Filter helper namespace:
+ * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
+ * @removeBy 8.0
  */
 export const esFilters = {
   buildQueryFilter,
@@ -46,7 +47,8 @@ import { getEsQueryConfig } from '../common';
 
 /*
  * Filter helper namespace
- * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
+ * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
+ * @removeBy 8.0
  */
 export const esKuery = {
   nodeTypes,
@@ -56,7 +58,8 @@ export const esKuery = {
 
 /*
  * Filter helper namespace
- * @deprecated Please import from the package kbn/es-query directly. This will be deprecated in v8.0.0.
+ * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
+ * @removeBy 8.0
  */
 export const esQuery = {
   buildQueryFromFilters,

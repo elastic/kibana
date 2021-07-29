@@ -9,8 +9,8 @@ import { IndexPatternFieldBase } from '@kbn/es-query';
 import { FieldSpec, IndexPattern } from '../..';
 
 /**
- * @deprecated
- * Use IndexPatternField or FieldSpec instead
+ * @deprecated Use `IndexPatternField` or `FieldSpec` instead
+ * @removeBy 8.0
  */
 export interface IFieldType extends IndexPatternFieldBase {
   count?: number;

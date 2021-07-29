@@ -317,7 +317,8 @@ export class AggConfig {
   }
 
   /**
-   * @deprecated - Use serialize() instead.
+   * @deprecated Use serialize() instead.
+   * @removeBy 8.0
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();
