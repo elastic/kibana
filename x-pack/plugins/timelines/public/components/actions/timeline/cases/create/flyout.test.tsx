@@ -8,24 +8,15 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import '../../../common/mock/match_media';
 import { CreateCaseFlyout } from './flyout';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../../mock';
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      cases: {
-        getCreateCase: () => {},
-      },
-    },
-  }),
-}));
 const onCloseFlyout = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {
   onCloseFlyout,
   onSuccess,
+  appId: 'securitySolution',
 };
 
 describe('CreateCaseFlyout', () => {
