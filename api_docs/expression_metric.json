@@ -1,0 +1,103 @@
+{
+  "id": "expressionMetric",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "expressionMetric",
+        "id": "def-public.metricRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "metricRenderer",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          "MetricRendererConfig",
+          ">"
+        ],
+        "source": {
+          "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
+          "lineNumber": 29
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "expressionMetric",
+        "id": "def-public.renderers",
+        "type": "Array",
+        "tags": [],
+        "label": "renderers",
+        "description": [],
+        "signature": [
+          "(() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          "MetricRendererConfig",
+          ">)[]"
+        ],
+        "source": {
+          "path": "src/plugins/expression_metric/public/expression_renderers/index.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionMetric",
+      "id": "def-public.ExpressionMetricPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionMetricPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "source": {
+        "path": "src/plugins/expression_metric/public/plugin.ts",
+        "lineNumber": 23
+      },
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

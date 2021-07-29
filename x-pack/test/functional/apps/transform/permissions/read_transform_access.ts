@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('for user with full transform access', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/107043
+  describe.skip('for user with full transform access', function () {
     describe('with no data loaded', function () {
       before(async () => {
         await transform.securityUI.loginAsTransformViewer();
