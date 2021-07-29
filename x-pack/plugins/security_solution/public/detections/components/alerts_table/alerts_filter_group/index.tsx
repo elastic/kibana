@@ -43,6 +43,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
         hasActiveFilters={filterGroup === FILTER_OPEN}
         onClick={onClickOpenFilterCallback}
         withNext
+        color="primary"
       >
         {i18n.OPEN_ALERTS}
       </EuiFilterButton>
@@ -52,6 +53,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
         hasActiveFilters={filterGroup === FILTER_IN_PROGRESS}
         onClick={onClickInProgressFilterCallback}
         withNext
+        color="primary"
       >
         {i18n.IN_PROGRESS_ALERTS}
       </EuiFilterButton>
@@ -60,6 +62,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
         data-test-subj="closedAlerts"
         hasActiveFilters={filterGroup === FILTER_CLOSED}
         onClick={onClickCloseFilterCallback}
+        color="primary"
       >
         {i18n.CLOSED_ALERTS}
       </EuiFilterButton>
