@@ -54,7 +54,6 @@ import { Logger as Logger_2 } from 'kibana/server';
 import { LoggerFactory } from '@kbn/logging';
 import { Moment } from 'moment';
 import moment from 'moment';
-import { NameList } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
@@ -75,7 +74,6 @@ import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
-import { ShardsResponse } from 'elasticsearch';
 import { SharedGlobalConfig as SharedGlobalConfig_2 } from 'kibana/server';
 import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -314,7 +312,7 @@ export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 're
     // (undocumented)
     completion_status: number;
     // (undocumented)
-    _shards: ShardsResponse;
+    _shards: estypes.ShardStatistics;
 }
 
 // Warning: (ae-missing-release-tag) "BUCKET_TYPES" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
