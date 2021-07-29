@@ -7,36 +7,17 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { EuiGlobalToastList } from '@elastic/eui';
-
-import { useKibana, useGetUserCasesPermissions } from '../../../common/lib/kibana';
-import { useStateToaster } from '../../../common/components/toasters';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
-import { basicCase } from '../../../../../cases/public/containers/mock';
-import { Case, SECURITY_SOLUTION_OWNER } from '../../../../../cases/common';
-import { APP_ID, SecurityPageName } from '../../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/link_to', () => {
-  const original = jest.requireActual('../../../common/components/link_to');
-  return {
-    ...original,
-    useFormatUrl: jest.fn().mockReturnValue({
-      formatUrl: jest.fn(),
-      search: '',
-    }),
-  };
-});
-jest.mock('../../../common/components/toasters', () => {
-  const actual = jest.requireActual('../../../common/components/toasters');
-  return {
-    ...actual,
-    useStateToaster: jest.fn(),
-  };
-});
+jest.mock('react-router-dom', () => ({
+  useLocation: () => ({
+    search: '',
+  }),
+}));
+jest.mock('./helpers');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('AddToCaseAction', () => {
   const props = {
     ecsRowData: {
@@ -44,29 +25,15 @@ describe('AddToCaseAction', () => {
       _index: 'test-index',
       signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
     },
+    casePermissions: {
+      crud: true,
+      read: true,
+    },
+    appId: 'securitySolution',
   };
-
-  const mockDispatchToaster = jest.fn();
-  const mockNavigateToApp = jest.fn();
-  const mockCreateCase = jest.fn();
-  const mockAllCasesModal = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useKibanaMock().services.application.navigateToApp = mockNavigateToApp;
-    useKibanaMock().services.cases = {
-      getAllCases: jest.fn(),
-      getCaseView: jest.fn(),
-      getConfigureCases: jest.fn(),
-      getRecentCases: jest.fn(),
-      getCreateCase: mockCreateCase,
-      getAllCasesSelectorModal: mockAllCasesModal.mockImplementation(() => <>{'test'}</>),
-    };
-    (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: true,
-      read: true,
-    });
   });
 
   it('it renders', () => {
@@ -100,7 +67,7 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    expect(mockCreateCase).toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="create-case-flyout"]').exists()).toBeTruthy();
   });
 
   it('it opens the all cases modal', () => {
@@ -113,12 +80,7 @@ describe('AddToCaseAction', () => {
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
 
-    expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
-      alertId: 'test-id',
-      index: 'test-index',
-      rule: { id: 'rule-id', name: 'rule-name' },
-      owner: SECURITY_SOLUTION_OWNER,
-    });
+    expect(wrapper.find('[data-test-subj="all-cases-modal"]')).toBeTruthy();
   });
 
   it('it set rule information as null when missing', () => {
@@ -137,7 +99,7 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
-    expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
+    expect(mockGetAllCasesSelectorModal.mock.calls[0][0].alertData).toEqual({
       alertId: 'test-id',
       index: 'test-index',
       rule: {
@@ -145,42 +107,6 @@ describe('AddToCaseAction', () => {
         name: null,
       },
       owner: SECURITY_SOLUTION_OWNER,
-    });
-  });
-
-  it('onSuccess triggers toaster that links to case view', () => {
-    // @ts-ignore
-    useKibanaMock().services.cases.getCreateCase = ({
-      onSuccess,
-    }: {
-      onSuccess: (theCase: Case) => Promise<void>;
-    }) => {
-      onSuccess(basicCase);
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <AddToCaseAction {...props} />
-      </TestProviders>
-    );
-
-    wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-
-    expect(mockDispatchToaster).toHaveBeenCalled();
-    const toast = mockDispatchToaster.mock.calls[0][0].toast;
-
-    const toastWrapper = mount(
-      <EuiGlobalToastList toasts={[toast]} toastLifeTimeMs={6000} dismissToast={() => {}} />
-    );
-
-    toastWrapper
-      .find('[data-test-subj="toaster-content-case-view-link"]')
-      .first()
-      .simulate('click');
-
-    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_ID, {
-      path: '/basic-case-id',
-      deepLinkId: SecurityPageName.case,
     });
   });
 
@@ -203,14 +129,16 @@ describe('AddToCaseAction', () => {
   });
 
   it('hides the icon when user does not have crud permissions', () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
-      read: true,
-    });
-
+    const newProps = {
+      ...props,
+      casePermissions: {
+        crud: false,
+        read: true,
+      },
+    };
     const wrapper = mount(
       <TestProviders>
-        <AddToCaseAction {...props} />
+        <AddToCaseAction {...newProps} />
       </TestProviders>
     );
 
