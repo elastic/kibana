@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { ESLicense } from '../../../telemetry_collection_xpack/server';
@@ -60,8 +59,8 @@ export async function fetchLicenses(
     },
   };
 
-  const { body: response } = await callCluster.search(params);
-  return response as SearchResponse<ESClusterStatsWithLicense>;
+  const { body: response } = await callCluster.search<ESClusterStatsWithLicense>(params);
+  return response;
 }
 
 export interface ESClusterStatsWithLicense {
@@ -73,13 +72,13 @@ export interface ESClusterStatsWithLicense {
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleLicenses(response: SearchResponse<ESClusterStatsWithLicense>) {
+export function handleLicenses(response: estypes.SearchResponse<ESClusterStatsWithLicense>) {
   const clusters = response.hits?.hits || [];
 
   return clusters.reduce(
     (acc, { _source }) => ({
       ...acc,
-      [_source.cluster_uuid]: _source.license,
+      [_source!.cluster_uuid]: _source!.license,
     }),
     {}
   );

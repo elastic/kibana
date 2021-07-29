@@ -23,11 +23,8 @@ been recreated as rules in {kib} {alert-features}. For this reason, the existing
 The default action for all {stack-monitor-app} rules is to write to {kib} logs 
 and display a notification in the UI.
 
-To review and modify all available rules, use *Enter setup mode* on the 
-*Cluster overview* page in *{stack-monitor-app}*:
-
-[role="screenshot"]
-image::user/monitoring/images/monitoring-kibana-alerting-setup-mode.png["Modify {kib} alerting rules in {stack-monitor-app}"]
+To review and modify all available rules, click *Enter setup mode* on the 
+*Cluster overview* page.
 
 [discrete]
 [[kibana-alerts-cpu-threshold]]
