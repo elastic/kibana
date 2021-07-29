@@ -256,8 +256,20 @@ export class FieldFormatsRegistry {
 
   register(fieldFormats: FieldFormatInstanceType[]) {
     fieldFormats.forEach((fieldFormat) => {
+      if (this.fieldFormats.has(fieldFormat.id))
+        throw new Error(
+          `Failed to register field format with id "${fieldFormat.id}" as it already has been registered`
+        );
       this.fieldFormats.set(fieldFormat.id, fieldFormat);
     });
+  }
+
+  /**
+   * Checks if field format with id already registered
+   * @param id
+   */
+  has(id: string): boolean {
+    return this.fieldFormats.has(id);
   }
 
   /**

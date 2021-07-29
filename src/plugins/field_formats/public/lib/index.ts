@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats_service';
 export { DateFormat, DateNanosFormat } from './converters';
 export { baseFormattersPublic } from './constants';

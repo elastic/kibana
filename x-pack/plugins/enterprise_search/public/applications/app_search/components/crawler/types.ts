@@ -65,3 +65,12 @@ export interface CrawlerData {
 export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
 }
+
+export interface CrawlerDomainValidationResultFromServer {
+  valid: boolean;
+  results: Array<{
+    name: string;
+    result: 'ok' | 'warning' | 'failure';
+    comment: string;
+  }>;
+}
