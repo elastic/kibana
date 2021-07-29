@@ -538,9 +538,10 @@ export class EncryptedSavedObjectsService {
           // it with several different descriptors depending upon how the migrations are structured, and whether this is a full index
           // migration or a single document migration. Note that the originId is set either when the document is converted _or_ when it is
           // imported with "createNewCopies: false", so we have to try with and without it.
-          const ids = params.originId ? [params.originId, descriptor.id] : [descriptor.id];
-          for (const id of ids) {
-            const decryptDescriptor = { ...descriptor, id };
+          const decryptDescriptors = params.originId
+            ? [{ ...descriptor, id: params.originId }, descriptor]
+            : [descriptor];
+          for (const decryptDescriptor of decryptDescriptors) {
             encryptionAADs.push(this.getAAD(typeDefinition, decryptDescriptor, attributes));
             if (descriptor.namespace) {
               const { namespace, ...alternateDescriptor } = decryptDescriptor;
