@@ -6,7 +6,7 @@
  */
 
 import { assertUnreachable } from '../../../../plugins/security_solution/common/utility_types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../detection_engine_api_integration/common/ftr_provider_context';
 import {
   t1AnalystUser,
   t2AnalystUser,
