@@ -307,7 +307,7 @@ export function ServiceList({
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    // (item) => item.transactionsPerMinute?.value ?? 0,
+                    (item) => item.throughput ?? 0,
                   ],
                   [sortDirection, sortDirection]
                 )
