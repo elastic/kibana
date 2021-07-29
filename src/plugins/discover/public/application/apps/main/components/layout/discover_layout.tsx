@@ -52,6 +52,7 @@ import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
 import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
+import { DISCOVER_VIEW_MODES } from '../view_mode_toggle';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -90,13 +91,12 @@ export function DiscoverLayout({
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-  // remember in storage
-  const [viewId, setViewId] = useState(storageViewPreference);
+  const [discoverViewMode, setDiscoverViewMode] = useState(storageViewPreference);
 
   const changeViewId = (option: string) => {
     // @todo: temp hack to replace storage
     storageViewPreference = option;
-    setViewId(option);
+    setDiscoverViewMode(option);
   };
 
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -346,8 +346,8 @@ export function DiscoverLayout({
                         savedSearch={savedSearch}
                         stateContainer={stateContainer}
                         timefield={timeField}
-                        viewId={viewId}
-                        setViewId={changeViewId}
+                        discoverViewMode={discoverViewMode}
+                        setDiscoverViewMode={changeViewId}
                       />
                     </EuiFlexItem>
                     <EuiHorizontalRule margin="none" />
@@ -366,7 +366,7 @@ export function DiscoverLayout({
                             defaultMessage="Documents"
                           />
                         </h2>
-                        {viewId === 'discoverViewOptionAggregated' && (
+                        {discoverViewMode === DISCOVER_VIEW_MODES.FIELD_LEVEL && (
                           <DataVisualizerGridMemoized
                             savedSearch={savedSearch}
                             services={services}
@@ -379,7 +379,7 @@ export function DiscoverLayout({
                             columns={columns}
                           />
                         )}
-                        {viewId === 'discoverViewOptionDocument' &&
+                        {discoverViewMode === DISCOVER_VIEW_MODES.DOCUMENT_LEVEL &&
                           isLegacy &&
                           rows &&
                           rows.length && (
@@ -400,7 +400,7 @@ export function DiscoverLayout({
                               useNewFieldsApi={useNewFieldsApi}
                             />
                           )}
-                        {viewId === 'discoverViewOptionDocument' &&
+                        {discoverViewMode === DISCOVER_VIEW_MODES.DOCUMENT_LEVEL &&
                           !isLegacy &&
                           rows &&
                           rows.length && (

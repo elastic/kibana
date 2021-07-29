@@ -18,7 +18,7 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 import { Chart as IChart } from './point_series';
 import { DiscoverHistogram } from './histogram';
-import { DocumentViewOption } from '../top_nav/open_options_popover';
+import { DocumentViewModeToggle } from '../view_mode_toggle';
 
 const TimechartHeaderMemoized = React.memo(TimechartHeader);
 const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
@@ -34,8 +34,8 @@ export function DiscoverChart({
   state,
   stateContainer,
   timefield,
-  viewId,
-  setViewId,
+  discoverViewMode,
+  setDiscoverViewMode,
 }: {
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
@@ -49,8 +49,8 @@ export function DiscoverChart({
   state: AppState;
   stateContainer: GetStateReturn;
   timefield?: string;
-  viewId: string;
-  setViewId: (viewId: string) => void;
+  discoverViewMode: string;
+  setDiscoverViewMode: (discoverViewMode: string) => void;
 }) {
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
@@ -134,7 +134,10 @@ export function DiscoverChart({
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
-          <DocumentViewOption viewId={viewId} setViewId={setViewId} />
+          <DocumentViewModeToggle
+            discoverViewMode={discoverViewMode}
+            setDiscoverViewMode={setDiscoverViewMode}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
       {!state.hideChart && chartData && (
