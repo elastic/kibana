@@ -41,7 +41,7 @@ export function getMigrations(
 ): SavedObjectMigrationMap {
   const migrationActionsTen = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+    (doc: SavedObjectUnsanitizedDoc<RawAction>): doc is SavedObjectUnsanitizedDoc<RawAction> =>
       doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
       doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
@@ -58,14 +58,26 @@ export function getMigrations(
 
   const migrationActionsFourteen = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
+    (doc: SavedObjectUnsanitizedDoc<RawAction>): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      true,
     pipeMigrations(addisMissingSecretsField)
+  );
+
+  // This empty migration is necessary to ensure that the saved object is decrypted with its old descriptor/ and re-encrypted with its new
+  // descriptor, if necessary. This is included because the saved object is being converted to `namespaceType: 'multiple-isolated'` in 8.0
+  // (see the `convertToMultiNamespaceTypeVersion` field in the saved object type registration process).
+  const migrationActions800 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawAction>): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      true,
+    (doc) => doc // no-op
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
+    '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
 
