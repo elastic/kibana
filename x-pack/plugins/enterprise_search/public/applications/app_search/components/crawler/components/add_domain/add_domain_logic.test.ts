@@ -36,8 +36,18 @@ import { getDomainWithProtocol } from './utils';
 
 const DEFAULT_VALUES: AddDomainLogicValues = {
   addDomainFormInputValue: 'https://',
-  allowSubmit: false,
   entryPointValue: '/',
+  domainValidationResult: {
+    steps: {
+      contentVerification: { state: '' },
+      indexingRestrictions: { state: '' },
+      initialValidation: { state: '' },
+      networkConnectivity: { state: '' },
+    },
+  },
+  allowSubmit: false,
+  isValidationLoading: false,
+  hasBlockingFailure: false,
   hasValidationCompleted: false,
   errors: [],
 };
@@ -64,6 +74,14 @@ describe('AddDomainLogic', () => {
           entryPointValue: '/foo',
           hasValidationCompleted: true,
           errors: ['first error', 'second error'],
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'loading' },
+              indexingRestrictions: { state: 'loading' },
+              initialValidation: { state: 'loading' },
+              networkConnectivity: { state: 'loading' },
+            },
+          },
         });
 
         AddDomainLogic.actions.clearDomainFormInputValue();
@@ -84,6 +102,17 @@ describe('AddDomainLogic', () => {
       it('should clear errors', () => {
         expect(AddDomainLogic.values.errors).toEqual([]);
       });
+
+      it('should clear validation results', () => {
+        expect(AddDomainLogic.values.domainValidationResult).toEqual({
+          steps: {
+            contentVerification: { state: '' },
+            indexingRestrictions: { state: '' },
+            initialValidation: { state: '' },
+            networkConnectivity: { state: '' },
+          },
+        });
+      });
     });
 
     describe('onSubmitNewDomainError', () => {
@@ -96,35 +125,6 @@ describe('AddDomainLogic', () => {
       });
     });
 
-    describe('onValidateDomain', () => {
-      beforeAll(() => {
-        mount({
-          addDomainFormInputValue: 'https://elastic.co',
-          entryPointValue: '/customers',
-          hasValidationCompleted: true,
-          errors: ['first error', 'second error'],
-        });
-
-        AddDomainLogic.actions.onValidateDomain('https://swiftype.com', '/site-search');
-      });
-
-      it('should set the input value', () => {
-        expect(AddDomainLogic.values.addDomainFormInputValue).toEqual('https://swiftype.com');
-      });
-
-      it('should set the entry point value', () => {
-        expect(AddDomainLogic.values.entryPointValue).toEqual('/site-search');
-      });
-
-      it('should flag validation as being completed', () => {
-        expect(AddDomainLogic.values.hasValidationCompleted).toEqual(true);
-      });
-
-      it('should clear errors', () => {
-        expect(AddDomainLogic.values.errors).toEqual([]);
-      });
-    });
-
     describe('setAddDomainFormInputValue', () => {
       beforeAll(() => {
         mount({
@@ -132,6 +132,14 @@ describe('AddDomainLogic', () => {
           entryPointValue: '/customers',
           hasValidationCompleted: true,
           errors: ['first error', 'second error'],
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'loading' },
+              indexingRestrictions: { state: 'loading' },
+              initialValidation: { state: 'loading' },
+              networkConnectivity: { state: 'loading' },
+            },
+          },
         });
 
         AddDomainLogic.actions.setAddDomainFormInputValue('https://swiftype.com/site-search');
@@ -154,11 +162,101 @@ describe('AddDomainLogic', () => {
       it('should clear errors', () => {
         expect(AddDomainLogic.values.errors).toEqual([]);
       });
+
+      it('should clear validation results', () => {
+        expect(AddDomainLogic.values.domainValidationResult).toEqual({
+          steps: {
+            contentVerification: { state: '' },
+            indexingRestrictions: { state: '' },
+            initialValidation: { state: '' },
+            networkConnectivity: { state: '' },
+          },
+        });
+      });
+    });
+
+    describe('setDomainValidationResult', () => {
+      it('should update the validation result', () => {
+        mount();
+
+        AddDomainLogic.actions.setDomainValidationResult({
+          contentVerification: { state: 'invalid' },
+        });
+
+        expect(AddDomainLogic.values.domainValidationResult).toEqual({
+          steps: {
+            contentVerification: { state: 'invalid' },
+            indexingRestrictions: { state: '' },
+            initialValidation: { state: '' },
+            networkConnectivity: { state: '' },
+          },
+        });
+      });
     });
 
     describe('submitNewDomain', () => {
       it('should clear errors', () => {
+        mount({
+          errors: ['first-error', 'second error'],
+        });
+
+        AddDomainLogic.actions.submitNewDomain();
+
         expect(AddDomainLogic.values.errors).toEqual([]);
+      });
+    });
+
+    describe('validateDomainInitialVerification', () => {
+      beforeAll(() => {
+        mount({
+          addDomainFormInputValue: 'https://elastic.co',
+          entryPointValue: '/customers',
+          hasValidationCompleted: true,
+          errors: ['first error', 'second error'],
+        });
+
+        AddDomainLogic.actions.validateDomainInitialVerification(
+          'https://swiftype.com',
+          '/site-search'
+        );
+      });
+
+      it('should set the input value', () => {
+        expect(AddDomainLogic.values.addDomainFormInputValue).toEqual('https://swiftype.com');
+      });
+
+      it('should set the entry point value', () => {
+        expect(AddDomainLogic.values.entryPointValue).toEqual('/site-search');
+      });
+
+      it('should clear errors', () => {
+        expect(AddDomainLogic.values.errors).toEqual([]);
+      });
+    });
+
+    describe('startDomainValidation', () => {
+      it('shold set validation results to loading', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: '' },
+              indexingRestrictions: { state: '' },
+              initialValidation: { state: '' },
+              networkConnectivity: { state: '' },
+            },
+          },
+        });
+
+        AddDomainLogic.actions.startDomainValidation();
+
+        expect(AddDomainLogic.values.domainValidationResult).toEqual({
+          steps: {
+            contentVerification: { state: 'loading' },
+            indexingRestrictions: { state: 'loading' },
+            initialValidation: { state: 'loading' },
+            networkConnectivity: { state: 'loading' },
+          },
+        });
       });
     });
   });
@@ -277,30 +375,319 @@ describe('AddDomainLogic', () => {
       });
     });
 
-    describe('validateDomain', () => {
+    describe('startDomainValidation', () => {
       it('extracts the domain and entrypoint and passes them to the callback ', async () => {
         mount({ addDomainFormInputValue: 'https://swiftype.com/site-search' });
-        jest.spyOn(AddDomainLogic.actions, 'onValidateDomain');
+        jest.spyOn(AddDomainLogic.actions, 'validateDomainInitialVerification');
 
-        AddDomainLogic.actions.validateDomain();
+        AddDomainLogic.actions.startDomainValidation();
         await nextTick();
 
-        expect(AddDomainLogic.actions.onValidateDomain).toHaveBeenCalledWith(
+        expect(AddDomainLogic.actions.validateDomainInitialVerification).toHaveBeenCalledWith(
           'https://swiftype.com',
           '/site-search'
         );
         expect(getDomainWithProtocol).toHaveBeenCalledWith('https://swiftype.com');
       });
     });
+
+    describe('validateDomainInitialVerification', () => {
+      it('validates the url', async () => {
+        jest.spyOn(AddDomainLogic.actions, 'performDomainValidationStep');
+
+        AddDomainLogic.actions.validateDomainInitialVerification('https://elastic.co', '/');
+        await nextTick();
+
+        expect(
+          AddDomainLogic.actions.performDomainValidationStep
+        ).toHaveBeenCalledWith('initialValidation', ['url']);
+      });
+    });
+
+    describe('validateDomainContentVerification', () => {
+      it('validates the domain content', async () => {
+        jest.spyOn(AddDomainLogic.actions, 'performDomainValidationStep');
+
+        AddDomainLogic.actions.validateDomainContentVerification();
+        await nextTick();
+
+        expect(
+          AddDomainLogic.actions.performDomainValidationStep
+        ).toHaveBeenCalledWith('contentVerification', ['url_request', 'url_content']);
+      });
+    });
+
+    describe('validateDomainIndexingRestrictions', () => {
+      it("validates the domain's robots.txt", async () => {
+        jest.spyOn(AddDomainLogic.actions, 'performDomainValidationStep');
+
+        AddDomainLogic.actions.validateDomainIndexingRestrictions();
+        await nextTick();
+
+        expect(
+          AddDomainLogic.actions.performDomainValidationStep
+        ).toHaveBeenCalledWith('indexingRestrictions', ['robots_txt']);
+      });
+    });
+
+    describe('validateDomainNetworkConnectivity', () => {
+      it("validates the domain's dns", async () => {
+        jest.spyOn(AddDomainLogic.actions, 'performDomainValidationStep');
+
+        AddDomainLogic.actions.validateDomainNetworkConnectivity();
+        await nextTick();
+
+        expect(
+          AddDomainLogic.actions.performDomainValidationStep
+        ).toHaveBeenCalledWith('networkConnectivity', ['dns', 'tcp']);
+      });
+    });
+
+    describe('performDomainValidationStep', () => {
+      beforeEach(() => {
+        // jest.clearAllMocks();
+        mount({
+          addDomainFormInputValue: 'https://elastic.co',
+        });
+      });
+
+      describe('on success', () => {
+        it('sets all remaining validation steps invaid on a blocking failure', async () => {
+          http.post.mockReturnValueOnce(
+            Promise.resolve({
+              valid: false,
+              results: [
+                {
+                  name: '-',
+                  result: 'failure',
+                  comment: 'Something unexpected happened',
+                },
+              ],
+            })
+          );
+
+          jest.spyOn(AddDomainLogic.actions, 'setDomainValidationResult');
+
+          AddDomainLogic.actions.performDomainValidationStep('initialValidation', ['url']);
+          await nextTick();
+
+          expect(AddDomainLogic.actions.setDomainValidationResult).toHaveBeenCalledWith({
+            initialValidation: {
+              state: 'invalid',
+              blockingFailure: true,
+              message: 'Something unexpected happened',
+            },
+            networkConnectivity: {
+              state: 'invalid',
+              message:
+                'Unable to establish a network connection because the "Initial Validation" check failed.',
+            },
+            indexingRestrictions: {
+              state: 'invalid',
+              message:
+                'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+            },
+            contentVerification: {
+              state: 'invalid',
+              message: 'Unable to verify content because the "Network Connectivity" check failed.',
+            },
+          });
+        });
+
+        describe('when there are no blocking failures', () => {
+          beforeEach(() => {
+            http.post.mockReturnValue(
+              Promise.resolve({
+                valid: true,
+                results: [],
+              })
+            );
+          });
+
+          it('updates the validation result', async () => {
+            jest.spyOn(AddDomainLogic.actions, 'setDomainValidationResult');
+
+            AddDomainLogic.actions.performDomainValidationStep('initialValidation', ['url']);
+            await nextTick();
+
+            expect(AddDomainLogic.actions.setDomainValidationResult).toHaveBeenCalledWith({
+              initialValidation: {
+                state: 'valid',
+              },
+            });
+          });
+
+          describe('validation chain', () => {
+            beforeEach(() => {
+              http.post.mockReturnValue(
+                Promise.resolve({
+                  valid: true,
+                  results: [],
+                })
+              );
+            });
+
+            it('checks network connectivity after initial validation', async () => {
+              jest.spyOn(AddDomainLogic.actions, 'validateDomainNetworkConnectivity');
+
+              AddDomainLogic.actions.performDomainValidationStep('initialValidation', ['url']);
+              await nextTick();
+
+              expect(AddDomainLogic.actions.validateDomainNetworkConnectivity).toHaveBeenCalled();
+            });
+
+            it('checks indexing restrictions after network connectivity', async () => {
+              jest.spyOn(AddDomainLogic.actions, 'validateDomainIndexingRestrictions');
+
+              AddDomainLogic.actions.performDomainValidationStep('networkConnectivity', ['url']);
+              await nextTick();
+
+              expect(AddDomainLogic.actions.validateDomainIndexingRestrictions).toHaveBeenCalled();
+            });
+
+            it('checks content after indexing restrictions', async () => {
+              jest.spyOn(AddDomainLogic.actions, 'validateDomainContentVerification');
+
+              AddDomainLogic.actions.performDomainValidationStep('indexingRestrictions', ['url']);
+              await nextTick();
+
+              expect(AddDomainLogic.actions.validateDomainContentVerification).toHaveBeenCalled();
+            });
+          });
+        });
+      });
+
+      describe('on failure', () => {
+        it('it sets all remaining validation steps as invalid', async () => {
+          http.post.mockReturnValueOnce(Promise.reject({}));
+
+          jest.spyOn(AddDomainLogic.actions, 'setDomainValidationResult');
+
+          AddDomainLogic.actions.performDomainValidationStep('initialValidation', ['url']);
+          await nextTick();
+
+          expect(AddDomainLogic.actions.setDomainValidationResult).toHaveBeenCalledWith({
+            initialValidation: {
+              state: 'invalid',
+              blockingFailure: true,
+              message: 'Unexpected error',
+            },
+            networkConnectivity: {
+              state: 'invalid',
+              message:
+                'Unable to establish a network connection because the "Initial Validation" check failed.',
+            },
+            indexingRestrictions: {
+              state: 'invalid',
+              message:
+                'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+            },
+            contentVerification: {
+              state: 'invalid',
+              message: 'Unable to verify content because the "Network Connectivity" check failed.',
+            },
+          });
+        });
+      });
+    });
   });
 
   describe('selectors', () => {
-    describe('allowSubmit', () => {
-      it('gets set true when validation is completed', () => {
-        mount({ hasValidationCompleted: false });
-        expect(AddDomainLogic.values.allowSubmit).toEqual(false);
+    describe('isValidationLoading', () => {
+      it('is false by default', () => {
+        expect(AddDomainLogic.values.isValidationLoading).toEqual(false);
+      });
 
-        mount({ hasValidationCompleted: true });
+      it('is true when any steps are loading', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'loading' },
+              indexingRestrictions: { state: 'loading' },
+              initialValidation: { state: 'loading' },
+              networkConnectivity: { state: 'loading' },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.isValidationLoading).toEqual(true);
+      });
+    });
+
+    describe('hasValidationCompleted', () => {
+      it('is false by default', () => {
+        expect(AddDomainLogic.values.hasValidationCompleted).toEqual(false);
+      });
+
+      it('is false when steps are loading', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'loading' },
+              indexingRestrictions: { state: 'loading' },
+              initialValidation: { state: 'loading' },
+              networkConnectivity: { state: 'loading' },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.hasValidationCompleted).toEqual(false);
+      });
+
+      it('is true when all steps no steps are valid or invalid', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'valid' },
+              indexingRestrictions: { state: 'valid' },
+              initialValidation: { state: 'invalid' },
+              networkConnectivity: { state: 'invalid' },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.hasValidationCompleted).toEqual(true);
+      });
+    });
+
+    describe('hasBlockingFailure', () => {
+      it('is false by defult', () => {
+        expect(AddDomainLogic.values.hasBlockingFailure).toEqual(false);
+      });
+
+      it('is true when any steps have blocking failures', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'valid' },
+              indexingRestrictions: { state: 'valid' },
+              initialValidation: { state: 'valid' },
+              networkConnectivity: { state: 'invalid', blockingFailure: true },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.hasBlockingFailure).toEqual(true);
+      });
+    });
+
+    describe('allowSubmit', () => {
+      it('is false by default', () => {
+        expect(AddDomainLogic.values.allowSubmit).toEqual(false);
+      });
+
+      it('is true when a user has validated all steps and has no failures', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'valid' },
+              indexingRestrictions: { state: 'valid' },
+              initialValidation: { state: 'valid' },
+              networkConnectivity: { state: 'valid' },
+            },
+          },
+        });
+
         expect(AddDomainLogic.values.allowSubmit).toEqual(true);
       });
     });

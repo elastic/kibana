@@ -18,50 +18,92 @@ import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../../routes';
 import { EngineLogic, generateEnginePath } from '../../../engine';
 
 import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
-import { CrawlerDataFromServer, CrawlerDomain } from '../../types';
-import { crawlerDataServerToClient } from '../../utils';
+import {
+  CrawlerDataFromServer,
+  CrawlerDomain,
+  CrawlerDomainValidationResult,
+  CrawlerDomainValidationResultChange,
+  CrawlerDomainValidationStepName,
+} from '../../types';
+import { crawlDomainValidationToResult, crawlerDataServerToClient } from '../../utils';
 
-import { extractDomainAndEntryPointFromUrl, getDomainWithProtocol } from './utils';
+import {
+  domainValidationFailureResultChange,
+  extractDomainAndEntryPointFromUrl,
+  getDomainWithProtocol,
+} from './utils';
 
 export interface AddDomainLogicValues {
   addDomainFormInputValue: string;
   allowSubmit: boolean;
-  hasValidationCompleted: boolean;
+  domainValidationResult: CrawlerDomainValidationResult;
   entryPointValue: string;
   errors: string[];
+  hasBlockingFailure: boolean;
+  hasValidationCompleted: boolean;
+  isValidationLoading: boolean;
 }
 
 export interface AddDomainLogicActions {
   clearDomainFormInputValue(): void;
-  setAddDomainFormInputValue(newValue: string): string;
   onSubmitNewDomainError(errors: string[]): { errors: string[] };
   onSubmitNewDomainSuccess(domain: CrawlerDomain): { domain: CrawlerDomain };
-  onValidateDomain(
+  performDomainValidationStep(
+    stepName: CrawlerDomainValidationStepName,
+    checks: string[]
+  ): {
+    stepName: CrawlerDomainValidationStepName;
+    checks: string[];
+  };
+  setAddDomainFormInputValue(newValue: string): string;
+  setDomainValidationResult(
+    change: CrawlerDomainValidationResultChange
+  ): { change: CrawlerDomainValidationResultChange };
+  startDomainValidation(): void;
+  submitNewDomain(): void;
+  validateDomainInitialVerification(
     newValue: string,
     newEntryPointValue: string
   ): { newValue: string; newEntryPointValue: string };
-  submitNewDomain(): void;
-  validateDomain(): void;
+  validateDomainContentVerification(): void;
+  validateDomainIndexingRestrictions(): void;
+  validateDomainNetworkConnectivity(): void;
 }
 
 const DEFAULT_SELECTOR_VALUES = {
   addDomainFormInputValue: 'https://',
   entryPointValue: '/',
+  domainValidationResult: {
+    steps: {
+      contentVerification: { state: '' },
+      indexingRestrictions: { state: '' },
+      initialValidation: { state: '' },
+      networkConnectivity: { state: '' },
+    },
+  } as CrawlerDomainValidationResult,
+  allowSubmit: false,
+  isValidationLoading: false,
 };
 
 export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainLogicActions>>({
   path: ['enterprise_search', 'app_search', 'crawler', 'add_domain'],
   actions: () => ({
     clearDomainFormInputValue: true,
-    setAddDomainFormInputValue: (newValue) => newValue,
+    initialValidation: true,
+    performDomainValidationStep: (stepName, checks) => ({ stepName, checks }),
     onSubmitNewDomainSuccess: (domain) => ({ domain }),
     onSubmitNewDomainError: (errors) => ({ errors }),
-    onValidateDomain: (newValue, newEntryPointValue) => ({
+    setAddDomainFormInputValue: (newValue) => newValue,
+    setDomainValidationResult: (change: CrawlerDomainValidationResultChange) => ({ change }),
+    startDomainValidation: true,
+    submitNewDomain: true,
+    validateDomainInitialVerification: (newValue, newEntryPointValue) => ({
       newValue,
       newEntryPointValue,
     }),
-    submitNewDomain: true,
-    validateDomain: true,
+    validateDomainContentVerification: true,
+    validateDomainIndexingRestrictions: true,
+    validateDomainNetworkConnectivity: true,
   }),
   reducers: () => ({
     addDomainFormInputValue: [
@@ -69,7 +111,28 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.addDomainFormInputValue,
         setAddDomainFormInputValue: (_, newValue: string) => newValue,
-        onValidateDomain: (_, { newValue }: { newValue: string }) => newValue,
+        validateDomainInitialVerification: (_, { newValue }: { newValue: string }) => newValue,
+      },
+    ],
+    domainValidationResult: [
+      DEFAULT_SELECTOR_VALUES.domainValidationResult,
+      {
+        clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.domainValidationResult,
+        setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.domainValidationResult,
+        setDomainValidationResult: ({ steps }, { change }) => ({
+          steps: {
+            ...steps,
+            ...change,
+          },
+        }),
+        startDomainValidation: () => ({
+          steps: {
+            contentVerification: { state: 'loading' },
+            indexingRestrictions: { state: 'loading' },
+            initialValidation: { state: 'loading' },
+            networkConnectivity: { state: 'loading' },
+          },
+        }),
       },
     ],
     entryPointValue: [
@@ -77,17 +140,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
         setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
-        onValidateDomain: (_, { newEntryPointValue }) => newEntryPointValue,
-      },
-    ],
-    // TODO When 4-step validation is added this will become a selector as
-    // we'll use individual step results to determine whether this is true/false
-    hasValidationCompleted: [
-      false,
-      {
-        clearDomainFormInputValue: () => false,
-        setAddDomainFormInputValue: () => false,
-        onValidateDomain: () => true,
+        validateDomainInitialVerification: (_, { newEntryPointValue }) => newEntryPointValue,
       },
     ],
     errors: [
@@ -95,17 +148,33 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => [],
         setAddDomainFormInputValue: () => [],
-        onValidateDomain: () => [],
+        validateDomainInitialVerification: () => [],
         submitNewDomain: () => [],
         onSubmitNewDomainError: (_, { errors }) => errors,
       },
     ],
   }),
   selectors: ({ selectors }) => ({
-    // TODO include selectors.blockingFailures once 4-step validation is migrated
+    isValidationLoading: [
+      () => [selectors.domainValidationResult],
+      (domainValidationResult: CrawlerDomainValidationResult) =>
+        !!Object.values(domainValidationResult.steps).find((step) => step.state === 'loading'),
+    ],
+    hasValidationCompleted: [
+      () => [selectors.domainValidationResult],
+      (domainValidationResult: CrawlerDomainValidationResult) =>
+        !Object.values(domainValidationResult.steps).find(
+          (step) => step.state === 'loading' || step.state === ''
+        ),
+    ],
+    hasBlockingFailure: [
+      () => [selectors.domainValidationResult],
+      (domainValidationResult: CrawlerDomainValidationResult) =>
+        !!Object.values(domainValidationResult.steps).find((step) => step.blockingFailure),
+    ],
     allowSubmit: [
-      () => [selectors.hasValidationCompleted], // should eventually also contain selectors.hasBlockingFailures when that is added
-      (hasValidationCompleted: boolean) => hasValidationCompleted, // && !hasBlockingFailures
+      () => [selectors.hasValidationCompleted, selectors.hasBlockingFailure],
+      (hasValidationCompleted, hasBlockingFailure) => hasValidationCompleted && !hasBlockingFailure,
     ],
   }),
   listeners: ({ actions, values }) => ({
@@ -124,6 +193,43 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       KibanaLogic.values.navigateToUrl(
         generateEnginePath(ENGINE_CRAWLER_DOMAIN_PATH, { domainId: domain.id })
       );
+    },
+    performDomainValidationStep: async ({ stepName, checks }) => {
+      const { http } = HttpLogic.values;
+      const failureResultChange = domainValidationFailureResultChange(stepName);
+
+      const route = '/api/app_search/crawler/validate_url';
+
+      try {
+        const data = await http.post(route, {
+          body: JSON.stringify({ url: values.addDomainFormInputValue.trim(), checks }),
+        });
+        const result = crawlDomainValidationToResult(data);
+
+        if (result.blockingFailure) {
+          actions.setDomainValidationResult({ [stepName]: result, ...failureResultChange });
+        } else {
+          actions.setDomainValidationResult({ [stepName]: result });
+
+          // Trigger next step
+          switch (stepName) {
+            case 'initialValidation':
+              actions.validateDomainNetworkConnectivity();
+              break;
+            case 'networkConnectivity':
+              actions.validateDomainIndexingRestrictions();
+              break;
+            case 'indexingRestrictions':
+              actions.validateDomainContentVerification();
+              break;
+          }
+        }
+      } catch (e) {
+        actions.setDomainValidationResult({
+          [stepName]: { state: 'invalid', blockingFailure: true, message: 'Unexpected error' },
+          ...failureResultChange,
+        });
+      }
     },
     submitNewDomain: async () => {
       const { http } = HttpLogic.values;
@@ -156,14 +262,24 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         actions.onSubmitNewDomainError(errorMessages);
       }
     },
-    validateDomain: async () => {
+    startDomainValidation: async () => {
       const { domain, entryPoint } = extractDomainAndEntryPointFromUrl(
         values.addDomainFormInputValue.trim()
       );
-
       const domainWithProtocol = await getDomainWithProtocol(domain);
-
-      actions.onValidateDomain(domainWithProtocol, entryPoint);
+      actions.validateDomainInitialVerification(domainWithProtocol, entryPoint);
+    },
+    validateDomainInitialVerification: () => {
+      actions.performDomainValidationStep('initialValidation', ['url']);
+    },
+    validateDomainContentVerification: () => {
+      actions.performDomainValidationStep('contentVerification', ['url_request', 'url_content']);
+    },
+    validateDomainIndexingRestrictions: () => {
+      actions.performDomainValidationStep('indexingRestrictions', ['robots_txt']);
+    },
+    validateDomainNetworkConnectivity: () => {
+      actions.performDomainValidationStep('networkConnectivity', ['dns', 'tcp']);
     },
   }),
 });
