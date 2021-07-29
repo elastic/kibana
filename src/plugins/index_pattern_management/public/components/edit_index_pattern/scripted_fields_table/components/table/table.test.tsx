@@ -11,15 +11,15 @@ import { shallow } from 'enzyme';
 
 import { Table } from '../table';
 import { ScriptedFieldItem } from '../../types';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IndexPattern);
 
 // @ts-expect-error invalid lang type
 const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
 
 describe('Table', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPattern;
 
   beforeEach(() => {
     indexPattern = getIndexPatternMock({

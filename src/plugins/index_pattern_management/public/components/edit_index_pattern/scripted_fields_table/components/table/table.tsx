@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { ScriptedFieldItem } from '../../types';
-import { IIndexPattern } from '../../../../../../../data/public';
+import { IndexPattern } from '../../../../../../../data/public';
 
 interface TableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   items: ScriptedFieldItem[];
   editField: (field: ScriptedFieldItem) => void;
   deleteField: (field: ScriptedFieldItem) => void;

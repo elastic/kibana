@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IIndexPattern } from '../../../../../../../data/public';
+import { IndexPattern } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
 
 // localized labels
@@ -168,7 +168,7 @@ const runtimeIconTipText = i18n.translate(
 );
 
 interface IndexedFieldProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string) => void;

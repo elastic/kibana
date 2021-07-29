@@ -9,10 +9,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPageHeader, EuiToolTip } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 interface IndexHeaderProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   defaultIndex?: string;
   setDefault?: () => void;
   deleteIndexPatternClick?: () => void;

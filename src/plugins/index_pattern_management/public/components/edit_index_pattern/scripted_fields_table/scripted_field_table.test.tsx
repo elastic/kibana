@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common/index_patterns';
+import { IndexPattern } from '../../../../../../plugins/data/common/index_patterns';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -40,7 +40,7 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IndexPattern);
 
 describe('ScriptedFieldsTable', () => {
   let indexPattern: IndexPattern;
