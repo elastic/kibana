@@ -397,7 +397,16 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "extended_bounds": Array [
-                            "{}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {},
+                                  "function": "extendedBounds",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "field": Array [
                             "timestamp",
@@ -612,7 +621,20 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "filter": Array [
-                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "bytes > 5",
+                                    ],
+                                  },
+                                  "function": "kql",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "id": Array [
                             "0-filter",
