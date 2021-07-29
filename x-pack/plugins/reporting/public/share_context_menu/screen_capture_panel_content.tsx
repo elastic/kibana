@@ -35,7 +35,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return (
       <ReportingPanelContent
         {...this.props}
-        layoutId={this.props.layoutOption}
+        layoutId={this.getLayout().id}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}
       />
