@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { shallow, mount } from 'enzyme';
+import { waitFor, act } from '@testing-library/react';
+import { mount } from 'enzyme';
 
-import '../../../common/mock/match_media';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
-import { TestProviders } from '../../../common/mock';
-import { SecurityPageName } from '../../../app/types';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { TestProviders } from '../../../../common/mock';
+import { SecurityPageName } from '../../../../app/types';
 
-import { AlertsHistogramPanel, buildCombinedQueries, parseCombinedQueries } from './index';
+import { AlertsHistogramPanel } from './index';
 import * as helpers from './helpers';
 
 jest.mock('react-router-dom', () => {
@@ -27,8 +26,8 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockNavigateToApp = jest.fn();
-jest.mock('../../../common/lib/kibana/kibana_react', () => {
-  const original = jest.requireActual('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../../common/lib/kibana/kibana_react', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
 
   return {
     ...original,
@@ -46,8 +45,8 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...original,
     useUiSetting$: jest.fn().mockReturnValue([]),
@@ -55,39 +54,65 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/components/navigation/use_get_url_search');
+jest.mock('../../../../common/components/navigation/use_get_url_search');
+
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
+  const original = jest.requireActual('../../../containers/detection_engine/alerts/use_query');
+  return {
+    ...original,
+    useQueryAlerts: jest.fn().mockReturnValue({
+      loading: true,
+      setQuery: () => undefined,
+      data: null,
+      response: '',
+      request: '',
+      refetch: null,
+    }),
+  };
+});
 
 describe('AlertsHistogramPanel', () => {
   const defaultProps = {
-    from: '2020-07-07T08:20:18.966Z',
     signalIndexName: 'signalIndexName',
     setQuery: jest.fn(),
-    to: '2020-07-08T08:20:18.966Z',
     updateDateRange: jest.fn(),
   };
 
   it('renders correctly', () => {
-    const wrapper = shallow(<AlertsHistogramPanel {...defaultProps} />);
-
-    expect(wrapper.find('[id="detections-histogram"]')).toBeTruthy();
+    const wrapper = mount(
+      <TestProviders>
+        <AlertsHistogramPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBeTruthy();
+    wrapper.unmount();
   });
 
   describe('Button view alerts', () => {
     it('renders correctly', () => {
       const props = { ...defaultProps, showLinkToAlerts: true };
-      const wrapper = shallow(<AlertsHistogramPanel {...props} />);
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...props} />
+        </TestProviders>
+      );
 
       expect(
-        wrapper.find('[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]')
+        wrapper.find('[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]').exists()
       ).toBeTruthy();
+      wrapper.unmount();
     });
 
     it('when click we call navigateToApp to make sure to navigate to right page', () => {
       const props = { ...defaultProps, showLinkToAlerts: true };
-      const wrapper = shallow(<AlertsHistogramPanel {...props} />);
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...props} />
+        </TestProviders>
+      );
 
       wrapper
-        .find('[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]')
+        .find('button[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]')
         .simulate('click', {
           preventDefault: jest.fn(),
         });
@@ -96,36 +121,36 @@ describe('AlertsHistogramPanel', () => {
         deepLinkId: SecurityPageName.alerts,
         path: '',
       });
+      wrapper.unmount();
     });
   });
 
   describe('Query', () => {
     it('it render with a illegal KQL', async () => {
-      const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
-      spyOnBuildEsQuery.mockImplementation(() => {
-        throw new Error('Something went wrong');
-      });
-      const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsHistogramPanel {...props} />
-        </TestProviders>
-      );
+      await act(async () => {
+        const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
+        spyOnBuildEsQuery.mockImplementation(() => {
+          throw new Error('Something went wrong');
+        });
+        const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...props} />
+          </TestProviders>
+        );
 
-      await waitFor(() => {
-        expect(wrapper.find('[id="detections-histogram"]')).toBeTruthy();
+        await waitFor(() => {
+          expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBeTruthy();
+        });
+        wrapper.unmount();
       });
     });
   });
 
   describe('CombinedQueries', () => {
-    jest.mock('./helpers');
-    const mockGetAlertsHistogramQuery = jest.spyOn(helpers, 'getAlertsHistogramQuery');
-    beforeEach(() => {
-      mockGetAlertsHistogramQuery.mockReset();
-    });
-
     it('combinedQueries props is valid, alerts query include combinedQueries', async () => {
+      const mockGetAlertsHistogramQuery = jest.spyOn(helpers, 'getAlertsHistogramQuery');
+
       const props = {
         ...defaultProps,
         query: { query: 'host.name: "', language: 'kql' },
@@ -137,6 +162,7 @@ describe('AlertsHistogramPanel', () => {
           <AlertsHistogramPanel {...props} />
         </TestProviders>
       );
+
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[0]).toEqual([
           'signal.rule.name',
@@ -159,20 +185,20 @@ describe('AlertsHistogramPanel', () => {
 
   describe('parseCombinedQueries', () => {
     it('return empty object when variables is undefined', async () => {
-      expect(parseCombinedQueries(undefined)).toEqual({});
+      expect(helpers.parseCombinedQueries(undefined)).toEqual({});
     });
 
     it('return empty object when variables is empty string', async () => {
-      expect(parseCombinedQueries('')).toEqual({});
+      expect(helpers.parseCombinedQueries('')).toEqual({});
     });
 
     it('return empty object when variables is NOT a valid stringify json object', async () => {
-      expect(parseCombinedQueries('hello world')).toEqual({});
+      expect(helpers.parseCombinedQueries('hello world')).toEqual({});
     });
 
     it('return a valid json object when variables is a valid json stringify', async () => {
       expect(
-        parseCombinedQueries(
+        helpers.parseCombinedQueries(
           '{"bool":{"must":[],"filter":[{"match_all":{}},{"exists":{"field":"process.name"}}],"should":[],"must_not":[]}}'
         )
       ).toMatchInlineSnapshot(`
@@ -199,20 +225,20 @@ describe('AlertsHistogramPanel', () => {
 
   describe('buildCombinedQueries', () => {
     it('return empty array when variables is undefined', async () => {
-      expect(buildCombinedQueries(undefined)).toEqual([]);
+      expect(helpers.buildCombinedQueries(undefined)).toEqual([]);
     });
 
     it('return empty array when variables is empty string', async () => {
-      expect(buildCombinedQueries('')).toEqual([]);
+      expect(helpers.buildCombinedQueries('')).toEqual([]);
     });
 
     it('return array with empty object when variables is NOT a valid stringify json object', async () => {
-      expect(buildCombinedQueries('hello world')).toEqual([{}]);
+      expect(helpers.buildCombinedQueries('hello world')).toEqual([{}]);
     });
 
     it('return a valid json object when variables is a valid json stringify', async () => {
       expect(
-        buildCombinedQueries(
+        helpers.buildCombinedQueries(
           '{"bool":{"must":[],"filter":[{"match_all":{}},{"exists":{"field":"process.name"}}],"should":[],"must_not":[]}}'
         )
       ).toMatchInlineSnapshot(`

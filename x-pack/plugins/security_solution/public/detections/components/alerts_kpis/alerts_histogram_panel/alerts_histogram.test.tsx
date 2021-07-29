@@ -8,10 +8,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import '../../../common/mock/match_media';
+import '../../../../common/mock/match_media';
 import { AlertsHistogram } from './alerts_histogram';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 describe('AlertsHistogram', () => {
   it('renders correctly', () => {
@@ -26,6 +26,6 @@ describe('AlertsHistogram', () => {
       />
     );
 
-    expect(wrapper.find('Chart')).toBeTruthy();
+    expect(wrapper.find('Chart').exists()).toBeTruthy();
   });
 });
