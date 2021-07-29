@@ -73,7 +73,7 @@ export interface TGridModel extends TGridModelSettings {
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTimeline[];
-  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
+  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;

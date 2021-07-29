@@ -15,7 +15,7 @@ import {
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { ComponentType, useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 // eslint-disable-next-line no-duplicate-imports
@@ -24,6 +24,7 @@ import type {
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
+  AlertStatus,
 } from '../../../../common/types/timeline';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 
@@ -32,14 +33,24 @@ import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';
 
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { OnRowSelected, OnSelectAll } from '../types';
-import { StatefulFieldsBrowser, tGridActions } from '../../../';
-import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type { OnRowSelected, OnSelectAll } from '../types';
+import type { Refetch } from '../../../store/t_grid/inputs';
+import type {
+  SetEventsDeletedProps,
+  SetEventsLoadingProps,
+} from '../../../hooks/use_status_bulk_action_items';
+// eslint-disable-next-line no-duplicate-imports
+import { useStatusBulkActionItems } from '../../../hooks/use_status_bulk_action_items';
+import { StatefulFieldsBrowser, BulkActions } from '../../../';
+import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../toolbar/fields_browser/helpers';
 import * as i18n from './translations';
+import * as i18nTimeline from '../translations';
+import { AlertCount } from '../styles';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 
 interface OwnProps {
   activePage: number;
@@ -48,16 +59,22 @@ interface OwnProps {
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
-  leadingControlColumns: ControlColumnProps[];
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   sort: Sort[];
   tabType: TimelineTabs;
-  trailingControlColumns: ControlColumnProps[];
+  leadingControlColumns?: ControlColumnProps[];
+  trailingControlColumns?: ControlColumnProps[];
   totalPages: number;
+  totalItems: number;
+  additionalBulkActions?: JSX.Element[];
+  filterStatus: AlertStatus;
+  unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
+  refetch: Refetch;
 }
 
+const basicUnit = (n: number) => i18n.UNIT(n);
 const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
@@ -169,13 +186,29 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     sort,
     tabType,
     totalPages,
+    totalItems,
+    filterStatus,
+    additionalBulkActions,
+    unit = basicUnit,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
+    refetch,
   }) => {
+    const dispatch = useDispatch();
+    const { addSuccess, addError, addWarning } = useAppToasts();
+    const [showClearSelection, setShowClearSelection] = useState(false);
+
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
+
+    const subtitle = useMemo(() => `${totalItems.toLocaleString()} ${unit(totalItems)}`, [
+      totalItems,
+      unit,
+    ]);
+
+    const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -183,14 +216,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           id,
           eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
           isSelected,
-          isSelectAllChecked:
-            isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
+          isSelectAllChecked: isSelected && selectedCount + 1 === data.length,
         });
       },
-      [setSelected, id, data, selectedEventIds, queryFields]
+      [setSelected, id, data, selectedCount, queryFields]
     );
 
-    const onSelectAll: OnSelectAll = useCallback(
+    const onSelectPage: OnSelectAll = useCallback(
       ({ isSelected }: { isSelected: boolean }) =>
         isSelected
           ? setSelected!({
@@ -210,16 +242,125 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
       if (selectAll && !isSelectAllChecked) {
-        onSelectAll({ isSelected: true });
+        onSelectPage({ isSelected: true });
       }
-    }, [isSelectAllChecked, onSelectAll, selectAll]);
+    }, [isSelectAllChecked, onSelectPage, selectAll]);
+
+    // Catches state change isSelectAllChecked->false (page checkbox) upon user selection change to reset toolbar select all
+    useEffect(() => {
+      if (isSelectAllChecked) {
+        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
+      } else {
+        setShowClearSelection(false);
+      }
+    }, [dispatch, isSelectAllChecked, id]);
+
+    // Callback for selecting all events on all pages from toolbar
+    // Dispatches to stateful_body's selectAll via TimelineTypeContext props
+    // as scope of response data required to actually set selectedEvents
+    const onSelectAll = useCallback(() => {
+      dispatch(tGridActions.setTGridSelectAll({ id, selectAll: true }));
+      setShowClearSelection(true);
+    }, [dispatch, id]);
+
+    // Callback for clearing entire selection from toolbar
+    const onClearSelection = useCallback(() => {
+      clearSelected!({ id });
+      dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
+      setShowClearSelection(false);
+    }, [clearSelected, dispatch, id]);
+
+    const onAlertStatusUpdateSuccess = useCallback(
+      (updated: number, conflicts: number, newStatus: AlertStatus) => {
+        if (conflicts > 0) {
+          // Partial failure
+          addWarning({
+            title: i18nTimeline.UPDATE_ALERT_STATUS_FAILED(conflicts),
+            text: i18nTimeline.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+          });
+        } else {
+          let title: string;
+          switch (newStatus) {
+            case 'closed':
+              title = i18nTimeline.CLOSED_ALERT_SUCCESS_TOAST(updated);
+              break;
+            case 'open':
+              title = i18nTimeline.OPENED_ALERT_SUCCESS_TOAST(updated);
+              break;
+            case 'in-progress':
+              title = i18nTimeline.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+          }
+          addSuccess({ title });
+        }
+        refetch();
+      },
+      [addSuccess, addWarning, refetch]
+    );
+
+    const onAlertStatusUpdateFailure = useCallback(
+      (newStatus: AlertStatus, error: Error) => {
+        let title: string;
+        switch (newStatus) {
+          case 'closed':
+            title = i18nTimeline.CLOSED_ALERT_FAILED_TOAST;
+            break;
+          case 'open':
+            title = i18nTimeline.OPENED_ALERT_FAILED_TOAST;
+            break;
+          case 'in-progress':
+            title = i18nTimeline.IN_PROGRESS_ALERT_FAILED_TOAST;
+        }
+        addError(error.message, { title });
+        refetch();
+      },
+      [addError, refetch]
+    );
+
+    const setEventsLoading = useCallback(
+      ({ eventIds, isLoading }: SetEventsLoadingProps) => {
+        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading }));
+      },
+      [dispatch, id]
+    );
+
+    const setEventsDeleted = useCallback(
+      ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
+        dispatch(tGridActions.setEventsDeleted({ id, eventIds, isDeleted }));
+      },
+      [dispatch, id]
+    );
+
+    const statusBulkActionItems = useStatusBulkActionItems({
+      currentStatus: filterStatus,
+      eventIds: Object.keys(selectedEventIds),
+      setEventsLoading,
+      setEventsDeleted,
+      onUpdateSuccess: onAlertStatusUpdateSuccess,
+      onUpdateFailure: onAlertStatusUpdateFailure,
+    });
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
-        additionalControls: (
-          <>
-            {additionalControls ?? null}
-            {
+        additionalControls:
+          selectedCount > 0 ? (
+            <>
+              <AlertCount>{subtitle}</AlertCount>
+              <BulkActions
+                data-test-subj="bulk-actions"
+                timelineId={id}
+                selectedCount={selectedCount}
+                totalItems={totalItems}
+                showClearSelection={showClearSelection}
+                onSelectAll={onSelectAll}
+                onClearSelection={onClearSelection}
+                bulkActionItems={statusBulkActionItems}
+              />
+              {additionalControls ?? null}
+            </>
+          ) : (
+            <>
+              <AlertCount>{subtitle}</AlertCount>
+              {additionalControls ?? null}
               <StatefulFieldsBrowser
                 data-test-subj="field-browser"
                 height={FIELD_BROWSER_HEIGHT}
@@ -228,13 +369,34 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 timelineId={id}
                 columnHeaders={columnHeaders}
               />
+            </>
+          ),
+        ...(selectedCount > 0
+          ? {
+              showColumnSelector: false,
+              showSortSelector: false,
+              showFullScreenSelector: false,
             }
-          </>
-        ),
-        showColumnSelector: { allowHide: false, allowReorder: true },
+          : {
+              showColumnSelector: { allowHide: true, allowReorder: true },
+              showSortSelector: true,
+              showFullScreenSelector: true,
+            }),
         showStyleSelector: false,
       }),
-      [additionalControls, browserFields, columnHeaders, id]
+      [
+        selectedCount,
+        id,
+        subtitle,
+        totalItems,
+        browserFields,
+        columnHeaders,
+        additionalControls,
+        statusBulkActionItems,
+        showClearSelection,
+        onSelectAll,
+        onClearSelection,
+      ]
     );
 
     const [sortingColumns, setSortingColumns] = useState([]);

@@ -468,6 +468,9 @@ export const UpdatedFlexItem = styled(EuiFlexItem)<{ show: boolean }>`
 `;
 
 export const AlertCount = styled.span`
-  color: ${({ theme }) => theme.eui.euiTextColors.subdued};
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  border-right: ${({ theme }) => theme.eui.euiBorderThin};
+  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-right: ${({ theme }) => theme.eui.paddingSizes.m};
 `;

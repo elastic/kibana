@@ -75,8 +75,11 @@ describe('Body', () => {
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
+    totalItems: 1,
     leadingControlColumns: [],
     trailingControlColumns: [],
+    filterStatus: 'open',
+    refetch: jest.fn(),
   };
 
   describe('rendering', () => {

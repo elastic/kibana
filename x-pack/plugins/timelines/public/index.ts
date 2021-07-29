@@ -52,6 +52,7 @@ export {
   getTimelineIdFromColumnDroppableId,
 } from './components/drag_and_drop/helpers';
 export { StatefulFieldsBrowser } from './components/t_grid/toolbar/fields_browser';
+export { BulkActions } from './components/t_grid/toolbar/bulk_actions';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.

@@ -90,3 +90,12 @@ export type ControlColumnProps = Omit<
   keyof AdditionalControlColumnProps
 > &
   Partial<AdditionalControlColumnProps>;
+
+export type BulkActionsProp =
+  | boolean
+  | {
+      defaultActions: boolean;
+      additionalActions: JSX.Element;
+    };
+
+export type AlertStatus = 'open' | 'closed' | 'in-progress';
