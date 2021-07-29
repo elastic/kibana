@@ -16,6 +16,7 @@ export function CopySavedObjectsToSpacePageProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
   const { savedObjects, common } = getPageObjects(['savedObjects', 'common']);
 
   return {
@@ -64,6 +65,7 @@ export function CopySavedObjectsToSpacePageProvider({
     async finishCopy() {
       await testSubjects.click('cts-finish-button');
       await testSubjects.waitForDeleted('copy-to-space-flyout');
+      await toasts.dismissAllToasts(); // the success toast gets in the way of buttons in subsequent tests
     },
 
     async getSummaryCounts() {
