@@ -8769,20 +8769,51 @@ module.exports = (chalk, temporary) => {
  * Side Public License, v 1.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseLogLevel = exports.pickLevelFromFlags = void 0;
+exports.parseLogLevel = exports.getLogLevelFlagsHelp = exports.LOG_LEVEL_FLAGS = exports.pickLevelFromFlags = exports.DEFAULT_LOG_LEVEL = void 0;
 const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'];
+exports.DEFAULT_LOG_LEVEL = 'info';
 function pickLevelFromFlags(flags, options = {}) {
     if (flags.verbose)
         return 'verbose';
     if (flags.debug)
         return 'debug';
+    if (flags.info)
+        return 'info';
     if (flags.quiet)
         return 'error';
     if (flags.silent)
         return 'silent';
-    return options.default || 'info';
+    return options.default || exports.DEFAULT_LOG_LEVEL;
 }
 exports.pickLevelFromFlags = pickLevelFromFlags;
+exports.LOG_LEVEL_FLAGS = [
+    {
+        name: 'verbose',
+        help: '--verbose, -v      Log verbosely',
+    },
+    {
+        name: 'info',
+        help: "--info             Don't log debug messages",
+    },
+    {
+        name: 'debug',
+        help: '--debug            Log debug messages (less than verbose)',
+    },
+    {
+        name: 'quiet',
+        help: '--quiet            Only log errors',
+    },
+    {
+        name: 'silent',
+        help: "--silent           Don't log anything",
+    },
+];
+function getLogLevelFlagsHelp(defaultLogLevel = exports.DEFAULT_LOG_LEVEL) {
+    return exports.LOG_LEVEL_FLAGS.filter(({ name }) => name !== defaultLogLevel)
+        .map(({ help }) => help)
+        .join('\n');
+}
+exports.getLogLevelFlagsHelp = getLogLevelFlagsHelp;
 function parseLogLevel(name) {
     const i = LEVELS.indexOf(name);
     if (i === -1) {

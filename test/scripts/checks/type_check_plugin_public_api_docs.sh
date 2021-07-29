@@ -7,8 +7,7 @@ checks-reporter-with-killswitch "Build TS Refs" \
     --ignore-type-failures \
     --clean \
     --no-cache \
-    --force \
-    --debug
+    --force
 
 checks-reporter-with-killswitch "Check Types" \
   node scripts/type_check
