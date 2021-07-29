@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
-import { getHighlightHtml } from '../utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getHighlightHtml } from '../utils';
 import { FieldFormat } from '../field_format';
 import {
   TextContextTypeConvert,
