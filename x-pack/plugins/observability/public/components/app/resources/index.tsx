@@ -25,6 +25,13 @@ const resources = [
     href: 'https://ela.st/observability-discuss',
   },
   {
+    iconType: 'play',
+    label: i18n.translate('xpack.observability.resources.quick_start', {
+      defaultMessage: 'Quick Start Videos',
+    }),
+    href: 'https://ela.st/observability-quick-starts',
+  },
+  {
     iconType: 'training',
     label: i18n.translate('xpack.observability.resources.training', {
       defaultMessage: 'Free Observability Course',
