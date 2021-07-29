@@ -10,7 +10,6 @@ import React from 'react';
 import type { SearchSourceFields } from 'src/plugins/data/common';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
-import type { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
 import { checkLicense } from '../lib/license_check';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 import { ExportPanelShareOpts } from '.';
@@ -49,7 +48,7 @@ export const ReportingCsvShareProvider = ({
       return [];
     }
 
-    const jobParams: JobParamsCSV = {
+    const jobParams = {
       title: sharingData.title as string,
       objectType,
       searchSource: sharingData.searchSource as SearchSourceFields,

@@ -8,13 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext } from 'src/plugins/share/public';
-import type { JobParamsPNG } from '../../server/export_types/png/types';
-import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
 import { checkLicense } from '../lib/license_check';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 
-const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => {
+const getPdfJobParams = (opts: JobParamsProviderOptions) => () => {
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
@@ -30,7 +28,7 @@ const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => 
   };
 };
 
-const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
+const getPngJobParams = (opts: JobParamsProviderOptions) => () => {
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
     window.location.origin + opts.apiClient.getServerBasePath(),
