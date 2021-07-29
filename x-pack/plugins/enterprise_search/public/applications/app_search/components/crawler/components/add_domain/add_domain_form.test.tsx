@@ -18,15 +18,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { rerender } from '../../../../../test_helpers';
 
 import { AddDomainForm } from './add_domain_form';
+import { AddDomainValidation } from './add_domain_validation';
 
 const MOCK_VALUES = {
   addDomainFormInputValue: 'https://',
   entryPointValue: '/',
+  isValidationLoading: false,
+  hasValidationCompleted: false,
 };
 
 const MOCK_ACTIONS = {
   setAddDomainFormInputValue: jest.fn(),
-  validateDomain: jest.fn(),
+  startDomainValidation: jest.fn(),
 };
 
 describe('AddDomainForm', () => {
@@ -50,7 +53,7 @@ describe('AddDomainForm', () => {
   it('validates domain on submit', () => {
     wrapper.find(EuiForm).simulate('submit', { preventDefault: jest.fn() });
 
-    expect(MOCK_ACTIONS.validateDomain).toHaveBeenCalledTimes(1);
+    expect(MOCK_ACTIONS.startDomainValidation).toHaveBeenCalledTimes(1);
   });
 
   describe('url field', () => {
@@ -117,6 +120,34 @@ describe('AddDomainForm', () => {
       rerender(wrapper);
 
       expect(wrapper.find(FormattedMessage)).toHaveLength(1);
+    });
+  });
+
+  describe('vaidation', () => {
+    it('is hidden by default', () => {
+      expect(wrapper.find(AddDomainValidation)).toHaveLength(0);
+    });
+
+    it('is visible when validation is loading', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        isValidationLoading: true,
+      });
+
+      rerender(wrapper);
+
+      expect(wrapper.find(AddDomainValidation)).toHaveLength(1);
+    });
+
+    it('is visible when validation is complete', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        hasValidationCompleted: true,
+      });
+
+      rerender(wrapper);
+
+      expect(wrapper.find(AddDomainValidation)).toHaveLength(1);
     });
   });
 });

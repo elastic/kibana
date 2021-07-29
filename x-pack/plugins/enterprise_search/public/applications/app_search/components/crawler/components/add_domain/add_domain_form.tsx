@@ -25,28 +25,34 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AddDomainLogic } from './add_domain_logic';
+import { AddDomainValidation } from './add_domain_validation';
 
 export const AddDomainForm: React.FC = () => {
-  const { setAddDomainFormInputValue, validateDomain } = useActions(AddDomainLogic);
+  const { setAddDomainFormInputValue, startDomainValidation } = useActions(AddDomainLogic);
 
-  const { addDomainFormInputValue, entryPointValue } = useValues(AddDomainLogic);
+  const {
+    addDomainFormInputValue,
+    entryPointValue,
+    hasValidationCompleted,
+    isValidationLoading,
+  } = useValues(AddDomainLogic);
+
+  const displayValidation = hasValidationCompleted || isValidationLoading;
 
   return (
     <>
       <EuiForm
         onSubmit={(event) => {
           event.preventDefault();
-          validateDomain();
+          startDomainValidation();
         }}
         component="form"
       >
         <EuiFormRow
           fullWidth
-          label={
-            i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainForm.urlLabel', {
-              defaultMessage: 'Domain URL',
-            }) /* "Domain URL"*/
-          }
+          label={i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainForm.urlLabel', {
+            defaultMessage: 'Domain URL',
+          })}
           helpText={
             <EuiText size="s">
               {i18n.translate(
@@ -99,6 +105,8 @@ export const AddDomainForm: React.FC = () => {
             </EuiText>
           </>
         )}
+
+        {displayValidation && <AddDomainValidation />}
       </EuiForm>
     </>
   );
