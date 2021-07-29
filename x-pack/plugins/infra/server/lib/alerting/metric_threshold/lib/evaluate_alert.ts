@@ -180,6 +180,7 @@ const getValuesFromAggregations = (
   try {
     const { buckets } = aggregations.aggregatedIntervals;
     if (!buckets.length) return null; // No Data state
+
     if (aggType === Aggregators.COUNT) {
       return buckets.map((bucket) => ({
         key: bucket.to_as_string,
