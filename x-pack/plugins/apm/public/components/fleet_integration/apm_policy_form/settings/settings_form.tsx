@@ -127,17 +127,26 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
-      <EuiButtonEmpty
-        iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-        onClick={() => {
-          setIsOpen((state) => !state);
-        }}
-      >
-        {i18n.translate(
-          'xpack.apm.fleet_integration.settings.advancedOptionsLavel',
-          { defaultMessage: 'Advanced options' }
-        )}
-      </EuiButtonEmpty>
+      <EuiFlexGroup>
+        <EuiFlexItem />
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                onClick={() => {
+                  setIsOpen((state) => !state);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.apm.fleet_integration.settings.advancedOptionsLavel',
+                  { defaultMessage: 'Advanced options' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {isOpen && (
         <>
           <EuiHorizontalRule />
