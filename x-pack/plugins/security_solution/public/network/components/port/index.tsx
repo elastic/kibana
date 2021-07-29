@@ -29,7 +29,7 @@ export const Port = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
-  isDraggable?: boolean;
+  isDraggable: boolean;
   value: string | undefined | null;
 }>(({ contextId, eventId, fieldName, isDraggable, value }) =>
   isDraggable ? (
@@ -37,7 +37,6 @@ export const Port = React.memo<{
       data-test-subj="port"
       field={fieldName}
       id={`port-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-      isDraggable={isDraggable}
       tooltipContent={fieldName}
       value={value}
     >
