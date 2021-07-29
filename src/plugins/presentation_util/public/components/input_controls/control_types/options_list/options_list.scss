@@ -20,6 +20,7 @@
   .euiFilterButton__text-hasNotification {
     flex-grow: 1;
     justify-content: space-between;
+    width: 0;
   }
   &.optionsList--filterBtnSingle {
     width: 100%;
