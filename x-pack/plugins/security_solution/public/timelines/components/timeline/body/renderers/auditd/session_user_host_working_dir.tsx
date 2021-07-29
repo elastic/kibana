@@ -23,21 +23,10 @@ interface Props {
   secondary: string | null | undefined;
   workingDirectory: string | null | undefined;
   session: string | null | undefined;
-  isDraggable?: boolean;
 }
 
 export const SessionUserHostWorkingDir = React.memo<Props>(
-  ({
-    eventId,
-    contextId,
-    hostName,
-    userName,
-    primary,
-    secondary,
-    workingDirectory,
-    session,
-    isDraggable,
-  }) => (
+  ({ eventId, contextId, hostName, userName, primary, secondary, workingDirectory, session }) => (
     <>
       <TokensFlexItem grow={false} component="span">
         {i18n.SESSION}
@@ -49,7 +38,6 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
           field="auditd.session"
           value={session}
           iconType="number"
-          isDraggable={isDraggable}
         />
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
@@ -59,7 +47,6 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
           userName={userName}
           primary={primary}
           secondary={secondary}
-          isDraggable={isDraggable}
         />
       </TokensFlexItem>
       {hostName != null && (
@@ -72,7 +59,6 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
         eventId={eventId}
         workingDirectory={workingDirectory}
         hostName={hostName}
-        isDraggable={isDraggable}
       />
     </>
   )

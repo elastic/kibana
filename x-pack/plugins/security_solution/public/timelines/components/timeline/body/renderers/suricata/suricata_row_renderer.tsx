@@ -21,14 +21,9 @@ export const suricataRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
-  renderRow: ({ browserFields, data, isDraggable, timelineId }) => (
+  renderRow: ({ browserFields, data, timelineId }) => (
     <RowRendererContainer>
-      <SuricataDetails
-        data={data}
-        browserFields={browserFields}
-        isDraggable={isDraggable}
-        timelineId={timelineId}
-      />
+      <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
     </RowRendererContainer>
   ),
 };

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { stopPropagationAndPreventDefault } from '../../../../common';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { defaultColumnHeaderType } from '../../t_grid/body/column_headers/default_headers';
@@ -32,47 +30,27 @@ export const NESTED_COLUMN = (field: string) =>
 
 export const COLUMN_TOGGLE_KEYBOARD_SHORTCUT = 'i';
 
+export interface ColumnToggleFnArgs {
+  toggleColumn: (column: ColumnHeaderOptions) => void;
+  field: string;
+}
+
+export const columnToggleFn = ({ toggleColumn, field }: ColumnToggleFnArgs): void => {
+  return toggleColumn({
+    columnHeaderType: defaultColumnHeaderType,
+    id: field,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+  });
+};
+
 export interface ColumnToggleProps extends HoverActionComponentProps {
   isDisabled: boolean;
   isObjectArray: boolean;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
-const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
-  ({
-    closePopOver,
-    defaultFocusedButtonRef,
-    field,
-    isDisabled,
-    isObjectArray,
-    keyboardEvent,
-    ownFocus,
-    showTooltip = false,
-    toggleColumn,
-    value,
-  }) => {
+export const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
+  ({ field, isDisabled, isObjectArray, onClick, ownFocus, showTooltip = false, value }) => {
     const label = isObjectArray ? NESTED_COLUMN(field) : COLUMN_TOGGLE(field);
-
-    const handleToggleColumn = useCallback(() => {
-      toggleColumn({
-        columnHeaderType: defaultColumnHeaderType,
-        id: field,
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      });
-      if (closePopOver != null) {
-        closePopOver();
-      }
-    }, [closePopOver, field, toggleColumn]);
-
-    useEffect(() => {
-      if (!ownFocus) {
-        return;
-      }
-      if (keyboardEvent?.key === COLUMN_TOGGLE_KEYBOARD_SHORTCUT) {
-        stopPropagationAndPreventDefault(keyboardEvent);
-        handleToggleColumn();
-      }
-    }, [handleToggleColumn, keyboardEvent, ownFocus]);
 
     return showTooltip ? (
       <EuiToolTip
@@ -90,7 +68,6 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
       >
         <EuiButtonIcon
           aria-label={label}
-          buttonRef={defaultFocusedButtonRef}
           className="timelines__hoverActionButton"
           data-test-subj={`toggle-field-${field}`}
           data-colindex={1}
@@ -98,13 +75,12 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
           id={field}
           iconSize="s"
           iconType="listAdd"
-          onClick={handleToggleColumn}
+          onClick={onClick}
         />
       </EuiToolTip>
     ) : (
       <EuiButtonIcon
         aria-label={label}
-        buttonRef={defaultFocusedButtonRef}
         className="timelines__hoverActionButton"
         data-test-subj={`toggle-field-${field}`}
         data-colindex={1}
@@ -112,13 +88,10 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
         id={field}
         iconSize="s"
         iconType="listAdd"
-        onClick={handleToggleColumn}
+        onClick={onClick}
       />
     );
   }
 );
 
 ColumnToggleButton.displayName = 'ColumnToggleButton';
-
-// eslint-disable-next-line import/no-default-export
-export { ColumnToggleButton as default };

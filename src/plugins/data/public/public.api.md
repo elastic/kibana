@@ -71,7 +71,6 @@ import { MatchAllFilter as MatchAllFilter_2 } from '@kbn/es-query';
 import { MaybePromise } from '@kbn/utility-types';
 import { Moment } from 'moment';
 import moment from 'moment';
-import { NameList } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
@@ -2516,7 +2515,7 @@ export interface SearchSourceFields {
     // Warning: (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
     fields?: SearchFieldValue[];
     // @deprecated
-    fieldsFromSource?: NameList;
+    fieldsFromSource?: estypes.Fields;
     // (undocumented)
     filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
     // (undocumented)
@@ -2544,7 +2543,7 @@ export interface SearchSourceFields {
     // (undocumented)
     sort?: EsQuerySortValue | EsQuerySortValue[];
     // (undocumented)
-    source?: NameList;
+    source?: boolean | estypes.Fields;
     // (undocumented)
     terminate_after?: number;
     // (undocumented)
@@ -2726,7 +2725,7 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/search/aggs/types.ts:129:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/search/aggs/types.ts:128:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/deprecated.ts:93:23 - (ae-forgotten-export) The symbol "changeTimeFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/deprecated.ts:93:23 - (ae-forgotten-export) The symbol "convertRangeFilterToTimeRangeString" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/deprecated.ts:93:23 - (ae-forgotten-export) The symbol "extractTimeFilter" needs to be exported by the entry point index.d.ts
