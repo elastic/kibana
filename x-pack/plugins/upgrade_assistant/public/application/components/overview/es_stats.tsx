@@ -8,14 +8,11 @@
 import React, { FunctionComponent } from 'react';
 
 import {
-  EuiLink,
-  EuiPanel,
   EuiStat,
-  EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
+  EuiCard,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -39,12 +36,6 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsTitle',
     {
       defaultMessage: 'Critical',
-    }
-  ),
-  viewDeprecationsLink: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.viewDeprecationsLinkText',
-    {
-      defaultMessage: 'View deprecations',
     }
   ),
   loadingText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.loadingText', {
@@ -83,70 +74,63 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
   );
 
   return (
-    <EuiPanel data-test-subj="esStatsPanel" hasShadow={false} hasBorder={true}>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>{i18nTexts.statsTitle}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            {...reactRouterNavigate(history, '/es_deprecations/cluster')}
-            data-test-subj="esDeprecationsLink"
-          >
-            {i18nTexts.viewDeprecationsLink}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiCard
+      data-test-subj="esStatsPanel"
+      layout="horizontal"
+      title={i18nTexts.statsTitle}
+      {...reactRouterNavigate(history, '/es_deprecations/cluster')}
+      description={
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiStat
+                data-test-subj="criticalDeprecations"
+                title={error ? '--' : criticalDeprecations.length}
+                titleElement="span"
+                description={i18nTexts.criticalDeprecationsTitle}
+                titleColor="danger"
+                isLoading={isLoading}
+              >
+                {error === null && (
+                  <EuiScreenReaderOnly>
+                    <p>
+                      {isLoading
+                        ? i18nTexts.loadingText
+                        : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
+                    </p>
+                  </EuiScreenReaderOnly>
+                )}
 
-      <EuiSpacer />
+                {error && <EsStatsErrors error={error} />}
+              </EuiStat>
+            </EuiFlexItem>
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiStat
-            data-test-subj="criticalDeprecations"
-            title={error ? '--' : criticalDeprecations.length}
-            description={i18nTexts.criticalDeprecationsTitle}
-            titleColor="danger"
-            isLoading={isLoading}
-          >
-            {error === null && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-
-            {error && <EsStatsErrors error={error} />}
-          </EuiStat>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiStat
-            data-test-subj="totalDeprecations"
-            title={error ? '--' : allDeprecations.length}
-            description={i18nTexts.totalDeprecationsTitle}
-            isLoading={isLoading}
-          >
-            {error === null && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getTotalDeprecationsMessage(
-                        esDeprecations?.cluster.length ?? 0,
-                        esDeprecations?.indices.length ?? 0
-                      )}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-          </EuiStat>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+            <EuiFlexItem>
+              <EuiStat
+                data-test-subj="totalDeprecations"
+                title={error ? '--' : allDeprecations.length}
+                titleElement="span"
+                description={i18nTexts.totalDeprecationsTitle}
+                isLoading={isLoading}
+              >
+                {error === null && (
+                  <EuiScreenReaderOnly>
+                    <p>
+                      {isLoading
+                        ? i18nTexts.loadingText
+                        : i18nTexts.getTotalDeprecationsMessage(
+                            esDeprecations?.cluster.length ?? 0,
+                            esDeprecations?.indices.length ?? 0
+                          )}
+                    </p>
+                  </EuiScreenReaderOnly>
+                )}
+              </EuiStat>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      }
+    />
   );
 };
