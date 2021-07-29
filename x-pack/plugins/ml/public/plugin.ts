@@ -44,6 +44,7 @@ import {
 } from '../../triggers_actions_ui/public';
 import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import { registerWithMaps } from './maps/register_with_maps';
 import { registerManagementSection } from './application/management';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
@@ -81,7 +82,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) { }
 
   setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
     core.application.register({
@@ -181,6 +182,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   }
 
   start(core: CoreStart, deps: MlStartDependencies) {
+    if (deps.maps) {
+      registerWithMaps(deps.maps);
+    }
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,
@@ -193,7 +197,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     };
   }
 
-  public stop() {}
+  public stop() { }
 }
 
 export type MlPluginSetup = ReturnType<MlPlugin['setup']>;
