@@ -155,7 +155,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               )}
               {packagePolicy.hasUpgrade && (
                 <>
-                  <EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiToolTip
                       content={i18n.translate(
                         'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
@@ -165,9 +165,10 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       <EuiIcon type="alert" color="warning" />
                     </EuiToolTip>
                   </EuiFlexItem>
-                  <EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiButton
                       size="s"
+                      minWidth="0"
                       href={`${getHref('edit_integration', {
                         policyId: agentPolicy.id,
                         packagePolicyId: packagePolicy.id,

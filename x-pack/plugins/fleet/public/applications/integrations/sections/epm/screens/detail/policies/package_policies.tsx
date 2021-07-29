@@ -236,9 +236,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               </EuiFlexItem>
 
               {hasUpgrade && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
+                    minWidth="0"
                     href={`${getHref('edit_integration', {
                       policyId: agentPolicy.id,
                       packagePolicyId: packagePolicy.id,
