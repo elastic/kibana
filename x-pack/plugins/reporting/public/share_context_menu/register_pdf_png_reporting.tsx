@@ -8,11 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext } from 'src/plugins/share/public';
-import { checkLicense } from '../lib/license_check';
-import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { checkLicense } from '../lib/license_check';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
-const getJobParams = (opts: JobParamsProviderOptions, type: 'pdf' | 'png') => () => {
+const getJobParams = (
+  apiClient: ReportingAPIClient,
+  opts: JobParamsProviderOptions,
+  type: 'pdf' | 'png'
+) => () => {
   const {
     objectType,
     sharingData: { title, layout },
@@ -27,7 +32,7 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pdf' | 'png') => ()
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
-    window.location.origin + opts.apiClient.getServerBasePath(),
+    window.location.origin + apiClient.getServerBasePath(),
     ''
   );
 
@@ -126,15 +131,7 @@ export const reportingScreenshotShareProvider = ({
             reportType="png"
             objectId={objectId}
             requiresSavedState={true}
-            getJobParams={getJobParams(
-              {
-                shareableUrl,
-                apiClient,
-                objectType,
-                sharingData,
-              },
-              'png'
-            )}
+            getJobParams={getJobParams(apiClient, { shareableUrl, objectType, sharingData }, 'png')}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -167,15 +164,7 @@ export const reportingScreenshotShareProvider = ({
             objectId={objectId}
             requiresSavedState={true}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(
-              {
-                shareableUrl,
-                apiClient,
-                objectType,
-                sharingData,
-              },
-              'pdf'
-            )}
+            getJobParams={getJobParams(apiClient, { shareableUrl, objectType, sharingData }, 'pdf')}
             isDirty={isDirty}
             onClose={onClose}
           />

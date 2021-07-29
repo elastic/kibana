@@ -27,7 +27,6 @@ export interface ReportingSharingData {
 }
 
 export interface JobParamsProviderOptions {
-  apiClient: ReportingAPIClient;
   sharingData: ReportingSharingData;
   shareableUrl: string;
   objectType: string;
