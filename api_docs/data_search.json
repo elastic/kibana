@@ -1055,11 +1055,10 @@
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.e",
+                "id": "def-public.ISearchStart.showError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "e",
@@ -1068,9 +1067,11 @@
                   "Error"
                 ],
                 "path": "src/plugins/data/public/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -1681,8 +1682,8 @@
             ],
             "path": "src/plugins/data/public/search/session/session_service.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -1727,8 +1728,8 @@
             ],
             "path": "src/plugins/data/public/search/session/session_service.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2788,11 +2789,10 @@
             ],
             "path": "src/plugins/data/server/search/session/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.core",
+                "id": "def-server.ISearchSessionService.asScopedProvider.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -2807,9 +2807,11 @@
                   }
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2891,21 +2893,24 @@
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.name",
+                "id": "def-server.ISearchSetup.registerSearchStrategy.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-server.strategy",
+                "id": "def-server.ISearchSetup.registerSearchStrategy.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "strategy",
@@ -2921,9 +2926,11 @@
                   "<SearchStrategyRequest, SearchStrategyResponse>"
                 ],
                 "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -3043,11 +3050,10 @@
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.name",
+                "id": "def-server.ISearchStart.getSearchStrategy.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -3056,9 +3062,11 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -3087,11 +3095,10 @@
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.request",
+                "id": "def-server.ISearchStart.asScoped.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -3107,9 +3114,11 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -3195,11 +3204,10 @@
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.request",
+                "id": "def-server.ISearchStrategy.search.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "request",
@@ -3208,11 +3216,12 @@
                   "SearchStrategyRequest"
                 ],
                 "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-server.options",
+                "id": "def-server.ISearchStrategy.search.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3227,11 +3236,12 @@
                   }
                 ],
                 "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-server.deps",
+                "id": "def-server.ISearchStrategy.search.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -3246,9 +3256,11 @@
                   }
                 ],
                 "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -3277,7 +3289,64 @@
               ") => Promise<void>) | undefined"
             ],
             "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.ISearchStrategy.cancel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.ISearchStrategy.cancel.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.ISearchOptions",
+                    "text": "ISearchOptions"
+                  }
+                ],
+                "path": "src/plugins/data/server/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.ISearchStrategy.cancel.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "server",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-server.SearchStrategyDependencies",
+                    "text": "SearchStrategyDependencies"
+                  }
+                ],
+                "path": "src/plugins/data/server/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -3306,7 +3375,78 @@
               ") => Promise<void>) | undefined"
             ],
             "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.ISearchStrategy.extend.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.ISearchStrategy.extend.$2",
+                "type": "string",
+                "tags": [],
+                "label": "keepAlive",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.ISearchStrategy.extend.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.ISearchOptions",
+                    "text": "ISearchOptions"
+                  }
+                ],
+                "path": "src/plugins/data/server/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.ISearchStrategy.extend.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "server",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-server.SearchStrategyDependencies",
+                    "text": "SearchStrategyDependencies"
+                  }
+                ],
+                "path": "src/plugins/data/server/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11782,11 +11922,10 @@
                 ],
                 "path": "src/plugins/data/common/search/expressions/esdsl.ts",
                 "deprecated": false,
-                "returnComment": [],
                 "children": [
                   {
                     "parentPluginId": "data",
-                    "id": "def-common.getKibanaRequest",
+                    "id": "def-common.getEsdslFn.$1.getStartDependencies.getStartDependencies.$1",
                     "type": "Any",
                     "tags": [],
                     "label": "getKibanaRequest",
@@ -11795,9 +11934,11 @@
                       "any"
                     ],
                     "path": "src/plugins/data/common/search/expressions/esdsl.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   }
-                ]
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -11856,19 +11997,23 @@
                 ],
                 "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
                 "deprecated": false,
-                "returnComment": [],
                 "children": [
                   {
                     "parentPluginId": "data",
-                    "id": "def-common.key",
+                    "id": "def-common.getFilterBucketAgg.$1.getConfig.getConfig.$1",
                     "type": "string",
                     "tags": [],
                     "label": "key",
                     "description": [],
+                    "signature": [
+                      "string"
+                    ],
                     "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   }
-                ]
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -19101,7 +19246,52 @@
               "((aggConfig: TAggConfig, key: any, params?: any) => any) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.createFilter.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "aggConfig",
+                "description": [],
+                "signature": [
+                  "TAggConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.createFilter.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.createFilter.$3",
+                "type": "Any",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -19280,7 +19470,9 @@
               "(() => any) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -19314,7 +19506,24 @@
               "<Record<string, any>>) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getSerializedFormat.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "agg",
+                "description": [],
+                "signature": [
+                  "TAggConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -19327,7 +19536,38 @@
               "((agg: TAggConfig, bucket: any) => any) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getValue.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "agg",
+                "description": [],
+                "signature": [
+                  "TAggConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getValue.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -19340,7 +19580,52 @@
               "((bucket: any, key: any, agg: TAggConfig) => any) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getKey.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getKey.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getKey.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "agg",
+                "description": [],
+                "signature": [
+                  "TAggConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -19353,7 +19638,24 @@
               "((agg: TAggConfig) => string) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getValueBucketPath.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "agg",
+                "description": [],
+                "signature": [
+                  "TAggConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -19576,8 +19878,8 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -19591,19 +19893,23 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.DateHistogramBucketAggDependencies.getConfig.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -19669,8 +19975,8 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_range.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -19684,19 +19990,23 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_range.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.DateRangeBucketAggDependencies.getConfig.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/search/aggs/buckets/date_range.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -19922,24 +20232,24 @@
             ],
             "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.request",
+                "id": "def-common.FetchHandlers.onResponse.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.response",
+                "id": "def-common.FetchHandlers.onResponse.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "response",
@@ -19955,9 +20265,11 @@
                   "<any>"
                 ],
                 "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -19984,19 +20296,23 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/filters.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.FiltersBucketAggDependencies.getConfig.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/search/aggs/buckets/filters.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -20023,19 +20339,23 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.HistogramBucketAggDependencies.getConfig.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -20256,11 +20576,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.bounds",
+                "id": "def-common.IBucketHistogramAggConfig.setAutoBounds.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "bounds",
@@ -20275,9 +20594,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -20298,8 +20619,8 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21124,11 +21445,10 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.fields",
+                "id": "def-common.ISearchStartSearchSource.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "fields",
@@ -21144,9 +21464,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/data/common/search/search_source/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -21170,8 +21492,8 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21209,21 +21531,24 @@
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/std_deviation.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.customLabel",
+                "id": "def-common.IStdDevAggConfig.keyedDetails.$1",
                 "type": "string",
                 "tags": [],
                 "label": "customLabel",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/search/aggs/metrics/std_deviation.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.fieldDisplayName",
+                "id": "def-common.IStdDevAggConfig.keyedDetails.$2",
                 "type": "string",
                 "tags": [],
                 "label": "fieldDisplayName",
@@ -21232,9 +21557,11 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/data/common/search/aggs/metrics/std_deviation.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -21248,8 +21575,8 @@
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/std_deviation.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21484,11 +21811,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.agg",
+                "id": "def-common.OptionedValueProp.isCompatible.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agg",
@@ -21503,9 +21829,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -25673,6 +26001,39 @@
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -25695,6 +26056,49 @@
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.keepAlive",
+            "type": "string",
+            "tags": [],
+            "label": "keepAlive",
+            "description": [],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -25751,6 +26155,42 @@
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.request",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "SearchStrategyRequest"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

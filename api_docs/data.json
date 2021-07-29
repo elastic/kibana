@@ -11767,7 +11767,67 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.IFieldType.toSpec.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.IFieldType.toSpec.$1.options.getFormatterForField",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getFormatterForField",
+                    "description": [],
+                    "signature": [
+                      "((field: ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IFieldType",
+                        "text": "IFieldType"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IndexPatternField",
+                        "text": "IndexPatternField"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.FieldSpec",
+                        "text": "FieldSpec"
+                      },
+                      ") => ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataFieldFormatsPluginApi",
+                        "section": "def-common.FieldFormat",
+                        "text": "FieldFormat"
+                      },
+                      ") | undefined"
+                    ],
+                    "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11796,18 +11856,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/types.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
           },
@@ -12526,14 +12574,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
           },
           {
             "plugin": "ml",
@@ -12796,7 +12836,46 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.IIndexPattern.getFormatterForField.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IFieldType",
+                    "text": "IFieldType"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPatternField",
+                    "text": "IndexPatternField"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/plugins/data/common/index_patterns/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14002,11 +14081,10 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.fields",
+                "id": "def-public.ISearchStartSearchSource.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "fields",
@@ -14022,9 +14100,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/data/common/search/search_source/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -14048,8 +14128,8 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14117,11 +14197,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.agg",
+                "id": "def-public.OptionedValueProp.isCompatible.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agg",
@@ -14136,9 +14215,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15408,6 +15489,32 @@
         ],
         "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -17737,6 +17844,42 @@
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.request",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "SearchStrategyRequest"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -30964,7 +31107,67 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IFieldType.toSpec.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IFieldType.toSpec.$1.options.getFormatterForField",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getFormatterForField",
+                    "description": [],
+                    "signature": [
+                      "((field: ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IFieldType",
+                        "text": "IFieldType"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IndexPatternField",
+                        "text": "IndexPatternField"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.FieldSpec",
+                        "text": "FieldSpec"
+                      },
+                      ") => ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataFieldFormatsPluginApi",
+                        "section": "def-common.FieldFormat",
+                        "text": "FieldFormat"
+                      },
+                      ") | undefined"
+                    ],
+                    "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -31341,11 +31544,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.agg",
+                "id": "def-server.OptionedValueProp.isCompatible.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agg",
@@ -31360,9 +31562,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -31785,6 +31989,32 @@
         ],
         "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-server.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -37924,19 +38154,23 @@
             ],
             "path": "src/plugins/data/common/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.type",
+                "id": "def-common.FilterValueFormatter.getConverterFor.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -40283,6 +40517,32 @@
         ],
         "path": "src/plugins/data/common/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

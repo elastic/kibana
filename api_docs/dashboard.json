@@ -1995,11 +1995,10 @@
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.editMode",
+                "id": "def-public.DashboardSavedObject.getFullEditPath.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "editMode",
@@ -2008,9 +2007,11 @@
                   "boolean | undefined"
                 ],
                 "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2508,8 +2509,8 @@
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "dashboard",
@@ -2523,8 +2524,8 @@
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "dashboard",

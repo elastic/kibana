@@ -3928,8 +3928,8 @@
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "apm",
@@ -3959,32 +3959,67 @@
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "apm",
-              "id": "def-server.params",
+              "id": "def-server.APMPluginSetup.createApmEventClient.$1.params",
               "type": "Object",
               "tags": [],
               "label": "params",
               "description": [],
-              "signature": [
-                "{ debug?: boolean | undefined; request: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
-                "<unknown, unknown, unknown, any>; context: ",
-                "ApmPluginRequestHandlerContext",
-                "; }"
-              ],
               "path": "x-pack/plugins/apm/server/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "children": [
+                {
+                  "parentPluginId": "apm",
+                  "id": "def-server.APMPluginSetup.createApmEventClient.$1.params.debug",
+                  "type": "CompoundType",
+                  "tags": [],
+                  "label": "debug",
+                  "description": [],
+                  "signature": [
+                    "boolean | undefined"
+                  ],
+                  "path": "x-pack/plugins/apm/server/types.ts",
+                  "deprecated": false
+                },
+                {
+                  "parentPluginId": "apm",
+                  "id": "def-server.APMPluginSetup.createApmEventClient.$1.params.request",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "request",
+                  "description": [],
+                  "signature": [
+                    {
+                      "pluginId": "core",
+                      "scope": "server",
+                      "docId": "kibCoreHttpPluginApi",
+                      "section": "def-server.KibanaRequest",
+                      "text": "KibanaRequest"
+                    },
+                    "<unknown, unknown, unknown, any>"
+                  ],
+                  "path": "x-pack/plugins/apm/server/types.ts",
+                  "deprecated": false
+                },
+                {
+                  "parentPluginId": "apm",
+                  "id": "def-server.APMPluginSetup.createApmEventClient.$1.params.context",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "context",
+                  "description": [],
+                  "signature": [
+                    "ApmPluginRequestHandlerContext"
+                  ],
+                  "path": "x-pack/plugins/apm/server/types.ts",
+                  "deprecated": false
+                }
+              ]
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
