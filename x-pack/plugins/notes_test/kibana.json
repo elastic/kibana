@@ -1,0 +1,10 @@
+{
+  "id": "notesTest",
+  "owner": { "name": "Platform Security", "githubTeam": "kibana-security" },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
