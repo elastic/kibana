@@ -46,7 +46,7 @@ export const getPreloadedState = (
     datasourceMap,
     visualizationMap,
   }: StoreDeps,
-  preloadedState: Partial<LensAppState>
+  preloadedState?: Partial<LensAppState>
 ) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
@@ -82,7 +82,10 @@ export const getPreloadedState = (
   return state;
 };
 
-export const makeConfigureStore = (storeDeps: StoreDeps, preloadedState: Partial<LensAppState>) => {
+export const makeConfigureStore = (
+  storeDeps: StoreDeps,
+  preloadedState?: Partial<LensAppState>
+) => {
   const middleware = [
     ...getDefaultMiddleware({
       serializableCheck: false,

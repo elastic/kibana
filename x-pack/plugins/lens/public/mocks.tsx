@@ -35,7 +35,7 @@ import {
 import { LensAttributeService } from './lens_attribute_service';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 
-import { makeConfigureStore, getPreloadedState, LensAppState } from './state_management/index';
+import { makeConfigureStore, LensAppState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
 import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
 import { DatasourcePublicAPI, Datasource, Visualization, FramePublicAPI } from './types';
@@ -82,6 +82,11 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
   };
 }
 
+const visualizationMap = {
+  vis: createMockVisualization(),
+  vis2: createMockVisualization(),
+};
+
 export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
 };
@@ -125,6 +130,13 @@ export function createMockDatasource(id: string): DatasourceMock {
     checkIntegrity: jest.fn((_state) => []),
   };
 }
+
+const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
+const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
+const datasourceMap = {
+  testDatasource2: mockDatasource2,
+  testDatasource: mockDatasource,
+};
 
 export function createExpressionRendererMock(): jest.Mock<
   React.ReactElement,
@@ -403,8 +415,8 @@ export function makeLensStore({
   const lensStore = makeConfigureStore(
     {
       lensServices: { ...makeDefaultServices(), data },
-      datasourceMap:
-      visualizationMap: 
+      datasourceMap,
+      visualizationMap,
     },
     {
       ...defaultState,

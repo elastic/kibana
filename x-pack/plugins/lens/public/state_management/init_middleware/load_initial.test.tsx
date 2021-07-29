@@ -66,14 +66,10 @@ describe('Mounter', () => {
     const redirectCallback = jest.fn();
     services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
 
-    const lensStore = await makeLensStore(
-      {
-        visualizationMap,
-        datasourceMap,
-        lensServices: services
-      }
-      
-      preloadedState);
+    const lensStore = await makeLensStore({
+      data: services.data,
+      preloadedState,
+    });
     await act(async () => {
       await loadInitial(
         lensStore,

@@ -162,10 +162,10 @@ export async function mountApp(
   const { datasourceMap, visualizationMap } = instance;
   const lensStore: LensRootStore = makeConfigureStore({
     lensServices,
-    initialContext,
-    embeddableEditorIncomingState,
     datasourceMap,
     visualizationMap,
+    embeddableEditorIncomingState,
+    initialContext,
   });
 
   const EditorRenderer = React.memo(
