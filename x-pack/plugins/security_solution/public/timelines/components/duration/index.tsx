@@ -26,7 +26,6 @@ export const Duration = React.memo<{
   isDraggable ? (
     <DefaultDraggable
       id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-      isDraggable={isDraggable}
       // @ts-expect-error
       name={name}
       field={fieldName}

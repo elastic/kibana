@@ -32,11 +32,23 @@ export const migratePackagePolicyToV7150: SavedObjectMigrationFn<PackagePolicy, 
     message: '',
     enabled: false,
   };
+  const behavior = {
+    mode: 'off',
+    // This value is based on license.
+    // For the migration, we add 'true', our license watcher will correct it, if needed, when the app starts.
+    supported: true,
+  };
+  const behaviorPopup = {
+    message: '',
+    enabled: false,
+  };
   if (input && input.config) {
     const policy = input.config.policy.value;
 
     policy.windows.memory_protection = memory;
     policy.windows.popup.memory_protection = memoryPopup;
+    policy.windows.behavior_protection = behavior;
+    policy.windows.popup.behavior_protection = behaviorPopup;
   }
 
   return updatedPackagePolicyDoc;

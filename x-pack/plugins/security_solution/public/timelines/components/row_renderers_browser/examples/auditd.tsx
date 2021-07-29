@@ -23,7 +23,6 @@ const AuditdExampleComponent: React.FC = () => {
       {auditdRowRenderer.renderRow({
         browserFields: {},
         data: mockTimelineData[26].ecs,
-        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

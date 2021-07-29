@@ -355,7 +355,7 @@ export class AggConfig {
         // If the param provides `toExpressionAst`, we call it with the value
         const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
         if (paramExpressionAst) {
-          acc[key] = [paramExpressionAst];
+          acc[key] = Array.isArray(paramExpressionAst) ? paramExpressionAst : [paramExpressionAst];
         }
       } else if (value && Array.isArray(value)) {
         // For array params which don't provide `toExpressionAst`, we stringify
