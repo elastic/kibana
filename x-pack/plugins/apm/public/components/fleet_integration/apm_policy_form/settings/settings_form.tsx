@@ -5,13 +5,12 @@
  * 2.0.
  */
 import {
+  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -101,8 +100,8 @@ export function SettingsForm({
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{title}</h4>
+          <EuiTitle size="s">
+            <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -128,30 +127,17 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem />
-        <EuiFlexItem>
-          <EuiLink
-            onClick={() => {
-              setIsOpen((state) => !state);
-            }}
-          >
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  {i18n.translate(
-                    'xpack.apm.fleet_integration.settings.advancedOptionsLavel',
-                    { defaultMessage: 'Advanced options' }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiButtonEmpty
+        iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+        onClick={() => {
+          setIsOpen((state) => !state);
+        }}
+      >
+        {i18n.translate(
+          'xpack.apm.fleet_integration.settings.advancedOptionsLavel',
+          { defaultMessage: 'Advanced options' }
+        )}
+      </EuiButtonEmpty>
       {isOpen && (
         <>
           <EuiHorizontalRule />
