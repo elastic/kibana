@@ -64,7 +64,7 @@ describe('interpreter/functions#pie', () => {
       },
     };
     await fn(context, visConfig, handlers as any);
-    // @ts-ignore
-    expect(loggedTable).toMatchSnapshot();
+
+    expect(loggedTable!).toMatchSnapshot();
   });
 });
