@@ -50,6 +50,7 @@ import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
+import { getAggsFormats } from '../common';
 
 export class DataPublicPlugin
   implements
@@ -71,6 +72,7 @@ export class DataPublicPlugin
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.nowProvider = new NowProvider();
@@ -113,13 +115,20 @@ export class DataPublicPlugin
       }))
     );
 
+    const fieldFormats = this.fieldFormatsService.setup(core);
+    fieldFormats.register(
+      getAggsFormats((serializedFieldFormat) =>
+        startServices().self.fieldFormats.deserialize(serializedFieldFormat)
+      )
+    );
+
     return {
       autocomplete: this.autocomplete.setup(core, {
         timefilter: queryService.timefilter,
         usageCollection,
       }),
       search: searchService,
-      fieldFormats: this.fieldFormatsService.setup(core),
+      fieldFormats,
       query: queryService,
     };
   }

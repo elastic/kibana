@@ -1697,6 +1697,27 @@
                 }
               },
               {
+                "plugin": "lens",
+                "link": {
+                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
+                  "lineNumber": 47
+                }
+              },
+              {
+                "plugin": "lens",
+                "link": {
+                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
+                  "lineNumber": 75
+                }
+              },
+              {
+                "plugin": "lens",
+                "link": {
+                  "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx",
+                  "lineNumber": 247
+                }
+              },
+              {
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/render_app.tsx",
@@ -1718,31 +1739,10 @@
                 }
               },
               {
-                "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 47
-                }
-              },
-              {
-                "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 74
-                }
-              },
-              {
-                "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx",
-                  "lineNumber": 209
-                }
-              },
-              {
                 "plugin": "ml",
                 "link": {
                   "path": "x-pack/plugins/ml/public/application/app.tsx",
-                  "lineNumber": 135
+                  "lineNumber": 133
                 }
               },
               {
@@ -2304,7 +2304,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx",
-              "lineNumber": 25
+              "lineNumber": 23
             }
           },
           {
@@ -2332,7 +2332,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
-              "lineNumber": 26
+              "lineNumber": 28
             }
           },
           {

@@ -6,6 +6,7 @@
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
+import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import {
   isTooManyBucketsPreviewException,
@@ -121,9 +122,14 @@ const getMetric: (
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
 
-  const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
+  const to = moment(timeframe ? timeframe.end : Date.now())
+    .add(1, timeUnit)
+    .startOf(timeUnit)
+    .valueOf();
+
   // We need enough data for 5 buckets worth of data. We also need
   // to convert the intervalAsSeconds to milliseconds.
+  // TODO: We only need to get 5 buckets for the rate query, so this logic should move there.
   const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
 
   const from = roundTimestamp(
@@ -223,30 +229,42 @@ const getValuesFromAggregations = (
   try {
     const { buckets } = aggregations.aggregatedIntervals;
     if (!buckets.length) return null; // No Data state
+
     if (aggType === Aggregators.COUNT) {
+      return buckets.map((bucket) => ({
+        key: bucket.from_as_string,
+        value: bucket.doc_count,
+      }));
+    }
+    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
+      return buckets.map((bucket) => {
+        const values = bucket.aggregatedValue?.values || [];
+        const firstValue = first(values);
+        if (!firstValue) return null;
+        return { key: bucket.from_as_string, value: firstValue.value };
+      });
+    }
+
+    if (aggType === Aggregators.AVERAGE) {
+      return buckets.map((bucket) => ({
+        key: bucket.key_as_string ?? bucket.from_as_string,
+        value: bucket.aggregatedValue?.value ?? null,
+      }));
+    }
+
+    if (aggType === Aggregators.RATE) {
       return buckets
         .map((bucket) => ({
-          key: bucket.from_as_string,
-          value: bucket.doc_count,
+          key: bucket.key_as_string ?? bucket.from_as_string,
+          value: bucket.aggregatedValue?.value ?? null,
         }))
         .filter(dropPartialBuckets(dropPartialBucketsOptions));
     }
-    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
-      return buckets
-        .map((bucket) => {
-          const values = bucket.aggregatedValue?.values || [];
-          const firstValue = first(values);
-          if (!firstValue) return null;
-          return { key: bucket.from_as_string, value: firstValue.value };
-        })
-        .filter(dropPartialBuckets(dropPartialBucketsOptions));
-    }
-    return buckets
-      .map((bucket) => ({
-        key: bucket.key_as_string ?? bucket.from_as_string,
-        value: bucket.aggregatedValue?.value ?? null,
-      }))
-      .filter(dropPartialBuckets(dropPartialBucketsOptions));
+
+    return buckets.map((bucket) => ({
+      key: bucket.key_as_string ?? bucket.from_as_string,
+      value: bucket.aggregatedValue?.value ?? null,
+    }));
   } catch (e) {
     return NaN; // Error state
   }

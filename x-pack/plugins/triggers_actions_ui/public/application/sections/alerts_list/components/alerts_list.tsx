@@ -89,7 +89,7 @@ export const AlertsList: React.FunctionComponent = () => {
     http,
     notifications: { toasts },
     application: { capabilities },
-    alertTypeRegistry,
+    ruleTypeRegistry,
     actionTypeRegistry,
     kibanaFeatures,
   } = useKibana().services;
@@ -889,7 +889,7 @@ export const AlertsList: React.FunctionComponent = () => {
             setAlertFlyoutVisibility(false);
           }}
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
           onSave={loadAlertsData}
         />
       )}
@@ -900,7 +900,7 @@ export const AlertsList: React.FunctionComponent = () => {
             setEditFlyoutVisibility(false);
           }}
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
           onSave={loadAlertsData}
         />
       )}
