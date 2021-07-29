@@ -32,6 +32,13 @@ const NO_ITEMS = (
   <EuiEmptyPrompt iconType="clock" title={<h2>No Items</h2>} body={<p>No Items</p>} />
 );
 
+// For the InlineEditableTable
+// Since InlineEditableTable caches handlers, we need to store this globally somewhere rather than just in useState
+let globalItems: Array<{ id: number; foo: string; bar: string }> = [];
+const getLastItems = () => globalItems;
+let globalItems2: Array<{ id: number; foo: string; bar: string }> = [];
+const getLastItems2 = () => globalItems2;
+
 export const Library: React.FC = () => {
   const props = {
     isMetaEngine: false,
@@ -92,10 +99,17 @@ export const Library: React.FC = () => {
     },
   ];
 
+  // For the InlineEditableTable
   const [items, setItems] = useState([
     { id: 1, foo: 'foo1', bar: '10' },
     { id: 2, foo: 'foo2', bar: '10' },
   ]);
+  globalItems = items;
+  const [items2, setItems2] = useState([
+    { id: 1, foo: 'foo1', bar: '10' },
+    { id: 2, foo: 'foo2', bar: '10' },
+  ]);
+  globalItems2 = items2;
 
   return (
     <>
@@ -388,15 +402,23 @@ export const Library: React.FC = () => {
                 ),
               },
             ]}
-            onAdd={(item) => {
-              setItems([...items, item]);
+            onAdd={(item, onSuccess) => {
+              const highestId = Math.max(...getLastItems().map((i) => i.id));
+              setItems([
+                ...getLastItems(),
+                {
+                  ...item,
+                  id: highestId + 1,
+                },
+              ]);
+              onSuccess();
             }}
             onDelete={(item) => {
-              setItems(items.filter((i) => i.id !== item.id));
+              setItems(getLastItems().filter((i) => i.id !== item.id));
             }}
             onUpdate={(item, onSuccess) => {
               setItems(
-                items.map((i) => {
+                getLastItems().map((i) => {
                   if (item.id === i.id) return item;
                   return i;
                 })
@@ -418,6 +440,71 @@ export const Library: React.FC = () => {
             }}
           />
           <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With uneditable items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <InlineEditableTable
+            items={items2}
+            uneditableItems={[{ id: 3, foo: 'foo', bar: 'bar' }]}
+            instanceId="MyInstance2"
+            title="My table"
+            columns={[
+              {
+                field: 'foo',
+                name: 'Foo',
+                render: (item) => <div>{item.foo}</div>,
+                editingRender: (item, onChange) => (
+                  <input type="text" value={item.foo} onChange={(e) => onChange(e.target.value)} />
+                ),
+              },
+              {
+                field: 'bar',
+                name: 'Bar (Must be a number)',
+                render: (item) => <div>{item.bar}</div>,
+                editingRender: (item, onChange) => (
+                  <input type="text" value={item.bar} onChange={(e) => onChange(e.target.value)} />
+                ),
+              },
+            ]}
+            onAdd={(item, onSuccess) => {
+              const highestId = Math.max(...getLastItems2().map((i) => i.id));
+              setItems2([
+                ...getLastItems2(),
+                {
+                  ...item,
+                  id: highestId + 1,
+                },
+              ]);
+              onSuccess();
+            }}
+            onDelete={(item) => {
+              setItems2(getLastItems2().filter((i) => i.id !== item.id));
+            }}
+            onUpdate={(item, onSuccess) => {
+              setItems2(
+                getLastItems2().map((i) => {
+                  if (item.id === i.id) return item;
+                  return i;
+                })
+              );
+              onSuccess();
+            }}
+            validateItem={(item) => {
+              let isValidNumber = false;
+              const num = parseInt(item.bar, 10);
+              if (!isNaN(num)) isValidNumber = true;
+
+              if (isValidNumber) return {};
+              return {
+                bar: 'Bar must be a valid number',
+              };
+            }}
+            onReorder={(newItems) => {
+              setItems2(newItems);
+            }}
+          />
 
           <EuiSpacer />
           <EuiSpacer />

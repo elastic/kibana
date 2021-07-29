@@ -127,7 +127,7 @@ describe('InlineEditableTable', () => {
 
     it('will change the displayed items to END with an empty item', () => {
       const wrapper = shallow(<InlineEditableTableContents {...requiredParams} items={items} />);
-      expect(wrapper.find(ReorderableTable).prop('items')).toEqual([...items, {}]);
+      expect(wrapper.find(ReorderableTable).prop('items')).toEqual([...items, { id: null }]);
     });
 
     it('will change the displayed items to START with an empty item when there are uneditableItems', () => {
@@ -139,7 +139,7 @@ describe('InlineEditableTable', () => {
         />
       );
 
-      expect(wrapper.find(ReorderableTable).prop('items')).toEqual([{}, ...items]);
+      expect(wrapper.find(ReorderableTable).prop('items')).toEqual([{ id: null }, ...items]);
     });
   });
 

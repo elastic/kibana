@@ -49,6 +49,8 @@ interface InlineEditableTableValues<Item extends ItemWithAnID> {
 interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   instanceId: string;
+  // TODO Because these callbacks are params, they are only set on the logic once, they will
+  // not update as they change, which makes using "useState" almost impossible with these.
   onAdd(item: Item, onSuccess: () => void): void;
   onDelete(item: Item, onSuccess: () => void): void;
   onReorder?(items: Item[], oldItems: Item[], onSuccess: () => void): void;

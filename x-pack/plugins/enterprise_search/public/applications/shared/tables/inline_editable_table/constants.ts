@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// TODO items have to have an id so this doesn't really work...
-export const EMPTY_ITEM = {};
+export const EMPTY_ITEM = { id: null };
