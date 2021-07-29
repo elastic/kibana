@@ -268,8 +268,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
+        await retry.waitFor('number of fetches to be 1', async () => {
+          const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+          return nrOfFetches === 1;
+        });
       });
     });
 
