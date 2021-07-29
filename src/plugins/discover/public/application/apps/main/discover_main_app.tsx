@@ -28,7 +28,7 @@ export interface DiscoverMainProps {
     /**
      * Use angular router for navigation
      */
-    navigateTo: () => void;
+    navigateTo: (path: string) => void;
     /**
      * Instance of browser history
      */

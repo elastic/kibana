@@ -24,7 +24,7 @@ export interface DiscoverMainProps {
     /**
      * Use angular router for navigation
      */
-    navigateTo: () => void;
+    navigateTo: (path: string) => void;
     /**
      * Instance of browser history
      */
@@ -52,7 +52,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     data,
     toastNotifications,
     core,
-    http: { basePath }
+    http: { basePath },
   } = services;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();

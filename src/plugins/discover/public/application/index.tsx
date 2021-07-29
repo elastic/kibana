@@ -21,11 +21,13 @@ import { KibanaContextProvider } from '../../../kibana_react/public';
 
 export const renderApp = ({ element }: AppMountParameters) => {
   const services = getServices();
-  const { history, capabilities, chrome } = services;
+  const { history, capabilities, chrome, data } = services;
   const opts = {
     services,
     history: history(),
-    navigateTo: () => {},
+    navigateTo: (path: string) => {
+      history().push(path);
+    },
     indexPatternList: [],
   };
   if (!capabilities.discover.save) {
@@ -61,7 +63,7 @@ export const renderApp = ({ element }: AppMountParameters) => {
           />
           <Route path="/view/:id" children={<DiscoverMainRoute opts={opts} />} />
           <Route path="/" exact children={<DiscoverMainRoute opts={opts} />} />
-          <Route path="*">
+          <Route path="/*">
             <NotFoundRoute services={services} />
           </Route>
         </Switch>
@@ -70,5 +72,8 @@ export const renderApp = ({ element }: AppMountParameters) => {
   );
   ReactDOM.render(app, element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    data.search.session.clear();
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };

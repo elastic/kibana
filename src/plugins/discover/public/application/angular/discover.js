@@ -35,7 +35,5 @@ function discoverController($route, $scope) {
     },
   };
 
-  $scope.$on('$destroy', () => {
-    data.search.session.clear();
-  });
+  $scope.$on('$destroy', () => {});
 }
