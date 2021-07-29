@@ -22,7 +22,7 @@ import {
   Query,
   TimeRange,
   Filter,
-  IFieldType,
+  IndexPatternField,
   IndexPattern,
   ISearchSource,
 } from '../../../../data/common';
@@ -50,7 +50,7 @@ export interface SearchProps extends Partial<DiscoverGridProps> {
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
 
-  filter?: (field: IFieldType, value: string[], operator: string) => void;
+  filter?: (field: IndexPatternField, value: string[], operator: string) => void;
   hits?: ElasticSearchHit[];
   totalHitCount?: number;
   onMoveColumn?: (column: string, index: number) => void;
