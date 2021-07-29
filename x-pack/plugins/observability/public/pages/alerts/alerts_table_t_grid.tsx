@@ -21,7 +21,12 @@ import {
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
+import type {
+  ActionProps,
+  AlertStatus,
+  ColumnHeaderOptions,
+  RowRenderer,
+} from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -216,8 +221,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             sortDirection: 'desc',
           },
         ],
+        filterStatus: status as AlertStatus,
         leadingControlColumns,
         trailingControlColumns,
+        // batchActions: true,
+        // batchActions: {
+        //   defaultActions: false,
+        //   additionalActions: <>Additional actions</>,
+        // },
         unit: (totalAlerts: number) =>
           i18n.translate('xpack.observability.alertsTable.showingAlertsTitle', {
             values: { totalAlerts },
