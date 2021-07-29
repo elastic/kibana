@@ -28,6 +28,8 @@ import {
 
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 
+export { ROLES };
+
 export const createUserAndRole = async (
   getService: FtrProviderContext['getService'],
   role: ROLES
