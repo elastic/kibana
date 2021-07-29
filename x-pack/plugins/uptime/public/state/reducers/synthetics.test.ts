@@ -327,7 +327,7 @@ describe('syntheticsReducer', () => {
       };
     });
 
-    it('sets pending blocks to in-flight', () => {
+    it('sets pending blocks to loading', () => {
       // @ts-expect-error redux-actions doesn't handle types well
       expect(syntheticsReducer(state, setBlockLoadingAction(['123']))).toEqual({
         blocks: { '123': { status: 'loading' } },

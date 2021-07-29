@@ -36,7 +36,7 @@ function isNewRef(a: ScreenshotRefImageData, b: ScreenshotRefImageData): boolean
   return stepA.index !== stepB.index || stepA.name !== stepB.name;
 }
 
-function shouldCompose(
+export function shouldCompose(
   imageData: string | undefined,
   imgRef: ScreenshotRefImageData,
   curRef: ScreenshotRefImageData,
