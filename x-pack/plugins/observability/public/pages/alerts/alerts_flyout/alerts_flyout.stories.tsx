@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import React, { ComponentType } from 'react';
 import type { TopAlertResponse } from '../';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
@@ -57,7 +57,7 @@ export default {
 };
 
 export function Example({ alerts }: Args) {
-  const selectedAlertId = apmAlertResponseExample[0][ALERT_UUID][0];
+  const selectedAlertId = apmAlertResponseExample[0]![ALERT_UUID]![0];
   const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
   return (
     <AlertsFlyout

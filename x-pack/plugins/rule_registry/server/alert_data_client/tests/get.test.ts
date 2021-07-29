@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_OWNER, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -59,8 +60,8 @@ describe('get()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.alert.owner': 'apm',
-                  'kibana.alert.status': 'open',
+                  [ALERT_OWNER]: 'apm',
+                  [ALERT_STATUS]: 'open',
                   'kibana.alert.space_ids': ['test_default_space_id'],
                 },
               },
@@ -140,8 +141,8 @@ describe('get()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.alert.owner': 'apm',
-                  'kibana.alert.status': 'open',
+                  [ALERT_OWNER]: 'apm',
+                  [ALERT_STATUS]: 'open',
                   'kibana.alert.space_ids': ['test_default_space_id'],
                 },
               },
@@ -202,8 +203,8 @@ describe('get()', () => {
                   _source: {
                     'rule.id': 'apm.error_rate',
                     message: 'hello world 1',
-                    'kibana.alert.owner': 'apm',
-                    'kibana.alert.status': 'open',
+                    [ALERT_OWNER]: 'apm',
+                    [ALERT_STATUS]: 'open',
                     'kibana.alert.space_ids': ['test_default_space_id'],
                   },
                 },

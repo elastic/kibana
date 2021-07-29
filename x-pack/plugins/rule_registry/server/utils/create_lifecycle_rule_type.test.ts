@@ -6,6 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  ALERT_DURATION,
+  ALERT_ID,
+  ALERT_OWNER,
+  ALERT_PRODUCER,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
@@ -176,24 +185,24 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc[ALERT_STATUS] === 'open')).toBeTruthy();
 
-        expect(alertDocuments.every((doc) => doc['kibana.alert.duration.us'] === 0)).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc[ALERT_DURATION] === 0)).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc['event.action'] === 'open')).toBeTruthy();
 
-        expect(documents.map((doc) => omit(doc, 'kibana.alert.uuid'))).toMatchInlineSnapshot(`
+        expect(documents.map((doc) => omit(doc, ALERT_UUID))).toMatchInlineSnapshot(`
           Array [
             Object {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
               "event.kind": "signal",
-              "kibana.alert.duration.us": 0,
-              "kibana.alert.id": "opbeans-java",
-              "kibana.alert.owner": "consumer",
-              "kibana.alert.producer": "producer",
-              "kibana.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.alert.status": "open",
+              ${ALERT_DURATION}: 0,
+              ${ALERT_ID}: "opbeans-java",
+              ${ALERT_OWNER}: "consumer",
+              ${ALERT_PRODUCER}: "producer",
+              ${ALERT_START}: "2021-06-16T09:01:00.000Z",
+              ${ALERT_STATUS}: "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
@@ -210,12 +219,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
               "event.kind": "signal",
-              "kibana.alert.duration.us": 0,
-              "kibana.alert.id": "opbeans-node",
-              "kibana.alert.owner": "consumer",
-              "kibana.alert.producer": "producer",
-              "kibana.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.alert.status": "open",
+              ${ALERT_DURATION}: 0,
+              ${ALERT_ID}: "opbeans-node",
+              ${ALERT_OWNER}: "consumer",
+              ${ALERT_PRODUCER}: "producer",
+              ${ALERT_START}: "2021-06-16T09:01:00.000Z",
+              ${ALERT_STATUS}: "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
@@ -279,10 +288,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(alertDocuments.every((doc) => doc['kibana.alert.status'] === 'open')).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc[ALERT_STATUS] === 'open')).toBeTruthy();
         expect(alertDocuments.every((doc) => doc['event.action'] === 'active')).toBeTruthy();
 
-        expect(alertDocuments.every((doc) => doc['kibana.alert.duration.us'] > 0)).toBeTruthy();
+        expect(alertDocuments.every((doc) => doc[ALERT_DURATION] > 0)).toBeTruthy();
       });
     });
 
@@ -357,10 +366,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         );
 
         expect(opbeansJavaAlertDoc['event.action']).toBe('active');
-        expect(opbeansJavaAlertDoc['kibana.alert.status']).toBe('open');
+        expect(opbeansJavaAlertDoc[ALERT_STATUS]).toBe('open');
 
         expect(opbeansNodeAlertDoc['event.action']).toBe('close');
-        expect(opbeansNodeAlertDoc['kibana.alert.status']).toBe('closed');
+        expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe('closed');
       });
     });
   });

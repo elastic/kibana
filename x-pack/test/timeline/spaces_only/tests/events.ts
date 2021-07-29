@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { JsonObject } from '@kbn/common-utils';
+import expect from '@kbn/expect';
+import { ALERT_ID, ALERT_OWNER } from '@kbn/rule-data-utils';
 
 import { FtrProviderContext } from '../../../rule_registry/common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../rule_registry/common/lib/authentication/spaces';
@@ -34,23 +35,17 @@ export default ({ getService }: FtrProviderContext) => {
         field: '@timestamp',
       },
       {
-        field: 'kibana.rac.alert.owner',
+        field: ALERT_OWNER,
       },
       {
-        field: 'kibana.rac.alert.id',
+        field: ALERT_ID,
       },
       {
         field: 'event.kind',
       },
     ],
     factoryQueryType: TimelineEventsQueries.all,
-    fieldRequested: [
-      '@timestamp',
-      'message',
-      'kibana.rac.alert.owner',
-      'kibana.rac.alert.id',
-      'event.kind',
-    ],
+    fieldRequested: ['@timestamp', 'message', ALERT_OWNER, ALERT_ID, 'event.kind'],
     fields: [],
     filterQuery: {
       bool: {

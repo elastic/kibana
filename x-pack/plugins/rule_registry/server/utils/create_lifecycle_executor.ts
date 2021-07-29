@@ -29,7 +29,7 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
-  OWNER,
+  ALERT_OWNER,
   RULE_UUID,
   TIMESTAMP,
   SPACE_IDS,
@@ -242,7 +242,7 @@ export const createLifecycleExecutor = (
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
-      [OWNER]: rule.consumer,
+      [ALERT_OWNER]: rule.consumer,
       [ALERT_ID]: alertId,
     } as ParsedTechnicalFields; // TODO: runtime validation?
 

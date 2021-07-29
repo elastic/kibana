@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
@@ -88,7 +89,7 @@ export const buildAlert = (docs: BaseSignalHit[], rule: RulesSchema): RACAlertSi
   );
   return {
     'kibana.alert.ancestors': ancestors as object[],
-    'kibana.alert.workflow_status': 'open',
+    [ALERT_WORKFLOW_STATUS]: 'open',
     'kibana.alert.depth': depth,
     'kibana.alert.rule.id': rule.id,
   };

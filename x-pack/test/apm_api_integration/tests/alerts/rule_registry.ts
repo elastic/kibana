@@ -6,9 +6,19 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_ID,
+  ALERT_OWNER,
+  ALERT_PRODUCER,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  EVENT_KIND,
+} from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { format } from 'url';
-import { EVENT_KIND } from '@kbn/rule-data-utils/target/technical_field_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
@@ -338,7 +348,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        const exclude = ['@timestamp', 'kibana.alert.start', 'kibana.alert.uuid', 'rule.uuid'];
+        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, 'rule.uuid'];
 
         const toCompare = omit(alertEvent, exclude);
 
@@ -359,16 +369,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.alert.id": Array [
+            ${ALERT_ID}: Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "kibana.alert.owner": Array [
+            ${ALERT_OWNER}: Array [
               "apm",
             ],
-            "kibana.alert.producer": Array [
+            ${ALERT_PRODUCER}: Array [
               "apm",
             ],
-            "kibana.alert.status": Array [
+            ${ALERT_STATUS}: Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -435,16 +445,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.alert.id": Array [
+            ${ALERT_ID}: Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "kibana.alert.owner": Array [
+            ${ALERT_OWNER}: Array [
               "apm",
             ],
-            "kibana.alert.producer": Array [
+            ${ALERT_PRODUCER}: Array [
               "apm",
             ],
-            "kibana.alert.status": Array [
+            ${ALERT_STATUS}: Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -520,18 +530,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        expect(recoveredAlertEvent['kibana.alert.status']?.[0]).to.eql('closed');
-        expect(recoveredAlertEvent['kibana.alert.duration.us']?.[0]).to.be.greaterThan(0);
-        expect(new Date(recoveredAlertEvent['kibana.alert.end']?.[0]).getTime()).to.be.greaterThan(
-          0
-        );
+        expect(recoveredAlertEvent[ALERT_STATUS]?.[0]).to.eql('closed');
+        expect(recoveredAlertEvent[ALERT_DURATION]?.[0]).to.be.greaterThan(0);
+        expect(new Date(recoveredAlertEvent[ALERT_END]?.[0]).getTime()).to.be.greaterThan(0);
 
-        expectSnapshot(
-          omit(
-            recoveredAlertEvent,
-            exclude.concat(['kibana.alert.duration.us', 'kibana.alert.end'])
-          )
-        ).toMatchInline(`
+        expectSnapshot(omit(recoveredAlertEvent, exclude.concat([ALERT_DURATION, ALERT_END])))
+          .toMatchInline(`
           Object {
             "event.action": Array [
               "close",
@@ -545,16 +549,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.alert.id": Array [
+            ${ALERT_ID}: Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "kibana.alert.owner": Array [
+            ${ALERT_OWNER}: Array [
               "apm",
             ],
-            "kibana.alert.producer": Array [
+            ${ALERT_PRODUCER}: Array [
               "apm",
             ],
-            "kibana.alert.status": Array [
+            ${ALERT_STATUS}: Array [
               "closed",
             ],
             "kibana.space_ids": Array [
@@ -605,7 +609,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(topAlertsAfterRecovery.length).to.be(1);
 
-        expect(topAlertsAfterRecovery[0]['kibana.alert.status']?.[0]).to.be('closed');
+        expect(topAlertsAfterRecovery[0][ALERT_STATUS]?.[0]).to.be('closed');
       });
     });
   });

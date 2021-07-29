@@ -985,10 +985,10 @@
           },
           {
             "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleExecutorData.PRODUCER",
+            "id": "def-server.RuleExecutorData.ALERT_PRODUCER",
             "type": "string",
             "tags": [],
-            "label": "[PRODUCER]",
+            "label": "[ALERT_PRODUCER]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",

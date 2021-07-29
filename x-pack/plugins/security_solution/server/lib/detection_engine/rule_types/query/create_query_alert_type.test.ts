@@ -41,6 +41,7 @@ describe('Custom query alerts', () => {
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
       ruleDataClient: dependencies.ruleDataClient,
+      version: '1.0.0',
     });
 
     dependencies.alerting.registerType(queryAlertType);
@@ -87,6 +88,7 @@ describe('Custom query alerts', () => {
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
       ruleDataClient: dependencies.ruleDataClient,
+      version: '1.0.0',
     });
 
     dependencies.alerting.registerType(queryAlertType);

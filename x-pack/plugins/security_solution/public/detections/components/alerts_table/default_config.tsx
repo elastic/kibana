@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import {
+  ALERT_DURATION,
+  ALERT_ID,
+  ALERT_PRODUCER,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -134,14 +143,14 @@ export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => 
       negate: false,
       disabled: false,
       type: 'phrase',
-      key: 'kibana.alert.status',
+      key: ALERT_STATUS,
       params: {
         query: status,
       },
     },
     query: {
       term: {
-        'kibana.alert.status': status,
+        ALERT_STATUS: status,
       },
     },
   },
@@ -169,18 +178,18 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.id': 'kibana.alert.id',
+  'alert.id': ALERT_ID,
   'event.kind': 'event.kind',
-  'alert.start': 'kibana.alert.start',
-  'alert.uuid': 'kibana.alert.uuid',
+  'alert.start': ALERT_START,
+  'alert.uuid': ALERT_UUID,
   'event.action': 'event.action',
-  'alert.status': 'kibana.alert.status',
-  'alert.duration.us': 'kibana.alert.duration.us',
+  'alert.status': ALERT_STATUS,
+  'alert.duration.us': ALERT_DURATION,
   'rule.uuid': 'rule.uuid',
   'rule.id': 'rule.id',
   'rule.name': 'rule.name',
   'rule.category': 'rule.category',
-  producer: 'kibana.alert.producer',
+  producer: ALERT_PRODUCER,
   tags: 'tags',
 };
 

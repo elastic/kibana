@@ -349,7 +349,7 @@ const createDefaultAlertExecutorOptions = <
     actions: [],
     enabled: true,
     consumer: 'CONSUMER',
-    producer: 'PRODUCER',
+    producer: 'ALERT_PRODUCER',
     schedule: { interval: '1m' },
     throttle: null,
     createdAt,

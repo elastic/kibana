@@ -20,8 +20,8 @@ export const technicalRuleFieldMap = {
     Fields.RULE_CATEGORY,
     Fields.TAGS
   ),
-  [Fields.OWNER]: { type: 'keyword' },
-  [Fields.PRODUCER]: { type: 'keyword' },
+  [Fields.ALERT_OWNER]: { type: 'keyword' },
+  [Fields.ALERT_PRODUCER]: { type: 'keyword' },
   [Fields.SPACE_IDS]: { type: 'keyword', array: true },
   [Fields.ALERT_UUID]: { type: 'keyword' },
   [Fields.ALERT_ID]: { type: 'keyword' },
@@ -33,12 +33,12 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_STATUS]: { type: 'keyword' },
   [Fields.ALERT_EVALUATION_THRESHOLD]: { type: 'scaled_float', scaling_factor: 100 },
   [Fields.ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100 },
-  'kibana.consumers': {
+  [Fields.CONSUMERS]: {
     type: 'keyword',
     array: true,
     required: false,
   },
-  'kibana.version': {
+  [Fields.VERSION]: {
     type: 'keyword',
     array: false,
     required: false,

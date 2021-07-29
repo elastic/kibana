@@ -34,6 +34,7 @@ export const wrapHitsFactory = ({
         String(doc._version),
         ruleSO.attributes.params.ruleId ?? ''
       ),
+      // TODO: type guard
       _source: buildBulkBody(ruleSO, doc as SignalSourceHit, mergeStrategy),
     },
   ]);
