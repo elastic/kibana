@@ -48,11 +48,11 @@ export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
       {pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
       <AccountHeader />
       <EuiPage className="personalDashboardLayout" paddingSize="none">
-        <EuiPageSideBar className="personalDashboardLayout__sideBar" sticky>
+        <EuiPageSideBar role="navigation" className="personalDashboardLayout__sideBar" sticky>
           {useRouteMatch(PERSONAL_SOURCES_PATH) && <PrivateSourcesSidebar />}
           {useRouteMatch(PERSONAL_SETTINGS_PATH) && <AccountSettingsSidebar />}
         </EuiPageSideBar>
-        <EuiPageBody component="main" panelled>
+        <EuiPageBody component="main" panelled role="main">
           <EuiPageContentBody className="personalDashboardLayout__body" restrictWidth>
             {readOnlyMode && (
               <>
