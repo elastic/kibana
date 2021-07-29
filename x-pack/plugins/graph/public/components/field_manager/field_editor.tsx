@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiKeyboardAccessible,
   EuiForm,
   EuiSpacer,
   EuiIconTip,
@@ -212,12 +211,9 @@ export function FieldEditor({
               defaultMessage: 'Edit',
             }),
             width: 380,
+            initialFocusedItemIndex: -1,
             content: (
               <EuiForm className="gphFieldEditor__displayForm">
-                {/* This is a workaround to prevent the field combo box from being focussed when opening the panel. */}
-                <EuiKeyboardAccessible>
-                  <span style={{ opacity: 0 }} onClick={() => {}} onKeyPress={() => {}} />
-                </EuiKeyboardAccessible>
                 <EuiFormRow
                   display="columnCompressed"
                   label={i18n.translate('xpack.graph.fieldManager.fieldLabel', {
