@@ -21,6 +21,7 @@ import {
   LegacyScopedClusterClient,
 } from './elasticsearch';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
+import { DeprecationsClient, DeprecationsServiceStart } from './deprecations';
 
 class CoreElasticsearchRouteHandlerContext {
   #client?: IScopedClusterClient;
@@ -103,10 +104,30 @@ class CoreUiSettingsRouteHandlerContext {
   }
 }
 
+class CoreDeprecationsRouteHandlerContext {
+  #client?: DeprecationsClient;
+  constructor(
+    private readonly deprecationsStart: DeprecationsServiceStart,
+    private readonly elasticsearchRouterHandlerContext: CoreElasticsearchRouteHandlerContext,
+    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
+  ) {}
+
+  public get client() {
+    if (this.#client == null) {
+      this.#client = this.deprecationsStart.asScopedToClient(
+        this.elasticsearchRouterHandlerContext.client,
+        this.savedObjectsRouterHandlerContext.client
+      );
+    }
+    return this.#client;
+  }
+}
+
 export class CoreRouteHandlerContext {
   readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
+  readonly deprecations: CoreDeprecationsRouteHandlerContext;
 
   constructor(
     private readonly coreStart: InternalCoreStart,
@@ -122,6 +143,11 @@ export class CoreRouteHandlerContext {
     );
     this.uiSettings = new CoreUiSettingsRouteHandlerContext(
       this.coreStart.uiSettings,
+      this.savedObjects
+    );
+    this.deprecations = new CoreDeprecationsRouteHandlerContext(
+      this.coreStart.deprecations,
+      this.elasticsearch,
       this.savedObjects
     );
   }

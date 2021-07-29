@@ -18,6 +18,8 @@ import { CoreContext } from '../core_context';
 import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
+import { IScopedClusterClient } from '../elasticsearch/client';
+import { SavedObjectsClientContract } from '../saved_objects/types';
 
 /**
  * The deprecations service provides a way for the Kibana platform to communicate deprecated
@@ -106,8 +108,24 @@ export interface DeprecationsServiceSetup {
   registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
-export interface DeprecationsServiceStart {
+/**
+ * Server-side client that provides access to fetch all Kibana deprecations
+ *
+ * @public
+ */
+export interface DeprecationsClient {
   getAllDeprecations: (dependencies: GetDeprecationsContext) => Promise<DomainDeprecationDetails[]>;
+}
+
+export interface DeprecationsServiceStart {
+  /**
+   * Creates a {@link DeprecationsClient} with provided SO client and ES client.
+   *
+   */
+  asScopedToClient(
+    esClient: IScopedClusterClient,
+    savedObjectsClient: SavedObjectsClientContract
+  ): DeprecationsClient;
 }
 
 /** @internal */
@@ -152,12 +170,25 @@ export class DeprecationsService
 
   public start(): DeprecationsServiceStart {
     return {
-      getAllDeprecations: (dependencies: GetDeprecationsContext) =>
-        this.deprecationsFactory.getAllDeprecations(dependencies),
+      asScopedToClient: this.createScopedDeprecations(),
     };
   }
 
   public stop() {}
+
+  private createScopedDeprecations(): (
+    esClient: IScopedClusterClient,
+    savedObjectsClient: SavedObjectsClientContract
+  ) => DeprecationsClient {
+    return (esClient: IScopedClusterClient, savedObjectsClient: SavedObjectsClientContract) => {
+      return {
+        getAllDeprecations: this.deprecationsFactory.getAllDeprecations.bind({
+          savedObjectsClient,
+          esClient,
+        }),
+      };
+    };
+  }
 
   private registerConfigDeprecationsInfo(deprecationsFactory: DeprecationsFactory) {
     const handledDeprecatedConfigs = this.coreContext.configService.getHandledDeprecatedConfigs();

@@ -25,6 +25,7 @@ export function registerUpgradeStatusRoute({ router, getDeprecationsService }: R
           core: {
             savedObjects: { client: savedObjectsClient },
             elasticsearch: { client: esClient },
+            deprecations: { client: deprecationsClient },
           },
         },
         request,
@@ -38,11 +39,7 @@ export function registerUpgradeStatusRoute({ router, getDeprecationsService }: R
           // Fetch Kibana upgrade status
           const {
             totalCriticalDeprecations: kibanaTotalCriticalDeps,
-          } = await getKibanaUpgradeStatus({
-            esClient,
-            savedObjectsClient,
-            getDeprecationsService,
-          });
+          } = await getKibanaUpgradeStatus(deprecationsClient);
           const readyForUpgrade = esTotalCriticalDeps === 0 && kibanaTotalCriticalDeps === 0;
 
           const getStatusMessage = () => {

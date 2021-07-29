@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import { DeprecationsServiceStart, IScopedClusterClient } from 'kibana/server';
-import { DomainDeprecationDetails, SavedObjectsClientContract } from 'src/core/server/types';
+import { DeprecationsClient } from 'kibana/server';
+import { DomainDeprecationDetails } from 'src/core/server/types';
 
-export const getKibanaUpgradeStatus = async ({
-  getDeprecationsService,
-  esClient,
-  savedObjectsClient,
-}: {
-  getDeprecationsService: () => Promise<DeprecationsServiceStart>;
-  esClient: IScopedClusterClient;
-  savedObjectsClient: SavedObjectsClientContract;
-}) => {
-  const deprecationsService = await getDeprecationsService();
-  const kibanaDeprecations: DomainDeprecationDetails[] = await deprecationsService.getAllDeprecations(
-    { esClient, savedObjectsClient }
-  );
+export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsClient) => {
+  const kibanaDeprecations: DomainDeprecationDetails[] = await deprecationsClient.getAllDeprecations();
 
   const totalCriticalDeprecations = kibanaDeprecations.filter((d) => d.level === 'critical').length;
 
