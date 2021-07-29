@@ -14,7 +14,7 @@ import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class RelativeDateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.RELATIVE_DATE;
-  static title = i18n.translate('data.fieldFormats.relative_date.title', {
+  static title = i18n.translate('fieldFormats.relative_date.title', {
     defaultMessage: 'Relative date',
   });
   static fieldType = KBN_FIELD_TYPES.DATE;

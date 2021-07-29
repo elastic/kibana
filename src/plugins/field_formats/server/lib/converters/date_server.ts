@@ -15,7 +15,7 @@ import { IFieldFormatMetaParams, TextContextTypeConvert } from '../../../common/
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
-  static title = i18n.translate('data.fieldFormats.date.title', {
+  static title = i18n.translate('fieldFormats.date.title', {
     defaultMessage: 'Date',
   });
   static fieldType = KBN_FIELD_TYPES.DATE;

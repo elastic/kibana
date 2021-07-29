@@ -13,7 +13,7 @@ import { UI_SETTINGS } from '../constants/ui_settings';
 
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;
-  static title = i18n.translate('data.fieldFormats.percent.title', {
+  static title = i18n.translate('fieldFormats.percent.title', {
     defaultMessage: 'Percentage',
   });
 

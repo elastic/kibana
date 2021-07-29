@@ -21,76 +21,76 @@ const HUMAN_FRIENDLY = 'humanize';
 const HUMAN_FRIENDLY_PRECISE = 'humanizePrecise';
 const DEFAULT_OUTPUT_PRECISION = 2;
 const DEFAULT_INPUT_FORMAT = {
-  text: i18n.translate('data.fieldFormats.duration.inputFormats.seconds', {
+  text: i18n.translate('fieldFormats.duration.inputFormats.seconds', {
     defaultMessage: 'Seconds',
   }),
   kind: 'seconds',
 };
 const inputFormats = [
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.picoseconds', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.picoseconds', {
       defaultMessage: 'Picoseconds',
     }),
     kind: 'picoseconds',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.nanoseconds', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.nanoseconds', {
       defaultMessage: 'Nanoseconds',
     }),
     kind: 'nanoseconds',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.microseconds', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.microseconds', {
       defaultMessage: 'Microseconds',
     }),
     kind: 'microseconds',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.milliseconds', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.milliseconds', {
       defaultMessage: 'Milliseconds',
     }),
     kind: 'milliseconds',
   },
   { ...DEFAULT_INPUT_FORMAT },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.minutes', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.minutes', {
       defaultMessage: 'Minutes',
     }),
     kind: 'minutes',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.hours', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.hours', {
       defaultMessage: 'Hours',
     }),
     kind: 'hours',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.days', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.days', {
       defaultMessage: 'Days',
     }),
     kind: 'days',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.weeks', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.weeks', {
       defaultMessage: 'Weeks',
     }),
     kind: 'weeks',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.months', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.months', {
       defaultMessage: 'Months',
     }),
     kind: 'months',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.inputFormats.years', {
+    text: i18n.translate('fieldFormats.duration.inputFormats.years', {
       defaultMessage: 'Years',
     }),
     kind: 'years',
   },
 ];
 const DEFAULT_OUTPUT_FORMAT = {
-  text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.approximate', {
+  text: i18n.translate('fieldFormats.duration.outputFormats.humanize.approximate', {
     defaultMessage: 'Human-readable (approximate)',
   }),
   method: 'humanize',
@@ -98,79 +98,79 @@ const DEFAULT_OUTPUT_FORMAT = {
 const outputFormats = [
   { ...DEFAULT_OUTPUT_FORMAT },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.precise', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.humanize.precise', {
       defaultMessage: 'Human-readable (precise)',
     }),
     method: 'humanizePrecise',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asMilliseconds', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds', {
       defaultMessage: 'Milliseconds',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asMilliseconds.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds.short', {
       defaultMessage: 'ms',
     }),
     method: 'asMilliseconds',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asSeconds', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asSeconds', {
       defaultMessage: 'Seconds',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asSeconds.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asSeconds.short', {
       defaultMessage: 's',
     }),
     method: 'asSeconds',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asMinutes', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asMinutes', {
       defaultMessage: 'Minutes',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asMinutes.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMinutes.short', {
       defaultMessage: 'min',
     }),
     method: 'asMinutes',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asHours', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asHours', {
       defaultMessage: 'Hours',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asHours.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asHours.short', {
       defaultMessage: 'h',
     }),
     method: 'asHours',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asDays', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asDays', {
       defaultMessage: 'Days',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asDays.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asDays.short', {
       defaultMessage: 'd',
     }),
     method: 'asDays',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asWeeks', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asWeeks', {
       defaultMessage: 'Weeks',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asWeeks.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asWeeks.short', {
       defaultMessage: 'w',
     }),
     method: 'asWeeks',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asMonths', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asMonths', {
       defaultMessage: 'Months',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asMonths.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMonths.short', {
       defaultMessage: 'mon',
     }),
     method: 'asMonths',
   },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.asYears', {
+    text: i18n.translate('fieldFormats.duration.outputFormats.asYears', {
       defaultMessage: 'Years',
     }),
-    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asYears.short', {
+    shortText: i18n.translate('fieldFormats.duration.outputFormats.asYears.short', {
       defaultMessage: 'y',
     }),
     method: 'asYears',
@@ -210,7 +210,7 @@ function formatInputHumanPrecise(
 
 export class DurationFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DURATION;
-  static title = i18n.translate('data.fieldFormats.duration.title', {
+  static title = i18n.translate('fieldFormats.duration.title', {
     defaultMessage: 'Duration',
   });
   static fieldType = KBN_FIELD_TYPES.NUMBER;
@@ -250,7 +250,7 @@ export class DurationFormat extends FieldFormat {
 
     const prefix =
       val < 0 && human
-        ? i18n.translate('data.fieldFormats.duration.negativeLabel', {
+        ? i18n.translate('fieldFormats.duration.negativeLabel', {
             defaultMessage: 'minus',
           }) + ' '
         : '';

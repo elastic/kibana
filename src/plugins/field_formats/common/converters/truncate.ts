@@ -16,7 +16,7 @@ const omission = '...';
 
 export class TruncateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.TRUNCATE;
-  static title = i18n.translate('data.fieldFormats.truncated_string.title', {
+  static title = i18n.translate('fieldFormats.truncated_string.title', {
     defaultMessage: 'Truncated string',
   });
   static fieldType = KBN_FIELD_TYPES.STRING;

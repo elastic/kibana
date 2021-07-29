@@ -12,7 +12,7 @@ import { FIELD_FORMAT_IDS } from '../types';
 
 export class BytesFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.BYTES;
-  static title = i18n.translate('data.fieldFormats.bytes.title', {
+  static title = i18n.translate('fieldFormats.bytes.title', {
     defaultMessage: 'Bytes',
   });
 

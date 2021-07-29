@@ -17,7 +17,7 @@ import { PercentFormat } from './percent';
 export class HistogramFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.HISTOGRAM;
   static fieldType = KBN_FIELD_TYPES.HISTOGRAM;
-  static title = i18n.translate('data.fieldFormats.histogram.title', {
+  static title = i18n.translate('fieldFormats.histogram.title', {
     defaultMessage: 'Histogram',
   });
 

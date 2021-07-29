@@ -14,7 +14,7 @@ import { asPrettyString } from '../utils';
 
 export class BoolFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.BOOLEAN;
-  static title = i18n.translate('data.fieldFormats.boolean.title', {
+  static title = i18n.translate('fieldFormats.boolean.title', {
     defaultMessage: 'Boolean',
   });
   static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];

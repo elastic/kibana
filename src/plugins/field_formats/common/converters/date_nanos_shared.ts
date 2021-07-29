@@ -60,7 +60,7 @@ export function formatWithNanos(
 
 export class DateNanosFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE_NANOS;
-  static title = i18n.translate('data.fieldFormats.date_nanos.title', {
+  static title = i18n.translate('fieldFormats.date_nanos.title', {
     defaultMessage: 'Date nanos',
   });
   static fieldType = KBN_FIELD_TYPES.DATE;

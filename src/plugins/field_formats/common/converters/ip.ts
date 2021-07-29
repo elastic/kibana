@@ -13,7 +13,7 @@ import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class IpFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.IP;
-  static title = i18n.translate('data.fieldFormats.ip.title', {
+  static title = i18n.translate('fieldFormats.ip.title', {
     defaultMessage: 'IP address',
   });
   static fieldType = KBN_FIELD_TYPES.IP;

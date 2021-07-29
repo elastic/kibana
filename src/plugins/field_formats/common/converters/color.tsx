@@ -18,7 +18,7 @@ import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
 
 export class ColorFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.COLOR;
-  static title = i18n.translate('data.fieldFormats.color.title', {
+  static title = i18n.translate('fieldFormats.color.title', {
     defaultMessage: 'Color',
   });
   static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
