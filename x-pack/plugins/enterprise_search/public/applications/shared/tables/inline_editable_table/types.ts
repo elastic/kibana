@@ -14,6 +14,8 @@ export interface FormErrors {
 }
 
 export type ItemWithAnID = {
+  // TODO This should really be id: number | null, but we can't because we have a separate
+  // editingItemId and editingItemValue in state, currently
   id?: number;
 } & object;
 
@@ -23,7 +25,7 @@ export interface EditingRenderFlags {
 }
 
 export interface InlineEditableTableColumn<Item extends ItemWithAnID> extends Column<Item> {
-  field: string; // TODO Is this even necessary?
+  field: string;
   editingRender: (
     item: Item,
     onChange: (value: string) => void,

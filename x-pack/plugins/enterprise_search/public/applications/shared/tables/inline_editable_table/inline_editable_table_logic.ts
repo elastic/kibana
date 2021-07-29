@@ -28,17 +28,13 @@ const generateEmptyItem = <Item extends ItemWithAnID>(
   return emptyItem;
 };
 
-// TODO ok, we should do this type of EMPTY_ITEM everywhere, including in the component
-export const EMPTY_ITEM = { id: null };
-// TODO wtf
 const getUnsavedItemId = () => null;
-// TODO wtf
 const doesIdMatchUnsavedId = (idToCheck: number) => idToCheck === getUnsavedItemId();
 
 interface InlineEditableTableValues<Item extends ItemWithAnID> {
   // TODO This could likely be a selector
   isEditing: boolean;
-  // TODO id below
+  // TODO we should editingItemValue have editingItemValue and editingItemId should be a selector
   editingItemId: Item['id'] | null; // editingItem is null when the user is editing a new but not saved item
   editingItemValue: Item | null;
   formErrors: FormErrors;
@@ -49,8 +45,8 @@ interface InlineEditableTableValues<Item extends ItemWithAnID> {
 interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   instanceId: string;
-  // TODO Because these callbacks are params, they are only set on the logic once, they will
-  // not update as they change, which makes using "useState" almost impossible with these.
+  // TODO Because these callbacks are params, they are only set on the logic once (i.e., they are cached)
+  // which makes using "useState" to back this really hard.
   onAdd(item: Item, onSuccess: () => void): void;
   onDelete(item: Item, onSuccess: () => void): void;
   onReorder?(items: Item[], oldItems: Item[], onSuccess: () => void): void;
@@ -88,16 +84,14 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
         editExistingItem: () => true,
       },
     ],
-    // TODO I feel like this could be a seletor...
     editingItemId: [
       null,
       {
         doneEditing: () => null,
-        editNewItem: () => getUnsavedItemId(), // TODO This was something weird prior
+        editNewItem: () => getUnsavedItemId(),
         editExistingItem: (_, { item }) => item.id,
       },
     ],
-    // TODO, empty item value default
     editingItemValue: [
       null,
       {
@@ -106,7 +100,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
         editExistingItem: (_, { item }) => item,
         setEditingItemValue: (_, { item }) => item,
       },
-    ], // TODO I changed this to null because empty objects don't have an id
+    ],
     formErrors: [
       {},
       {

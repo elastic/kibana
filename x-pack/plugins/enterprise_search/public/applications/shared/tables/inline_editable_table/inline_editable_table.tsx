@@ -95,6 +95,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   const { editingItemId, isEditing, isEditingUnsavedItem } = useValues(InlineEditableTableLogic);
   const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
 
+  // TODO These two things shoud just be selectors
   const isEditingItem = (item: Item) => item.id === editingItemId;
   const isActivelyEditing = (item: Item) => isEditing && isEditingItem(item);
 
@@ -166,8 +167,6 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
         noItemsMessage={noItemsMessage(editNewItem)}
         onReorder={reorderItems}
         disableDragging={isEditing}
-        // TODO don't pass down everything
-        {...rest}
       />
     </>
   );

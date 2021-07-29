@@ -44,7 +44,7 @@ export const EditingColumn = <Item extends ItemWithAnID>({
           (newValue) => {
             setEditingItemValue({
               ...editingItemValue,
-              [column.field]: newValue, // TODO Can newValue ever be something other than a string?
+              [column.field]: newValue,
             });
           },
           {

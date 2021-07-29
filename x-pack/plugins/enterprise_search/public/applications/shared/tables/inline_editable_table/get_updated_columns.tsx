@@ -52,7 +52,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
         <ActionColumn
           displayedItems={displayedItems}
           isActivelyEditing={isActivelyEditing}
-          isLoading={isLoading} // TODO This should be consistently optional or not optional
+          isLoading={isLoading}
           canRemoveLastItem={canRemoveLastItem}
           lastItemWarning={lastItemWarning}
           uneditableItems={uneditableItems}

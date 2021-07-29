@@ -23,9 +23,8 @@ import { ItemWithAnID } from './types';
 
 interface ActionColumnProps<Item extends ItemWithAnID> {
   displayedItems: Item[];
-  // TODO maybe this should be  a selector
   isActivelyEditing: (i: Item) => boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   item: Item;
   canRemoveLastItem?: boolean;
   lastItemWarning?: string;
@@ -35,7 +34,7 @@ interface ActionColumnProps<Item extends ItemWithAnID> {
 export const ActionColumn = <Item extends ItemWithAnID>({
   displayedItems,
   isActivelyEditing,
-  isLoading,
+  isLoading = false,
   item,
   canRemoveLastItem,
   lastItemWarning,
@@ -48,7 +47,6 @@ export const ActionColumn = <Item extends ItemWithAnID>({
     InlineEditableTableLogic
   );
 
-  // TODO this could be passed in as a boolean prop?
   if (uneditableItems?.includes(item)) {
     return null;
   }
